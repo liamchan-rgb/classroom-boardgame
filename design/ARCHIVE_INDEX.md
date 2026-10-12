@@ -42,7 +42,7 @@
 - 新版标签：archive-design-ui-art-round2-20261012
 - 新版ZIP：[classroom-ui-art-round2-20261012.zip](archives/classroom-ui-art-round2-20261012.zip)；16816126字节；SHA256：4d2396660f0fb76012cdcfa57401d6aec61525faebfd137883143286f92d171a
 - 文件数：64，载荷63，静态尺寸/实际字形/安全区/全姓名/资源字段/原素材哈希/ZIP CRC及逐文件SHA通过。
-- 上传状态：本地检查已通过，等待远端回读；完成后见archives/round2-upload-receipt.json。
+- 上传状态：已从GitHub新克隆回读核验，ZIP SHA256/CRC、全部63载荷SHA256与远端展开文件一致；回执见archives/round2-upload-receipt.json。
 - 原有第一轮图、ZIP、标签不变；本轮只写design，未改App、GameCore、main或工作流，未构建IPA。
 - 未验证：原生玻璃、触控效率、电视距离、运行隐私、实际PPTX及人物动画。本轮没有制作新职业/怪物头像或动画。
 - 后续每次实际更新均上传、创建新版本/ZIP/唯一标签，并回读核验；旧版本保留。
