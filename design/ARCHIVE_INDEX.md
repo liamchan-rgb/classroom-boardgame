@@ -95,3 +95,11 @@
 - 标签：archive-design-ui-art-round3-review04-20261012
 - ZIP：[classroom-ui-art-round3-review04-20261012.zip](archives/classroom-ui-art-round3-review04-20261012.zip)；SHA256：f48d95b1fad5e1dbf71addbcb9d2540ce0b446bcf1b92b0d032c812a63f7b778
 - 本次不修改图片、App、GameCore、main或工作流。
+
+## 审核进度05与美术制作授权 · 2026-10-12
+
+- 第三轮4:3战斗布局通过；与16:9均通过。暂停其他图片审核，授权自主补齐职业/怪物/装备道具及基础动画。
+- 记录：[round3-review05_production-authorized_20261012.md](reviews/round3-review05_production-authorized_20261012.md)
+- 标签：archive-design-art-production-authorized-20261012
+- 恢复ZIP：[classroom-art-production-authorization-20261012.zip](archives/classroom-art-production-authorization-20261012.zip)；SHA256：4a92ec561f7802cbe142685221c4994285cdd4dfbcd25cf1caea933ae53c6488
+- 后续各批资源独立存档；只写design，不修改App/规则。
