@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "deliveryVersion": "2026-10-12-b-production-v1",
   "selectedStyle": "b",
-  "status": "static-art-produced-animations-in-progress",
+  "status": "static-and-basic-motion-production-candidates",
   "counts": {
     "classes": 4,
     "monsters": 6,
@@ -779,5 +779,6 @@
       "license": "本项目可本地使用与修改；无外部素材",
       "sha256": "b6b0b469217f318a078550a51d8d1082dde160022cc8e9573ee688be90418029"
     }
-  ]
+  ],
+  "animationManifest": "animation-manifest.json"
 }

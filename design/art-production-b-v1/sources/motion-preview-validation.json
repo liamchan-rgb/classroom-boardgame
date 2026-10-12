@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "scope": "offline-preview-only",
+  "initialActors": 10,
+  "autoplay": false,
+  "oneShotDuplicateRejected": true,
+  "reducedMotionStopsAnimation": true,
+  "downFinalOpacity": 0.55,
+  "reviveFinalOpacity": 1,
+  "effectDuplicatesRejected": true,
+  "doesNotRunGameCore": true,
+  "nativeRuntimeVerified": false
+}

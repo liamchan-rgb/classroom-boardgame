@@ -1,0 +1,371 @@
+{
+  "formatVersion": 1,
+  "version": "b-basic-motion-v1",
+  "units": "x/y fractions of displayed image width/height; rotation degrees; t normalized 0..1",
+  "motionSet": "basic-transform-v1",
+  "motions": {
+    "idle": {
+      "durationMs": 2400,
+      "loop": true,
+      "keyframes": [
+        {
+          "t": 0,
+          "x": 0,
+          "y": 0,
+          "scaleX": 1,
+          "scaleY": 1,
+          "rotationDeg": 0,
+          "opacity": 1
+        },
+        {
+          "t": 0.5,
+          "x": 0,
+          "y": -0.008,
+          "scaleX": 0.996,
+          "scaleY": 1.012,
+          "rotationDeg": 0,
+          "opacity": 1
+        },
+        {
+          "t": 1,
+          "x": 0,
+          "y": 0,
+          "scaleX": 1,
+          "scaleY": 1,
+          "rotationDeg": 0,
+          "opacity": 1
+        }
+      ]
+    },
+    "move": {
+      "durationMs": 600,
+      "loop": false,
+      "keyframes": [
+        {
+          "t": 0,
+          "x": 0,
+          "y": 0,
+          "rotationDeg": 0
+        },
+        {
+          "t": 0.25,
+          "x": 0.01,
+          "y": -0.018,
+          "rotationDeg": -1
+        },
+        {
+          "t": 0.5,
+          "x": 0,
+          "y": 0,
+          "rotationDeg": 0
+        },
+        {
+          "t": 0.75,
+          "x": -0.01,
+          "y": -0.018,
+          "rotationDeg": 1
+        },
+        {
+          "t": 1,
+          "x": 0,
+          "y": 0,
+          "rotationDeg": 0
+        }
+      ]
+    },
+    "attack": {
+      "durationMs": 520,
+      "loop": false,
+      "keyframes": [
+        {
+          "t": 0,
+          "x": 0,
+          "y": 0,
+          "rotationDeg": 0
+        },
+        {
+          "t": 0.2,
+          "x": -0.018,
+          "y": 0.004,
+          "rotationDeg": -2
+        },
+        {
+          "t": 0.45,
+          "x": 0.045,
+          "y": -0.01,
+          "rotationDeg": 2
+        },
+        {
+          "t": 0.65,
+          "x": 0.035,
+          "y": -0.008,
+          "rotationDeg": 1
+        },
+        {
+          "t": 1,
+          "x": 0,
+          "y": 0,
+          "rotationDeg": 0
+        }
+      ]
+    },
+    "hurt": {
+      "durationMs": 280,
+      "loop": false,
+      "keyframes": [
+        {
+          "t": 0,
+          "x": 0,
+          "rotationDeg": 0
+        },
+        {
+          "t": 0.2,
+          "x": -0.018,
+          "rotationDeg": -1
+        },
+        {
+          "t": 0.4,
+          "x": 0.014,
+          "rotationDeg": 1
+        },
+        {
+          "t": 0.65,
+          "x": -0.008,
+          "rotationDeg": -1
+        },
+        {
+          "t": 1,
+          "x": 0,
+          "rotationDeg": 0
+        }
+      ]
+    },
+    "down": {
+      "durationMs": 450,
+      "loop": false,
+      "holdFinalFrame": true,
+      "keyframes": [
+        {
+          "t": 0,
+          "x": 0,
+          "y": 0,
+          "rotationDeg": 0,
+          "opacity": 1,
+          "saturation": 1
+        },
+        {
+          "t": 0.45,
+          "x": 0,
+          "y": 0.012,
+          "rotationDeg": 3,
+          "opacity": 0.7,
+          "saturation": 0.6
+        },
+        {
+          "t": 1,
+          "x": 0,
+          "y": 0.02,
+          "rotationDeg": 5,
+          "opacity": 0.55,
+          "saturation": 0.25
+        }
+      ]
+    },
+    "revive": {
+      "durationMs": 680,
+      "loop": false,
+      "keyframes": [
+        {
+          "t": 0,
+          "y": 0.02,
+          "rotationDeg": 5,
+          "scaleX": 1,
+          "scaleY": 1,
+          "opacity": 0.55,
+          "saturation": 0.25
+        },
+        {
+          "t": 0.45,
+          "y": -0.014,
+          "rotationDeg": 0,
+          "scaleX": 1.018,
+          "scaleY": 1.018,
+          "opacity": 1,
+          "saturation": 1
+        },
+        {
+          "t": 1,
+          "y": 0,
+          "rotationDeg": 0,
+          "scaleX": 1,
+          "scaleY": 1,
+          "opacity": 1,
+          "saturation": 1
+        }
+      ]
+    }
+  },
+  "entityProfiles": [
+    {
+      "entityID": "adventurer",
+      "entityType": "classes",
+      "image": "assets/classes/class_adventurer_portrait.png",
+      "motionSet": "basic-transform-v1",
+      "anchor": [
+        0.5,
+        0.82
+      ],
+      "amplitudeMultiplier": 1,
+      "facingDirection": 1,
+      "minimumCanvasOverflowFraction": 0.08,
+      "status": "authored-transform-profile-not-skeletal"
+    },
+    {
+      "entityID": "ranger",
+      "entityType": "classes",
+      "image": "assets/classes/class_ranger_portrait.png",
+      "motionSet": "basic-transform-v1",
+      "anchor": [
+        0.5,
+        0.82
+      ],
+      "amplitudeMultiplier": 1,
+      "facingDirection": 1,
+      "minimumCanvasOverflowFraction": 0.08,
+      "status": "authored-transform-profile-not-skeletal"
+    },
+    {
+      "entityID": "spellblade",
+      "entityType": "classes",
+      "image": "assets/classes/class_spellblade_portrait.png",
+      "motionSet": "basic-transform-v1",
+      "anchor": [
+        0.5,
+        0.82
+      ],
+      "amplitudeMultiplier": 1,
+      "facingDirection": 1,
+      "minimumCanvasOverflowFraction": 0.08,
+      "status": "authored-transform-profile-not-skeletal"
+    },
+    {
+      "entityID": "dragonKnight",
+      "entityType": "classes",
+      "image": "assets/classes/class_dragon_knight_portrait.png",
+      "motionSet": "basic-transform-v1",
+      "anchor": [
+        0.5,
+        0.82
+      ],
+      "amplitudeMultiplier": 1,
+      "facingDirection": 1,
+      "minimumCanvasOverflowFraction": 0.08,
+      "status": "authored-transform-profile-not-skeletal"
+    },
+    {
+      "entityID": "slime",
+      "entityType": "monsters",
+      "image": "assets/monsters/monster_slime_portrait.png",
+      "motionSet": "basic-transform-v1",
+      "anchor": [
+        0.5,
+        0.82
+      ],
+      "amplitudeMultiplier": 1.12,
+      "facingDirection": -1,
+      "minimumCanvasOverflowFraction": 0.08,
+      "status": "authored-transform-profile-not-skeletal"
+    },
+    {
+      "entityID": "wolf",
+      "entityType": "monsters",
+      "image": "assets/monsters/monster_wolf_portrait.png",
+      "motionSet": "basic-transform-v1",
+      "anchor": [
+        0.5,
+        0.82
+      ],
+      "amplitudeMultiplier": 1,
+      "facingDirection": -1,
+      "minimumCanvasOverflowFraction": 0.08,
+      "status": "authored-transform-profile-not-skeletal"
+    },
+    {
+      "entityID": "goblinArcher",
+      "entityType": "monsters",
+      "image": "assets/monsters/monster_goblin_archer_portrait.png",
+      "motionSet": "basic-transform-v1",
+      "anchor": [
+        0.5,
+        0.82
+      ],
+      "amplitudeMultiplier": 1,
+      "facingDirection": -1,
+      "minimumCanvasOverflowFraction": 0.08,
+      "status": "authored-transform-profile-not-skeletal"
+    },
+    {
+      "entityID": "stoneGuardian",
+      "entityType": "monsters",
+      "image": "assets/monsters/monster_stone_guardian_portrait.png",
+      "motionSet": "basic-transform-v1",
+      "anchor": [
+        0.5,
+        0.78
+      ],
+      "amplitudeMultiplier": 0.65,
+      "facingDirection": -1,
+      "minimumCanvasOverflowFraction": 0.08,
+      "status": "authored-transform-profile-not-skeletal"
+    },
+    {
+      "entityID": "caveTroll",
+      "entityType": "monsters",
+      "image": "assets/monsters/monster_cave_troll_portrait.png",
+      "motionSet": "basic-transform-v1",
+      "anchor": [
+        0.5,
+        0.78
+      ],
+      "amplitudeMultiplier": 0.65,
+      "facingDirection": -1,
+      "minimumCanvasOverflowFraction": 0.08,
+      "status": "authored-transform-profile-not-skeletal"
+    },
+    {
+      "entityID": "ruinDragon",
+      "entityType": "monsters",
+      "image": "assets/monsters/monster_ruin_dragon_portrait.png",
+      "motionSet": "basic-transform-v1",
+      "anchor": [
+        0.5,
+        0.78
+      ],
+      "amplitudeMultiplier": 0.65,
+      "facingDirection": -1,
+      "minimumCanvasOverflowFraction": 0.08,
+      "status": "authored-transform-profile-not-skeletal"
+    }
+  ],
+  "reducedMotion": {
+    "idle": "off",
+    "move": "instant visual placement from committed path",
+    "attack": "static pose + brief effect",
+    "hurt": "static pose + impact glyph",
+    "down": "instant persistent down styling",
+    "revive": "instant final pose + brief glyph"
+  },
+  "eventPolicy": {
+    "presentationOnly": true,
+    "eventKey": "gameSessionID + operationResultID",
+    "oneShotPlaysPerResult": 1,
+    "replayOnRenderOrReconnect": false,
+    "mayCallRulesEngine": false,
+    "mayRollDice": false,
+    "mayChangeDecisionTimer": false,
+    "unknownEntityMayRender": false,
+    "publicResourceDeltaMode": "one consolidated fade-in/hold/fade-out text",
+    "resourceCountersTween": false,
+    "inactiveUnitsKeepDownOrEligibilityMarkers": true
+  }
+}

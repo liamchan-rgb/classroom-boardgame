@@ -19,5 +19,12 @@
     "height": 1030,
     "source": "sources/items_contact_sheet.svg",
     "file": "previews/items_contact_sheet.png"
+  },
+  {
+    "name": "effects_contact_sheet",
+    "width": 1536,
+    "height": 1120,
+    "source": "sources/effects_contact_sheet.svg",
+    "file": "previews/effects_contact_sheet.png"
   }
 ]

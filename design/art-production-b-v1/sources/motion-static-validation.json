@@ -1,0 +1,130 @@
+{
+  "status": "passed",
+  "scope": "resource-structure-only",
+  "entityCount": 10,
+  "characterMotionStates": 6,
+  "effects": [
+    {
+      "effectID": "impact",
+      "size": [
+        2048,
+        256
+      ],
+      "frames": 8,
+      "transparentTerminalFrame": true,
+      "minimumFrameMarginPx": 20
+    },
+    {
+      "effectID": "shield",
+      "size": [
+        2048,
+        256
+      ],
+      "frames": 8,
+      "transparentTerminalFrame": true,
+      "minimumFrameMarginPx": 20
+    },
+    {
+      "effectID": "heal",
+      "size": [
+        2048,
+        256
+      ],
+      "frames": 8,
+      "transparentTerminalFrame": true,
+      "minimumFrameMarginPx": 20
+    },
+    {
+      "effectID": "revive",
+      "size": [
+        2048,
+        256
+      ],
+      "frames": 8,
+      "transparentTerminalFrame": true,
+      "minimumFrameMarginPx": 20
+    },
+    {
+      "effectID": "coin",
+      "size": [
+        2048,
+        256
+      ],
+      "frames": 8,
+      "transparentTerminalFrame": true,
+      "minimumFrameMarginPx": 20
+    },
+    {
+      "effectID": "score",
+      "size": [
+        2048,
+        256
+      ],
+      "frames": 8,
+      "transparentTerminalFrame": true,
+      "minimumFrameMarginPx": 20
+    },
+    {
+      "effectID": "natural20",
+      "size": [
+        2048,
+        256
+      ],
+      "frames": 8,
+      "transparentTerminalFrame": true,
+      "minimumFrameMarginPx": 20
+    },
+    {
+      "effectID": "dice6",
+      "size": [
+        2048,
+        256
+      ],
+      "frames": 8,
+      "transparentTerminalFrame": true,
+      "minimumFrameMarginPx": 20
+    },
+    {
+      "effectID": "dice20",
+      "size": [
+        2048,
+        256
+      ],
+      "frames": 8,
+      "transparentTerminalFrame": true,
+      "minimumFrameMarginPx": 20
+    },
+    {
+      "effectID": "rune",
+      "size": [
+        2048,
+        256
+      ],
+      "frames": 8,
+      "transparentTerminalFrame": true,
+      "minimumFrameMarginPx": 20
+    },
+    {
+      "effectID": "flame",
+      "size": [
+        2048,
+        256
+      ],
+      "frames": 8,
+      "transparentTerminalFrame": true,
+      "minimumFrameMarginPx": 20
+    },
+    {
+      "effectID": "projectile",
+      "size": [
+        2048,
+        256
+      ],
+      "frames": 8,
+      "transparentTerminalFrame": true,
+      "minimumFrameMarginPx": 20
+    }
+  ],
+  "nativeRuntimeVerified": false,
+  "skeletalAnimationMade": false
+}
