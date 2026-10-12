@@ -1,0 +1,18 @@
+{
+  "checkedAt": "2026-10-12T05:28:45.376280+00:00",
+  "authenticated": true,
+  "account": "liamchan-rgb",
+  "githubPluginInstalled": true,
+  "requestedRepository": "liamchan-rgb/classroom-boardgame",
+  "requestedVisibility": "private",
+  "repositoryCreation": {
+    "graphql": "CreateRepository permission denied",
+    "restStatus": 403,
+    "restMessage": "Resource not accessible by integration"
+  },
+  "accessibleRepositoryCount": 0,
+  "sourceCommittedLocally": true,
+  "cloudBuildStarted": false,
+  "ipaGenerated": false,
+  "nextStep": "Provide and authorize a writable private repository; then upload and dispatch Xcode27 build."
+}
