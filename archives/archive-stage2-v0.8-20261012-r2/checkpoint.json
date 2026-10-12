@@ -1,0 +1,77 @@
+{
+  "formatVersion": 1,
+  "milestone": "archive-stage2-v0.8-20261012-r2",
+  "date": "2026-10-12",
+  "status": "archived-and-remote-verified",
+  "scope": "阶段0—2当前源码/资料/设计/验证，历史及当前全部现存构建与交付",
+  "sourceSnapshotCommit": "39393717cffe6a082a5447426b21baccb75109e8",
+  "sourceTag": "archive-stage2-v0.8-20261012-r2",
+  "compiledCommit": "aff02aad17fc24b6f76c6ac3e8ce3b4269934f2d",
+  "currentAppVersion": "0.8",
+  "newPVEDeviceVerified": false,
+  "payloadFiles": 153,
+  "sourceFiles": 116,
+  "deliveryFiles": 35,
+  "archive": {
+    "name": "classroom-stage0-2-v0.8-20261012-r2.zip",
+    "bytes": 8502923,
+    "sha256": "397c4a18cfc08395b7478b530e365ab3ced39cad6e4d82f72357d613a601d51c"
+  },
+  "storage": {
+    "repositoryPrivate": true,
+    "type": "isolated-git-branch",
+    "branch": "archive-assets",
+    "commit": "bfa1c745821b255ff0ef6a65ae305b8614dcfbaa",
+    "directoryURL": "https://github.com/liamchan-rgb/classroom-boardgame/tree/bfa1c745821b255ff0ef6a65ae305b8614dcfbaa/archive-stage2-v0.8-20261012-r2",
+    "branchDirectoryURL": "https://github.com/liamchan-rgb/classroom-boardgame/tree/archive-assets/archive-stage2-v0.8-20261012-r2",
+    "assets": [
+      {
+        "download_url": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/archive-assets/archive-stage2-v0.8-20261012-r2/classroom-stage0-2-v0.8-20261012-r2.manifest.json?token=CRL2HAAOUJCCUMDIRBDKB53KZTUITAA",
+        "html_url": "https://github.com/liamchan-rgb/classroom-boardgame/blob/archive-assets/archive-stage2-v0.8-20261012-r2/classroom-stage0-2-v0.8-20261012-r2.manifest.json",
+        "name": "classroom-stage0-2-v0.8-20261012-r2.manifest.json",
+        "sha": "eeb6e91a669fba2fcbd563c78af896e2540bd405",
+        "size": 35698
+      },
+      {
+        "download_url": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/archive-assets/archive-stage2-v0.8-20261012-r2/classroom-stage0-2-v0.8-20261012-r2.zip?token=CRL2HADF33GBZ4HHF6P23D3KZTUITAA",
+        "html_url": "https://github.com/liamchan-rgb/classroom-boardgame/blob/archive-assets/archive-stage2-v0.8-20261012-r2/classroom-stage0-2-v0.8-20261012-r2.zip",
+        "name": "classroom-stage0-2-v0.8-20261012-r2.zip",
+        "sha": "7b93565fe6a8eceecb27173c6a6018869534eacf",
+        "size": 8502923
+      },
+      {
+        "download_url": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/archive-assets/archive-stage2-v0.8-20261012-r2/classroom-stage0-2-v0.8-20261012-r2.zip.sha256?token=CRL2HAATJXUC2XGO46I3V53KZTUITAA",
+        "html_url": "https://github.com/liamchan-rgb/classroom-boardgame/blob/archive-assets/archive-stage2-v0.8-20261012-r2/classroom-stage0-2-v0.8-20261012-r2.zip.sha256",
+        "name": "classroom-stage0-2-v0.8-20261012-r2.zip.sha256",
+        "sha": "8d826969c94678162d231398d235732071013833",
+        "size": 106
+      },
+      {
+        "download_url": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/archive-assets/archive-stage2-v0.8-20261012-r2/classroom-stage0-2-v0.8-20261012-r2.恢复说明.md?token=CRL2HACW2HLAHE6AEXZZYWDKZTUITAA",
+        "html_url": "https://github.com/liamchan-rgb/classroom-boardgame/blob/archive-assets/archive-stage2-v0.8-20261012-r2/classroom-stage0-2-v0.8-20261012-r2.%E6%81%A2%E5%A4%8D%E8%AF%B4%E6%98%8E.md",
+        "name": "classroom-stage0-2-v0.8-20261012-r2.恢复说明.md",
+        "sha": "dcc2a696c0c0e83cc519119c639039424256d00f",
+        "size": 1765
+      }
+    ]
+  },
+  "verification": {
+    "date": "2026-10-12",
+    "archiveSHA256": "397c4a18cfc08395b7478b530e365ab3ced39cad6e4d82f72357d613a601d51c",
+    "remoteGithubBlobSHA": "7b93565fe6a8eceecb27173c6a6018869534eacf",
+    "remoteRoundTripSHA256": "passed",
+    "zipCRCAndAll153Checksums": "passed",
+    "sourceSnapshotCommit": "39393717cffe6a082a5447426b21baccb75109e8",
+    "compiledCommit": "aff02aad17fc24b6f76c6ac3e8ce3b4269934f2d",
+    "independentSourceRestore": "116 files passed",
+    "compiledAppSourcesUnchanged": "passed",
+    "futureBundlesExcludeArchiveAssets": "passed",
+    "sourceOnlyBundleBytesAfterBinaryArchive": 285327
+  },
+  "releaseAttempt": {
+    "attachmentUploadHTTP": 401,
+    "emptyDraftRemoved": true,
+    "fallback": "private repository archive-assets branch"
+  },
+  "notIncluded": "未交付到项目的真实课堂文件、iPad本机进度和个人签名/配对材料"
+}

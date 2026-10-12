@@ -6,7 +6,11 @@
 
 ## 当前归档
 
-正在建立阶段0—2完整存档：原需求/开发步骤、实施计划、源码及版本历史、测试数据和日志、美术/UI标准、历史交付包及当前v0.8 IPA。完成上传后，具体索引写入 `archive-stage2-v0.8-20261012-r2/`。
+| 存档 | 状态 | 长期位置 |
+|---|---|---|
+| [阶段0—2 / v0.8 / 2026-10-12](archive-stage2-v0.8-20261012-r2/README.md) | 153项载荷、35份交付；远端SHA256和116份源码恢复通过 | [私有项目存档](https://github.com/liamchan-rgb/classroom-boardgame/tree/bfa1c745821b255ff0ef6a65ae305b8614dcfbaa/archive-stage2-v0.8-20261012-r2) |
+
+当前完整ZIP约8.5MB，包含历史及最终交付，当前推荐IPA是其中的ClassroomStage2_v0.8_unsigned.ipa。
 
 ## 后续操作
 

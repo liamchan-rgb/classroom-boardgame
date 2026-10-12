@@ -1,0 +1,969 @@
+{
+  "formatVersion": 1,
+  "milestone": "archive-stage2-v0.8-20261012-r2",
+  "createdAt": "2026-10-12T13:59:20.725530+00:00",
+  "repository": "https://github.com/liamchan-rgb/classroom-boardgame",
+  "sourceSnapshotCommit": "39393717cffe6a082a5447426b21baccb75109e8",
+  "snapshotTag": "archive-stage2-v0.8-20261012-r2",
+  "currentAppVersion": "0.8",
+  "compiledCommit": "aff02aad17fc24b6f76c6ac3e8ce3b4269934f2d",
+  "currentIPA": "deliveries/ClassroomStage2_v0.8_unsigned.ipa",
+  "buildEvidence": "source/stage2/evidence/cloud-build-result-v0.8.json",
+  "coreTests": {
+    "GameCore": "58 passed, 0 failures",
+    "ProbeCore": "6 passed, 0 failures"
+  },
+  "currentDeviceVerified": false,
+  "gitBundleRefs": [
+    "39393717cffe6a082a5447426b21baccb75109e8 refs/heads/main",
+    "39393717cffe6a082a5447426b21baccb75109e8 refs/remotes/origin/HEAD",
+    "39393717cffe6a082a5447426b21baccb75109e8 refs/remotes/origin/main",
+    "75d8996ee4007d07c87cef5a095457bbe267ede9 refs/tags/archive-stage2-v0.8-20261012",
+    "34e3efe8e47aa22586a328c221d170deef233480 refs/tags/archive-stage2-v0.8-20261012-r2"
+  ],
+  "deliveries": [
+    {
+      "file": "ClassroomStage0_v0.5_unsigned.ipa",
+      "bytes": 342305,
+      "sha256": "886040f11efaaa4bdc6db861c0129fea1151242e142b916473f93b7ed24b3961"
+    },
+    {
+      "file": "ClassroomStage0_v0.5_unsigned.ipa.sha256",
+      "bytes": 100,
+      "sha256": "f47adce2e5a2e555511ee617c987deff35d73e8d684ace7abaa4c1f0e38e6999"
+    },
+    {
+      "file": "ClassroomStage0_v0.5_构建产物.zip",
+      "bytes": 357256,
+      "sha256": "fda8b53efc979fb8264e92f9cb70f3cfcb76e0700bdc878f6e0f881c37e407e6"
+    },
+    {
+      "file": "ClassroomStage0_v0.6_unsigned.ipa",
+      "bytes": 342284,
+      "sha256": "9e79b883c70f59bb017abf28acf87ebbcb7fa072ce0f703fb75d8e0531a5c4f0"
+    },
+    {
+      "file": "ClassroomStage0_v0.6_unsigned.ipa.sha256",
+      "bytes": 100,
+      "sha256": "95cb512b72ca8789426205aa7c8523a6b9e775e7d278807df47dbadb508eba01"
+    },
+    {
+      "file": "ClassroomStage0_v0.6_构建产物.zip",
+      "bytes": 358199,
+      "sha256": "021e0a59a3c97fade99747cb7d3f9f47cbb164a85f53da86aec33746d0e4cbfc"
+    },
+    {
+      "file": "ClassroomStage1_v0.7_unsigned.ipa",
+      "bytes": 755557,
+      "sha256": "83947037775925499a6b54c2243543715e069a350642fb958e42de47f47a604a"
+    },
+    {
+      "file": "ClassroomStage1_v0.7_unsigned.ipa.sha256",
+      "bytes": 100,
+      "sha256": "374553a8dea9eb2294f0ef3a43201bcaf3aee1bfd575b132146d937b3f197b63"
+    },
+    {
+      "file": "ClassroomStage1_v0.7_构建产物.zip",
+      "bytes": 774759,
+      "sha256": "53abb9ba3a21413fe0f8522066e1d9d901574084c5f19000328f7656b6b89527"
+    },
+    {
+      "file": "ClassroomStage2_v0.8_first_unsigned.ipa",
+      "bytes": 1056623,
+      "sha256": "7a13fa6b631feded8f44d207cf03f037ee48b6b3150093210f5c22237af109b6"
+    },
+    {
+      "file": "ClassroomStage2_v0.8_first_unsigned.ipa.sha256",
+      "bytes": 106,
+      "sha256": "568682680d168a2fce334a0ef80a8e2fb80780b69d6a5f3f897e79a42fe0744a"
+    },
+    {
+      "file": "ClassroomStage2_v0.8_first_构建产物.zip",
+      "bytes": 1077584,
+      "sha256": "98094d60529fc5121c479df96660092eb44ada6f0a46c5ad5894ef6e84074053"
+    },
+    {
+      "file": "ClassroomStage2_v0.8_unsigned.ipa",
+      "bytes": 1056939,
+      "sha256": "9022886cac9e1a73f40bd6db93e1f78fb689ebaac551d12497ec5c4fa61df860"
+    },
+    {
+      "file": "ClassroomStage2_v0.8_unsigned.ipa.sha256",
+      "bytes": 100,
+      "sha256": "2fd2ba576e74c510be4021558cb5f1465cce0493ebebd82a6b0c93deaa3e30f9"
+    },
+    {
+      "file": "ClassroomStage2_v0.8_构建产物.zip",
+      "bytes": 1076670,
+      "sha256": "f9d8bc9c0124a72a9ac8980e83abe7fb779f2250a4721081a3529f6bdcefd01f"
+    },
+    {
+      "file": "DisplayProbe.swiftpm.zip",
+      "bytes": 8405,
+      "sha256": "8703461b4dc52a4a4cd2b7687cdbf8652c1d5f07ee8485141ef558cf3a239a96"
+    },
+    {
+      "file": "DisplayProbe_iPadOS27_v0.2.swiftpm.zip",
+      "bytes": 8347,
+      "sha256": "86cdb4f34c1b50f05412d65f1a6103b0f1d22ae0dc7c529d0c060046e48b5373"
+    },
+    {
+      "file": "DisplayProbe_iPadOS27_v0.3.swiftpm.zip",
+      "bytes": 8405,
+      "sha256": "8703461b4dc52a4a4cd2b7687cdbf8652c1d5f07ee8485141ef558cf3a239a96"
+    },
+    {
+      "file": "原生阶段0_v0.5_安装说明.md",
+      "bytes": 6563,
+      "sha256": "7bc5aa8aa49464a8d7523b88335558f7f3c499edda57052c3a1a859b9fb6aec8"
+    },
+    {
+      "file": "原生阶段0_v0.6_安装说明.md",
+      "bytes": 6712,
+      "sha256": "06582e8b3e7947fa81ef72117b479cd7a4b676c83daae6411d369c7ce4885974"
+    },
+    {
+      "file": "课堂桌游_v0.7_安装与真机验收.md",
+      "bytes": 7114,
+      "sha256": "2417b535fb08fcd13b920f9f5086f7b9832c26897504279c1d62e6842a913586"
+    },
+    {
+      "file": "课堂桌游_v0.7_新增功能与验收.md",
+      "bytes": 6488,
+      "sha256": "1e8b1133333bb614ed93ef2b036cea242507b8919589bdb20da475b5b6070c52"
+    },
+    {
+      "file": "课堂桌游_v0.8_安装与真机验收.md",
+      "bytes": 8025,
+      "sha256": "e1db6aa78a6b66b1d709b26e70bbde2e876710980087112b9c1f8eefa89fd4ed"
+    },
+    {
+      "file": "课堂桌游_v0.8_快速开始.md",
+      "bytes": 2623,
+      "sha256": "7faa1d3a9a380b4ebd920bb240221dc5a275a981c1eccc2d99da467b45af8fba"
+    },
+    {
+      "file": "课堂桌游_v0.8_阶段2验收.md",
+      "bytes": 8365,
+      "sha256": "54cef4d17fa9f2b34ee78914a6958139d83d779fff909a979987c913a7019767"
+    },
+    {
+      "file": "课堂桌游_原生阶段0_v0.5_源码.zip",
+      "bytes": 235159,
+      "sha256": "214369f567e34fc38e903c0348e05610cc896e3e9bcc1a030ad7b41f26d4518c"
+    },
+    {
+      "file": "课堂桌游_原生阶段0_v0.5_源码.zip.sha256",
+      "bytes": 109,
+      "sha256": "f79535c348a3de42a59a1386d3a60e188bfc2787fed4656e167fe60f4aa041e2"
+    },
+    {
+      "file": "课堂桌游_美术UI设计交接包_v1.zip",
+      "bytes": 53906,
+      "sha256": "d292d300277f0436616dc762aaf63de5342dfb7367ff1cc7dcbb1740084ab2e7"
+    },
+    {
+      "file": "课堂桌游_美术与UI设计标准_v1.md",
+      "bytes": 16087,
+      "sha256": "e6e2c4127ab2e6de5e8dab7bd9dd31cce82d99432aac86598c1dcf6800b59437"
+    },
+    {
+      "file": "课堂桌游_设计对话启动提示词.md",
+      "bytes": 2558,
+      "sha256": "8e5701b3660a38f912b4acecb31b8d5b070be5005dcf3934c17d053d348c908f"
+    },
+    {
+      "file": "课堂桌游_阶段0验证包.zip",
+      "bytes": 125809,
+      "sha256": "6c5f76c60629146bdc2fe56feeb8850a56ece4c398ab277885cd99958a41aaee"
+    },
+    {
+      "file": "课堂桌游_阶段0验证包_v0.2.zip",
+      "bytes": 124286,
+      "sha256": "f5eb0aab479d525fbad63d6eb02f3e85e27ab91810784611e068ad518d910eaf"
+    },
+    {
+      "file": "课堂桌游_阶段0验证包_v0.3.zip",
+      "bytes": 125809,
+      "sha256": "6c5f76c60629146bdc2fe56feeb8850a56ece4c398ab277885cd99958a41aaee"
+    },
+    {
+      "file": "阶段0_测试绘本.pptx",
+      "bytes": 37544,
+      "sha256": "74f28a3877d1999f1566ee7c78bb6d85ba17f1726b748abdef10a8c9a8d0ab9d"
+    },
+    {
+      "file": "首次安装_SideStore.md",
+      "bytes": 1855,
+      "sha256": "2d9888529be642dc0063577779a9481f61abc64926680ca585d5c68a22db2ab3"
+    }
+  ],
+  "manifestSelfExcluded": true,
+  "entries": [
+    {
+      "path": "deliveries/ClassroomStage0_v0.5_unsigned.ipa",
+      "bytes": 342305,
+      "sha256": "886040f11efaaa4bdc6db861c0129fea1151242e142b916473f93b7ed24b3961"
+    },
+    {
+      "path": "deliveries/ClassroomStage0_v0.5_unsigned.ipa.sha256",
+      "bytes": 100,
+      "sha256": "f47adce2e5a2e555511ee617c987deff35d73e8d684ace7abaa4c1f0e38e6999"
+    },
+    {
+      "path": "deliveries/ClassroomStage0_v0.5_构建产物.zip",
+      "bytes": 357256,
+      "sha256": "fda8b53efc979fb8264e92f9cb70f3cfcb76e0700bdc878f6e0f881c37e407e6"
+    },
+    {
+      "path": "deliveries/ClassroomStage0_v0.6_unsigned.ipa",
+      "bytes": 342284,
+      "sha256": "9e79b883c70f59bb017abf28acf87ebbcb7fa072ce0f703fb75d8e0531a5c4f0"
+    },
+    {
+      "path": "deliveries/ClassroomStage0_v0.6_unsigned.ipa.sha256",
+      "bytes": 100,
+      "sha256": "95cb512b72ca8789426205aa7c8523a6b9e775e7d278807df47dbadb508eba01"
+    },
+    {
+      "path": "deliveries/ClassroomStage0_v0.6_构建产物.zip",
+      "bytes": 358199,
+      "sha256": "021e0a59a3c97fade99747cb7d3f9f47cbb164a85f53da86aec33746d0e4cbfc"
+    },
+    {
+      "path": "deliveries/ClassroomStage1_v0.7_unsigned.ipa",
+      "bytes": 755557,
+      "sha256": "83947037775925499a6b54c2243543715e069a350642fb958e42de47f47a604a"
+    },
+    {
+      "path": "deliveries/ClassroomStage1_v0.7_unsigned.ipa.sha256",
+      "bytes": 100,
+      "sha256": "374553a8dea9eb2294f0ef3a43201bcaf3aee1bfd575b132146d937b3f197b63"
+    },
+    {
+      "path": "deliveries/ClassroomStage1_v0.7_构建产物.zip",
+      "bytes": 774759,
+      "sha256": "53abb9ba3a21413fe0f8522066e1d9d901574084c5f19000328f7656b6b89527"
+    },
+    {
+      "path": "deliveries/ClassroomStage2_v0.8_first_unsigned.ipa",
+      "bytes": 1056623,
+      "sha256": "7a13fa6b631feded8f44d207cf03f037ee48b6b3150093210f5c22237af109b6"
+    },
+    {
+      "path": "deliveries/ClassroomStage2_v0.8_first_unsigned.ipa.sha256",
+      "bytes": 106,
+      "sha256": "568682680d168a2fce334a0ef80a8e2fb80780b69d6a5f3f897e79a42fe0744a"
+    },
+    {
+      "path": "deliveries/ClassroomStage2_v0.8_first_构建产物.zip",
+      "bytes": 1077584,
+      "sha256": "98094d60529fc5121c479df96660092eb44ada6f0a46c5ad5894ef6e84074053"
+    },
+    {
+      "path": "deliveries/ClassroomStage2_v0.8_unsigned.ipa",
+      "bytes": 1056939,
+      "sha256": "9022886cac9e1a73f40bd6db93e1f78fb689ebaac551d12497ec5c4fa61df860"
+    },
+    {
+      "path": "deliveries/ClassroomStage2_v0.8_unsigned.ipa.sha256",
+      "bytes": 100,
+      "sha256": "2fd2ba576e74c510be4021558cb5f1465cce0493ebebd82a6b0c93deaa3e30f9"
+    },
+    {
+      "path": "deliveries/ClassroomStage2_v0.8_构建产物.zip",
+      "bytes": 1076670,
+      "sha256": "f9d8bc9c0124a72a9ac8980e83abe7fb779f2250a4721081a3529f6bdcefd01f"
+    },
+    {
+      "path": "deliveries/DisplayProbe.swiftpm.zip",
+      "bytes": 8405,
+      "sha256": "8703461b4dc52a4a4cd2b7687cdbf8652c1d5f07ee8485141ef558cf3a239a96"
+    },
+    {
+      "path": "deliveries/DisplayProbe_iPadOS27_v0.2.swiftpm.zip",
+      "bytes": 8347,
+      "sha256": "86cdb4f34c1b50f05412d65f1a6103b0f1d22ae0dc7c529d0c060046e48b5373"
+    },
+    {
+      "path": "deliveries/DisplayProbe_iPadOS27_v0.3.swiftpm.zip",
+      "bytes": 8405,
+      "sha256": "8703461b4dc52a4a4cd2b7687cdbf8652c1d5f07ee8485141ef558cf3a239a96"
+    },
+    {
+      "path": "deliveries/原生阶段0_v0.5_安装说明.md",
+      "bytes": 6563,
+      "sha256": "7bc5aa8aa49464a8d7523b88335558f7f3c499edda57052c3a1a859b9fb6aec8"
+    },
+    {
+      "path": "deliveries/原生阶段0_v0.6_安装说明.md",
+      "bytes": 6712,
+      "sha256": "06582e8b3e7947fa81ef72117b479cd7a4b676c83daae6411d369c7ce4885974"
+    },
+    {
+      "path": "deliveries/课堂桌游_v0.7_安装与真机验收.md",
+      "bytes": 7114,
+      "sha256": "2417b535fb08fcd13b920f9f5086f7b9832c26897504279c1d62e6842a913586"
+    },
+    {
+      "path": "deliveries/课堂桌游_v0.7_新增功能与验收.md",
+      "bytes": 6488,
+      "sha256": "1e8b1133333bb614ed93ef2b036cea242507b8919589bdb20da475b5b6070c52"
+    },
+    {
+      "path": "deliveries/课堂桌游_v0.8_安装与真机验收.md",
+      "bytes": 8025,
+      "sha256": "e1db6aa78a6b66b1d709b26e70bbde2e876710980087112b9c1f8eefa89fd4ed"
+    },
+    {
+      "path": "deliveries/课堂桌游_v0.8_快速开始.md",
+      "bytes": 2623,
+      "sha256": "7faa1d3a9a380b4ebd920bb240221dc5a275a981c1eccc2d99da467b45af8fba"
+    },
+    {
+      "path": "deliveries/课堂桌游_v0.8_阶段2验收.md",
+      "bytes": 8365,
+      "sha256": "54cef4d17fa9f2b34ee78914a6958139d83d779fff909a979987c913a7019767"
+    },
+    {
+      "path": "deliveries/课堂桌游_原生阶段0_v0.5_源码.zip",
+      "bytes": 235159,
+      "sha256": "214369f567e34fc38e903c0348e05610cc896e3e9bcc1a030ad7b41f26d4518c"
+    },
+    {
+      "path": "deliveries/课堂桌游_原生阶段0_v0.5_源码.zip.sha256",
+      "bytes": 109,
+      "sha256": "f79535c348a3de42a59a1386d3a60e188bfc2787fed4656e167fe60f4aa041e2"
+    },
+    {
+      "path": "deliveries/课堂桌游_美术UI设计交接包_v1.zip",
+      "bytes": 53906,
+      "sha256": "d292d300277f0436616dc762aaf63de5342dfb7367ff1cc7dcbb1740084ab2e7"
+    },
+    {
+      "path": "deliveries/课堂桌游_美术与UI设计标准_v1.md",
+      "bytes": 16087,
+      "sha256": "e6e2c4127ab2e6de5e8dab7bd9dd31cce82d99432aac86598c1dcf6800b59437"
+    },
+    {
+      "path": "deliveries/课堂桌游_设计对话启动提示词.md",
+      "bytes": 2558,
+      "sha256": "8e5701b3660a38f912b4acecb31b8d5b070be5005dcf3934c17d053d348c908f"
+    },
+    {
+      "path": "deliveries/课堂桌游_阶段0验证包.zip",
+      "bytes": 125809,
+      "sha256": "6c5f76c60629146bdc2fe56feeb8850a56ece4c398ab277885cd99958a41aaee"
+    },
+    {
+      "path": "deliveries/课堂桌游_阶段0验证包_v0.2.zip",
+      "bytes": 124286,
+      "sha256": "f5eb0aab479d525fbad63d6eb02f3e85e27ab91810784611e068ad518d910eaf"
+    },
+    {
+      "path": "deliveries/课堂桌游_阶段0验证包_v0.3.zip",
+      "bytes": 125809,
+      "sha256": "6c5f76c60629146bdc2fe56feeb8850a56ece4c398ab277885cd99958a41aaee"
+    },
+    {
+      "path": "deliveries/阶段0_测试绘本.pptx",
+      "bytes": 37544,
+      "sha256": "74f28a3877d1999f1566ee7c78bb6d85ba17f1726b748abdef10a8c9a8d0ab9d"
+    },
+    {
+      "path": "deliveries/首次安装_SideStore.md",
+      "bytes": 1855,
+      "sha256": "2d9888529be642dc0063577779a9481f61abc64926680ca585d5c68a22db2ab3"
+    },
+    {
+      "path": "git-history.bundle",
+      "bytes": 285327,
+      "sha256": "015a0f5cd89ea4690e03f3c421fbdeb4990e0f6107f859f583a4e80c36b41957"
+    },
+    {
+      "path": "source/.github/workflows/build-native-ipa.yml",
+      "bytes": 2673,
+      "sha256": "2c9d199a812aa149bdc4997fd073b97faa810ae5d58d8422d0036f89e973d646"
+    },
+    {
+      "path": "source/.gitignore",
+      "bytes": 275,
+      "sha256": "1cf64ffaa20a54d4c69f197ef315266305af3101e9609ec6666561f0ce61f7fb"
+    },
+    {
+      "path": "source/AGENTS.md",
+      "bytes": 2648,
+      "sha256": "676dec96aaa536a2973fbbd4a185a98770aa4c2b70da958248aa1ef55bc1f76d"
+    },
+    {
+      "path": "source/README.md",
+      "bytes": 4695,
+      "sha256": "8911010d8300c1d6986c5ab0be9da61cc45fabf660f74d674d6907a12be8445c"
+    },
+    {
+      "path": "source/archives/README.md",
+      "bytes": 2233,
+      "sha256": "e0afb91f7f2ed13e1caff7bd471f9b268cbc31560a6e8a4d14c0dc5a445d709b"
+    },
+    {
+      "path": "source/design/README.md",
+      "bytes": 706,
+      "sha256": "d79f85659d9791785b4fb218e1c6eec45a35fa7fec94f2d989d2bacddf1a1a0e"
+    },
+    {
+      "path": "source/design/asset-manifest_v1.json",
+      "bytes": 13568,
+      "sha256": "c3a9a258708c0e24d95b91e9bb142cc4fca4a39675085378663267f1320d12e1"
+    },
+    {
+      "path": "source/design/design-tokens_v1.json",
+      "bytes": 1438,
+      "sha256": "fbf6634801a849cfe6ee207bedc34a31c98b56a2a134be2b66569254635c2838"
+    },
+    {
+      "path": "source/design/新对话启动提示词.md",
+      "bytes": 2558,
+      "sha256": "8e5701b3660a38f912b4acecb31b8d5b070be5005dcf3934c17d053d348c908f"
+    },
+    {
+      "path": "source/design/美术与UI设计标准_v1.md",
+      "bytes": 16087,
+      "sha256": "e6e2c4127ab2e6de5e8dab7bd9dd31cce82d99432aac86598c1dcf6800b59437"
+    },
+    {
+      "path": "source/docs/课堂桌游_开发步骤_v1.md",
+      "bytes": 21011,
+      "sha256": "5708c79bd35dca68bc714bedb80fcd7ea5deea46a31fb6571058b097c47601bc"
+    },
+    {
+      "path": "source/docs/课堂桌游_需求设计_v1.md",
+      "bytes": 47658,
+      "sha256": "7ebd819fe1f57fd0b2a20121dd025c3ad649cd34be867ac52ca6f280cc708f4d"
+    },
+    {
+      "path": "source/native/ClassroomProbe.xcodeproj/project.pbxproj",
+      "bytes": 12168,
+      "sha256": "9b371183a1b0a290069c7ffb24160896bf492967a1cc67a1df5f00edbd06fbc6"
+    },
+    {
+      "path": "source/native/ClassroomProbe.xcodeproj/project.xcworkspace/contents.xcworkspacedata",
+      "bytes": 113,
+      "sha256": "5c2b91b67a72f0c341d6fa0eda978eee611ff4a1efee3017a5617c46284973b3"
+    },
+    {
+      "path": "source/native/ClassroomProbe.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved",
+      "bytes": 312,
+      "sha256": "8e1a1d7de570f9bacd587f56f70f41fa0da6d077505047bdf26ed31437e9dfc1"
+    },
+    {
+      "path": "source/native/ClassroomProbe.xcodeproj/xcshareddata/xcschemes/ClassroomProbe.xcscheme",
+      "bytes": 1616,
+      "sha256": "9309774e2e09073d9b77d74ccb445dc0165b36b2d6f98cb21e3498867c2692f0"
+    },
+    {
+      "path": "source/native/ClassroomProbe/App.swift",
+      "bytes": 6668,
+      "sha256": "889c1bf6579e67ce342cf7e57721fb4bb846f18f09057939299e34a1066df009"
+    },
+    {
+      "path": "source/native/ClassroomProbe/DeckRenderer.swift",
+      "bytes": 4772,
+      "sha256": "6554fd3eac2189d5969865994e6f3c9bc05dab6782295ed5e2a0e5dd62b2fe0e"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Info.plist",
+      "bytes": 1216,
+      "sha256": "781caa4a4930e44337c8b07a93868b47a149d911345c1035f93bdf845356bafd"
+    },
+    {
+      "path": "source/native/ClassroomProbe/PVEAppSession.swift",
+      "bytes": 11614,
+      "sha256": "a277967bd32450a20f349aab24a650c3d7a6eea5ad911fcb873a8206b4f5b109"
+    },
+    {
+      "path": "source/native/ClassroomProbe/PVEKeyboard.swift",
+      "bytes": 3614,
+      "sha256": "0b9faa07888fe2457f26800d2d92fe21b608bec819e64f45f73c813645abeea5"
+    },
+    {
+      "path": "source/native/ClassroomProbe/PVEMapView.swift",
+      "bytes": 3448,
+      "sha256": "ff828311a90cc2a98b5ebf45a7bc47e6dea0f398bf2875d684ab42841fee81c8"
+    },
+    {
+      "path": "source/native/ClassroomProbe/PVEPlayView.swift",
+      "bytes": 14723,
+      "sha256": "b49b895a472c32645c3a4496a60eeeee3628bcf743c8e3b96b3809d3303b1566"
+    },
+    {
+      "path": "source/native/ClassroomProbe/PVEPublicView.swift",
+      "bytes": 5102,
+      "sha256": "b241e5a410d23c3d384d4a200d9349b498b7655dd25053197185f44cd37d112c"
+    },
+    {
+      "path": "source/native/ClassroomProbe/PVESheets.swift",
+      "bytes": 10704,
+      "sha256": "0e2fad3d9140b250f3395ae703d43935cb609c0f2260461d0bb2686f86bcd834"
+    },
+    {
+      "path": "source/native/ClassroomProbe/PVEStyle.swift",
+      "bytes": 2373,
+      "sha256": "b298073a31e699288975df1a5d782929c93fff141e6d7f36410163300e6c1583"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/ThirdPartyNotices.txt",
+      "bytes": 1169,
+      "sha256": "d30286a0aa06d4e9e2f31f972a4ade89d7501b4d637b8663dafaecd770c92d87"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/design-tokens.json",
+      "bytes": 1438,
+      "sha256": "fbf6634801a849cfe6ee207bedc34a31c98b56a2a134be2b66569254635c2838"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/sample.pptx",
+      "bytes": 37544,
+      "sha256": "74f28a3877d1999f1566ee7c78bb6d85ba17f1726b748abdef10a8c9a8d0ab9d"
+    },
+    {
+      "path": "source/native/ClassroomProbe/RulesLabView.swift",
+      "bytes": 12716,
+      "sha256": "79a2cb93711facf4446584c9438cdc0906d3c5532daf11c36bccb18462e0c95e"
+    },
+    {
+      "path": "source/native/ClassroomProbe/TeacherSession.swift",
+      "bytes": 11410,
+      "sha256": "db8eeafdfd7018533211deb389f6f2c36cbcfa40e0e67877cec73519054d4c21"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Views.swift",
+      "bytes": 9327,
+      "sha256": "3b3c686ef8791a98c27fd41a839f739997ab7a2b979c2863b13cc43e4c279709"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Package.swift",
+      "bytes": 429,
+      "sha256": "70f223621d686b263ed98486ee229bcce20f443b95436203808790166fab9bfe"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Sources/ClassroomGameCore/ActionPlanning.swift",
+      "bytes": 7347,
+      "sha256": "104976daefc47062997d4d190eab304eea4774c65605732d288c1ddf226957d7"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Sources/ClassroomGameCore/Catalog.swift",
+      "bytes": 10404,
+      "sha256": "e814e9a50e493988e5250a85bb7c7b0a936ae05d890c751350bb154fb9e0e354"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Sources/ClassroomGameCore/GameEngine.swift",
+      "bytes": 34396,
+      "sha256": "fd7af9210e625efcf508fe5cf3c1465b4af46479d523f6ab73887c8029f22c49"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Sources/ClassroomGameCore/GameState.swift",
+      "bytes": 10172,
+      "sha256": "0b0afe748f20a7ea0018b910a23bbfee8bdf79a7b7237bfa073dd7f2547073a6"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Sources/ClassroomGameCore/MonsterAI.swift",
+      "bytes": 4818,
+      "sha256": "cdfa3df6182046f7f1c1f266c6a9bcd016fcccd67a188d792f1f96e184a53ffc"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Sources/ClassroomGameCore/PVEPlaySession.swift",
+      "bytes": 13284,
+      "sha256": "d9ae184f0d43d0e6e309cbd8ea3139f93268569cff77b98e6de3706f10c05115"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Sources/ClassroomGameCore/PlayProjection.swift",
+      "bytes": 4166,
+      "sha256": "c7513eb897822fbbe286fba0fac2a6986dfdcf64930025aa7374078df8a3461d"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Sources/ClassroomGameCore/PublicProjection.swift",
+      "bytes": 3099,
+      "sha256": "5d51f69c60885055e2ead942debab4136b904c49e467085adc7dfce9cb273e0b"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Sources/ClassroomGameCore/Resources/initial-content.json",
+      "bytes": 32227,
+      "sha256": "aaab980fd5f3154ac813a02dc907a835ee0e0181c4149f2b7803d9594795f34a"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Sources/ClassroomGameCore/RuleExamples.swift",
+      "bytes": 11349,
+      "sha256": "b4cb5f728efa72ceafeb8aff0206ce38c47bc72e4ebc2ddf217fdc3363d5d1e1"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Sources/ClassroomGameCore/Rules.swift",
+      "bytes": 12399,
+      "sha256": "f87e42dcf0947f04be3a3fe649f8753c7b7073819c4fa6d53fad23d19bcb06d8"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Tests/ClassroomGameCoreTests/CatalogTests.swift",
+      "bytes": 4194,
+      "sha256": "f91c11ff374fd69cce810b7ef2ed9e607f848a979badbf7d8fd6b2e5b0bde94d"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Tests/ClassroomGameCoreTests/CombatTests.swift",
+      "bytes": 12879,
+      "sha256": "9abd8ba6667e6935cef7a3d81830bff71164f4bf1455ca9acd766128179945c9"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Tests/ClassroomGameCoreTests/EdgeRuleTests.swift",
+      "bytes": 5284,
+      "sha256": "f16fb159c35ea8ce49c00424181985afb2eb1755c3acdf0d6fd2970975bb0ee3"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Tests/ClassroomGameCoreTests/ExampleTests.swift",
+      "bytes": 809,
+      "sha256": "f91a626266695bcf3bc4492b47b2de70dfd906748f5e9518478685ba6d83df28"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Tests/ClassroomGameCoreTests/Fixtures.swift",
+      "bytes": 2389,
+      "sha256": "2beca79965c3853d996c88a159ab6c2558fa57f0ebf8d641af933aa8f0de450c"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Tests/ClassroomGameCoreTests/IntegrationBoundaryTests.swift",
+      "bytes": 4280,
+      "sha256": "735929c5ed765fee578173334d3a50cf6b01d71cf67a7efb1cd19a680e284072"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Tests/ClassroomGameCoreTests/MonsterAITests.swift",
+      "bytes": 6608,
+      "sha256": "33ad53eb55af989a7723100ff1b1bb9210cb2df58dd6038f60267e5205ee3bbe"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Tests/ClassroomGameCoreTests/PVEFlowTests.swift",
+      "bytes": 9597,
+      "sha256": "c319012f8874a210d02562289dcd9f0174467d8ab9be29268fd1975526ba68c7"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Tests/ClassroomGameCoreTests/StateAndScoringTests.swift",
+      "bytes": 14280,
+      "sha256": "db50c711bd661dcd9cb2e5b6c389cb5dd8be1701ad1e50fae16a21a17d6af7d6"
+    },
+    {
+      "path": "source/native/Packages/ProbeCore/Package.resolved",
+      "bytes": 312,
+      "sha256": "8e1a1d7de570f9bacd587f56f70f41fa0da6d077505047bdf26ed31437e9dfc1"
+    },
+    {
+      "path": "source/native/Packages/ProbeCore/Package.swift",
+      "bytes": 585,
+      "sha256": "5ae57ad3403b289fd76d84f046becbb167c7a6861d359116b1d5c7af1ba53890"
+    },
+    {
+      "path": "source/native/Packages/ProbeCore/Sources/ClassroomProbeCore/PPTXReader.swift",
+      "bytes": 14183,
+      "sha256": "27be3a634efb98fc4d84c98bdd6f448dd158eec5e83deb142e9d92e1d9611d96"
+    },
+    {
+      "path": "source/native/Packages/ProbeCore/Sources/ClassroomProbeCore/ProbeState.swift",
+      "bytes": 5858,
+      "sha256": "57bfc57a52b686ab9529f52cb1863aaab5af6b6934cda90e66d7ddfd4d30bda1"
+    },
+    {
+      "path": "source/native/Packages/ProbeCore/Tests/ClassroomProbeCoreTests/Fixtures/sample.pptx",
+      "bytes": 37544,
+      "sha256": "74f28a3877d1999f1566ee7c78bb6d85ba17f1726b748abdef10a8c9a8d0ab9d"
+    },
+    {
+      "path": "source/native/Packages/ProbeCore/Tests/ClassroomProbeCoreTests/ProbeCoreTests.swift",
+      "bytes": 4903,
+      "sha256": "d2ab2020b10d03cfd208d73c618e64a31d5edc51629b51c62cd1e4e898e22f9a"
+    },
+    {
+      "path": "source/native/evidence/cloud-build-result-v0.6.json",
+      "bytes": 861,
+      "sha256": "a6f6f3cba8ba3bb38569f5cb47c178f29b0968cdbc31bb6f7d916692bb251596"
+    },
+    {
+      "path": "source/native/evidence/cloud-build-result.json",
+      "bytes": 820,
+      "sha256": "7dc97e7627d508908073a9bdf9eaa7457ffb99c2a243ab785d9aca017ec49f08"
+    },
+    {
+      "path": "source/native/evidence/configuration-check.json",
+      "bytes": 787,
+      "sha256": "158b473c42db1db4aa1bd1ed4d78480ec6787e63d243151cddc1bc07dffd3a08"
+    },
+    {
+      "path": "source/native/evidence/core-tests-linux.log",
+      "bytes": 2296,
+      "sha256": "3cef9afbcb27f44fecd23598afdfbe08b9d8552117393928c90895f6a54a11f5"
+    },
+    {
+      "path": "source/native/evidence/core-tests-macos.log",
+      "bytes": 4772,
+      "sha256": "8b01636d76b8a2a3a37e31cc1d97d8e32800f02e2bb9b69242fb703e6e2fbb67"
+    },
+    {
+      "path": "source/native/evidence/github-build-attempt.json",
+      "bytes": 1177,
+      "sha256": "052cef157943f4b68f3ada73cb7a12376b42a453e517d906e8888d069461ed1f"
+    },
+    {
+      "path": "source/native/evidence/sidestore-name-fix.json",
+      "bytes": 824,
+      "sha256": "7fcdfb1ce3038c2b74b275e091c854ef5bfd07e73a60cbd3ad752e4553590e5f"
+    },
+    {
+      "path": "source/native/tools/generate_xcode_project.py",
+      "bytes": 8604,
+      "sha256": "5f398585c5160eb3f006b1cb1b959465f4ed51f82685b60eae94da8e30ca3829"
+    },
+    {
+      "path": "source/native/tools/package_ipa.py",
+      "bytes": 3408,
+      "sha256": "48ae9c18dab2544ba077df4954d387d9822ff3ff1c65d891f4cbcd3b59b56d2a"
+    },
+    {
+      "path": "source/native/安装与真机验收.md",
+      "bytes": 8025,
+      "sha256": "e1db6aa78a6b66b1d709b26e70bbde2e876710980087112b9c1f8eefa89fd4ed"
+    },
+    {
+      "path": "source/native/首次安装_SideStore.md",
+      "bytes": 1855,
+      "sha256": "2d9888529be642dc0063577779a9481f61abc64926680ca585d5c68a22db2ab3"
+    },
+    {
+      "path": "source/stage0/evidence/generated-v02-import/deck-private.json",
+      "bytes": 10319,
+      "sha256": "a3454b8698a9e07b8c957f1085158813d325360def812b3b10486ee058daf07a"
+    },
+    {
+      "path": "source/stage0/evidence/generated-v02-import/deck-public.json",
+      "bytes": 600,
+      "sha256": "f0c78f96ac62cc9202245611df2fead94b18cd700ea13afea8ae13833f733937"
+    },
+    {
+      "path": "source/stage0/evidence/generated-v02-import/import-report.json",
+      "bytes": 3204,
+      "sha256": "6bb54e08ad717460a10d0f9688cf82ce25d7212520bc5ce82b5cbcc6e31fa890"
+    },
+    {
+      "path": "source/stage0/evidence/iPadOS27-api.json",
+      "bytes": 9427,
+      "sha256": "0bc02daca0a78127d0eeb93b54563fa11176d76ae69bd24b2a27d11c4cda7ce0"
+    },
+    {
+      "path": "source/stage0/evidence/synthetic-check.json",
+      "bytes": 326,
+      "sha256": "73432fc549f669e4f825a084378a5677475008cc5682f126108b896e11825c91"
+    },
+    {
+      "path": "source/stage0/evidence/synthetic-import/deck-private.json",
+      "bytes": 10192,
+      "sha256": "badb6c0a7c3fe9908ac3e105d8d6d4707c3b303f30cab64df3f18d617b781708"
+    },
+    {
+      "path": "source/stage0/evidence/synthetic-import/deck-public.json",
+      "bytes": 473,
+      "sha256": "cdb58f17389f0a978e5c741457ab025a6ce435fa3ae38763697c226eea7920a4"
+    },
+    {
+      "path": "source/stage0/evidence/synthetic-import/import-report.json",
+      "bytes": 3202,
+      "sha256": "033ccc95c8090cb719efb972d37666916e92185c8fa898b652798d3ca5605867"
+    },
+    {
+      "path": "source/stage0/evidence/v02-check.json",
+      "bytes": 400,
+      "sha256": "03cdc1c642d03ece7494d9f23c3f12cf644d0f2c1b33d28c884a8c88c3f0e891"
+    },
+    {
+      "path": "source/stage0/evidence/v03-check.json",
+      "bytes": 290,
+      "sha256": "89dd5c730cd597f1172a975b48cc2d670639f224c232829d92b66fbcc5a67c32"
+    },
+    {
+      "path": "source/stage0/evidence/合成测试绘本.pptx",
+      "bytes": 37321,
+      "sha256": "4bda60b7c2e9db6a7c035e2516935ae52d21488b770001379221fc0cef61728a"
+    },
+    {
+      "path": "source/stage0/evidence/阶段0_测试绘本.pptx",
+      "bytes": 37544,
+      "sha256": "74f28a3877d1999f1566ee7c78bb6d85ba17f1726b748abdef10a8c9a8d0ab9d"
+    },
+    {
+      "path": "source/stage0/evidence/验证输出.txt",
+      "bytes": 1644,
+      "sha256": "69159e3223cedcf8976ea6cd173e8e6fd3a9958dd390fde84b29985a48cde05f"
+    },
+    {
+      "path": "source/stage0/ipad/DisplayProbe.swiftpm/Package.swift",
+      "bytes": 783,
+      "sha256": "d3d7e97bbbf78a7dbd8eead30ee1504bc753a1aff1cd11f4d68c02729bd9dd7e"
+    },
+    {
+      "path": "source/stage0/ipad/DisplayProbe.swiftpm/Sources/AppModule/Probe.swift",
+      "bytes": 18319,
+      "sha256": "5a98bca55d7728cba0936560d35c4a90e1336736432cbd346d7fbf7e2031962c"
+    },
+    {
+      "path": "source/stage0/ipad/DisplayProbe.swiftpm/Sources/AppModule/SceneAccessoryBridge.swift",
+      "bytes": 3607,
+      "sha256": "2cbf3ce3abbac5fd137651d93a9dc21f60a67a33e11f755d2ef14cee26c8263e"
+    },
+    {
+      "path": "source/stage0/tests/test_inspect_pptx.py",
+      "bytes": 6291,
+      "sha256": "89b5ad3cf168f46b9d7605a4a3fd0a1a48a38a7b4cddac1accdda65ad1c188bd"
+    },
+    {
+      "path": "source/stage0/tools/inspect_pptx.py",
+      "bytes": 11280,
+      "sha256": "0bfbf3868ec68d5cb4ee8f62732bef539284de2aac77b6d10ac8be9ef4cb5d43"
+    },
+    {
+      "path": "source/stage0/tools/make_test_deck.py",
+      "bytes": 2540,
+      "sha256": "0ab5b509899886073b6a56e0592eb1a1995f48a3eb0713dacde05fa9be4f2e2f"
+    },
+    {
+      "path": "source/stage0/tools/package_probe.py",
+      "bytes": 2102,
+      "sha256": "a13722bdb305b869f48fe08001b9c516db039ee2cc12a8c954c3bbea1a4d4303"
+    },
+    {
+      "path": "source/stage0/免费原生App安装方案.md",
+      "bytes": 6973,
+      "sha256": "d87de838c0f0e461f567a712d3f82c855230bb4c50f9afcde9f9024534f759d0"
+    },
+    {
+      "path": "source/stage0/环境恢复步骤.md",
+      "bytes": 1362,
+      "sha256": "d4c354d0d8fae1d1de214c48d55f88e37cf65a095d86bc7e69658d856af06c4c"
+    },
+    {
+      "path": "source/stage0/真机验证步骤.md",
+      "bytes": 4751,
+      "sha256": "f8b241bd9fee1fb5539959493490f4eff7526187250fefbb1ae5fc4875c00894"
+    },
+    {
+      "path": "source/stage0/网页路线评估.md",
+      "bytes": 4002,
+      "sha256": "260c87ffc510b30f3c79d0f0c561274088f7c2dedfd770490e6bc702dea7680d"
+    },
+    {
+      "path": "source/stage0/设备与范围.md",
+      "bytes": 3586,
+      "sha256": "c88c9eb10841a922f8a3b643f1cf0f2f97b686db31f1606669e6a00ea0dee0fb"
+    },
+    {
+      "path": "source/stage1/evidence/cloud-build-result-v0.7.json",
+      "bytes": 1278,
+      "sha256": "255499b007fd55d9292f7abb485ba60d568f7cc1b408c7dc81bf250af3463427"
+    },
+    {
+      "path": "source/stage1/evidence/configuration-check.json",
+      "bytes": 569,
+      "sha256": "db339a46e7f8c5f7b2f92871f2acdd704362817c292f7f14be0f7d1d4a629f2a"
+    },
+    {
+      "path": "source/stage1/evidence/game-core-tests-linux.log",
+      "bytes": 10513,
+      "sha256": "f727d6031d4a9c9c84fb6b4a83cc3347dbd8eb8a5d9e9e142e23b9ac76d94fbc"
+    },
+    {
+      "path": "source/stage1/evidence/game-core-tests-macos.log",
+      "bytes": 11981,
+      "sha256": "d5f28e0d5dd992a5acd5c4743511526184d915e3f8fc77c52e3d5254c2551327"
+    },
+    {
+      "path": "source/stage1/evidence/probe-core-tests-linux.log",
+      "bytes": 2302,
+      "sha256": "ed6b9390604648ecdba35bc0fea8c7b4e01dcd437c532333d4dc0295a80ee44f"
+    },
+    {
+      "path": "source/stage1/evidence/probe-core-tests-macos.log",
+      "bytes": 4753,
+      "sha256": "129755e1ae3a04bde8c130d64dfe9b5b72a7468e9b151dd05452c55d64776225"
+    },
+    {
+      "path": "source/stage1/evidence/stage0-teacher-feedback.json",
+      "bytes": 439,
+      "sha256": "6c3a70c267967213abcc065b63c473ff0b8133629f94d7bb676b583c38a3a2d2"
+    },
+    {
+      "path": "source/stage1/evidence/v0.7-teacher-feedback.json",
+      "bytes": 473,
+      "sha256": "56d6e02f22b468f5c9b0a15a372949066baf1fa10782040bb2f9f712d1498ac0"
+    },
+    {
+      "path": "source/stage1/阶段1验收.md",
+      "bytes": 6558,
+      "sha256": "7ec6c54552dea2903ddf733c1c240b538fff48a33a99d5e8e2fb29692d6cd667"
+    },
+    {
+      "path": "source/stage2/evidence/cloud-build-result-v0.8-first.json",
+      "bytes": 1307,
+      "sha256": "f53006fa8a12c6d473698e015725e4e3233a4e84a26ae9bed82bf22683922446"
+    },
+    {
+      "path": "source/stage2/evidence/cloud-build-result-v0.8.json",
+      "bytes": 1307,
+      "sha256": "97d33f03230a93d5332a08fd891bbbd5a482334bbc32e6f1494ab2d701a5d69b"
+    },
+    {
+      "path": "source/stage2/evidence/configuration-check.json",
+      "bytes": 628,
+      "sha256": "184834b872c514f3f74733ab8df0ff4d3a9d7cde50133bfe18a40f048a009bad"
+    },
+    {
+      "path": "source/stage2/evidence/game-core-tests-linux.log",
+      "bytes": 16167,
+      "sha256": "8aa2f9b0ca4a63fa699850069de65e1dcc554eb2cf43d9f76b920963f28cc5da"
+    },
+    {
+      "path": "source/stage2/evidence/game-core-tests-macos.log",
+      "bytes": 17925,
+      "sha256": "a4e22cb83d6f67fb36928a7e9264c1a8b804ed22189b4f5b245f373f54db8dd2"
+    },
+    {
+      "path": "source/stage2/evidence/probe-core-tests-linux.log",
+      "bytes": 2049,
+      "sha256": "3d81cad3701fd6b389c8218fd52183689f3720d373c3590a79be4535c86feee2"
+    },
+    {
+      "path": "source/stage2/evidence/probe-core-tests-macos.log",
+      "bytes": 4805,
+      "sha256": "3ec4f296a250dca4e049ed65b331eb33cb1e226ee2d29e573c74ad71a133e9c6"
+    },
+    {
+      "path": "source/stage2/快速开始.md",
+      "bytes": 2623,
+      "sha256": "7faa1d3a9a380b4ebd920bb240221dc5a275a981c1eccc2d99da467b45af8fba"
+    },
+    {
+      "path": "source/stage2/阶段2验收.md",
+      "bytes": 8365,
+      "sha256": "54cef4d17fa9f2b34ee78914a6958139d83d779fff909a979987c913a7019767"
+    },
+    {
+      "path": "source/tools/archive_milestone.py",
+      "bytes": 10031,
+      "sha256": "301d3f569b1f49846bc73119da15a197335ed5ddf26038b3606e58929da3d643"
+    },
+    {
+      "path": "source/实施计划_v2.md",
+      "bytes": 7944,
+      "sha256": "c1b41c81087b07ff4ae2303449a13486a344f409dd3024748fc470e3385a0a29"
+    },
+    {
+      "path": "source/技术验证.md",
+      "bytes": 9427,
+      "sha256": "4faac9ecab7a05add521fde49cf67fa2656a374f757ad49a8b04d70d783bb825"
+    },
+    {
+      "path": "恢复说明.md",
+      "bytes": 1765,
+      "sha256": "07c6fc93a2b642a0bd1e5c7c02f5f9a566ead8251f0fec7ee70cad5d46ba15d1"
+    }
+  ]
+}
