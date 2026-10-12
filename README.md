@@ -13,11 +13,14 @@
 - [native/安装与真机验收.md](native/安装与真机验收.md)：构建、首次安装、续签和设备测试。
 - [技术验证.md](技术验证.md)：已通过的检查与仍待验证的项目。
 
-GitHub 私有仓库 `liamchan-rgb/classroom-boardgame` 已完成首轮云端构建：Xcode 27.0、iOS 27 SDK、6项核心测试和 arm64 设备版 App 均通过。v0.5 IPA已下载并核对SHA256，仍需免费个人签名后安装。真机启动、投屏、绘本视觉和续签尚未验证。
+当前候选为v0.6：Xcode27、iOS27 SDK、6项核心测试与arm64设备版编译均通过，IPA已校验。安装包显示名为`ClassroomProbe`，中文教师界面保留；需SideStore个人签名后安装。
 
-- [成功构建记录](https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38210974473)
-- [下载GitHub构建产物](https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38210974473/artifacts/11728909540)：需登录仓库账号；包含未个人签名IPA、日志和校验值，保留至2026-10-15。
-- 构建证据：`native/evidence/cloud-build-result.json` 与 `core-tests-macos.log`。IPA对应提交 `0d327fbe28746c14d38c817f66bfdb8d1d53ced6`；后续文档更新不改变已编译的App源码。
+v0.5曾被Apple签名服务拒绝，截图指出中文`appIdName`无效。v0.6改用ASCII显示名与Bundle名称，并加入打包校验；教师已确认SideStore登录成功，等待新版安装及启动结果。
+
+- [v0.6成功构建](https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38222596815)
+- [v0.6构建产物](https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38222596815/artifacts/11735060890)：需登录仓库账号，包含IPA、日志及校验值，保留至2026-10-15。
+- 最新证据：`native/evidence/cloud-build-result-v0.6.json`及`sidestore-name-fix.json`，对应源码提交`d78884dcfe2335373ed0918d2d83543e2a51d00e`。v0.5构建记录保留作为历史。
+- 安装、启动、真实投屏、绘本视觉与续签尚未通过，阶段0仍未完成。
 
 ## 开发检查
 

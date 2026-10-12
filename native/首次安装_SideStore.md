@@ -8,8 +8,8 @@
 4. 打开iloader，登录免费Apple ID、选择iPad，点击“Install SideStore (Stable)”。
 5. iPad“设置→通用→VPN与设备管理”允许个人开发者；“隐私与安全性”开启开发者模式，按系统提示重启。
 6. LocalDevVPN点击Connect；打开SideStore，用同一Apple ID登录，在My Apps点击SideStore旁的“7 DAYS”完成首次刷新。
-7. 将已编译的 `ClassroomStage0_v0.5_unsigned.ipa` 保存到iPad“文件”；SideStore的My Apps点“＋”，选择此IPA安装。
-8. 启动“课堂双画面验证”，先确认教师控制台正常，再测试电视连接和内置绘本。
+7. 将已编译的 `ClassroomStage0_v0.6_unsigned.ipa` 保存到iPad“文件”；SideStore的My Apps点“＋”，选择此IPA安装。
+8. 启动“ClassroomProbe”，先确认教师控制台正常，再测试电视连接和内置绘本。
 
 安装／刷新时需要Wi-Fi及LocalDevVPN。免费签名7天，需要刷新SideStore自身和课堂App。首次安装及iPadOS27行为仍待教师实测。
 

@@ -11,7 +11,10 @@
   "newDisplayName": "ClassroomProbe",
   "newBundleName": "ClassroomProbe",
   "bundleIdentifierChanged": false,
-  "buildResult": "pending",
+  "buildResult": "success",
   "installationValidated": false,
-  "reference": "https://github.com/SideStore/SideStore/issues/1489"
+  "reference": "https://github.com/SideStore/SideStore/issues/1489",
+  "ipaNameCheck": "passed",
+  "workflowURL": "https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38222596815",
+  "ipaSha256": "9e79b883c70f59bb017abf28acf87ebbcb7fa072ce0f703fb75d8e0531a5c4f0"
 }

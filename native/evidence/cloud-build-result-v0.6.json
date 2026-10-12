@@ -1,0 +1,22 @@
+{
+  "workflowURL": "https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38222596815",
+  "runID": 38222596815,
+  "testedCommit": "d78884dcfe2335373ed0918d2d83543e2a51d00e",
+  "conclusion": "success",
+  "xcodeVersion": "Xcode 27.0\nBuild version 27A266a",
+  "coreTests": "6 passed, 0 failures",
+  "appVersion": "0.6",
+  "buildNumber": "6",
+  "displayName": "ClassroomProbe",
+  "bundleName": "ClassroomProbe",
+  "bundleIdentifier": "org.personal.classroom.stage0",
+  "minimumOS": "27.0",
+  "sdk": "iphoneos27.0",
+  "architecture": "arm64",
+  "ipaBytes": 342284,
+  "ipaSha256": "9e79b883c70f59bb017abf28acf87ebbcb7fa072ce0f703fb75d8e0531a5c4f0",
+  "artifactArchiveSha256": "021e0a59a3c97fade99747cb7d3f9f47cbb164a85f53da86aec33746d0e4cbfc",
+  "requiresPersonalSigning": true,
+  "deviceInstalled": false,
+  "artifactExpiresAt": "2026-10-15T08:17:49Z"
+}
