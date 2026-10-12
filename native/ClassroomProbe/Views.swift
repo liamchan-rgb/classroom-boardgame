@@ -7,6 +7,9 @@ import ClassroomProbeCore
 struct PublicSurface: View {
     @ObservedObject var model: PublicDisplayModel
     var body: some View {
+        if let example = model.ruleExample {
+            GameExamplePublicView(snapshot: example)
+        } else {
         VStack(spacing: 16) {
             HStack {
                 Text("英语课堂 · 公开画面").font(.title2.bold())
@@ -37,6 +40,7 @@ struct PublicSurface: View {
                 }
             }
         }.padding(20).foregroundStyle(.white).background(Color(red: 0.02, green: 0.24, blue: 0.22))
+        }
     }
 }
 
@@ -48,17 +52,23 @@ struct TeacherConsole: View {
     @State private var showReport = false
     @State private var exportingURL: URL?
     @State private var showExporter = false
+    @State private var showRules = false
     @FocusState private var notesFocused: Bool
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
-                    Label("教师端 · 原生阶段0 v0.6", systemImage: "book.closed.fill").font(.title2.bold())
+                    Label("教师端 · 阶段1 v0.7", systemImage: "book.closed.fill").font(.title2.bold())
                     Spacer()
                     Text("公开场景 \(session.connectionCount)").font(.headline)
                 }
                 Text(session.registrationStatus).foregroundStyle(.secondary)
                 Text(session.message).font(.callout)
+                Button("规则示例与初始资料") {
+                    notesFocused = false
+                    session.beginRules()
+                    showRules = true
+                }.buttonStyle(.borderedProminent)
                 HStack(spacing: 8) {
                     ForEach(session.state.players) { player in
                         Button(player.name) { session.select(player.id) }
@@ -107,7 +117,7 @@ struct TeacherConsole: View {
                     }
                     Button("导入备份") { importingBackup = true; openImporter() }
                 }.buttonStyle(.bordered)
-                Text("本样例仅用于阶段0能力验证；绘本基础渲染的限制详见导入报告。")
+                Text("阶段1新增规则示例与初始资料；下方保留阶段0验证功能。绘本基础渲染的限制详见导入报告。")
                     .font(.caption).foregroundStyle(.secondary)
             }.padding(24)
         }.background(Color(uiColor: .systemGroupedBackground))
@@ -131,6 +141,9 @@ struct TeacherConsole: View {
             }
             .sheet(isPresented: $showExporter, onDismiss: { session.pause(.filePicker, enabled: false) }) {
                 if let url = exportingURL { ExportDocument(url: url) }
+            }
+            .sheet(isPresented: $showRules, onDismiss: { session.endRules() }) {
+                RulesLabView(session: session)
             }
     }
     private func openImporter() { notesFocused = false; session.pause(.filePicker, enabled: true); showImporter = true }

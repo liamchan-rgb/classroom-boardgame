@@ -11,6 +11,7 @@ struct ClassroomProbeApp: App {
                 .ignoresSafeArea()
                 .onChange(of: scenePhase) { _, phase in
                     if phase != .active {
+                        TeacherSession.shared.display.ruleExample = nil
                         TeacherSession.shared.pause(.background, enabled: true)
                         TeacherSession.shared.concealNotes()
                     }
@@ -56,7 +57,7 @@ final class TeacherHostController: UIViewController {
     override func resignFirstResponder() -> Bool { heldKeys.removeAll(); return super.resignFirstResponder() }
     override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
         let session = TeacherSession.shared
-        guard !session.isEditingNotes else { heldKeys.removeAll(); super.pressesBegan(presses, with: event); return }
+        guard !session.isEditingNotes, !session.rulesOpen else { heldKeys.removeAll(); super.pressesBegan(presses, with: event); return }
         var handled = false
         for press in presses {
             guard let key = press.key,

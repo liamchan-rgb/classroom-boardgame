@@ -1,0 +1,34 @@
+Building for debugging...
+[Computing dependencies]
+[2 / 9] ClassroomProbeCore
+[8 / 13] ClassroomProbeCoreTests-product
+[11 / 17] ClassroomProbeCore
+[15 / 18] ClassroomProbeCoreTests-product
+[20 / 22] ClassroomProbeCoreTests-test-runner
+[23 / 23] ClassroomProbeCoreTests-test-runner
+Build complete! (2.02 secs)
+Test Suite 'All tests' started at 2026-10-12 09:40:37.596
+Test Suite 'Debug-linux-x86_64.xctest' started at 2026-10-12 09:40:37.597
+Test Suite 'ProbeCoreTests' started at 2026-10-12 09:40:37.597
+Test Case 'ProbeCoreTests.testActualPPTXOrderImagesEmptyAndLongNotes' started at 2026-10-12 09:40:37.597
+Test Case 'ProbeCoreTests.testActualPPTXOrderImagesEmptyAndLongNotes' passed (0.009 seconds)
+Test Case 'ProbeCoreTests.testBackupRoundTripIncludesAssetsButRestoresPaused' started at 2026-10-12 09:40:37.607
+Test Case 'ProbeCoreTests.testBackupRoundTripIncludesAssetsButRestoresPaused' passed (0.001 seconds)
+Test Case 'ProbeCoreTests.testInvalidBackupIsRejectedBeforeUse' started at 2026-10-12 09:40:37.607
+Test Case 'ProbeCoreTests.testInvalidBackupIsRejectedBeforeUse' passed (0.0 seconds)
+Test Case 'ProbeCoreTests.testNotesExcludeSlideNumberAndFooter' started at 2026-10-12 09:40:37.608
+Test Case 'ProbeCoreTests.testNotesExcludeSlideNumberAndFooter' passed (0.0 seconds)
+Test Case 'ProbeCoreTests.testPauseReasonsRemainIndependentAndTimeFreezes' started at 2026-10-12 09:40:37.608
+Test Case 'ProbeCoreTests.testPauseReasonsRemainIndependentAndTimeFreezes' passed (0.0 seconds)
+Test Case 'ProbeCoreTests.testUnsafePathBadZipAndDTDRejected' started at 2026-10-12 09:40:37.608
+Test Case 'ProbeCoreTests.testUnsafePathBadZipAndDTDRejected' passed (0.109 seconds)
+Test Suite 'ProbeCoreTests' passed at 2026-10-12 09:40:37.717
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.119 (0.119) seconds
+Test Suite 'Debug-linux-x86_64.xctest' passed at 2026-10-12 09:40:37.717
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.119 (0.119) seconds
+Test Suite 'All tests' passed at 2026-10-12 09:40:37.717
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.119 (0.119) seconds
+◇ Test run started.
+↳ Testing Library Version: 6.4 (efd8d65801f569d)
+↳ Target Platform: x86_64-unknown-linux-gnu
+✔ Test run with 0 tests in 0 suites passed after 0.001 seconds.

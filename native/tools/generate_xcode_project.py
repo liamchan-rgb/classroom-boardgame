@@ -30,7 +30,7 @@ def encode(value, level=0):
 
 sources = []
 files = []
-for name in ("App.swift", "DeckRenderer.swift", "TeacherSession.swift", "Views.swift"):
+for name in ("App.swift", "DeckRenderer.swift", "TeacherSession.swift", "Views.swift", "RulesLabView.swift"):
     ref = add("file:" + name, "PBXFileReference", lastKnownFileType="sourcecode.swift", path=name, sourceTree="<group>")
     files.append(ref)
     sources.append(add("build:" + name, "PBXBuildFile", fileRef=ref))
@@ -48,9 +48,12 @@ main_group = add("main-group", "PBXGroup", children=[app_group, products_group],
 package = add("core-package", "XCLocalSwiftPackageReference", relativePath="Packages/ProbeCore")
 package_product = add("core-product", "XCSwiftPackageProductDependency", package=package, productName="ClassroomProbeCore")
 framework_build = add("build:core", "PBXBuildFile", productRef=package_product)
+game_package = add("game-package", "XCLocalSwiftPackageReference", relativePath="Packages/GameCore")
+game_product = add("game-product", "XCSwiftPackageProductDependency", package=game_package, productName="ClassroomGameCore")
+game_framework = add("build:game", "PBXBuildFile", productRef=game_product)
 source_phase = add("sources", "PBXSourcesBuildPhase", buildActionMask="2147483647", files=sources, runOnlyForDeploymentPostprocessing="0")
 resource_phase = add("resources", "PBXResourcesBuildPhase", buildActionMask="2147483647", files=resource_builds, runOnlyForDeploymentPostprocessing="0")
-framework_phase = add("frameworks", "PBXFrameworksBuildPhase", buildActionMask="2147483647", files=[framework_build], runOnlyForDeploymentPostprocessing="0")
+framework_phase = add("frameworks", "PBXFrameworksBuildPhase", buildActionMask="2147483647", files=[framework_build, game_framework], runOnlyForDeploymentPostprocessing="0")
 project_configs = []
 target_configs = []
 for name in ("Debug", "Release"):
@@ -69,7 +72,7 @@ for name in ("Debug", "Release"):
                            SUPPORTS_MACCATALYST="NO", SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD="NO",
                            SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD="NO", SWIFT_EMIT_LOC_STRINGS="NO",
                            LD_RUNPATH_SEARCH_PATHS=["$(inherited)", "@executable_path/Frameworks"],
-                           CURRENT_PROJECT_VERSION="6", MARKETING_VERSION="0.6")
+                           CURRENT_PROJECT_VERSION="7", MARKETING_VERSION="0.7")
     target_configs.append(add("target:" + name, "XCBuildConfiguration", name=name, buildSettings=target_settings))
 project_config_list = add("project-config-list", "XCConfigurationList", buildConfigurations=project_configs,
                           defaultConfigurationIsVisible="0", defaultConfigurationName="Release")
@@ -78,11 +81,11 @@ target_config_list = add("target-config-list", "XCConfigurationList", buildConfi
 target = add("target", "PBXNativeTarget", name="ClassroomProbe", productName="ClassroomProbe", productReference=product,
              productType="com.apple.product-type.application", buildConfigurationList=target_config_list,
              buildPhases=[source_phase, framework_phase, resource_phase], buildRules=[], dependencies=[],
-             packageProductDependencies=[package_product])
+             packageProductDependencies=[package_product, game_product])
 project = add("project", "PBXProject", attributes=dict(LastUpgradeCheck="2700", BuildIndependentTargetsInParallel="YES"),
               buildConfigurationList=project_config_list, compatibilityVersion="Xcode 14.0", developmentRegion="zh-Hans",
               hasScannedForEncodings="0", knownRegions=["zh-Hans", "en", "Base"], mainGroup=main_group,
-              productRefGroup=products_group, projectDirPath="", projectRoot="", targets=[target], packageReferences=[package])
+              productRefGroup=products_group, projectDirPath="", projectRoot="", targets=[target], packageReferences=[package, game_package])
 project_path = ROOT / "ClassroomProbe.xcodeproj"
 (project_path / "project.pbxproj").write_text("// !$*UTF8*$!\n" + encode(dict(archiveVersion="1", classes={}, objectVersion="56",
                                                                             objects=objects, rootObject=project)) + "\n", encoding="utf-8")

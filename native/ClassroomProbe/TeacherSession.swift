@@ -1,11 +1,13 @@
 import UIKit
 import Combine
 import ClassroomProbeCore
+import ClassroomGameCore
 
 @MainActor
 final class PublicDisplayModel: ObservableObject {
     @Published var snapshot = ProbeState().publicSnapshot
     @Published var image: UIImage?
+    @Published var ruleExample: PublicGameSnapshot?
 }
 
 @MainActor
@@ -19,6 +21,7 @@ final class TeacherSession: ObservableObject {
     @Published private(set) var importReport = "尚未导入PPTX。"
     @Published var showNotes = false
     private(set) var isEditingNotes = false
+    private(set) var rulesOpen = false
     private var connectedIDs: Set<String> = []
     private var deck: ParsedDeck?
     private var pptxData: Data?
@@ -59,10 +62,20 @@ final class TeacherSession: ObservableObject {
         isEditingNotes = false
         pause(.notes, enabled: false)
     }
+    func beginRules() {
+        concealNotes()
+        rulesOpen = true
+        pause(.rules, enabled: true)
+    }
+    func endRules() {
+        display.ruleExample = nil
+        rulesOpen = false
+        pause(.rules, enabled: false)
+    }
     func setConnection(id: String, connected: Bool) {
         if connected { connectedIDs.insert(id) } else { connectedIDs.remove(id) }
         connectionCount = connectedIDs.count
-        if connectedIDs.isEmpty { concealNotes(); pause(.manual, enabled: true) }
+        if connectedIDs.isEmpty { display.ruleExample = nil; concealNotes(); pause(.manual, enabled: true) }
     }
     func setRegistrationStatus(_ text: String) { registrationStatus = text }
     func fileSelectionFailed(_ error: Error) { message = "选择文件失败：\(error.localizedDescription)" }

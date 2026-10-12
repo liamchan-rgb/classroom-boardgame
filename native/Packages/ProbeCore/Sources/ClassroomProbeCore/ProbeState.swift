@@ -18,7 +18,7 @@ public struct PublicPlayer: Codable, Equatable, Identifiable {
 }
 
 public enum PauseReason: String, Codable, CaseIterable {
-    case manual, notes, background, filePicker, expired, importing
+    case manual, notes, background, filePicker, expired, importing, rules
 }
 
 // This value is the only game metadata passed to the external display.

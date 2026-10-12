@@ -1,35 +1,29 @@
 # 英语课堂电子桌游
 
-当前实施路线：**独立原生 iPad App → GitHub Xcode 27 云端构建 → SideStore 免费个人签名与续签**。备用安装工具为 AltStore Classic。纯自用，不使用 TestFlight，不需要购买 Apple Developer Program。
+实施路线：**独立原生iPad App → GitHub Xcode27云端构建 → SideStore免费个人签名与续签**。纯自用，不使用TestFlight，不需要购买Apple Developer Program。
 
-目前只做阶段0能力验证。原始两份文档保存在 `docs/`，保持不变；更新安排见 [实施计划_v2.md](实施计划_v2.md)。完整桌游尚未实现，阶段0也未完成真机验收。
+教师已反馈v0.6各功能正常，并同意继续。当前进入**阶段1：规则计算、数据与完整操作结算**。原始两份文档在 `docs/`，保持不变；[实施计划](实施计划_v2.md)、[技术验证](技术验证.md)、[阶段1验收](stage1/阶段1验收.md)。完整PVE操作界面从阶段2接入。
 
 ## 当前交付
 
-- `native/ClassroomProbe.xcodeproj`：独立 App 工程，目标为 iPadOS 27，仅支持 iPad。
-- `native/ClassroomProbe/`：教师控制台、电视公开画面、实体键盘、基础离线绘本和本地备份。
-- `native/Packages/ProbeCore/`：Swift 核心库、PPTX 离线解析与6项自动验证。
-- `.github/workflows/build-native-ipa.yml`：手动触发的云端构建，生成待个人签名的 IPA。
-- [native/安装与真机验收.md](native/安装与真机验收.md)：构建、首次安装、续签和设备测试。
-- [技术验证.md](技术验证.md)：已通过的检查与仍待验证的项目。
+- `native/ClassroomProbe.xcodeproj`：iPadOS27原生App工程。
+- `native/ClassroomProbe/`：教师控制台、电视公开场景、键盘、基础离线绘本、备份；v0.7新增规则示例与初始资料。
+- `native/Packages/GameCore/`：独立规则计算、4职业/19技能/18物品/2套装/6怪物的校验数据、原子结算、版本化存档、完整历史与可控随机。
+- `native/Packages/ProbeCore/`：PPTX离线解析及原阶段0核心。
+- `.github/workflows/build-native-ipa.yml`：手动构建，测试两个核心库，再生成待个人签名的IPA。
+- [安装与真机验收](native/安装与真机验收.md)：SideStore覆盖更新与免费7天续签。
 
-当前候选为v0.6：Xcode27、iOS27 SDK、6项核心测试与arm64设备版编译均通过，IPA已校验。安装包显示名为`ClassroomProbe`，中文教师界面保留；需SideStore个人签名后安装。
+安装名继续使用ASCII `ClassroomProbe`，保留中文界面和Bundle ID，避免v0.5中文appIdName签名失败，并用于覆盖更新。v0.7云端构建结果在完成后记录到 `stage1/evidence/`；App新增界面仍需本次真机核对。
 
-v0.5曾被Apple签名服务拒绝，截图指出中文`appIdName`无效。v0.6改用ASCII显示名与Bundle名称，并加入打包校验；教师已确认SideStore登录成功，等待新版安装及启动结果。
-
-- [v0.6成功构建](https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38222596815)
-- [v0.6构建产物](https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38222596815/artifacts/11735060890)：需登录仓库账号，包含IPA、日志及校验值，保留至2026-10-15。
-- 最新证据：`native/evidence/cloud-build-result-v0.6.json`及`sidestore-name-fix.json`，对应源码提交`d78884dcfe2335373ed0918d2d83543e2a51d00e`。v0.5构建记录保留作为历史。
-- 安装、启动、真实投屏、绘本视觉与续签尚未通过，阶段0仍未完成。
+v0.6历史成功构建：[工作流38222596815](https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38222596815)，证据见 `native/evidence/cloud-build-result-v0.6.json`。阶段0教师反馈见 `stage1/evidence/stage0-teacher-feedback.json`。复杂PPTX母版、图表、组合及字体的完整兼容仍在阶段6处理。
 
 ## 开发检查
 
 ```sh
+swift test --package-path native/Packages/GameCore
 swift test --package-path native/Packages/ProbeCore
 ```
 
-这是开发侧核心验证；教师不需要在 iPad 运行命令，也不增加 Windows/Linux 产品端。
+这是开发侧验证，不增加Windows/Linux产品端，也不要求教师运行命令。修改App文件清单后用 `python3 native/tools/generate_xcode_project.py` 重建已提交工程。Xcode项目无需XcodeGen或Homebrew。
 
-Xcode 工程已包含在源码中，无需生成器或 Homebrew。修改工程文件清单后，可通过 `python3 native/tools/generate_xcode_project.py` 重建工程；云端直接使用已提交的工程。
-
-旧 Swift Playground 样例保留在 `stage0/ipad/` 作为历史记录。教师设备上新建空白 Playground App 也会预启动失败，本次实施已改为独立原生 App。
+旧Swift Playground样例在 `stage0/ipad/`，仅保留历史；当前App不再依赖该宿主。

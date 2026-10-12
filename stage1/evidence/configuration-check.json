@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-12",
+  "appVersion": "0.7",
+  "buildNumber": "7",
+  "bundleIdentifier": "org.personal.classroom.stage0",
+  "displayName": "ClassroomProbe",
+  "bundleName": "ClassroomProbe",
+  "localProducts": [
+    "ClassroomProbeCore",
+    "ClassroomGameCore"
+  ],
+  "xcodeRunner": "xcode-27",
+  "coreTests": {
+    "GameCore": 38,
+    "ProbeCore": 6,
+    "failures": 0
+  },
+  "nativeSwiftSyntax": "passed; not a device type-check",
+  "projectAndWorkflowStructure": "passed",
+  "deviceBuild": "pending real Xcode27 workflow"
+}

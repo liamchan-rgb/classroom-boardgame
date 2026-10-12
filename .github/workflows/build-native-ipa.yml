@@ -1,4 +1,4 @@
-name: Build personal iPad probe
+name: Build personal iPad app
 
 # Manual runs only. No Apple credentials, provisioning profiles or paid runners.
 on:
@@ -34,6 +34,7 @@ jobs:
         run: |
           set -euo pipefail
           swift test --package-path native/Packages/ProbeCore 2>&1 | tee artifacts/core-tests.log
+          swift test --package-path native/Packages/GameCore 2>&1 | tee artifacts/game-core-tests.log
       - name: Build unsigned iPad app
         shell: bash
         run: |
@@ -53,14 +54,15 @@ jobs:
           app_path='native/build/Build/Products/Release-iphoneos/ClassroomProbe.app'
           lipo -archs "$app_path/ClassroomProbe" | tee artifacts/architectures.txt
           test "$(lipo -archs "$app_path/ClassroomProbe")" = arm64
-          python3 native/tools/package_ipa.py "$app_path" artifacts/ClassroomStage0-unsigned.ipa
+          python3 native/tools/package_ipa.py "$app_path" artifacts/ClassroomStage1-unsigned.ipa
           cp native/安装与真机验收.md artifacts/
+          cp stage1/阶段1验收.md artifacts/
           printf '%s\n' "$GITHUB_SHA" > artifacts/source-commit.txt
       - name: Retain IPA and diagnostics briefly
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: ClassroomStage0-build
+          name: ClassroomStage1-build
           path: artifacts/
           retention-days: 3
           if-no-files-found: warn
