@@ -1,0 +1,10 @@
+{
+  "tool": "image_gen",
+  "createdAt": "2026-10-12",
+  "scope": "two original style options, one adventurer and slime per style; not final full set",
+  "sharedPrompt": "Bright warm picture-book light fantasy, HD-2D crisp pixel clusters, original full-body subject, clean silhouette, gentle daylight, no blood, transparent isolated image, no text or stats. Do not copy an existing game character.",
+  "styleA": "Forest palette moss green, cream, ochre. Adventurer with chestnut hair, short cloak, cream tunic, brown boots and training short sword. Slime mint green jelly, mischievous eyes, golden leaf inside.",
+  "styleB": "Clear magical school palette teal, ivory, soft sky blue. Same adventurer role with academy-style tunic, teal cloak and short sword; no staff or book. Slime teal mint with cream-blue highlights.",
+  "rawOutputs": "sources/original_[a|b]_[class_adventurer|monster_slime].png",
+  "standardExport": "1024x1024 sRGB transparent, original fitted within 736 square at x/y144; preserves complete image and shape. Source SVG canvas provided."
+}

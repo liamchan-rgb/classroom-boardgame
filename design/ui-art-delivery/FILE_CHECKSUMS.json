@@ -1,0 +1,383 @@
+{
+  "formatVersion": 1,
+  "version": "2026-10-12-round1",
+  "scope": "design-only",
+  "selfExcluded": true,
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 3926,
+      "sha256": "b5c383664ccc92de6dc5092ed5ab70f236d05389e064031c863ea422230f59a1"
+    },
+    {
+      "path": "annotations/01_rule_boundaries.md",
+      "bytes": 8001,
+      "sha256": "4d7dc74fbfa1d3ff1614857f7aa0d182ab90114a986456acb4e00c3ff76e936d"
+    },
+    {
+      "path": "annotations/02_component_states.md",
+      "bytes": 8868,
+      "sha256": "d0074e697d5d9e61c6134b0c1778a6c3ad7d8fe729c08788d3be2f091ffd6d31"
+    },
+    {
+      "path": "annotations/03_layout_and_adaptation.md",
+      "bytes": 6373,
+      "sha256": "f46526c062b9059994d9fb02f2c75e797a1c2b6e5129087c93bf885220aa007a"
+    },
+    {
+      "path": "annotations/04_interaction_and_swiftui.md",
+      "bytes": 7457,
+      "sha256": "cd3403557a15690fc40c56116c97663e02cbc173d3d45f13a0b9fdce47359c61"
+    },
+    {
+      "path": "annotations/05_acceptance_checklist.md",
+      "bytes": 6198,
+      "sha256": "8763014f4540f6e6e017d4404f71a99e3805e9a3f22a37c5a5d505dd0934e8c0"
+    },
+    {
+      "path": "annotations/06_materials_and_license.md",
+      "bytes": 3084,
+      "sha256": "d676660b1b629329665e9b9dc4572a188fbf34416a37aa5da3891f9cac3269ee"
+    },
+    {
+      "path": "annotations/07_validation.md",
+      "bytes": 1431,
+      "sha256": "348b042b4bc286b949ea9726db0d9fa7a6ca8285afbf30e6dd694ad6d016cd06"
+    },
+    {
+      "path": "annotations/08_recovery.md",
+      "bytes": 1559,
+      "sha256": "c81efcd4662716d78c042e96a71ed621a6f47680c57d57bc7b83d73b29fc7f3a"
+    },
+    {
+      "path": "asset-manifest.json",
+      "bytes": 21403,
+      "sha256": "91847ca6c1eb400d6e048929a483531f73d5984bebeb8329299314947de77efc"
+    },
+    {
+      "path": "assets/icons/icon_action.png",
+      "bytes": 4207,
+      "sha256": "0241713c81477af51f58688b4cb7b6c4adef337797a9cf0a35519b9276568893"
+    },
+    {
+      "path": "assets/icons/icon_action.svg",
+      "bytes": 158,
+      "sha256": "62ed7920cba16dd9980d9694cb824f994e9496b3c6ef497f964791d0eb1b127b"
+    },
+    {
+      "path": "assets/icons/icon_coin.png",
+      "bytes": 10201,
+      "sha256": "3f80ff65d715874b65d87b65a965581537c513ff5412bf1b8b1120b0aba4461c"
+    },
+    {
+      "path": "assets/icons/icon_coin.svg",
+      "bytes": 303,
+      "sha256": "285adfc122fadfa1909d97199f702bde3c2eae32e06ace131772fb34ddf8eec4"
+    },
+    {
+      "path": "assets/icons/icon_downed.png",
+      "bytes": 6398,
+      "sha256": "b6b0b469217f318a078550a51d8d1082dde160022cc8e9573ee688be90418029"
+    },
+    {
+      "path": "assets/icons/icon_downed.svg",
+      "bytes": 281,
+      "sha256": "4755a76137ec2763eafd9bf433ab7487fdd429f23802964472f082a105b38f25"
+    },
+    {
+      "path": "assets/icons/icon_health.png",
+      "bytes": 4910,
+      "sha256": "5c8a7e342f21c040811a2275cb495e40915bbd8fc4a58c30eb6b4c84f70c65a2"
+    },
+    {
+      "path": "assets/icons/icon_health.svg",
+      "bytes": 178,
+      "sha256": "d94f5cefe09d4edf1a9c7e1cb1b9e998fb20810362ab66e0c533f940076b5cd3"
+    },
+    {
+      "path": "assets/icons/icon_score.png",
+      "bytes": 4970,
+      "sha256": "b39bd62794927697f12f5c9385aedb2df97dafee375e3a4de44d931d351c216c"
+    },
+    {
+      "path": "assets/icons/icon_score.svg",
+      "bytes": 192,
+      "sha256": "b2bff6207081fb0f7adb223addd09a77de5e619bc87adfdf7725ce4d3fc66d22"
+    },
+    {
+      "path": "assets/icons/icon_shield.png",
+      "bytes": 3867,
+      "sha256": "0b1155ba83bfa485d40b35fff30d0c231013ee4938cdc5396a1a4b50f5434c1c"
+    },
+    {
+      "path": "assets/icons/icon_shield.svg",
+      "bytes": 243,
+      "sha256": "e7c926d93736584ea83ca9a2da83ae9248fa4fb374b364e5b57ad9b3167454da"
+    },
+    {
+      "path": "assets/style_a/class_adventurer_portrait.png",
+      "bytes": 307711,
+      "sha256": "cb9705ca40114bc60ed01536093450e4a0501ad874bb789433f9cfb60c29a7a4"
+    },
+    {
+      "path": "assets/style_a/monster_slime_portrait.png",
+      "bytes": 335205,
+      "sha256": "1fc5dacc760b83c403723d25286be0e7c5710b509e5605a50ef55a5ebd7212f5"
+    },
+    {
+      "path": "assets/style_b/class_adventurer_portrait.png",
+      "bytes": 327672,
+      "sha256": "0a1509c010698f329b7568eb85766a69497d738e13adbdd2c007f1515bc34c21"
+    },
+    {
+      "path": "assets/style_b/monster_slime_portrait.png",
+      "bytes": 349437,
+      "sha256": "f43af2575443831de7241708e34b08af66c93c7fbfb790d09719917154e0e356"
+    },
+    {
+      "path": "design-tokens.json",
+      "bytes": 3761,
+      "sha256": "7e6e5dc78fe567bc6280e8cbaa7902ea763c067819e593ce2745d564bf461413"
+    },
+    {
+      "path": "previews/component_states.png",
+      "bytes": 638780,
+      "sha256": "6c40310a99ae23aa2020ced047c764e74953910416cf09125909302708f84a68"
+    },
+    {
+      "path": "previews/index.html",
+      "bytes": 4574,
+      "sha256": "3a7ee1616f344937c443f81e58c92498fcda999c3de8174dbf5719c3d7b75761"
+    },
+    {
+      "path": "previews/public_battle_a_16x9.png",
+      "bytes": 469114,
+      "sha256": "65670925229897215f7ce44c9b7d1e05e6166aa2e07cf7cb0630b748fce7c3fa"
+    },
+    {
+      "path": "previews/public_battle_a_4x3.png",
+      "bytes": 444827,
+      "sha256": "1ef8c088d3c69d045b1854a6a7ccbe9edd401a0918221c0d39a2a64d265d1f43"
+    },
+    {
+      "path": "previews/public_battle_b_16x9.png",
+      "bytes": 460387,
+      "sha256": "18fc4c97362ce8d197ca304f210478dd3b033d0abb62a4e9a565fd53e5e22897"
+    },
+    {
+      "path": "previews/public_battle_b_4x3.png",
+      "bytes": 436662,
+      "sha256": "12da22352962333b3b0ae8d1e924a560f13f760c453ef81a1f6a87b751797e87"
+    },
+    {
+      "path": "previews/public_storybook_16x9.png",
+      "bytes": 244125,
+      "sha256": "52e4a781198cb2c32044a82c3546eee6569981b851286c2d4c9e878a4b52fac0"
+    },
+    {
+      "path": "previews/public_storybook_4x3.png",
+      "bytes": 238864,
+      "sha256": "a2f351e7ab0aebf58b3d0abf42c8008d0ad6d0dbf12d698ab95a45e7de275011"
+    },
+    {
+      "path": "previews/settlement_and_privacy.png",
+      "bytes": 408349,
+      "sha256": "1979bf1c4a08c02cf0a008e3c6f52d0cf8b95f7387c9875d5fc53e0fbb310c29"
+    },
+    {
+      "path": "previews/seven_roles_multi_monsters.png",
+      "bytes": 381152,
+      "sha256": "b455c0e439aa31e0389880badcae9579e85b6556fa9e215df24ba1671bfec5df"
+    },
+    {
+      "path": "previews/style_sample_a.png",
+      "bytes": 472886,
+      "sha256": "d0f74a5ab688dfc5ac640be300fe123bd612ce96e89f8450d16a5a6cad64aed2"
+    },
+    {
+      "path": "previews/style_sample_b.png",
+      "bytes": 477222,
+      "sha256": "f6792368c64c26b89fb0176e848bd316b380c43bed072d072feea749e014e842"
+    },
+    {
+      "path": "previews/teacher_battle_a.png",
+      "bytes": 1049125,
+      "sha256": "170b9721c627f77e5b6a478031e6c8848540df73e7a06cd976a92d7ab91019e4"
+    },
+    {
+      "path": "previews/teacher_battle_b.png",
+      "bytes": 1039278,
+      "sha256": "c353c3bf6c1e1d460e841b3b95200daf33cb9c9a51ab1bcc0379e5670826b5fc"
+    },
+    {
+      "path": "sources/archive_design.py",
+      "bytes": 2050,
+      "sha256": "42fca2653ae39b4d4fed75e6594d4cf9d2b8e2f40fee43a43eb0ab9d1b07b4ce"
+    },
+    {
+      "path": "sources/art-generation-notes.json",
+      "bytes": 1061,
+      "sha256": "20c339f2eae6589d52a6c94ee680998de0fe0fdfa917d0bf144fde9975e85f30"
+    },
+    {
+      "path": "sources/build_previews.py",
+      "bytes": 26488,
+      "sha256": "bab438d510952c4025bc472b5673e025cec2a65fa012e379e76b74ae0b8df0eb"
+    },
+    {
+      "path": "sources/component_states.svg",
+      "bytes": 69985,
+      "sha256": "02bc408bb70834a127024fb63a09f1be26dd174ae5015e34aa797124c6ba421f"
+    },
+    {
+      "path": "sources/demo-scenarios.json",
+      "bytes": 19584,
+      "sha256": "19eec63cfe8e36dcd566e4b4c671a903e080910cd32876bfce9c552865b1a41d"
+    },
+    {
+      "path": "sources/export_a_class_adventurer.svg",
+      "bytes": 961068,
+      "sha256": "fe6fc283d3c4b8162e89c340ac0238b19006dc9092400a3d77d65a50f8bc800b"
+    },
+    {
+      "path": "sources/export_a_monster_slime.svg",
+      "bytes": 1104784,
+      "sha256": "e43b29cf76231cf9d12c33c5a579e5af5ceb7b501cb71a97dd970c41f90108a7"
+    },
+    {
+      "path": "sources/export_b_class_adventurer.svg",
+      "bytes": 1027900,
+      "sha256": "367e046275712a9e641eb66e233de6caf06556d15cbaa558ebe4b3ee65c27dc9"
+    },
+    {
+      "path": "sources/export_b_monster_slime.svg",
+      "bytes": 1210392,
+      "sha256": "1d4afc757833891cdc4f86e4b9003078b50713bb2ee7512f51b230859c4b693a"
+    },
+    {
+      "path": "sources/export_previews.cjs",
+      "bytes": 3544,
+      "sha256": "44e37afd00e496a4654a5faa5ec172cebb7f32d2226c30763d19f67ff2899f8a"
+    },
+    {
+      "path": "sources/original_a_class_adventurer.png",
+      "bytes": 720659,
+      "sha256": "dec8ca9ddc35f83db5a454c14830ebecb4daa8e7c5c85f77804cc7b5a751968c"
+    },
+    {
+      "path": "sources/original_a_monster_slime.png",
+      "bytes": 828447,
+      "sha256": "b3ed5bb1e856e583cf1ac3b7c60f5c13a565411a3b3925998ece6602dc4c4065"
+    },
+    {
+      "path": "sources/original_b_class_adventurer.png",
+      "bytes": 770783,
+      "sha256": "eddad23c236a2c77980bd550024f745d781a09ac6bec461adc5d591742a7bc22"
+    },
+    {
+      "path": "sources/original_b_monster_slime.png",
+      "bytes": 907651,
+      "sha256": "b1bf8af9d16259b931b6952fcfb2acaeaa0ae0dda229b04c8a6ecb31afaccf14"
+    },
+    {
+      "path": "sources/package_delivery.py",
+      "bytes": 13634,
+      "sha256": "7b8cad717c3d784f0d384cde6e6d898dcdc9f4dcc10338892d67e405ec0b957d"
+    },
+    {
+      "path": "sources/preview-index.json",
+      "bytes": 116352,
+      "sha256": "9057d5ad396b0c6fafa4069f0b0c1c1085167befd61bdf5e55173f129618c6ec"
+    },
+    {
+      "path": "sources/public_battle_a_16x9.svg",
+      "bytes": 1739270,
+      "sha256": "ec5950655ad7dbe19d9a4cb0a8e4706852a10fa3b5a6b413e79896aca834460e"
+    },
+    {
+      "path": "sources/public_battle_a_4x3.svg",
+      "bytes": 1740044,
+      "sha256": "4c3ba5d376a974951dbee57e25811a08572c11a9e782d0ece54c5c57e66d0899"
+    },
+    {
+      "path": "sources/public_battle_b_16x9.svg",
+      "bytes": 1830446,
+      "sha256": "9da27569365f8685100f22d9100379d68225175c4b00203903087b2f332c878c"
+    },
+    {
+      "path": "sources/public_battle_b_4x3.svg",
+      "bytes": 1831220,
+      "sha256": "b9b05a4caf0eb043defc7163e869428fbf182988e3ed8b864cf66d217a16eff3"
+    },
+    {
+      "path": "sources/public_storybook_16x9.svg",
+      "bytes": 837363,
+      "sha256": "ef0490006f1a0d8535e2d9bdc71e21723ef3d040cf1577d18cf475f9cc687402"
+    },
+    {
+      "path": "sources/public_storybook_4x3.svg",
+      "bytes": 836773,
+      "sha256": "d3fb676be38e5aa47829b834024a32fbe3b37404a4073b3e6ed2befa76887af8"
+    },
+    {
+      "path": "sources/reference_inputs/design/asset-manifest_v1.json",
+      "bytes": 13568,
+      "sha256": "c3a9a258708c0e24d95b91e9bb142cc4fca4a39675085378663267f1320d12e1"
+    },
+    {
+      "path": "sources/reference_inputs/design/design-tokens_v1.json",
+      "bytes": 1438,
+      "sha256": "fbf6634801a849cfe6ee207bedc34a31c98b56a2a134be2b66569254635c2838"
+    },
+    {
+      "path": "sources/reference_inputs/design/ui_art_standard_v1.md",
+      "bytes": 16087,
+      "sha256": "e6e2c4127ab2e6de5e8dab7bd9dd31cce82d99432aac86598c1dcf6800b59437"
+    },
+    {
+      "path": "sources/settlement_and_privacy.svg",
+      "bytes": 12333,
+      "sha256": "2aa14d14cc3d0d12885a324fb6259da34cabd9e5552c759e34b49596c6c022b3"
+    },
+    {
+      "path": "sources/seven_roles_multi_monsters.svg",
+      "bytes": 1732431,
+      "sha256": "434d009dc8555c87612418cf6f5d0d7e37753f4ec7d0bed8901699f5b1ce01f3"
+    },
+    {
+      "path": "sources/style_sample_a.svg",
+      "bytes": 1727568,
+      "sha256": "1197c01a090b3b8eaca8a4186b379c6114c494b0a86ae4ee0f019459bf950e4b"
+    },
+    {
+      "path": "sources/style_sample_b.svg",
+      "bytes": 1818744,
+      "sha256": "fed8bd1106ceb48e216a97c5d4f36c054445fc671011e3c0e9bea24721b9ba7a"
+    },
+    {
+      "path": "sources/teacher_battle_a.svg",
+      "bytes": 1302488,
+      "sha256": "dbdd062f0ea0ca056977cdb66785c17ee512df21318447c1729a2f86c532eaf2"
+    },
+    {
+      "path": "sources/teacher_battle_b.svg",
+      "bytes": 1374688,
+      "sha256": "05967f7ad919aa8a7b3309e180f8f0a6fd0587c997a2057ff03559471b2e72a4"
+    },
+    {
+      "path": "sources/text-measurements.json",
+      "bytes": 124596,
+      "sha256": "f381e934e74c94cdde0066f3246ff029ae3c8c1df2c5efc2be227023b199310b"
+    },
+    {
+      "path": "sources/validation-report.json",
+      "bytes": 9369,
+      "sha256": "34365913547d99e7523cc3decdbac2b1f8ef9725afae34165cd865664f05c0a8"
+    },
+    {
+      "path": "sources/verify_delivery.py",
+      "bytes": 4882,
+      "sha256": "6636235f80acc1b730792f1c84cecfaccf68b1b2e962451e19475400d69454de"
+    }
+  ]
+}

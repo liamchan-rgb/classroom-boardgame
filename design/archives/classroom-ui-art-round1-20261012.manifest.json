@@ -1,0 +1,19 @@
+{
+  "formatVersion": 1,
+  "version": "classroom-ui-art-round1-20261012",
+  "branch": "design/ui-art-round1-20261012",
+  "tag": "archive-design-ui-art-round1-20261012",
+  "repository": "liamchan-rgb/classroom-boardgame",
+  "baseMainCommit": "f43439ae212757631d03e4869e932e72b1dcd1da",
+  "zipFile": "classroom-ui-art-round1-20261012.zip",
+  "bytes": 26459491,
+  "sha256": "36267724f073c05001fe3e2590da8fce38ead1ae61bcc04685892ca176d8a8e5",
+  "payloadFiles": 76,
+  "checks": [
+    "ZIP CRC passed",
+    "Every archived payload SHA256 passed"
+  ],
+  "compiledCommit": null,
+  "ipa": null,
+  "notes": "仅设计交付，不改main或App。远端上传验证见design/ARCHIVE_INDEX.md；此清单不是资料库上传回执。"
+}

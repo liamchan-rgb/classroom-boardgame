@@ -1,0 +1,478 @@
+{
+  "formatVersion": 1,
+  "scope": "静态设计导出，不是App或设备验收",
+  "fixtureChecks": "7玩家/1主持人/10队列单位/12中文/24英文/行动奖励独立/绘本无AP",
+  "previewChecks": [
+    {
+      "preview": "teacher_battle_a",
+      "pngSize": [
+        2732,
+        2048
+      ],
+      "textCount": 99,
+      "canvasOverflow": 0,
+      "publicSafeAreaCheck": false,
+      "minPublicFont": null
+    },
+    {
+      "preview": "public_battle_a_16x9",
+      "pngSize": [
+        1920,
+        1080
+      ],
+      "textCount": 67,
+      "canvasOverflow": 0,
+      "publicSafeAreaCheck": true,
+      "minPublicFont": 24
+    },
+    {
+      "preview": "public_battle_a_4x3",
+      "pngSize": [
+        1440,
+        1080
+      ],
+      "textCount": 73,
+      "canvasOverflow": 0,
+      "publicSafeAreaCheck": true,
+      "minPublicFont": 24
+    },
+    {
+      "preview": "style_sample_a",
+      "pngSize": [
+        1800,
+        1200
+      ],
+      "textCount": 26,
+      "canvasOverflow": 0,
+      "publicSafeAreaCheck": false,
+      "minPublicFont": null
+    },
+    {
+      "preview": "teacher_battle_b",
+      "pngSize": [
+        2732,
+        2048
+      ],
+      "textCount": 99,
+      "canvasOverflow": 0,
+      "publicSafeAreaCheck": false,
+      "minPublicFont": null
+    },
+    {
+      "preview": "public_battle_b_16x9",
+      "pngSize": [
+        1920,
+        1080
+      ],
+      "textCount": 67,
+      "canvasOverflow": 0,
+      "publicSafeAreaCheck": true,
+      "minPublicFont": 24
+    },
+    {
+      "preview": "public_battle_b_4x3",
+      "pngSize": [
+        1440,
+        1080
+      ],
+      "textCount": 73,
+      "canvasOverflow": 0,
+      "publicSafeAreaCheck": true,
+      "minPublicFont": 24
+    },
+    {
+      "preview": "style_sample_b",
+      "pngSize": [
+        1800,
+        1200
+      ],
+      "textCount": 26,
+      "canvasOverflow": 0,
+      "publicSafeAreaCheck": false,
+      "minPublicFont": null
+    },
+    {
+      "preview": "component_states",
+      "pngSize": [
+        1920,
+        1600
+      ],
+      "textCount": 102,
+      "canvasOverflow": 0,
+      "publicSafeAreaCheck": false,
+      "minPublicFont": null
+    },
+    {
+      "preview": "public_storybook_16x9",
+      "pngSize": [
+        1920,
+        1080
+      ],
+      "textCount": 40,
+      "canvasOverflow": 0,
+      "publicSafeAreaCheck": true,
+      "minPublicFont": 24
+    },
+    {
+      "preview": "public_storybook_4x3",
+      "pngSize": [
+        1440,
+        1080
+      ],
+      "textCount": 39,
+      "canvasOverflow": 0,
+      "publicSafeAreaCheck": true,
+      "minPublicFont": 24
+    },
+    {
+      "preview": "settlement_and_privacy",
+      "pngSize": [
+        1600,
+        1080
+      ],
+      "textCount": 24,
+      "canvasOverflow": 0,
+      "publicSafeAreaCheck": false,
+      "minPublicFont": null
+    },
+    {
+      "preview": "seven_roles_multi_monsters",
+      "pngSize": [
+        1600,
+        1080
+      ],
+      "textCount": 42,
+      "canvasOverflow": 0,
+      "publicSafeAreaCheck": false,
+      "minPublicFont": null
+    }
+  ],
+  "assetChecks": [
+    {
+      "file": "assets/style_a/class_adventurer_portrait.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "alphaBounds": [
+        215,
+        165,
+        845,
+        852
+      ],
+      "sRGB": "Chromium export forced sRGB"
+    },
+    {
+      "file": "assets/style_b/class_adventurer_portrait.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "alphaBounds": [
+        145,
+        184,
+        828,
+        852
+      ],
+      "sRGB": "Chromium export forced sRGB"
+    },
+    {
+      "file": "assets/style_a/monster_slime_portrait.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "alphaBounds": [
+        144,
+        154,
+        864,
+        880
+      ],
+      "sRGB": "Chromium export forced sRGB"
+    },
+    {
+      "file": "assets/style_b/monster_slime_portrait.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "alphaBounds": [
+        203,
+        207,
+        845,
+        855
+      ],
+      "sRGB": "Chromium export forced sRGB"
+    },
+    {
+      "file": "assets/icons/icon_health.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "alphaBounds": [
+        24,
+        54,
+        232,
+        211
+      ],
+      "sRGB": "Chromium export forced sRGB"
+    },
+    {
+      "file": "assets/icons/icon_shield.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "alphaBounds": [
+        36,
+        25,
+        220,
+        231
+      ],
+      "sRGB": "Chromium export forced sRGB"
+    },
+    {
+      "file": "assets/icons/icon_action.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "alphaBounds": [
+        52,
+        20,
+        208,
+        235
+      ],
+      "sRGB": "Chromium export forced sRGB"
+    },
+    {
+      "file": "assets/icons/icon_coin.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "alphaBounds": [
+        30,
+        30,
+        226,
+        226
+      ],
+      "sRGB": "Chromium export forced sRGB"
+    },
+    {
+      "file": "assets/icons/icon_score.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "alphaBounds": [
+        25,
+        20,
+        231,
+        218
+      ],
+      "sRGB": "Chromium export forced sRGB"
+    },
+    {
+      "file": "assets/icons/icon_downed.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "alphaBounds": [
+        30,
+        30,
+        226,
+        226
+      ],
+      "sRGB": "Chromium export forced sRGB"
+    }
+  ],
+  "contrastChecks": [
+    {
+      "token": "ink",
+      "foreground": "#183B36",
+      "background": "#FFFFFF",
+      "ratio": 12.23
+    },
+    {
+      "token": "ink",
+      "foreground": "#183B36",
+      "background": "#F5F1E8",
+      "ratio": 10.85
+    },
+    {
+      "token": "ink",
+      "foreground": "#183B36",
+      "background": "#E4EDD9",
+      "ratio": 10.14
+    },
+    {
+      "token": "ink",
+      "foreground": "#183B36",
+      "background": "#EDF0EA",
+      "ratio": 10.63
+    },
+    {
+      "token": "muted",
+      "foreground": "#526B64",
+      "background": "#FFFFFF",
+      "ratio": 5.76
+    },
+    {
+      "token": "muted",
+      "foreground": "#526B64",
+      "background": "#F5F1E8",
+      "ratio": 5.11
+    },
+    {
+      "token": "muted",
+      "foreground": "#526B64",
+      "background": "#E4EDD9",
+      "ratio": 4.78
+    },
+    {
+      "token": "muted",
+      "foreground": "#526B64",
+      "background": "#EDF0EA",
+      "ratio": 5.01
+    },
+    {
+      "token": "primary",
+      "foreground": "#176B5B",
+      "background": "#FFFFFF",
+      "ratio": 6.38
+    },
+    {
+      "token": "primary",
+      "foreground": "#176B5B",
+      "background": "#F5F1E8",
+      "ratio": 5.66
+    },
+    {
+      "token": "primary",
+      "foreground": "#176B5B",
+      "background": "#E4EDD9",
+      "ratio": 5.29
+    },
+    {
+      "token": "primary",
+      "foreground": "#176B5B",
+      "background": "#EDF0EA",
+      "ratio": 5.55
+    },
+    {
+      "token": "accent",
+      "foreground": "#995207",
+      "background": "#FFFFFF",
+      "ratio": 5.89
+    },
+    {
+      "token": "accent",
+      "foreground": "#995207",
+      "background": "#F5F1E8",
+      "ratio": 5.23
+    },
+    {
+      "token": "accent",
+      "foreground": "#995207",
+      "background": "#E4EDD9",
+      "ratio": 4.89
+    },
+    {
+      "token": "accent",
+      "foreground": "#995207",
+      "background": "#EDF0EA",
+      "ratio": 5.12
+    },
+    {
+      "token": "danger",
+      "foreground": "#B93838",
+      "background": "#FFFFFF",
+      "ratio": 5.7
+    },
+    {
+      "token": "danger",
+      "foreground": "#B93838",
+      "background": "#F5F1E8",
+      "ratio": 5.05
+    },
+    {
+      "token": "danger",
+      "foreground": "#B93838",
+      "background": "#E4EDD9",
+      "ratio": 4.72
+    },
+    {
+      "token": "danger",
+      "foreground": "#B93838",
+      "background": "#EDF0EA",
+      "ratio": 4.95
+    },
+    {
+      "token": "shield",
+      "foreground": "#315E9C",
+      "background": "#FFFFFF",
+      "ratio": 6.54
+    },
+    {
+      "token": "shield",
+      "foreground": "#315E9C",
+      "background": "#F5F1E8",
+      "ratio": 5.8
+    },
+    {
+      "token": "shield",
+      "foreground": "#315E9C",
+      "background": "#E4EDD9",
+      "ratio": 5.42
+    },
+    {
+      "token": "shield",
+      "foreground": "#315E9C",
+      "background": "#EDF0EA",
+      "ratio": 5.68
+    },
+    {
+      "token": "action",
+      "foreground": "#6650A4",
+      "background": "#FFFFFF",
+      "ratio": 6.46
+    },
+    {
+      "token": "action",
+      "foreground": "#6650A4",
+      "background": "#F5F1E8",
+      "ratio": 5.73
+    },
+    {
+      "token": "action",
+      "foreground": "#6650A4",
+      "background": "#E4EDD9",
+      "ratio": 5.36
+    },
+    {
+      "token": "action",
+      "foreground": "#6650A4",
+      "background": "#EDF0EA",
+      "ratio": 5.62
+    }
+  ],
+  "limitations": [
+    "iOS原生毛玻璃/液态玻璃需真实系统验证",
+    "最远课堂观看与无线投屏未测试",
+    "占位绘本页不是实际PPTX导入测试",
+    "超长队伍名/三位数资源等额外压力场景待接入测试"
+  ]
+}

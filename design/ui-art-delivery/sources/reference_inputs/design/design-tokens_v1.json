@@ -1,0 +1,74 @@
+{
+  "formatVersion": 1,
+  "status": "proposed",
+  "reference": {
+    "teacherWidthPt": 1366,
+    "teacherHeightPt": 1024,
+    "publicWidthUnits": 1920,
+    "publicHeightUnits": 1080,
+    "publicAspectFallback": "4:3"
+  },
+  "colors": {
+    "background": "#F5F1E8",
+    "surface": "#FFFFFF",
+    "ink": "#183B36",
+    "muted": "#526B64",
+    "primary": "#176B5B",
+    "onPrimary": "#FFFFFF",
+    "accent": "#B76A08",
+    "danger": "#B93838",
+    "shield": "#315E9C",
+    "action": "#6650A4"
+  },
+  "spacingPt": [
+    8,
+    12,
+    16,
+    24,
+    32
+  ],
+  "cornerRadiusPt": {
+    "panel": 16,
+    "button": 12,
+    "badge": 8
+  },
+  "teacherTypographyPt": {
+    "title": 28,
+    "section": 22,
+    "body": 18,
+    "secondary": 15,
+    "resource": 20
+  },
+  "publicTypographyUnits": {
+    "title": 44,
+    "body": 30,
+    "name": 32,
+    "resource": 28,
+    "secondary": 24,
+    "focus": 56
+  },
+  "font": {
+    "family": "system",
+    "chinese": "system fallback",
+    "numeric": "monospaced digits",
+    "offline": true
+  },
+  "touch": {
+    "minimumWidthPt": 44,
+    "minimumHeightPt": 44,
+    "primaryHeightPt": 56
+  },
+  "publicContentInsetFraction": 0.05,
+  "motionMs": {
+    "press": 150,
+    "panel": 220,
+    "resourceChange": 350,
+    "diceMaximum": 900
+  },
+  "accessibility": {
+    "normalTextContrastMinimum": 4.5,
+    "largeTextContrastMinimum": 3.0,
+    "stateRequiresNonColorMarker": true,
+    "reducedMotion": true
+  }
+}
