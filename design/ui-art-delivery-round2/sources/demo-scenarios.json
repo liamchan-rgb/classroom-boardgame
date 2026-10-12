@@ -1,0 +1,855 @@
+{
+  "formatVersion": 1,
+  "deliveryVersion": "2026-10-12-round1",
+  "purpose": "纯设计演示数据，仅验证排版、字段、状态和结果展示；不执行规则、不替换GameCore数据、不是可导入存档。",
+  "runtimeNumbers": "App正式接入读取本局模板、当前状态与已提交结果；本文件的数字仅供预览。",
+  "baseBattle": {
+    "id": "seven_roles_long_names",
+    "phase": "pve",
+    "phaseLabel": "PVE战斗",
+    "round": 1,
+    "remainingSeconds": 17,
+    "paused": true,
+    "pauseReasons": [
+      "manual"
+    ],
+    "currentUnitID": "p_a",
+    "currentName": "晨曦森林守护者小队长安然",
+    "rewardObjectIDs": [
+      "p_b",
+      "p_c"
+    ],
+    "rewardLabel": "奖励对象：AlexandriaWinterbrookJoy、小禾",
+    "selectedActionID": "heavyStrike",
+    "selectedTargetIDs": [
+      "m_slime_b"
+    ],
+    "selectedPath": [],
+    "teams": [
+      {
+        "id": "team_blue",
+        "name": "蓝队",
+        "marker": "圆"
+      },
+      {
+        "id": "team_orange",
+        "name": "橙队",
+        "marker": "菱"
+      },
+      {
+        "id": "team_violet",
+        "name": "紫队",
+        "marker": "三角"
+      }
+    ],
+    "players": [
+      {
+        "id": "p_a",
+        "name": "晨曦森林守护者小队长安然",
+        "shortName": "安然",
+        "nameTest": "12个汉字",
+        "classID": "adventurer",
+        "className": "冒险者",
+        "health": 9,
+        "maximumHealth": 12,
+        "shield": 4,
+        "ap": 3,
+        "maximumAP": 8,
+        "coins": 30,
+        "score": 4,
+        "teamID": "team_blue",
+        "team": "蓝队",
+        "host": false,
+        "player": true,
+        "current": true,
+        "rewardSelected": false,
+        "nodeID": 3,
+        "status": "行动中",
+        "eligibleFromRound": 1
+      },
+      {
+        "id": "p_b",
+        "name": "AlexandriaWinterbrookJoy",
+        "shortName": "Alex",
+        "nameTest": "24个英文字符",
+        "classID": "ranger",
+        "className": "游侠",
+        "health": 16,
+        "maximumHealth": 18,
+        "shield": 0,
+        "ap": 8,
+        "maximumAP": 8,
+        "coins": 40,
+        "score": 6,
+        "teamID": "team_blue",
+        "team": "蓝队",
+        "host": false,
+        "player": true,
+        "current": false,
+        "rewardSelected": true,
+        "nodeID": 2,
+        "status": "奖励对象",
+        "eligibleFromRound": 1
+      },
+      {
+        "id": "p_c",
+        "name": "小禾",
+        "shortName": "小禾",
+        "classID": "spellblade",
+        "className": "魔剑士",
+        "health": 20,
+        "maximumHealth": 24,
+        "shield": 6,
+        "ap": 2,
+        "maximumAP": 8,
+        "coins": 20,
+        "score": 3,
+        "teamID": "team_orange",
+        "team": "橙队",
+        "host": false,
+        "player": true,
+        "current": false,
+        "rewardSelected": true,
+        "nodeID": 3,
+        "status": "奖励对象",
+        "eligibleFromRound": 1
+      },
+      {
+        "id": "p_d",
+        "name": "星星",
+        "shortName": "星星",
+        "classID": "dragonKnight",
+        "className": "龙骑士",
+        "health": 26,
+        "maximumHealth": 32,
+        "shield": 6,
+        "ap": 3,
+        "maximumAP": 8,
+        "coins": 50,
+        "score": 7,
+        "teamID": "team_orange",
+        "team": "橙队",
+        "host": false,
+        "player": true,
+        "current": false,
+        "rewardSelected": false,
+        "nodeID": 3,
+        "status": "普通",
+        "eligibleFromRound": 1
+      },
+      {
+        "id": "p_e",
+        "name": "阿乐",
+        "shortName": "阿乐",
+        "classID": "adventurer",
+        "className": "冒险者",
+        "health": 0,
+        "maximumHealth": 12,
+        "shield": 0,
+        "ap": 3,
+        "maximumAP": 8,
+        "coins": 10,
+        "score": 2,
+        "teamID": "team_violet",
+        "team": "紫队",
+        "host": false,
+        "player": true,
+        "current": false,
+        "rewardSelected": false,
+        "nodeID": 2,
+        "status": "倒地",
+        "eligibleFromRound": 1
+      },
+      {
+        "id": "p_f",
+        "name": "小满",
+        "shortName": "小满",
+        "classID": "ranger",
+        "className": "游侠",
+        "health": 13,
+        "maximumHealth": 18,
+        "shield": 0,
+        "ap": 4,
+        "maximumAP": 8,
+        "coins": 25,
+        "score": 5,
+        "teamID": "team_violet",
+        "team": "紫队",
+        "host": false,
+        "player": true,
+        "current": false,
+        "rewardSelected": false,
+        "nodeID": 2,
+        "status": "普通",
+        "eligibleFromRound": 1
+      },
+      {
+        "id": "p_g",
+        "name": "林老师",
+        "shortName": "老师",
+        "classID": "dragonKnight",
+        "className": "龙骑士",
+        "health": 32,
+        "maximumHealth": 32,
+        "shield": 0,
+        "ap": 3,
+        "maximumAP": 8,
+        "coins": 35,
+        "score": 4,
+        "teamID": "team_blue",
+        "team": "蓝队",
+        "host": true,
+        "player": true,
+        "current": false,
+        "rewardSelected": false,
+        "nodeID": 1,
+        "status": "主持人",
+        "eligibleFromRound": 1
+      }
+    ],
+    "monsters": [
+      {
+        "id": "m_slime_a",
+        "templateID": "slime",
+        "name": "捣蛋史莱姆甲",
+        "shortName": "史莱姆甲",
+        "health": 2,
+        "maximumHealth": 8,
+        "shield": 0,
+        "ap": 1,
+        "team": "敌方",
+        "nodeID": 3,
+        "revealed": true,
+        "player": false,
+        "host": false,
+        "eligibleFromRound": 1
+      },
+      {
+        "id": "m_slime_b",
+        "templateID": "slime",
+        "name": "捣蛋史莱姆乙",
+        "shortName": "史莱姆乙",
+        "health": 8,
+        "maximumHealth": 8,
+        "shield": 0,
+        "ap": 1,
+        "team": "敌方",
+        "nodeID": 3,
+        "revealed": true,
+        "player": false,
+        "host": false,
+        "eligibleFromRound": 1
+      },
+      {
+        "id": "m_wolf",
+        "templateID": "wolf",
+        "name": "森林狼",
+        "shortName": "狼",
+        "health": 12,
+        "maximumHealth": 12,
+        "shield": 0,
+        "ap": 2,
+        "team": "敌方",
+        "nodeID": 4,
+        "revealed": true,
+        "player": false,
+        "host": false,
+        "eligibleFromRound": 2
+      }
+    ],
+    "queue": [
+      "p_a",
+      "m_slime_a",
+      "p_b",
+      "p_c",
+      "m_slime_b",
+      "p_d",
+      "p_e",
+      "p_f",
+      "m_wolf",
+      "p_g"
+    ],
+    "queueLabels": [
+      "安然",
+      "史甲",
+      "Alex",
+      "小禾",
+      "史乙",
+      "星星",
+      "阿乐",
+      "小满",
+      "狼",
+      "老师"
+    ],
+    "queueStates": {
+      "p_a": "当前",
+      "p_e": "倒地跳过",
+      "m_wolf": "第2轮可行动"
+    },
+    "nodes": [
+      {
+        "id": 1,
+        "name": "起点",
+        "kind": "start",
+        "x": 0.14,
+        "y": 0.58,
+        "revealed": true
+      },
+      {
+        "id": 2,
+        "name": "林间路口",
+        "kind": "empty",
+        "x": 0.34,
+        "y": 0.34,
+        "revealed": true
+      },
+      {
+        "id": 3,
+        "name": "浅溪石桥",
+        "kind": "combat",
+        "x": 0.56,
+        "y": 0.55,
+        "revealed": true
+      },
+      {
+        "id": 4,
+        "name": "树影小径",
+        "kind": "combat",
+        "x": 0.75,
+        "y": 0.25,
+        "revealed": true
+      },
+      {
+        "id": 5,
+        "name": "未探索",
+        "kind": null,
+        "x": 0.82,
+        "y": 0.72,
+        "revealed": false
+      }
+    ],
+    "roads": [
+      {
+        "a": 1,
+        "b": 2
+      },
+      {
+        "a": 2,
+        "b": 3
+      },
+      {
+        "a": 3,
+        "b": 4
+      },
+      {
+        "a": 3,
+        "b": 5
+      }
+    ],
+    "selectedAction": {
+      "id": "heavyStrike",
+      "name": "强击",
+      "cost": 1,
+      "range": 0,
+      "remainingUses": 1,
+      "maximumUses": 2,
+      "diceLabel": "1D6＋2",
+      "legal": true,
+      "targetID": "m_slime_b"
+    },
+    "actionButtons": [
+      {
+        "id": "move",
+        "name": "移动",
+        "costLabel": "每条道路 1 AP",
+        "state": "available"
+      },
+      {
+        "id": "attack",
+        "name": "普攻",
+        "cost": 1,
+        "range": 0,
+        "diceLabel": "1D6",
+        "state": "available"
+      },
+      {
+        "id": "heavyStrike",
+        "name": "强击",
+        "cost": 1,
+        "range": 0,
+        "remainingUses": 1,
+        "maximumUses": 2,
+        "state": "selected"
+      },
+      {
+        "id": "breather",
+        "name": "喘息",
+        "cost": 1,
+        "rangeLabel": "自身",
+        "remainingUses": 2,
+        "maximumUses": 2,
+        "state": "available"
+      },
+      {
+        "id": "simpleGuard",
+        "name": "简易防护",
+        "cost": 1,
+        "rangeLabel": "自身",
+        "remainingUses": 2,
+        "maximumUses": 2,
+        "state": "available"
+      },
+      {
+        "id": "item",
+        "name": "道具",
+        "costLabel": "普通道具 1 AP",
+        "state": "available"
+      },
+      {
+        "id": "rescue",
+        "name": "救援",
+        "cost": 2,
+        "itemID": "revivalStone",
+        "itemCount": 1,
+        "state": "noLegalTarget",
+        "reason": "无同队同节点倒地队友"
+      },
+      {
+        "id": "endTurn",
+        "name": "结束回合",
+        "state": "available",
+        "reason": "保留剩余AP"
+      }
+    ],
+    "latestCommittedResult": {
+      "id": "demo_committed_heavy_strike_001",
+      "committed": true,
+      "actorID": "p_a",
+      "actorName": "晨曦森林守护者小队长安然",
+      "actionID": "heavyStrike",
+      "actionName": "强击",
+      "dice": {
+        "sides": 6,
+        "rolls": [
+          4
+        ],
+        "flat": 2,
+        "total": 6,
+        "natural20": false
+      },
+      "actorAP": {
+        "before": 4,
+        "after": 3,
+        "actualDelta": -1
+      },
+      "remainingUses": {
+        "before": 2,
+        "after": 1
+      },
+      "targets": [
+        {
+          "id": "m_slime_a",
+          "name": "捣蛋史莱姆甲",
+          "healthBefore": 8,
+          "healthAfter": 2,
+          "shieldBefore": 0,
+          "shieldAfter": 0,
+          "actualHealthDelta": -6,
+          "actualShieldDelta": 0,
+          "defeated": false
+        }
+      ],
+      "drops": [],
+      "actualScoreDelta": 0,
+      "summary": "强击 · 捣蛋史莱姆甲生命−6",
+      "publicLines": [
+        "D6：4 ＋ 2 ＝ 6",
+        "捣蛋史莱姆甲：生命8→2",
+        "安然：AP4→3"
+      ]
+    },
+    "privateTeacherNotes": "仅设计隐私测试：教师台词不得进入任何公开快照。"
+  },
+  "rewardAPCap": {
+    "independentFixture": true,
+    "actorStill": "p_a",
+    "rewardObjectIDs": [
+      "p_b",
+      "p_c"
+    ],
+    "request": {
+      "coins": 10,
+      "ap": 1
+    },
+    "committedResult": {
+      "id": "demo_reward_001",
+      "committed": true,
+      "changes": [
+        {
+          "id": "p_b",
+          "coinsBefore": 40,
+          "coinsAfter": 50,
+          "actualCoinsDelta": 10,
+          "apBefore": 8,
+          "apAfter": 8,
+          "actualAPDelta": 0,
+          "reason": "已达AP上限"
+        },
+        {
+          "id": "p_c",
+          "coinsBefore": 20,
+          "coinsAfter": 30,
+          "actualCoinsDelta": 10,
+          "apBefore": 2,
+          "apAfter": 3,
+          "actualAPDelta": 1
+        }
+      ],
+      "publicLines": [
+        "Alex：金币+10，AP+0（已达上限）",
+        "小禾：金币+10，AP+1"
+      ]
+    }
+  },
+  "natural20Group": {
+    "independentFixture": true,
+    "purpose": "单独验收自然20群攻与整步结果；不是主预览强击的续算。",
+    "actor": {
+      "id": "p_d",
+      "classID": "dragonKnight",
+      "healthBefore": 26,
+      "healthAfter": 32,
+      "maximumHealth": 32,
+      "shieldBefore": 4,
+      "shieldAfter": 6,
+      "apBefore": 3,
+      "apAfter": 1,
+      "coinsBefore": 50,
+      "coinsAfter": 85,
+      "scoreBefore": 7,
+      "scoreAfter": 14,
+      "nodeID": 2
+    },
+    "action": {
+      "id": "dragonFlame",
+      "cost": 2,
+      "range": 1,
+      "remainingUsesBefore": 1,
+      "remainingUsesAfter": 0
+    },
+    "dice": {
+      "sides": 20,
+      "rolls": [
+        20
+      ],
+      "flat": 6,
+      "displayTotal": 26,
+      "natural20": true,
+      "rollCount": 1
+    },
+    "targets": [
+      {
+        "id": "n20_slime",
+        "templateID": "slime",
+        "name": "捣蛋史莱姆",
+        "maximumHealth": 8,
+        "healthBefore": 8,
+        "healthAfter": 0,
+        "shieldBefore": 0,
+        "shieldAfter": 0,
+        "score": 1,
+        "drops": [
+          {
+            "coins": 5,
+            "count": 1
+          },
+          {
+            "itemID": "smallPotion",
+            "count": 1
+          }
+        ],
+        "nodeID": 3
+      },
+      {
+        "id": "n20_guardian",
+        "templateID": "stoneGuardian",
+        "name": "石像守卫",
+        "maximumHealth": 24,
+        "healthBefore": 24,
+        "healthAfter": 0,
+        "shieldBefore": 6,
+        "shieldAfter": 0,
+        "score": 1,
+        "drops": [],
+        "nodeID": 3
+      },
+      {
+        "id": "n20_dragon",
+        "templateID": "ruinDragon",
+        "name": "遗迹魔龙",
+        "maximumHealth": 72,
+        "healthBefore": 72,
+        "healthAfter": 0,
+        "shieldBefore": 10,
+        "shieldAfter": 0,
+        "score": 5,
+        "drops": [
+          {
+            "coins": 30,
+            "count": 1
+          },
+          {
+            "itemID": "revivalStone",
+            "count": 1
+          }
+        ],
+        "nodeID": 3
+      }
+    ],
+    "committedResult": {
+      "id": "demo_natural20_001",
+      "committed": true,
+      "natural20": true,
+      "actualHeal": 6,
+      "actualShieldDelta": 2,
+      "actualCoinsDelta": 35,
+      "actualScoreDelta": 7,
+      "phaseAfter": "exploration",
+      "temporaryDamageBuffAfter": 0,
+      "publicLines": [
+        "自然20 · 三目标全部战败",
+        "护盾无法抵挡自然20",
+        "星星：生命+6，盾+2",
+        "星星：金币+35，积分+7",
+        "获得小治疗药水1、复活石1",
+        "结算完成 · 返回探索"
+      ]
+    },
+    "note": "击败本场最后三敌后才回探索；临时伤害+2持续2轮已在同次效果中处理，但战斗结束清除；公开最终态不留下战斗增益。掉落是固定展示结果，没有随机采样代码。",
+    "roads": [
+      {
+        "a": 2,
+        "b": 3
+      }
+    ]
+  },
+  "rescue13To7": {
+    "independentFixture": true,
+    "round": 1,
+    "rescuer": {
+      "id": "rescue_ranger",
+      "classID": "ranger",
+      "team": "蓝队",
+      "nodeID": 3,
+      "apBefore": 3,
+      "apAfter": 1,
+      "revivalStoneBefore": 1,
+      "revivalStoneAfter": 0,
+      "scoreBefore": 4,
+      "scoreAfter": 6
+    },
+    "target": {
+      "id": "rescue_target",
+      "name": "被救援队友",
+      "classID": "adventurer",
+      "team": "蓝队",
+      "nodeID": 3,
+      "healthBefore": 0,
+      "healthAfter": 7,
+      "maximumHealth": 13,
+      "shieldAfter": 0,
+      "eligibleFromRound": 2
+    },
+    "sourceNote": "生命上限13为本局教师配置演示，不改变冒险者初始模板12。",
+    "committedResult": {
+      "id": "demo_rescue_001",
+      "committed": true,
+      "publicLines": [
+        "救援成功 · 生命恢复7/13",
+        "第2轮可行动",
+        "救援者：AP−2，积分+2"
+      ]
+    }
+  },
+  "buttonStates": [
+    {
+      "id": "available",
+      "label": "可用",
+      "skillID": "heavyStrike",
+      "ap": 3,
+      "cost": 1,
+      "remainingUses": 1,
+      "reason": "请选择合法目标"
+    },
+    {
+      "id": "selected",
+      "label": "已选中",
+      "skillID": "heavyStrike",
+      "ap": 3,
+      "cost": 1,
+      "remainingUses": 1,
+      "reason": "目标：捣蛋史莱姆乙"
+    },
+    {
+      "id": "insufficientAP",
+      "label": "AP不足",
+      "skillID": "dragonFlame",
+      "ap": 0,
+      "cost": 2,
+      "remainingUses": 1,
+      "reason": "需要2AP，当前0"
+    },
+    {
+      "id": "usesExhausted",
+      "label": "次数耗尽",
+      "skillID": "heavyStrike",
+      "ap": 3,
+      "cost": 1,
+      "remainingUses": 0,
+      "reason": "本场次数已用完"
+    },
+    {
+      "id": "outOfRange",
+      "label": "距离不足",
+      "skillID": "heavyStrike",
+      "ap": 3,
+      "cost": 1,
+      "range": 0,
+      "targetDistance": 1,
+      "remainingUses": 1,
+      "reason": "射程0，目标距离1"
+    },
+    {
+      "id": "noTarget",
+      "label": "未选目标",
+      "skillID": "heavyStrike",
+      "ap": 3,
+      "cost": 1,
+      "remainingUses": 1,
+      "reason": "请选择合法目标"
+    },
+    {
+      "id": "wrongStage",
+      "label": "阶段不允许",
+      "skillID": "heavyStrike",
+      "phase": "exploration",
+      "remainingUses": 1,
+      "reason": "仅战斗可用"
+    }
+  ],
+  "pauseStack": {
+    "independentFixture": true,
+    "remainingSeconds": 17,
+    "steps": [
+      {
+        "teacherView": "game",
+        "pauseReasons": [
+          "manual"
+        ],
+        "paused": true
+      },
+      {
+        "teacherView": "storybook",
+        "pauseReasons": [
+          "manual",
+          "storybook"
+        ],
+        "paused": true
+      },
+      {
+        "teacherView": "game",
+        "pauseReasons": [
+          "manual"
+        ],
+        "paused": true
+      },
+      {
+        "teacherView": "history",
+        "pauseReasons": [
+          "manual",
+          "history"
+        ],
+        "paused": true
+      },
+      {
+        "teacherView": "game",
+        "pauseReasons": [
+          "manual"
+        ],
+        "paused": true
+      }
+    ],
+    "publicLabel": "已暂停 · 保留17秒"
+  },
+  "unknownNodes": {
+    "independentFixture": true,
+    "nodes": [
+      {
+        "id": 5,
+        "name": "未探索",
+        "kind": null,
+        "revealed": false
+      }
+    ],
+    "forbiddenPublicFields": [
+      "hiddenMonsterTemplateID",
+      "rewardContents",
+      "dropPercent",
+      "teacherNotes"
+    ],
+    "label": "未探索",
+    "placeholder": "中性问号轮廓"
+  },
+  "storybookSeven": {
+    "independentFixture": true,
+    "playerSource": "baseBattle.players",
+    "publicFields": [
+      "name",
+      "health",
+      "maximumHealth",
+      "shield",
+      "coins",
+      "score",
+      "team",
+      "host",
+      "status"
+    ],
+    "excludedFields": [
+      "ap",
+      "maximumAP",
+      "rewardSelected",
+      "privateTeacherNotes"
+    ],
+    "slideFit": "等比完整显示，不裁切正文",
+    "teacherNotes": "教师专属独立滚动；本轮另有公开绘本占位页与7角色无AP状态条检查稿，不代表实际PPT导入验证。"
+  },
+  "rankTie": {
+    "independentFixture": true,
+    "players": [
+      {
+        "id": "rank_a",
+        "name": "甲",
+        "score": 10,
+        "rank": 1
+      },
+      {
+        "id": "rank_b",
+        "name": "乙",
+        "score": 10,
+        "rank": 1
+      },
+      {
+        "id": "rank_c",
+        "name": "丙",
+        "score": 7,
+        "rank": 3
+      }
+    ],
+    "battleWinner": "橙队",
+    "scoreChampion": [
+      "甲",
+      "乙"
+    ],
+    "note": "战斗胜者与积分冠军分开。PVP仍有多个存活阵营时提前结束，由教师明确指定胜者或选择积分结算。"
+  }
+}

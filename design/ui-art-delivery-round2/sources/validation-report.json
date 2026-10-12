@@ -1,0 +1,340 @@
+{
+  "scope": "static-design-only",
+  "version": "2026-10-12-round2",
+  "pages": [
+    {
+      "name": "teacher_battle_b",
+      "PNGSize": [
+        2732,
+        2048
+      ],
+      "textInkWithinCanvas": true,
+      "noTextInkOverlap": true,
+      "publicSafeZone": null
+    },
+    {
+      "name": "public_battle_b_16x9",
+      "PNGSize": [
+        1920,
+        1080
+      ],
+      "textInkWithinCanvas": true,
+      "noTextInkOverlap": true,
+      "publicSafeZone": true
+    },
+    {
+      "name": "public_exploration_b_16x9",
+      "PNGSize": [
+        1920,
+        1080
+      ],
+      "textInkWithinCanvas": true,
+      "noTextInkOverlap": true,
+      "publicSafeZone": true
+    },
+    {
+      "name": "public_storybook_16x9",
+      "PNGSize": [
+        1920,
+        1080
+      ],
+      "textInkWithinCanvas": true,
+      "noTextInkOverlap": true,
+      "publicSafeZone": true
+    },
+    {
+      "name": "public_storybook_16x9_timer_enabled",
+      "PNGSize": [
+        1920,
+        1080
+      ],
+      "textInkWithinCanvas": true,
+      "noTextInkOverlap": true,
+      "publicSafeZone": true
+    },
+    {
+      "name": "public_battle_b_4x3",
+      "PNGSize": [
+        1440,
+        1080
+      ],
+      "textInkWithinCanvas": true,
+      "noTextInkOverlap": true,
+      "publicSafeZone": true
+    },
+    {
+      "name": "public_exploration_b_4x3",
+      "PNGSize": [
+        1440,
+        1080
+      ],
+      "textInkWithinCanvas": true,
+      "noTextInkOverlap": true,
+      "publicSafeZone": true
+    },
+    {
+      "name": "public_storybook_4x3",
+      "PNGSize": [
+        1440,
+        1080
+      ],
+      "textInkWithinCanvas": true,
+      "noTextInkOverlap": true,
+      "publicSafeZone": true
+    },
+    {
+      "name": "public_storybook_4x3_timer_enabled",
+      "PNGSize": [
+        1440,
+        1080
+      ],
+      "textInkWithinCanvas": true,
+      "noTextInkOverlap": true,
+      "publicSafeZone": true
+    },
+    {
+      "name": "component_states",
+      "PNGSize": [
+        1920,
+        1600
+      ],
+      "textInkWithinCanvas": true,
+      "noTextInkOverlap": true,
+      "publicSafeZone": null
+    },
+    {
+      "name": "settlement_and_privacy",
+      "PNGSize": [
+        1600,
+        1080
+      ],
+      "textInkWithinCanvas": true,
+      "noTextInkOverlap": true,
+      "publicSafeZone": null
+    },
+    {
+      "name": "seven_roles_multi_monsters",
+      "PNGSize": [
+        1600,
+        1080
+      ],
+      "textInkWithinCanvas": true,
+      "noTextInkOverlap": true,
+      "publicSafeZone": null
+    }
+  ],
+  "unverified": [
+    "native-materials",
+    "touch-efficiency",
+    "TV-distance",
+    "runtime-privacy",
+    "actual-PPTX",
+    "animations"
+  ],
+  "unchangedAssets": [
+    {
+      "path": "assets/style_b/monster_slime_portrait.png",
+      "sha256": "f43af2575443831de7241708e34b08af66c93c7fbfb790d09719917154e0e356"
+    },
+    {
+      "path": "assets/style_b/class_adventurer_portrait.png",
+      "sha256": "0a1509c010698f329b7568eb85766a69497d738e13adbdd2c007f1515bc34c21"
+    },
+    {
+      "path": "assets/style_a/monster_slime_portrait.png",
+      "sha256": "1fc5dacc760b83c403723d25286be0e7c5710b509e5605a50ef55a5ebd7212f5"
+    },
+    {
+      "path": "assets/style_a/class_adventurer_portrait.png",
+      "sha256": "cb9705ca40114bc60ed01536093450e4a0501ad874bb789433f9cfb60c29a7a4"
+    },
+    {
+      "path": "assets/icons/icon_health.png",
+      "sha256": "5c8a7e342f21c040811a2275cb495e40915bbd8fc4a58c30eb6b4c84f70c65a2"
+    },
+    {
+      "path": "assets/icons/icon_score.png",
+      "sha256": "b39bd62794927697f12f5c9385aedb2df97dafee375e3a4de44d931d351c216c"
+    },
+    {
+      "path": "assets/icons/icon_health.svg",
+      "sha256": "d94f5cefe09d4edf1a9c7e1cb1b9e998fb20810362ab66e0c533f940076b5cd3"
+    },
+    {
+      "path": "assets/icons/icon_downed.png",
+      "sha256": "b6b0b469217f318a078550a51d8d1082dde160022cc8e9573ee688be90418029"
+    },
+    {
+      "path": "assets/icons/icon_score.svg",
+      "sha256": "b2bff6207081fb0f7adb223addd09a77de5e619bc87adfdf7725ce4d3fc66d22"
+    },
+    {
+      "path": "assets/icons/icon_action.svg",
+      "sha256": "62ed7920cba16dd9980d9694cb824f994e9496b3c6ef497f964791d0eb1b127b"
+    },
+    {
+      "path": "assets/icons/icon_shield.svg",
+      "sha256": "e7c926d93736584ea83ca9a2da83ae9248fa4fb374b364e5b57ad9b3167454da"
+    },
+    {
+      "path": "assets/icons/icon_downed.svg",
+      "sha256": "4755a76137ec2763eafd9bf433ab7487fdd429f23802964472f082a105b38f25"
+    },
+    {
+      "path": "assets/icons/icon_action.png",
+      "sha256": "0241713c81477af51f58688b4cb7b6c4adef337797a9cf0a35519b9276568893"
+    },
+    {
+      "path": "assets/icons/icon_shield.png",
+      "sha256": "0b1155ba83bfa485d40b35fff30d0c231013ee4938cdc5396a1a4b50f5434c1c"
+    },
+    {
+      "path": "assets/icons/icon_coin.png",
+      "sha256": "3f80ff65d715874b65d87b65a965581537c513ff5412bf1b8b1120b0aba4461c"
+    },
+    {
+      "path": "assets/icons/icon_coin.svg",
+      "sha256": "285adfc122fadfa1909d97199f702bde3c2eae32e06ace131772fb34ddf8eec4"
+    },
+    {
+      "path": "sources/original_b_monster_slime.png",
+      "sha256": "b1bf8af9d16259b931b6952fcfb2acaeaa0ae0dda229b04c8a6ecb31afaccf14"
+    },
+    {
+      "path": "sources/original_a_class_adventurer.png",
+      "sha256": "dec8ca9ddc35f83db5a454c14830ebecb4daa8e7c5c85f77804cc7b5a751968c"
+    },
+    {
+      "path": "sources/original_a_monster_slime.png",
+      "sha256": "b3ed5bb1e856e583cf1ac3b7c60f5c13a565411a3b3925998ece6602dc4c4065"
+    },
+    {
+      "path": "sources/original_b_class_adventurer.png",
+      "sha256": "eddad23c236a2c77980bd550024f745d781a09ac6bec461adc5d591742a7bc22"
+    },
+    {
+      "path": "sources/export_a_monster_slime.svg",
+      "sha256": "e43b29cf76231cf9d12c33c5a579e5af5ceb7b501cb71a97dd970c41f90108a7"
+    },
+    {
+      "path": "sources/export_b_class_adventurer.svg",
+      "sha256": "367e046275712a9e641eb66e233de6caf06556d15cbaa558ebe4b3ee65c27dc9"
+    },
+    {
+      "path": "sources/export_b_monster_slime.svg",
+      "sha256": "1d4afc757833891cdc4f86e4b9003078b50713bb2ee7512f51b230859c4b693a"
+    },
+    {
+      "path": "sources/export_a_class_adventurer.svg",
+      "sha256": "fe6fc283d3c4b8162e89c340ac0238b19006dc9092400a3d77d65a50f8bc800b"
+    }
+  ],
+  "staticColorContrast": [
+    {
+      "color": "ink",
+      "background": "#FFFFFF",
+      "ratio": 11.27
+    },
+    {
+      "color": "ink",
+      "background": "#F5FAFC",
+      "ratio": 10.71
+    },
+    {
+      "color": "ink",
+      "background": "#E4F1F6",
+      "ratio": 9.77
+    },
+    {
+      "color": "muted",
+      "background": "#FFFFFF",
+      "ratio": 5.93
+    },
+    {
+      "color": "muted",
+      "background": "#F5FAFC",
+      "ratio": 5.63
+    },
+    {
+      "color": "muted",
+      "background": "#E4F1F6",
+      "ratio": 5.14
+    },
+    {
+      "color": "primary",
+      "background": "#FFFFFF",
+      "ratio": 6.1
+    },
+    {
+      "color": "primary",
+      "background": "#F5FAFC",
+      "ratio": 5.8
+    },
+    {
+      "color": "primary",
+      "background": "#E4F1F6",
+      "ratio": 5.29
+    },
+    {
+      "color": "accent",
+      "background": "#FFFFFF",
+      "ratio": 5.89
+    },
+    {
+      "color": "accent",
+      "background": "#F5FAFC",
+      "ratio": 5.6
+    },
+    {
+      "color": "accent",
+      "background": "#E4F1F6",
+      "ratio": 5.11
+    },
+    {
+      "color": "danger",
+      "background": "#FFFFFF",
+      "ratio": 5.7
+    },
+    {
+      "color": "danger",
+      "background": "#F5FAFC",
+      "ratio": 5.42
+    },
+    {
+      "color": "danger",
+      "background": "#E4F1F6",
+      "ratio": 4.94
+    },
+    {
+      "color": "shield",
+      "background": "#FFFFFF",
+      "ratio": 6.54
+    },
+    {
+      "color": "shield",
+      "background": "#F5FAFC",
+      "ratio": 6.22
+    },
+    {
+      "color": "shield",
+      "background": "#E4F1F6",
+      "ratio": 5.67
+    },
+    {
+      "color": "action",
+      "background": "#FFFFFF",
+      "ratio": 6.46
+    },
+    {
+      "color": "action",
+      "background": "#F5FAFC",
+      "ratio": 6.15
+    },
+    {
+      "color": "action",
+      "background": "#E4F1F6",
+      "ratio": 5.61
+    }
+  ],
+  "status": "passed"
+}

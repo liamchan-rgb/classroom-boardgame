@@ -1,0 +1,323 @@
+{
+  "formatVersion": 1,
+  "version": "2026-10-12-round2",
+  "scope": "design-only",
+  "selfExcluded": true,
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 3342,
+      "sha256": "fd70e73495974503f545cc3568e1a54b569dc79aa9efafa8b031f85afbdd4875"
+    },
+    {
+      "path": "annotations/00_review_feedback.md",
+      "bytes": 4031,
+      "sha256": "0969cb2ddf83042644d138189c8eb567bd2512234288f5ef1024e28c43c68924"
+    },
+    {
+      "path": "annotations/01_changes_and_handoff.md",
+      "bytes": 3024,
+      "sha256": "09718ce435949a1b6c302cbb078d980fe642459bdf272aa782541c8ebfbe2f60"
+    },
+    {
+      "path": "annotations/02_recovery_and_limits.md",
+      "bytes": 1625,
+      "sha256": "befc0b5b48786687836d0dee03bb4700e6394820062db94c4070c0598ac360a1"
+    },
+    {
+      "path": "asset-manifest.json",
+      "bytes": 21632,
+      "sha256": "3185041b966659519603228ad16d786e0e4a6af20636dd77d8c947e347dbd744"
+    },
+    {
+      "path": "assets/icons/icon_action.png",
+      "bytes": 4207,
+      "sha256": "0241713c81477af51f58688b4cb7b6c4adef337797a9cf0a35519b9276568893"
+    },
+    {
+      "path": "assets/icons/icon_action.svg",
+      "bytes": 158,
+      "sha256": "62ed7920cba16dd9980d9694cb824f994e9496b3c6ef497f964791d0eb1b127b"
+    },
+    {
+      "path": "assets/icons/icon_coin.png",
+      "bytes": 10201,
+      "sha256": "3f80ff65d715874b65d87b65a965581537c513ff5412bf1b8b1120b0aba4461c"
+    },
+    {
+      "path": "assets/icons/icon_coin.svg",
+      "bytes": 303,
+      "sha256": "285adfc122fadfa1909d97199f702bde3c2eae32e06ace131772fb34ddf8eec4"
+    },
+    {
+      "path": "assets/icons/icon_downed.png",
+      "bytes": 6398,
+      "sha256": "b6b0b469217f318a078550a51d8d1082dde160022cc8e9573ee688be90418029"
+    },
+    {
+      "path": "assets/icons/icon_downed.svg",
+      "bytes": 281,
+      "sha256": "4755a76137ec2763eafd9bf433ab7487fdd429f23802964472f082a105b38f25"
+    },
+    {
+      "path": "assets/icons/icon_health.png",
+      "bytes": 4910,
+      "sha256": "5c8a7e342f21c040811a2275cb495e40915bbd8fc4a58c30eb6b4c84f70c65a2"
+    },
+    {
+      "path": "assets/icons/icon_health.svg",
+      "bytes": 178,
+      "sha256": "d94f5cefe09d4edf1a9c7e1cb1b9e998fb20810362ab66e0c533f940076b5cd3"
+    },
+    {
+      "path": "assets/icons/icon_score.png",
+      "bytes": 4970,
+      "sha256": "b39bd62794927697f12f5c9385aedb2df97dafee375e3a4de44d931d351c216c"
+    },
+    {
+      "path": "assets/icons/icon_score.svg",
+      "bytes": 192,
+      "sha256": "b2bff6207081fb0f7adb223addd09a77de5e619bc87adfdf7725ce4d3fc66d22"
+    },
+    {
+      "path": "assets/icons/icon_shield.png",
+      "bytes": 3867,
+      "sha256": "0b1155ba83bfa485d40b35fff30d0c231013ee4938cdc5396a1a4b50f5434c1c"
+    },
+    {
+      "path": "assets/icons/icon_shield.svg",
+      "bytes": 243,
+      "sha256": "e7c926d93736584ea83ca9a2da83ae9248fa4fb374b364e5b57ad9b3167454da"
+    },
+    {
+      "path": "assets/style_a/class_adventurer_portrait.png",
+      "bytes": 307711,
+      "sha256": "cb9705ca40114bc60ed01536093450e4a0501ad874bb789433f9cfb60c29a7a4"
+    },
+    {
+      "path": "assets/style_a/monster_slime_portrait.png",
+      "bytes": 335205,
+      "sha256": "1fc5dacc760b83c403723d25286be0e7c5710b509e5605a50ef55a5ebd7212f5"
+    },
+    {
+      "path": "assets/style_b/class_adventurer_portrait.png",
+      "bytes": 327672,
+      "sha256": "0a1509c010698f329b7568eb85766a69497d738e13adbdd2c007f1515bc34c21"
+    },
+    {
+      "path": "assets/style_b/monster_slime_portrait.png",
+      "bytes": 349437,
+      "sha256": "f43af2575443831de7241708e34b08af66c93c7fbfb790d09719917154e0e356"
+    },
+    {
+      "path": "design-tokens.json",
+      "bytes": 4375,
+      "sha256": "30ab748f0207867c306be0a302b198d0e055f75e969fdd8912eb2ef0a155548b"
+    },
+    {
+      "path": "previews/component_states.png",
+      "bytes": 604516,
+      "sha256": "0fce1447197d7132a9e3fc7cfe6f03e5b0388e9c5c63bad4cf832782f0627931"
+    },
+    {
+      "path": "previews/index.html",
+      "bytes": 3294,
+      "sha256": "e2dc5b731b54957b5589e425c8567edfe8656f734e5fac475b9b303c7314dbbb"
+    },
+    {
+      "path": "previews/public_battle_b_16x9.png",
+      "bytes": 408093,
+      "sha256": "f773a3924756a755873d4fedb1a97e1c4e6ad1219198e203cb3900a612b64795"
+    },
+    {
+      "path": "previews/public_battle_b_4x3.png",
+      "bytes": 385746,
+      "sha256": "4f59b947a811964268cab1cea7a958608caf9247e4f48d7be9b0b20ec49f8e13"
+    },
+    {
+      "path": "previews/public_exploration_b_16x9.png",
+      "bytes": 255967,
+      "sha256": "47f7457f06401879dbdfdfdab5be8f836aba951b7811d01862ec3266918a1eff"
+    },
+    {
+      "path": "previews/public_exploration_b_4x3.png",
+      "bytes": 247847,
+      "sha256": "cca61af6a1ec8e29be405af5271b5f41a2dac41137dca502c36391ec45e2242e"
+    },
+    {
+      "path": "previews/public_storybook_16x9.png",
+      "bytes": 160977,
+      "sha256": "9f49cde37832a34804fefc1949f29bc509810170947280a4360ccad945bcaec3"
+    },
+    {
+      "path": "previews/public_storybook_16x9_timer_enabled.png",
+      "bytes": 168104,
+      "sha256": "43c3c0f33d896a150975ca0504e6e25be3c20bdf0bd6da50aadf03469291de5d"
+    },
+    {
+      "path": "previews/public_storybook_4x3.png",
+      "bytes": 148823,
+      "sha256": "0f8229177df5cd111e2fc8c52320569afa80cb0c0bdd7f48410d4869f6892c2f"
+    },
+    {
+      "path": "previews/public_storybook_4x3_timer_enabled.png",
+      "bytes": 158644,
+      "sha256": "8328cb7c7984924d7a8b567e91d55c84c65161aea4682e124d832fe18e742ae1"
+    },
+    {
+      "path": "previews/settlement_and_privacy.png",
+      "bytes": 389769,
+      "sha256": "048416851d470490160d54e2ce9e7d9bb5d4e002a50dabaf0bcf0a23350745e8"
+    },
+    {
+      "path": "previews/seven_roles_multi_monsters.png",
+      "bytes": 364208,
+      "sha256": "0b110d93259711089ad620ea2557f278819801a8007303219e7546029e793960"
+    },
+    {
+      "path": "previews/teacher_battle_b.png",
+      "bytes": 1011672,
+      "sha256": "6718bb66cddda174fda128fe1c2cab144071574db458d218d4d4d113216aaa3f"
+    },
+    {
+      "path": "sources/build_round2.py",
+      "bytes": 10083,
+      "sha256": "b103dc59ad81ae36952916194bb9081b351f305fd41d0ccc75c7edb90c02a685"
+    },
+    {
+      "path": "sources/component_states.svg",
+      "bytes": 67663,
+      "sha256": "2ae9025952c2de92c2edb5ae36b1c3d4e0171c064f8f248d35938ba8ed5771e0"
+    },
+    {
+      "path": "sources/demo-scenarios.json",
+      "bytes": 19584,
+      "sha256": "19eec63cfe8e36dcd566e4b4c671a903e080910cd32876bfce9c552865b1a41d"
+    },
+    {
+      "path": "sources/export_a_class_adventurer.svg",
+      "bytes": 961068,
+      "sha256": "fe6fc283d3c4b8162e89c340ac0238b19006dc9092400a3d77d65a50f8bc800b"
+    },
+    {
+      "path": "sources/export_a_monster_slime.svg",
+      "bytes": 1104784,
+      "sha256": "e43b29cf76231cf9d12c33c5a579e5af5ceb7b501cb71a97dd970c41f90108a7"
+    },
+    {
+      "path": "sources/export_b_class_adventurer.svg",
+      "bytes": 1027900,
+      "sha256": "367e046275712a9e641eb66e233de6caf06556d15cbaa558ebe4b3ee65c27dc9"
+    },
+    {
+      "path": "sources/export_b_monster_slime.svg",
+      "bytes": 1210392,
+      "sha256": "1d4afc757833891cdc4f86e4b9003078b50713bb2ee7512f51b230859c4b693a"
+    },
+    {
+      "path": "sources/export_previews.cjs",
+      "bytes": 4261,
+      "sha256": "13399d0ad2aa68dd5bad580482ff46ccb383be6b0e56536781c9fc1f74ad1bbf"
+    },
+    {
+      "path": "sources/original_a_class_adventurer.png",
+      "bytes": 720659,
+      "sha256": "dec8ca9ddc35f83db5a454c14830ebecb4daa8e7c5c85f77804cc7b5a751968c"
+    },
+    {
+      "path": "sources/original_a_monster_slime.png",
+      "bytes": 828447,
+      "sha256": "b3ed5bb1e856e583cf1ac3b7c60f5c13a565411a3b3925998ece6602dc4c4065"
+    },
+    {
+      "path": "sources/original_b_class_adventurer.png",
+      "bytes": 770783,
+      "sha256": "eddad23c236a2c77980bd550024f745d781a09ac6bec461adc5d591742a7bc22"
+    },
+    {
+      "path": "sources/original_b_monster_slime.png",
+      "bytes": 907651,
+      "sha256": "b1bf8af9d16259b931b6952fcfb2acaeaa0ae0dda229b04c8a6ecb31afaccf14"
+    },
+    {
+      "path": "sources/preview-index.json",
+      "bytes": 110115,
+      "sha256": "de6e868ece51bb4e4c527cdf4d61b89725683e975b28a038806855ee11cc27be"
+    },
+    {
+      "path": "sources/public_battle_b_16x9.svg",
+      "bytes": 1186465,
+      "sha256": "2dea993aa9a7037879fe57d7ae4e3b55ca7fd413cb84a4eb0a4725437ae504d3"
+    },
+    {
+      "path": "sources/public_battle_b_4x3.svg",
+      "bytes": 1186352,
+      "sha256": "0f367eb33d6994136a805824a3747c7917ff3310cf9bfee318d5e6fc858f79dc"
+    },
+    {
+      "path": "sources/public_exploration_b_16x9.svg",
+      "bytes": 280047,
+      "sha256": "9c2a76617d3c09c6d60d7f8bb62e362f9d921c72688b036a60e7fa8328ea576a"
+    },
+    {
+      "path": "sources/public_exploration_b_4x3.svg",
+      "bytes": 280143,
+      "sha256": "f456b6a3c53bd81e181b1c990bcadc70402d31f87dd3f8a511bddd6966c00009"
+    },
+    {
+      "path": "sources/public_storybook_16x9.svg",
+      "bytes": 273918,
+      "sha256": "99860b14c20f880d172d560ec439d606ab52bc5e5f0af8c8e83c66eda2efb045"
+    },
+    {
+      "path": "sources/public_storybook_16x9_timer_enabled.svg",
+      "bytes": 274097,
+      "sha256": "9e2e739cd25f10412970dfd87a066b881f9639352d9174fd5f826682fddd3909"
+    },
+    {
+      "path": "sources/public_storybook_4x3.svg",
+      "bytes": 273875,
+      "sha256": "81d418c5a7e68cc8c6175c941df040becf67811745c3fb170c31fd7bf0e6d82c"
+    },
+    {
+      "path": "sources/public_storybook_4x3_timer_enabled.svg",
+      "bytes": 274056,
+      "sha256": "074b7a476728c5fd2d4eb1ef128b39a4c7879e71ec002eb11cebc96f3f28da99"
+    },
+    {
+      "path": "sources/round1_layout_reference.py",
+      "bytes": 26488,
+      "sha256": "bab438d510952c4025bc472b5673e025cec2a65fa012e379e76b74ae0b8df0eb"
+    },
+    {
+      "path": "sources/settlement_and_privacy.svg",
+      "bytes": 10453,
+      "sha256": "edf8d69fa985255c3ed3e759add84f34dd2757dd91a91bd4c333f73ed95d0569"
+    },
+    {
+      "path": "sources/seven_roles_multi_monsters.svg",
+      "bytes": 1821727,
+      "sha256": "6a6b02d678a869edb883bfd12382de8b664cb7fb1ab32118f35149bd0e2dc6fe"
+    },
+    {
+      "path": "sources/teacher_battle_b.svg",
+      "bytes": 1372701,
+      "sha256": "dac1b53917a292b4c5b8f5a67f6e717b5af142d9cdcfa80afac454c028e144dd"
+    },
+    {
+      "path": "sources/text-measurements.json",
+      "bytes": 240086,
+      "sha256": "380a8de0419e0339ad23f0b13cd7ae3e3ac494e9f1431d603022974600750499"
+    },
+    {
+      "path": "sources/validation-report.json",
+      "bytes": 8164,
+      "sha256": "44f2a2fe1c3fca509262df6fd0a580ccf8043f1c5bec4b86e0aa94d6aeeba5b1"
+    },
+    {
+      "path": "sources/verify_round2.py",
+      "bytes": 3756,
+      "sha256": "310bdb1b1fbea3df9975d818abca94c4bcd482bc07fd189519f745e483e086ea"
+    }
+  ]
+}
