@@ -103,3 +103,15 @@
 - 标签：archive-design-art-production-authorized-20261012
 - 恢复ZIP：[classroom-art-production-authorization-20261012.zip](archives/classroom-art-production-authorization-20261012.zip)；SHA256：4a92ec561f7802cbe142685221c4994285cdd4dfbcd25cf1caea933ae53c6488
 - 后续各批资源独立存档；只写design，不修改App/规则。
+
+## B美术制作批次 b-static-assets-v1 · 2026-10-12
+
+- 目录：[art-production-b-v1/README.md](art-production-b-v1/README.md)
+- 静态实体：4职业、6怪物、18物品，2张沿用原B样稿、26张新增标准导出；新稿待最终审美确认。
+- 快照：1cab27984628cacd0c12a705375572cbcea60a39
+- 标签：archive-design-b-static-assets-v1-20261012
+- 完整ZIP：[classroom-b-static-assets-v1-20261012.zip](archives/classroom-b-static-assets-v1-20261012.zip)
+- 大小：29179151字节；SHA256：10f9304f522eb98819b3e6d7ff0bd29e0847ee3930135baccfb91c54eb7fa1ac
+- 文件：99；逐文件载荷：98，ZIP CRC与SHA通过。
+- 远端状态：等待新克隆回读；回执见archives/b-static-assets-v1-upload-receipt.json。
+- 原App、GameCore、main和工作流不改，无IPA；系统原生/真机及逐图审美未验证。旧版本/ZIP/标签保留。
