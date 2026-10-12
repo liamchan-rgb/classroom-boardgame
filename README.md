@@ -13,7 +13,7 @@
 - `.github/workflows/build-native-ipa.yml`：手动构建，测试两个核心库，再生成待个人签名的IPA。
 - [安装与真机验收](native/安装与真机验收.md)：SideStore覆盖更新与免费7天续签。
 
-安装名继续使用ASCII `ClassroomProbe`，保留中文界面和Bundle ID，避免v0.5中文appIdName签名失败，并用于覆盖更新。v0.7已通过Xcode27.0设备版编译及44项核心测试（游戏38、绘本6），IPA与内置规则资源已校验；App新增界面仍需本次真机核对。
+安装名继续使用ASCII `ClassroomProbe`，保留中文界面和Bundle ID，避免v0.5中文appIdName签名失败，并用于覆盖更新。v0.7已通过Xcode27.0设备版编译及44项核心测试（游戏38、绘本6），IPA与内置规则资源已校验；教师本次已反馈v0.7“没有问题”，新增界面未提供分项测试日志。
 
 v0.7：[成功构建](https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38231894206)、[构建产物](https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38231894206/artifacts/11738378519)（仓库账号登录后下载，保留至2026-10-15）。证据见 `stage1/evidence/cloud-build-result-v0.7.json`，编译源码提交 `26e0c62e76cda7430fce9ac20c33491a014891ee`。
 
@@ -29,3 +29,7 @@ swift test --package-path native/Packages/ProbeCore
 这是开发侧验证，不增加Windows/Linux产品端，也不要求教师运行命令。修改App文件清单后用 `python3 native/tools/generate_xcode_project.py` 重建已提交工程。Xcode项目无需XcodeGen或Homebrew。
 
 旧Swift Playground样例在 `stage0/ipad/`，仅保留历史；当前App不再依赖该宿主。
+
+## 美术与UI
+
+阶段2开始逐步接入，设计可另开对话并行。详见 [设计标准](design/美术与UI设计标准_v1.md) 与 [新对话启动提示词](design/新对话启动提示词.md)。令牌与资产清单在 `design/`，视觉方向是待样稿检验的建议；当前未生成正式美术。
