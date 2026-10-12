@@ -64,3 +64,11 @@
 - ZIP：[classroom-ui-art-round2-review02-20261012.zip](archives/classroom-ui-art-round2-review02-20261012.zip)
 - SHA256：73796b56419cac3236e48688b88189a4aa720366244254ad64411873ac88be18
 - 本意见先于第三轮图片修改上传。
+
+## 最新审图意见03 · 2026-10-12
+
+- 战斗优先，下方仅头像队列常驻，玩家回合展开紧凑技能/道具/资源；不重复姓名。替代前一次公开常驻七人卡布局。
+- 意见：[round3-review03_compact-active-turn_20261012.md](reviews/round3-review03_compact-active-turn_20261012.md)
+- 标签archive-design-ui-art-review03-20261012
+- ZIP：[classroom-ui-art-review03-20261012.zip](archives/classroom-ui-art-review03-20261012.zip)；SHA256：2435f2853b5e7980141e0f299e1128297b60cf0ed0b0075146b4f5cc9d337fba
+- 制作中的第三轮图尚未通过，按此意见继续修改。
