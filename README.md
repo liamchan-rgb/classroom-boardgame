@@ -41,3 +41,7 @@ swift test --package-path native/Packages/ProbeCore
 ## 美术与UI
 
 阶段2开始逐步接入，设计可另开对话并行。详见 [设计标准](design/美术与UI设计标准_v1.md) 与 [新对话启动提示词](design/新对话启动提示词.md)。令牌与资产清单在 `design/`，视觉方向是待样稿检验的建议；当前未生成正式美术。
+
+## 逐步存档
+
+按教师要求，每个有新成果的交付都建立完整快照、校验清单和恢复说明，上传本项目私有GitHub Release长期保存。索引见 [archives/README.md](archives/README.md)，后续工作必须遵守 [AGENTS.md](AGENTS.md)。GitHub Actions的3天产物保留不作为长期备份。
