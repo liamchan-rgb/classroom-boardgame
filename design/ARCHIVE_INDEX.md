@@ -55,3 +55,12 @@
 - 恢复ZIP：[classroom-ui-art-round2-review01-20261012.zip](archives/classroom-ui-art-round2-review01-20261012.zip)
 - ZIP SHA256：2d0831377d992b900622f32bd60f472c5783117b9667063a5248d62efbb6ac3c
 - 本次只记录审核反馈，图片与App未改。
+
+## 第二轮审图意见02 · 2026-10-12
+
+- 公开16:9图待修改：去图例、图形队列附玩家区、公开完整角色技能、一次淡入淡出反馈、教师专用全局明细。
+- 意见：[round2-review02_public-changes_20261012.md](reviews/round2-review02_public-changes_20261012.md)
+- 标签：archive-design-ui-art-round2-review02-20261012
+- ZIP：[classroom-ui-art-round2-review02-20261012.zip](archives/classroom-ui-art-round2-review02-20261012.zip)
+- SHA256：73796b56419cac3236e48688b88189a4aa720366244254ad64411873ac88be18
+- 本意见先于第三轮图片修改上传。
