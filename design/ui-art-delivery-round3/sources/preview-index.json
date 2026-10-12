@@ -1,0 +1,6309 @@
+[
+  {
+    "name": "teacher_battle_b",
+    "width": 1366,
+    "height": 1024,
+    "scale": 2,
+    "label": "晴空学园｜教师战斗 1366×1024",
+    "text": [
+      {
+        "x": 71.0,
+        "baseline": 60,
+        "text": "PVE",
+        "fontSize": 15,
+        "weight": 600
+      },
+      {
+        "x": 120,
+        "baseline": 56,
+        "text": "第 1 轮",
+        "fontSize": 22,
+        "weight": 600
+      },
+      {
+        "x": 120,
+        "baseline": 85,
+        "text": "行动中：晨曦森林守护者小队长安然",
+        "fontSize": 18,
+        "weight": 400
+      },
+      {
+        "x": 738.0,
+        "baseline": 64,
+        "text": "暂停 · 保留17秒",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 905.0,
+        "baseline": 61,
+        "text": "公开屏已连接",
+        "fontSize": 15,
+        "weight": 600
+      },
+      {
+        "x": 1210.0,
+        "baseline": 71.0,
+        "text": "继续 · 空格",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 40,
+        "baseline": 151,
+        "text": "角色与奖励对象",
+        "fontSize": 22,
+        "weight": 600
+      },
+      {
+        "x": 40,
+        "baseline": 175,
+        "text": "右侧勾选只用于发奖",
+        "fontSize": 15,
+        "weight": 400
+      },
+      {
+        "x": 90,
+        "baseline": 208,
+        "text": "晨曦森林守护者",
+        "fontSize": 17,
+        "weight": 600
+      },
+      {
+        "x": 90,
+        "baseline": 228,
+        "text": "小队长安然",
+        "fontSize": 17,
+        "weight": 600
+      },
+      {
+        "x": 44,
+        "baseline": 249,
+        "text": "生命 9/12  盾 4",
+        "fontSize": 17,
+        "weight": 400
+      },
+      {
+        "x": 44,
+        "baseline": 268,
+        "text": "行动点 3 · 蓝队 · 行动中",
+        "fontSize": 15,
+        "weight": 400
+      },
+      {
+        "x": 63.0,
+        "baseline": 313.32,
+        "text": "弓",
+        "fontSize": 15,
+        "weight": 600
+      },
+      {
+        "x": 90,
+        "baseline": 300,
+        "text": "AlexandriaWi",
+        "fontSize": 17,
+        "weight": 600
+      },
+      {
+        "x": 90,
+        "baseline": 320,
+        "text": "nterbrookJoy",
+        "fontSize": 17,
+        "weight": 600
+      },
+      {
+        "x": 44,
+        "baseline": 341,
+        "text": "生命 16/18  盾 0",
+        "fontSize": 17,
+        "weight": 400
+      },
+      {
+        "x": 44,
+        "baseline": 360,
+        "text": "行动点 8 · 蓝队",
+        "fontSize": 15,
+        "weight": 400
+      },
+      {
+        "x": 252,
+        "baseline": 312,
+        "text": "✓",
+        "fontSize": 17,
+        "weight": 600
+      },
+      {
+        "x": 63.0,
+        "baseline": 405.32,
+        "text": "剑",
+        "fontSize": 15,
+        "weight": 600
+      },
+      {
+        "x": 90,
+        "baseline": 392,
+        "text": "小禾",
+        "fontSize": 17,
+        "weight": 600
+      },
+      {
+        "x": 90,
+        "baseline": 412,
+        "text": "橙队",
+        "fontSize": 15,
+        "weight": 400
+      },
+      {
+        "x": 44,
+        "baseline": 433,
+        "text": "生命 20/24  盾 6",
+        "fontSize": 17,
+        "weight": 400
+      },
+      {
+        "x": 44,
+        "baseline": 452,
+        "text": "行动点 2 · 橙队",
+        "fontSize": 15,
+        "weight": 400
+      },
+      {
+        "x": 252,
+        "baseline": 404,
+        "text": "✓",
+        "fontSize": 17,
+        "weight": 600
+      },
+      {
+        "x": 63.0,
+        "baseline": 497.32,
+        "text": "龙",
+        "fontSize": 15,
+        "weight": 600
+      },
+      {
+        "x": 90,
+        "baseline": 484,
+        "text": "星星",
+        "fontSize": 17,
+        "weight": 600
+      },
+      {
+        "x": 90,
+        "baseline": 504,
+        "text": "橙队",
+        "fontSize": 15,
+        "weight": 400
+      },
+      {
+        "x": 44,
+        "baseline": 525,
+        "text": "生命 26/32  盾 6",
+        "fontSize": 17,
+        "weight": 400
+      },
+      {
+        "x": 44,
+        "baseline": 544,
+        "text": "行动点 3 · 橙队",
+        "fontSize": 15,
+        "weight": 400
+      },
+      {
+        "x": 90,
+        "baseline": 576,
+        "text": "阿乐",
+        "fontSize": 17,
+        "weight": 600
+      },
+      {
+        "x": 90,
+        "baseline": 596,
+        "text": "倒地",
+        "fontSize": 15,
+        "weight": 400
+      },
+      {
+        "x": 44,
+        "baseline": 617,
+        "text": "生命 0/12  盾 0",
+        "fontSize": 17,
+        "weight": 400
+      },
+      {
+        "x": 44,
+        "baseline": 636,
+        "text": "行动点 3 · 紫队",
+        "fontSize": 15,
+        "weight": 400
+      },
+      {
+        "x": 63.0,
+        "baseline": 681.32,
+        "text": "弓",
+        "fontSize": 15,
+        "weight": 600
+      },
+      {
+        "x": 90,
+        "baseline": 668,
+        "text": "小满",
+        "fontSize": 17,
+        "weight": 600
+      },
+      {
+        "x": 90,
+        "baseline": 688,
+        "text": "紫队",
+        "fontSize": 15,
+        "weight": 400
+      },
+      {
+        "x": 44,
+        "baseline": 709,
+        "text": "生命 13/18  盾 0",
+        "fontSize": 17,
+        "weight": 400
+      },
+      {
+        "x": 44,
+        "baseline": 728,
+        "text": "行动点 4 · 紫队",
+        "fontSize": 15,
+        "weight": 400
+      },
+      {
+        "x": 63.0,
+        "baseline": 773.32,
+        "text": "龙",
+        "fontSize": 15,
+        "weight": 600
+      },
+      {
+        "x": 90,
+        "baseline": 760,
+        "text": "林老师",
+        "fontSize": 17,
+        "weight": 600
+      },
+      {
+        "x": 90,
+        "baseline": 780,
+        "text": "主持人",
+        "fontSize": 15,
+        "weight": 400
+      },
+      {
+        "x": 44,
+        "baseline": 801,
+        "text": "生命 32/32  盾 0",
+        "fontSize": 17,
+        "weight": 400
+      },
+      {
+        "x": 44,
+        "baseline": 820,
+        "text": "行动点 3 · 蓝队",
+        "fontSize": 15,
+        "weight": 400
+      },
+      {
+        "x": 328,
+        "baseline": 153,
+        "text": "同一张地图，继续战斗",
+        "fontSize": 22,
+        "weight": 600
+      },
+      {
+        "x": 328,
+        "baseline": 182,
+        "text": "固定队列",
+        "fontSize": 15,
+        "weight": 400
+      },
+      {
+        "x": 418,
+        "baseline": 182,
+        "text": "① 安然 → ② 史莱姆甲 → ③ Alex → ④ 小禾 → ⑤ 史莱姆乙",
+        "fontSize": 15,
+        "weight": 400
+      },
+      {
+        "x": 328,
+        "baseline": 207,
+        "text": "⑥ 星星 → ⑦ 阿乐（倒地） → ⑧ 小满 → ⑨ 狼（下轮） → ⑩ 主持人",
+        "fontSize": 15,
+        "weight": 400
+      },
+      {
+        "x": 412.76,
+        "baseline": 450.5,
+        "text": "1",
+        "fontSize": 22,
+        "weight": 600
+      },
+      {
+        "x": 412.76,
+        "baseline": 490.5,
+        "text": "起点",
+        "fontSize": 17,
+        "weight": 500
+      },
+      {
+        "x": 539.56,
+        "baseline": 360.5,
+        "text": "2",
+        "fontSize": 22,
+        "weight": 600
+      },
+      {
+        "x": 539.56,
+        "baseline": 400.5,
+        "text": "林间路口",
+        "fontSize": 17,
+        "weight": 500
+      },
+      {
+        "x": 679.04,
+        "baseline": 439.25,
+        "text": "3",
+        "fontSize": 22,
+        "weight": 600
+      },
+      {
+        "x": 679.04,
+        "baseline": 479.25,
+        "text": "浅溪石桥",
+        "fontSize": 17,
+        "weight": 500
+      },
+      {
+        "x": 799.5,
+        "baseline": 326.75,
+        "text": "4",
+        "fontSize": 22,
+        "weight": 600
+      },
+      {
+        "x": 799.5,
+        "baseline": 366.75,
+        "text": "树影小径",
+        "fontSize": 17,
+        "weight": 500
+      },
+      {
+        "x": 843.88,
+        "baseline": 503.0,
+        "text": "?",
+        "fontSize": 22,
+        "weight": 600
+      },
+      {
+        "x": 843.88,
+        "baseline": 543.0,
+        "text": "未探索",
+        "fontSize": 17,
+        "weight": 500
+      },
+      {
+        "x": 679.04,
+        "baseline": 361.25,
+        "text": "角色3 · 敌人2",
+        "fontSize": 15,
+        "weight": 600
+      },
+      {
+        "x": 539.56,
+        "baseline": 295.5,
+        "text": "角色 × 3",
+        "fontSize": 15,
+        "weight": 600
+      },
+      {
+        "x": 799.5,
+        "baseline": 270.75,
+        "text": "敌人 × 1",
+        "fontSize": 15,
+        "weight": 600
+      },
+      {
+        "x": 412.76,
+        "baseline": 394.5,
+        "text": "角色 × 1",
+        "fontSize": 15,
+        "weight": 600
+      },
+      {
+        "x": 344,
+        "baseline": 257,
+        "text": "当前地图 · PVE",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 344,
+        "baseline": 582,
+        "text": "选择节点查看单位 · 道路距离计算",
+        "fontSize": 15,
+        "weight": 400
+      },
+      {
+        "x": 328,
+        "baseline": 665,
+        "text": "最近一次结算",
+        "fontSize": 22,
+        "weight": 600
+      },
+      {
+        "x": 877.0,
+        "baseline": 662,
+        "text": "已提交结果",
+        "fontSize": 15,
+        "weight": 600
+      },
+      {
+        "x": 328,
+        "baseline": 706,
+        "text": "安然 → 史莱姆甲 · 强击",
+        "fontSize": 20,
+        "weight": 600
+      },
+      {
+        "x": 359,
+        "baseline": 764,
+        "text": "4",
+        "fontSize": 32,
+        "weight": 600
+      },
+      {
+        "x": 406,
+        "baseline": 747,
+        "text": "D6：4  ＋ 2 ＝ 6",
+        "fontSize": 20,
+        "weight": 400
+      },
+      {
+        "x": 406,
+        "baseline": 778,
+        "text": "目标生命 8 → 2 · 护盾吸收 0",
+        "fontSize": 18,
+        "weight": 400
+      },
+      {
+        "x": 328,
+        "baseline": 829,
+        "text": "行动点 4 → 3 · 强击剩余 1 次",
+        "fontSize": 17,
+        "weight": 400
+      },
+      {
+        "x": 1006,
+        "baseline": 153,
+        "text": "当前行动者",
+        "fontSize": 22,
+        "weight": 600
+      },
+      {
+        "x": 1006,
+        "baseline": 188,
+        "text": "晨曦森林守护者",
+        "fontSize": 22,
+        "weight": 600
+      },
+      {
+        "x": 1006,
+        "baseline": 216,
+        "text": "小队长安然",
+        "fontSize": 22,
+        "weight": 600
+      },
+      {
+        "x": 1006,
+        "baseline": 247,
+        "text": "冒险者 · 生命 9/12 · 护盾 4",
+        "fontSize": 17,
+        "weight": 400
+      },
+      {
+        "x": 1006,
+        "baseline": 270,
+        "text": "行动点 3/8 · 金币 30 · 积分 4",
+        "fontSize": 17,
+        "weight": 400
+      },
+      {
+        "x": 1082.0,
+        "baseline": 319.0,
+        "text": "移动 · 每路1点",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 1250.0,
+        "baseline": 319.0,
+        "text": "普攻 · 1点",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 1022,
+        "baseline": 376,
+        "text": "强击 · 1行动点",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 1022,
+        "baseline": 401,
+        "text": "射程 0 · 剩余 1 次 · 1D6＋2",
+        "fontSize": 15,
+        "weight": 400
+      },
+      {
+        "x": 1022,
+        "baseline": 452,
+        "text": "喘息 · 1行动点",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 1022,
+        "baseline": 477,
+        "text": "自己 · 剩余 2 次 · 恢复4生命",
+        "fontSize": 15,
+        "weight": 400
+      },
+      {
+        "x": 1022,
+        "baseline": 528,
+        "text": "简易防护 · 1行动点",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 1022,
+        "baseline": 553,
+        "text": "自己 · 剩余 2 次 · 护盾4",
+        "fontSize": 15,
+        "weight": 400
+      },
+      {
+        "x": 1082.0,
+        "baseline": 611.0,
+        "text": "道具 · 1点",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 1250.0,
+        "baseline": 611.0,
+        "text": "救援 · 2点",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 1006,
+        "baseline": 658,
+        "text": "目标：史莱姆乙 · 同节点",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 1006,
+        "baseline": 683,
+        "text": "合法目标 · 选中不扣点",
+        "fontSize": 15,
+        "weight": 400
+      },
+      {
+        "x": 1166.0,
+        "baseline": 733.0,
+        "text": "施放强击 · 消耗1行动点",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 1166.0,
+        "baseline": 803.0,
+        "text": "结束回合 · 保留余点",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 1006,
+        "baseline": 842,
+        "text": "救援不可用：无同节点倒地队友",
+        "fontSize": 15,
+        "weight": 400
+      },
+      {
+        "x": 84.0,
+        "baseline": 903,
+        "text": "奖励对象",
+        "fontSize": 15,
+        "weight": 600
+      },
+      {
+        "x": 142,
+        "baseline": 907,
+        "text": "Alex、小禾（2人）",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 40,
+        "baseline": 973,
+        "text": "发奖前检查：Alex 行动点8/8（已达上限）；小禾2/8",
+        "fontSize": 17,
+        "weight": 400
+      },
+      {
+        "x": 737.0,
+        "baseline": 923.0,
+        "text": "金币 +10 · G",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 907.0,
+        "baseline": 923.0,
+        "text": "行动点 +1",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 1077.0,
+        "baseline": 923.0,
+        "text": "积分 +2",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 1248.0,
+        "baseline": 923.0,
+        "text": "绘本 / 更多",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 660,
+        "baseline": 975,
+        "text": "发奖不切换当前行动者",
+        "fontSize": 17,
+        "weight": 400
+      },
+      {
+        "x": 1248.0,
+        "baseline": 979.0,
+        "text": "撤销最近一步",
+        "fontSize": 18,
+        "weight": 600
+      }
+    ],
+    "revision": "round3"
+  },
+  {
+    "name": "public_battle_b_16x9",
+    "width": 1920,
+    "height": 1080,
+    "scale": 1,
+    "label": "公开战斗｜完整技能/图形队列",
+    "text": [
+      {
+        "x": 120,
+        "baseline": 94,
+        "text": "PVE · 第1轮",
+        "fontSize": 30,
+        "weight": 600
+      },
+      {
+        "x": 366,
+        "baseline": 94,
+        "text": "行动中：晨曦森林守护者小队长安然",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1800,
+        "baseline": 94,
+        "text": "已暂停 · 17秒",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 219.8,
+        "baseline": 468.28,
+        "text": "1",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 219.8,
+        "baseline": 519.28,
+        "text": "起点",
+        "fontSize": 26,
+        "weight": 500
+      },
+      {
+        "x": 344.24,
+        "baseline": 280.56,
+        "text": "2",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 344.24,
+        "baseline": 331.56,
+        "text": "林间路口",
+        "fontSize": 26,
+        "weight": 500
+      },
+      {
+        "x": 497.96000000000004,
+        "baseline": 458.4,
+        "text": "3",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 497.96000000000004,
+        "baseline": 509.4,
+        "text": "浅溪石桥",
+        "fontSize": 26,
+        "weight": 500
+      },
+      {
+        "x": 695.6,
+        "baseline": 250.92000000000002,
+        "text": "4",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 695.6,
+        "baseline": 301.92,
+        "text": "树影小径",
+        "fontSize": 26,
+        "weight": 500
+      },
+      {
+        "x": 724.88,
+        "baseline": 557.2,
+        "text": "?",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 724.88,
+        "baseline": 608.2,
+        "text": "未探索",
+        "fontSize": 26,
+        "weight": 500
+      },
+      {
+        "x": 219.8,
+        "baseline": 407.28,
+        "text": "角色 1",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 344.24,
+        "baseline": 219.56,
+        "text": "角色 3",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 497.96000000000004,
+        "baseline": 397.4,
+        "text": "角色 3 · 敌人 2",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 695.6,
+        "baseline": 189.92000000000002,
+        "text": "敌人 1",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 130,
+        "baseline": 188,
+        "text": "当前地图",
+        "fontSize": 30,
+        "weight": 600
+      },
+      {
+        "x": 902,
+        "baseline": 178,
+        "text": "浅溪石桥 · 战斗",
+        "fontSize": 30,
+        "weight": 600
+      },
+      {
+        "x": 1144.3200000000002,
+        "baseline": 323,
+        "text": "安然",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 1588.0,
+        "baseline": 323,
+        "text": "史莱姆甲",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 902,
+        "baseline": 356,
+        "text": "冒险者技能",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 914,
+        "baseline": 403,
+        "text": "强击",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1790,
+        "baseline": 403,
+        "text": "1 AP",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 914,
+        "baseline": 438,
+        "text": "单敌 · 射程0 · 1D6+2",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1790,
+        "baseline": 438,
+        "text": "剩余1/2",
+        "fontSize": 24,
+        "weight": 500
+      },
+      {
+        "x": 914,
+        "baseline": 495,
+        "text": "喘息",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1790,
+        "baseline": 495,
+        "text": "1 AP",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 914,
+        "baseline": 530,
+        "text": "自身 · 恢复4生命",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1790,
+        "baseline": 530,
+        "text": "剩余2/2",
+        "fontSize": 24,
+        "weight": 500
+      },
+      {
+        "x": 914,
+        "baseline": 587,
+        "text": "简易防护",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1790,
+        "baseline": 587,
+        "text": "1 AP",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 914,
+        "baseline": 622,
+        "text": "自身 · 护盾4",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1790,
+        "baseline": 622,
+        "text": "剩余2/2",
+        "fontSize": 24,
+        "weight": 500
+      },
+      {
+        "x": 328.0,
+        "baseline": 825,
+        "text": "AP 3",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 104,
+        "baseline": 858,
+        "text": "晨曦森林守护者小",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 104,
+        "baseline": 889,
+        "text": "队长安然",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 136,
+        "baseline": 959,
+        "text": "9/12",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 309.0,
+        "baseline": 959,
+        "text": "4",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 136,
+        "baseline": 999,
+        "text": "30",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 309.0,
+        "baseline": 999,
+        "text": "4",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 576.0,
+        "baseline": 825,
+        "text": "AP 8",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 352.0,
+        "baseline": 858,
+        "text": "AlexandriaWi",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 352.0,
+        "baseline": 889,
+        "text": "nterbrookJoy",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 384.0,
+        "baseline": 959,
+        "text": "16/18",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 557.0,
+        "baseline": 959,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 384.0,
+        "baseline": 999,
+        "text": "40",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 557.0,
+        "baseline": 999,
+        "text": "6",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 824.0,
+        "baseline": 825,
+        "text": "AP 2",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 600.0,
+        "baseline": 858,
+        "text": "小禾",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 632.0,
+        "baseline": 959,
+        "text": "20/24",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 805.0,
+        "baseline": 959,
+        "text": "6",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 632.0,
+        "baseline": 999,
+        "text": "20",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 805.0,
+        "baseline": 999,
+        "text": "3",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1072.0,
+        "baseline": 825,
+        "text": "AP 3",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 848.0,
+        "baseline": 858,
+        "text": "星星",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 880.0,
+        "baseline": 959,
+        "text": "26/32",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1053.0,
+        "baseline": 959,
+        "text": "6",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 880.0,
+        "baseline": 999,
+        "text": "50",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1053.0,
+        "baseline": 999,
+        "text": "7",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1320.0,
+        "baseline": 825,
+        "text": "AP 3",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 1096.0,
+        "baseline": 858,
+        "text": "阿乐",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1096.0,
+        "baseline": 900,
+        "text": "倒地",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 1128.0,
+        "baseline": 959,
+        "text": "0/12",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1301.0,
+        "baseline": 959,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1128.0,
+        "baseline": 999,
+        "text": "10",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1301.0,
+        "baseline": 999,
+        "text": "2",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1568.0,
+        "baseline": 825,
+        "text": "AP 4",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 1344.0,
+        "baseline": 858,
+        "text": "小满",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1376.0,
+        "baseline": 959,
+        "text": "13/18",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1549.0,
+        "baseline": 959,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1376.0,
+        "baseline": 999,
+        "text": "25",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1549.0,
+        "baseline": 999,
+        "text": "5",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1816.0,
+        "baseline": 825,
+        "text": "AP 3",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 1592.0,
+        "baseline": 858,
+        "text": "林老师",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1592.0,
+        "baseline": 900,
+        "text": "主持人",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 1624.0,
+        "baseline": 959,
+        "text": "32/32",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1797.0,
+        "baseline": 959,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1624.0,
+        "baseline": 999,
+        "text": "35",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1797.0,
+        "baseline": 999,
+        "text": "4",
+        "fontSize": 26,
+        "weight": 400
+      }
+    ],
+    "revision": "round3"
+  },
+  {
+    "name": "public_exploration_b_16x9",
+    "width": 1920,
+    "height": 1080,
+    "scale": 1,
+    "label": "公开探索｜战斗区收起（密度数据示意）",
+    "text": [
+      {
+        "x": 120,
+        "baseline": 94,
+        "text": "探索",
+        "fontSize": 30,
+        "weight": 600
+      },
+      {
+        "x": 365.0,
+        "baseline": 468.28,
+        "text": "1",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 365.0,
+        "baseline": 519.28,
+        "text": "起点",
+        "fontSize": 26,
+        "weight": 500
+      },
+      {
+        "x": 654.0,
+        "baseline": 280.56,
+        "text": "2",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 654.0,
+        "baseline": 331.56,
+        "text": "林间路口",
+        "fontSize": 26,
+        "weight": 500
+      },
+      {
+        "x": 1011.0,
+        "baseline": 458.4,
+        "text": "3",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1011.0,
+        "baseline": 509.4,
+        "text": "浅溪石桥",
+        "fontSize": 26,
+        "weight": 500
+      },
+      {
+        "x": 1470.0,
+        "baseline": 250.92000000000002,
+        "text": "4",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1470.0,
+        "baseline": 301.92,
+        "text": "树影小径",
+        "fontSize": 26,
+        "weight": 500
+      },
+      {
+        "x": 1538.0,
+        "baseline": 557.2,
+        "text": "?",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1538.0,
+        "baseline": 608.2,
+        "text": "未探索",
+        "fontSize": 26,
+        "weight": 500
+      },
+      {
+        "x": 365.0,
+        "baseline": 407.28,
+        "text": "角色 1",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 654.0,
+        "baseline": 219.56,
+        "text": "角色 3",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 1011.0,
+        "baseline": 397.4,
+        "text": "角色 3 · 敌人 2",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 1470.0,
+        "baseline": 189.92000000000002,
+        "text": "敌人 1",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 130,
+        "baseline": 188,
+        "text": "当前地图",
+        "fontSize": 30,
+        "weight": 600
+      },
+      {
+        "x": 328.0,
+        "baseline": 825,
+        "text": "AP 3",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 104,
+        "baseline": 858,
+        "text": "晨曦森林守护者小",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 104,
+        "baseline": 889,
+        "text": "队长安然",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 136,
+        "baseline": 959,
+        "text": "9/12",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 309.0,
+        "baseline": 959,
+        "text": "4",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 136,
+        "baseline": 999,
+        "text": "30",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 309.0,
+        "baseline": 999,
+        "text": "4",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 576.0,
+        "baseline": 825,
+        "text": "AP 8",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 352.0,
+        "baseline": 858,
+        "text": "AlexandriaWi",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 352.0,
+        "baseline": 889,
+        "text": "nterbrookJoy",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 384.0,
+        "baseline": 959,
+        "text": "16/18",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 557.0,
+        "baseline": 959,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 384.0,
+        "baseline": 999,
+        "text": "40",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 557.0,
+        "baseline": 999,
+        "text": "6",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 824.0,
+        "baseline": 825,
+        "text": "AP 2",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 600.0,
+        "baseline": 858,
+        "text": "小禾",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 632.0,
+        "baseline": 959,
+        "text": "20/24",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 805.0,
+        "baseline": 959,
+        "text": "6",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 632.0,
+        "baseline": 999,
+        "text": "20",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 805.0,
+        "baseline": 999,
+        "text": "3",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1072.0,
+        "baseline": 825,
+        "text": "AP 3",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 848.0,
+        "baseline": 858,
+        "text": "星星",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 880.0,
+        "baseline": 959,
+        "text": "26/32",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1053.0,
+        "baseline": 959,
+        "text": "6",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 880.0,
+        "baseline": 999,
+        "text": "50",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1053.0,
+        "baseline": 999,
+        "text": "7",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1320.0,
+        "baseline": 825,
+        "text": "AP 3",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 1096.0,
+        "baseline": 858,
+        "text": "阿乐",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1096.0,
+        "baseline": 900,
+        "text": "倒地",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 1128.0,
+        "baseline": 959,
+        "text": "0/12",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1301.0,
+        "baseline": 959,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1128.0,
+        "baseline": 999,
+        "text": "10",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1301.0,
+        "baseline": 999,
+        "text": "2",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1568.0,
+        "baseline": 825,
+        "text": "AP 4",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 1344.0,
+        "baseline": 858,
+        "text": "小满",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1376.0,
+        "baseline": 959,
+        "text": "13/18",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1549.0,
+        "baseline": 959,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1376.0,
+        "baseline": 999,
+        "text": "25",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1549.0,
+        "baseline": 999,
+        "text": "5",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1816.0,
+        "baseline": 825,
+        "text": "AP 3",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 1592.0,
+        "baseline": 858,
+        "text": "林老师",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1592.0,
+        "baseline": 900,
+        "text": "主持人",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 1624.0,
+        "baseline": 959,
+        "text": "32/32",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1797.0,
+        "baseline": 959,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1624.0,
+        "baseline": 999,
+        "text": "35",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1797.0,
+        "baseline": 999,
+        "text": "4",
+        "fontSize": 26,
+        "weight": 400
+      }
+    ],
+    "revision": "round3"
+  },
+  {
+    "name": "public_battle_b_16x9_feedback",
+    "width": 1920,
+    "height": 1080,
+    "scale": 1,
+    "label": "公开战斗｜一次文字反馈中间帧",
+    "text": [
+      {
+        "x": 120,
+        "baseline": 94,
+        "text": "PVE · 第1轮",
+        "fontSize": 30,
+        "weight": 600
+      },
+      {
+        "x": 366,
+        "baseline": 94,
+        "text": "行动中：晨曦森林守护者小队长安然",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1800,
+        "baseline": 94,
+        "text": "已暂停 · 17秒",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 219.8,
+        "baseline": 468.28,
+        "text": "1",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 219.8,
+        "baseline": 519.28,
+        "text": "起点",
+        "fontSize": 26,
+        "weight": 500
+      },
+      {
+        "x": 344.24,
+        "baseline": 280.56,
+        "text": "2",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 344.24,
+        "baseline": 331.56,
+        "text": "林间路口",
+        "fontSize": 26,
+        "weight": 500
+      },
+      {
+        "x": 497.96000000000004,
+        "baseline": 458.4,
+        "text": "3",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 497.96000000000004,
+        "baseline": 509.4,
+        "text": "浅溪石桥",
+        "fontSize": 26,
+        "weight": 500
+      },
+      {
+        "x": 695.6,
+        "baseline": 250.92000000000002,
+        "text": "4",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 695.6,
+        "baseline": 301.92,
+        "text": "树影小径",
+        "fontSize": 26,
+        "weight": 500
+      },
+      {
+        "x": 724.88,
+        "baseline": 557.2,
+        "text": "?",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 724.88,
+        "baseline": 608.2,
+        "text": "未探索",
+        "fontSize": 26,
+        "weight": 500
+      },
+      {
+        "x": 219.8,
+        "baseline": 407.28,
+        "text": "角色 1",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 344.24,
+        "baseline": 219.56,
+        "text": "角色 3",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 497.96000000000004,
+        "baseline": 397.4,
+        "text": "角色 3 · 敌人 2",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 695.6,
+        "baseline": 189.92000000000002,
+        "text": "敌人 1",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 130,
+        "baseline": 188,
+        "text": "当前地图",
+        "fontSize": 30,
+        "weight": 600
+      },
+      {
+        "x": 902,
+        "baseline": 178,
+        "text": "浅溪石桥 · 战斗",
+        "fontSize": 30,
+        "weight": 600
+      },
+      {
+        "x": 1144.3200000000002,
+        "baseline": 323,
+        "text": "安然",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 1588.0,
+        "baseline": 323,
+        "text": "史莱姆甲",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 902,
+        "baseline": 356,
+        "text": "冒险者技能",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 914,
+        "baseline": 403,
+        "text": "强击",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1790,
+        "baseline": 403,
+        "text": "1 AP",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 914,
+        "baseline": 438,
+        "text": "单敌 · 射程0 · 1D6+2",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1790,
+        "baseline": 438,
+        "text": "剩余1/2",
+        "fontSize": 24,
+        "weight": 500
+      },
+      {
+        "x": 914,
+        "baseline": 495,
+        "text": "喘息",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1790,
+        "baseline": 495,
+        "text": "1 AP",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 914,
+        "baseline": 530,
+        "text": "自身 · 恢复4生命",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1790,
+        "baseline": 530,
+        "text": "剩余2/2",
+        "fontSize": 24,
+        "weight": 500
+      },
+      {
+        "x": 914,
+        "baseline": 587,
+        "text": "简易防护",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1790,
+        "baseline": 587,
+        "text": "1 AP",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 914,
+        "baseline": 622,
+        "text": "自身 · 护盾4",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1790,
+        "baseline": 622,
+        "text": "剩余2/2",
+        "fontSize": 24,
+        "weight": 500
+      },
+      {
+        "x": 328.0,
+        "baseline": 825,
+        "text": "AP 3",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 104,
+        "baseline": 858,
+        "text": "晨曦森林守护者小",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 104,
+        "baseline": 889,
+        "text": "队长安然",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 136,
+        "baseline": 959,
+        "text": "9/12",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 309.0,
+        "baseline": 959,
+        "text": "4",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 136,
+        "baseline": 999,
+        "text": "30",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 309.0,
+        "baseline": 999,
+        "text": "4",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 576.0,
+        "baseline": 825,
+        "text": "AP 8",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 352.0,
+        "baseline": 858,
+        "text": "AlexandriaWi",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 352.0,
+        "baseline": 889,
+        "text": "nterbrookJoy",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 384.0,
+        "baseline": 959,
+        "text": "16/18",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 557.0,
+        "baseline": 959,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 384.0,
+        "baseline": 999,
+        "text": "40",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 557.0,
+        "baseline": 999,
+        "text": "6",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 824.0,
+        "baseline": 825,
+        "text": "AP 2",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 600.0,
+        "baseline": 858,
+        "text": "小禾",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 632.0,
+        "baseline": 959,
+        "text": "20/24",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 805.0,
+        "baseline": 959,
+        "text": "6",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 632.0,
+        "baseline": 999,
+        "text": "20",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 805.0,
+        "baseline": 999,
+        "text": "3",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1072.0,
+        "baseline": 825,
+        "text": "AP 3",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 848.0,
+        "baseline": 858,
+        "text": "星星",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 880.0,
+        "baseline": 959,
+        "text": "26/32",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1053.0,
+        "baseline": 959,
+        "text": "6",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 880.0,
+        "baseline": 999,
+        "text": "50",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1053.0,
+        "baseline": 999,
+        "text": "7",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1320.0,
+        "baseline": 825,
+        "text": "AP 3",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 1096.0,
+        "baseline": 858,
+        "text": "阿乐",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1096.0,
+        "baseline": 900,
+        "text": "倒地",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 1128.0,
+        "baseline": 959,
+        "text": "0/12",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1301.0,
+        "baseline": 959,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1128.0,
+        "baseline": 999,
+        "text": "10",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1301.0,
+        "baseline": 999,
+        "text": "2",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1568.0,
+        "baseline": 825,
+        "text": "AP 4",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 1344.0,
+        "baseline": 858,
+        "text": "小满",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1376.0,
+        "baseline": 959,
+        "text": "13/18",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1549.0,
+        "baseline": 959,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1376.0,
+        "baseline": 999,
+        "text": "25",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1549.0,
+        "baseline": 999,
+        "text": "5",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1816.0,
+        "baseline": 825,
+        "text": "AP 3",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 1592.0,
+        "baseline": 858,
+        "text": "林老师",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1592.0,
+        "baseline": 900,
+        "text": "主持人",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 1624.0,
+        "baseline": 959,
+        "text": "32/32",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1797.0,
+        "baseline": 959,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1624.0,
+        "baseline": 999,
+        "text": "35",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1797.0,
+        "baseline": 999,
+        "text": "4",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 928,
+        "baseline": 244,
+        "text": "安然 AP −1",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 928,
+        "baseline": 281,
+        "text": "史莱姆甲 生命 −6",
+        "fontSize": 26,
+        "weight": 600
+      }
+    ],
+    "revision": "round3"
+  },
+  {
+    "name": "public_storybook_16x9",
+    "width": 1920,
+    "height": 1080,
+    "scale": 1,
+    "label": "公开绘本｜七人单条状态区｜计时未启用",
+    "text": [
+      {
+        "x": 960.0,
+        "baseline": 406.36,
+        "text": "本地绘本页面",
+        "fontSize": 44,
+        "weight": 600
+      },
+      {
+        "x": 960.0,
+        "baseline": 482.96000000000004,
+        "text": "占位页 · 尚未提供实际PPTX",
+        "fontSize": 28,
+        "weight": 400
+      },
+      {
+        "x": 104,
+        "baseline": 893,
+        "text": "晨曦森林守护者小",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 104,
+        "baseline": 924,
+        "text": "队长安然",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 136,
+        "baseline": 972,
+        "text": "9/12",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 309.0,
+        "baseline": 972,
+        "text": "4",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 136,
+        "baseline": 1001,
+        "text": "30",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 291.0,
+        "baseline": 1001,
+        "text": "4",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 352.0,
+        "baseline": 893,
+        "text": "AlexandriaWi",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 352.0,
+        "baseline": 924,
+        "text": "nterbrookJoy",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 384.0,
+        "baseline": 972,
+        "text": "16/18",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 557.0,
+        "baseline": 972,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 384.0,
+        "baseline": 1001,
+        "text": "40",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 539.0,
+        "baseline": 1001,
+        "text": "6",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 600.0,
+        "baseline": 893,
+        "text": "小禾",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 632.0,
+        "baseline": 972,
+        "text": "20/24",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 805.0,
+        "baseline": 972,
+        "text": "6",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 632.0,
+        "baseline": 1001,
+        "text": "20",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 787.0,
+        "baseline": 1001,
+        "text": "3",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 848.0,
+        "baseline": 893,
+        "text": "星星",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 880.0,
+        "baseline": 972,
+        "text": "26/32",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1053.0,
+        "baseline": 972,
+        "text": "6",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 880.0,
+        "baseline": 1001,
+        "text": "50",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1035.0,
+        "baseline": 1001,
+        "text": "7",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1096.0,
+        "baseline": 893,
+        "text": "阿乐",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1128.0,
+        "baseline": 972,
+        "text": "0/12",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1301.0,
+        "baseline": 972,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1128.0,
+        "baseline": 1001,
+        "text": "10",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1283.0,
+        "baseline": 1001,
+        "text": "2",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1096.0,
+        "baseline": 930,
+        "text": "倒地",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 1344.0,
+        "baseline": 893,
+        "text": "小满",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1376.0,
+        "baseline": 972,
+        "text": "13/18",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1549.0,
+        "baseline": 972,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1376.0,
+        "baseline": 1001,
+        "text": "25",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1531.0,
+        "baseline": 1001,
+        "text": "5",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1592.0,
+        "baseline": 893,
+        "text": "林老师",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1624.0,
+        "baseline": 972,
+        "text": "32/32",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1797.0,
+        "baseline": 972,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1624.0,
+        "baseline": 1001,
+        "text": "35",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1779.0,
+        "baseline": 1001,
+        "text": "4",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1592.0,
+        "baseline": 930,
+        "text": "主持人",
+        "fontSize": 24,
+        "weight": 600
+      }
+    ],
+    "revision": "round3"
+  },
+  {
+    "name": "public_storybook_16x9_timer_enabled",
+    "width": 1920,
+    "height": 1080,
+    "scale": 1,
+    "label": "公开绘本｜七人单条状态区｜计时已启用",
+    "text": [
+      {
+        "x": 960.0,
+        "baseline": 427.96000000000004,
+        "text": "本地绘本页面",
+        "fontSize": 44,
+        "weight": 600
+      },
+      {
+        "x": 960.0,
+        "baseline": 500.56000000000006,
+        "text": "占位页 · 尚未提供实际PPTX",
+        "fontSize": 28,
+        "weight": 400
+      },
+      {
+        "x": 104,
+        "baseline": 893,
+        "text": "晨曦森林守护者小",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 104,
+        "baseline": 924,
+        "text": "队长安然",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 136,
+        "baseline": 972,
+        "text": "9/12",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 309.0,
+        "baseline": 972,
+        "text": "4",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 136,
+        "baseline": 1001,
+        "text": "30",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 291.0,
+        "baseline": 1001,
+        "text": "4",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 352.0,
+        "baseline": 893,
+        "text": "AlexandriaWi",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 352.0,
+        "baseline": 924,
+        "text": "nterbrookJoy",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 384.0,
+        "baseline": 972,
+        "text": "16/18",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 557.0,
+        "baseline": 972,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 384.0,
+        "baseline": 1001,
+        "text": "40",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 539.0,
+        "baseline": 1001,
+        "text": "6",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 600.0,
+        "baseline": 893,
+        "text": "小禾",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 632.0,
+        "baseline": 972,
+        "text": "20/24",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 805.0,
+        "baseline": 972,
+        "text": "6",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 632.0,
+        "baseline": 1001,
+        "text": "20",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 787.0,
+        "baseline": 1001,
+        "text": "3",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 848.0,
+        "baseline": 893,
+        "text": "星星",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 880.0,
+        "baseline": 972,
+        "text": "26/32",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1053.0,
+        "baseline": 972,
+        "text": "6",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 880.0,
+        "baseline": 1001,
+        "text": "50",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1035.0,
+        "baseline": 1001,
+        "text": "7",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1096.0,
+        "baseline": 893,
+        "text": "阿乐",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1128.0,
+        "baseline": 972,
+        "text": "0/12",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1301.0,
+        "baseline": 972,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1128.0,
+        "baseline": 1001,
+        "text": "10",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1283.0,
+        "baseline": 1001,
+        "text": "2",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1096.0,
+        "baseline": 930,
+        "text": "倒地",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 1344.0,
+        "baseline": 893,
+        "text": "小满",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1376.0,
+        "baseline": 972,
+        "text": "13/18",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1549.0,
+        "baseline": 972,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1376.0,
+        "baseline": 1001,
+        "text": "25",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1531.0,
+        "baseline": 1001,
+        "text": "5",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1592.0,
+        "baseline": 893,
+        "text": "林老师",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1624.0,
+        "baseline": 972,
+        "text": "32/32",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1797.0,
+        "baseline": 972,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1624.0,
+        "baseline": 1001,
+        "text": "35",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1779.0,
+        "baseline": 1001,
+        "text": "4",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1592.0,
+        "baseline": 930,
+        "text": "主持人",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 1824,
+        "baseline": 82,
+        "text": "已暂停 · 保留17秒",
+        "fontSize": 24,
+        "weight": 600
+      }
+    ],
+    "revision": "round3"
+  },
+  {
+    "name": "public_battle_b_4x3",
+    "width": 1440,
+    "height": 1080,
+    "scale": 1,
+    "label": "公开战斗｜完整技能/图形队列",
+    "text": [
+      {
+        "x": 96,
+        "baseline": 94,
+        "text": "PVE · 第1轮",
+        "fontSize": 30,
+        "weight": 600
+      },
+      {
+        "x": 342,
+        "baseline": 94,
+        "text": "行动中：晨曦森林守护者小队长安然",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1344,
+        "baseline": 94,
+        "text": "已暂停 · 17秒",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 171.2,
+        "baseline": 468.28,
+        "text": "1",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 171.2,
+        "baseline": 519.28,
+        "text": "起点",
+        "fontSize": 26,
+        "weight": 500
+      },
+      {
+        "x": 267.76,
+        "baseline": 280.56,
+        "text": "2",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 267.76,
+        "baseline": 331.56,
+        "text": "林间路口",
+        "fontSize": 26,
+        "weight": 500
+      },
+      {
+        "x": 387.04,
+        "baseline": 458.4,
+        "text": "3",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 387.04,
+        "baseline": 509.4,
+        "text": "浅溪石桥",
+        "fontSize": 26,
+        "weight": 500
+      },
+      {
+        "x": 540.4000000000001,
+        "baseline": 250.92000000000002,
+        "text": "4",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 540.4000000000001,
+        "baseline": 301.92,
+        "text": "树影小径",
+        "fontSize": 26,
+        "weight": 500
+      },
+      {
+        "x": 563.12,
+        "baseline": 557.2,
+        "text": "?",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 563.12,
+        "baseline": 608.2,
+        "text": "未探索",
+        "fontSize": 26,
+        "weight": 500
+      },
+      {
+        "x": 171.2,
+        "baseline": 407.28,
+        "text": "角色 1",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 267.76,
+        "baseline": 219.56,
+        "text": "角色 3",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 387.04,
+        "baseline": 397.4,
+        "text": "角色 3 · 敌人 2",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 540.4000000000001,
+        "baseline": 189.92000000000002,
+        "text": "敌人 1",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 106,
+        "baseline": 188,
+        "text": "当前地图",
+        "fontSize": 30,
+        "weight": 600
+      },
+      {
+        "x": 714,
+        "baseline": 178,
+        "text": "浅溪石桥 · 战斗",
+        "fontSize": 30,
+        "weight": 600
+      },
+      {
+        "x": 881.28,
+        "baseline": 323,
+        "text": "安然",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 1199.0,
+        "baseline": 323,
+        "text": "史莱姆甲",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 714,
+        "baseline": 356,
+        "text": "冒险者技能",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 726,
+        "baseline": 403,
+        "text": "强击",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1334,
+        "baseline": 403,
+        "text": "1 AP",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 726,
+        "baseline": 438,
+        "text": "单敌 · 射程0 · 1D6+2",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1334,
+        "baseline": 438,
+        "text": "剩余1/2",
+        "fontSize": 24,
+        "weight": 500
+      },
+      {
+        "x": 726,
+        "baseline": 495,
+        "text": "喘息",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1334,
+        "baseline": 495,
+        "text": "1 AP",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 726,
+        "baseline": 530,
+        "text": "自身 · 恢复4生命",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1334,
+        "baseline": 530,
+        "text": "剩余2/2",
+        "fontSize": 24,
+        "weight": 500
+      },
+      {
+        "x": 726,
+        "baseline": 587,
+        "text": "简易防护",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1334,
+        "baseline": 587,
+        "text": "1 AP",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 726,
+        "baseline": 622,
+        "text": "自身 · 护盾4",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1334,
+        "baseline": 622,
+        "text": "剩余2/2",
+        "fontSize": 24,
+        "weight": 500
+      },
+      {
+        "x": 286,
+        "baseline": 825,
+        "text": "AP 3",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 80,
+        "baseline": 858,
+        "text": "晨曦森林守护者",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 80,
+        "baseline": 889,
+        "text": "小队长安然",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 112,
+        "baseline": 959,
+        "text": "9/12",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 267,
+        "baseline": 959,
+        "text": "4",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 112,
+        "baseline": 999,
+        "text": "30",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 267,
+        "baseline": 999,
+        "text": "4",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 508,
+        "baseline": 825,
+        "text": "AP 8",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 302,
+        "baseline": 858,
+        "text": "AlexandriaWi",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 302,
+        "baseline": 889,
+        "text": "nterbrookJoy",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 334,
+        "baseline": 959,
+        "text": "16/18",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 489,
+        "baseline": 959,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 334,
+        "baseline": 999,
+        "text": "40",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 489,
+        "baseline": 999,
+        "text": "6",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 678.4,
+        "baseline": 825,
+        "text": "AP 2",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 524,
+        "baseline": 858,
+        "text": "小禾",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 556,
+        "baseline": 959,
+        "text": "20/24",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 659.4,
+        "baseline": 959,
+        "text": "6",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 556,
+        "baseline": 999,
+        "text": "20",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 659.4,
+        "baseline": 999,
+        "text": "3",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 848.8,
+        "baseline": 825,
+        "text": "AP 3",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 694.4,
+        "baseline": 858,
+        "text": "星星",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 726.4,
+        "baseline": 959,
+        "text": "26/32",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 829.8,
+        "baseline": 959,
+        "text": "6",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 726.4,
+        "baseline": 999,
+        "text": "50",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 829.8,
+        "baseline": 999,
+        "text": "7",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1019.2,
+        "baseline": 825,
+        "text": "AP 3",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 864.8,
+        "baseline": 858,
+        "text": "阿乐",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 864.8,
+        "baseline": 900,
+        "text": "倒地",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 896.8,
+        "baseline": 959,
+        "text": "0/12",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1000.2,
+        "baseline": 959,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 896.8,
+        "baseline": 999,
+        "text": "10",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1000.2,
+        "baseline": 999,
+        "text": "2",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1189.6000000000001,
+        "baseline": 825,
+        "text": "AP 4",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 1035.2,
+        "baseline": 858,
+        "text": "小满",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1067.2,
+        "baseline": 959,
+        "text": "13/18",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1170.6000000000001,
+        "baseline": 959,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1067.2,
+        "baseline": 999,
+        "text": "25",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1170.6000000000001,
+        "baseline": 999,
+        "text": "5",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1360.0,
+        "baseline": 825,
+        "text": "AP 3",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 1205.6,
+        "baseline": 858,
+        "text": "林老师",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1205.6,
+        "baseline": 900,
+        "text": "主持人",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 1237.6,
+        "baseline": 959,
+        "text": "32/32",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1341.0,
+        "baseline": 959,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1237.6,
+        "baseline": 999,
+        "text": "35",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1341.0,
+        "baseline": 999,
+        "text": "4",
+        "fontSize": 26,
+        "weight": 400
+      }
+    ],
+    "revision": "round3"
+  },
+  {
+    "name": "public_exploration_b_4x3",
+    "width": 1440,
+    "height": 1080,
+    "scale": 1,
+    "label": "公开探索｜战斗区收起（密度数据示意）",
+    "text": [
+      {
+        "x": 96,
+        "baseline": 94,
+        "text": "探索",
+        "fontSize": 30,
+        "weight": 600
+      },
+      {
+        "x": 276.2,
+        "baseline": 468.28,
+        "text": "1",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 276.2,
+        "baseline": 519.28,
+        "text": "起点",
+        "fontSize": 26,
+        "weight": 500
+      },
+      {
+        "x": 491.76,
+        "baseline": 280.56,
+        "text": "2",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 491.76,
+        "baseline": 331.56,
+        "text": "林间路口",
+        "fontSize": 26,
+        "weight": 500
+      },
+      {
+        "x": 758.0400000000001,
+        "baseline": 458.4,
+        "text": "3",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 758.0400000000001,
+        "baseline": 509.4,
+        "text": "浅溪石桥",
+        "fontSize": 26,
+        "weight": 500
+      },
+      {
+        "x": 1100.4,
+        "baseline": 250.92000000000002,
+        "text": "4",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1100.4,
+        "baseline": 301.92,
+        "text": "树影小径",
+        "fontSize": 26,
+        "weight": 500
+      },
+      {
+        "x": 1151.12,
+        "baseline": 557.2,
+        "text": "?",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1151.12,
+        "baseline": 608.2,
+        "text": "未探索",
+        "fontSize": 26,
+        "weight": 500
+      },
+      {
+        "x": 276.2,
+        "baseline": 407.28,
+        "text": "角色 1",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 491.76,
+        "baseline": 219.56,
+        "text": "角色 3",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 758.0400000000001,
+        "baseline": 397.4,
+        "text": "角色 3 · 敌人 2",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 1100.4,
+        "baseline": 189.92000000000002,
+        "text": "敌人 1",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 106,
+        "baseline": 188,
+        "text": "当前地图",
+        "fontSize": 30,
+        "weight": 600
+      },
+      {
+        "x": 286,
+        "baseline": 825,
+        "text": "AP 3",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 80,
+        "baseline": 858,
+        "text": "晨曦森林守护者",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 80,
+        "baseline": 889,
+        "text": "小队长安然",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 112,
+        "baseline": 959,
+        "text": "9/12",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 267,
+        "baseline": 959,
+        "text": "4",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 112,
+        "baseline": 999,
+        "text": "30",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 267,
+        "baseline": 999,
+        "text": "4",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 508,
+        "baseline": 825,
+        "text": "AP 8",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 302,
+        "baseline": 858,
+        "text": "AlexandriaWi",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 302,
+        "baseline": 889,
+        "text": "nterbrookJoy",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 334,
+        "baseline": 959,
+        "text": "16/18",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 489,
+        "baseline": 959,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 334,
+        "baseline": 999,
+        "text": "40",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 489,
+        "baseline": 999,
+        "text": "6",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 678.4,
+        "baseline": 825,
+        "text": "AP 2",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 524,
+        "baseline": 858,
+        "text": "小禾",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 556,
+        "baseline": 959,
+        "text": "20/24",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 659.4,
+        "baseline": 959,
+        "text": "6",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 556,
+        "baseline": 999,
+        "text": "20",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 659.4,
+        "baseline": 999,
+        "text": "3",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 848.8,
+        "baseline": 825,
+        "text": "AP 3",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 694.4,
+        "baseline": 858,
+        "text": "星星",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 726.4,
+        "baseline": 959,
+        "text": "26/32",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 829.8,
+        "baseline": 959,
+        "text": "6",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 726.4,
+        "baseline": 999,
+        "text": "50",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 829.8,
+        "baseline": 999,
+        "text": "7",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1019.2,
+        "baseline": 825,
+        "text": "AP 3",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 864.8,
+        "baseline": 858,
+        "text": "阿乐",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 864.8,
+        "baseline": 900,
+        "text": "倒地",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 896.8,
+        "baseline": 959,
+        "text": "0/12",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1000.2,
+        "baseline": 959,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 896.8,
+        "baseline": 999,
+        "text": "10",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1000.2,
+        "baseline": 999,
+        "text": "2",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1189.6000000000001,
+        "baseline": 825,
+        "text": "AP 4",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 1035.2,
+        "baseline": 858,
+        "text": "小满",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1067.2,
+        "baseline": 959,
+        "text": "13/18",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1170.6000000000001,
+        "baseline": 959,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1067.2,
+        "baseline": 999,
+        "text": "25",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1170.6000000000001,
+        "baseline": 999,
+        "text": "5",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1360.0,
+        "baseline": 825,
+        "text": "AP 3",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 1205.6,
+        "baseline": 858,
+        "text": "林老师",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1205.6,
+        "baseline": 900,
+        "text": "主持人",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 1237.6,
+        "baseline": 959,
+        "text": "32/32",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1341.0,
+        "baseline": 959,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1237.6,
+        "baseline": 999,
+        "text": "35",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1341.0,
+        "baseline": 999,
+        "text": "4",
+        "fontSize": 26,
+        "weight": 400
+      }
+    ],
+    "revision": "round3"
+  },
+  {
+    "name": "public_battle_b_4x3_feedback",
+    "width": 1440,
+    "height": 1080,
+    "scale": 1,
+    "label": "公开战斗｜一次文字反馈中间帧",
+    "text": [
+      {
+        "x": 96,
+        "baseline": 94,
+        "text": "PVE · 第1轮",
+        "fontSize": 30,
+        "weight": 600
+      },
+      {
+        "x": 342,
+        "baseline": 94,
+        "text": "行动中：晨曦森林守护者小队长安然",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1344,
+        "baseline": 94,
+        "text": "已暂停 · 17秒",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 171.2,
+        "baseline": 468.28,
+        "text": "1",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 171.2,
+        "baseline": 519.28,
+        "text": "起点",
+        "fontSize": 26,
+        "weight": 500
+      },
+      {
+        "x": 267.76,
+        "baseline": 280.56,
+        "text": "2",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 267.76,
+        "baseline": 331.56,
+        "text": "林间路口",
+        "fontSize": 26,
+        "weight": 500
+      },
+      {
+        "x": 387.04,
+        "baseline": 458.4,
+        "text": "3",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 387.04,
+        "baseline": 509.4,
+        "text": "浅溪石桥",
+        "fontSize": 26,
+        "weight": 500
+      },
+      {
+        "x": 540.4000000000001,
+        "baseline": 250.92000000000002,
+        "text": "4",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 540.4000000000001,
+        "baseline": 301.92,
+        "text": "树影小径",
+        "fontSize": 26,
+        "weight": 500
+      },
+      {
+        "x": 563.12,
+        "baseline": 557.2,
+        "text": "?",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 563.12,
+        "baseline": 608.2,
+        "text": "未探索",
+        "fontSize": 26,
+        "weight": 500
+      },
+      {
+        "x": 171.2,
+        "baseline": 407.28,
+        "text": "角色 1",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 267.76,
+        "baseline": 219.56,
+        "text": "角色 3",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 387.04,
+        "baseline": 397.4,
+        "text": "角色 3 · 敌人 2",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 540.4000000000001,
+        "baseline": 189.92000000000002,
+        "text": "敌人 1",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 106,
+        "baseline": 188,
+        "text": "当前地图",
+        "fontSize": 30,
+        "weight": 600
+      },
+      {
+        "x": 714,
+        "baseline": 178,
+        "text": "浅溪石桥 · 战斗",
+        "fontSize": 30,
+        "weight": 600
+      },
+      {
+        "x": 881.28,
+        "baseline": 323,
+        "text": "安然",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 1199.0,
+        "baseline": 323,
+        "text": "史莱姆甲",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 714,
+        "baseline": 356,
+        "text": "冒险者技能",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 726,
+        "baseline": 403,
+        "text": "强击",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1334,
+        "baseline": 403,
+        "text": "1 AP",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 726,
+        "baseline": 438,
+        "text": "单敌 · 射程0 · 1D6+2",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1334,
+        "baseline": 438,
+        "text": "剩余1/2",
+        "fontSize": 24,
+        "weight": 500
+      },
+      {
+        "x": 726,
+        "baseline": 495,
+        "text": "喘息",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1334,
+        "baseline": 495,
+        "text": "1 AP",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 726,
+        "baseline": 530,
+        "text": "自身 · 恢复4生命",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1334,
+        "baseline": 530,
+        "text": "剩余2/2",
+        "fontSize": 24,
+        "weight": 500
+      },
+      {
+        "x": 726,
+        "baseline": 587,
+        "text": "简易防护",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1334,
+        "baseline": 587,
+        "text": "1 AP",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 726,
+        "baseline": 622,
+        "text": "自身 · 护盾4",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1334,
+        "baseline": 622,
+        "text": "剩余2/2",
+        "fontSize": 24,
+        "weight": 500
+      },
+      {
+        "x": 286,
+        "baseline": 825,
+        "text": "AP 3",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 80,
+        "baseline": 858,
+        "text": "晨曦森林守护者",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 80,
+        "baseline": 889,
+        "text": "小队长安然",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 112,
+        "baseline": 959,
+        "text": "9/12",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 267,
+        "baseline": 959,
+        "text": "4",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 112,
+        "baseline": 999,
+        "text": "30",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 267,
+        "baseline": 999,
+        "text": "4",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 508,
+        "baseline": 825,
+        "text": "AP 8",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 302,
+        "baseline": 858,
+        "text": "AlexandriaWi",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 302,
+        "baseline": 889,
+        "text": "nterbrookJoy",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 334,
+        "baseline": 959,
+        "text": "16/18",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 489,
+        "baseline": 959,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 334,
+        "baseline": 999,
+        "text": "40",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 489,
+        "baseline": 999,
+        "text": "6",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 678.4,
+        "baseline": 825,
+        "text": "AP 2",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 524,
+        "baseline": 858,
+        "text": "小禾",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 556,
+        "baseline": 959,
+        "text": "20/24",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 659.4,
+        "baseline": 959,
+        "text": "6",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 556,
+        "baseline": 999,
+        "text": "20",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 659.4,
+        "baseline": 999,
+        "text": "3",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 848.8,
+        "baseline": 825,
+        "text": "AP 3",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 694.4,
+        "baseline": 858,
+        "text": "星星",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 726.4,
+        "baseline": 959,
+        "text": "26/32",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 829.8,
+        "baseline": 959,
+        "text": "6",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 726.4,
+        "baseline": 999,
+        "text": "50",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 829.8,
+        "baseline": 999,
+        "text": "7",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1019.2,
+        "baseline": 825,
+        "text": "AP 3",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 864.8,
+        "baseline": 858,
+        "text": "阿乐",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 864.8,
+        "baseline": 900,
+        "text": "倒地",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 896.8,
+        "baseline": 959,
+        "text": "0/12",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1000.2,
+        "baseline": 959,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 896.8,
+        "baseline": 999,
+        "text": "10",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1000.2,
+        "baseline": 999,
+        "text": "2",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1189.6000000000001,
+        "baseline": 825,
+        "text": "AP 4",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 1035.2,
+        "baseline": 858,
+        "text": "小满",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1067.2,
+        "baseline": 959,
+        "text": "13/18",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1170.6000000000001,
+        "baseline": 959,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1067.2,
+        "baseline": 999,
+        "text": "25",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1170.6000000000001,
+        "baseline": 999,
+        "text": "5",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1360.0,
+        "baseline": 825,
+        "text": "AP 3",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 1205.6,
+        "baseline": 858,
+        "text": "林老师",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1205.6,
+        "baseline": 900,
+        "text": "主持人",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 1237.6,
+        "baseline": 959,
+        "text": "32/32",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1341.0,
+        "baseline": 959,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1237.6,
+        "baseline": 999,
+        "text": "35",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1341.0,
+        "baseline": 999,
+        "text": "4",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 740,
+        "baseline": 244,
+        "text": "安然 AP −1",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 740,
+        "baseline": 281,
+        "text": "史莱姆甲 生命 −6",
+        "fontSize": 26,
+        "weight": 600
+      }
+    ],
+    "revision": "round3"
+  },
+  {
+    "name": "public_storybook_4x3",
+    "width": 1440,
+    "height": 1080,
+    "scale": 1,
+    "label": "公开绘本｜七人单条状态区｜计时未启用",
+    "text": [
+      {
+        "x": 720.0,
+        "baseline": 407.84000000000003,
+        "text": "本地绘本页面",
+        "fontSize": 44,
+        "weight": 600
+      },
+      {
+        "x": 720.0,
+        "baseline": 480.74000000000007,
+        "text": "占位页 · 尚未提供实际PPTX",
+        "fontSize": 28,
+        "weight": 400
+      },
+      {
+        "x": 80,
+        "baseline": 893,
+        "text": "晨曦森林守护者",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 80,
+        "baseline": 924,
+        "text": "小队长安然",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 112,
+        "baseline": 972,
+        "text": "9/12",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 267,
+        "baseline": 972,
+        "text": "4",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 112,
+        "baseline": 1001,
+        "text": "30",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 267,
+        "baseline": 1001,
+        "text": "4",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 302,
+        "baseline": 893,
+        "text": "AlexandriaWi",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 302,
+        "baseline": 924,
+        "text": "nterbrookJoy",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 334,
+        "baseline": 972,
+        "text": "16/18",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 489,
+        "baseline": 972,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 334,
+        "baseline": 1001,
+        "text": "40",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 489,
+        "baseline": 1001,
+        "text": "6",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 524,
+        "baseline": 893,
+        "text": "小禾",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 556,
+        "baseline": 972,
+        "text": "20/24",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 659.4,
+        "baseline": 972,
+        "text": "6",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 556,
+        "baseline": 1001,
+        "text": "20",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 659.4,
+        "baseline": 1001,
+        "text": "3",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 694.4,
+        "baseline": 893,
+        "text": "星星",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 726.4,
+        "baseline": 972,
+        "text": "26/32",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 829.8,
+        "baseline": 972,
+        "text": "6",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 726.4,
+        "baseline": 1001,
+        "text": "50",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 829.8,
+        "baseline": 1001,
+        "text": "7",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 864.8,
+        "baseline": 893,
+        "text": "阿乐",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 896.8,
+        "baseline": 972,
+        "text": "0/12",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1000.2,
+        "baseline": 972,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 896.8,
+        "baseline": 1001,
+        "text": "10",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1000.2,
+        "baseline": 1001,
+        "text": "2",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 864.8,
+        "baseline": 930,
+        "text": "倒地",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 1035.2,
+        "baseline": 893,
+        "text": "小满",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1067.2,
+        "baseline": 972,
+        "text": "13/18",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1170.6000000000001,
+        "baseline": 972,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1067.2,
+        "baseline": 1001,
+        "text": "25",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1170.6000000000001,
+        "baseline": 1001,
+        "text": "5",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1205.6,
+        "baseline": 893,
+        "text": "林老师",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1237.6,
+        "baseline": 972,
+        "text": "32/32",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1341.0,
+        "baseline": 972,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1237.6,
+        "baseline": 1001,
+        "text": "35",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1341.0,
+        "baseline": 1001,
+        "text": "4",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1205.6,
+        "baseline": 930,
+        "text": "主持人",
+        "fontSize": 24,
+        "weight": 600
+      }
+    ],
+    "revision": "round3"
+  },
+  {
+    "name": "public_storybook_4x3_timer_enabled",
+    "width": 1440,
+    "height": 1080,
+    "scale": 1,
+    "label": "公开绘本｜七人单条状态区｜计时已启用",
+    "text": [
+      {
+        "x": 720.0,
+        "baseline": 427.96000000000004,
+        "text": "本地绘本页面",
+        "fontSize": 44,
+        "weight": 600
+      },
+      {
+        "x": 720.0,
+        "baseline": 500.56000000000006,
+        "text": "占位页 · 尚未提供实际PPTX",
+        "fontSize": 28,
+        "weight": 400
+      },
+      {
+        "x": 80,
+        "baseline": 893,
+        "text": "晨曦森林守护者",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 80,
+        "baseline": 924,
+        "text": "小队长安然",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 112,
+        "baseline": 972,
+        "text": "9/12",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 267,
+        "baseline": 972,
+        "text": "4",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 112,
+        "baseline": 1001,
+        "text": "30",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 267,
+        "baseline": 1001,
+        "text": "4",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 302,
+        "baseline": 893,
+        "text": "AlexandriaWi",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 302,
+        "baseline": 924,
+        "text": "nterbrookJoy",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 334,
+        "baseline": 972,
+        "text": "16/18",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 489,
+        "baseline": 972,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 334,
+        "baseline": 1001,
+        "text": "40",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 489,
+        "baseline": 1001,
+        "text": "6",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 524,
+        "baseline": 893,
+        "text": "小禾",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 556,
+        "baseline": 972,
+        "text": "20/24",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 659.4,
+        "baseline": 972,
+        "text": "6",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 556,
+        "baseline": 1001,
+        "text": "20",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 659.4,
+        "baseline": 1001,
+        "text": "3",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 694.4,
+        "baseline": 893,
+        "text": "星星",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 726.4,
+        "baseline": 972,
+        "text": "26/32",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 829.8,
+        "baseline": 972,
+        "text": "6",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 726.4,
+        "baseline": 1001,
+        "text": "50",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 829.8,
+        "baseline": 1001,
+        "text": "7",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 864.8,
+        "baseline": 893,
+        "text": "阿乐",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 896.8,
+        "baseline": 972,
+        "text": "0/12",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1000.2,
+        "baseline": 972,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 896.8,
+        "baseline": 1001,
+        "text": "10",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1000.2,
+        "baseline": 1001,
+        "text": "2",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 864.8,
+        "baseline": 930,
+        "text": "倒地",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 1035.2,
+        "baseline": 893,
+        "text": "小满",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1067.2,
+        "baseline": 972,
+        "text": "13/18",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1170.6000000000001,
+        "baseline": 972,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1067.2,
+        "baseline": 1001,
+        "text": "25",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1170.6000000000001,
+        "baseline": 1001,
+        "text": "5",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1205.6,
+        "baseline": 893,
+        "text": "林老师",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1237.6,
+        "baseline": 972,
+        "text": "32/32",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1341.0,
+        "baseline": 972,
+        "text": "0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1237.6,
+        "baseline": 1001,
+        "text": "35",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1341.0,
+        "baseline": 1001,
+        "text": "4",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1205.6,
+        "baseline": 930,
+        "text": "主持人",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 1368,
+        "baseline": 82,
+        "text": "已暂停 · 保留17秒",
+        "fontSize": 24,
+        "weight": 600
+      }
+    ],
+    "revision": "round3"
+  },
+  {
+    "name": "component_states",
+    "width": 1920,
+    "height": 1600,
+    "scale": 1,
+    "label": "组件状态板｜角色、动作、资源、地图、队列、结果",
+    "text": [
+      {
+        "x": 56,
+        "baseline": 74,
+        "text": "组件与状态 / 同一语义，双端表达",
+        "fontSize": 44,
+        "weight": 700
+      },
+      {
+        "x": 56,
+        "baseline": 117,
+        "text": "大面板：系统毛玻璃   小按钮：纯色 / 液态玻璃   状态必须带文字或标记",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 72,
+        "baseline": 196,
+        "text": "01 角色卡 · 状态可以叠加",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 176.0,
+        "baseline": 254,
+        "text": "普通",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 88,
+        "baseline": 299,
+        "text": "小禾",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 88,
+        "baseline": 335,
+        "text": "生命 20/24",
+        "fontSize": 24,
+        "weight": 400
+      },
+      {
+        "x": 88,
+        "baseline": 368,
+        "text": "盾 6 · 橙队",
+        "fontSize": 20,
+        "weight": 400
+      },
+      {
+        "x": 400.0,
+        "baseline": 254,
+        "text": "行动中",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 312,
+        "baseline": 299,
+        "text": "小禾",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 312,
+        "baseline": 335,
+        "text": "生命 20/24",
+        "fontSize": 24,
+        "weight": 400
+      },
+      {
+        "x": 312,
+        "baseline": 368,
+        "text": "盾 6 · 橙队",
+        "fontSize": 20,
+        "weight": 400
+      },
+      {
+        "x": 624.0,
+        "baseline": 254,
+        "text": "奖励选中",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 536,
+        "baseline": 299,
+        "text": "小禾",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 536,
+        "baseline": 335,
+        "text": "生命 20/24",
+        "fontSize": 24,
+        "weight": 400
+      },
+      {
+        "x": 536,
+        "baseline": 368,
+        "text": "盾 6 · 橙队",
+        "fontSize": 20,
+        "weight": 400
+      },
+      {
+        "x": 848.0,
+        "baseline": 254,
+        "text": "合法目标",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 760,
+        "baseline": 299,
+        "text": "小禾",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 760,
+        "baseline": 335,
+        "text": "生命 20/24",
+        "fontSize": 24,
+        "weight": 400
+      },
+      {
+        "x": 760,
+        "baseline": 368,
+        "text": "盾 6 · 橙队",
+        "fontSize": 20,
+        "weight": 400
+      },
+      {
+        "x": 1072.0,
+        "baseline": 254,
+        "text": "受击",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 984,
+        "baseline": 299,
+        "text": "小禾",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 984,
+        "baseline": 335,
+        "text": "生命 20/24",
+        "fontSize": 24,
+        "weight": 400
+      },
+      {
+        "x": 984,
+        "baseline": 368,
+        "text": "盾 6 · 橙队",
+        "fontSize": 20,
+        "weight": 400
+      },
+      {
+        "x": 1296.0,
+        "baseline": 254,
+        "text": "倒地",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 1208,
+        "baseline": 299,
+        "text": "小禾",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 1208,
+        "baseline": 335,
+        "text": "生命 0/24",
+        "fontSize": 24,
+        "weight": 400
+      },
+      {
+        "x": 1208,
+        "baseline": 368,
+        "text": "盾 0 · 橙队",
+        "fontSize": 20,
+        "weight": 400
+      },
+      {
+        "x": 1520.0,
+        "baseline": 254,
+        "text": "主持人",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 1432,
+        "baseline": 299,
+        "text": "小禾",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 1432,
+        "baseline": 335,
+        "text": "生命 20/24",
+        "fontSize": 24,
+        "weight": 400
+      },
+      {
+        "x": 1432,
+        "baseline": 368,
+        "text": "盾 6 · 橙队",
+        "fontSize": 20,
+        "weight": 400
+      },
+      {
+        "x": 1744.0,
+        "baseline": 254,
+        "text": "下轮可行动",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 1656,
+        "baseline": 299,
+        "text": "小禾",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 1656,
+        "baseline": 335,
+        "text": "生命 20/24",
+        "fontSize": 24,
+        "weight": 400
+      },
+      {
+        "x": 1656,
+        "baseline": 368,
+        "text": "盾 6 · 橙队",
+        "fontSize": 20,
+        "weight": 400
+      },
+      {
+        "x": 72,
+        "baseline": 479,
+        "text": "02 技能 / 道具按钮",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 88,
+        "baseline": 526,
+        "text": "可用 · 强击",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 88,
+        "baseline": 551,
+        "text": "1点 · 射程0 · 余2次",
+        "fontSize": 15,
+        "weight": 400
+      },
+      {
+        "x": 508,
+        "baseline": 526,
+        "text": "选中 · 强击",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 508,
+        "baseline": 551,
+        "text": "待选合法目标，未扣点",
+        "fontSize": 15,
+        "weight": 400
+      },
+      {
+        "x": 88,
+        "baseline": 608,
+        "text": "AP不足",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 88,
+        "baseline": 633,
+        "text": "当前0 / 需要1行动点",
+        "fontSize": 15,
+        "weight": 400
+      },
+      {
+        "x": 508,
+        "baseline": 608,
+        "text": "次数耗尽",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 508,
+        "baseline": 633,
+        "text": "剩余0次 · 本场不可用",
+        "fontSize": 15,
+        "weight": 400
+      },
+      {
+        "x": 88,
+        "baseline": 690,
+        "text": "无合法目标",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 88,
+        "baseline": 715,
+        "text": "射程不足 / 未选目标",
+        "fontSize": 15,
+        "weight": 400
+      },
+      {
+        "x": 508,
+        "baseline": 690,
+        "text": "阶段不允许",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 508,
+        "baseline": 715,
+        "text": "探索不可用战斗技能",
+        "fontSize": 15,
+        "weight": 400
+      },
+      {
+        "x": 984,
+        "baseline": 479,
+        "text": "03 资源 · 不用颜色代替含义",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 998,
+        "baseline": 538,
+        "text": "生命",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 998,
+        "baseline": 581,
+        "text": "9 / 12",
+        "fontSize": 32,
+        "weight": 600
+      },
+      {
+        "x": 1284,
+        "baseline": 538,
+        "text": "护盾",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 1284,
+        "baseline": 581,
+        "text": "4",
+        "fontSize": 32,
+        "weight": 600
+      },
+      {
+        "x": 1570,
+        "baseline": 538,
+        "text": "行动点",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 1570,
+        "baseline": 581,
+        "text": "3 / 8",
+        "fontSize": 32,
+        "weight": 600
+      },
+      {
+        "x": 998,
+        "baseline": 656,
+        "text": "金币",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 998,
+        "baseline": 699,
+        "text": "20",
+        "fontSize": 32,
+        "weight": 600
+      },
+      {
+        "x": 1284,
+        "baseline": 656,
+        "text": "积分",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 1284,
+        "baseline": 699,
+        "text": "2",
+        "fontSize": 32,
+        "weight": 600
+      },
+      {
+        "x": 1570,
+        "baseline": 656,
+        "text": "队伍",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 1570,
+        "baseline": 699,
+        "text": "橙队 ◆",
+        "fontSize": 32,
+        "weight": 600
+      },
+      {
+        "x": 72,
+        "baseline": 834,
+        "text": "04 地图节点 · 道路距离，拥挤单独展开",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 112,
+        "baseline": 907,
+        "text": "1",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 112,
+        "baseline": 962,
+        "text": "已探索",
+        "fontSize": 20,
+        "weight": 400
+      },
+      {
+        "x": 324,
+        "baseline": 907,
+        "text": "?",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 324,
+        "baseline": 962,
+        "text": "未知轮廓",
+        "fontSize": 20,
+        "weight": 400
+      },
+      {
+        "x": 536,
+        "baseline": 907,
+        "text": "3",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 536,
+        "baseline": 962,
+        "text": "当前地点",
+        "fontSize": 20,
+        "weight": 400
+      },
+      {
+        "x": 748,
+        "baseline": 907,
+        "text": "4",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 748,
+        "baseline": 962,
+        "text": "路径经过",
+        "fontSize": 20,
+        "weight": 400
+      },
+      {
+        "x": 112,
+        "baseline": 1041,
+        "text": "5",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 112,
+        "baseline": 1096,
+        "text": "敌人地点",
+        "fontSize": 20,
+        "weight": 400
+      },
+      {
+        "x": 324,
+        "baseline": 1041,
+        "text": "✓",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 324,
+        "baseline": 1096,
+        "text": "奖励已领取",
+        "fontSize": 20,
+        "weight": 400
+      },
+      {
+        "x": 536,
+        "baseline": 1041,
+        "text": "7",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 536,
+        "baseline": 1096,
+        "text": "同地点多人",
+        "fontSize": 20,
+        "weight": 400
+      },
+      {
+        "x": 984,
+        "baseline": 834,
+        "text": "05 固定队列与暂停",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1083.0,
+        "baseline": 878,
+        "text": "① 当前",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 1297.0,
+        "baseline": 878,
+        "text": "② 已行动",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 1511.0,
+        "baseline": 878,
+        "text": "③ 倒地跳过",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 1725.0,
+        "baseline": 878,
+        "text": "④ 下轮可行动",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 984,
+        "baseline": 943,
+        "text": "手动暂停 · 保留17秒",
+        "fontSize": 32,
+        "weight": 600
+      },
+      {
+        "x": 984,
+        "baseline": 990,
+        "text": "绘本 / 编辑 / 历史暂停叠加，返回后保留原暂停",
+        "fontSize": 24,
+        "weight": 400
+      },
+      {
+        "x": 984,
+        "baseline": 1040,
+        "text": "怪物行动 / 全员倒地：不消耗学生决策时间",
+        "fontSize": 24,
+        "weight": 400
+      },
+      {
+        "x": 72,
+        "baseline": 1182,
+        "text": "06 已结算反馈与异常 · 原结果显示，不重新计算",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 183.0,
+        "baseline": 1227,
+        "text": "自然20 · 穿透护盾",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 72,
+        "baseline": 1280,
+        "text": "节点3的三个目标全部倒地",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 72,
+        "baseline": 1321,
+        "text": "自疗、护盾、掉落、积分显示实际变化",
+        "fontSize": 24,
+        "weight": 400
+      },
+      {
+        "x": 72,
+        "baseline": 1362,
+        "text": "结算完成后才显示战斗结束",
+        "fontSize": 24,
+        "weight": 400
+      },
+      {
+        "x": 698,
+        "baseline": 1240,
+        "text": "救援成功",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 698,
+        "baseline": 1291,
+        "text": "生命 0/13 → 7/13",
+        "fontSize": 30,
+        "weight": 400
+      },
+      {
+        "x": 698,
+        "baseline": 1334,
+        "text": "第2轮可行动",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 698,
+        "baseline": 1380,
+        "text": "消耗：2行动点 + 1复活石",
+        "fontSize": 24,
+        "weight": 400
+      },
+      {
+        "x": 1260,
+        "baseline": 1240,
+        "text": "教师文件 / 纠错",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 1260,
+        "baseline": 1284,
+        "text": "空资料 / 正在导入 / 导入失败",
+        "fontSize": 24,
+        "weight": 400
+      },
+      {
+        "x": 1260,
+        "baseline": 1326,
+        "text": "保存失败 / 恢复后暂停",
+        "fontSize": 24,
+        "weight": 400
+      },
+      {
+        "x": 1260,
+        "baseline": 1368,
+        "text": "断连：公开画面等待重连",
+        "fontSize": 24,
+        "weight": 400
+      },
+      {
+        "x": 1260,
+        "baseline": 1410,
+        "text": "撤销预览恢复范围 · 保留原骰子",
+        "fontSize": 24,
+        "weight": 400
+      },
+      {
+        "x": 168.0,
+        "baseline": 1436,
+        "text": "安然 · 行动中",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 357.0,
+        "baseline": 1436,
+        "text": "✓ 奖励选中",
+        "fontSize": 18,
+        "weight": 600
+      },
+      {
+        "x": 698,
+        "baseline": 1450,
+        "text": "叠加示例：同一人可以同时行动中与被选作奖励对象",
+        "fontSize": 24,
+        "weight": 400
+      },
+      {
+        "x": 72,
+        "baseline": 1504,
+        "text": "按钮150ms · 面板220ms · 数字350ms · 骰子最长900ms · 减少动态效果直接显示完整结果",
+        "fontSize": 24,
+        "weight": 400
+      }
+    ],
+    "revision": "round3"
+  },
+  {
+    "name": "settlement_and_privacy",
+    "width": 1600,
+    "height": 1080,
+    "scale": 1,
+    "label": "特殊结果与隐私｜自然20、救援、AP触顶、暂停",
+    "text": [
+      {
+        "x": 56,
+        "baseline": 76,
+        "text": "已提交结果 / 特殊结算与教师隔离",
+        "fontSize": 40,
+        "weight": 700
+      },
+      {
+        "x": 72,
+        "baseline": 168,
+        "text": "自然20 · 同一节点群体结果",
+        "fontSize": 32,
+        "weight": 600
+      },
+      {
+        "x": 192.0,
+        "baseline": 218,
+        "text": "D20 原始结果：20",
+        "fontSize": 22,
+        "weight": 600
+      },
+      {
+        "x": 72,
+        "baseline": 290,
+        "text": "遗迹魔龙、石像守卫、史莱姆 → 全部战败",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 72,
+        "baseline": 340,
+        "text": "护盾不能阻挡自然20 · 倒地后盾归0",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 72,
+        "baseline": 408,
+        "text": "行动者：星星 · 龙焰",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 72,
+        "baseline": 456,
+        "text": "实际自疗 +6 · 生命 26 → 32 / 32",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 72,
+        "baseline": 504,
+        "text": "实际护盾 +2 · 护盾 4 → 6",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 72,
+        "baseline": 552,
+        "text": "实际掉落：金币35、药水1、复活石1",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 72,
+        "baseline": 600,
+        "text": "实际积分 +7 · 普通怪物1+1，Boss5",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 72,
+        "baseline": 680,
+        "text": "各目标独立掉落已完成 · 回放沿用这一批结果",
+        "fontSize": 24,
+        "weight": 400
+      },
+      {
+        "x": 1008,
+        "baseline": 168,
+        "text": "救援成功",
+        "fontSize": 32,
+        "weight": 600
+      },
+      {
+        "x": 1008,
+        "baseline": 250,
+        "text": "生命 0/13 → 7/13",
+        "fontSize": 34,
+        "weight": 600
+      },
+      {
+        "x": 1156.0,
+        "baseline": 308,
+        "text": "第2轮才可行动",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 1008,
+        "baseline": 372,
+        "text": "同节点队友",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1008,
+        "baseline": 426,
+        "text": "消耗2行动点、1复活石",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1008,
+        "baseline": 480,
+        "text": "救援者实际积分 +2",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1008,
+        "baseline": 534,
+        "text": "保持原队列位置",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1008,
+        "baseline": 680,
+        "text": "已提交结果 · 不因播放而再次发奖",
+        "fontSize": 24,
+        "weight": 400
+      },
+      {
+        "x": 72,
+        "baseline": 786,
+        "text": "教师选奖 / 私有备注 / 公共输出",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 72,
+        "baseline": 840,
+        "text": "行动者：安然   奖励对象：亚历山德里娅、小禾",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 72,
+        "baseline": 888,
+        "text": "AP奖励实际：亚历山德里娅 +0（上限8）；小禾 +1（2 → 3）",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 72,
+        "baseline": 936,
+        "text": "教师查看备注时，公开端仅显示绘本与公开状态，不展示勾选对象或备注",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 72,
+        "baseline": 986,
+        "text": "回到游戏仍保留手动暂停与17秒 · 日志只接收可公开的已提交结果",
+        "fontSize": 24,
+        "weight": 400
+      }
+    ],
+    "revision": "round3"
+  },
+  {
+    "name": "seven_roles_multi_monsters",
+    "width": 1600,
+    "height": 1080,
+    "scale": 1,
+    "label": "密度检查｜7角色、3怪物、长名字、下轮资格",
+    "text": [
+      {
+        "x": 56,
+        "baseline": 74,
+        "text": "单位展开 / 7角色 + 3怪物",
+        "fontSize": 40,
+        "weight": 700
+      },
+      {
+        "x": 56,
+        "baseline": 116,
+        "text": "教师点击节点展开名单，完整身份与状态可读；公开端仅展示已揭示单位",
+        "fontSize": 24,
+        "weight": 400
+      },
+      {
+        "x": 152,
+        "baseline": 189,
+        "text": "晨曦森林守护者小队长安然",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 72,
+        "baseline": 265,
+        "text": "生命 9/12 · 护盾 4 · AP 3",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 72,
+        "baseline": 306,
+        "text": "蓝队 · 节点3 · 行动中",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 608.0,
+        "baseline": 208.96,
+        "text": "弓",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 656,
+        "baseline": 189,
+        "text": "AlexandriaWi",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 656,
+        "baseline": 221,
+        "text": "nterbrookJoy",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 576,
+        "baseline": 265,
+        "text": "生命 16/18 · 护盾 0 · AP 8",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 576,
+        "baseline": 306,
+        "text": "蓝队 · 节点2 · 奖励对象",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 1112.0,
+        "baseline": 208.96,
+        "text": "剑",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 1160,
+        "baseline": 189,
+        "text": "小禾",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 1080,
+        "baseline": 265,
+        "text": "生命 20/24 · 护盾 6 · AP 2",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1080,
+        "baseline": 306,
+        "text": "橙队 · 节点3 · 奖励对象",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 104.0,
+        "baseline": 428.96,
+        "text": "龙",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 152,
+        "baseline": 409,
+        "text": "星星",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 72,
+        "baseline": 485,
+        "text": "生命 26/32 · 护盾 6 · AP 3",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 72,
+        "baseline": 526,
+        "text": "橙队 · 节点3 · 普通",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 656,
+        "baseline": 409,
+        "text": "阿乐",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 576,
+        "baseline": 485,
+        "text": "生命 0/12 · 护盾 0 · AP 3",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 576,
+        "baseline": 526,
+        "text": "紫队 · 节点2 · 倒地",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 1112.0,
+        "baseline": 428.96,
+        "text": "弓",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 1160,
+        "baseline": 409,
+        "text": "小满",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 1080,
+        "baseline": 485,
+        "text": "生命 13/18 · 护盾 0 · AP 4",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1080,
+        "baseline": 526,
+        "text": "紫队 · 节点2 · 普通",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 104.0,
+        "baseline": 648.96,
+        "text": "龙",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 152,
+        "baseline": 629,
+        "text": "林老师",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 72,
+        "baseline": 705,
+        "text": "生命 32/32 · 护盾 0 · AP 3",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 72,
+        "baseline": 746,
+        "text": "蓝队 · 节点1 · 主持人",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 656,
+        "baseline": 629,
+        "text": "捣蛋史莱姆甲",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 576,
+        "baseline": 705,
+        "text": "生命 2/8 · 护盾 0 · AP 1",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 576,
+        "baseline": 746,
+        "text": "敌方 · 节点3 · 已揭示怪物",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 1160,
+        "baseline": 629,
+        "text": "捣蛋史莱姆乙",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 1080,
+        "baseline": 705,
+        "text": "生命 8/8 · 护盾 0 · AP 1",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 1080,
+        "baseline": 746,
+        "text": "敌方 · 节点3 · 已揭示怪物",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 104,
+        "baseline": 872,
+        "text": "狼",
+        "fontSize": 28,
+        "weight": 600
+      },
+      {
+        "x": 152,
+        "baseline": 849,
+        "text": "森林狼",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 72,
+        "baseline": 925,
+        "text": "生命 12/12 · 护盾 0 · AP 2",
+        "fontSize": 26,
+        "weight": 400
+      },
+      {
+        "x": 72,
+        "baseline": 966,
+        "text": "敌方 · 节点4 · 第2轮可行动",
+        "fontSize": 24,
+        "weight": 600
+      },
+      {
+        "x": 584,
+        "baseline": 892,
+        "text": "同职业可多人使用同一模板头像",
+        "fontSize": 26,
+        "weight": 600
+      },
+      {
+        "x": 584,
+        "baseline": 944,
+        "text": "未定稿职业 / 森林狼使用中性占位图",
+        "fontSize": 24,
+        "weight": 400
+      },
+      {
+        "x": 584,
+        "baseline": 998,
+        "text": "头像不包含姓名、资源数字或队伍标记",
+        "fontSize": 24,
+        "weight": 400
+      }
+    ],
+    "revision": "round3"
+  }
+]
