@@ -113,5 +113,5 @@
 - 完整ZIP：[classroom-b-static-assets-v1-20261012.zip](archives/classroom-b-static-assets-v1-20261012.zip)
 - 大小：29179151字节；SHA256：10f9304f522eb98819b3e6d7ff0bd29e0847ee3930135baccfb91c54eb7fa1ac
 - 文件：99；逐文件载荷：98，ZIP CRC与SHA通过。
-- 远端状态：等待新克隆回读；回执见archives/b-static-assets-v1-upload-receipt.json。
+- 远端状态：已从GitHub新克隆回读；ZIP SHA256/CRC、98个载荷SHA256与远端展开文件一致，回执见archives/b-static-assets-v1-upload-receipt.json。
 - 原App、GameCore、main和工作流不改，无IPA；系统原生/真机及逐图审美未验证。旧版本/ZIP/标签保留。
