@@ -125,5 +125,7 @@
 - 完整ZIP：[classroom-b-art-motion-v1-20261012.zip](archives/classroom-b-art-motion-v1-20261012.zip)
 - 大小：30131839字节；SHA256：a3adf24c5136e4db62796787df5d38ce2f0fc60f8df8a5c57296356e09e97e5e
 - 文件：139；逐文件载荷：138，ZIP CRC与SHA通过。
-- 远端状态：等待新克隆回读；回执见archives/b-art-motion-v1-upload-receipt.json。
+- 远端状态：已从GitHub新克隆回读；ZIP SHA256/CRC、138个载荷SHA256与远端展开文件一致，原静态/UI各轮存档不变。回执见archives/b-art-motion-v1-upload-receipt.json。
 - 原App、GameCore、main和工作流不改，无IPA；系统原生/真机及逐图审美未验证。旧版本/ZIP/标签保留。
+
+本动画完整批另含10实体6状态的基础变换参数、12套八帧透明贴图（96帧）、离线动画演示/检查与原生交接；不是骨骼/手绘逐帧肢体。新素材仍待最终审美，原生未验证。
