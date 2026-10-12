@@ -43,6 +43,16 @@
       "publicSafeZone": true
     },
     {
+      "name": "public_battle_b_16x9_monster_turn",
+      "PNGSize": [
+        1920,
+        1080
+      ],
+      "textInkWithinCanvas": true,
+      "noTextInkOverlap": true,
+      "publicSafeZone": true
+    },
+    {
       "name": "public_storybook_16x9",
       "PNGSize": [
         1920,
@@ -84,6 +94,16 @@
     },
     {
       "name": "public_battle_b_4x3_feedback",
+      "PNGSize": [
+        1440,
+        1080
+      ],
+      "textInkWithinCanvas": true,
+      "noTextInkOverlap": true,
+      "publicSafeZone": true
+    },
+    {
+      "name": "public_battle_b_4x3_monster_turn",
       "PNGSize": [
         1440,
         1080

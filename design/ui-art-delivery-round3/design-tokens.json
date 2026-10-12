@@ -1,6 +1,6 @@
 {
   "formatVersion": 1,
-  "status": "style-b-public-revision-awaiting-review",
+  "status": "style-b-battle-first-current-turn-awaiting-review",
   "reference": {
     "teacherWidthPt": 1366,
     "teacherHeightPt": 1024,
@@ -134,14 +134,19 @@
       "mapWidth": 760,
       "battleWidth": 944,
       "mapY": 138,
-      "mapHeight": 522,
-      "playerStripY": 684,
-      "playerStripHeight": 342,
+      "mapHeight": 622,
+      "playerStripY": 784,
+      "playerStripHeight": 80,
       "legendHeight": 0,
       "playerColumns": 7,
-      "queueStyle": "mixed-unit-portrait-progress-track",
+      "queueStyle": "mixed-unit-portrait-track",
       "queueAttachedToPlayers": true,
-      "headerHeight": 60
+      "headerHeight": 60,
+      "currentPlayerDetailY": 882,
+      "currentPlayerDetailHeight": 144,
+      "showSevenNameCards": false,
+      "showCurrentNameInHeader": true,
+      "showPlayerDetailsOnlyDuringPlayerTurn": true
     },
     "public4x3": {
       "width": 1440,
@@ -155,18 +160,23 @@
       "mapWidth": 596,
       "battleWidth": 676,
       "mapY": 138,
-      "mapHeight": 522,
-      "playerStripY": 684,
-      "playerStripHeight": 342,
+      "mapHeight": 622,
+      "playerStripY": 784,
+      "playerStripHeight": 80,
       "legendHeight": 0,
       "playerColumns": 7,
       "longNameColumnWidths": [
         222,
         222
       ],
-      "queueStyle": "mixed-unit-portrait-progress-track",
+      "queueStyle": "mixed-unit-portrait-track",
       "queueAttachedToPlayers": true,
-      "headerHeight": 60
+      "headerHeight": 60,
+      "currentPlayerDetailY": 882,
+      "currentPlayerDetailHeight": 144,
+      "showSevenNameCards": false,
+      "showCurrentNameInHeader": true,
+      "showPlayerDetailsOnlyDuringPlayerTurn": true
     }
   },
   "teamMarkers": {

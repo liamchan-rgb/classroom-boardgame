@@ -9,7 +9,7 @@ report={'scope':'static-design-only','version':'2026-10-12-round3','pages':[],
         'unverified':['native-materials','touch-efficiency','TV-distance','runtime-privacy','actual-PPTX','animations']}
 index=json.loads((ROOT/'sources/preview-index.json').read_text())
 metrics={p['name']:p for p in json.loads((ROOT/'sources/text-measurements.json').read_text())}
-assert len(index)==14
+assert len(index)==16
 players=json.loads((ROOT/'sources/demo-scenarios.json').read_text())['baseBattle']['players']
 assert len(players)==7 and sum(p['host'] for p in players)==1
 for p in index:
@@ -27,12 +27,18 @@ for p in index:
   assert dx<=1 or dy<=1,(name,'ink overlap',a['text'],b['text'])
  text=''.join(b['text'] for b in boxes)
  if public:
-  for player in players:assert player['name'] in text,(name,player['name'])
+  if 'storybook' in name:
+   for player in players:assert player['name'] in text,(name,player['name'])
+  elif name.startswith('public_battle_') and not name.endswith('_monster_turn'):
+   assert players[0]['name'] in text,(name,'current full name')
+   for other in players[1:]:assert other['name'] not in text,(name,'lower name should not be shown')
   assert '奖励对象' not in text and '备注' not in text and '史莱姆乙 · 同节点' not in text,name
   if 'storybook' in name:
    assert 'AP' not in text and '行动点' not in text,name
    assert ('保留17秒' in text)==name.endswith('_timer_enabled'),name
-  else:assert sum(bool(re.fullmatch(r'AP \d+',b['text'])) for b in boxes)==7,name
+  else:
+   count=sum(bool(re.fullmatch(r'AP \d+',b['text'])) for b in boxes)
+   assert count==(1 if name.startswith('public_battle_') and not name.endswith('_monster_turn') else 0),(name,count)
  report['pages'].append({'name':name,'PNGSize':im.size,'textInkWithinCanvas':True,'noTextInkOverlap':True,'publicSafeZone':True if public else None})
 
 # Hash all independent runtime assets and original generation/export files.
@@ -69,7 +75,7 @@ for p in index:
   assert svg.count('id="committed-feedback"')==(1 if p['name'].endswith('_feedback') else 0)
   text=''.join(b['text'] for b in metrics[p['name']]['inkBoxes'])
   assert '→' not in text and '最近一次结算' not in text and '已结算' not in text,p['name']
-  if p['name'].startswith('public_battle_'):
+  if p['name'].startswith('public_battle_') and not p['name'].endswith('_monster_turn'):
    for label in ['强击','喘息','简易防护']:assert label in text
 new_teacher=ROOT/'previews/teacher_battle_b.png'
 prev_teacher=ROOT.parent/'ui-art-delivery-round2/previews/teacher_battle_b.png'
@@ -80,4 +86,4 @@ report['teacherImageUnchanged']=True
 report['catalogSourceUnchanged']=True
 report['status']='passed' 
 (ROOT/'sources/validation-report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
-print('PASS: 14 PNGs, actual text ink, 5% public safety, full names, 7 AP / no AP, preserved artwork, contrast')
+print('PASS: 16 PNGs, actual text ink, 5% public safety, current full name / storybook seven names, current AP / no storybook AP, preserved artwork, contrast')

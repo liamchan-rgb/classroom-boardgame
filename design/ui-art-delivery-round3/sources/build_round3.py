@@ -59,14 +59,14 @@ def player_name(s,p,x,y,w,fs=28):
  s.lines(x,y,ls,fs,INK,fs+3,600)
  return len(ls)
 
-def queue_bar(s,x,y,w):
+def queue_bar(s,x,y,w,current_id=None):
  d=json.loads((ROOT/'sources/demo-scenarios.json').read_text())['baseBattle']
  units={u['id']:u for u in d['players']+d['monsters']}
  step=(w-112)/9;cy=y+41
  s.line(x+56,cy,x+w-56,cy,'#C4DAE6',8)
  s.add(f'<path d="M{x+w-38} {cy-7}L{x+w-28} {cy}L{x+w-38} {cy+7}Z" fill="#7C9CAA"/>')
  for i,uid in enumerate(d['queue']):
-  u=units[uid];xx=x+56+i*step;current=uid==d['currentUnitID'];monster=not u.get('player',False)
+  u=units[uid];xx=x+56+i*step;current=uid==(current_id or d['currentUnitID']);monster=not u.get('player',False)
   color=PRIMARY if current else '#B93838' if monster else TEAMS[u['team']][0]
   s.add(f'<g data-queue-unit="{uid}" data-current="{str(current).lower()}"><title>{ref.esc(u["name"])}</title>')
   s.circle(xx,cy,30,'#FFFFFF',color,4 if current else 2)
@@ -97,27 +97,29 @@ def queue_bar(s,x,y,w):
    s.line(xx+23,cy-29,xx+23,cy-23,ref.PURPLE,2);s.line(xx+23,cy-23,xx+28,cy-23,ref.PURPLE,2)
   s.add('</g>')
 
-def battle_cards(s,ps,x,y,totalw,compact):
- gap=0 if compact else 8
- widths=[222,222]+[(totalw-444)/5]*5 if compact else [(totalw-6*gap)/7]*7
- ch=342
- s.glass(x,y,totalw,ch);queue_bar(s,x+8,y+13,totalw-16)
- s.line(x+16,y+100,x+totalw-16,y+100,'#C9DDE7',1)
- py=y+118
- for i,p in enumerate(ps):
-  cw=widths[i];xx=x+sum(widths[:i])+i*gap
-  if p['current']:s.rect(xx+2,py-4,cw-4,216,'none',14,PRIMARY,3)
-  if i:s.line(xx-gap/2,py+8,xx-gap/2,py+204,'#C9DDE7',1)
-  team_marker(s,p['team'],xx+12,py+13,7)
-  s.t(xx+cw-8,py+23,f"AP {p['ap']}",26,ref.PURPLE,600,'end')
-  player_name(s,p,xx+8,py+56,cw-16,28)
-  status='主持人' if p['host'] else '倒地' if p['health']==0 else ''
-  if status:s.t(xx+8,py+98,status,24,ref.RED if p['health']==0 else PRIMARY,600)
-  ry=py+157
-  icon(s,'health',xx+8,ry-22);s.t(xx+40,ry,f"{p['health']}/{p['maximumHealth']}",26)
-  icon(s,'shield',xx+cw-59,ry-22);s.t(xx+cw-27,ry,str(p['shield']),26)
-  icon(s,'coin',xx+8,ry+18);s.t(xx+40,ry+40,str(p['coins']),26)
-  icon(s,'score',xx+cw-59,ry+18);s.t(xx+cw-27,ry+40,str(p['score']),26)
+def battle_cards(s,ps,x,y,totalw,compact,show_details=True,current_id=None):
+ s.glass(x,y,totalw,80);queue_bar(s,x+8,y-1,totalw-16,current_id)
+ if not show_details:return
+ # This is the currently acting player's compact panel, never seven name cards.
+ dy=y+98;s.glass(x,dy,totalw,144);p=ps[0]
+ s.t(x+20,dy+35,'冒险者',28,INK,600);team_marker(s,p['team'],x+152,dy+24,8)
+ labels=[f"生命 {p['health']}/{p['maximumHealth']}",f"盾 {p['shield']}",f"AP {p['ap']}",f"金币 {p['coins']}",f"积分 {p['score']}"]
+ for i,label in enumerate(labels):s.t(x+180+i*(totalw-210)/5,dy+35,label,26,ref.PURPLE if i==2 else INK)
+ catalog=json.loads((ROOT/'sources/reference_initial-content.json').read_text());skills={sk['id']:sk for sk in catalog['skills']}
+ d=json.loads((ROOT/'sources/demo-scenarios.json').read_text())['baseBattle'];remaining={a['id']:a.get('remainingUses') for a in d['actionButtons']}
+ cls=next(c for c in catalog['classes'] if c['id']==p['classID'])
+ gap=12;cw=(totalw-40-3*gap)/4;cy=dy+50
+ for i,sid in enumerate(cls['skills']):
+  sk=skills[sid];xx=x+20+i*(cw+gap);s.rect(xx,cy,cw,74,'#EEF7FC',12,'#CDDFEA',1)
+  s.t(xx+12,cy+29,sk['name'],28,PRIMARY,600);s.t(xx+cw-12,cy+29,f"{sk['cost']} AP",26,ref.PURPLE,600,'end')
+  ef=sk['effects'][0]
+  if ef['kind']=='damage':di=ef['dice'];label=f"射程{sk['range']} · {di['count']}D{di['sides']}+{di['flat']} · 余{remaining[sid]}次"
+  elif ef['kind']=='heal':label=f"自身 · 恢复{ef['amount']}生命 · 余{remaining[sid]}次"
+  else:label=f"自身 · 护盾{ef['amount']} · 余{remaining[sid]}次"
+  s.t(xx+12,cy+62,label,24)
+ xx=x+20+3*(cw+gap);s.rect(xx,cy,cw,74,'#F5FAFC',12,'#CDDFEA',1)
+ s.t(xx+12,cy+29,'道具',28,PRIMARY,600);s.t(xx+12,cy+62,'个人背包',24,MUTED)
+ # The review data has no inventory: no invented ownership or usable item counts.
 
 def node_map(s,x,y,w,h,public=True):
  s.rect(x,y,w,h,'#E4F1F6',16)
@@ -136,40 +138,22 @@ def node_map(s,x,y,w,h,public=True):
   s.badge(nx-width/2,ny-77,width,label,color,24)
  s.t(x+20,y+36,'当前地图',30,INK,600)
 
-def header(s,compact=False,battle=True):
- inset=72 if compact else 96;w=s.w-2*inset
- s.glass(inset,54,w,60)
+def header(s,compact=False,battle=True,monster_turn=False):
+ inset=72 if compact else 96;w=s.w-2*inset;s.glass(inset,54,w,60)
  s.t(inset+24,94,'PVE · 第1轮' if battle else '探索',30,INK,600)
  if battle:
-  s.t(inset+270,94,'行动中：晨曦森林守护者小队长安然',28,INK,600)
+  name='怪物行动：捣蛋史莱姆甲' if monster_turn else '行动中：晨曦森林守护者小队长安然'
+  s.t(inset+270,94,name,28,INK,600)
   s.t(s.w-inset-24,94,'已暂停 · 17秒',28,INK,600,'end')
 
 def battle_stage(s,x,y,w,h,compact):
  s.glass(x,y,w,h);s.t(x+22,y+40,'浅溪石桥 · 战斗',30,INK,600)
- stage_y=y+54;stage_h=132
- s.rect(x+18,stage_y,w-36,stage_h,'#E8F3F8',18)
- for f,which in [(.28,'hero'),(.75,'slime')]:
-  s.add(f'<ellipse cx="{x+w*f}" cy="{stage_y+stage_h-15}" rx="54" ry="8" fill="#B8D3DF" opacity=".45"/>')
-  ref.art(s,'b',which,x+w*f-82,stage_y-14,164,164)
-  s.t(x+w*f,stage_y+stage_h-1,'安然' if which=='hero' else '史莱姆甲',26,INK,600,'middle')
- title_y=stage_y+stage_h+32;s.t(x+22,title_y,'冒险者技能',28,INK,600)
- catalog=json.loads((ROOT/'sources/reference_initial-content.json').read_text())
- skills={sk['id']:sk for sk in catalog['skills']}
- cls=next(c for c in catalog['classes'] if c['id']=='adventurer')
- data=json.loads((ROOT/'sources/demo-scenarios.json').read_text())['baseBattle']
- remaining={a['id']:a.get('remainingUses') for a in data['actionButtons']}
- for i,sid in enumerate(cls['skills']):
-  sk=skills[sid];sy=title_y+16+i*92
-  s.rect(x+18,sy,w-36,84,'#F2F8FC',14,'#CFDFE8',1)
-  s.t(x+34,sy+31,sk['name'],28,PRIMARY,600)
-  s.t(x+w-34,sy+31,f"{sk['cost']} AP",26,ref.PURPLE,600,'end')
-  effect=sk['effects'][0]
-  if effect['kind']=='damage':
-   dice=effect['dice'];label=f"单敌 · 射程{sk['range']} · {dice['count']}D{dice['sides']}+{dice['flat']}"
-  elif effect['kind']=='heal':label=f"自身 · 恢复{effect['amount']}生命"
-  else:label=f"自身 · 护盾{effect['amount']}"
-  s.t(x+34,sy+66,label,26)
-  s.t(x+w-34,sy+66,f"剩余{remaining[sid]}/{sk['uses']}",24,MUTED,500,'end')
+ stage_y=y+62;stage_h=h-82;s.rect(x+18,stage_y,w-36,stage_h,'#E8F3F8',18)
+ size=290 if compact else 380;floor=stage_y+stage_h*.72
+ for f,which in [(.27,'hero'),(.74,'slime')]:
+  s.add(f'<ellipse cx="{x+w*f}" cy="{floor}" rx="{size*.30}" ry="14" fill="#B8D3DF" opacity=".45"/>')
+  ref.art(s,'b',which,x+w*f-size/2,floor-size*.86,size,size)
+ # Full-height stage remains available for later character animations.
 
 def transient(s,compact=False):
  # One composite message from the last committed result; neither rules nor random draws.
@@ -181,17 +165,18 @@ def transient(s,compact=False):
  s.t(x+48,281,'史莱姆甲 生命 −6',26,ref.RED,600)
  s.add('</g>')
 
-def public_battle(compact=False,expanded=True,feedback=False):
+def public_battle(compact=False,expanded=True,feedback=False,monster_turn=False):
  W=1440 if compact else 1920;inset=72 if compact else 96;total=W-2*inset
- s=S(W,1080);backdrop(s);header(s,compact,expanded)
- y=138;h=522;gap=24;mapw=(596 if compact else 760) if expanded else total
+ s=S(W,1080);backdrop(s);header(s,compact,expanded,monster_turn)
+ y=138;h=622;gap=24;mapw=(596 if compact else 760) if expanded else total
  s.glass(inset,y,mapw,h);node_map(s,inset+14,y+14,mapw-28,h-28)
  if expanded:battle_stage(s,inset+mapw+gap,y,total-mapw-gap,h,compact)
- battle_cards(s,ref.get_players(),inset,684,total,compact)
+ battle_cards(s,ref.get_players(),inset,784,total,compact,expanded and not monster_turn,"m_slime_a" if monster_turn else None)
  if feedback:transient(s,compact)
  name=f'public_battle_b_{"4x3" if compact else "16x9"}' if expanded else f'public_exploration_b_{"4x3" if compact else "16x9"}'
  if feedback:name+='_feedback'
- s.save(name,1,'公开战斗｜一次文字反馈中间帧' if feedback else '公开战斗｜完整技能/图形队列' if expanded else '公开探索｜战斗区收起（密度数据示意）')
+ if monster_turn:name+='_monster_turn'
+ s.save(name,1,'公开战斗｜一次文字反馈中间帧' if feedback else '公开战斗｜怪物回合、玩家详情收起' if monster_turn else '公开战斗｜当前玩家紧凑技能/道具/资源' if expanded else '公开探索｜战斗区与玩家详情收起（布局示意）')
 
 def storybook(compact=False,timer=False):
  W=1440 if compact else 1920; inset=72 if compact else 96; total=W-2*inset
@@ -232,7 +217,7 @@ def storybook(compact=False,timer=False):
 if __name__=='__main__':
  ref.teacher('b')
  for compact in [False,True]:
-  public_battle(compact);public_battle(compact,False);public_battle(compact,True,True)
+  public_battle(compact);public_battle(compact,False);public_battle(compact,True,True);public_battle(compact,True,False,True)
   storybook(compact);storybook(compact,True)
  ref.component_board();ref.result_board();ref.density_board()
  (ROOT/'sources/preview-index.json').write_text(json.dumps(ref.META,ensure_ascii=False,indent=2))

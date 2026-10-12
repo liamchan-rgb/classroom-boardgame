@@ -1,0 +1,23 @@
+{
+  "scope": "offline-review-demo-only",
+  "status": "passed",
+  "cases": [
+    {
+      "aspect": "16x9",
+      "played": 1,
+      "durationMs": 1300,
+      "opacity": 0,
+      "duplicateAgain": false
+    },
+    {
+      "aspect": "4x3",
+      "played": 1,
+      "durationMs": 1300,
+      "opacity": 0,
+      "duplicateAgain": false
+    }
+  ],
+  "appLifecycleVerified": false,
+  "fileURLTested": false,
+  "method": "Local HTML read into browser DOM; no network or App state"
+}
