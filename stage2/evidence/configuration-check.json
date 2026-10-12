@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-12",
+  "appVersion": "0.8",
+  "buildNumber": "8",
+  "displayName": "ClassroomProbe",
+  "bundleName": "ClassroomProbe",
+  "bundleIdentifier": "org.personal.classroom.stage0",
+  "appSourceFiles": 12,
+  "runner": "xcode-27",
+  "localCoreTests": {
+    "GameCore": 58,
+    "ProbeCore": 6,
+    "failures": 0
+  },
+  "nativeSyntax": "passed; not a device build",
+  "staticProjectWorkflow": "passed",
+  "designTokensBundled": "identical to design/design-tokens_v1.json",
+  "deviceBuild": "pending actual workflow"
+}

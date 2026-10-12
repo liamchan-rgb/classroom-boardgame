@@ -54,15 +54,15 @@ jobs:
           app_path='native/build/Build/Products/Release-iphoneos/ClassroomProbe.app'
           lipo -archs "$app_path/ClassroomProbe" | tee artifacts/architectures.txt
           test "$(lipo -archs "$app_path/ClassroomProbe")" = arm64
-          python3 native/tools/package_ipa.py "$app_path" artifacts/ClassroomStage1-unsigned.ipa
+          python3 native/tools/package_ipa.py "$app_path" artifacts/ClassroomStage2-unsigned.ipa
           cp native/安装与真机验收.md artifacts/
-          cp stage1/阶段1验收.md artifacts/
+          cp stage2/阶段2验收.md artifacts/
           printf '%s\n' "$GITHUB_SHA" > artifacts/source-commit.txt
       - name: Retain IPA and diagnostics briefly
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: ClassroomStage1-build
+          name: ClassroomStage2-build
           path: artifacts/
           retention-days: 3
           if-no-files-found: warn

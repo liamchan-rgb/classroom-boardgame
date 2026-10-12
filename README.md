@@ -2,12 +2,12 @@
 
 实施路线：**独立原生iPad App → GitHub Xcode27云端构建 → SideStore免费个人签名与续签**。纯自用，不使用TestFlight，不需要购买Apple Developer Program。
 
-教师已反馈v0.6各功能正常，并同意继续。当前进入**阶段1：规则计算、数据与完整操作结算**。原始两份文档在 `docs/`，保持不变；[实施计划](实施计划_v2.md)、[技术验证](技术验证.md)、[阶段1验收](stage1/阶段1验收.md)。完整PVE操作界面从阶段2接入。
+教师已反馈v0.6各功能正常，并同意继续。阶段1已完成，教师反馈v0.7正常。当前实施**阶段2：可操作的最小PVE完整流程 v0.8**。原始两份文档在 `docs/`，保持不变；[实施计划](实施计划_v2.md)、[技术验证](技术验证.md)、[阶段1验收](stage1/阶段1验收.md)。本阶段核对见 [阶段2验收](stage2/阶段2验收.md)。
 
 ## 当前交付
 
 - `native/ClassroomProbe.xcodeproj`：iPadOS27原生App工程。
-- `native/ClassroomProbe/`：教师控制台、电视公开场景、键盘、基础离线绘本、备份；v0.7新增规则示例与初始资料。
+- `native/ClassroomProbe/`：教师控制台、电视公开场景、键盘、基础离线绘本、备份；v0.7规则示例保留；v0.8新增PVE操作、小地图、怪物自动回合、资源编辑和本机恢复。
 - `native/Packages/GameCore/`：独立规则计算、4职业/19技能/18物品/2套装/6怪物的校验数据、原子结算、版本化存档、完整历史与可控随机。
 - `native/Packages/ProbeCore/`：PPTX离线解析及原阶段0核心。
 - `.github/workflows/build-native-ipa.yml`：手动构建，测试两个核心库，再生成待个人签名的IPA。
@@ -18,6 +18,14 @@
 v0.7：[成功构建](https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38231894206)、[构建产物](https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38231894206/artifacts/11738378519)（仓库账号登录后下载，保留至2026-10-15）。证据见 `stage1/evidence/cloud-build-result-v0.7.json`，编译源码提交 `26e0c62e76cda7430fce9ac20c33491a014891ee`。
 
 v0.6历史成功构建：[工作流38222596815](https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38222596815)，证据见 `native/evidence/cloud-build-result-v0.6.json`。阶段0教师反馈见 `stage1/evidence/stage0-teacher-feedback.json`。复杂PPTX母版、图表、组合及字体的完整兼容仍在阶段6处理。
+
+## 阶段2 v0.8
+
+主页面点“进入PVE课堂”。用五节点森林地图探索、开战，选择移动/普攻/技能/道具/救援；当前行动者和奖励对象分开。怪物按策略和技能优先级自动行动，暂停/绘本/编辑/记录时停止。可配置1—6学生及主持人；两个独立验证剧本展示玩家/魔龙D20自然20。
+
+配色和布局开始采用设计令牌；正式美术仍可由设计对话交付后替换。尚不提供商店、正式随机地图编辑、自定义键位和完整存档包。
+
+本地GameCore58项、ProbeCore6项通过；v0.8实际Xcode27构建与IPA证据在完成后记录到 `stage2/evidence/`。新界面真机核对仍待教师反馈。
 
 ## 开发检查
 

@@ -76,6 +76,7 @@ extension GameState {
         guard formatVersion == 1, !gameID.isEmpty, (1...7).contains(players.count),
               teamIDs.count == teams.count, remainingSeconds.isFinite, remainingSeconds >= 0,
               random.cursor >= 0, random.cursor <= random.scripted.count else { throw GameError("本局状态或计时、随机状态无效。") }
+        if let value = random.damageD20Override, !(1...20).contains(value) { throw GameError("验证骰值无效。") }
         for (key, unit) in units {
             let stats = try GameRules.attributes(unit, catalog: catalog)
             guard key == unit.id, !unit.id.isEmpty, !unit.name.isEmpty, nodeIDs.contains(unit.nodeID),
@@ -108,6 +109,9 @@ extension GameState {
             }
         }
         if let battle {
+            for (monster, target) in battle.monsterTargets ?? [:] {
+                guard units[monster]?.kind == .monster, units[target]?.kind == .player else { throw GameError("怪物选敌记录无效。") }
+            }
             let queue = Set(battle.queue)
             let expected: GamePhase = battle.kind == .pve ? .pve : battle.kind == .teamPvp ? .teamPvp : .freeForAll
             guard phase == expected, battle.round >= 1, queue.count == battle.queue.count,
@@ -132,7 +136,19 @@ public struct ResourceReward: Codable, Equatable {
         self.coins = coins; self.ap = ap; self.score = score; self.items = items
     }
 }
+public struct ResourcePatch: Codable, Equatable {
+    public var health: Int?
+    public var shield: Int?
+    public var ap: Int?
+    public var coins: Int?
+    public var score: Int?
+    public init(health: Int? = nil, shield: Int? = nil, ap: Int? = nil, coins: Int? = nil, score: Int? = nil) {
+        self.health = health; self.shield = shield; self.ap = ap; self.coins = coins; self.score = score
+    }
+}
 public enum GameCommand: Codable, Equatable {
+    case monsterStep
+    case editResources(unit: String, value: ResourcePatch)
     case startBattle(kind: BattleKind, monsters: [String])
     case move(actors: [String], path: [Int])
     case attack(actor: String, target: String)
@@ -167,7 +183,7 @@ public struct GameEvent: Codable, Equatable {
         self.kind = kind; self.actor = actor; self.target = target; self.amount = amount; self.detail = detail
     }
 }
-public struct OperationReceipt: Codable, Equatable {
+public struct OperationReceipt: Codable, Equatable, Identifiable {
     public var id: String
     public var sequence: Int
     public var command: GameCommand

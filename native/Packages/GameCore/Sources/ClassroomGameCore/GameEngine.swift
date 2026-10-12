@@ -52,8 +52,14 @@ public final class GameEngine {
     }
     public func setPause(_ reason: GamePause, enabled: Bool) throws {
         // View changes are metadata, not game actions. Pausing remains effective if saving fails.
-        if enabled { state.pauseReasons.insert(reason) } else { state.pauseReasons.remove(reason) }
-        try persist?(archive)
+        if enabled {
+            state.pauseReasons.insert(reason)
+            try persist?(archive)
+        } else {
+            var next = state; next.pauseReasons.remove(reason)
+            try persist?(GameArchive(catalog: catalog, state: next, history: history))
+            state = next
+        }
     }
     public func extendTime(by seconds: Double) throws {
         guard seconds.isFinite, seconds > 0, (state.remainingSeconds + seconds).isFinite else { throw GameError("延长时间无效。") }
@@ -71,7 +77,7 @@ public final class GameEngine {
     }
 }
 
-private struct Evaluation {
+struct Evaluation {
     var state: GameState
     let catalog: GameCatalog
     var dice: [DiceResult] = []
@@ -95,7 +101,13 @@ private struct Evaluation {
     mutating func roll(_ formula: DiceFormula, source: String) throws -> DiceResult {
         try formula.validate()
         var values: [Int] = []
-        for _ in 0..<formula.count { values.append(try state.random.next(upperBound: formula.sides)) }
+        for _ in 0..<formula.count {
+            if source == "damage", formula.sides == 20, let forced = state.random.damageD20Override {
+                guard (1...20).contains(forced) else { throw GameError("验证D20值必须在1…20。") }
+                values.append(forced); state.random.damageD20Override = nil
+                events.append(GameEvent("verificationRoll", amount: forced, detail: "伤害D20"))
+            } else { values.append(try state.random.next(upperBound: formula.sides)) }
+        }
         let total = try values.reduce(formula.flat) { try checkedAdd($0, $1) }
         let result = DiceResult(source: source, formula: formula, values: values, total: total,
                                 naturalTwenty: source == "damage" && formula.sides == 20 && values.contains(20))
@@ -110,6 +122,16 @@ private struct Evaluation {
 
     mutating func execute(_ command: GameCommand) throws {
         switch command {
+        case .monsterStep: try monsterStep()
+        case .editResources(let id, let patch):
+            if let health = patch.health { try setHealth(id, value: health, killer: nil) }
+            var edited = try unit(id)
+            if let shield = patch.shield { edited.shield = shield }
+            if let ap = patch.ap { edited.ap = ap }
+            if let coins = patch.coins { edited.coins = coins }
+            if let score = patch.score { edited.score = score }
+            state.units[id] = edited
+            events.append(GameEvent("teacherResources", target: id))
         case .startBattle(let kind, let monsters): try start(kind: kind, monsters: monsters)
         case .move(let actors, let path): try move(actors: actors, path: path)
         case .attack(let actor, let target): try attack(actor: actor, target: target)
@@ -216,17 +238,7 @@ private struct Evaluation {
     }
 
     mutating func move(actors: [String], path: [Int]) throws {
-        guard !actors.isEmpty, Set(actors).count == actors.count, path.count >= 2 else { throw GameError("请选择同行角色和连续路径。") }
-        if let battle = state.battle { guard actors == [battle.current ?? ""] else { throw GameError("战斗中仅当前角色可正常移动。") } }
-        let travelers = try actors.map(acting)
-        guard travelers.allSatisfy({ $0.nodeID == path[0] }) else { throw GameError("同行角色必须在同一出发节点。") }
-        for index in 1..<path.count { guard state.map.neighbors(path[index - 1]).contains(path[index]) else { throw GameError("路径存在不相邻节点。") } }
-        var stops = Array(path.dropFirst())
-        let triggersEncounters = travelers[0].kind == .player && (state.battle == nil || state.battle?.kind == .pve)
-        if triggersEncounters, let encounter = stops.firstIndex(where: { node in state.units.values.contains { $0.kind == .monster && $0.isAlive && !$0.active && $0.nodeID == node } }) {
-            stops = Array(stops.prefix(encounter + 1))
-        }
-        guard travelers.allSatisfy({ $0.ap >= stops.count }) else { throw GameError("有同行角色行动点不足，整组移动未执行。") }
+        let (travelers, stops, triggersEncounters) = try movementPlan(actors: actors, path: path)
         for id in actors { try spend(id, cost: stops.count) }
         for node in stops {
             for id in actors { state.units[id]?.nodeID = node }
@@ -247,11 +259,7 @@ private struct Evaluation {
     }
 
     mutating func attack(actor id: String, target targetID: String) throws {
-        guard state.battle != nil else { throw GameError("普通攻击仅在战斗中使用。") }
-        let actor = try acting(id), target = try unit(targetID), attack = try GameRules.attack(actor, catalog: catalog)
-        guard target.isAlive, GameRules.enemies(actor, target, in: state), actor.ap >= 1 else { throw GameError("攻击目标或行动点无效。") }
-        let stats = try GameRules.attributes(actor, catalog: catalog)
-        try inRange(actor, node: target.nodeID, range: checkedAdd(attack.range, stats.range))
+        let (_, target, attack, stats) = try attackPlan(actor: id, target: targetID)
         if target.kind == .monster && !target.active { try join(targetID) }
         try spend(id, cost: 1)
         let rolled = try roll(attack.dice, source: "damage")
@@ -279,22 +287,7 @@ private struct Evaluation {
         }
     }
     mutating func cast(actor id: String, skillID: String, target: ActionTarget?) throws {
-        let actor = try acting(id), skill = try catalog.skill(skillID)
-        guard try GameRules.skills(actor, catalog: catalog).contains(skillID), actor.ap >= skill.cost,
-              skill.uses.map({ (actor.skillUses[skillID] ?? 0) < $0 }) ?? true,
-              skill.stage == .both || (state.isBattle ? skill.stage == .battle : skill.stage == .exploration) else { throw GameError("技能阶段、次数或行动点不满足。") }
-        let selected = try targets(actor: actor, skill: skill, target: target)
-        let stats = try GameRules.attributes(actor, catalog: catalog)
-        for targetID in selected { try inRange(actor, node: unit(targetID).nodeID, range: checkedAdd(skill.range, stats.range)) }
-        if actor.kind == .monster {
-            switch skill.condition {
-            case .always: break
-            case .shieldEmpty: guard actor.shield == 0 else { throw GameError("怪物护盾尚未耗尽。") }
-            case .healthHalfOrLess: guard actor.health <= stats.maximumHealth / 2 else { throw GameError("怪物生命尚高于一半。") }
-            case .twoEnemiesAtNode: guard selected.count >= 2 else { throw GameError("群攻条件需要至少两名存活敌人。") }
-            }
-            if skill.oncePerTurn && state.battle?.onceSkillsThisTurn.contains(skillID) == true { throw GameError("同一怪物回合不重复施放自恢复技能。") }
-        }
+        let (actor, skill, selected, stats) = try castPlan(actor: id, skillID: skillID, target: target)
         for targetID in selected where state.units[targetID]?.kind == .monster && state.units[targetID]?.active == false { try join(targetID) }
         try spend(id, cost: skill.cost)
         state.units[id]?.skillUses[skillID, default: 0] += 1
@@ -360,10 +353,7 @@ private struct Evaluation {
     }
 
     mutating func useItem(actor id: String, itemID: String, target targetID: String) throws {
-        let actor = try acting(id), target = try unit(targetID), item = try catalog.item(itemID)
-        guard item.kind == .consumable, actor.ap >= 1, (actor.inventory[itemID] ?? 0) >= 1,
-              target.isAlive, GameRules.allies(actor, target, in: state) else { throw GameError("药水、背包或队友目标无效。") }
-        try inRange(actor, node: target.nodeID, range: item.range)
+        let item = try itemPlan(actor: id, itemID: itemID, target: targetID)
         try spend(id, cost: 1); try consume(id, itemID: itemID)
         try heal(targetID, amount: item.heal, actor: id); try shield(targetID, amount: item.shield, actor: id)
         state.remainingSeconds = catalog.rules.decisionSeconds
@@ -375,11 +365,7 @@ private struct Evaluation {
         state.units[id] = actor; events.append(GameEvent("item", actor: id, target: id, amount: -1, detail: itemID))
     }
     mutating func rescue(actor id: String, target targetID: String) throws {
-        let actor = try acting(id), target = try unit(targetID)
-        guard actor.kind == .player, target.kind == .player, !target.isAlive,
-              actor.nodeID == target.nodeID, GameRules.allies(actor, target, in: state),
-              actor.ap >= catalog.rules.rescueCost,
-              (actor.inventory[catalog.rules.revivalStone] ?? 0) > 0 else { throw GameError("救援需要同节点倒地队友、2行动点和个人复活石。") }
+        try rescuePlan(actor: id, target: targetID)
         try spend(id, cost: catalog.rules.rescueCost); try consume(id, itemID: catalog.rules.revivalStone)
         try revive(targetID)
         try addScore(id, amount: catalog.rules.rescueScore, source: "rescue", target: targetID)

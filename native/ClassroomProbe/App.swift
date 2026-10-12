@@ -14,6 +14,9 @@ struct ClassroomProbeApp: App {
                         TeacherSession.shared.display.ruleExample = nil
                         TeacherSession.shared.pause(.background, enabled: true)
                         TeacherSession.shared.concealNotes()
+                        if TeacherSession.shared.playOpen { TeacherSession.shared.pve.pause(.background, enabled: true) }
+                    } else if TeacherSession.shared.playOpen {
+                        TeacherSession.shared.pve.pause(.background, enabled: false)
                     }
                 }
         }
@@ -57,23 +60,43 @@ final class TeacherHostController: UIViewController {
     override func resignFirstResponder() -> Bool { heldKeys.removeAll(); return super.resignFirstResponder() }
     override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
         let session = TeacherSession.shared
-        guard !session.isEditingNotes, !session.rulesOpen else { heldKeys.removeAll(); super.pressesBegan(presses, with: event); return }
+        guard !session.isEditingNotes, !session.rulesOpen, !(session.playOpen && session.pve.modalOpen) else { heldKeys.removeAll(); super.pressesBegan(presses, with: event); return }
         var handled = false
         for press in presses {
             guard let key = press.key,
                   key.modifierFlags.intersection([.command, .control, .alternate]).isEmpty else { continue }
-            let code = key.charactersIgnoringModifiers.lowercased()
-            guard ["g", " "].contains(code) || (Int(code).map { (1...7).contains($0) } ?? false) else { continue }
+            let code: String
+            if session.playOpen && session.pve.bookOpen && key.keyCode == .keyboardLeftArrow { code = "book-left" }
+            else if session.playOpen && session.pve.bookOpen && key.keyCode == .keyboardRightArrow { code = "book-right" }
+            else if (UIKeyboardHIDUsage.keyboard1.rawValue...UIKeyboardHIDUsage.keyboard7.rawValue).contains(key.keyCode.rawValue) {
+                code = String(key.keyCode.rawValue - UIKeyboardHIDUsage.keyboard1.rawValue + 1)
+            } else { code = key.charactersIgnoringModifiers.lowercased() }
+            let playKeys = session.playOpen ? ["g", "a", "s", "e", " ", "book-left", "book-right"] : ["g", " "]
+            guard playKeys.contains(code) || (Int(code).map { (1...7).contains($0) } ?? false) else { continue }
             handled = true
             guard heldKeys.insert(code).inserted else { continue }
-            if code == "g" { session.award() }
+            if session.playOpen {
+                if code == "book-left" { session.turnPage(-1) }
+                else if code == "book-right" { session.turnPage(1) }
+                else { _ = session.pve.handleKey(code, shift: key.modifierFlags.contains(.shift)) }
+            }
+            else if code == "g" { session.award() }
             else if code == " " { session.togglePause() }
             else if let number = Int(code) { session.select(number) }
         }
         if !handled { super.pressesBegan(presses, with: event) }
     }
     override func pressesEnded(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
-        for press in presses { if let key = press.key { heldKeys.remove(key.charactersIgnoringModifiers.lowercased()) } }
+        for press in presses {
+            if let key = press.key {
+                heldKeys.remove(key.charactersIgnoringModifiers.lowercased())
+                if key.keyCode == .keyboardLeftArrow { heldKeys.remove("book-left") }
+                if key.keyCode == .keyboardRightArrow { heldKeys.remove("book-right") }
+                if (UIKeyboardHIDUsage.keyboard1.rawValue...UIKeyboardHIDUsage.keyboard7.rawValue).contains(key.keyCode.rawValue) {
+                    heldKeys.remove(String(key.keyCode.rawValue - UIKeyboardHIDUsage.keyboard1.rawValue + 1))
+                }
+            }
+        }
         super.pressesEnded(presses, with: event)
     }
     override func pressesCancelled(_ presses: Set<UIPress>, with event: UIPressesEvent?) {

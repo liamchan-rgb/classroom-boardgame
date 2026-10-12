@@ -8,6 +8,8 @@ final class PublicDisplayModel: ObservableObject {
     @Published var snapshot = ProbeState().publicSnapshot
     @Published var image: UIImage?
     @Published var ruleExample: PublicGameSnapshot?
+    @Published var playFrame: PublicPlayFrame?
+    @Published var playBook = false
 }
 
 @MainActor
@@ -22,6 +24,8 @@ final class TeacherSession: ObservableObject {
     @Published var showNotes = false
     private(set) var isEditingNotes = false
     private(set) var rulesOpen = false
+    private(set) var playOpen = false
+    lazy var pve = PVEAppSession(display: display)
     private var connectedIDs: Set<String> = []
     private var deck: ParsedDeck?
     private var pptxData: Data?
@@ -67,6 +71,18 @@ final class TeacherSession: ObservableObject {
         rulesOpen = true
         pause(.rules, enabled: true)
     }
+    func beginPlay() {
+        concealNotes()
+        display.ruleExample = nil
+        pause(.manual, enabled: true)
+        playOpen = true
+        pve.activate()
+    }
+    func endPlay() {
+        pve.deactivate()
+        playOpen = false
+        concealNotes()
+    }
     func endRules() {
         display.ruleExample = nil
         rulesOpen = false
@@ -75,7 +91,10 @@ final class TeacherSession: ObservableObject {
     func setConnection(id: String, connected: Bool) {
         if connected { connectedIDs.insert(id) } else { connectedIDs.remove(id) }
         connectionCount = connectedIDs.count
-        if connectedIDs.isEmpty { display.ruleExample = nil; concealNotes(); pause(.manual, enabled: true) }
+        if connectedIDs.isEmpty {
+            display.ruleExample = nil; concealNotes(); pause(.manual, enabled: true)
+            if playOpen { pve.pause(.manual, enabled: true) }
+        }
     }
     func setRegistrationStatus(_ text: String) { registrationStatus = text }
     func fileSelectionFailed(_ error: Error) { message = "选择文件失败：\(error.localizedDescription)" }

@@ -131,6 +131,7 @@ public struct BattleState: Codable, Equatable {
     public var acted: Set<String>
     public var current: String?
     public var initiatives: [Initiative]
+    public var monsterTargets: [String: String]? = nil
     public var onceSkillsThisTurn: Set<String>
     public init(kind: BattleKind, queue: [String], current: String? = nil, round: Int = 1, initiatives: [Initiative] = []) {
         self.kind = kind; self.queue = queue; self.current = current; self.round = round
@@ -149,6 +150,7 @@ public struct RandomState: Codable, Equatable {
     public var seed: UInt64
     public var scripted: [Int]
     public var cursor: Int
+    public var damageD20Override: Int? = nil
     public init(seed: UInt64 = 1, scripted: [Int] = []) { self.seed = seed; self.scripted = scripted; cursor = 0 }
     public mutating func next(upperBound: Int) throws -> Int {
         guard upperBound > 0, cursor >= 0, cursor <= scripted.count else { throw GameError("随机范围或游标无效。") }
@@ -172,6 +174,7 @@ public struct RandomState: Codable, Equatable {
 public struct GameState: Codable, Equatable {
     public var formatVersion: Int = 1
     public var gameID: String
+    public var verificationScenario: String? = nil
     public var phase: GamePhase
     public var units: [String: GameUnit]
     public var teams: [GameTeam]

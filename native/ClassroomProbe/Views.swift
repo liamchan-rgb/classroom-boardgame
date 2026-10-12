@@ -7,7 +7,9 @@ import ClassroomProbeCore
 struct PublicSurface: View {
     @ObservedObject var model: PublicDisplayModel
     var body: some View {
-        if let example = model.ruleExample {
+        if let frame = model.playFrame {
+            PVEPublicView(frame: frame, image: model.playBook ? model.image : nil, showingBook: model.playBook)
+        } else if let example = model.ruleExample {
             GameExamplePublicView(snapshot: example)
         } else {
         VStack(spacing: 16) {
@@ -53,17 +55,23 @@ struct TeacherConsole: View {
     @State private var exportingURL: URL?
     @State private var showExporter = false
     @State private var showRules = false
+    @State private var showPlay = false
     @FocusState private var notesFocused: Bool
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
-                    Label("教师端 · 阶段1 v0.7", systemImage: "book.closed.fill").font(.title2.bold())
+                    Label("教师端 · 阶段2 v0.8", systemImage: "book.closed.fill").font(.title2.bold())
                     Spacer()
                     Text("公开场景 \(session.connectionCount)").font(.headline)
                 }
                 Text(session.registrationStatus).foregroundStyle(.secondary)
                 Text(session.message).font(.callout)
+                Button("进入PVE课堂") {
+                    notesFocused = false
+                    session.beginPlay()
+                    showPlay = true
+                }.buttonStyle(.borderedProminent)
                 Button("规则示例与初始资料") {
                     notesFocused = false
                     session.beginRules()
@@ -144,6 +152,9 @@ struct TeacherConsole: View {
             }
             .sheet(isPresented: $showRules, onDismiss: { session.endRules() }) {
                 RulesLabView(session: session)
+            }
+            .fullScreenCover(isPresented: $showPlay, onDismiss: { session.endPlay() }) {
+                PVEPlayView(model: session.pve, teacher: session)
             }
     }
     private func openImporter() { notesFocused = false; session.pause(.filePicker, enabled: true); showImporter = true }

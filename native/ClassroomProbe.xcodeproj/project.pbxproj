@@ -56,6 +56,76 @@
 			"isa" = "PBXBuildFile";
 			"fileRef" = "1B718BC2F6E50CD44FCF14A5";
 		};
+		"C7B104AF595657B7FC620B62" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "PVEAppSession.swift";
+			"sourceTree" = "<group>";
+		};
+		"EF72657BBA2F83C34549BE3F" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "C7B104AF595657B7FC620B62";
+		};
+		"753E9B1832356A767E10F071" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "PVEStyle.swift";
+			"sourceTree" = "<group>";
+		};
+		"2070907CBE17BF0E408705B2" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "753E9B1832356A767E10F071";
+		};
+		"6E4F7F11D4407EC2135AE5E5" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "PVEMapView.swift";
+			"sourceTree" = "<group>";
+		};
+		"D4F0C8015D109FA2315E94A8" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "6E4F7F11D4407EC2135AE5E5";
+		};
+		"AF15B03012E392E5AFF61706" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "PVEPublicView.swift";
+			"sourceTree" = "<group>";
+		};
+		"C5314677CF5925C8E34B0528" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "AF15B03012E392E5AFF61706";
+		};
+		"6D05EA9CF3115E304EB5E6A4" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "PVEPlayView.swift";
+			"sourceTree" = "<group>";
+		};
+		"6F9981CF519EF3267506AD2A" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "6D05EA9CF3115E304EB5E6A4";
+		};
+		"8FCBDC717CA54A4D73F56A98" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "PVESheets.swift";
+			"sourceTree" = "<group>";
+		};
+		"18BEA6D452A0D5BF25AE1168" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "8FCBDC717CA54A4D73F56A98";
+		};
+		"B5421907CB9D8A66E9193821" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "PVEKeyboard.swift";
+			"sourceTree" = "<group>";
+		};
+		"47F8E596E5EE7C98D64D5460" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "B5421907CB9D8A66E9193821";
+		};
 		"06271BAF49532C879AA3C58B" = {
 			"isa" = "PBXFileReference";
 			"lastKnownFileType" = "text.plist.xml";
@@ -82,6 +152,16 @@
 			"isa" = "PBXBuildFile";
 			"fileRef" = "2BF35B3FB72A3D4E876979D6";
 		};
+		"54AE073B4791810725C73209" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "file";
+			"path" = "Resources/design-tokens.json";
+			"sourceTree" = "<group>";
+		};
+		"BB38697EEA1B34302C3C92D1" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "54AE073B4791810725C73209";
+		};
 		"A8792157CB4F27FB949C035F" = {
 			"isa" = "PBXFileReference";
 			"explicitFileType" = "wrapper.application";
@@ -97,9 +177,17 @@
 				"B1A3FE4A8FE761A756D23B4A",
 				"68721AB0B096F524A9B42608",
 				"1B718BC2F6E50CD44FCF14A5",
+				"C7B104AF595657B7FC620B62",
+				"753E9B1832356A767E10F071",
+				"6E4F7F11D4407EC2135AE5E5",
+				"AF15B03012E392E5AFF61706",
+				"6D05EA9CF3115E304EB5E6A4",
+				"8FCBDC717CA54A4D73F56A98",
+				"B5421907CB9D8A66E9193821",
 				"06271BAF49532C879AA3C58B",
 				"6BFC76380CC79F82566884C6",
 				"2BF35B3FB72A3D4E876979D6",
+				"54AE073B4791810725C73209",
 			);
 			"path" = "ClassroomProbe";
 			"sourceTree" = "<group>";
@@ -155,6 +243,13 @@
 				"3D37AAC1141D10B6E3121AE3",
 				"0D99D4DB6ACD79E97AF4824E",
 				"AC83F6BF172A14E66F5B4B70",
+				"EF72657BBA2F83C34549BE3F",
+				"2070907CBE17BF0E408705B2",
+				"D4F0C8015D109FA2315E94A8",
+				"C5314677CF5925C8E34B0528",
+				"6F9981CF519EF3267506AD2A",
+				"18BEA6D452A0D5BF25AE1168",
+				"47F8E596E5EE7C98D64D5460",
 			);
 			"runOnlyForDeploymentPostprocessing" = "0";
 		};
@@ -164,6 +259,7 @@
 			"files" = (
 				"4D846A8C621CBB1D64264EF4",
 				"A782B7B15BD1CF048DF4D43E",
+				"BB38697EEA1B34302C3C92D1",
 			);
 			"runOnlyForDeploymentPostprocessing" = "0";
 		};
@@ -213,8 +309,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				"CURRENT_PROJECT_VERSION" = "7";
-				"MARKETING_VERSION" = "0.7";
+				"CURRENT_PROJECT_VERSION" = "8";
+				"MARKETING_VERSION" = "0.8";
 			};
 		};
 		"07CA1E69F6068DEA30A4DA6B" = {
@@ -253,8 +349,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				"CURRENT_PROJECT_VERSION" = "7";
-				"MARKETING_VERSION" = "0.7";
+				"CURRENT_PROJECT_VERSION" = "8";
+				"MARKETING_VERSION" = "0.8";
 			};
 		};
 		"7ED5184A5487DF185E3420D0" = {
