@@ -44,4 +44,4 @@ swift test --package-path native/Packages/ProbeCore
 
 ## 逐步存档
 
-按教师要求，每个有新成果的交付都建立完整快照、校验清单和恢复说明，上传本项目私有GitHub Release长期保存。索引见 [archives/README.md](archives/README.md)，后续工作必须遵守 [AGENTS.md](AGENTS.md)。GitHub Actions的3天产物保留不作为长期备份。
+按教师要求，每个有新成果的交付都建立完整快照、校验清单和恢复说明，保存到本项目私有archive-assets专用分支或可用的私有Release，长期保留。索引见 [archives/README.md](archives/README.md)，后续工作必须遵守 [AGENTS.md](AGENTS.md)。GitHub Actions的3天产物保留不作为长期备份。

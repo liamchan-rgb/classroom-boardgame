@@ -134,10 +134,17 @@ Git bundle保存生成时的项目refs和历史；本存档提交包含归档规
     output.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="classroom-milestone-") as temporary:
         bundle = Path(temporary) / "git-history.bundle"
-        git(repo, "bundle", "create", str(bundle), "--all")
+        source_refs = [ref for ref in git(repo, "for-each-ref", "--format=%(refname)").splitlines()
+                       if ref.rsplit("/", 1)[-1] != "archive-assets"]
+        if not source_refs:
+            raise ValueError("No source refs are available to preserve.")
+        # An isolated binary-backup branch must never enter later source bundles.
+        git(repo, "bundle", "create", str(bundle), *source_refs)
         git(repo, "bundle", "verify", str(bundle))
         payload["git-history.bundle"] = bundle.read_bytes()
         refs = git(repo, "bundle", "list-heads", str(bundle)).splitlines()
+        if any(line.endswith("/archive-assets") for line in refs):
+            raise ValueError("Binary archive refs leaked into the source history bundle.")
     entries = [dict(path=name, bytes=len(data), sha256=digest(data)) for name, data in sorted(payload.items())]
     manifest = dict(formatVersion=1, milestone=args.milestone, createdAt=datetime.now(timezone.utc).isoformat(),
                     repository="https://github.com/liamchan-rgb/classroom-boardgame", sourceSnapshotCommit=snapshot,
