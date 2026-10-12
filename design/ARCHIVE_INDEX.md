@@ -87,3 +87,11 @@
 - 检查：字形边界/相交、5%安全区、当前全名、绘本七人全名/无AP、完整队列ID顺序、技能原JSON、教师图及独立素材哈希、ZIP CRC及逐文件SHA通过；两比例离线文字演示一次播放和同ID不重播通过。
 - 上传：已从GitHub新克隆，ZIP SHA256/CRC、全部80个载荷SHA256与远端文件一致；旧两轮ZIP和已通过教师图不变。回执见archives/round3-upload-receipt.json。
 - 未验证：系统玻璃、TV最远可读性、App公开技能/一次提示/全局明细、实际PPTX、人物动画。只改design，无IPA，旧版本/ZIP/标签/main不改。
+
+## 第三轮审核进度04 · 2026-10-12
+
+- 公开16:9战斗布局通过，4:3等其他第三轮稿待审；不扩大为原生/真机通过。
+- 记录：[round3-review04_public16x9-approved_20261012.md](reviews/round3-review04_public16x9-approved_20261012.md)
+- 标签：archive-design-ui-art-round3-review04-20261012
+- ZIP：[classroom-ui-art-round3-review04-20261012.zip](archives/classroom-ui-art-round3-review04-20261012.zip)；SHA256：f48d95b1fad5e1dbf71addbcb9d2540ce0b446bcf1b92b0d032c812a63f7b778
+- 本次不修改图片、App、GameCore、main或工作流。
