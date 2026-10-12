@@ -115,3 +115,15 @@
 - 文件：99；逐文件载荷：98，ZIP CRC与SHA通过。
 - 远端状态：已从GitHub新克隆回读；ZIP SHA256/CRC、98个载荷SHA256与远端展开文件一致，回执见archives/b-static-assets-v1-upload-receipt.json。
 - 原App、GameCore、main和工作流不改，无IPA；系统原生/真机及逐图审美未验证。旧版本/ZIP/标签保留。
+
+## B美术制作批次 b-art-motion-v1 · 2026-10-12
+
+- 目录：[art-production-b-v1/README.md](art-production-b-v1/README.md)
+- 静态实体：4职业、6怪物、18物品，2张沿用原B样稿、26张新增标准导出；新稿待最终审美确认。
+- 快照：bc2049fb579ef488470a8a2a75a0c078eb492c22
+- 标签：archive-design-b-art-motion-v1-20261012
+- 完整ZIP：[classroom-b-art-motion-v1-20261012.zip](archives/classroom-b-art-motion-v1-20261012.zip)
+- 大小：30131839字节；SHA256：a3adf24c5136e4db62796787df5d38ce2f0fc60f8df8a5c57296356e09e97e5e
+- 文件：139；逐文件载荷：138，ZIP CRC与SHA通过。
+- 远端状态：等待新克隆回读；回执见archives/b-art-motion-v1-upload-receipt.json。
+- 原App、GameCore、main和工作流不改，无IPA；系统原生/真机及逐图审美未验证。旧版本/ZIP/标签保留。
