@@ -85,5 +85,5 @@
 - 大小：34520140字节；SHA256：356f5933e82358de9cd446749ccdc8b88a5a328ceaa3b29a2914cfc6224febef
 - 文件：81；载荷：80；预览：16张。
 - 检查：字形边界/相交、5%安全区、当前全名、绘本七人全名/无AP、完整队列ID顺序、技能原JSON、教师图及独立素材哈希、ZIP CRC及逐文件SHA通过；两比例离线文字演示一次播放和同ID不重播通过。
-- 上传：待远端回读完成，结果见archives/round3-upload-receipt.json。
+- 上传：已从GitHub新克隆，ZIP SHA256/CRC、全部80个载荷SHA256与远端文件一致；旧两轮ZIP和已通过教师图不变。回执见archives/round3-upload-receipt.json。
 - 未验证：系统玻璃、TV最远可读性、App公开技能/一次提示/全局明细、实际PPTX、人物动画。只改design，无IPA，旧版本/ZIP/标签/main不改。
