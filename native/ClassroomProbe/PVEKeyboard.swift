@@ -12,8 +12,11 @@ struct PVEKeyboardReceiver:UIViewControllerRepresentable {
     }
     func updateUIViewController(_ controller:PVEKeyboardController,context:Context) {
         controller.model = model; controller.teacher = teacher
-        if !model.modalOpen && !teacher.isEditingNotes { controller.becomeFirstResponder() }
-        else if controller.isFirstResponder { controller.resignFirstResponder() }
+        if model.modalOpen || teacher.isEditingNotes {
+            if controller.isFirstResponder { _ = controller.resignFirstResponder() }
+        } else if !controller.isFirstResponder && UIApplication.shared.applicationState == .active {
+            _ = controller.becomeFirstResponder()
+        }
     }
 }
 @MainActor
@@ -23,6 +26,12 @@ final class PVEKeyboardController:UIViewController {
     private var held:Set<Int> = []
     override var canBecomeFirstResponder:Bool { true }
     override func loadView() { view = UIView(); view.isUserInteractionEnabled = false }
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        NotificationCenter.default.addObserver(self,selector:#selector(clearHeldKeys),name:UIApplication.willResignActiveNotification,object:nil)
+    }
+    deinit { NotificationCenter.default.removeObserver(self) }
+    @objc private func clearHeldKeys() { held.removeAll() }
     override func viewDidAppear(_ animated:Bool) { super.viewDidAppear(animated); becomeFirstResponder() }
     override func resignFirstResponder() -> Bool { held.removeAll(); return super.resignFirstResponder() }
     override func pressesBegan(_ presses:Set<UIPress>,with event:UIPressesEvent?) {
