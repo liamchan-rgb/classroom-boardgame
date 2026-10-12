@@ -1,0 +1,25 @@
+{
+  "format_version": 1,
+  "source_name": "阶段0_测试绘本.pptx",
+  "slide_size_emu": {
+    "cx": "12191695",
+    "cy": "6858000"
+  },
+  "pages": [
+    {
+      "number": 1,
+      "part": "ppt/slides/slide3.xml",
+      "texts": "图文测试页\nWelcome to the forest!\nLook, think and answer."
+    },
+    {
+      "number": 2,
+      "part": "ppt/slides/slide1.xml",
+      "texts": "空备注测试页\nWhat color is it?\nA. Green   B. Red"
+    },
+    {
+      "number": 3,
+      "part": "ppt/slides/slide2.xml",
+      "texts": "长备注测试页\nTell a short story about the forest."
+    }
+  ]
+}

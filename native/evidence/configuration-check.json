@@ -1,0 +1,21 @@
+{
+  "xcodeProjectSyntax": "passed (OpenStep parser)",
+  "projectObjectReferences": "passed",
+  "sourceAndResourcePaths": "passed",
+  "schemeTarget": "passed",
+  "infoPlist": "passed",
+  "workflowManualOnly": "passed",
+  "workflowShellSyntax": "passed",
+  "runner": "xcode-27",
+  "iosSDKRequired": "27",
+  "iosAppCompiled": false,
+  "deviceTested": false,
+  "coreCompiler": "Swift 6.4, Linux x86_64",
+  "workspaceXML": "passed",
+  "dependencyVersion": "ZIPFoundation 0.9.20",
+  "dependencyRevision": "22787ffb59de99e5dc1fbfe80b19c97a904ad48d",
+  "swiftFrontendSyntax": "passed; UIKit not type-checked",
+  "coreTests": "6 passed, 0 failures",
+  "githubAuthentication": "unavailable (HTTP 401)",
+  "cloudBuildRun": false
+}

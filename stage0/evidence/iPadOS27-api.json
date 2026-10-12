@@ -1,0 +1,355 @@
+[
+  {
+    "title": "UISceneAccessory",
+    "url": "https://developer.apple.com/documentation/uikit/uisceneaccessory",
+    "platforms": [
+      {
+        "beta": false,
+        "deprecated": false,
+        "introducedAt": "27.0",
+        "name": "iOS",
+        "unavailable": false
+      },
+      {
+        "beta": false,
+        "deprecated": false,
+        "introducedAt": "27.0",
+        "name": "iPadOS",
+        "unavailable": false
+      },
+      {
+        "beta": false,
+        "deprecated": false,
+        "introducedAt": "27.0",
+        "name": "Mac Catalyst",
+        "unavailable": false
+      }
+    ],
+    "declarations": [
+      {
+        "languages": [
+          "swift"
+        ],
+        "declaration": "@MainActor class UISceneAccessory"
+      }
+    ],
+    "objc_variant": [
+      {
+        "op": "replace",
+        "path": "/primaryContentSections/0",
+        "value": {
+          "declarations": [
+            {
+              "languages": [
+                "occ"
+              ],
+              "platforms": [
+                "iOS",
+                "iPadOS",
+                "Mac Catalyst",
+                "tvOS",
+                "visionOS",
+                "watchOS"
+              ],
+              "tokens": [
+                {
+                  "kind": "keyword",
+                  "text": "@interface"
+                },
+                {
+                  "kind": "text",
+                  "text": " "
+                },
+                {
+                  "kind": "identifier",
+                  "text": "UISceneAccessory"
+                },
+                {
+                  "kind": "text",
+                  "text": " : "
+                },
+                {
+                  "identifier": "doc://com.apple.documentation/documentation/ObjectiveC/NSObject-swift.class",
+                  "kind": "typeIdentifier",
+                  "preciseIdentifier": "c:objc(cs)NSObject",
+                  "text": "NSObject"
+                }
+              ]
+            }
+          ],
+          "kind": "declarations"
+        }
+      }
+    ]
+  },
+  {
+    "title": "registerSceneAccessory(_:)",
+    "url": "https://developer.apple.com/documentation/uikit/uiviewcontroller/registersceneaccessory(_:)",
+    "platforms": [
+      {
+        "beta": false,
+        "deprecated": false,
+        "introducedAt": "27.0",
+        "name": "iOS",
+        "unavailable": false
+      },
+      {
+        "beta": false,
+        "deprecated": false,
+        "introducedAt": "27.0",
+        "name": "iPadOS",
+        "unavailable": false
+      },
+      {
+        "beta": false,
+        "deprecated": false,
+        "introducedAt": "27.0",
+        "name": "Mac Catalyst",
+        "unavailable": false
+      }
+    ],
+    "declarations": [
+      {
+        "languages": [
+          "swift"
+        ],
+        "declaration": "func registerSceneAccessory(_ accessory: UISceneAccessory) -> UISceneAccessoryRegistration"
+      }
+    ],
+    "objc_variant": [
+      {
+        "op": "replace",
+        "path": "/primaryContentSections/0",
+        "value": {
+          "declarations": [
+            {
+              "languages": [
+                "occ"
+              ],
+              "platforms": [
+                "iOS",
+                "iPadOS",
+                "Mac Catalyst",
+                "tvOS",
+                "visionOS",
+                "watchOS"
+              ],
+              "tokens": [
+                {
+                  "kind": "text",
+                  "text": "- ("
+                },
+                {
+                  "identifier": "doc://com.apple.uikit/documentation/UIKit/UISceneAccessoryRegistration",
+                  "kind": "typeIdentifier",
+                  "preciseIdentifier": "c:objc(cs)UISceneAccessoryRegistration",
+                  "text": "UISceneAccessoryRegistration"
+                },
+                {
+                  "kind": "text",
+                  "text": " *) "
+                },
+                {
+                  "kind": "identifier",
+                  "text": "registerSceneAccessory:"
+                },
+                {
+                  "kind": "text",
+                  "text": "("
+                },
+                {
+                  "identifier": "doc://com.apple.uikit/documentation/UIKit/UISceneAccessory",
+                  "kind": "typeIdentifier",
+                  "preciseIdentifier": "c:objc(cs)UISceneAccessory",
+                  "text": "UISceneAccessory"
+                },
+                {
+                  "kind": "text",
+                  "text": " *) "
+                },
+                {
+                  "kind": "internalParam",
+                  "text": "accessory"
+                },
+                {
+                  "kind": "text",
+                  "text": ";"
+                }
+              ]
+            }
+          ],
+          "kind": "declarations"
+        }
+      },
+      {
+        "op": "replace",
+        "path": "/primaryContentSections/1",
+        "value": {
+          "kind": "parameters",
+          "parameters": [
+            {
+              "content": [
+                {
+                  "inlineContent": [
+                    {
+                      "text": "A configuration which defines system functionality necessary to present the scene accessory.",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "paragraph"
+                }
+              ],
+              "name": "accessory"
+            }
+          ]
+        }
+      },
+      {
+        "op": "replace",
+        "path": "/primaryContentSections/2",
+        "value": {
+          "content": [
+            {
+              "anchor": "return-value",
+              "level": 2,
+              "text": "Return Value",
+              "type": "heading"
+            },
+            {
+              "inlineContent": [
+                {
+                  "text": "A registration object which can be used to monitor changes for the scene accessory or unregister it.",
+                  "type": "text"
+                }
+              ],
+              "type": "paragraph"
+            }
+          ],
+          "kind": "content"
+        }
+      }
+    ]
+  },
+  {
+    "title": "externalNonInteractive(sceneConfiguration:)",
+    "url": "https://developer.apple.com/documentation/uikit/uisceneaccessory/externalnoninteractive(sceneconfiguration:)",
+    "platforms": [
+      {
+        "beta": false,
+        "deprecated": false,
+        "introducedAt": "27.0",
+        "name": "iOS",
+        "unavailable": false
+      },
+      {
+        "beta": false,
+        "deprecated": false,
+        "introducedAt": "27.0",
+        "name": "iPadOS",
+        "unavailable": false
+      },
+      {
+        "beta": false,
+        "deprecated": false,
+        "introducedAt": "27.0",
+        "name": "Mac Catalyst",
+        "unavailable": false
+      }
+    ],
+    "declarations": [
+      {
+        "languages": [
+          "swift"
+        ],
+        "declaration": "class func externalNonInteractive(sceneConfiguration: UISceneConfiguration) -> Self"
+      }
+    ],
+    "objc_variant": [
+      {
+        "op": "replace",
+        "path": "/primaryContentSections/0",
+        "value": {
+          "declarations": [
+            {
+              "languages": [
+                "occ"
+              ],
+              "platforms": [
+                "iOS",
+                "iPadOS",
+                "Mac Catalyst",
+                "tvOS",
+                "visionOS",
+                "watchOS"
+              ],
+              "tokens": [
+                {
+                  "kind": "text",
+                  "text": "+ ("
+                },
+                {
+                  "kind": "keyword",
+                  "text": "instancetype"
+                },
+                {
+                  "kind": "text",
+                  "text": ") "
+                },
+                {
+                  "kind": "identifier",
+                  "text": "externalNonInteractiveSceneAccessoryWithConfiguration:"
+                },
+                {
+                  "kind": "text",
+                  "text": "("
+                },
+                {
+                  "identifier": "doc://com.apple.uikit/documentation/UIKit/UISceneConfiguration",
+                  "kind": "typeIdentifier",
+                  "preciseIdentifier": "c:objc(cs)UISceneConfiguration",
+                  "text": "UISceneConfiguration"
+                },
+                {
+                  "kind": "text",
+                  "text": " *) "
+                },
+                {
+                  "kind": "internalParam",
+                  "text": "sceneConfiguration"
+                },
+                {
+                  "kind": "text",
+                  "text": ";"
+                }
+              ]
+            }
+          ],
+          "kind": "declarations"
+        }
+      },
+      {
+        "op": "replace",
+        "path": "/primaryContentSections/1",
+        "value": {
+          "kind": "parameters",
+          "parameters": [
+            {
+              "content": [
+                {
+                  "inlineContent": [
+                    {
+                      "text": "A scene configuration value with delegate type defined for it.",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "paragraph"
+                }
+              ],
+              "name": "sceneConfiguration"
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

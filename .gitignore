@@ -1,0 +1,20 @@
+# Build and editor state
+**/.build/
+native/build/
+artifacts/
+**/xcuserdata/
+**/*.xcuserstate
+**/__pycache__/
+*.pyc
+.DS_Store
+
+# Personal signing material must remain outside this repository
+*.p12
+*.p8
+*.mobileprovision
+*.pem
+*.ipa
+*.pairing
+*.mobiledevicepairing
+.env
+.env.*

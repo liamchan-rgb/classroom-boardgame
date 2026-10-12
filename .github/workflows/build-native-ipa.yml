@@ -1,0 +1,66 @@
+name: Build personal iPad probe
+
+# Manual runs only. No Apple credentials, provisioning profiles or paid runners.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: classroom-native-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: xcode-27
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Confirm iOS 27 SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          xcodebuild -version | tee artifacts/xcode-version.txt
+          xcodebuild -showsdks | tee artifacts/xcode-sdks.txt
+          sdk_version="$(xcrun --sdk iphoneos --show-sdk-version)"
+          case "$sdk_version" in
+            27.*) ;;
+            *) echo "iOS 27 SDK is required; found $sdk_version"; exit 1 ;;
+          esac
+      - name: Test offline core
+        shell: bash
+        run: |
+          set -euo pipefail
+          swift test --package-path native/Packages/ProbeCore 2>&1 | tee artifacts/core-tests.log
+      - name: Build unsigned iPad app
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild -resolvePackageDependencies \
+            -project native/ClassroomProbe.xcodeproj -scheme ClassroomProbe \
+            2>&1 | tee artifacts/dependencies.log
+          xcodebuild -project native/ClassroomProbe.xcodeproj -scheme ClassroomProbe \
+            -configuration Release -destination 'generic/platform=iOS' \
+            -derivedDataPath native/build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO build \
+            2>&1 | tee artifacts/xcode-build.log
+      - name: Package for free personal signing
+        shell: bash
+        run: |
+          set -euo pipefail
+          app_path='native/build/Build/Products/Release-iphoneos/ClassroomProbe.app'
+          lipo -archs "$app_path/ClassroomProbe" | tee artifacts/architectures.txt
+          test "$(lipo -archs "$app_path/ClassroomProbe")" = arm64
+          python3 native/tools/package_ipa.py "$app_path" artifacts/ClassroomStage0-unsigned.ipa
+          cp native/安装与真机验收.md artifacts/
+          printf '%s\n' "$GITHUB_SHA" > artifacts/source-commit.txt
+      - name: Retain IPA and diagnostics briefly
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ClassroomStage0-build
+          path: artifacts/
+          retention-days: 3
+          if-no-files-found: warn

@@ -1,0 +1,41 @@
+日期：2026-10-12
+环境：Linux，Python 3.12.14，python-pptx 1.0.2
+
+命令：python -m unittest discover -s stage0/tests -v
+结果：8 tests，OK
+覆盖：
+  actual_order_notes_relationship_empty_long_and_footer
+  broken_notes_is_failure_not_empty_success
+  dtd_is_rejected
+  existing_evidence_is_not_overwritten
+  inspection_works_when_network_access_is_blocked
+  invalid_package_leaves_existing_output_unchanged
+  missing_page_is_reported_in_place_not_silently_dropped
+  unsafe_relationship_is_rejected
+
+合成PPTX端到端核对：
+  页数：3
+  顺序：图文测试页、空备注测试页、长备注测试页
+  备注字符数：34、0、3200；逐字核对源字符串通过
+  图文页图片对象：1
+  公开输出不含私有测试标记：通过
+  页面渲染：not_implemented
+  AC35：not_passed
+
+iPad源码静态检查：
+  plist教师／非交互外屏角色：有效
+  公开控制器不引用私有备注字段：通过
+  源码无网络调用：通过
+  Swift编译：未执行
+  iPad真机、接收器、离线导入实际PPTX：未执行
+
+v0.2追加核对：
+  已确认设备：2021款12.9英寸iPad Pro，iPadOS27，电视无线镜像
+  用户授权自制PPTX，不要求上传课堂大文件
+  自制PPTX：37544字节，3页；图文、空备注、长备注
+  新版页序与备注34／0／3200字符：逐字核对通过
+  公开输出不含私有测试标记：通过
+  iPadOS27运行时桥接方法名：与Apple官方Objective-C声明一致
+  相关API官方introducedAt：27.0
+  新版Swift编译与真机注册：未执行
+  当前产品不做Windows/Linux兼容性；开发脚本不构成用户端依赖

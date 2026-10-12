@@ -1,0 +1,9 @@
+{
+  "version": "0.3",
+  "button_actions": 10,
+  "action_references_match_declarations": true,
+  "conflicting_next_export_method_names_removed": true,
+  "layout_enum_types_explicit": true,
+  "swift_compilation": "not_run_in_development_environment",
+  "iPad_build_result": "pending_retest"
+}

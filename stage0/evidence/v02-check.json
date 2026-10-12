@@ -1,0 +1,19 @@
+{
+  "sample_name": "阶段0_测试绘本.pptx",
+  "pages": 3,
+  "page_order": [
+    "图文测试页",
+    "空备注测试页",
+    "长备注测试页"
+  ],
+  "notes_lengths": [
+    34,
+    0,
+    3200
+  ],
+  "public_notes_isolated": true,
+  "bridge_selectors_match_official_declarations": true,
+  "swift_compilation": "not_run",
+  "device_validation": "pending",
+  "rendering": "not_implemented"
+}

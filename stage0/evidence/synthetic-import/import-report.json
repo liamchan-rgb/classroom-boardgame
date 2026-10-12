@@ -1,0 +1,132 @@
+{
+  "format_version": 1,
+  "tool": "stage0-pptx-inspector",
+  "checked_at": "2026-10-12T02:31:51.055924+00:00",
+  "source_name": "合成测试绘本.pptx",
+  "source_sha256": "4bda60b7c2e9db6a7c035e2516935ae52d21488b770001379221fc0cef61728a",
+  "elapsed_seconds": 0.0057,
+  "network_requests": 0,
+  "page_count": 3,
+  "pages": [
+    {
+      "number": 1,
+      "structure_status": "parsed",
+      "render_status": "not_implemented",
+      "issues": [
+        "尚未渲染；文字／图片位置、样式、字体和视觉一致性未验证。"
+      ],
+      "part": "ppt/slides/slide3.xml",
+      "objects": {
+        "sp": 1,
+        "pic": 1,
+        "graphicFrame": 0,
+        "grpSp": 0,
+        "tbl": 0,
+        "chart": 0,
+        "oleObj": 0,
+        "videoFile": 0,
+        "audioFile": 0,
+        "timing": 0
+      },
+      "notes_part": "ppt/notesSlides/notesSlide2.xml",
+      "notes_characters": 34,
+      "external_relationships": 0
+    },
+    {
+      "number": 2,
+      "structure_status": "parsed",
+      "render_status": "not_implemented",
+      "issues": [
+        "尚未渲染；文字／图片位置、样式、字体和视觉一致性未验证。"
+      ],
+      "part": "ppt/slides/slide1.xml",
+      "objects": {
+        "sp": 1,
+        "pic": 0,
+        "graphicFrame": 0,
+        "grpSp": 0,
+        "tbl": 0,
+        "chart": 0,
+        "oleObj": 0,
+        "videoFile": 0,
+        "audioFile": 0,
+        "timing": 0
+      },
+      "notes_characters": 0,
+      "external_relationships": 0
+    },
+    {
+      "number": 3,
+      "structure_status": "parsed",
+      "render_status": "not_implemented",
+      "issues": [
+        "尚未渲染；文字／图片位置、样式、字体和视觉一致性未验证。"
+      ],
+      "part": "ppt/slides/slide2.xml",
+      "objects": {
+        "sp": 1,
+        "pic": 0,
+        "graphicFrame": 0,
+        "grpSp": 0,
+        "tbl": 0,
+        "chart": 0,
+        "oleObj": 0,
+        "videoFile": 0,
+        "audioFile": 0,
+        "timing": 0
+      },
+      "notes_part": "ppt/notesSlides/notesSlide1.xml",
+      "notes_characters": 3200,
+      "external_relationships": 0
+    }
+  ],
+  "declared_fonts": [
+    "+mj-cs",
+    "+mj-ea",
+    "+mj-lt",
+    "+mn-cs",
+    "+mn-ea",
+    "+mn-lt",
+    "Angsana New",
+    "Arial",
+    "Calibri",
+    "Cordia New",
+    "DaunPenh",
+    "DokChampa",
+    "Estrangelo Edessa",
+    "Euphemia",
+    "Gautami",
+    "Iskoola Pota",
+    "Kalinga",
+    "Kartika",
+    "Latha",
+    "MV Boli",
+    "Mangal",
+    "Microsoft Himalaya",
+    "Microsoft Uighur",
+    "Microsoft Yi Baiti",
+    "Mongolian Baiti",
+    "MoolBoran",
+    "Nyala",
+    "Plantagenet Cherokee",
+    "Raavi",
+    "Shruti",
+    "Sylfaen",
+    "Times New Roman",
+    "Tunga",
+    "Vrinda",
+    "宋体",
+    "新細明體",
+    "맑은 고딕",
+    "ＭＳ Ｐゴシック"
+  ],
+  "font_scan_errors": [],
+  "iPad_font_availability": "not_tested",
+  "rendering": "not_implemented",
+  "AC35": "not_passed",
+  "device": "Python host, not iPad",
+  "limitations": [
+    "仅验证包结构、页序、文字和备注读取，不是静态页渲染器。",
+    "没有在教师 iPad 上执行；真实 PPTX 与真机仍需验证。"
+  ]
+}

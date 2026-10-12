@@ -1,0 +1,17 @@
+{
+  "synthetic_fixture_pages": 3,
+  "actual_page_order": [
+    "图文测试页",
+    "空备注测试页",
+    "长备注测试页"
+  ],
+  "note_character_counts": [
+    34,
+    0,
+    3200
+  ],
+  "image_count": 1,
+  "public_output_has_private_marker": false,
+  "static_rendering": "not_implemented",
+  "AC35": "not_passed"
+}
