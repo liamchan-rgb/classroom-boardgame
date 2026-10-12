@@ -13,7 +13,9 @@
 - `.github/workflows/build-native-ipa.yml`：手动构建，测试两个核心库，再生成待个人签名的IPA。
 - [安装与真机验收](native/安装与真机验收.md)：SideStore覆盖更新与免费7天续签。
 
-安装名继续使用ASCII `ClassroomProbe`，保留中文界面和Bundle ID，避免v0.5中文appIdName签名失败，并用于覆盖更新。v0.7云端构建结果在完成后记录到 `stage1/evidence/`；App新增界面仍需本次真机核对。
+安装名继续使用ASCII `ClassroomProbe`，保留中文界面和Bundle ID，避免v0.5中文appIdName签名失败，并用于覆盖更新。v0.7已通过Xcode27.0设备版编译及44项核心测试（游戏38、绘本6），IPA与内置规则资源已校验；App新增界面仍需本次真机核对。
+
+v0.7：[成功构建](https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38231894206)、[构建产物](https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38231894206/artifacts/11738378519)（仓库账号登录后下载，保留至2026-10-15）。证据见 `stage1/evidence/cloud-build-result-v0.7.json`，编译源码提交 `26e0c62e76cda7430fce9ac20c33491a014891ee`。
 
 v0.6历史成功构建：[工作流38222596815](https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38222596815)，证据见 `native/evidence/cloud-build-result-v0.6.json`。阶段0教师反馈见 `stage1/evidence/stage0-teacher-feedback.json`。复杂PPTX母版、图表、组合及字体的完整兼容仍在阶段6处理。
 

@@ -17,5 +17,5 @@
   },
   "nativeSwiftSyntax": "passed; not a device type-check",
   "projectAndWorkflowStructure": "passed",
-  "deviceBuild": "pending real Xcode27 workflow"
+  "deviceBuild": "passed: Xcode27 workflow38231894206, arm64 iPadOS27, 44 core tests"
 }
