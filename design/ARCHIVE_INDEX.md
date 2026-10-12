@@ -22,3 +22,11 @@
 大面板毛玻璃、小按钮原生液态玻璃/纯色、独立公开投影、运行文字与数字由App生成，详见交接说明。原规则/职业/技能/费用未修改。头像4张为小批风格备选，资源图标6套；其余4职业/6怪物清单中的未制作项、18物品与地图装饰仍按批次推进。
 
 本轮按用户指定design目录保存；通用工具要求IPA及其他归档分支，与本轮边界冲突，解释与恢复步骤见ui-art-delivery/annotations/08_recovery.md。没有改main、App源码、GameCore数据或工作流；工作流只有手动触发，未触发构建。
+
+## 新窗口审图交接 · 2026-10-12
+
+- 提示词：[image-review-start_20261012.md](handoffs/image-review-start_20261012.md)
+- 新增交接ZIP：[classroom-design-review-handoff-20261012.zip](archives/classroom-design-review-handoff-20261012.zip)
+- 新增ZIP SHA256：`30885d6217419253d6a15ff01956466d54d03ee04af26d32abb401757f0b14c3`
+- 标签：`archive-design-review-handoff-20261012`
+- 仅新增状态总结与提示词；原13张图、原设计ZIP、原设计标签不变。
