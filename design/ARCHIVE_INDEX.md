@@ -46,3 +46,12 @@
 - 原有第一轮图、ZIP、标签不变；本轮只写design，未改App、GameCore、main或工作流，未构建IPA。
 - 未验证：原生玻璃、触控效率、电视距离、运行隐私、实际PPTX及人物动画。本轮没有制作新职业/怪物头像或动画。
 - 后续每次实际更新均上传、创建新版本/ZIP/唯一标签，并回读核验；旧版本保留。
+
+## 第二轮审图进度01 · 2026-10-12
+
+- B教师战斗屏通过；其余第二轮图待审。
+- 记录：[round2-review01_teacher-approved_20261012.md](reviews/round2-review01_teacher-approved_20261012.md)
+- 标签：archive-design-ui-art-round2-review01-20261012
+- 恢复ZIP：[classroom-ui-art-round2-review01-20261012.zip](archives/classroom-ui-art-round2-review01-20261012.zip)
+- ZIP SHA256：2d0831377d992b900622f32bd60f472c5783117b9667063a5248d62efbb6ac3c
+- 本次只记录审核反馈，图片与App未改。
