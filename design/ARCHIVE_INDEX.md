@@ -72,3 +72,18 @@
 - 标签archive-design-ui-art-review03-20261012
 - ZIP：[classroom-ui-art-review03-20261012.zip](archives/classroom-ui-art-review03-20261012.zip)；SHA256：2435f2853b5e7980141e0f299e1128297b60cf0ed0b0075146b4f5cc9d337fba
 - 制作中的第三轮图尚未通过，按此意见继续修改。
+
+## 第三轮公开端紧凑版 · 2026-10-12
+
+- 新版：[ui-art-delivery-round3/README.md](ui-art-delivery-round3/README.md)
+- 修改：战斗区优先；完整头像队列附玩家区；无下方姓名/图例；玩家回合紧凑展开技能/道具/资源，怪物回合收起；数值变化只一次淡入淡出。
+- 教师整场明细和公开防重复行为记录在交接，尚未实现App功能；第二轮教师屏字节保持已通过版本。第三轮公开稿仍待审核。
+- 来源：意见02、03均先上传并回读；以最新意见03覆盖常驻七人卡布局，绘本仍保留七人姓名六字段、无AP。
+- 设计快照：4536362c0b77bc5def237fb6bedeb76df99807da
+- 唯一标签：archive-design-ui-art-round3-20261012
+- ZIP：[classroom-ui-art-round3-20261012.zip](archives/classroom-ui-art-round3-20261012.zip)
+- 大小：34520140字节；SHA256：356f5933e82358de9cd446749ccdc8b88a5a328ceaa3b29a2914cfc6224febef
+- 文件：81；载荷：80；预览：16张。
+- 检查：字形边界/相交、5%安全区、当前全名、绘本七人全名/无AP、完整队列ID顺序、技能原JSON、教师图及独立素材哈希、ZIP CRC及逐文件SHA通过；两比例离线文字演示一次播放和同ID不重播通过。
+- 上传：待远端回读完成，结果见archives/round3-upload-receipt.json。
+- 未验证：系统玻璃、TV最远可读性、App公开技能/一次提示/全局明细、实际PPTX、人物动画。只改design，无IPA，旧版本/ZIP/标签/main不改。
