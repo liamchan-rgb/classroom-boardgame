@@ -1,0 +1,498 @@
+{
+  "formatVersion": 1,
+  "scope": "design-only",
+  "version": "b-static-assets-v1",
+  "selfExcluded": true,
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 2596,
+      "sha256": "ea5764e1b1108e510d86e4869ba72a1bf233ce35f9270ed0654746585b7174df"
+    },
+    {
+      "path": "asset-manifest.json",
+      "bytes": 30915,
+      "sha256": "b63a6f8b7fe005992001528e7fd6af61e9935e632af0b19c93c75462f5e7fa11"
+    },
+    {
+      "path": "assets/classes/class_adventurer_portrait.png",
+      "bytes": 327672,
+      "sha256": "0a1509c010698f329b7568eb85766a69497d738e13adbdd2c007f1515bc34c21"
+    },
+    {
+      "path": "assets/classes/class_dragon_knight_portrait.png",
+      "bytes": 666761,
+      "sha256": "aae2dcd5771df7c0be37ee237e451ccc3418d9fa2974a7aae9c394c58b96dc0d"
+    },
+    {
+      "path": "assets/classes/class_ranger_portrait.png",
+      "bytes": 446278,
+      "sha256": "d7ad17351283aff1c2d55ef1b470309f65245442355946aa7ad917c8d796cd50"
+    },
+    {
+      "path": "assets/classes/class_spellblade_portrait.png",
+      "bytes": 443237,
+      "sha256": "639b1ac1c3f8d97246fc0e90008ccabd50d59ea4e2910b240c3869886bdca5dd"
+    },
+    {
+      "path": "assets/icons/icon_action.png",
+      "bytes": 4207,
+      "sha256": "0241713c81477af51f58688b4cb7b6c4adef337797a9cf0a35519b9276568893"
+    },
+    {
+      "path": "assets/icons/icon_action.svg",
+      "bytes": 158,
+      "sha256": "62ed7920cba16dd9980d9694cb824f994e9496b3c6ef497f964791d0eb1b127b"
+    },
+    {
+      "path": "assets/icons/icon_coin.png",
+      "bytes": 10201,
+      "sha256": "3f80ff65d715874b65d87b65a965581537c513ff5412bf1b8b1120b0aba4461c"
+    },
+    {
+      "path": "assets/icons/icon_coin.svg",
+      "bytes": 303,
+      "sha256": "285adfc122fadfa1909d97199f702bde3c2eae32e06ace131772fb34ddf8eec4"
+    },
+    {
+      "path": "assets/icons/icon_downed.png",
+      "bytes": 6398,
+      "sha256": "b6b0b469217f318a078550a51d8d1082dde160022cc8e9573ee688be90418029"
+    },
+    {
+      "path": "assets/icons/icon_downed.svg",
+      "bytes": 281,
+      "sha256": "4755a76137ec2763eafd9bf433ab7487fdd429f23802964472f082a105b38f25"
+    },
+    {
+      "path": "assets/icons/icon_health.png",
+      "bytes": 4910,
+      "sha256": "5c8a7e342f21c040811a2275cb495e40915bbd8fc4a58c30eb6b4c84f70c65a2"
+    },
+    {
+      "path": "assets/icons/icon_health.svg",
+      "bytes": 178,
+      "sha256": "d94f5cefe09d4edf1a9c7e1cb1b9e998fb20810362ab66e0c533f940076b5cd3"
+    },
+    {
+      "path": "assets/icons/icon_score.png",
+      "bytes": 4970,
+      "sha256": "b39bd62794927697f12f5c9385aedb2df97dafee375e3a4de44d931d351c216c"
+    },
+    {
+      "path": "assets/icons/icon_score.svg",
+      "bytes": 192,
+      "sha256": "b2bff6207081fb0f7adb223addd09a77de5e619bc87adfdf7725ce4d3fc66d22"
+    },
+    {
+      "path": "assets/icons/icon_shield.png",
+      "bytes": 3867,
+      "sha256": "0b1155ba83bfa485d40b35fff30d0c231013ee4938cdc5396a1a4b50f5434c1c"
+    },
+    {
+      "path": "assets/icons/icon_shield.svg",
+      "bytes": 243,
+      "sha256": "e7c926d93736584ea83ca9a2da83ae9248fa4fb374b364e5b57ad9b3167454da"
+    },
+    {
+      "path": "assets/items/item_action_ring.png",
+      "bytes": 217324,
+      "sha256": "092378d8b93850065d65812f225ec15fd347e3aaf1790d5912223eb464df70da"
+    },
+    {
+      "path": "assets/items/item_dragon_armor.png",
+      "bytes": 270058,
+      "sha256": "6873c458dcc6e9cc4764f6177b8e2c696ec8886fd1b93faa2adfdea53b35fbc9"
+    },
+    {
+      "path": "assets/items/item_dragon_charm.png",
+      "bytes": 146869,
+      "sha256": "c7f2d5c529b7295b0419d48e879b5ba1fb88030edc244b633315daab0a94d677"
+    },
+    {
+      "path": "assets/items/item_dragon_fang_sword.png",
+      "bytes": 131638,
+      "sha256": "8f90a4816e2cf0c89bfc7bb93c5b51cc09b4a44e3fcfe1ae7040a615c3f230ac"
+    },
+    {
+      "path": "assets/items/item_great_sword.png",
+      "bytes": 102290,
+      "sha256": "4346576b8de25b1ef4ef7ec78fcafb063ad52f28b3a0c2bca8611d72961bafcd"
+    },
+    {
+      "path": "assets/items/item_hunting_bow.png",
+      "bytes": 65150,
+      "sha256": "3fee4deeb573172ebac211a2d2bf01425e36baae1bf11e6099deeb5152b832f5"
+    },
+    {
+      "path": "assets/items/item_large_potion.png",
+      "bytes": 168000,
+      "sha256": "9641bb5def250456414108822f279cc9e90a7775e27e756947f8b103cc2e8c72"
+    },
+    {
+      "path": "assets/items/item_leather_armor.png",
+      "bytes": 222409,
+      "sha256": "4f70408011bd6151b490ec1f577162d6ec17c78fa93cac7f8bee705c8d57d837"
+    },
+    {
+      "path": "assets/items/item_legendary_staff.png",
+      "bytes": 87801,
+      "sha256": "58c5ec4a1f53d6667bffbb46536d000a36020ae85331ab30c3c2a8329ef8d7e1"
+    },
+    {
+      "path": "assets/items/item_power_badge.png",
+      "bytes": 174156,
+      "sha256": "f34fffcdee2946e9d8810e6267c83748eece205f733027fbdd2a0d40fd29fed2"
+    },
+    {
+      "path": "assets/items/item_revival_stone.png",
+      "bytes": 113877,
+      "sha256": "1d3d594fb9fdb46781eaa6434b3d409cd3195b4ffa0fd03ed3cb22eef29c5803"
+    },
+    {
+      "path": "assets/items/item_rune_armor.png",
+      "bytes": 265966,
+      "sha256": "0f5004f8b2b835c07afc3f4c57a1aaf8e7e2a38dcaf8224f9aadc2cc2de4cec4"
+    },
+    {
+      "path": "assets/items/item_shield_potion.png",
+      "bytes": 145186,
+      "sha256": "c57f86636af263cf8d22931d0e13630ca959dde5806865c6296df3f3f035ca22"
+    },
+    {
+      "path": "assets/items/item_small_potion.png",
+      "bytes": 128451,
+      "sha256": "cbca94a567e6175d1dfee79b20f66029c48458287fbe5b50b2907ba822d5934e"
+    },
+    {
+      "path": "assets/items/item_starlight_armor.png",
+      "bytes": 281407,
+      "sha256": "3b4f924992683ea05d4157e15ea9e453b2e2e65481b40248b00d03233ec18296"
+    },
+    {
+      "path": "assets/items/item_starlight_blade.png",
+      "bytes": 102499,
+      "sha256": "18bc18bf6774b211b239d2a09c16cdd30634073fe2cb9b0102e4a22da3b30b97"
+    },
+    {
+      "path": "assets/items/item_starlight_charm.png",
+      "bytes": 120079,
+      "sha256": "d8571049fa8d39aaabbccb6046c9f6038f6ef5c66cede038ad06ae168b9ed5ca"
+    },
+    {
+      "path": "assets/items/item_training_sword.png",
+      "bytes": 98462,
+      "sha256": "0a9adb9c988f637e8cfe0ccf398ba569b007703d4c904f6bfe1aad0b1c01d75a"
+    },
+    {
+      "path": "assets/monsters/monster_cave_troll_portrait.png",
+      "bytes": 613813,
+      "sha256": "debe3c3f7dd9dd102ff9a056c45440464aadbb1b6117842da0b346792c897cdc"
+    },
+    {
+      "path": "assets/monsters/monster_goblin_archer_portrait.png",
+      "bytes": 423008,
+      "sha256": "8f881cf8dde8e6889c487ec2504a6fd213768062c7e51967882a5b0d1912dca0"
+    },
+    {
+      "path": "assets/monsters/monster_ruin_dragon_portrait.png",
+      "bytes": 645611,
+      "sha256": "7ce49c5d081d977810a28c970f73a1b73cf15c17ec99a360853c435b6e1e2fb2"
+    },
+    {
+      "path": "assets/monsters/monster_slime_portrait.png",
+      "bytes": 349437,
+      "sha256": "f43af2575443831de7241708e34b08af66c93c7fbfb790d09719917154e0e356"
+    },
+    {
+      "path": "assets/monsters/monster_stone_guardian_portrait.png",
+      "bytes": 703191,
+      "sha256": "e52fd126cdae4a6c8bf4758550f8096f284ce2cb345d45e4730fa9ce67e3869b"
+    },
+    {
+      "path": "assets/monsters/monster_wolf_portrait.png",
+      "bytes": 436955,
+      "sha256": "4426192208ba8ad205c07ad40e718f941d9ee48d1db8a3b743d2f9523e39cc65"
+    },
+    {
+      "path": "previews/classes_contact_sheet.png",
+      "bytes": 247256,
+      "sha256": "a6cfc20caf3b38e08566dc425292c700c11eca5d642deeab9297d0a379620f89"
+    },
+    {
+      "path": "previews/items_contact_sheet.png",
+      "bytes": 562398,
+      "sha256": "d22a0fb46a6c33cfaf7a14a18a8e9335066a43412bf3500b9c5d15faea012a08"
+    },
+    {
+      "path": "previews/monsters_contact_sheet.png",
+      "bytes": 570183,
+      "sha256": "586493729048a053eea84980c88c2efb1215612544f652d892a9e440cfbb7489"
+    },
+    {
+      "path": "sources/archive_batch.py",
+      "bytes": 2965,
+      "sha256": "bb1574f2be5ed912c622223bfbd2df69ca8070f5de45f065ee698d2fbe1b31b4"
+    },
+    {
+      "path": "sources/build_manifest_and_gallery.py",
+      "bytes": 5029,
+      "sha256": "5420adefe5ce30825281a72a50e88c06f3bab5e0a302adb5e6c535e9a4a29af0"
+    },
+    {
+      "path": "sources/classes_contact_sheet.svg",
+      "bytes": 1614,
+      "sha256": "5e5d12b4d44e7dfa80f7035da4632d2000249f715f0de0e821512fa1fcf75e9e"
+    },
+    {
+      "path": "sources/draft_classes_sheet.png",
+      "bytes": 2426436,
+      "sha256": "29c207416bdbd9d4c49e6bb620f125301efdb2bf8ce171f3917cc6553de63ba2"
+    },
+    {
+      "path": "sources/draft_items_sheet.png",
+      "bytes": 2260751,
+      "sha256": "70d6c1fe6d0de919b90ee8d05f400af9fb822c2faa5c4745120967c2931c8da5"
+    },
+    {
+      "path": "sources/draft_monsters_sheet.png",
+      "bytes": 2337437,
+      "sha256": "2e37f26aac873d4a2b62fea1908fcd662bdb26d035b0bdad09212b3f2ba91ce3"
+    },
+    {
+      "path": "sources/export-jobs.json",
+      "bytes": 9356,
+      "sha256": "5ebcab93b973beeadfe5e657ed72848d4d82bb0044481d893bb6962332122aa6"
+    },
+    {
+      "path": "sources/export_actionRing.svg",
+      "bytes": 6128,
+      "sha256": "e95993fc89710bd49798ead4dd19690db6f4313e9d363e776906c7771be8c735"
+    },
+    {
+      "path": "sources/export_assets.cjs",
+      "bytes": 1175,
+      "sha256": "36b6f437f96decb4fd17b07ac2ab7ba1c5d267433830fa6e7474d5d8b9c879d3"
+    },
+    {
+      "path": "sources/export_caveTroll.svg",
+      "bytes": 213,
+      "sha256": "a4bcb1e75faf7191b1ea004e463f76535d39c7abe004989e426b93c10d9e467c"
+    },
+    {
+      "path": "sources/export_dragonArmor.svg",
+      "bytes": 9915,
+      "sha256": "fca7a649b3ab24f46c15c62f72da1f42094316c6b7ccb065e6adeeb81c3253dd"
+    },
+    {
+      "path": "sources/export_dragonCharm.svg",
+      "bytes": 7818,
+      "sha256": "abf6282e8c2a214ce22f699ce78aae6ba04dd31b07b9dd1724dfc289442f5b92"
+    },
+    {
+      "path": "sources/export_dragonFangSword.svg",
+      "bytes": 8292,
+      "sha256": "bc57a88445819a3b2853c54e20ee058fd69ef3a7605bc8df3667305953b62b5c"
+    },
+    {
+      "path": "sources/export_dragonKnight.svg",
+      "bytes": 216,
+      "sha256": "1b738174828806926b82432108f1d05f913f3474106a60c2bd717053ecd563e1"
+    },
+    {
+      "path": "sources/export_gallery.cjs",
+      "bytes": 975,
+      "sha256": "6df926790b5db591c8bb0246b5e92731e9548720589fe3272df9f7c5804a7e71"
+    },
+    {
+      "path": "sources/export_goblinArcher.svg",
+      "bytes": 216,
+      "sha256": "c3e8892bda70b39d4632c74d87c3d030f886303f338da396f8d72a52a7c0e3d0"
+    },
+    {
+      "path": "sources/export_greatSword.svg",
+      "bytes": 6378,
+      "sha256": "89ecea66b8c8aa30f3fe38d81c31c578bc2aeff8a4e6e4e28f78e0336229877a"
+    },
+    {
+      "path": "sources/export_huntingBow.svg",
+      "bytes": 9091,
+      "sha256": "03175910f75cb99642d4bb7c542c8b56c63475a1f4dbe7a0c09f08cb4c9ff1d2"
+    },
+    {
+      "path": "sources/export_largePotion.svg",
+      "bytes": 5210,
+      "sha256": "e6e50ba4a4e1bb96ba9988dd9186549f46755685677ee4839013331c5cfc1cad"
+    },
+    {
+      "path": "sources/export_leatherArmor.svg",
+      "bytes": 6440,
+      "sha256": "3cb0400ea2b4f74e00cd057e5938ce29a9c4d66f0ec9640143448504e97c33af"
+    },
+    {
+      "path": "sources/export_legendaryStaff.svg",
+      "bytes": 7787,
+      "sha256": "b96c45f1bcdd0d4abd1b3e312641b59aac00591c686257f68c997b1948a68c34"
+    },
+    {
+      "path": "sources/export_powerBadge.svg",
+      "bytes": 5225,
+      "sha256": "e71ced8c610cb2c0d4bf708ba22281cf11aff5e465853bb915ae6a529f5b4248"
+    },
+    {
+      "path": "sources/export_ranger.svg",
+      "bytes": 210,
+      "sha256": "480e1f70d183ae0e5fa66c7a379340313d8bf2020ea19a70bf97fed42cc5fae8"
+    },
+    {
+      "path": "sources/export_revivalStone.svg",
+      "bytes": 5006,
+      "sha256": "8efdafe02888faf0a2b28708209ecaab93af6199319bc1ba3431dad056514e0d"
+    },
+    {
+      "path": "sources/export_ruinDragon.svg",
+      "bytes": 214,
+      "sha256": "fefafe4d3ba48ff68deda625fdbc1a35c6db4b12c83796ca06ea18c1a56eecd9"
+    },
+    {
+      "path": "sources/export_runeArmor.svg",
+      "bytes": 9156,
+      "sha256": "e4a9815841cb83210fcabc73440a5138c78f04d541b29386abefc56c522b9918"
+    },
+    {
+      "path": "sources/export_shieldPotion.svg",
+      "bytes": 5429,
+      "sha256": "4266c70740ba10faf9440a79d2de114a0c641d2bfd645e92aaf3ae58caa5af96"
+    },
+    {
+      "path": "sources/export_smallPotion.svg",
+      "bytes": 4418,
+      "sha256": "a14d920703b3b6a9c39ac5f524974b78c7633d0698808dec0a8ffe97c2357c32"
+    },
+    {
+      "path": "sources/export_spellblade.svg",
+      "bytes": 214,
+      "sha256": "2f064a469681c3f14e7317974a8d64082f522d2d07bc506fd9dc7d6a8c3bdf9c"
+    },
+    {
+      "path": "sources/export_starlightArmor.svg",
+      "bytes": 10372,
+      "sha256": "dea4ec490de9d28b44017bd280dc401f1f731f881ce6df086f5951bf99d7811a"
+    },
+    {
+      "path": "sources/export_starlightBlade.svg",
+      "bytes": 6602,
+      "sha256": "130acd4d6866375e59537c057e3f2c4582144a00fb230050196d0881459bf8cf"
+    },
+    {
+      "path": "sources/export_starlightCharm.svg",
+      "bytes": 10378,
+      "sha256": "efbaed0946051e68e6ca7574e530b580574b385f6553a618b178f435ec8ed3b7"
+    },
+    {
+      "path": "sources/export_stoneGuardian.svg",
+      "bytes": 217,
+      "sha256": "ab97534752451be3eaa524b9c41a2dfb69c18b65aad14e2db88150f781d2cada"
+    },
+    {
+      "path": "sources/export_trainingSword.svg",
+      "bytes": 5191,
+      "sha256": "98b5b530f0c4b15559541cc5f22533e58f70fcf8df10855a3bca3050a2a365ae"
+    },
+    {
+      "path": "sources/export_wolf.svg",
+      "bytes": 208,
+      "sha256": "75d7fa1be14b99dc115bd2e2f31be6f5552652468f29a3d811678b2f970e82ad"
+    },
+    {
+      "path": "sources/gallery-index.json",
+      "bytes": 554,
+      "sha256": "814f338007ffad013b2110a2fdf24cd59166c419143d1590cf56ddc80f6a6577"
+    },
+    {
+      "path": "sources/generated-portraits.json",
+      "bytes": 2131,
+      "sha256": "e029b88271c6d71cb9c42f1132e32b908fbdf9f08877623aecf271700273cd80"
+    },
+    {
+      "path": "sources/generated_caveTroll.png",
+      "bytes": 1469556,
+      "sha256": "ec5e9dcaeb78dfa55be4f8597ad2f65ee6aab059153d8e6f7ecb7e6f579a0815"
+    },
+    {
+      "path": "sources/generated_dragonKnight.png",
+      "bytes": 1756352,
+      "sha256": "62d74062405d779bb62f1f2733ae237b5d64a623d352f7d026c3ba9034a839c9"
+    },
+    {
+      "path": "sources/generated_goblinArcher.png",
+      "bytes": 988844,
+      "sha256": "6b008d78fe806d5f9da10309be12c2a61bc38d38e70d82b68ef96b6a0ca92887"
+    },
+    {
+      "path": "sources/generated_ranger.png",
+      "bytes": 1167856,
+      "sha256": "0549b1814ce5ad573117de76d0d7052b22afe7e6611e91143b96094fbbea4ed6"
+    },
+    {
+      "path": "sources/generated_ruinDragon.png",
+      "bytes": 1543934,
+      "sha256": "1ef78670d5fdad958df5ee94fa32035ed4abf30d6bf19afb4156f8d606194a7b"
+    },
+    {
+      "path": "sources/generated_spellblade.png",
+      "bytes": 1157003,
+      "sha256": "a634dfe3ea5af0b6a21e6af2c9391024848dfede99eb8f99cb7179a8c341d5b0"
+    },
+    {
+      "path": "sources/generated_stoneGuardian.png",
+      "bytes": 1652412,
+      "sha256": "63b49b4f9854a259fc5099d7d80965c9c101752a3218ebfce0b2256dd53cbc3a"
+    },
+    {
+      "path": "sources/generated_wolf.png",
+      "bytes": 1038275,
+      "sha256": "252d13566323e1380536735366471bf538364708ad7eea82ed59c5b8d87d85e6"
+    },
+    {
+      "path": "sources/item-atlas-selections.json",
+      "bytes": 4436,
+      "sha256": "7a6340873d4ed4597c6a20c8c2abeac781cd270c36b7bffb3bcd4d17058e9eee"
+    },
+    {
+      "path": "sources/items_clean_sheet.png",
+      "bytes": 2406060,
+      "sha256": "a3a28a1757f9509e8cdf7df434dfa98d1179f162de5aee0246b47ad0f1e686df"
+    },
+    {
+      "path": "sources/items_contact_sheet.svg",
+      "bytes": 6311,
+      "sha256": "f0ef5ac54d116821978c0095db2ffa54b8f16a809e6c9af277b8b86cf0f12581"
+    },
+    {
+      "path": "sources/monsters_contact_sheet.svg",
+      "bytes": 2348,
+      "sha256": "b800229946bbe62b3aa3c5461ba86fc6d2468aa44f3c64babcb399e81d9715d7"
+    },
+    {
+      "path": "sources/prepare_exports.py",
+      "bytes": 3739,
+      "sha256": "87bfcd98ad592e107eb840d23cfd1653bfd6f83359254ce001dbff371d1a2382"
+    },
+    {
+      "path": "sources/reference-manifest.json",
+      "bytes": 21854,
+      "sha256": "26b7ebf650b06c93fd5a80b6a0342ef44fc93155db9cc217e63b94a77904f98f"
+    },
+    {
+      "path": "sources/reference_initial-content.json",
+      "bytes": 32227,
+      "sha256": "aaab980fd5f3154ac813a02dc907a835ee0e0181c4149f2b7803d9594795f34a"
+    },
+    {
+      "path": "sources/static-validation.json",
+      "bytes": 11030,
+      "sha256": "7f518afbe10c9aebefd5d9ecc756863668c375cb17f8d8eb55ea9d1abefe9479"
+    }
+  ]
+}

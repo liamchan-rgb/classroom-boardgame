@@ -1,0 +1,344 @@
+[
+  {
+    "entityID": "trainingSword",
+    "index": 7,
+    "bbox": [
+      64,
+      70,
+      254,
+      304
+    ],
+    "cx": 159.0,
+    "cy": 187.0,
+    "area": 13630,
+    "selectedBBox": [
+      61,
+      67,
+      257,
+      307
+    ]
+  },
+  {
+    "entityID": "huntingBow",
+    "index": 1,
+    "bbox": [
+      307,
+      19,
+      495,
+      318
+    ],
+    "cx": 401.0,
+    "cy": 168.5,
+    "area": 9929,
+    "selectedBBox": [
+      304,
+      16,
+      498,
+      321
+    ]
+  },
+  {
+    "entityID": "greatSword",
+    "index": 2,
+    "bbox": [
+      532,
+      19,
+      764,
+      322
+    ],
+    "cx": 648.0,
+    "cy": 170.5,
+    "area": 21592,
+    "selectedBBox": [
+      529,
+      16,
+      767,
+      325
+    ]
+  },
+  {
+    "entityID": "legendaryStaff",
+    "index": 4,
+    "bbox": [
+      782,
+      30,
+      1007,
+      329
+    ],
+    "cx": 894.5,
+    "cy": 179.5,
+    "area": 14778,
+    "selectedBBox": [
+      779,
+      27,
+      1010,
+      332
+    ]
+  },
+  {
+    "entityID": "leatherArmor",
+    "index": 8,
+    "bbox": [
+      1018,
+      77,
+      1261,
+      327
+    ],
+    "cx": 1139.5,
+    "cy": 202.0,
+    "area": 42219,
+    "selectedBBox": [
+      1015,
+      74,
+      1264,
+      330
+    ]
+  },
+  {
+    "entityID": "runeArmor",
+    "index": 6,
+    "bbox": [
+      1276,
+      69,
+      1526,
+      326
+    ],
+    "cx": 1401.0,
+    "cy": 197.5,
+    "area": 47547,
+    "selectedBBox": [
+      1273,
+      66,
+      1529,
+      329
+    ]
+  },
+  {
+    "entityID": "powerBadge",
+    "index": 11,
+    "bbox": [
+      39,
+      355,
+      234,
+      598
+    ],
+    "cx": 136.5,
+    "cy": 476.5,
+    "area": 27566,
+    "selectedBBox": [
+      36,
+      352,
+      237,
+      601
+    ]
+  },
+  {
+    "entityID": "actionRing",
+    "index": 14,
+    "bbox": [
+      291,
+      380,
+      505,
+      583
+    ],
+    "cx": 398.0,
+    "cy": 481.5,
+    "area": 27598,
+    "selectedBBox": [
+      288,
+      377,
+      508,
+      586
+    ]
+  },
+  {
+    "entityID": "smallPotion",
+    "index": 13,
+    "bbox": [
+      586,
+      365,
+      718,
+      578
+    ],
+    "cx": 652.0,
+    "cy": 471.5,
+    "area": 18381,
+    "selectedBBox": [
+      583,
+      362,
+      721,
+      581
+    ]
+  },
+  {
+    "entityID": "largePotion",
+    "index": 9,
+    "bbox": [
+      783,
+      350,
+      990,
+      598
+    ],
+    "cx": 886.5,
+    "cy": 474.0,
+    "area": 33016,
+    "selectedBBox": [
+      780,
+      347,
+      993,
+      601
+    ]
+  },
+  {
+    "entityID": "shieldPotion",
+    "index": 10,
+    "bbox": [
+      1061,
+      351,
+      1241,
+      601
+    ],
+    "cx": 1151.0,
+    "cy": 476.0,
+    "area": 26631,
+    "selectedBBox": [
+      1058,
+      348,
+      1244,
+      604
+    ]
+  },
+  {
+    "entityID": "revivalStone",
+    "index": 12,
+    "bbox": [
+      1336,
+      363,
+      1478,
+      596
+    ],
+    "cx": 1407.0,
+    "cy": 479.5,
+    "area": 17567,
+    "selectedBBox": [
+      1333,
+      360,
+      1481,
+      599
+    ]
+  },
+  {
+    "entityID": "starlightBlade",
+    "index": 15,
+    "bbox": [
+      35,
+      617,
+      264,
+      905
+    ],
+    "cx": 149.5,
+    "cy": 761.0,
+    "area": 18112,
+    "selectedBBox": [
+      32,
+      614,
+      267,
+      908
+    ]
+  },
+  {
+    "entityID": "starlightArmor",
+    "index": 17,
+    "bbox": [
+      264,
+      622,
+      545,
+      905
+    ],
+    "cx": 404.5,
+    "cy": 763.5,
+    "area": 59271,
+    "selectedBBox": [
+      261,
+      619,
+      548,
+      908
+    ]
+  },
+  {
+    "entityID": "starlightCharm",
+    "index": 19,
+    "bbox": [
+      563,
+      623,
+      747,
+      903
+    ],
+    "cx": 655.0,
+    "cy": 763.0,
+    "area": 17118,
+    "selectedBBox": [
+      560,
+      620,
+      750,
+      906
+    ]
+  },
+  {
+    "entityID": "dragonFangSword",
+    "index": 18,
+    "bbox": [
+      756,
+      622,
+      1018,
+      905
+    ],
+    "cx": 887.0,
+    "cy": 763.5,
+    "area": 23394,
+    "selectedBBox": [
+      753,
+      619,
+      1021,
+      908
+    ]
+  },
+  {
+    "entityID": "dragonArmor",
+    "index": 20,
+    "bbox": [
+      1024,
+      631,
+      1297,
+      904
+    ],
+    "cx": 1160.5,
+    "cy": 767.5,
+    "area": 54744,
+    "selectedBBox": [
+      1021,
+      628,
+      1300,
+      907
+    ]
+  },
+  {
+    "entityID": "dragonCharm",
+    "index": 16,
+    "bbox": [
+      1318,
+      620,
+      1507,
+      914
+    ],
+    "cx": 1412.5,
+    "cy": 767.0,
+    "area": 29208,
+    "selectedBBox": [
+      1315,
+      617,
+      1510,
+      917
+    ]
+  }
+]

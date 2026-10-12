@@ -1,0 +1,318 @@
+[
+  {
+    "entityID": "ranger",
+    "size": 1024,
+    "svg": "sources/export_ranger.svg",
+    "file": "assets/classes/class_ranger_portrait.png",
+    "source": "sources/generated_ranger.png",
+    "method": "full original sprite aspectFit in 14%-inset standard canvas"
+  },
+  {
+    "entityID": "spellblade",
+    "size": 1024,
+    "svg": "sources/export_spellblade.svg",
+    "file": "assets/classes/class_spellblade_portrait.png",
+    "source": "sources/generated_spellblade.png",
+    "method": "full original sprite aspectFit in 14%-inset standard canvas"
+  },
+  {
+    "entityID": "dragonKnight",
+    "size": 1024,
+    "svg": "sources/export_dragonKnight.svg",
+    "file": "assets/classes/class_dragon_knight_portrait.png",
+    "source": "sources/generated_dragonKnight.png",
+    "method": "full original sprite aspectFit in 14%-inset standard canvas"
+  },
+  {
+    "entityID": "wolf",
+    "size": 1024,
+    "svg": "sources/export_wolf.svg",
+    "file": "assets/monsters/monster_wolf_portrait.png",
+    "source": "sources/generated_wolf.png",
+    "method": "full original sprite aspectFit in 14%-inset standard canvas"
+  },
+  {
+    "entityID": "goblinArcher",
+    "size": 1024,
+    "svg": "sources/export_goblinArcher.svg",
+    "file": "assets/monsters/monster_goblin_archer_portrait.png",
+    "source": "sources/generated_goblinArcher.png",
+    "method": "full original sprite aspectFit in 14%-inset standard canvas"
+  },
+  {
+    "entityID": "stoneGuardian",
+    "size": 1024,
+    "svg": "sources/export_stoneGuardian.svg",
+    "file": "assets/monsters/monster_stone_guardian_portrait.png",
+    "source": "sources/generated_stoneGuardian.png",
+    "method": "full original sprite aspectFit in 14%-inset standard canvas"
+  },
+  {
+    "entityID": "caveTroll",
+    "size": 1024,
+    "svg": "sources/export_caveTroll.svg",
+    "file": "assets/monsters/monster_cave_troll_portrait.png",
+    "source": "sources/generated_caveTroll.png",
+    "method": "full original sprite aspectFit in 14%-inset standard canvas"
+  },
+  {
+    "entityID": "ruinDragon",
+    "size": 1024,
+    "svg": "sources/export_ruinDragon.svg",
+    "file": "assets/monsters/monster_ruin_dragon_portrait.png",
+    "source": "sources/generated_ruinDragon.png",
+    "method": "full original sprite aspectFit in 14%-inset standard canvas"
+  },
+  {
+    "entityID": "trainingSword",
+    "size": 512,
+    "svg": "sources/export_trainingSword.svg",
+    "file": "assets/items/item_training_sword.png",
+    "source": "sources/items_clean_sheet.png",
+    "sourceSelectionBBox": [
+      61,
+      67,
+      257,
+      307
+    ],
+    "method": "connected atlas silhouette selected in SVG; original color/alpha preserved; 12.5% canvas inset"
+  },
+  {
+    "entityID": "huntingBow",
+    "size": 512,
+    "svg": "sources/export_huntingBow.svg",
+    "file": "assets/items/item_hunting_bow.png",
+    "source": "sources/items_clean_sheet.png",
+    "sourceSelectionBBox": [
+      304,
+      16,
+      498,
+      321
+    ],
+    "method": "connected atlas silhouette selected in SVG; original color/alpha preserved; 12.5% canvas inset"
+  },
+  {
+    "entityID": "greatSword",
+    "size": 512,
+    "svg": "sources/export_greatSword.svg",
+    "file": "assets/items/item_great_sword.png",
+    "source": "sources/items_clean_sheet.png",
+    "sourceSelectionBBox": [
+      529,
+      16,
+      767,
+      325
+    ],
+    "method": "connected atlas silhouette selected in SVG; original color/alpha preserved; 12.5% canvas inset"
+  },
+  {
+    "entityID": "legendaryStaff",
+    "size": 512,
+    "svg": "sources/export_legendaryStaff.svg",
+    "file": "assets/items/item_legendary_staff.png",
+    "source": "sources/items_clean_sheet.png",
+    "sourceSelectionBBox": [
+      779,
+      27,
+      1010,
+      332
+    ],
+    "method": "connected atlas silhouette selected in SVG; original color/alpha preserved; 12.5% canvas inset"
+  },
+  {
+    "entityID": "leatherArmor",
+    "size": 512,
+    "svg": "sources/export_leatherArmor.svg",
+    "file": "assets/items/item_leather_armor.png",
+    "source": "sources/items_clean_sheet.png",
+    "sourceSelectionBBox": [
+      1015,
+      74,
+      1264,
+      330
+    ],
+    "method": "connected atlas silhouette selected in SVG; original color/alpha preserved; 12.5% canvas inset"
+  },
+  {
+    "entityID": "runeArmor",
+    "size": 512,
+    "svg": "sources/export_runeArmor.svg",
+    "file": "assets/items/item_rune_armor.png",
+    "source": "sources/items_clean_sheet.png",
+    "sourceSelectionBBox": [
+      1273,
+      66,
+      1529,
+      329
+    ],
+    "method": "connected atlas silhouette selected in SVG; original color/alpha preserved; 12.5% canvas inset"
+  },
+  {
+    "entityID": "powerBadge",
+    "size": 512,
+    "svg": "sources/export_powerBadge.svg",
+    "file": "assets/items/item_power_badge.png",
+    "source": "sources/items_clean_sheet.png",
+    "sourceSelectionBBox": [
+      36,
+      352,
+      237,
+      601
+    ],
+    "method": "connected atlas silhouette selected in SVG; original color/alpha preserved; 12.5% canvas inset"
+  },
+  {
+    "entityID": "actionRing",
+    "size": 512,
+    "svg": "sources/export_actionRing.svg",
+    "file": "assets/items/item_action_ring.png",
+    "source": "sources/items_clean_sheet.png",
+    "sourceSelectionBBox": [
+      288,
+      377,
+      508,
+      586
+    ],
+    "method": "connected atlas silhouette selected in SVG; original color/alpha preserved; 12.5% canvas inset"
+  },
+  {
+    "entityID": "smallPotion",
+    "size": 512,
+    "svg": "sources/export_smallPotion.svg",
+    "file": "assets/items/item_small_potion.png",
+    "source": "sources/items_clean_sheet.png",
+    "sourceSelectionBBox": [
+      583,
+      362,
+      721,
+      581
+    ],
+    "method": "connected atlas silhouette selected in SVG; original color/alpha preserved; 12.5% canvas inset"
+  },
+  {
+    "entityID": "largePotion",
+    "size": 512,
+    "svg": "sources/export_largePotion.svg",
+    "file": "assets/items/item_large_potion.png",
+    "source": "sources/items_clean_sheet.png",
+    "sourceSelectionBBox": [
+      780,
+      347,
+      993,
+      601
+    ],
+    "method": "connected atlas silhouette selected in SVG; original color/alpha preserved; 12.5% canvas inset"
+  },
+  {
+    "entityID": "shieldPotion",
+    "size": 512,
+    "svg": "sources/export_shieldPotion.svg",
+    "file": "assets/items/item_shield_potion.png",
+    "source": "sources/items_clean_sheet.png",
+    "sourceSelectionBBox": [
+      1058,
+      348,
+      1244,
+      604
+    ],
+    "method": "connected atlas silhouette selected in SVG; original color/alpha preserved; 12.5% canvas inset"
+  },
+  {
+    "entityID": "revivalStone",
+    "size": 512,
+    "svg": "sources/export_revivalStone.svg",
+    "file": "assets/items/item_revival_stone.png",
+    "source": "sources/items_clean_sheet.png",
+    "sourceSelectionBBox": [
+      1333,
+      360,
+      1481,
+      599
+    ],
+    "method": "connected atlas silhouette selected in SVG; original color/alpha preserved; 12.5% canvas inset"
+  },
+  {
+    "entityID": "starlightBlade",
+    "size": 512,
+    "svg": "sources/export_starlightBlade.svg",
+    "file": "assets/items/item_starlight_blade.png",
+    "source": "sources/items_clean_sheet.png",
+    "sourceSelectionBBox": [
+      32,
+      614,
+      267,
+      908
+    ],
+    "method": "connected atlas silhouette selected in SVG; original color/alpha preserved; 12.5% canvas inset"
+  },
+  {
+    "entityID": "starlightArmor",
+    "size": 512,
+    "svg": "sources/export_starlightArmor.svg",
+    "file": "assets/items/item_starlight_armor.png",
+    "source": "sources/items_clean_sheet.png",
+    "sourceSelectionBBox": [
+      261,
+      619,
+      548,
+      908
+    ],
+    "method": "connected atlas silhouette selected in SVG; original color/alpha preserved; 12.5% canvas inset"
+  },
+  {
+    "entityID": "starlightCharm",
+    "size": 512,
+    "svg": "sources/export_starlightCharm.svg",
+    "file": "assets/items/item_starlight_charm.png",
+    "source": "sources/items_clean_sheet.png",
+    "sourceSelectionBBox": [
+      560,
+      620,
+      750,
+      906
+    ],
+    "method": "connected atlas silhouette selected in SVG; original color/alpha preserved; 12.5% canvas inset"
+  },
+  {
+    "entityID": "dragonFangSword",
+    "size": 512,
+    "svg": "sources/export_dragonFangSword.svg",
+    "file": "assets/items/item_dragon_fang_sword.png",
+    "source": "sources/items_clean_sheet.png",
+    "sourceSelectionBBox": [
+      753,
+      619,
+      1021,
+      908
+    ],
+    "method": "connected atlas silhouette selected in SVG; original color/alpha preserved; 12.5% canvas inset"
+  },
+  {
+    "entityID": "dragonArmor",
+    "size": 512,
+    "svg": "sources/export_dragonArmor.svg",
+    "file": "assets/items/item_dragon_armor.png",
+    "source": "sources/items_clean_sheet.png",
+    "sourceSelectionBBox": [
+      1021,
+      628,
+      1300,
+      907
+    ],
+    "method": "connected atlas silhouette selected in SVG; original color/alpha preserved; 12.5% canvas inset"
+  },
+  {
+    "entityID": "dragonCharm",
+    "size": 512,
+    "svg": "sources/export_dragonCharm.svg",
+    "file": "assets/items/item_dragon_charm.png",
+    "source": "sources/items_clean_sheet.png",
+    "sourceSelectionBBox": [
+      1315,
+      617,
+      1510,
+      917
+    ],
+    "method": "connected atlas silhouette selected in SVG; original color/alpha preserved; 12.5% canvas inset"
+  }
+]

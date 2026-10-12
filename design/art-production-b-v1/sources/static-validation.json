@@ -1,0 +1,486 @@
+{
+  "status": "passed",
+  "scope": "static-assets-only",
+  "entities": [
+    {
+      "entityID": "adventurer",
+      "file": "assets/classes/class_adventurer_portrait.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "alphaBBox": [
+        145,
+        184,
+        828,
+        852
+      ],
+      "minimumTransparentInsetFraction": 0.1416,
+      "sha256": "0a1509c010698f329b7568eb85766a69497d738e13adbdd2c007f1515bc34c21"
+    },
+    {
+      "entityID": "ranger",
+      "file": "assets/classes/class_ranger_portrait.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "alphaBBox": [
+        162,
+        163,
+        825,
+        861
+      ],
+      "minimumTransparentInsetFraction": 0.1582,
+      "sha256": "d7ad17351283aff1c2d55ef1b470309f65245442355946aa7ad917c8d796cd50"
+    },
+    {
+      "entityID": "spellblade",
+      "file": "assets/classes/class_spellblade_portrait.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "alphaBBox": [
+        201,
+        195,
+        845,
+        868
+      ],
+      "minimumTransparentInsetFraction": 0.1523,
+      "sha256": "639b1ac1c3f8d97246fc0e90008ccabd50d59ea4e2910b240c3869886bdca5dd"
+    },
+    {
+      "entityID": "dragonKnight",
+      "file": "assets/classes/class_dragon_knight_portrait.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "alphaBBox": [
+        265,
+        164,
+        785,
+        867
+      ],
+      "minimumTransparentInsetFraction": 0.1533,
+      "sha256": "aae2dcd5771df7c0be37ee237e451ccc3418d9fa2974a7aae9c394c58b96dc0d"
+    },
+    {
+      "entityID": "slime",
+      "file": "assets/monsters/monster_slime_portrait.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "alphaBBox": [
+        203,
+        207,
+        845,
+        855
+      ],
+      "minimumTransparentInsetFraction": 0.165,
+      "sha256": "f43af2575443831de7241708e34b08af66c93c7fbfb790d09719917154e0e356"
+    },
+    {
+      "entityID": "wolf",
+      "file": "assets/monsters/monster_wolf_portrait.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "alphaBBox": [
+        145,
+        167,
+        863,
+        880
+      ],
+      "minimumTransparentInsetFraction": 0.1406,
+      "sha256": "4426192208ba8ad205c07ad40e718f941d9ee48d1db8a3b743d2f9523e39cc65"
+    },
+    {
+      "entityID": "goblinArcher",
+      "file": "assets/monsters/monster_goblin_archer_portrait.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "alphaBBox": [
+        145,
+        158,
+        864,
+        869
+      ],
+      "minimumTransparentInsetFraction": 0.1416,
+      "sha256": "8f881cf8dde8e6889c487ec2504a6fd213768062c7e51967882a5b0d1912dca0"
+    },
+    {
+      "entityID": "stoneGuardian",
+      "file": "assets/monsters/monster_stone_guardian_portrait.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "alphaBBox": [
+        144,
+        145,
+        864,
+        849
+      ],
+      "minimumTransparentInsetFraction": 0.1406,
+      "sha256": "e52fd126cdae4a6c8bf4758550f8096f284ce2cb345d45e4730fa9ce67e3869b"
+    },
+    {
+      "entityID": "caveTroll",
+      "file": "assets/monsters/monster_cave_troll_portrait.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "alphaBBox": [
+        165,
+        189,
+        816,
+        840
+      ],
+      "minimumTransparentInsetFraction": 0.1611,
+      "sha256": "debe3c3f7dd9dd102ff9a056c45440464aadbb1b6117842da0b346792c897cdc"
+    },
+    {
+      "entityID": "ruinDragon",
+      "file": "assets/monsters/monster_ruin_dragon_portrait.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "alphaBBox": [
+        144,
+        189,
+        872,
+        880
+      ],
+      "minimumTransparentInsetFraction": 0.1406,
+      "sha256": "7ce49c5d081d977810a28c970f73a1b73cf15c17ec99a360853c435b6e1e2fb2"
+    },
+    {
+      "entityID": "trainingSword",
+      "file": "assets/items/item_training_sword.png",
+      "size": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaBBox": [
+        101,
+        66,
+        411,
+        446
+      ],
+      "minimumTransparentInsetFraction": 0.1289,
+      "sha256": "0a9adb9c988f637e8cfe0ccf398ba569b007703d4c904f6bfe1aad0b1c01d75a"
+    },
+    {
+      "entityID": "huntingBow",
+      "file": "assets/items/item_hunting_bow.png",
+      "size": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaBBox": [
+        135,
+        66,
+        376,
+        446
+      ],
+      "minimumTransparentInsetFraction": 0.1289,
+      "sha256": "3fee4deeb573172ebac211a2d2bf01425e36baae1bf11e6099deeb5152b832f5"
+    },
+    {
+      "entityID": "greatSword",
+      "file": "assets/items/item_great_sword.png",
+      "size": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaBBox": [
+        109,
+        66,
+        402,
+        446
+      ],
+      "minimumTransparentInsetFraction": 0.1289,
+      "sha256": "4346576b8de25b1ef4ef7ec78fcafb063ad52f28b3a0c2bca8611d72961bafcd"
+    },
+    {
+      "entityID": "legendaryStaff",
+      "file": "assets/items/item_legendary_staff.png",
+      "size": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaBBox": [
+        112,
+        65,
+        400,
+        446
+      ],
+      "minimumTransparentInsetFraction": 0.127,
+      "sha256": "58c5ec4a1f53d6667bffbb46536d000a36020ae85331ab30c3c2a8329ef8d7e1"
+    },
+    {
+      "entityID": "leatherArmor",
+      "file": "assets/items/item_leather_armor.png",
+      "size": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaBBox": [
+        71,
+        66,
+        441,
+        446
+      ],
+      "minimumTransparentInsetFraction": 0.1289,
+      "sha256": "4f70408011bd6151b490ec1f577162d6ec17c78fa93cac7f8bee705c8d57d837"
+    },
+    {
+      "entityID": "runeArmor",
+      "file": "assets/items/item_rune_armor.png",
+      "size": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaBBox": [
+        71,
+        66,
+        441,
+        446
+      ],
+      "minimumTransparentInsetFraction": 0.1289,
+      "sha256": "0f5004f8b2b835c07afc3f4c57a1aaf8e7e2a38dcaf8224f9aadc2cc2de4cec4"
+    },
+    {
+      "entityID": "powerBadge",
+      "file": "assets/items/item_power_badge.png",
+      "size": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaBBox": [
+        103,
+        66,
+        410,
+        446
+      ],
+      "minimumTransparentInsetFraction": 0.1289,
+      "sha256": "f34fffcdee2946e9d8810e6267c83748eece205f733027fbdd2a0d40fd29fed2"
+    },
+    {
+      "entityID": "actionRing",
+      "file": "assets/items/item_action_ring.png",
+      "size": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaBBox": [
+        67,
+        75,
+        446,
+        437
+      ],
+      "minimumTransparentInsetFraction": 0.1289,
+      "sha256": "092378d8b93850065d65812f225ec15fd347e3aaf1790d5912223eb464df70da"
+    },
+    {
+      "entityID": "smallPotion",
+      "file": "assets/items/item_small_potion.png",
+      "size": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaBBox": [
+        137,
+        66,
+        375,
+        446
+      ],
+      "minimumTransparentInsetFraction": 0.1289,
+      "sha256": "cbca94a567e6175d1dfee79b20f66029c48458287fbe5b50b2907ba822d5934e"
+    },
+    {
+      "entityID": "largePotion",
+      "file": "assets/items/item_large_potion.png",
+      "size": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaBBox": [
+        97,
+        66,
+        415,
+        446
+      ],
+      "minimumTransparentInsetFraction": 0.1289,
+      "sha256": "9641bb5def250456414108822f279cc9e90a7775e27e756947f8b103cc2e8c72"
+    },
+    {
+      "entityID": "shieldPotion",
+      "file": "assets/items/item_shield_potion.png",
+      "size": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaBBox": [
+        118,
+        66,
+        394,
+        446
+      ],
+      "minimumTransparentInsetFraction": 0.1289,
+      "sha256": "c57f86636af263cf8d22931d0e13630ca959dde5806865c6296df3f3f035ca22"
+    },
+    {
+      "entityID": "revivalStone",
+      "file": "assets/items/item_revival_stone.png",
+      "size": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaBBox": [
+        139,
+        67,
+        372,
+        445
+      ],
+      "minimumTransparentInsetFraction": 0.1309,
+      "sha256": "1d3d594fb9fdb46781eaa6434b3d409cd3195b4ffa0fd03ed3cb22eef29c5803"
+    },
+    {
+      "entityID": "starlightBlade",
+      "file": "assets/items/item_starlight_blade.png",
+      "size": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaBBox": [
+        104,
+        65,
+        408,
+        447
+      ],
+      "minimumTransparentInsetFraction": 0.127,
+      "sha256": "18bc18bf6774b211b239d2a09c16cdd30634073fe2cb9b0102e4a22da3b30b97"
+    },
+    {
+      "entityID": "starlightArmor",
+      "file": "assets/items/item_starlight_armor.png",
+      "size": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaBBox": [
+        67,
+        65,
+        445,
+        446
+      ],
+      "minimumTransparentInsetFraction": 0.127,
+      "sha256": "3b4f924992683ea05d4157e15ea9e453b2e2e65481b40248b00d03233ec18296"
+    },
+    {
+      "entityID": "starlightCharm",
+      "file": "assets/items/item_starlight_charm.png",
+      "size": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaBBox": [
+        130,
+        66,
+        382,
+        446
+      ],
+      "minimumTransparentInsetFraction": 0.1289,
+      "sha256": "d8571049fa8d39aaabbccb6046c9f6038f6ef5c66cede038ad06ae168b9ed5ca"
+    },
+    {
+      "entityID": "dragonFangSword",
+      "file": "assets/items/item_dragon_fang_sword.png",
+      "size": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaBBox": [
+        80,
+        66,
+        433,
+        447
+      ],
+      "minimumTransparentInsetFraction": 0.127,
+      "sha256": "8f90a4816e2cf0c89bfc7bb93c5b51cc09b4a44e3fcfe1ae7040a615c3f230ac"
+    },
+    {
+      "entityID": "dragonArmor",
+      "file": "assets/items/item_dragon_armor.png",
+      "size": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaBBox": [
+        66,
+        66,
+        446,
+        446
+      ],
+      "minimumTransparentInsetFraction": 0.1289,
+      "sha256": "6873c458dcc6e9cc4764f6177b8e2c696ec8886fd1b93faa2adfdea53b35fbc9"
+    },
+    {
+      "entityID": "dragonCharm",
+      "file": "assets/items/item_dragon_charm.png",
+      "size": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaBBox": [
+        133,
+        66,
+        379,
+        446
+      ],
+      "minimumTransparentInsetFraction": 0.1289,
+      "sha256": "c7f2d5c529b7295b0419d48e879b5ba1fb88030edc244b633315daab0a94d677"
+    }
+  ],
+  "catalogIDsMatch": true,
+  "originalBSamplesUnchanged": true,
+  "PPTXTested": false,
+  "nativeTested": false
+}

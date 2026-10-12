@@ -1,0 +1,58 @@
+[
+  {
+    "entityID": "ranger",
+    "generatedPath": "/workspace/generated_images/exec-3cf89a97-95dd-4ded-a2e8-d4d94738a0cd.png",
+    "source": "sources/generated_ranger.png",
+    "provider": "image_gen",
+    "status": "new-generated-production-candidate"
+  },
+  {
+    "entityID": "spellblade",
+    "generatedPath": "/workspace/generated_images/exec-2d3260dd-7d3b-45c4-a99b-98e45f8709b2.png",
+    "source": "sources/generated_spellblade.png",
+    "provider": "image_gen",
+    "status": "new-generated-production-candidate"
+  },
+  {
+    "entityID": "dragonKnight",
+    "generatedPath": "/workspace/generated_images/exec-cafb2d60-7434-42ad-96d3-be29ae4e7716.png",
+    "source": "sources/generated_dragonKnight.png",
+    "provider": "image_gen",
+    "status": "new-generated-production-candidate"
+  },
+  {
+    "entityID": "wolf",
+    "generatedPath": "/workspace/generated_images/exec-1f26e92e-ee99-45f8-ace4-a87d83d45e72.png",
+    "source": "sources/generated_wolf.png",
+    "provider": "image_gen",
+    "status": "new-generated-production-candidate"
+  },
+  {
+    "entityID": "goblinArcher",
+    "generatedPath": "/workspace/generated_images/exec-2c79a3d2-65f0-46da-aa05-8a48a92956ef.png",
+    "source": "sources/generated_goblinArcher.png",
+    "provider": "image_gen",
+    "status": "new-generated-production-candidate"
+  },
+  {
+    "entityID": "stoneGuardian",
+    "generatedPath": "/workspace/generated_images/exec-fb335491-b197-46d8-99e5-52c068b68b76.png",
+    "source": "sources/generated_stoneGuardian.png",
+    "provider": "image_gen",
+    "status": "new-generated-production-candidate"
+  },
+  {
+    "entityID": "caveTroll",
+    "generatedPath": "/workspace/generated_images/exec-34fe5484-b447-459d-8805-2115f5416ba0.png",
+    "source": "sources/generated_caveTroll.png",
+    "provider": "image_gen",
+    "status": "new-generated-production-candidate"
+  },
+  {
+    "entityID": "ruinDragon",
+    "generatedPath": "/workspace/generated_images/exec-423c1576-3caa-4dd4-8041-bf20d4475f10.png",
+    "source": "sources/generated_ruinDragon.png",
+    "provider": "image_gen",
+    "status": "new-generated-production-candidate"
+  }
+]

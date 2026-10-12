@@ -1,0 +1,23 @@
+[
+  {
+    "name": "classes_contact_sheet",
+    "width": 1600,
+    "height": 680,
+    "source": "sources/classes_contact_sheet.svg",
+    "file": "previews/classes_contact_sheet.png"
+  },
+  {
+    "name": "monsters_contact_sheet",
+    "width": 1536,
+    "height": 1100,
+    "source": "sources/monsters_contact_sheet.svg",
+    "file": "previews/monsters_contact_sheet.png"
+  },
+  {
+    "name": "items_contact_sheet",
+    "width": 1536,
+    "height": 1030,
+    "source": "sources/items_contact_sheet.svg",
+    "file": "previews/items_contact_sheet.png"
+  }
+]
