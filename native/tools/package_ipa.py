@@ -12,6 +12,12 @@ from pathlib import Path
 
 def package(app, output):
     info = plistlib.loads((app / "Info.plist").read_bytes())
+    # SideStore passes the app name to Apple's App ID registration service.
+    # The service rejects the Chinese display name observed in stage0 v0.5.
+    for key in ("CFBundleDisplayName", "CFBundleName"):
+        name = info.get(key, "")
+        if not name or any(character not in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 " for character in name):
+            raise ValueError(f"{key} must use ASCII letters, numbers or spaces for personal signing.")
     executable = app / info["CFBundleExecutable"]
     if not executable.is_file() or not (app / "sample.pptx").is_file():
         raise ValueError("The executable or built-in test deck is missing.")
@@ -44,6 +50,7 @@ def package(app, output):
     output.with_suffix(".ipa.sha256").write_text(digest + "  " + output.name + "\n")
     output.with_suffix(".build.json").write_text(json.dumps(dict(
         bundleIdentifier=info["CFBundleIdentifier"], version=info["CFBundleShortVersionString"],
+        displayName=info["CFBundleDisplayName"], bundleName=info["CFBundleName"],
         minimumOS=info.get("MinimumOSVersion"), platform=info["CFBundleSupportedPlatforms"],
         signedForDevice=False, requiresPersonalSigning=True, sha256=digest), indent=2) + "\n")
     print("Created unsigned IPA; personal signing is required before installation.")

@@ -1,0 +1,17 @@
+{
+  "reportedBy": "teacher screenshot",
+  "failedVersion": "0.5",
+  "stage": "SideStore signing / Apple App ID registration",
+  "error": "SideSign.DeveloperPortalError 10",
+  "rejectedParameter": "appIdName",
+  "rejectedValue": "课堂双画面验证",
+  "teacherConfirmedSideStoreSignedIn": true,
+  "loginErrorInScreenshot": "historical; resolved",
+  "fixVersion": "0.6",
+  "newDisplayName": "ClassroomProbe",
+  "newBundleName": "ClassroomProbe",
+  "bundleIdentifierChanged": false,
+  "buildResult": "pending",
+  "installationValidated": false,
+  "reference": "https://github.com/SideStore/SideStore/issues/1489"
+}

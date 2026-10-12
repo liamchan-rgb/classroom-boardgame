@@ -53,7 +53,7 @@ struct TeacherConsole: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
-                    Label("教师端 · 原生阶段0 v0.5", systemImage: "book.closed.fill").font(.title2.bold())
+                    Label("教师端 · 原生阶段0 v0.6", systemImage: "book.closed.fill").font(.title2.bold())
                     Spacer()
                     Text("公开场景 \(session.connectionCount)").font(.headline)
                 }
