@@ -1,0 +1,25 @@
+{
+  "workflowURL": "https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38210974473",
+  "runID": 38210974473,
+  "testedCommit": "0d327fbe28746c14d38c817f66bfdb8d1d53ced6",
+  "conclusion": "success",
+  "xcodeVersion": "Xcode 27.0\nBuild version 27A266a",
+  "coreTests": "6 passed, 0 failures",
+  "appVersion": "0.5",
+  "minimumOS": "27.0",
+  "sdk": "iphoneos27.0",
+  "platform": [
+    "iPhoneOS"
+  ],
+  "deviceFamily": [
+    2
+  ],
+  "architecture": "arm64",
+  "executableType": "Mach-O executable",
+  "ipaBytes": 342305,
+  "ipaSha256": "886040f11efaaa4bdc6db861c0129fea1151242e142b916473f93b7ed24b3961",
+  "artifactArchiveSha256": "fda8b53efc979fb8264e92f9cb70f3cfcb76e0700bdc878f6e0f881c37e407e6",
+  "requiresPersonalSigning": true,
+  "deviceTested": false,
+  "artifactExpiresAt": "2026-10-15T06:08:08Z"
+}

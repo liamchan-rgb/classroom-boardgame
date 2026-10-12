@@ -12,9 +12,9 @@
   },
   "accessibleRepositoryCount": 0,
   "sourceCommittedLocally": true,
-  "cloudBuildStarted": false,
-  "ipaGenerated": false,
-  "nextStep": "Upload source and dispatch Xcode27 build.",
+  "cloudBuildStarted": true,
+  "ipaGenerated": true,
+  "nextStep": "Initialize SideStore with a free Apple ID, sign and install the IPA, then validate device behavior.",
   "lastAccessCheck": {
     "checkedAt": "2026-10-12T06:05:45.619084+00:00",
     "repositoryURL": "https://github.com/liamchan-rgb/classroom-boardgame",
@@ -23,5 +23,9 @@
     "private": true,
     "canRead": true,
     "canPush": true
-  }
+  },
+  "cloudBuildConclusion": "success",
+  "workflowRunID": 38210974473,
+  "workflowURL": "https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38210974473",
+  "ipaSha256": "886040f11efaaa4bdc6db861c0129fea1151242e142b916473f93b7ed24b3961"
 }

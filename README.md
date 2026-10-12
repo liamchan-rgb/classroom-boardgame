@@ -13,7 +13,11 @@
 - [native/安装与真机验收.md](native/安装与真机验收.md)：构建、首次安装、续签和设备测试。
 - [技术验证.md](技术验证.md)：已通过的检查与仍待验证的项目。
 
-GitHub 私有仓库 `liamchan-rgb/classroom-boardgame` 已创建并完成访问授权，当前开始上传工程并执行 Xcode 27 云端构建。构建与IPA结果以实际工作流记录为准。核心测试结果不能替代 iOS App 编译或真机验证。
+GitHub 私有仓库 `liamchan-rgb/classroom-boardgame` 已完成首轮云端构建：Xcode 27.0、iOS 27 SDK、6项核心测试和 arm64 设备版 App 均通过。v0.5 IPA已下载并核对SHA256，仍需免费个人签名后安装。真机启动、投屏、绘本视觉和续签尚未验证。
+
+- [成功构建记录](https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38210974473)
+- [下载GitHub构建产物](https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38210974473/artifacts/11728909540)：需登录仓库账号；包含未个人签名IPA、日志和校验值，保留至2026-10-15。
+- 构建证据：`native/evidence/cloud-build-result.json` 与 `core-tests-macos.log`。IPA对应提交 `0d327fbe28746c14d38c817f66bfdb8d1d53ced6`；后续文档更新不改变已编译的App源码。
 
 ## 开发检查
 
