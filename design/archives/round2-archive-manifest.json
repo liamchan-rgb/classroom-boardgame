@@ -1,0 +1,21 @@
+{
+  "version": "2026-10-12-round2",
+  "branch": "design/ui-art-round1-20261012",
+  "snapshotCommit": "352afb2625cbb54102a58398beaae276d7273ef8",
+  "tag": "archive-design-ui-art-round2-20261012",
+  "zip": "design/archives/classroom-ui-art-round2-20261012.zip",
+  "bytes": 16816126,
+  "sha256": "4d2396660f0fb76012cdcfa57401d6aec61525faebfd137883143286f92d171a",
+  "files": 64,
+  "payloadsVerified": 63,
+  "selectedStyle": "b",
+  "newPreviewCount": 12,
+  "appSourcesChanged": false,
+  "workflowsChanged": false,
+  "mainRefChanged": false,
+  "ipaBuilt": false,
+  "nativeTested": false,
+  "PPTXTested": false,
+  "newCharacterArtMade": false,
+  "animationsMade": false
+}

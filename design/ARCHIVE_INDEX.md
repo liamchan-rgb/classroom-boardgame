@@ -30,3 +30,19 @@
 - 新增ZIP SHA256：`30885d6217419253d6a15ff01956466d54d03ee04af26d32abb401757f0b14c3`
 - 标签：`archive-design-review-handoff-20261012`
 - 仅新增状态总结与提示词；原13张图、原设计ZIP、原设计标签不变。
+
+## 第一轮审核意见与第二轮UI修订 · 2026-10-12
+
+- 审核意见：[round1-review-feedback_20261012.md](reviews/round1-review-feedback_20261012.md)
+- 意见上传提交：3543a2022b477c5a951eb50db39fb7e66ab10004；标签archive-design-review-feedback-20261012。先上传并回读确认，再开始修改。
+- 意见存档ZIP：[classroom-ui-art-review-feedback-20261012.zip](archives/classroom-ui-art-review-feedback-20261012.zip)；SHA256：31f592d1dccf704d0ffd9aced641b07e2996ea46a146ad2970ef6ab4a309d208
+- 用户确认：B晴空学园；教师布局通过；公开战斗右区展开/地图收窄/玩家卡缩小；绘本单条状态区、队伍颜色+非颜色标识、计时仅启用时显示。
+- 新版设计：[ui-art-delivery-round2/README.md](ui-art-delivery-round2/README.md)，12张新版预览，仍待教师审图。
+- 新版快照提交：352afb2625cbb54102a58398beaae276d7273ef8
+- 新版标签：archive-design-ui-art-round2-20261012
+- 新版ZIP：[classroom-ui-art-round2-20261012.zip](archives/classroom-ui-art-round2-20261012.zip)；16816126字节；SHA256：4d2396660f0fb76012cdcfa57401d6aec61525faebfd137883143286f92d171a
+- 文件数：64，载荷63，静态尺寸/实际字形/安全区/全姓名/资源字段/原素材哈希/ZIP CRC及逐文件SHA通过。
+- 上传状态：本地检查已通过，等待远端回读；完成后见archives/round2-upload-receipt.json。
+- 原有第一轮图、ZIP、标签不变；本轮只写design，未改App、GameCore、main或工作流，未构建IPA。
+- 未验证：原生玻璃、触控效率、电视距离、运行隐私、实际PPTX及人物动画。本轮没有制作新职业/怪物头像或动画。
+- 后续每次实际更新均上传、创建新版本/ZIP/唯一标签，并回读核验；旧版本保留。
