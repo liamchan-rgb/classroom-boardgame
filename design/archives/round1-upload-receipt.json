@@ -1,0 +1,15 @@
+{
+  "status": "verified-remote",
+  "repository": "liamchan-rgb/classroom-boardgame",
+  "branch": "design/ui-art-round1-20261012",
+  "snapshotCommit": "5b445c290df23e34fdc07d4b754ad8707117ad33",
+  "tag": "archive-design-ui-art-round1-20261012",
+  "zipSha256": "36267724f073c05001fe3e2590da8fce38ead1ae61bcc04685892ca176d8a8e5",
+  "bytes": 26459491,
+  "payloadsVerified": 75,
+  "method": "fresh shallow GitHub clone; ZIP CRC, every payload SHA256, and uncompressed tracked file equality",
+  "appSourcesChanged": false,
+  "workflowsChanged": false,
+  "mainRefChanged": false,
+  "ipaBuilt": false
+}
