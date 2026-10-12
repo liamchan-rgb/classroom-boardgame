@@ -1,0 +1,183 @@
+Building for debugging...
+[Pre-planning 1 / 124]
+[Planning deferred tasks]
+[40 / 67] ClassroomGameCore_ClassroomGameCore
+[42 / 67]
+[43 / 68] ClassroomGameCore
+[52 / 108]
+[55 / 108]
+[60 / 108]
+[62 / 108]
+[66 / 108]
+[68 / 108]
+[71 / 108]
+[74 / 108]
+[76 / 108]
+[77 / 108]
+[83 / 108] ClassroomGameCore
+[84 / 108] ClassroomGameCore
+[91 / 108] ClassroomGameCore
+[98 / 109] ClassroomGameCoreTests-product
+[106 / 148]
+[112 / 148]
+[116 / 148]
+[121 / 148]
+[122 / 148]
+[126 / 148]
+[127 / 148]
+[130 / 148]
+[131 / 148]
+[137 / 148] ClassroomGameCoreTests-product
+[138 / 148] ClassroomGameCoreTests-product
+[144 / 148] ClassroomGameCoreTests-product
+Build complete! (10.13 sec)
+Test Suite 'All tests' started at 2026-10-12 12:24:31.565.
+Test Suite 'ClassroomGameCoreTests.xctest' started at 2026-10-12 12:24:31.566.
+Test Suite 'CatalogTests' started at 2026-10-12 12:24:31.566.
+Test Case '-[ClassroomGameCoreTests.CatalogTests testAllPricesMonsterStatsAndIndependentRareDrops]' started.
+Test Case '-[ClassroomGameCoreTests.CatalogTests testAllPricesMonsterStatsAndIndependentRareDrops]' passed (0.003 seconds).
+Test Case '-[ClassroomGameCoreTests.CatalogTests testAllTwelveClassSkillsAndBothSetSkillsMatchTheSpecification]' started.
+Test Case '-[ClassroomGameCoreTests.CatalogTests testAllTwelveClassSkillsAndBothSetSkillsMatchTheSpecification]' passed (0.001 seconds).
+Test Case '-[ClassroomGameCoreTests.CatalogTests testConfirmedInitialCountsAndClassProfiles]' started.
+Test Case '-[ClassroomGameCoreTests.CatalogTests testConfirmedInitialCountsAndClassProfiles]' passed (0.001 seconds).
+Test Case '-[ClassroomGameCoreTests.CatalogTests testInvalidReferencesAndProbabilitiesAreRejected]' started.
+Test Case '-[ClassroomGameCoreTests.CatalogTests testInvalidReferencesAndProbabilitiesAreRejected]' passed (0.003 seconds).
+Test Suite 'CatalogTests' passed at 2026-10-12 12:24:31.574.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.008 (0.008) seconds
+Test Suite 'CombatTests' started at 2026-10-12 12:24:31.574.
+Test Case '-[ClassroomGameCoreTests.CombatTests testAllPlayersDownPausesWithoutPenaltiesAndTeacherCanRevive]' started.
+Test Case '-[ClassroomGameCoreTests.CombatTests testAllPlayersDownPausesWithoutPenaltiesAndTeacherCanRevive]' passed (0.002 seconds).
+Test Case '-[ClassroomGameCoreTests.CombatTests testAPRefillPreservesStoredPointsAndSkillUses]' started.
+Test Case '-[ClassroomGameCoreTests.CombatTests testAPRefillPreservesStoredPointsAndSkillUses]' passed (0.003 seconds).
+Test Case '-[ClassroomGameCoreTests.CombatTests testBuffLifetimeRefreshAndNewBattleSkillReset]' started.
+Test Case '-[ClassroomGameCoreTests.CombatTests testBuffLifetimeRefreshAndNewBattleSkillReset]' passed (0.005 seconds).
+Test Case '-[ClassroomGameCoreTests.CombatTests testGroupTwentyAllRewardsSelfEffectsAndUndoAreOneTransaction]' started.
+Test Case '-[ClassroomGameCoreTests.CombatTests testGroupTwentyAllRewardsSelfEffectsAndUndoAreOneTransaction]' passed (0.003 seconds).
+Test Case '-[ClassroomGameCoreTests.CombatTests testInvalidActionAndPersistenceFailureNeverConsumeResourcesOrRandom]' started.
+Test Case '-[ClassroomGameCoreTests.CombatTests testInvalidActionAndPersistenceFailureNeverConsumeResourcesOrRandom]' passed (0.002 seconds).
+Test Case '-[ClassroomGameCoreTests.CombatTests testInvalidRescueCasesAreAtomic]' started.
+Test Case '-[ClassroomGameCoreTests.CombatTests testInvalidRescueCasesAreAtomic]' passed (0.002 seconds).
+Test Case '-[ClassroomGameCoreTests.CombatTests testLateMonsterIsImmediatelyAttackableButWaitsForNextRound]' started.
+Test Case '-[ClassroomGameCoreTests.CombatTests testLateMonsterIsImmediatelyAttackableButWaitsForNextRound]' passed (0.002 seconds).
+Test Case '-[ClassroomGameCoreTests.CombatTests testManualEndKeepsAPButTimeoutClearsItAndAdvances]' started.
+Test Case '-[ClassroomGameCoreTests.CombatTests testManualEndKeepsAPButTimeoutClearsItAndAdvances]' passed (0.002 seconds).
+Test Case '-[ClassroomGameCoreTests.CombatTests testMinimumDamageStillHitsAndShieldAbsorbsFirst]' started.
+Test Case '-[ClassroomGameCoreTests.CombatTests testMinimumDamageStillHitsAndShieldAbsorbsFirst]' passed (0.002 seconds).
+Test Case '-[ClassroomGameCoreTests.CombatTests testMonsterRecoveryCanOnlyBeUsedOncePerTurn]' started.
+Test Case '-[ClassroomGameCoreTests.CombatTests testMonsterRecoveryCanOnlyBeUsedOncePerTurn]' passed (0.002 seconds).
+Test Case '-[ClassroomGameCoreTests.CombatTests testMovementAttackMovementConsumesActualAPAndResetsDecisionClock]' started.
+Test Case '-[ClassroomGameCoreTests.CombatTests testMovementAttackMovementConsumesActualAPAndResetsDecisionClock]' passed (0.002 seconds).
+Test Case '-[ClassroomGameCoreTests.CombatTests testNaturalTwentyKillsBossButEighteenPlusTwoDoesNot]' started.
+Test Case '-[ClassroomGameCoreTests.CombatTests testNaturalTwentyKillsBossButEighteenPlusTwoDoesNot]' passed (0.002 seconds).
+Test Case '-[ClassroomGameCoreTests.CombatTests testPauseReasonsStackAndRemainingTimeIsExact]' started.
+Test Case '-[ClassroomGameCoreTests.CombatTests testPauseReasonsStackAndRemainingTimeIsExact]' passed (0.001 seconds).
+Test Case '-[ClassroomGameCoreTests.CombatTests testRescueHalfHealthAndEligibilityStartsNextRound]' started.
+Test Case '-[ClassroomGameCoreTests.CombatTests testRescueHalfHealthAndEligibilityStartsNextRound]' passed (0.002 seconds).
+Test Suite 'CombatTests' passed at 2026-10-12 12:24:31.608.
+	 Executed 14 tests, with 0 failures (0 unexpected) in 0.031 (0.033) seconds
+Test Suite 'EdgeRuleTests' started at 2026-10-12 12:24:31.608.
+Test Case '-[ClassroomGameCoreTests.EdgeRuleTests testAnyDamageD20CanTriggerInstantKillButHealingTwentyCannot]' started.
+Test Case '-[ClassroomGameCoreTests.EdgeRuleTests testAnyDamageD20CanTriggerInstantKillButHealingTwentyCannot]' passed (0.002 seconds).
+Test Case '-[ClassroomGameCoreTests.EdgeRuleTests testLastLivingPvPFactionWinsAfterKnockoutPointsAreIncluded]' started.
+Test Case '-[ClassroomGameCoreTests.EdgeRuleTests testLastLivingPvPFactionWinsAfterKnockoutPointsAreIncluded]' passed (0.002 seconds).
+Test Case '-[ClassroomGameCoreTests.EdgeRuleTests testNaturalTwentyAlsoDefeatsShieldedPvPPlayer]' started.
+Test Case '-[ClassroomGameCoreTests.EdgeRuleTests testNaturalTwentyAlsoDefeatsShieldedPvPPlayer]' passed (0.002 seconds).
+Test Case '-[ClassroomGameCoreTests.EdgeRuleTests testShieldTakesMaximumPersistsAfterBattleAndClearsOnDown]' started.
+Test Case '-[ClassroomGameCoreTests.EdgeRuleTests testShieldTakesMaximumPersistsAfterBattleAndClearsOnDown]' passed (0.002 seconds).
+Test Case '-[ClassroomGameCoreTests.EdgeRuleTests testSpendingLastActionPointAdvancesOnlyAfterDamageResolves]' started.
+Test Case '-[ClassroomGameCoreTests.EdgeRuleTests testSpendingLastActionPointAdvancesOnlyAfterDamageResolves]' passed (0.001 seconds).
+Test Case '-[ClassroomGameCoreTests.EdgeRuleTests testWeakerBuffDoesNotReplaceOrRefreshStrongerBuff]' started.
+Test Case '-[ClassroomGameCoreTests.EdgeRuleTests testWeakerBuffDoesNotReplaceOrRefreshStrongerBuff]' passed (0.002 seconds).
+Test Suite 'EdgeRuleTests' passed at 2026-10-12 12:24:31.619.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.010 (0.011) seconds
+Test Suite 'ExampleTests' started at 2026-10-12 12:24:31.620.
+Test Case '-[ClassroomGameCoreTests.ExampleTests testAllTeacherExamplesRunTheRealEngineAndMeetTheirChecks]' started.
+Test Case '-[ClassroomGameCoreTests.ExampleTests testAllTeacherExamplesRunTheRealEngineAndMeetTheirChecks]' passed (0.009 seconds).
+Test Suite 'ExampleTests' passed at 2026-10-12 12:24:31.629.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.009 (0.009) seconds
+Test Suite 'IntegrationBoundaryTests' started at 2026-10-12 12:24:31.629.
+Test Case '-[ClassroomGameCoreTests.IntegrationBoundaryTests testFailedUnpauseKeepsClockFrozenAndShortcutSevenAlwaysMeansHost]' started.
+Test Case '-[ClassroomGameCoreTests.IntegrationBoundaryTests testFailedUnpauseKeepsClockFrozenAndShortcutSevenAlwaysMeansHost]' passed (0.002 seconds).
+Test Case '-[ClassroomGameCoreTests.IntegrationBoundaryTests testMovementActivatesMonsterImmediatelyButItsAutomaticTurnWaitsNextRound]' started.
+Test Case '-[ClassroomGameCoreTests.IntegrationBoundaryTests testMovementActivatesMonsterImmediatelyButItsAutomaticTurnWaitsNextRound]' passed (0.002 seconds).
+Test Case '-[ClassroomGameCoreTests.IntegrationBoundaryTests testThreeClassesCompleteMixedBattleUsingInteractionAndAutomaticSteps]' started.
+Test Case '-[ClassroomGameCoreTests.IntegrationBoundaryTests testThreeClassesCompleteMixedBattleUsingInteractionAndAutomaticSteps]' passed (0.014 seconds).
+Test Suite 'IntegrationBoundaryTests' passed at 2026-10-12 12:24:31.647.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.018 (0.018) seconds
+Test Suite 'MonsterAITests' started at 2026-10-12 12:24:31.647.
+Test Case '-[ClassroomGameCoreTests.MonsterAITests testAIContinuesOrdinaryAttacksAndEndsWhenAPIsExhausted]' started.
+Test Case '-[ClassroomGameCoreTests.MonsterAITests testAIContinuesOrdinaryAttacksAndEndsWhenAPIsExhausted]' passed (0.002 seconds).
+Test Case '-[ClassroomGameCoreTests.MonsterAITests testMonsterNaturalTwentyPausesAllDownAndNoMoreAutoStepsRun]' started.
+Test Case '-[ClassroomGameCoreTests.MonsterAITests testMonsterNaturalTwentyPausesAllDownAndNoMoreAutoStepsRun]' passed (0.002 seconds).
+Test Case '-[ClassroomGameCoreTests.MonsterAITests testNearestEnemyMovesThenAttacksWithoutDecisionClock]' started.
+Test Case '-[ClassroomGameCoreTests.MonsterAITests testNearestEnemyMovesThenAttacksWithoutDecisionClock]' passed (0.002 seconds).
+Test Case '-[ClassroomGameCoreTests.MonsterAITests testNearestTieDrawRecordedAndEntireAIStepUndoRestoresRandom]' started.
+Test Case '-[ClassroomGameCoreTests.MonsterAITests testNearestTieDrawRecordedAndEntireAIStepUndoRestoresRandom]' passed (0.001 seconds).
+Test Case '-[ClassroomGameCoreTests.MonsterAITests testPausedAIAndFailedSaveDoNotSelectTargetsOrSpendPoints]' started.
+Test Case '-[ClassroomGameCoreTests.MonsterAITests testPausedAIAndFailedSaveDoNotSelectTargetsOrSpendPoints]' passed (0.002 seconds).
+Test Case '-[ClassroomGameCoreTests.MonsterAITests testRandomTargetIsSavedAcrossMovementAndRestoreAndRetargetsOnlyWhenInvalid]' started.
+Test Case '-[ClassroomGameCoreTests.MonsterAITests testRandomTargetIsSavedAcrossMovementAndRestoreAndRetargetsOnlyWhenInvalid]' passed (0.006 seconds).
+Test Case '-[ClassroomGameCoreTests.MonsterAITests testRecoveryPriorityOnceThenAttackAndRoundRefill]' started.
+Test Case '-[ClassroomGameCoreTests.MonsterAITests testRecoveryPriorityOnceThenAttackAndRoundRefill]' passed (0.002 seconds).
+Test Suite 'MonsterAITests' passed at 2026-10-12 12:24:31.663.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.015 (0.016) seconds
+Test Suite 'PVEFlowTests' started at 2026-10-12 12:24:31.663.
+Test Case '-[ClassroomGameCoreTests.PVEFlowTests testAllCompleteEffectsAndVictoryViaPlayerInteractionInTwentyScenario]' started.
+Test Case '-[ClassroomGameCoreTests.PVEFlowTests testAllCompleteEffectsAndVictoryViaPlayerInteractionInTwentyScenario]' passed (0.002 seconds).
+Test Case '-[ClassroomGameCoreTests.PVEFlowTests testContinuousPathStopsAtFirstEnemyAndAllPlayersJoinAtOriginalPositions]' started.
+Test Case '-[ClassroomGameCoreTests.PVEFlowTests testContinuousPathStopsAtFirstEnemyAndAllPlayersJoinAtOriginalPositions]' passed (0.002 seconds).
+Test Case '-[ClassroomGameCoreTests.PVEFlowTests testGroupMovementCannotPartlySpendAndRewardTargetsAreSeparate]' started.
+Test Case '-[ClassroomGameCoreTests.PVEFlowTests testGroupMovementCannotPartlySpendAndRewardTargetsAreSeparate]' passed (0.001 seconds).
+Test Case '-[ClassroomGameCoreTests.PVEFlowTests testMovingAttackMovingUsesActualActorAndDoesNotChangeRewardSelection]' started.
+Test Case '-[ClassroomGameCoreTests.PVEFlowTests testMovingAttackMovingUsesActualActorAndDoesNotChangeRewardSelection]' passed (0.002 seconds).
+Test Case '-[ClassroomGameCoreTests.PVEFlowTests testPreviewSelectionsAndInvalidCommandsNeverRollSaveOrResetClock]' started.
+Test Case '-[ClassroomGameCoreTests.PVEFlowTests testPreviewSelectionsAndInvalidCommandsNeverRollSaveOrResetClock]' passed (0.001 seconds).
+Test Case '-[ClassroomGameCoreTests.PVEFlowTests testPublicPlayProjectionAndLogHideUndiscoveredMonsterNamesAndDropChecks]' started.
+Test Case '-[ClassroomGameCoreTests.PVEFlowTests testPublicPlayProjectionAndLogHideUndiscoveredMonsterNamesAndDropChecks]' passed (0.002 seconds).
+Test Case '-[ClassroomGameCoreTests.PVEFlowTests testRescueAndPersonalPotionThroughInteractionController]' started.
+Test Case '-[ClassroomGameCoreTests.PVEFlowTests testRescueAndPersonalPotionThroughInteractionController]' passed (0.001 seconds).
+Test Case '-[ClassroomGameCoreTests.PVEFlowTests testResourceEditingIsOneAtomicOperationAndDoesNotAwardTeacherMonsterKills]' started.
+Test Case '-[ClassroomGameCoreTests.PVEFlowTests testResourceEditingIsOneAtomicOperationAndDoesNotAwardTeacherMonsterKills]' passed (0.001 seconds).
+Test Case '-[ClassroomGameCoreTests.PVEFlowTests testSetupSixStudentsAndHostAndRejectsInvalidParticipation]' started.
+Test Case '-[ClassroomGameCoreTests.PVEFlowTests testSetupSixStudentsAndHostAndRejectsInvalidParticipation]' passed (0.002 seconds).
+Test Case '-[ClassroomGameCoreTests.PVEFlowTests testTimeoutClearsPendingTargetsInsteadOfAttackingAsNextPlayer]' started.
+Test Case '-[ClassroomGameCoreTests.PVEFlowTests testTimeoutClearsPendingTargetsInsteadOfAttackingAsNextPlayer]' passed (0.001 seconds).
+Test Suite 'PVEFlowTests' passed at 2026-10-12 12:24:31.680.
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.016 (0.017) seconds
+Test Suite 'StateAndScoringTests' started at 2026-10-12 12:24:31.680.
+Test Case '-[ClassroomGameCoreTests.StateAndScoringTests testArchiveAndAtomicStoreRestoreCompleteStatePausedAndDoNotMutateTemplates]' started.
+Test Case '-[ClassroomGameCoreTests.StateAndScoringTests testArchiveAndAtomicStoreRestoreCompleteStatePausedAndDoNotMutateTemplates]' passed (0.006 seconds).
+Test Case '-[ClassroomGameCoreTests.StateAndScoringTests testBothSetThresholdsAccumulateWithoutHealingOrRefilling]' started.
+Test Case '-[ClassroomGameCoreTests.StateAndScoringTests testBothSetThresholdsAccumulateWithoutHealingOrRefilling]' passed (0.002 seconds).
+Test Case '-[ClassroomGameCoreTests.StateAndScoringTests testGroupMoveFailureAndEncounterStopAreAtomic]' started.
+Test Case '-[ClassroomGameCoreTests.StateAndScoringTests testGroupMoveFailureAndEncounterStopAreAtomic]' passed (0.002 seconds).
+Test Case '-[ClassroomGameCoreTests.StateAndScoringTests testMultipleRewardsRespectCapWithoutChangingCurrentActor]' started.
+Test Case '-[ClassroomGameCoreTests.StateAndScoringTests testMultipleRewardsRespectCapWithoutChangingCurrentActor]' passed (0.001 seconds).
+Test Case '-[ClassroomGameCoreTests.StateAndScoringTests testNoSurvivingPvPFactionWaitsForTeacherAndScoreTiesArePreserved]' started.
+Test Case '-[ClassroomGameCoreTests.StateAndScoringTests testNoSurvivingPvPFactionWaitsForTeacherAndScoreTiesArePreserved]' passed (0.001 seconds).
+Test Case '-[ClassroomGameCoreTests.StateAndScoringTests testPublicProjectionOmitsUnrevealedContentsAndPrivateSimulationState]' started.
+Test Case '-[ClassroomGameCoreTests.StateAndScoringTests testPublicProjectionOmitsUnrevealedContentsAndPrivateSimulationState]' passed (0.001 seconds).
+Test Case '-[ClassroomGameCoreTests.StateAndScoringTests testPvPKnockoutCanScoreAgainAfterReviveWithoutDroppingAssets]' started.
+Test Case '-[ClassroomGameCoreTests.StateAndScoringTests testPvPKnockoutCanScoreAgainAfterReviveWithoutDroppingAssets]' passed (0.002 seconds).
+Test Case '-[ClassroomGameCoreTests.StateAndScoringTests testRollbackDropsFutureBranchAndRestoresRandomAndWholeOperations]' started.
+Test Case '-[ClassroomGameCoreTests.StateAndScoringTests testRollbackDropsFutureBranchAndRestoresRandomAndWholeOperations]' passed (0.001 seconds).
+Test Case '-[ClassroomGameCoreTests.StateAndScoringTests testSetSkillUsageDoesNotResetWhenUnequippingAndReequipping]' started.
+Test Case '-[ClassroomGameCoreTests.StateAndScoringTests testSetSkillUsageDoesNotResetWhenUnequippingAndReequipping]' passed (0.001 seconds).
+Test Case '-[ClassroomGameCoreTests.StateAndScoringTests testSevenPlayersIncludingHostHaveIndependentResourcesAndRankingTies]' started.
+Test Case '-[ClassroomGameCoreTests.StateAndScoringTests testSevenPlayersIncludingHostHaveIndependentResourcesAndRankingTies]' passed (0.002 seconds).
+Test Case '-[ClassroomGameCoreTests.StateAndScoringTests testSharedNodeRewardIsClaimedOnceAndUndoRestoresAllArrivalEffects]' started.
+Test Case '-[ClassroomGameCoreTests.StateAndScoringTests testSharedNodeRewardIsClaimedOnceAndUndoRestoresAllArrivalEffects]' passed (0.001 seconds).
+Test Case '-[ClassroomGameCoreTests.StateAndScoringTests testTeacherKillWithoutOwnerDoesNotAutoPayButExplicitAttributionCan]' started.
+Test Case '-[ClassroomGameCoreTests.StateAndScoringTests testTeacherKillWithoutOwnerDoesNotAutoPayButExplicitAttributionCan]' passed (0.001 seconds).
+Test Case '-[ClassroomGameCoreTests.StateAndScoringTests testTeamSupportAndRescueUseCurrentBattleFaction]' started.
+Test Case '-[ClassroomGameCoreTests.StateAndScoringTests testTeamSupportAndRescueUseCurrentBattleFaction]' passed (0.002 seconds).
+Test Suite 'StateAndScoringTests' passed at 2026-10-12 12:24:31.706.
+	 Executed 13 tests, with 0 failures (0 unexpected) in 0.024 (0.026) seconds
+Test Suite 'ClassroomGameCoreTests.xctest' passed at 2026-10-12 12:24:31.706.
+	 Executed 58 tests, with 0 failures (0 unexpected) in 0.132 (0.140) seconds
+Test Suite 'All tests' passed at 2026-10-12 12:24:31.706.
+	 Executed 58 tests, with 0 failures (0 unexpected) in 0.132 (0.141) seconds
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+✔ Test run with 0 tests in 0 suites passed after 0.001 seconds.

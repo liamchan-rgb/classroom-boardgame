@@ -2,7 +2,7 @@
 
 实施路线：**独立原生iPad App → GitHub Xcode27云端构建 → SideStore免费个人签名与续签**。纯自用，不使用TestFlight，不需要购买Apple Developer Program。
 
-教师已反馈v0.6各功能正常，并同意继续。阶段1已完成，教师反馈v0.7正常。当前实施**阶段2：可操作的最小PVE完整流程 v0.8**。原始两份文档在 `docs/`，保持不变；[实施计划](实施计划_v2.md)、[技术验证](技术验证.md)、[阶段1验收](stage1/阶段1验收.md)。本阶段核对见 [阶段2验收](stage2/阶段2验收.md)。
+教师已反馈v0.6各功能正常，并同意继续。阶段1已完成，教师反馈v0.7正常。当前实施**阶段2：可操作的最小PVE完整流程 v0.8**。原始两份文档在 `docs/`，保持不变；[实施计划](实施计划_v2.md)、[技术验证](技术验证.md)、[阶段1验收](stage1/阶段1验收.md)。操作入口见 [快速开始](stage2/快速开始.md)，完整范围见 [阶段2验收](stage2/阶段2验收.md)。
 
 ## 当前交付
 
@@ -25,7 +25,7 @@ v0.6历史成功构建：[工作流38222596815](https://github.com/liamchan-rgb/
 
 配色和布局开始采用设计令牌；正式美术仍可由设计对话交付后替换。尚不提供商店、正式随机地图编辑、自定义键位和完整存档包。
 
-本地GameCore58项、ProbeCore6项通过；v0.8实际Xcode27构建与IPA证据在完成后记录到 `stage2/evidence/`。新界面真机核对仍待教师反馈。
+本地及Xcode27云端GameCore58项、ProbeCore6项通过。v0.8设备版已编译并校验：[成功构建](https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38248744250)、[构建产物](https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38248744250/artifacts/11747620718)。编译提交 `aff02aad17fc24b6f76c6ac3e8ce3b4269934f2d`；证据在 `stage2/evidence/cloud-build-result-v0.8.json`。新PVE触摸、键盘与电视排版仍需真机反馈。
 
 ## 开发检查
 

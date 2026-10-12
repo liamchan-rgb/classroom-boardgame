@@ -1,0 +1,40 @@
+{
+  "date": "2026-10-12",
+  "workflowURL": "https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38248165668",
+  "runID": 38248165668,
+  "jobID": 114807234051,
+  "artifactID": 11746529558,
+  "testedCommit": "915a87eb4f9155dfd59e6743a91798512d2e18c9",
+  "conclusion": "success",
+  "xcodeVersion": "Xcode 27.0\nBuild version 27A266a",
+  "coreTests": {
+    "GameCore": "58 passed, 0 failures",
+    "ProbeCore": "6 passed, 0 failures"
+  },
+  "appVersion": "0.8",
+  "buildNumber": "8",
+  "displayName": "ClassroomProbe",
+  "bundleName": "ClassroomProbe",
+  "bundleIdentifier": "org.personal.classroom.stage0",
+  "minimumOS": "27.0",
+  "sdk": "iphoneos27.0",
+  "deviceFamily": [
+    2
+  ],
+  "architecture": "arm64",
+  "rulesResource": "Payload/ClassroomProbe.app/ClassroomGameCore_ClassroomGameCore.bundle/initial-content.json",
+  "contentCounts": {
+    "classes": 4,
+    "skills": 19,
+    "items": 18,
+    "sets": 2,
+    "monsters": 6
+  },
+  "designTokensBundledAndVerified": true,
+  "ipaBytes": 1056623,
+  "ipaSha256": "7a13fa6b631feded8f44d207cf03f037ee48b6b3150093210f5c22237af109b6",
+  "artifactArchiveSha256": "98094d60529fc5121c479df96660092eb44ada6f0a46c5ad5894ef6e84074053",
+  "requiresPersonalSigning": true,
+  "newPVEDeviceVerified": false,
+  "artifactExpiresAt": "2026-10-15T12:19:25Z"
+}

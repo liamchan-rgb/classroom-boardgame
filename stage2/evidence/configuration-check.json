@@ -15,5 +15,6 @@
   "nativeSyntax": "passed; not a device build",
   "staticProjectWorkflow": "passed",
   "designTokensBundled": "identical to design/design-tokens_v1.json",
-  "deviceBuild": "pending actual workflow"
+  "deviceBuild": "passed: Xcode27 workflow38248744250, 64 tests, arm64 iPadOS27",
+  "testedCommit": "aff02aad17fc24b6f76c6ac3e8ce3b4269934f2d"
 }
