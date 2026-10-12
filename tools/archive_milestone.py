@@ -101,7 +101,7 @@ def main():
     current_ipa = matching_ipa[0]["file"]
     guide = f'''# {args.milestone} 恢复说明
 
-这份存档包含阶段0—2现存成果的源码、资料、设计、测试及交付文件。后续版本按各自清单记录范围。
+本存档包含该步源码、项目资料、设计、测试和明确选定的交付文件；范围以清单为准。首次阶段0—2存档同时保存此前全部现存交付。
 
 - 源码快照提交：{snapshot}
 - 本存档标签：{args.milestone}
@@ -124,7 +124,7 @@ cd classroom-boardgame-restored
 git checkout {snapshot}
 ```
 
-Git bundle保存生成时的项目refs和历史；本存档提交包含归档规则/工具。若继续与原私有仓库协作，将origin改为 https://github.com/liamchan-rgb/classroom-boardgame.git，再使用自己的GitHub授权。
+Git bundle保存源码分支/标签和历史，排除二进制archive-assets分支；本存档提交包含归档规则/工具。若继续与原私有仓库协作，将origin改为 https://github.com/liamchan-rgb/classroom-boardgame.git，再使用自己的GitHub授权。
 
 构建设备版使用Xcode27工程；不用重新解析源码也可直接把当前IPA交给SideStore。历史安装包/Playground样例保留用于追溯，不能把其中失败版本当作当前推荐包。
 
