@@ -17,7 +17,7 @@ struct PVEMapView:View {
             let width = Double(geometry.size.width), height = Double(geometry.size.height)
             let marginX = min(64.0,width*0.13), marginY = min(88.0,height*0.20)
             let labelSize = publicDisplay ? 24.0 : 16.0
-            let artSize = publicDisplay ? 112.0 : 96.0
+            let artSize = publicDisplay ? 112.0 : min(96.0,max(64.0,width*0.18))
             ZStack {
                 ArtImage(type:"visualLayer",id:width/height > 1.5 ? "map_ground_1920" : "map_ground_1440").aspectRatio(contentMode:.fill).frame(width:width,height:height).clipped()
                 ArtImage(type:"visualLayer",id:width/height > 1.5 ? "map_decoration_1920" : "map_decoration_1440").aspectRatio(contentMode:.fill).frame(width:width,height:height).clipped()

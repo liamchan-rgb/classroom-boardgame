@@ -34,17 +34,6 @@ final class TeacherHostController: UIViewController {
     private var registration: UISceneAccessoryRegistration?
     private var heldKeys: Set<String> = []
     override var canBecomeFirstResponder: Bool { true }
-    #if DEBUG
-    override func viewDidAppear(_ animated:Bool) {
-        super.viewDidAppear(animated)
-        if ProcessInfo.processInfo.arguments.contains("--visual-check"), let window = view.window {
-            Task { @MainActor in
-                do { try await NativeVisualValidation.run(in:window) }
-                catch { print("VISUAL_VALIDATION_FAILED: \(error)") }
-            }
-        }
-    }
-    #endif
     override func viewDidLoad() {
         super.viewDidLoad()
         let host = UIHostingController(rootView: TeacherConsole(session: .shared))
@@ -65,7 +54,17 @@ final class TeacherHostController: UIViewController {
         registration = registerSceneAccessory(.externalNonInteractive(sceneConfiguration: configuration))
         TeacherSession.shared.setRegistrationStatus("已注册iPadOS27公开场景，等待电视连接。")
     }
-    override func viewDidAppear(_ animated: Bool) { super.viewDidAppear(animated); becomeFirstResponder() }
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated); becomeFirstResponder()
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--visual-check"), let window = view.window {
+            Task { @MainActor in
+                do { try await NativeVisualValidation.run(in:window) }
+                catch { print("VISUAL_VALIDATION_FAILED: \(error)") }
+            }
+        }
+        #endif
+    }
     deinit { NotificationCenter.default.removeObserver(self) }
     @objc private func clearPressedKeys() { heldKeys.removeAll() }
     override func resignFirstResponder() -> Bool { heldKeys.removeAll(); return super.resignFirstResponder() }

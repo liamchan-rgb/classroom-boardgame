@@ -70,14 +70,16 @@ jobs:
             -configuration Debug -destination "id=$device_id" -derivedDataPath native/simulator-build \
             CODE_SIGNING_ALLOWED=NO ARCHS=arm64 ONLY_ACTIVE_ARCH=YES build > artifacts/simulator-build.log 2>&1
           xcrun simctl install "$device_id" native/simulator-build/Build/Products/Debug-iphonesimulator/ClassroomProbe.app
-          xcrun simctl launch "$device_id" org.personal.classroom.stage0 --visual-check
+          xcrun simctl launch --console-pty "$device_id" org.personal.classroom.stage0 --visual-check > artifacts/visual-validation-console.log 2>&1 &
+          visual_console_pid=$!
           app_data=$(xcrun simctl get_app_container "$device_id" org.personal.classroom.stage0 data)
           for attempt in {1..45}; do
             test ! -f "$app_data/Documents/visual-validation/complete.txt" || break
             sleep 1
           done
+          if test -d "$app_data/Documents/visual-validation"; then cp -R "$app_data/Documents/visual-validation" artifacts/; fi
+          kill "$visual_console_pid" || true
           test -f "$app_data/Documents/visual-validation/complete.txt"
-          cp -R "$app_data/Documents/visual-validation" artifacts/
       - name: Retain IPA and diagnostics briefly
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

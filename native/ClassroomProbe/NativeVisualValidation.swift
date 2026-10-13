@@ -15,7 +15,7 @@ enum NativeVisualValidation {
         for id in state.units.keys { state.units[id]?.nodeID = 2 }
         state.map.revealed = [1,2,3]
         let queue = ["p1","m1","p2","p3","m2","p4","p5","p6","m3","p7"]
-        state.battle = BattleState(kind:.pve,queue:queue,current:"p1",initiatives:queue.enumerated().map { Initiative(unitID:$0.element,value:20-$0.offset) })
+        state.battle = BattleState(kind:.pve,queue:queue,current:"p1")
         state.phase = .pve; state.pauseReasons = [.manual]; state.remainingSeconds = 17
         for id in ["m1","m2","m3"] { state.units[id]?.active = true }
         state.units["p1"]?.inventory = ["smallPotion":2,"largePotion":1,"shieldPotion":1,"revivalStone":1]

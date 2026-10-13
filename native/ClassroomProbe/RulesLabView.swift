@@ -44,6 +44,7 @@ struct RulesLabView: View {
             .navigationTitle("阶段1 · 规则与资料")
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("完成") { dismiss() } } }
         }
+        .tint(GameTheme.primary).preferredColorScheme(.light)
         .onChange(of: lab.example) { _, _ in lab.clear(); syncDisplay() }
         .onChange(of: projecting) { _, _ in syncDisplay() }
         .onChange(of: lab.showBefore) { _, _ in syncDisplay() }
@@ -110,11 +111,11 @@ struct GameExamplePublicView: View {
                         VStack(alignment: .leading, spacing: 7) {
                             Text(unit.name + (unit.current ? " · 当前" : "")).font(.headline)
                             Text("生命 \(unit.health)/\(unit.maximumHealth) · 护盾 \(unit.shield)")
-                            Text("行动点 \(unit.ap) · 地点 \(unit.nodeID)")
+                            Text("地点 \(unit.nodeID)")
                             if unit.player { Text("金币 \(unit.coins) · 积分 \(unit.score)") }
                             Text(unit.health == 0 ? (unit.player ? "已倒地" : "已击败") : unit.team)
                         }.font(.callout).frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(14).background(.white.opacity(unit.current ? 0.22 : 0.12), in: RoundedRectangle(cornerRadius: 12))
+                            .padding(14).background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
                     }
                 }
                 ForEach(Array(snapshot.dice.enumerated()), id: \.offset) { _, roll in
@@ -122,7 +123,7 @@ struct GameExamplePublicView: View {
                         .font(.title3.bold())
                 }
             }.padding(24)
-        }.foregroundStyle(.white).background(Color(red: 0.02, green: 0.24, blue: 0.22))
+        }.foregroundStyle(GameTheme.ink).background(GameTheme.background)
     }
 }
 
@@ -146,24 +147,24 @@ private struct CatalogView: View {
         List {
             Section("4种职业") {
                 ForEach(catalog.classes) { definition in
-                    DisclosureGroup(definition.name) {
+                    DisclosureGroup {
                         Text(attributes(definition.attributes))
                         ForEach(definition.skills, id: \.self) { id in
                             if let skill = catalog.skills.first(where: { $0.id == id }) { SkillRow(skill: skill) }
                         }
-                    }
+                    } label: { HStack { ArtImage(type:"classes",id:definition.id).frame(width:44,height:44); Text(definition.name) } }
                 }
             }
             Section("18种物品") {
                 ForEach(catalog.items) { item in
-                    DisclosureGroup(item.name) {
+                    DisclosureGroup {
                         Text(item.purchasePrice.map { "买入\($0)金币 · 卖出\(item.sellPrice)金币" } ?? "稀有掉落 · 卖出\(item.sellPrice)金币")
                         if let attack = item.attack { Text("攻击 \(attack.dice.label) · 射程\(attack.range)") }
                         if item.kind == .equipment { Text(bonus(item.attributes)) }
                         if item.heal > 0 { Text("恢复\(item.heal)生命 · 消耗1行动点 · 射程\(item.range)") }
                         if item.shield > 0 { Text("获得\(item.shield)护盾 · 消耗1行动点 · 射程\(item.range)") }
                         if item.kind == .revivalStone { Text("救援消耗1枚复活石和2行动点；同地点队友恢复一半生命，向上取整。") }
-                    }
+                    } label: { HStack { ArtImage(type:"items",id:item.id).frame(width:44,height:44); Text(item.name) } }
                 }
             }
             Section("2种套装 · 两件与三件效果累加") {
@@ -178,7 +179,7 @@ private struct CatalogView: View {
             }
             Section("6种怪物 · 各项掉落独立判定") {
                 ForEach(catalog.monsters) { monster in
-                    DisclosureGroup(monster.name + (monster.boss ? " · Boss" : "")) {
+                    DisclosureGroup {
                         Text(attributes(monster.attributes) + " · 初始护盾\(monster.shield)")
                         Text("攻击 \(monster.attack.dice.label) · 射程\(monster.attack.range) · 击败积分\(monster.score)")
                         ForEach(monster.skills, id: \.self) { id in
@@ -187,7 +188,7 @@ private struct CatalogView: View {
                         ForEach(Array(monster.drops.enumerated()), id: \.offset) { _, drop in
                             Text("\(drop.percent)%：" + (drop.itemID.flatMap { id in catalog.items.first { $0.id == id }?.name }.map { "\($0) ×\(drop.count)" } ?? "\(drop.coins)金币"))
                         }
-                    }
+                    } label: { HStack { ArtImage(type:"monsters",id:monster.id).frame(width:44,height:44); Text(monster.name + (monster.boss ? " · Boss" : "")) } }
                 }
             }
         }

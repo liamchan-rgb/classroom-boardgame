@@ -12,37 +12,45 @@ struct PublicSurface: View {
         } else if let example = model.ruleExample {
             GameExamplePublicView(snapshot: example)
         } else {
-        VStack(spacing: 16) {
-            HStack {
-                Text("英语课堂 · 公开画面").font(.title2.bold())
-                Spacer()
-                Text(model.snapshot.paused ? "已暂停" : "计时中")
-                Text("\(Int(ceil(model.snapshot.remainingSeconds)))秒").monospacedDigit()
-                Text("\(model.snapshot.pageCount == 0 ? 0 : model.snapshot.pageIndex + 1) / \(model.snapshot.pageCount)")
-            }
-            if let image = model.image {
-                Image(uiImage: image).resizable().scaledToFit().frame(maxHeight: .infinity)
-            } else {
-                VStack(spacing: 20) {
-                    Image(systemName: "rectangle.on.rectangle").font(.system(size: 64))
-                    Text("学生公开画面").font(.largeTitle.bold())
-                    Text("教师端导入绘本后，在此显示公开页面。")
-                }.frame(maxWidth: .infinity, maxHeight: .infinity)
-            }
-            HStack(alignment: .top, spacing: 8) {
-                ForEach(model.snapshot.players) { player in
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(player.name).font(.headline)
-                        Text("生命 \(player.health)/\(player.maxHealth)")
-                        Text("护盾 \(player.shield)")
-                        Text("金币 \(player.coins) · 积分 \(player.score)")
-                        Text(player.team)
-                    }.font(.caption).frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(9).background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 12))
-                }
-            }
-        }.padding(20).foregroundStyle(.white).background(Color(red: 0.02, green: 0.24, blue: 0.22))
+            LegacyPublicBook(snapshot:model.snapshot,image:model.image)
         }
+    }
+}
+
+/// The retained stage0 book entry uses the same local theme and six public fields.
+private struct LegacyPublicBook:View {
+    let snapshot:PublicSnapshot
+    let image:UIImage?
+    var body:some View {
+        GeometryReader { geometry in
+            let width = geometry.size.width/geometry.size.height > 1.5 ? 1920.0 : 1440.0
+            let scale = min(geometry.size.width/width,geometry.size.height/1080)
+            VStack(spacing:16) {
+                HStack {
+                    Text("英语课堂 · 绘本").font(.system(size:30,weight:.bold))
+                    Spacer()
+                    Text(snapshot.paused ? "已暂停" : "计时中")
+                    Text("\(Int(ceil(snapshot.remainingSeconds)))秒").monospacedDigit()
+                    Text("\(snapshot.pageCount == 0 ? 0 : snapshot.pageIndex+1) / \(snapshot.pageCount)")
+                }.font(.system(size:28)).frame(height:60)
+                if let image { Image(uiImage:image).resizable().scaledToFit().frame(maxWidth:.infinity,maxHeight:.infinity) }
+                else { Text("教师正在准备绘本").font(.system(size:36)).frame(maxWidth:.infinity,maxHeight:.infinity) }
+                HStack(alignment:.top,spacing:8) {
+                    ForEach(snapshot.players) { player in
+                        VStack(alignment:.leading,spacing:4) {
+                            Text(player.name).bold().fixedSize(horizontal:false,vertical:true).frame(height:62,alignment:.top)
+                            ResourceValue(id:"health",text:"\(player.health)/\(player.maxHealth)")
+                            ResourceValue(id:"shield",text:String(player.shield))
+                            ResourceValue(id:"coin",text:String(player.coins))
+                            ResourceValue(id:"score",text:String(player.score))
+                            HStack(spacing:4) { TeamMark(id:player.team); Text(player.team) }
+                        }.font(.system(size:26)).padding(10).frame(maxWidth:.infinity,alignment:.leading)
+                            .background(.regularMaterial,in:RoundedRectangle(cornerRadius:12))
+                    }
+                }.frame(height:244)
+            }.padding(.horizontal,width*0.05).padding(.vertical,54).frame(width:width,height:1080).scaleEffect(scale)
+                .frame(width:geometry.size.width,height:geometry.size.height)
+        }.foregroundStyle(GameTheme.ink).background(GameTheme.background).preferredColorScheme(.light)
     }
 }
 
@@ -61,7 +69,7 @@ struct TeacherConsole: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
-                    Label("教师端 · 阶段2 v0.8", systemImage: "book.closed.fill").font(.title2.bold())
+                    Label("晴空学园 · v0.9", systemImage: "book.closed.fill").font(.title2.bold())
                     Spacer()
                     Text("公开场景 \(session.connectionCount)").font(.headline)
                 }
@@ -71,23 +79,23 @@ struct TeacherConsole: View {
                     notesFocused = false
                     session.beginPlay()
                     showPlay = true
-                }.buttonStyle(.borderedProminent)
+                }.buttonStyle(ClassroomButtonStyle(primary:true))
                 Button("规则示例与初始资料") {
                     notesFocused = false
                     session.beginRules()
                     showRules = true
-                }.buttonStyle(.borderedProminent)
+                }.buttonStyle(ClassroomButtonStyle(primary:true))
                 HStack(spacing: 8) {
                     ForEach(session.state.players) { player in
                         Button(player.name) { session.select(player.id) }
-                            .buttonStyle(.bordered)
+                            .buttonStyle(ClassroomButtonStyle())
                             .tint(player.id == session.state.selectedPlayerID ? .blue : .gray)
                     }
                 }
                 HStack {
-                    Button("发10金币（G）") { session.award() }.buttonStyle(.borderedProminent)
-                    Button("暂停／继续（空格）") { session.togglePause() }.buttonStyle(.bordered)
-                    Button("重置30秒") { session.resetClock() }.buttonStyle(.bordered)
+                    Button("发10金币（G）") { session.award() }.buttonStyle(ClassroomButtonStyle(primary:true))
+                    Button("暂停／继续（空格）") { session.togglePause() }.buttonStyle(ClassroomButtonStyle())
+                    Button("重置30秒") { session.resetClock() }.buttonStyle(ClassroomButtonStyle())
                     Text("奖励对象：\(session.selectedName)")
                 }
                 HStack(alignment: .top, spacing: 16) {
@@ -95,9 +103,9 @@ struct TeacherConsole: View {
                         PublicSurface(model: session.display).frame(minHeight: 380)
                             .clipShape(RoundedRectangle(cornerRadius: 16))
                         HStack {
-                            Button("上一页") { session.turnPage(-1) }.buttonStyle(.bordered)
-                            Button("下一页") { session.turnPage(1) }.buttonStyle(.bordered)
-                            Button("导入报告") { showReport = true; session.pause(.filePicker, enabled: true) }.buttonStyle(.bordered)
+                            Button("上一页") { session.turnPage(-1) }.buttonStyle(ClassroomButtonStyle())
+                            Button("下一页") { session.turnPage(1) }.buttonStyle(ClassroomButtonStyle())
+                            Button("导入报告") { showReport = true; session.pause(.filePicker, enabled: true) }.buttonStyle(ClassroomButtonStyle())
                         }
                     }.frame(maxWidth: .infinity)
                     VStack(alignment: .leading, spacing: 10) {
@@ -124,11 +132,11 @@ struct TeacherConsole: View {
                         if let url = session.exportedURL() { exportingURL = url; showExporter = true; session.pause(.filePicker, enabled: true) }
                     }
                     Button("导入备份") { importingBackup = true; openImporter() }
-                }.buttonStyle(.bordered)
+                }.buttonStyle(ClassroomButtonStyle())
                 Text("阶段1新增规则示例与初始资料；下方保留阶段0验证功能。绘本基础渲染的限制详见导入报告。")
                     .font(.caption).foregroundStyle(.secondary)
             }.padding(24)
-        }.background(Color(uiColor: .systemGroupedBackground))
+        }.background(GameTheme.background).foregroundStyle(GameTheme.ink).tint(GameTheme.primary).preferredColorScheme(.light)
             .onChange(of: notesFocused) { _, active in session.notesFocus(active) }
             .onChange(of: session.showNotes) { _, visible in if !visible { notesFocused = false } }
             .fileImporter(isPresented: $showImporter,
