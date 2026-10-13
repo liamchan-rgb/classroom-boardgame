@@ -1,0 +1,13 @@
+{
+  "status": "hd-pixel-concepts-awaiting-review",
+  "asset": "previews/hd_pixel_scene_concepts.png",
+  "width": 1536,
+  "height": 1024,
+  "sceneCount": 4,
+  "layout": "2x2",
+  "generated": true,
+  "fixedPixelGridVerified": false,
+  "layered": false,
+  "runtimeReady": false,
+  "appChanged": false
+}
