@@ -1,0 +1,14 @@
+{
+  "snapshotCommit": "02e67bce7f75d67d975d65e2fdf7a61688891c05",
+  "tag": "archive-design-map-battle-ui-b-v4-20261013",
+  "branch": "design/map-battle-ui-round4-20261013",
+  "zip": "classroom-map-battle-ui-b-v4-20261013.zip",
+  "bytes": 9181634,
+  "sha256": "65e57d96d25fb4647c77d04509ecc4938a077e32ce83401758226a33dcd1928f",
+  "payloadFiles": 138,
+  "zipEntries": 139,
+  "designStatus": "awaiting-review",
+  "nativeAppChanged": false,
+  "crcChecked": true,
+  "payloadHashesChecked": true
+}
