@@ -1,0 +1,31 @@
+{
+  "verifiedAtUTC": "2026-10-13T16:44:46.797687+00:00",
+  "testedCommit": "1c1a47a89eb912daa25068c887cc71a6da66e5e8",
+  "sourceCommit": "a5260baafa2438363dc34dea5808d69ffcca6d5a",
+  "sourceCommitMeaning": "PR head; testedCommit is actual GITHUB_SHA synthetic merge commit",
+  "runID": 38432491033,
+  "jobID": 115417970811,
+  "workflowURL": "https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38432491033",
+  "event": "pull_request",
+  "conclusion": "success",
+  "runnerLabel": "xcode-27",
+  "runnerOS": "macOS 27.0.1 arm64",
+  "xcodeVersion": "Xcode 27.2\nBuild version 27B5028f",
+  "sdk": "iphonesimulator27.2",
+  "appVersion": "0.10",
+  "buildKind": "Debug unsigned iOS Simulator build",
+  "coreTests": {
+    "GameCore": "72 passed, 0 failures",
+    "ProbeCore": "6 passed, 0 failures"
+  },
+  "artifactID": 11832006688,
+  "artifactArchiveSha256": "faaf2610cc80476e875ad0bbe8326090c1829fa94b212018ce09e37406068a77",
+  "artifactArchiveBytes": 87829,
+  "artifactZIPCRC": "pass",
+  "artifactLogsChecked": true,
+  "xcresultIncluded": true,
+  "ipaProduced": false,
+  "ipaCompiledCommit": null,
+  "nativeDeviceVerified": false,
+  "localNativeBuild": "not-run-Linux-no-Apple-SDK"
+}

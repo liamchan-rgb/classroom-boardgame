@@ -1,0 +1,16 @@
+{
+  "runID": 38432119814,
+  "url": "https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38432119814",
+  "testedCommit": "c511f75c5b1f4493dfc597ea46789783d9abaa99",
+  "runnerLabel": "macos-latest",
+  "runnerOS": "macOS 26.6.2 arm64",
+  "highestIOSSDK": "26.5",
+  "requiredMinimumIOS": "27.0",
+  "conclusion": "failure-before-compilation-no-compatible-SDK",
+  "buildLogArtifactUpload": "success",
+  "artifactID": 11831476741,
+  "artifactDownloadedAndCRCVerified": true,
+  "artifactArchiveSha256": "90399f294dfc410ebf665a6834dce35545fecc27bead04ec7d8770864ff98f52",
+  "correction": "Use repository verified macOS/Xcode 27 runner xcode-27",
+  "deploymentTargetLowered": false
+}

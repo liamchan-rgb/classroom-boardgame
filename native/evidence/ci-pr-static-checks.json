@@ -9,7 +9,7 @@
   "teeFailurePropagation": "pass-exit-65-and-log-retained",
   "localXcodeBuild": "not-run-Linux-no-Apple-SDK",
   "nativePackageTests": "not-run-local",
-  "cloudRun": "pending-first-PR",
+  "cloudRun": "success-see-ci-pr-cloud-success.json",
   "deploymentMinimumChanged": false,
   "appAndRulesChanged": false
 }
