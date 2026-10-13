@@ -1,0 +1,19 @@
+PASS: field channels finite and bounded across world
+PASS: seeded world field deterministic
+PASS: natural patches have multiple density levels
+PASS: decoration seed changes field
+PASS: road center has no dense detail
+PASS: camp center has no dense detail
+PASS: clearance recovers away from paths
+PASS: noise continuous at small camera-independent displacement
+PASS: shadow foot fixed
+PASS: upper-left sun casts lower-right
+PASS: finite bounded effects
+PASS: default settings already bounded
+PASS: pixel character excluded from environment kind
+PASS: only public edges rendered
+PASS: original five nodes unchanged
+PASS: road/movement endpoints unchanged
+PASS: duplicate display event not replayed
+PASS: 16:9 and 4:3 fits positive
+PASS: 18 effect/geometry checks; no screenshots, simulator or visual review.

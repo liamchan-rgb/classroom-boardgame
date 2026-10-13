@@ -1,0 +1,7 @@
+PASS original 7 Art resource bytes and ideal-reference SHA256, atlas rectangles and generated Xcode configuration.
+PASS tree-sitter Swift syntax for sample sources, tests and pure check harness.
+PASS glslangValidator 12.0.0 two GLES 1.00 fragment sources with declared SpriteKit built-ins/custom inputs.
+PASS actionlint 1.7.12 device workflow.
+PASS sample packager valid device header and 7 adverse cases, including arm64 simulator disguised with iPhoneOS plist.
+PASS downloaded IPA CRC, Mach-O arm64 and iOS LC_BUILD_VERSION=2, executable modes, no signature/provisioning material, immutable resource SHA256.
+No screenshot, recording, intermediate visual review or frame-rate assertion performed.

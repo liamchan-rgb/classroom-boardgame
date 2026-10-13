@@ -1,0 +1,12 @@
+Project minimum iOS: 17.0
+{"developer": "/Applications/Xcode.app/Contents/Developer", "xcode": "Xcode 27.0\nBuild version 27A266a", "iphoneos": "27.0", "iphonesimulator": "27.0", "compatible": true}
+{"developer": "/Applications/Xcode_27.0.0.app/Contents/Developer", "xcode": "Xcode 27.0\nBuild version 27A266a", "iphoneos": "27.0", "iphonesimulator": "27.0", "compatible": true}
+{"developer": "/Applications/Xcode_27.0.app/Contents/Developer", "xcode": "Xcode 27.0\nBuild version 27A266a", "iphoneos": "27.0", "iphonesimulator": "27.0", "compatible": true}
+{"developer": "/Applications/Xcode_27.1.0.app/Contents/Developer", "xcode": "Xcode 27.1\nBuild version 27A9269", "iphoneos": "27.1", "iphonesimulator": "27.1", "compatible": true}
+{"developer": "/Applications/Xcode_27.1.app/Contents/Developer", "xcode": "Xcode 27.1\nBuild version 27A9269", "iphoneos": "27.1", "iphonesimulator": "27.1", "compatible": true}
+{"developer": "/Applications/Xcode_27.1_beta.app/Contents/Developer", "xcode": "Xcode 27.1\nBuild version 27A9269", "iphoneos": "27.1", "iphonesimulator": "27.1", "compatible": true}
+{"developer": "/Applications/Xcode_27.2.0.app/Contents/Developer", "xcode": "Xcode 27.2\nBuild version 27B5028f", "iphoneos": "27.2", "iphonesimulator": "27.2", "compatible": true}
+{"developer": "/Applications/Xcode_27.2.app/Contents/Developer", "xcode": "Xcode 27.2\nBuild version 27B5028f", "iphoneos": "27.2", "iphonesimulator": "27.2", "compatible": true}
+{"developer": "/Applications/Xcode_27.2_beta_2.app/Contents/Developer", "xcode": "Xcode 27.2\nBuild version 27B5028f", "iphoneos": "27.2", "iphonesimulator": "27.2", "compatible": true}
+{"developer": "/Applications/Xcode_27.app/Contents/Developer", "xcode": "Xcode 27.0\nBuild version 27A266a", "iphoneos": "27.0", "iphonesimulator": "27.0", "compatible": true}
+Selected DEVELOPER_DIR=/Applications/Xcode_27.2_beta_2.app/Contents/Developer
