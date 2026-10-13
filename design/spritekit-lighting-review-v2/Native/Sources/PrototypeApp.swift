@@ -128,17 +128,17 @@ struct PrototypeGlass: ViewModifier {
             .sheet(isPresented: $settings) {
                 NavigationStack {
                     Form {
-                        Picker("光照", selection: Binding(get: { model.mode }, set: model.setMode)) {
+                        Picker("光照", selection: Binding(get: { model.mode }, set: { model.setMode($0) })) {
                             ForEach(LightingMode.allCases, id: \.self) { mode in Text(mode.title).tag(mode) }
                         }
                         VStack(alignment: .leading) {
                             Text("光影强度")
-                            Slider(value: Binding(get: { model.strength }, set: model.setStrength), in: 0...1)
+                            Slider(value: Binding(get: { model.strength }, set: { model.setStrength($0) }), in: 0...1)
                         }
                         Picker("画面比例", selection: $model.aspect) {
                             ForEach(ReviewAspect.allCases, id: \.self) { aspect in Text(aspect.title).tag(aspect) }
                         }.pickerStyle(.segmented)
-                        Toggle("跟随人物", isOn: Binding(get: { model.follows }, set: model.follow))
+                        Toggle("跟随人物", isOn: Binding(get: { model.follows }, set: { model.follow($0) }))
                         Text("原始素材保留图内已有光照；太阳光影增加投影与遮阴；局部光照用于比较灯光效果。")
                             .font(.footnote).foregroundStyle(.secondary)
                     }.navigationTitle("小样查看设置")

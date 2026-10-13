@@ -1,9 +1,13 @@
 import XCTest
 
 final class LightingSmokeTests: XCTestCase {
+    private var application: XCUIApplication?
+    override func setUpWithError() throws { continueAfterFailure = false }
+    override func tearDownWithError() throws { application?.terminate(); application = nil }
     private func capture(_ ratio: String) {
         XCUIDevice.shared.orientation = .landscapeLeft
         let app = XCUIApplication(); app.launchArguments = ["--reduce-motion", "--lighting=flat"]
+        application = app
         app.launchEnvironment["PROTOTYPE_RATIO"] = ratio; app.launch()
         let play = app.buttons["play-demo"]
         XCTAssertTrue(play.waitForExistence(timeout: 20))

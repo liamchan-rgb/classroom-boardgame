@@ -1,0 +1,40 @@
+{
+  "runID": 38435849668,
+  "jobID": 115429473521,
+  "workflowURL": "https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38435849668",
+  "sourceCommit": "fb94d27a2f4b41dc3409a027fe22f7a2c4237eb0",
+  "testedCommit": "6947f2e1dcb65beadbb01a99a9a6b52f8e5deb4d",
+  "xcodeVersion": "Xcode 27.2\nBuild version 27B5028f",
+  "device": {
+    "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-27-0",
+    "device": {
+      "dataPath": "/Users/runner/Library/Developer/CoreSimulator/Devices/A94882C9-6952-425C-A48F-76AEA5D6D4A3/data",
+      "dataPathSize": 18337792,
+      "logPath": "/Users/runner/Library/Logs/CoreSimulator/A94882C9-6952-425C-A48F-76AEA5D6D4A3",
+      "udid": "A94882C9-6952-425C-A48F-76AEA5D6D4A3",
+      "isAvailable": true,
+      "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPad-Pro-13-inch-M5-12GB",
+      "state": "Shutdown",
+      "name": "iPad Pro 13-inch (M5)"
+    }
+  },
+  "appSDKCompilation": "completed-before-test-execution",
+  "unitTests": "5 passed, 0 failures",
+  "uiTests": "2 passed, 0 failures",
+  "screenshotAttachmentsWritten": 8,
+  "workflowConclusion": "cancelled-after-test-suites-passed",
+  "reason": "Test command did not finish while gathering simulator diagnostics; cancelled to inspect existing logs",
+  "diagnosticsArtifactID": 11834105434,
+  "artifactArchiveBytes": 115593028,
+  "artifactArchiveSha256": "3a095f6ee1499f6082d2f9128b3d6de16c82d4db475da8d720a54cd9d150fc91",
+  "artifactCRC": "pass",
+  "pngAttachmentsExported": false,
+  "videosProduced": false,
+  "corrections": [
+    "disable test diagnostics gathering",
+    "split boot/build/test/export/video stages and bound time",
+    "terminate app in UI teardown",
+    "replace Binding method references with context-inferred closures"
+  ],
+  "artApproved": false
+}

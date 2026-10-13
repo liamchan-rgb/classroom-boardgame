@@ -46,10 +46,32 @@ jobs:
           set -euo pipefail
           python3 design/spritekit-lighting-review-v2/scripts/check_review.py \
             2>&1 | tee "$PROTOTYPE_REVIEW_OUTPUT_DIR/source-checks.log"
-      - name: Test, capture native screenshots and record replay
+      - name: Prepare and boot iPad simulator
+        timeout-minutes: 5
         run: |
           set -euo pipefail
-          bash design/spritekit-lighting-review-v2/scripts/review_native.sh
+          bash design/spritekit-lighting-review-v2/scripts/review_native.sh prepare
+      - name: Compile independent app and test targets
+        timeout-minutes: 7
+        run: |
+          set -euo pipefail
+          bash design/spritekit-lighting-review-v2/scripts/review_native.sh build
+      - name: Run geometry and native screenshot tests
+        timeout-minutes: 7
+        run: |
+          set -euo pipefail
+          bash design/spritekit-lighting-review-v2/scripts/review_native.sh test
+      - name: Export native test attachments
+        if: ${{ !cancelled() }}
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          bash design/spritekit-lighting-review-v2/scripts/review_native.sh export
+      - name: Record two aspect replays
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          bash design/spritekit-lighting-review-v2/scripts/review_native.sh video
       - name: Upload screenshots, videos and diagnostics
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
