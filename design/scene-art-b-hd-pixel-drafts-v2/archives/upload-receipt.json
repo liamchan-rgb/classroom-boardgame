@@ -1,0 +1,13 @@
+{
+  "verifiedAtUTC": "2026-10-13T12:45:36.321519+00:00",
+  "method": "independent remote checkout",
+  "snapshotCommit": "e59114440d9a7092c9aff163d05d8f98f69c1e2d",
+  "tag": "archive-design-scene-art-b-hd-pixel-v2-20261013",
+  "zipSHA256": "134d08f454400e22bba9839371d6eacf67bff2588db2a0f10af47c12a123d8f4",
+  "payloadFiles": 4,
+  "zipCRC": "pass",
+  "remoteAndLocalAndZIPMatch": true,
+  "tagPayloadMatch": true,
+  "artApproved": false,
+  "runtimeReady": false
+}
