@@ -27,7 +27,7 @@ struct PVEPublicView:View {
             camera = MapCamera(x:(a.x+b.x)/2,y:(a.y+b.y)/2,zoom:min(1.35,camera.zoom))
         }
         return VStack(spacing:14) {
-            header(arriving:arriving != nil)
+            header(arrival:arriving)
             if showingBook {
                 Group {
                     if let image { Image(uiImage:image).resizable().scaledToFit() }
@@ -53,11 +53,13 @@ struct PVEPublicView:View {
         }.padding(.horizontal,width*0.05).padding(.vertical,54)
             .overlay(alignment:.center) { CommittedFeedback(events:frame.presentations).padding(.horizontal,width*0.07) }
     }
-    private func header(arriving:Bool) -> some View {
-        HStack(spacing:18) {
+    private func header(arrival:CommittedPresentation?) -> some View {
+        let arriving = arrival != nil
+        let movingName = arrival?.mapMoves.first.flatMap { move in frame.snapshot.units.first { $0.id == move.unitID }?.name }
+        return HStack(spacing:18) {
             Text(showingBook ? "课堂绘本" : arriving ? "前往地点" : frame.snapshot.phase.displayName).font(.system(size:30,weight:.bold))
             if !showingBook {
-                Text(frame.snapshot.currentName.map { "行动中："+$0 } ??
+                Text(movingName.map { "移动："+$0 } ?? frame.snapshot.currentName.map { "行动中："+$0 } ??
                      frame.snapshot.units.first(where: { $0.id == frame.cameraFocusID }).map { "查看："+$0.name } ?? "探索 · 沿道路前进")
                     .font(.system(size:34,weight:.bold)).fixedSize(horizontal:false,vertical:true).frame(maxWidth:.infinity,alignment:.leading)
             } else { Spacer() }
@@ -149,6 +151,12 @@ struct PVEPublicView:View {
             ForEach(units) { unit in
                 VStack(spacing:2) {
                     UnitPortrait(unit:unit,event:event,animate:!frame.presentations.isEmpty).frame(height:units.count > 4 ? 60 : units.count > 3 ? 82 : 120)
+                        .overlay(alignment:.bottom) {
+                            Text(identity(unit)).font(.system(size:14,weight:.bold)).padding(.horizontal,6).background(.white,in:Capsule())
+                        }
+                        .overlay(alignment:.top) {
+                            if unit.current { Image(systemName:"arrowtriangle.down.fill").font(.system(size:14)).foregroundStyle(GameTheme.primary) }
+                        }
                     ResourceValue(id:"health",text:"\(unit.health)/\(unit.maximumHealth)")
                     ResourceValue(id:"shield",text:String(unit.shield))
                     if unit.health == 0 { Text(unit.player ? "倒地" : "战败").foregroundStyle(GameTheme.danger) }
@@ -159,7 +167,7 @@ struct PVEPublicView:View {
     }
     private func turnDetails(_ detail:PublicTurnDetails,player:PublicGameUnit) -> some View {
         let pages = max(1,(detail.items.count+3)/4)
-        let page = min(max(0,frame.inventoryPage),pages-1)
+        let page = min(max(0,frame.itemPage),pages-1)
         let items = Array(detail.items.dropFirst(page*4).prefix(4))
         return GamePanel(inset:14) {
             VStack(alignment:.leading,spacing:8) {

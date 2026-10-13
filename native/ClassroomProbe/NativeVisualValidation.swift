@@ -82,7 +82,7 @@ enum NativeVisualValidation {
         let inventoryPlay = PVEPlaySession(engine:try GameEngine(catalog:catalog,state:inventory))
         var inventoryFrame = try inventoryPlay.publicFrame()
         try await capture("public-many-items-page1-4x3",PVEPublicView(frame:inventoryFrame,image:nil,showingBook:false),CGSize(width:1440,height:1080))
-        inventoryFrame.inventoryPage = 4
+        inventoryFrame.itemPage = 4
         try await capture("public-many-items-page5-4x3",PVEPublicView(frame:inventoryFrame,image:nil,showingBook:false),CGSize(width:1440,height:1080))
         let travelingState = try PVEGameFactory.make(players:players,seed:22,catalog:catalog)
         let traveling = PVEPlaySession(engine:try GameEngine(catalog:catalog,state:travelingState))

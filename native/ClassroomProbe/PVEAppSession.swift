@@ -12,7 +12,7 @@ final class PVEAppSession: ObservableObject {
     @Published private(set) var publicCamera = MapCamera(zoom:1.35)
     @Published private(set) var cameraFocusID: String?
     @Published private(set) var cameraFollowsCurrent = true
-    @Published private(set) var inventoryPage = 0
+    @Published private(set) var itemPage = 0
     private var detailActorID: String?
     private(set) var modalOpen = false
     private let display: PublicDisplayModel
@@ -98,7 +98,7 @@ final class PVEAppSession: ObservableObject {
     }
     func turnInventoryPage(_ amount:Int) {
         let count = (try? play?.publicFrame().currentDetails?.items.count) ?? 0
-        inventoryPage = max(0,min(max(0,(count+3)/4-1),inventoryPage+amount)); publish()
+        itemPage = max(0,min(max(0,(count+3)/4-1),itemPage+amount)); publish()
     }
     func perform() {
         guard let play, !aiRunning, !bookOpen, !modalOpen else { return }
@@ -162,6 +162,7 @@ final class PVEAppSession: ObservableObject {
             let engine = try GameEngine(catalog:catalog,state:state,persist:store.save)
             try store.save(engine.archive)
             presentation.suppressHistory([])
+            cameraFocusID = nil; cameraFollowsCurrent = true; publicCamera = MapCamera(zoom:1.35); itemPage = 0
             play = PVEPlaySession(engine:engine); message = "新局已建立：\(scenario.title)。"; lastTick = ProcessInfo.processInfo.systemUptime
             publish(); scheduleAI(); return true
         } catch { message = "新局未建立，当前进度保留：\(error.localizedDescription)"; publish(); return false }
@@ -251,10 +252,10 @@ final class PVEAppSession: ObservableObject {
             if let focus, let node = frame.snapshot.nodes.first(where: { $0.id == focus.nodeID }) {
                 publicCamera = MapCamera(x:node.x,y:node.y,zoom:publicCamera.zoom)
             }
-            if detailActorID != frame.currentDetails?.unitID { inventoryPage = 0; detailActorID = frame.currentDetails?.unitID }
-            inventoryPage = min(inventoryPage,max(0,((frame.currentDetails?.items.count ?? 0)+3)/4-1))
+            if detailActorID != frame.currentDetails?.unitID { itemPage = 0; detailActorID = frame.currentDetails?.unitID }
+            itemPage = min(itemPage,max(0,((frame.currentDetails?.items.count ?? 0)+3)/4-1))
             frame.camera = publicCamera; frame.cameraFocusID = cameraFocusID
-            frame.followsCurrent = cameraFollowsCurrent; frame.inventoryPage = inventoryPage
+            frame.followsCurrent = cameraFollowsCurrent; frame.itemPage = itemPage
             display.playFrame = frame; display.playBook = bookOpen
         }
         catch { message = "公开画面未更新：\(error.localizedDescription)" }

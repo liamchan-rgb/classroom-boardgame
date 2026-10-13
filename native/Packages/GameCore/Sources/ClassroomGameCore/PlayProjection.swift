@@ -8,7 +8,7 @@ public struct PublicPlayFrame: Codable, Equatable {
     public var presentations: [CommittedPresentation] = []
     public var camera: MapCamera = MapCamera()
     public var cameraFocusID: String? = nil
-    public var inventoryPage: Int = 0
+    public var itemPage: Int = 0
     public var followsCurrent: Bool = true
     public init(snapshot: PublicGameSnapshot, log: [String], verification: Bool) {
         self.snapshot = snapshot; self.log = log; self.verification = verification

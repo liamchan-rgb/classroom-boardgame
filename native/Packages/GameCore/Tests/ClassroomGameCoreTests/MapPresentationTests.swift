@@ -67,7 +67,7 @@ final class MapPresentationTests:XCTestCase {
         let play = PVEPlaySession(engine:try GameEngine(catalog:catalog,state:state))
         let before = play.engine.archive
         var frame = try play.publicFrame()
-        frame.camera = MapCamera(x:1,y:1,zoom:3); frame.cameraFocusID = "p2"; frame.inventoryPage = 3
+        frame.camera = MapCamera(x:1,y:1,zoom:3); frame.cameraFocusID = "p2"; frame.itemPage = 3
         XCTAssertFalse(frame.snapshot.units.contains { $0.id == "m1" })
         XCTAssertTrue(frame.snapshot.nodes.filter { !$0.revealed }.allSatisfy { $0.kind == nil })
         XCTAssertFalse(frame.snapshot.nodes.contains { $0.id == 4 })
