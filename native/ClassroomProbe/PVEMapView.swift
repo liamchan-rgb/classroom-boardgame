@@ -73,9 +73,9 @@ struct PVEMapView:View {
                         }
                     }
                     ForEach(markers) { marker in
-                        if let unit = units.first(where: { $0.id == marker.id }) {
+                        if let unit = units.first(where: { $0.id == marker.unitIDs.first }) {
                             ZStack(alignment:.topTrailing) {
-                                unitButton(unit,size:publicDisplay ? 48 : 36)
+                                edgeButton(marker,unit:unit)
                                 Image(systemName:"arrow.right.circle.fill").font(.system(size:publicDisplay ? 24 : 18,weight:.bold))
                                     .rotationEffect(.degrees(marker.directionDegrees)).foregroundStyle(GameTheme.primary)
                                     .background(.white,in:Circle()).offset(x:8,y:-6).allowsHitTesting(false)
@@ -101,6 +101,22 @@ struct PVEMapView:View {
             Button { onFocusUnit(unit.id) } label: { pin(unit,size:size) }.buttonStyle(.plain)
                 .accessibilityLabel("查看\(unit.name)所在地图位置")
         } else { pin(unit,size:size) }
+    }
+    @ViewBuilder private func edgeButton(_ marker:MapEdgeMarker,unit:PublicGameUnit) -> some View {
+        if marker.unitIDs.count > 1, let onFocusUnit {
+            Menu {
+                ForEach(marker.unitIDs,id:\.self) { id in
+                    if let player = units.first(where: { $0.id == id }) { Button("查看 "+player.name) { onFocusUnit(id) } }
+                }
+            } label: { edgePin(marker,unit:unit) }
+        } else if marker.unitIDs.count > 1 { edgePin(marker,unit:unit) }
+        else { unitButton(unit,size:publicDisplay ? 48 : 36) }
+    }
+    private func edgePin(_ marker:MapEdgeMarker,unit:PublicGameUnit) -> some View {
+        pin(unit,size:publicDisplay ? 48 : 36).overlay(alignment:.topLeading) {
+            Text("\(marker.unitIDs.count)人").font(.system(size:publicDisplay ? 15 : 12,weight:.bold))
+                .padding(3).background(.white,in:Capsule()).offset(x:-8,y:-6)
+        }.accessibilityLabel("视野外\(marker.unitIDs.count)名玩家，展开选择查看位置")
     }
     private func pin(_ unit:PublicGameUnit,size:Double) -> some View {
         ZStack(alignment:.bottom) {

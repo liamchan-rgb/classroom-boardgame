@@ -18,6 +18,15 @@ final class MapPresentationTests:XCTestCase {
         for i in 1..<positions.count { XCTAssertGreaterThanOrEqual(positions[i]-positions[i-1],44) }
         XCTAssertTrue(markers.allSatisfy { $0.point.x > 700 && $0.point.x < 800 && $0.point.y >= 52 && $0.point.y <= 448 })
     }
+    func testSmallTeacherViewportGroupsCrowdedMarkersWithoutLosingPlayers() {
+        let points = (1...7).map { ("p\($0)",MapPoint(x:-1000,y:140)) }
+        let markers = MapDisplayGeometry.edgeMarkers(points:points,width:500,height:320,size:44)
+        XCTAssertLessThan(markers.count,7)
+        XCTAssertEqual(Set(markers.flatMap(\.unitIDs)),Set(points.map(\.0)))
+        let positions = markers.map(\.point.y).sorted()
+        for i in 1..<positions.count { XCTAssertGreaterThanOrEqual(positions[i]-positions[i-1],44) }
+        XCTAssertTrue(markers.allSatisfy { $0.point.y > 80 && $0.point.y < 240 })
+    }
     func testCommittedGroupMoveUsesActualEncounterStopsAndNeverReplays() throws {
         let catalog = try GameCatalog.initial()
         let state = try PVEGameFactory.make(players:[PlayerSetup(id:"p1",name:"甲",classID:"adventurer"),PlayerSetup(id:"p2",name:"乙",classID:"ranger")],seed:19,catalog:catalog)

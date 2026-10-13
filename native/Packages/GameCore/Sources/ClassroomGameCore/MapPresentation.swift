@@ -26,6 +26,7 @@ public struct MapEdgeMarker: Equatable, Identifiable {
     public var point: MapPoint
     public var edge: MapEdge
     public var directionDegrees: Double
+    public var unitIDs: [String] = []
 }
 public enum MapDisplayGeometry {
     /// Only call with units from the public snapshot when drawing the public map.
@@ -39,7 +40,7 @@ public enum MapDisplayGeometry {
             let ty = dy == 0 ? Double.infinity : halfY/abs(dy)
             let t = min(tx,ty)
             let edge: MapEdge = tx < ty ? (dx < 0 ? .left : .right) : (dy < 0 ? .top : .bottom)
-            markers.append(MapEdgeMarker(id:id,point:MapPoint(x:width/2+dx*t,y:height/2+dy*t),edge:edge,directionDegrees:atan2(dy,dx)*180/Double.pi))
+            markers.append(MapEdgeMarker(id:id,point:MapPoint(x:width/2+dx*t,y:height/2+dy*t),edge:edge,directionDegrees:atan2(dy,dx)*180/Double.pi,unitIDs:[id]))
         }
         // Keep coincident offscreen players separate, in stable ID order.
         var result: [MapEdgeMarker] = []
@@ -49,12 +50,23 @@ public enum MapDisplayGeometry {
                 let a = vertical ? $0.point.y : $0.point.x, b = vertical ? $1.point.y : $1.point.x
                 return a == b ? $0.id < $1.id : a < b
             }
-            let high = (vertical ? height : width)-margin
-            let gap = min(size+4,(high-margin)/Double(max(1,group.count-1)))
-            var previous = margin-gap
+            let low = margin+size*0.8, high = (vertical ? height : width)-margin-size*0.8
+            let capacity = max(1,Int(max(0,high-low)/(size+4))+1)
+            if group.count > capacity {
+                let countPerGroup = Int(ceil(Double(group.count)/Double(capacity)))
+                group = stride(from:0,to:group.count,by:countPerGroup).map { start in
+                    let subset = Array(group[start..<min(group.count,start+countPerGroup)])
+                    var merged = subset[0]
+                    merged.unitIDs = subset.flatMap(\.unitIDs); merged.id = merged.unitIDs.joined(separator:"+")
+                    merged.point = MapPoint(x:subset.map { $0.point.x }.reduce(0,+)/Double(subset.count),y:subset.map { $0.point.y }.reduce(0,+)/Double(subset.count))
+                    return merged
+                }
+            }
+            let gap = min(size+4,max(0,high-low)/Double(max(1,group.count-1)))
+            var previous = low-gap
             for i in group.indices {
                 let raw = vertical ? group[i].point.y : group[i].point.x
-                let value = min(high-Double(group.count-i-1)*gap,max(margin,max(raw,previous+gap)))
+                let value = min(high-Double(group.count-i-1)*gap,max(low,max(raw,previous+gap)))
                 if vertical { group[i].point.y = value } else { group[i].point.x = value }
                 previous = value
             }

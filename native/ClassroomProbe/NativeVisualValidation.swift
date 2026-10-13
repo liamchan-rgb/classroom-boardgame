@@ -107,13 +107,15 @@ enum NativeVisualValidation {
         guard cameraControlsPure else { throw GameError("镜头控制改变了游戏或私有选择") }
         try await capture("teacher-1366x1024",PVEPlayView(model:model,teacher:teacher),CGSize(width:1366,height:1024))
         try await capture("teacher-1180x820",PVEPlayView(model:model,teacher:teacher),CGSize(width:1180,height:820))
+        model.zoomPublicMap(2); model.panPublicMap(x:0.64,y:0)
+        try await capture("teacher-offscreen-grouped-1180x820",PVEPlayView(model:model,teacher:teacher),CGSize(width:1180,height:820))
         // Every manifest PNG must decode using Bundle.main while the simulator has no asset server.
         var missing:[String] = []
         for key in GameArt.bindings.keys.sorted() {
             let pair = key.split(separator:":",maxSplits:1).map(String.init)
             if GameArt.image(pair[0],pair[1]) == nil { missing.append(key) }
         }
-        let report:[String:Any] = ["screenshots":21,"assetCount":GameArt.bindings.count,"cameraControlsPure":cameraControlsPure,"missingAssets":missing,"names":names,"deviceVerified":false,"note":"Actual native SwiftUI simulator rendering; not physical iPad/TV feedback"]
+        let report:[String:Any] = ["screenshots":22,"assetCount":GameArt.bindings.count,"cameraControlsPure":cameraControlsPure,"missingAssets":missing,"names":names,"deviceVerified":false,"note":"Actual native SwiftUI simulator rendering; not physical iPad/TV feedback"]
         try JSONSerialization.data(withJSONObject:report,options:[.prettyPrinted,.sortedKeys]).write(to:output.appendingPathComponent("report.json"))
         guard missing.isEmpty else { throw GameError("离线资产无法解码") }
         try Data("success".utf8).write(to:output.appendingPathComponent("complete.txt"))
