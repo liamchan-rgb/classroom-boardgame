@@ -1,0 +1,13 @@
+{
+  "verifiedAtUTC": "2026-10-13T14:17:03.819746+00:00",
+  "method": "independent remote verification checkout",
+  "snapshotCommit": "c1cf88a53bf1d5bf78a04fecbfcd2368151547ca",
+  "tag": "archive-design-modular-hd-pixel-map-kit-v5-20261013",
+  "zipSHA256": "28ed8201c3f44ca4778e4db10bac6039f746b4bc053ff1d6954b6dc891b99b88",
+  "payloadFiles": 46,
+  "zipCRC": "pass",
+  "remoteAndLocalAndZIPMatch": true,
+  "tagPayloadMatch": true,
+  "artApproved": false,
+  "appChanged": false
+}
