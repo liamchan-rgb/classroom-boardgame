@@ -1,0 +1,40 @@
+{
+  "status": "pass",
+  "browserOnly": true,
+  "nativeMaterialVerified": false,
+  "artApproved": false,
+  "canvas": [
+    1920,
+    1080
+  ],
+  "frostPanels": 5,
+  "liquidButtons": [
+    {
+      "label": "回到行动者",
+      "glass": true,
+      "w": 52,
+      "h": 52
+    },
+    {
+      "label": "地图总览",
+      "glass": true,
+      "w": 52,
+      "h": 52
+    },
+    {
+      "label": "缩小",
+      "glass": true,
+      "w": 52,
+      "h": 52
+    },
+    {
+      "label": "放大",
+      "glass": true,
+      "w": 52,
+      "h": 52
+    }
+  ],
+  "skillCards": 3,
+  "queueUnits": 10,
+  "overflow": []
+}
