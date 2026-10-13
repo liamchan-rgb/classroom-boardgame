@@ -1,0 +1,367 @@
+{
+  "checks": [
+    {
+      "file": "assets/nodes/node_start.png",
+      "size": [
+        512,
+        512
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        79,
+        96,
+        439,
+        439
+      ],
+      "sha256": "0af7a86ace9e8ca766ff4883dde05a121fff8afbe4c26f62dc1f1f58484ba87c"
+    },
+    {
+      "file": "assets/nodes/node_combat.png",
+      "size": [
+        512,
+        512
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        61,
+        78,
+        450,
+        451
+      ],
+      "sha256": "c677d7e9daa6dfb5b29fa7213ccfb20123a73a0d51ea532507efc45078639978"
+    },
+    {
+      "file": "assets/nodes/node_boss.png",
+      "size": [
+        512,
+        512
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        61,
+        68,
+        452,
+        450
+      ],
+      "sha256": "8e079f05a6930e9c01ddccccbcf10cb732393250af2088914a18e1da51c0d20b"
+    },
+    {
+      "file": "assets/nodes/node_reward.png",
+      "size": [
+        512,
+        512
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        56,
+        61,
+        441,
+        456
+      ],
+      "sha256": "e56e9e1a5e6be8f7638c904cf1b5d698ba7a4402ad0dceac279e17abae2a966c"
+    },
+    {
+      "file": "assets/nodes/node_empty.png",
+      "size": [
+        512,
+        512
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        71,
+        72,
+        419,
+        453
+      ],
+      "sha256": "22af9a9cbc1428530526fcdd72e6228a45acd583bcea60618afd66eba9d336b8"
+    },
+    {
+      "file": "assets/nodes/node_unknown.png",
+      "size": [
+        512,
+        512
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        74,
+        140,
+        438,
+        404
+      ],
+      "sha256": "fe3dbb985b4777a77314d4ef025d958934c0aeb7e29b85417a868658c326dbf3"
+    },
+    {
+      "file": "assets/backgrounds/map_decoration_1440.png",
+      "size": [
+        1440,
+        1080
+      ],
+      "alphaExtrema": [
+        0,
+        178
+      ],
+      "alphaBounds": [
+        34,
+        48,
+        1398,
+        1050
+      ],
+      "sha256": "69b9d8382740c6aca902eeb11c4439ec3af44103938c2b821699587a563249d6"
+    },
+    {
+      "file": "assets/backgrounds/map_decoration_1920.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "alphaExtrema": [
+        0,
+        178
+      ],
+      "alphaBounds": [
+        34,
+        48,
+        1878,
+        1050
+      ],
+      "sha256": "378f3d270abc7f51ff42b7fb59fffa75120fba7d27e6079a12e754c79e86a6ea"
+    },
+    {
+      "file": "assets/backgrounds/map_ground_1440.png",
+      "size": [
+        1440,
+        1080
+      ],
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "alphaBounds": [
+        0,
+        0,
+        1440,
+        1080
+      ],
+      "sha256": "0b0d6fea54876ed97d5a5193ae6e2b73aae9651ed787bbcc16c6e924f197614d"
+    },
+    {
+      "file": "assets/backgrounds/map_ground_1920.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "alphaBounds": [
+        0,
+        0,
+        1920,
+        1080
+      ],
+      "sha256": "40c98ded4958700d757a5037798632a4b164936327858aebfc42fbe877de4368"
+    },
+    {
+      "file": "assets/overlays/fog_unknown.png",
+      "size": [
+        512,
+        512
+      ],
+      "alphaExtrema": [
+        0,
+        204
+      ],
+      "alphaBounds": [
+        76,
+        132,
+        432,
+        390
+      ],
+      "sha256": "aa6f7a24a34d1fe74bdb3f0ba21c25df3a1c575a370195bc0e100d1380d0d7ed"
+    },
+    {
+      "file": "assets/overlays/node_state_claimed.png",
+      "size": [
+        512,
+        512
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        328,
+        328,
+        456,
+        456
+      ],
+      "sha256": "bda970adc3207da209d0b0d2cea88f8e57dc7cdd76f31932ecd0cd5263cc06d0"
+    },
+    {
+      "file": "assets/overlays/node_state_crowded.png",
+      "size": [
+        512,
+        512
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        324,
+        324,
+        456,
+        456
+      ],
+      "sha256": "51d17ca366edfb02309c84ca9f69c47b5d78f4b084bbcd0a3a58311b412c486d"
+    },
+    {
+      "file": "assets/overlays/node_state_current.png",
+      "size": [
+        512,
+        512
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        66,
+        48,
+        446,
+        446
+      ],
+      "sha256": "5ab61429c1531070d82dfcc40c932d6ff94563ef7b44d05bf988298e10bd4fd7"
+    },
+    {
+      "file": "assets/overlays/node_state_enemy.png",
+      "size": [
+        512,
+        512
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        67,
+        67,
+        445,
+        445
+      ],
+      "sha256": "b1daaf30c813c3fc65645a8f90e3a3cfd5067e371203c10af30da80511cd8504"
+    },
+    {
+      "file": "assets/overlays/node_state_path.png",
+      "size": [
+        512,
+        512
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        67,
+        67,
+        445,
+        448
+      ],
+      "sha256": "c46329c07cba7d9cb139551252e1244b8fd71f895ab0183fe0f330287e315d61"
+    },
+    {
+      "file": "assets/overlays/node_state_target.png",
+      "size": [
+        512,
+        512
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        104,
+        104,
+        408,
+        408
+      ],
+      "sha256": "3a9ba4ca5eaa561841aa5b39d57fcb6ac91097a7033c072d5284b9b16df0c81d"
+    },
+    {
+      "file": "assets/roads/road_normal.png",
+      "size": [
+        512,
+        512
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        58,
+        250,
+        454,
+        262
+      ],
+      "sha256": "6c0542e7fe00ff152b0c698204f2e8b0391bf8919b794b1d93104ddd2bddb238"
+    },
+    {
+      "file": "assets/roads/road_plan_unavailable.png",
+      "size": [
+        512,
+        512
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        58,
+        250,
+        450,
+        262
+      ],
+      "sha256": "fc1d9ea9eb682793107a9311bc958e54d6b1e02a514431351c29dcb2db04da73"
+    },
+    {
+      "file": "assets/roads/road_planned.png",
+      "size": [
+        512,
+        512
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        58,
+        250,
+        454,
+        262
+      ],
+      "sha256": "2a090e0a891fa5871c3677390ab78623657718c9dd68fcffff5add0d9006d693"
+    }
+  ],
+  "unknownHiddenTypePixelEquality": true,
+  "fixtureTopologyUnchanged": true,
+  "appOrDeviceTested": false
+}

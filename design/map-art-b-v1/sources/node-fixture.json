@@ -1,0 +1,64 @@
+{
+  "source": "design/ui-art-delivery-round3/sources/demo-scenarios.json#baseBattle",
+  "purpose": "public-map-only-fit-check-no-rule-engine",
+  "nodes": [
+    {
+      "id": 1,
+      "name": "起点",
+      "kind": "start",
+      "x": 0.14,
+      "y": 0.58,
+      "revealed": true
+    },
+    {
+      "id": 2,
+      "name": "林间路口",
+      "kind": "empty",
+      "x": 0.34,
+      "y": 0.34,
+      "revealed": true
+    },
+    {
+      "id": 3,
+      "name": "浅溪石桥",
+      "kind": "combat",
+      "x": 0.56,
+      "y": 0.55,
+      "revealed": true
+    },
+    {
+      "id": 4,
+      "name": "树影小径",
+      "kind": "combat",
+      "x": 0.75,
+      "y": 0.25,
+      "revealed": true
+    },
+    {
+      "id": 5,
+      "name": "未探索",
+      "kind": null,
+      "x": 0.82,
+      "y": 0.72,
+      "revealed": false
+    }
+  ],
+  "roads": [
+    {
+      "a": 1,
+      "b": 2
+    },
+    {
+      "a": 2,
+      "b": 3
+    },
+    {
+      "a": 3,
+      "b": 4
+    },
+    {
+      "a": 3,
+      "b": 5
+    }
+  ]
+}
