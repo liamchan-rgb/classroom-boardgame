@@ -1,0 +1,10 @@
+{
+  "snapshotCommit": "eb500facd15395469ac9064298dd8ed038a79805",
+  "tag": "archive-design-player-battle-glass-v5-20261013",
+  "zip": "player-battle-glass-sample-v5-20261013.zip",
+  "sha256": "2d34f335b80fb4520f2718a9876f6c1b45a2fe8d6b7ddf49d09c6959cbf5826c",
+  "bytes": 2494934,
+  "payloadFiles": 27,
+  "zipEntries": 28,
+  "status": "awaiting-art-review"
+}
