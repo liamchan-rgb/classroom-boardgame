@@ -1,0 +1,261 @@
+{
+  "status": "layout-fixture-not-an-engine-receipt",
+  "basis": "main PVEGameFactory coordinates and roads; independent display scenarios",
+  "units": [
+    {
+      "id": "p1",
+      "templateID": "adventurer",
+      "name": "安然",
+      "nodeID": 2,
+      "health": 12,
+      "maximumHealth": 12,
+      "shield": 0,
+      "coins": 0,
+      "score": 0,
+      "team": "蓝队",
+      "teamID": "blue",
+      "player": true,
+      "acted": true,
+      "canActFromRound": 1
+    },
+    {
+      "id": "p2",
+      "templateID": "ranger",
+      "name": "AlexandriaWinterbrookJoy",
+      "nodeID": 2,
+      "health": 18,
+      "maximumHealth": 18,
+      "shield": 0,
+      "coins": 0,
+      "score": 0,
+      "team": "蓝队",
+      "teamID": "blue",
+      "player": true,
+      "acted": true,
+      "canActFromRound": 1
+    },
+    {
+      "id": "p3",
+      "templateID": "spellblade",
+      "name": "晨曦森林守护者小队长安然",
+      "nodeID": 2,
+      "health": 20,
+      "maximumHealth": 24,
+      "shield": 0,
+      "coins": 0,
+      "score": 0,
+      "team": "蓝队",
+      "teamID": "blue",
+      "player": true,
+      "acted": false,
+      "canActFromRound": 1
+    },
+    {
+      "id": "p4",
+      "templateID": "dragonKnight",
+      "name": "星星",
+      "nodeID": 2,
+      "health": 32,
+      "maximumHealth": 32,
+      "shield": 0,
+      "coins": 0,
+      "score": 0,
+      "team": "蓝队",
+      "teamID": "blue",
+      "player": true,
+      "acted": false,
+      "canActFromRound": 1
+    },
+    {
+      "id": "p5",
+      "templateID": "adventurer",
+      "name": "阿乐",
+      "nodeID": 2,
+      "health": 0,
+      "maximumHealth": 12,
+      "shield": 0,
+      "coins": 0,
+      "score": 0,
+      "team": "蓝队",
+      "teamID": "blue",
+      "player": true,
+      "acted": false,
+      "canActFromRound": 1
+    },
+    {
+      "id": "p6",
+      "templateID": "ranger",
+      "name": "小满",
+      "nodeID": 2,
+      "health": 9,
+      "maximumHealth": 18,
+      "shield": 0,
+      "coins": 0,
+      "score": 0,
+      "team": "蓝队",
+      "teamID": "blue",
+      "player": true,
+      "acted": false,
+      "canActFromRound": 2
+    },
+    {
+      "id": "p7",
+      "templateID": "dragonKnight",
+      "name": "林老师",
+      "nodeID": 2,
+      "health": 32,
+      "maximumHealth": 32,
+      "shield": 0,
+      "coins": 0,
+      "score": 0,
+      "team": "蓝队",
+      "teamID": "blue",
+      "player": true,
+      "acted": false,
+      "canActFromRound": 1
+    },
+    {
+      "id": "m1",
+      "templateID": "slime",
+      "name": "捣蛋史莱姆",
+      "nodeID": 2,
+      "health": 8,
+      "maximumHealth": 8,
+      "shield": 0,
+      "coins": 0,
+      "score": 0,
+      "team": "敌方",
+      "teamID": null,
+      "player": false,
+      "acted": true,
+      "canActFromRound": 1
+    },
+    {
+      "id": "m2",
+      "templateID": "goblinArcher",
+      "name": "哥布林弓手",
+      "nodeID": 2,
+      "health": 12,
+      "maximumHealth": 12,
+      "shield": 0,
+      "coins": 0,
+      "score": 0,
+      "team": "敌方",
+      "teamID": null,
+      "player": false,
+      "acted": false,
+      "canActFromRound": 1
+    },
+    {
+      "id": "m3",
+      "templateID": "caveTroll",
+      "name": "洞穴巨魔",
+      "nodeID": 2,
+      "health": 48,
+      "maximumHealth": 48,
+      "shield": 0,
+      "coins": 0,
+      "score": 0,
+      "team": "敌方",
+      "teamID": null,
+      "player": false,
+      "acted": false,
+      "canActFromRound": 1
+    }
+  ],
+  "queueIDs": [
+    "p1",
+    "m1",
+    "p2",
+    "p3",
+    "m2",
+    "p4",
+    "p5",
+    "p6",
+    "m3",
+    "p7"
+  ],
+  "nodes": [
+    {
+      "id": 1,
+      "name": "营地",
+      "x": 0.1,
+      "y": 0.55,
+      "kind": "start",
+      "revealed": true
+    },
+    {
+      "id": 2,
+      "name": "森林路口",
+      "x": 0.36,
+      "y": 0.55,
+      "kind": "combat",
+      "revealed": true
+    },
+    {
+      "id": 3,
+      "name": "弓手哨点",
+      "x": 0.62,
+      "y": 0.26,
+      "kind": "combat",
+      "revealed": true
+    },
+    {
+      "id": 4,
+      "name": "未探索地点4",
+      "x": 0.62,
+      "y": 0.78,
+      "kind": null,
+      "revealed": false
+    },
+    {
+      "id": 5,
+      "name": "未探索地点5",
+      "x": 0.9,
+      "y": 0.55,
+      "kind": null,
+      "revealed": false
+    }
+  ],
+  "roads": [
+    [
+      1,
+      2
+    ],
+    [
+      2,
+      3
+    ],
+    [
+      2,
+      4
+    ],
+    [
+      3,
+      5
+    ]
+  ],
+  "current": "p3",
+  "round": 1,
+  "remainingSeconds": 17,
+  "paused": true,
+  "inventory": {
+    "smallPotion": 2,
+    "shieldPotion": 1,
+    "revivalStone": 1
+  },
+  "skillUses": {
+    "runeSlash": 0,
+    "runeWard": 0,
+    "battleRune": 0
+  },
+  "availability": [
+    "行动点不足",
+    "行动点不足",
+    "可用"
+  ],
+  "notes": [
+    "Preview action points are 1; the count is not shown in public status.",
+    "Exploration puts p6/p7 at unknown node5 and hides monsters; not an executed gameplay test."
+  ]
+}
