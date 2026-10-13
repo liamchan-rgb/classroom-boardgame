@@ -118,4 +118,14 @@ final class PresentationTests: XCTestCase {
         XCTAssertEqual(play.engine.archive,archive)
     }
 
+    func testExplorationDoesNotPublishUncommittedActorOrSkillSelection() throws {
+        let (catalog,state) = try fixture(classes:["adventurer","dragonKnight"],kind:nil)
+        let play = PVEPlaySession(engine:try GameEngine(catalog:catalog,state:state))
+        let before = try play.publicFrame()
+        XCTAssertNil(before.currentDetails)
+        play.selectPlayer("p2"); play.toggleReward("p2"); play.choose(.skill("dragonFlame")); play.selectTarget(.node(2))
+        XCTAssertEqual(try play.publicFrame(),before)
+        XCTAssertEqual(play.engine.state,state)
+    }
+
 }

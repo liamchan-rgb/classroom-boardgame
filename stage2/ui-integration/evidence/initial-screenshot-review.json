@@ -1,0 +1,11 @@
+{
+  "runID": 38344136902,
+  "nativeImages": 12,
+  "offlineAssets": 66,
+  "unknownMapPixelIdentical": true,
+  "issues": [
+    "4:3 English long name overlaps resources",
+    "compact teacher reward bar outside screen"
+  ],
+  "action": "Adjusted weighted name columns, compact teacher rail and map count badges; rerun required"
+}

@@ -36,8 +36,9 @@ extension GamePause {
 struct GamePanel<Content:View>:View {
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     let content:Content
-    init(@ViewBuilder _ content:()->Content) { self.content = content() }
-    var body:some View { content.padding(16)
+    let inset:CGFloat
+    init(inset:CGFloat = 16,@ViewBuilder _ content:()->Content) { self.content = content(); self.inset = inset }
+    var body:some View { content.padding(inset)
         .background {
             if reduceTransparency { RoundedRectangle(cornerRadius:16).fill(.white) }
             else { RoundedRectangle(cornerRadius:16).fill(.regularMaterial) }
@@ -57,5 +58,11 @@ struct ClassroomButtonStyle:ButtonStyle {
             .background(primary && enabled ? GameTheme.primary : Color.white.opacity(enabled ? 0.9 : 0.45),in:RoundedRectangle(cornerRadius:12))
             .overlay(RoundedRectangle(cornerRadius:12).stroke(GameTheme.primary.opacity(0.2),lineWidth:1))
             .opacity(configuration.isPressed ? 0.7 : enabled ? 1 : 0.55)
+    }
+}
+
+struct PlayerSelectionStyle:ButtonStyle {
+    func makeBody(configuration:Configuration) -> some View {
+        configuration.label.foregroundStyle(GameTheme.ink).opacity(configuration.isPressed ? 0.8 : 1)
     }
 }

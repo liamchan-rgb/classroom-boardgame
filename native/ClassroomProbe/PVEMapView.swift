@@ -63,10 +63,14 @@ struct PVEMapView:View {
                 if here.count > 1 { ArtImage(type:"visualLayer",id:"node_state_crowded") }
                 Text(node.revealed ? String(node.id) : "").font(.system(size:labelSize,weight:.bold)).padding(4).background(.white.opacity(0.9),in:Circle()).offset(y:artSize*0.30)
             }.frame(width:artSize,height:artSize)
+                .overlay(alignment:.top) {
+                    if !here.isEmpty {
+                        Text("角色\(here.filter(\.player).count) · 敌\(here.filter { !$0.player && $0.health > 0 }.count)")
+                            .font(.system(size:publicDisplay ? 24 : 13,weight:.semibold)).foregroundStyle(.white)
+                            .padding(.horizontal,6).padding(.vertical,3).background(GameTheme.primary,in:Capsule()).fixedSize().offset(y:-18)
+                    }
+                }
             Text(node.name).font(.system(size:labelSize,weight:.semibold)).lineLimit(2).multilineTextAlignment(.center)
-            if !here.isEmpty {
-                Text("角色\(here.filter(\.player).count) · 敌\(here.filter { !$0.player }.count)").font(.system(size:publicDisplay ? 24 : 13)).foregroundStyle(GameTheme.muted)
-            }
         }.foregroundStyle(GameTheme.ink).accessibilityElement(children:.combine)
     }
     private func point(_ node:PublicGameNode,size:CGSize,marginX:Double,marginY:Double) -> CGPoint {

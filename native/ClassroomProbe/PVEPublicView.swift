@@ -36,7 +36,7 @@ struct PVEPublicView:View {
                 queue.frame(height:80)
                 if let details = frame.currentDetails,
                    let player = frame.snapshot.units.first(where: { $0.id == details.unitID }), player.player,
-                   frame.snapshot.round == 0 || player.current {
+                   player.current {
                     turnDetails(details,player:player).frame(height:(details.skills.count > 3 ? 250.0 : 224.0)+Double(max(0,(details.items.count+4)/5-1))*38)
                 }
             }
@@ -115,7 +115,7 @@ struct PVEPublicView:View {
                     ResourceValue(id:"health",text:"\(unit.health)/\(unit.maximumHealth)")
                     ResourceValue(id:"shield",text:String(unit.shield))
                     if unit.health == 0 { Text(unit.player ? "倒地" : "战败").foregroundStyle(GameTheme.danger) }
-                    else if unit.canActFromRound > frame.snapshot.round && frame.snapshot.round > 0 { Label("下轮可行动",systemImage:"clock") }
+                    else if unit.canActFromRound > frame.snapshot.round && frame.snapshot.round > 0 { Label("下轮",systemImage:"clock") }
                 }.font(.system(size:24,weight:.semibold)).padding(4)
             }
         }.frame(maxWidth:.infinity)
@@ -158,18 +158,27 @@ struct PublicPlayerStrip:View {
     let players:[PublicGameUnit]
     let fontSize:Double
     var body:some View {
-        HStack(alignment:.top,spacing:8) {
-            ForEach(players) { player in
-                VStack(alignment:.leading,spacing:4) {
-                    Text(player.name).fontWeight(.bold).fixedSize(horizontal:false,vertical:true).frame(height:62,alignment:.top)
-                    ResourceValue(id:"health",text:"\(player.health)/\(player.maximumHealth)")
-                    ResourceValue(id:"shield",text:String(player.shield))
-                    ResourceValue(id:"coin",text:String(player.coins))
-                    ResourceValue(id:"score",text:String(player.score))
-                    HStack(spacing:4) { TeamMark(id:player.teamID); Text(player.team) }
-                    if player.health == 0 { Label("倒地",systemImage:"xmark.circle.fill").foregroundStyle(GameTheme.danger) }
-                }.font(.system(size:fontSize)).frame(maxWidth:.infinity,alignment:.leading).padding(10)
-                    .background(.regularMaterial,in:RoundedRectangle(cornerRadius:12))
+        GeometryReader { geometry in
+            let weights = players.map { player in player.name.count > 8 ? 1.4 : 1.0 }
+            let available = geometry.size.width-Double(max(0,players.count-1))*8
+            let total = weights.reduce(0,+)
+            HStack(alignment:.top,spacing:8) {
+                ForEach(Array(players.enumerated()),id:\.element.id) { index,player in
+                    VStack(alignment:.leading,spacing:4) {
+                        Text(player.name).font(.system(size:28,weight:.bold)).fixedSize(horizontal:false,vertical:true).frame(height:72,alignment:.top)
+                        ResourceValue(id:"health",text:"\(player.health)/\(player.maximumHealth)")
+                        ResourceValue(id:"shield",text:String(player.shield))
+                        HStack(spacing:8) {
+                            ResourceValue(id:"coin",text:String(player.coins))
+                            ResourceValue(id:"score",text:String(player.score))
+                        }
+                        HStack(spacing:4) {
+                            TeamMark(id:player.teamID).font(.system(size:20)); Text(player.team)
+                            if player.health == 0 { ArtImage(type:"uiResource",id:"downed").frame(width:22,height:22).accessibilityLabel("倒地") }
+                        }
+                    }.font(.system(size:fontSize)).padding(10).frame(width:available*weights[index]/max(1,total),alignment:.leading)
+                        .background(.regularMaterial,in:RoundedRectangle(cornerRadius:12))
+                }
             }
         }
     }

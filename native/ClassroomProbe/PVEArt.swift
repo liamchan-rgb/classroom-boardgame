@@ -41,7 +41,7 @@ struct ResourceValue:View {
 }
 struct TeamMark:View {
     let id:String?
-    private var index:Int { (id ?? "").utf8.reduce(0) { ($0+Int($1))%3 } }
+    private var index:Int { ["blue":0,"orange":1,"violet":2,"green":2][id ?? ""] ?? (id ?? "").utf8.reduce(0) { ($0+Int($1))%3 } }
     var body:some View {
         Image(systemName:["circle.fill","diamond.fill","triangle.fill"][index])
             .foregroundStyle([GameTheme.shield,GameTheme.accent,GameTheme.action][index])

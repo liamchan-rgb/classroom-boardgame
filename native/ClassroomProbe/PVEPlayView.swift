@@ -70,9 +70,9 @@ struct PVEPlayView:View {
         }
     }
     private func playerRail(play:PVEPlaySession,compact:Bool) -> some View {
-        GamePanel {
+        GamePanel(inset:compact ? 10 : 16) {
             VStack(alignment:.leading,spacing:6) {
-                Text("角色 · 右侧勾选发奖").font(.system(size:compact ? 14 : 17,weight:.bold))
+                Text(play.engine.state.battle == nil ? "角色 · 勾选发奖" : "回合按队列 · 勾选发奖").font(.system(size:compact ? 14 : 17,weight:.bold))
                 ForEach(play.engine.state.players) { player in
                     let stats = try? GameRules.attributes(player,catalog:play.engine.catalog)
                     let current = play.actor?.id == player.id
@@ -93,9 +93,9 @@ struct PVEPlayView:View {
                                     Text(play.engine.state.teams.first { $0.id == player.teamID }?.name ?? "未分队")
                                 }
                             }.font(.system(size:compact ? 13 : 15)).frame(maxWidth:.infinity,minHeight:44,alignment:.leading)
-                        }.buttonStyle(.plain).disabled(play.engine.state.battle != nil)
+                        }.buttonStyle(PlayerSelectionStyle()).disabled(play.engine.state.battle != nil)
                         VStack(spacing:0) {
-                            ArtImage(type:"classes",id:player.templateID).frame(width:28,height:28)
+                            ArtImage(type:"classes",id:player.templateID).frame(width:compact ? 20 : 28,height:compact ? 20 : 28)
                                 .overlay(alignment:.topTrailing) {
                                     if current { Image(systemName:"arrowtriangle.right.fill").foregroundStyle(GameTheme.primary).accessibilityLabel("行动中") }
                                     if player.health == 0 { ArtImage(type:"uiResource",id:"downed").frame(width:18,height:18).accessibilityLabel("倒地") }
@@ -106,7 +106,7 @@ struct PVEPlayView:View {
                             }.buttonStyle(.plain).foregroundStyle(reward ? GameTheme.accent : GameTheme.muted)
                                 .accessibilityLabel("奖励对象：\(player.name)").accessibilityValue(reward ? "已选中" : "未选中")
                         }
-                    }.padding(compact ? 4 : 8).frame(maxWidth:.infinity,alignment:.leading)
+                    }.padding(compact ? 2 : 8).frame(maxWidth:.infinity,alignment:.leading)
                         .background(.white.opacity(0.85),in:RoundedRectangle(cornerRadius:12))
                         .overlay(RoundedRectangle(cornerRadius:12).stroke(current ? GameTheme.primary : reward ? GameTheme.accent : GameTheme.primary.opacity(0.1),lineWidth:current || reward ? 2 : 1))
                 }
