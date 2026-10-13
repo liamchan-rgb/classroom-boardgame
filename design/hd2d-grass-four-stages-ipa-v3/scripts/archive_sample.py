@@ -20,12 +20,20 @@ def main():
     targets=[output,output.with_suffix('.manifest.json'),output.with_suffix(output.suffix+'.sha256'),output.with_suffix('.恢复说明.md')]
     if any(p.exists() for p in targets): raise FileExistsError('Refusing to overwrite a checkpoint')
     repo=Path(__file__).resolve().parents[3]
+    if subprocess.check_output(['git','-C',str(repo),'rev-parse','--is-shallow-repository'],text=True).strip() != 'false':
+        raise ValueError('Full source history required. Fetch --unshallow before archiving.')
     output.parent.mkdir(parents=True,exist_ok=True)
     with tempfile.TemporaryDirectory(prefix='hd2d-source-archive-') as directory:
         staged=Path(directory)/'canonical.zip';forward=args.copy();forward[index]=str(staged)
         subprocess.run([sys.executable,str(repo/'tools/archive_milestone.py'),*forward],check=True)
         with zipfile.ZipFile(staged) as archive:
             payload={row.filename:archive.read(row.filename) for row in archive.infolist() if not row.is_dir()}
+        # Canonical bundle verification within the source repository can miss shallow
+        # boundaries. Independently import into an empty repository before publication.
+        history=Path(directory)/'history.bundle';history.write_bytes(payload['git-history.bundle'])
+        restored=Path(directory)/'history-verify.git'
+        subprocess.run(['git','clone','--mirror',str(history),str(restored)],check=True)
+        subprocess.run(['git','-C',str(restored),'fsck','--full','--no-dangling'],check=True)
         manifest=json.loads(payload.pop('manifest.json'))
         recovery=f'''# {manifest['milestone']} 独立草原小样恢复说明
 

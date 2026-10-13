@@ -52,5 +52,6 @@
   "limitations": [
     "SpriteKit shader translation, appearance and performance await user device testing.",
     "Formal classroom App integration is outside this independent sample."
-  ]
+  ],
+  "archiveCorrection": "r2: complete source history and independent empty-repository Git bundle/fsck validation; runtime/IPA unchanged."
 }
