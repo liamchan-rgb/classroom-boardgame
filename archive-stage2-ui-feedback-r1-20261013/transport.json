@@ -1,0 +1,39 @@
+{
+  "formatVersion": 1,
+  "logicalZIP": "classroom-stage2-ui-feedback-r1-20261013.zip",
+  "bytes": 290966164,
+  "sha256": "efdc1c37c8d1fcd50f4edc7735297787f95b8fdcf1e84816f0f810e701ac7017",
+  "parts": [
+    {
+      "file": "classroom-stage2-ui-feedback-r1-20261013.zip.part000",
+      "bytes": 50331648,
+      "sha256": "442c3bec381a8f2b470333bcb33c9e1f6ca2b0eb40f06bcd8778050b27913851"
+    },
+    {
+      "file": "classroom-stage2-ui-feedback-r1-20261013.zip.part001",
+      "bytes": 50331648,
+      "sha256": "f316506449c89e5b52c4e0b0f4f03808827d9d9f6d02e681932b988230adda67"
+    },
+    {
+      "file": "classroom-stage2-ui-feedback-r1-20261013.zip.part002",
+      "bytes": 50331648,
+      "sha256": "4496df9f9a8d9fbb8a3996b5fa2893e14c98dbd38424fb7b56571b6d6ef56d08"
+    },
+    {
+      "file": "classroom-stage2-ui-feedback-r1-20261013.zip.part003",
+      "bytes": 50331648,
+      "sha256": "c888837f77efccfd1e3e3fe5b18bfdc678bc8a31cc8329c4a56d391f7c9d0587"
+    },
+    {
+      "file": "classroom-stage2-ui-feedback-r1-20261013.zip.part004",
+      "bytes": 50331648,
+      "sha256": "d067b5c414c4adad825591328dfbbcd0bb36b21b8fc0166bef8a7046c24ca327"
+    },
+    {
+      "file": "classroom-stage2-ui-feedback-r1-20261013.zip.part005",
+      "bytes": 39307924,
+      "sha256": "1a4fad8f7109b38212a0fa6ab1953558d224ca86ccd26c6fce3353b8181b385e"
+    }
+  ],
+  "reason": "Lossless split; GitHub normal Git rejects files over 100MB"
+}
