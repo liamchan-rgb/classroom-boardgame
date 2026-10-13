@@ -10,6 +10,6 @@
 
 ## 检查与限制
 
-本地ZIP CRC、逐文件SHA通过；Swift语法、工程结构、资源矩形、原图字节与浏览器离线设计参考检查通过。远端ZIP/标签/逐文件回读核对中，完成后回执补入本目录。
+本地ZIP CRC、逐文件SHA通过；Swift语法、工程结构、资源矩形、原图字节与浏览器离线设计参考检查通过。GitHub远端ZIP/标签/41个交付文件与本地、ZIP及源码快照逐字节回读一致，原始理想图SHA也通过，见[上传回执](archives/upload-receipt.json)。
 
 当前Linux无Xcode/Apple SDK：未进行SDK类型检查、Xcode编译、原生测试、SpriteKit截图或iPad性能测量。原生编译提交为空，未生成IPA；PNG为浏览器设计参考，不能标记为原生截图。美术仍待用户审美确认。

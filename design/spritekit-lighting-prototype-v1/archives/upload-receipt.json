@@ -1,0 +1,20 @@
+{
+  "checkedAtUTC": "2026-10-13T16:29:11.103835+00:00",
+  "remoteBranch": "origin/design/map-battle-ui-round4-20261013",
+  "remoteCommit": "c291088c404611408f81c745bf8b2862e95ef37b",
+  "snapshotCommit": "24778c3a317cae21cae03dcdf928c065dc2e946b",
+  "tag": "archive-design-spritekit-lighting-prototype-v1-20261013",
+  "tagMatchesSnapshot": true,
+  "remoteZIPMatchesLocal": true,
+  "zipCRC": "pass",
+  "zipSHA256": "e420931af57f6568e1573c7d85b1c183ff4f682c5e81b78ca1f316f43897ba6a",
+  "zipBytes": 28414346,
+  "remoteLocalZIPTagPayloadFiles": 41,
+  "allPayloadChecks": "pass",
+  "userIdealReferenceSHA256": "f37522f5788ae7d22e570c85438ecc0e5503f8714c7893400de5609366a2d673",
+  "nativeBuild": "not-run-no-Xcode-Apple-SDK",
+  "nativeVerified": false,
+  "nativeBuildCommit": null,
+  "nativeScreenshots": [],
+  "ipaProduced": false
+}
