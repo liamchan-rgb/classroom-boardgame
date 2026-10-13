@@ -1,0 +1,15 @@
+{
+  "sourceVersion": "spritekit-lighting-prototype-v1",
+  "sourceSnapshot": "24778c3a317cae21cae03dcdf928c065dc2e946b",
+  "assets": {
+    "Native/Resources/Art/landmark_atlas.png": "f747e7ca9b31ae0bb9350c2a4ed1fac22cfdab20ec650bf4cf2b1782366304b4",
+    "Native/Resources/Art/class_spellblade_portrait.png": "8f0f59b217039c012a2a8ff8e0ff475c80c33bed76f231e028966b5f3d259d10",
+    "Native/Resources/Art/scenery_atlas.png": "31c244a8cf76c3e0a01af76b1e883a2be2a2317b21bf80dbf5134c8e6fcfda9d",
+    "Native/Resources/Art/adventurer_sheet.png": "2749cd9a78bb269d22b9177f92cabeeb6d816870bae74d1e40d06979d8585e8c",
+    "Native/Resources/Art/terrain_atlas.png": "8e180dd175ba9014aab0bb5dea26032aefcedb3f438721799d9fd94da3ca33dd",
+    "Native/Resources/Art/class_ranger_portrait.png": "bf6306c1b1034b900d1e63b478b320cc11382418615292453b4d23f8aaa56f45",
+    "Native/Resources/Art/module-manifest.json": "bec3120b132049c0e0c35e186eb14f0dd4e43ecf23e0c7e16c4d8a4b6cd9133f"
+  },
+  "userIdealReferenceSHA256": "f37522f5788ae7d22e570c85438ecc0e5503f8714c7893400de5609366a2d673",
+  "artApproved": false
+}

@@ -1,0 +1,466 @@
+// !$*UTF8*$!
+{
+"archiveVersion" = 1;
+"classes" = {
+};
+"objectVersion" = 56;
+"objects" = {
+"71CE1D37BAF7ED3747C3C79B" = {
+"isa" = "PBXFileReference";
+"path" = "AssetStore.swift";
+"lastKnownFileType" = "sourcecode.swift";
+"sourceTree" = "<group>";
+};
+"E48FD299AFDFC4959CB80D3D" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "71CE1D37BAF7ED3747C3C79B";
+};
+"414CD337ED519D18E593F4BD" = {
+"isa" = "PBXFileReference";
+"path" = "DisplayModel.swift";
+"lastKnownFileType" = "sourcecode.swift";
+"sourceTree" = "<group>";
+};
+"09C02A39836A6F72B4B4E424" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "414CD337ED519D18E593F4BD";
+};
+"FC3D152F4B51750B8FB9CB39" = {
+"isa" = "PBXFileReference";
+"path" = "GrassScene.swift";
+"lastKnownFileType" = "sourcecode.swift";
+"sourceTree" = "<group>";
+};
+"30197DB37F6169A90FB3F9F4" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "FC3D152F4B51750B8FB9CB39";
+};
+"D2D1C5D8FF6EF92D3DED6E84" = {
+"isa" = "PBXFileReference";
+"path" = "PrototypeApp.swift";
+"lastKnownFileType" = "sourcecode.swift";
+"sourceTree" = "<group>";
+};
+"761F955CE12BCBDD694F509E" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "D2D1C5D8FF6EF92D3DED6E84";
+};
+"BCE16DD0260827ECF338C787" = {
+"isa" = "PBXGroup";
+"path" = "Sources";
+"sourceTree" = "<group>";
+"children" = ("71CE1D37BAF7ED3747C3C79B","414CD337ED519D18E593F4BD","FC3D152F4B51750B8FB9CB39","D2D1C5D8FF6EF92D3DED6E84");
+};
+"606C64AA2B9EC0076519F193" = {
+"isa" = "PBXFileReference";
+"path" = "DisplayGeometryTests.swift";
+"lastKnownFileType" = "sourcecode.swift";
+"sourceTree" = "<group>";
+};
+"69D06D26B348980171BD958B" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "606C64AA2B9EC0076519F193";
+};
+"04D13FD0AA6F0197CF2C9990" = {
+"isa" = "PBXGroup";
+"path" = "Tests";
+"sourceTree" = "<group>";
+"children" = ("606C64AA2B9EC0076519F193");
+};
+"5B0D7497CF98D1CB7F77D563" = {
+"isa" = "PBXFileReference";
+"path" = "LightingSmokeTests.swift";
+"lastKnownFileType" = "sourcecode.swift";
+"sourceTree" = "<group>";
+};
+"F02C9B16049348AE038BA6EA" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "5B0D7497CF98D1CB7F77D563";
+};
+"21A4721043EF7FE8B14BE5D9" = {
+"isa" = "PBXGroup";
+"path" = "UITests";
+"sourceTree" = "<group>";
+"children" = ("5B0D7497CF98D1CB7F77D563");
+};
+"4F468A6824D620BF0F58640C" = {
+"isa" = "PBXFileReference";
+"path" = "Resources/Art";
+"lastKnownFileType" = "folder";
+"sourceTree" = "<group>";
+};
+"DFA867CD2A02BFAE41F8DA71" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "4F468A6824D620BF0F58640C";
+};
+"59BD0A3FF43B32849B319E64" = {
+"isa" = "PBXFileReference";
+"path" = "Resources/Info.plist";
+"lastKnownFileType" = "text.plist.xml";
+"sourceTree" = "<group>";
+};
+"8BCD5BC4CDFDF0918087C782" = {
+"isa" = "PBXFileReference";
+"path" = "GrassLightingPrototype.app";
+"lastKnownFileType" = "wrapper.application";
+"sourceTree" = "BUILT_PRODUCTS_DIR";
+};
+"F219C0274590DA45E4BEF1EA" = {
+"isa" = "PBXFileReference";
+"path" = "DisplayGeometryTests.xctest";
+"lastKnownFileType" = "wrapper.cfbundle";
+"sourceTree" = "BUILT_PRODUCTS_DIR";
+};
+"A7C9FD69DA095A3BF0CB4587" = {
+"isa" = "PBXFileReference";
+"path" = "LightingSmokeTests.xctest";
+"lastKnownFileType" = "wrapper.cfbundle";
+"sourceTree" = "BUILT_PRODUCTS_DIR";
+};
+"FBDC4F23F93125BBEEAE800C" = {
+"isa" = "PBXGroup";
+"name" = "Products";
+"sourceTree" = "<group>";
+"children" = ("8BCD5BC4CDFDF0918087C782","F219C0274590DA45E4BEF1EA","A7C9FD69DA095A3BF0CB4587");
+};
+"B28B7AF69320201D1CF206EB" = {
+"isa" = "PBXGroup";
+"sourceTree" = "<group>";
+"children" = ("BCE16DD0260827ECF338C787","04D13FD0AA6F0197CF2C9990","21A4721043EF7FE8B14BE5D9","4F468A6824D620BF0F58640C","59BD0A3FF43B32849B319E64","FBDC4F23F93125BBEEAE800C");
+};
+"89E1FD6268CC0F221A2BE178" = {
+"isa" = "XCBuildConfiguration";
+"name" = "Debug";
+"buildSettings" = {
+"SWIFT_VERSION" = "5.0";
+"IPHONEOS_DEPLOYMENT_TARGET" = "17.0";
+"SDKROOT" = "iphoneos";
+"SUPPORTED_PLATFORMS" = "iphoneos iphonesimulator";
+"TARGETED_DEVICE_FAMILY" = "2";
+"CLANG_ENABLE_MODULES" = "YES";
+"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
+"DEBUG_INFORMATION_FORMAT" = "dwarf";
+"ENABLE_TESTABILITY" = "YES";
+"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "DEBUG $(inherited)";
+};
+};
+"E6DE6C99132752C914FEF632" = {
+"isa" = "XCBuildConfiguration";
+"name" = "Release";
+"buildSettings" = {
+"SWIFT_VERSION" = "5.0";
+"IPHONEOS_DEPLOYMENT_TARGET" = "17.0";
+"SDKROOT" = "iphoneos";
+"SUPPORTED_PLATFORMS" = "iphoneos iphonesimulator";
+"TARGETED_DEVICE_FAMILY" = "2";
+"CLANG_ENABLE_MODULES" = "YES";
+"SWIFT_OPTIMIZATION_LEVEL" = "-O";
+"DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym";
+"ENABLE_TESTABILITY" = "NO";
+};
+};
+"4CCF67E0217451C7B58AAC6C" = {
+"isa" = "XCConfigurationList";
+"buildConfigurations" = ("89E1FD6268CC0F221A2BE178","E6DE6C99132752C914FEF632");
+"defaultConfigurationName" = "Release";
+"defaultConfigurationIsVisible" = 0;
+};
+"E9B2E96ABC5F6856F2BE79CF" = {
+"isa" = "XCBuildConfiguration";
+"name" = "Debug";
+"buildSettings" = {
+"SWIFT_VERSION" = "5.0";
+"IPHONEOS_DEPLOYMENT_TARGET" = "17.0";
+"SDKROOT" = "iphoneos";
+"SUPPORTED_PLATFORMS" = "iphoneos iphonesimulator";
+"TARGETED_DEVICE_FAMILY" = "2";
+"CLANG_ENABLE_MODULES" = "YES";
+"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
+"DEBUG_INFORMATION_FORMAT" = "dwarf";
+"ENABLE_TESTABILITY" = "YES";
+"PRODUCT_NAME" = "$(TARGET_NAME)";
+"PRODUCT_BUNDLE_IDENTIFIER" = "com.classroomboardgame.design.grasslightingreviewv2";
+"INFOPLIST_FILE" = "Resources/Info.plist";
+"GENERATE_INFOPLIST_FILE" = "NO";
+"CODE_SIGN_STYLE" = "Automatic";
+"SUPPORTS_MACCATALYST" = "NO";
+"LD_RUNPATH_SEARCH_PATHS" = "$(inherited) @executable_path/Frameworks";
+"MARKETING_VERSION" = "0.1";
+"CURRENT_PROJECT_VERSION" = "1";
+"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "DEBUG $(inherited)";
+};
+};
+"5A8C91857F674E16E2724F47" = {
+"isa" = "XCBuildConfiguration";
+"name" = "Release";
+"buildSettings" = {
+"SWIFT_VERSION" = "5.0";
+"IPHONEOS_DEPLOYMENT_TARGET" = "17.0";
+"SDKROOT" = "iphoneos";
+"SUPPORTED_PLATFORMS" = "iphoneos iphonesimulator";
+"TARGETED_DEVICE_FAMILY" = "2";
+"CLANG_ENABLE_MODULES" = "YES";
+"SWIFT_OPTIMIZATION_LEVEL" = "-O";
+"DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym";
+"ENABLE_TESTABILITY" = "NO";
+"PRODUCT_NAME" = "$(TARGET_NAME)";
+"PRODUCT_BUNDLE_IDENTIFIER" = "com.classroomboardgame.design.grasslightingreviewv2";
+"INFOPLIST_FILE" = "Resources/Info.plist";
+"GENERATE_INFOPLIST_FILE" = "NO";
+"CODE_SIGN_STYLE" = "Automatic";
+"SUPPORTS_MACCATALYST" = "NO";
+"LD_RUNPATH_SEARCH_PATHS" = "$(inherited) @executable_path/Frameworks";
+"MARKETING_VERSION" = "0.1";
+"CURRENT_PROJECT_VERSION" = "1";
+};
+};
+"386177F3FB4BB0A01FB78F15" = {
+"isa" = "XCConfigurationList";
+"buildConfigurations" = ("E9B2E96ABC5F6856F2BE79CF","5A8C91857F674E16E2724F47");
+"defaultConfigurationName" = "Release";
+"defaultConfigurationIsVisible" = 0;
+};
+"971ED9D05B25DB6C4D7680D4" = {
+"isa" = "PBXSourcesBuildPhase";
+"buildActionMask" = 2147483647;
+"files" = ("E48FD299AFDFC4959CB80D3D","09C02A39836A6F72B4B4E424","30197DB37F6169A90FB3F9F4","761F955CE12BCBDD694F509E");
+"runOnlyForDeploymentPostprocessing" = 0;
+};
+"364863F9F2E558B0F50473FC" = {
+"isa" = "PBXResourcesBuildPhase";
+"buildActionMask" = 2147483647;
+"files" = ("DFA867CD2A02BFAE41F8DA71");
+"runOnlyForDeploymentPostprocessing" = 0;
+};
+"78AE8C6BEB2A40A6D824CCEE" = {
+"isa" = "PBXFrameworksBuildPhase";
+"buildActionMask" = 2147483647;
+"files" = ();
+"runOnlyForDeploymentPostprocessing" = 0;
+};
+"C13732C8E715C9BEE4FA51C9" = {
+"isa" = "PBXNativeTarget";
+"name" = "GrassLightingPrototype";
+"productName" = "GrassLightingPrototype";
+"productReference" = "8BCD5BC4CDFDF0918087C782";
+"productType" = "com.apple.product-type.application";
+"buildConfigurationList" = "386177F3FB4BB0A01FB78F15";
+"buildPhases" = ("971ED9D05B25DB6C4D7680D4","78AE8C6BEB2A40A6D824CCEE","364863F9F2E558B0F50473FC");
+"buildRules" = ();
+"dependencies" = ();
+};
+"AEE072417D1ABB34757C5072" = {
+"isa" = "XCBuildConfiguration";
+"name" = "Debug";
+"buildSettings" = {
+"SWIFT_VERSION" = "5.0";
+"IPHONEOS_DEPLOYMENT_TARGET" = "17.0";
+"SDKROOT" = "iphoneos";
+"SUPPORTED_PLATFORMS" = "iphoneos iphonesimulator";
+"TARGETED_DEVICE_FAMILY" = "2";
+"CLANG_ENABLE_MODULES" = "YES";
+"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
+"DEBUG_INFORMATION_FORMAT" = "dwarf";
+"ENABLE_TESTABILITY" = "YES";
+"PRODUCT_NAME" = "$(TARGET_NAME)";
+"PRODUCT_BUNDLE_IDENTIFIER" = "com.classroomboardgame.design.reviewv2.unittests";
+"GENERATE_INFOPLIST_FILE" = "YES";
+"CODE_SIGN_STYLE" = "Automatic";
+"LD_RUNPATH_SEARCH_PATHS" = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+"TEST_HOST" = "$(BUILT_PRODUCTS_DIR)/GrassLightingPrototype.app/GrassLightingPrototype";
+"BUNDLE_LOADER" = "$(TEST_HOST)";
+"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "DEBUG $(inherited)";
+};
+};
+"9BB52494F7CCFD3DFCED98B0" = {
+"isa" = "XCBuildConfiguration";
+"name" = "Release";
+"buildSettings" = {
+"SWIFT_VERSION" = "5.0";
+"IPHONEOS_DEPLOYMENT_TARGET" = "17.0";
+"SDKROOT" = "iphoneos";
+"SUPPORTED_PLATFORMS" = "iphoneos iphonesimulator";
+"TARGETED_DEVICE_FAMILY" = "2";
+"CLANG_ENABLE_MODULES" = "YES";
+"SWIFT_OPTIMIZATION_LEVEL" = "-O";
+"DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym";
+"ENABLE_TESTABILITY" = "NO";
+"PRODUCT_NAME" = "$(TARGET_NAME)";
+"PRODUCT_BUNDLE_IDENTIFIER" = "com.classroomboardgame.design.reviewv2.unittests";
+"GENERATE_INFOPLIST_FILE" = "YES";
+"CODE_SIGN_STYLE" = "Automatic";
+"LD_RUNPATH_SEARCH_PATHS" = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+"TEST_HOST" = "$(BUILT_PRODUCTS_DIR)/GrassLightingPrototype.app/GrassLightingPrototype";
+"BUNDLE_LOADER" = "$(TEST_HOST)";
+};
+};
+"8737ACAE7490683A580D8B90" = {
+"isa" = "XCConfigurationList";
+"buildConfigurations" = ("AEE072417D1ABB34757C5072","9BB52494F7CCFD3DFCED98B0");
+"defaultConfigurationName" = "Release";
+"defaultConfigurationIsVisible" = 0;
+};
+"52606C9CA499E9BE9CBF72E0" = {
+"isa" = "PBXContainerItemProxy";
+"containerPortal" = "98F54143AB4E86B28C3AFEE0";
+"proxyType" = 1;
+"remoteGlobalIDString" = "C13732C8E715C9BEE4FA51C9";
+"remoteInfo" = "GrassLightingPrototype";
+};
+"2601754192FDB04563C80EF6" = {
+"isa" = "PBXTargetDependency";
+"target" = "C13732C8E715C9BEE4FA51C9";
+"targetProxy" = "52606C9CA499E9BE9CBF72E0";
+};
+"254997B761D4EBEC4B65DD70" = {
+"isa" = "PBXSourcesBuildPhase";
+"buildActionMask" = 2147483647;
+"files" = ("69D06D26B348980171BD958B");
+"runOnlyForDeploymentPostprocessing" = 0;
+};
+"A0C136533CEB3FBB31D5D182" = {
+"isa" = "PBXFrameworksBuildPhase";
+"buildActionMask" = 2147483647;
+"files" = ();
+"runOnlyForDeploymentPostprocessing" = 0;
+};
+"8C40F1F655563060A4AAA4CF" = {
+"isa" = "PBXResourcesBuildPhase";
+"buildActionMask" = 2147483647;
+"files" = ();
+"runOnlyForDeploymentPostprocessing" = 0;
+};
+"CA67227E0198D50520DB978D" = {
+"isa" = "PBXNativeTarget";
+"name" = "DisplayGeometryTests";
+"productName" = "DisplayGeometryTests";
+"productReference" = "F219C0274590DA45E4BEF1EA";
+"productType" = "com.apple.product-type.bundle.unit-test";
+"buildConfigurationList" = "8737ACAE7490683A580D8B90";
+"buildPhases" = ("254997B761D4EBEC4B65DD70","A0C136533CEB3FBB31D5D182","8C40F1F655563060A4AAA4CF");
+"buildRules" = ();
+"dependencies" = ("2601754192FDB04563C80EF6");
+};
+"94C1D7A82E2F92E70C5BA5D8" = {
+"isa" = "XCBuildConfiguration";
+"name" = "Debug";
+"buildSettings" = {
+"SWIFT_VERSION" = "5.0";
+"IPHONEOS_DEPLOYMENT_TARGET" = "17.0";
+"SDKROOT" = "iphoneos";
+"SUPPORTED_PLATFORMS" = "iphoneos iphonesimulator";
+"TARGETED_DEVICE_FAMILY" = "2";
+"CLANG_ENABLE_MODULES" = "YES";
+"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
+"DEBUG_INFORMATION_FORMAT" = "dwarf";
+"ENABLE_TESTABILITY" = "YES";
+"PRODUCT_NAME" = "$(TARGET_NAME)";
+"PRODUCT_BUNDLE_IDENTIFIER" = "com.classroomboardgame.design.reviewv2.uitests";
+"GENERATE_INFOPLIST_FILE" = "YES";
+"CODE_SIGN_STYLE" = "Automatic";
+"LD_RUNPATH_SEARCH_PATHS" = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+"TEST_TARGET_NAME" = "GrassLightingPrototype";
+"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "DEBUG $(inherited)";
+};
+};
+"9609A256A79253DD705A918E" = {
+"isa" = "XCBuildConfiguration";
+"name" = "Release";
+"buildSettings" = {
+"SWIFT_VERSION" = "5.0";
+"IPHONEOS_DEPLOYMENT_TARGET" = "17.0";
+"SDKROOT" = "iphoneos";
+"SUPPORTED_PLATFORMS" = "iphoneos iphonesimulator";
+"TARGETED_DEVICE_FAMILY" = "2";
+"CLANG_ENABLE_MODULES" = "YES";
+"SWIFT_OPTIMIZATION_LEVEL" = "-O";
+"DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym";
+"ENABLE_TESTABILITY" = "NO";
+"PRODUCT_NAME" = "$(TARGET_NAME)";
+"PRODUCT_BUNDLE_IDENTIFIER" = "com.classroomboardgame.design.reviewv2.uitests";
+"GENERATE_INFOPLIST_FILE" = "YES";
+"CODE_SIGN_STYLE" = "Automatic";
+"LD_RUNPATH_SEARCH_PATHS" = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+"TEST_TARGET_NAME" = "GrassLightingPrototype";
+};
+};
+"4066C808A2C9203280E5B59E" = {
+"isa" = "XCConfigurationList";
+"buildConfigurations" = ("94C1D7A82E2F92E70C5BA5D8","9609A256A79253DD705A918E");
+"defaultConfigurationName" = "Release";
+"defaultConfigurationIsVisible" = 0;
+};
+"DC81A1167233FC404FD46B40" = {
+"isa" = "PBXContainerItemProxy";
+"containerPortal" = "98F54143AB4E86B28C3AFEE0";
+"proxyType" = 1;
+"remoteGlobalIDString" = "C13732C8E715C9BEE4FA51C9";
+"remoteInfo" = "GrassLightingPrototype";
+};
+"655155E16B7E441A9189F8CC" = {
+"isa" = "PBXTargetDependency";
+"target" = "C13732C8E715C9BEE4FA51C9";
+"targetProxy" = "DC81A1167233FC404FD46B40";
+};
+"3F0002D04A541FE103F80CF6" = {
+"isa" = "PBXSourcesBuildPhase";
+"buildActionMask" = 2147483647;
+"files" = ("F02C9B16049348AE038BA6EA");
+"runOnlyForDeploymentPostprocessing" = 0;
+};
+"8390B7595BCD2F6FEF17F197" = {
+"isa" = "PBXFrameworksBuildPhase";
+"buildActionMask" = 2147483647;
+"files" = ();
+"runOnlyForDeploymentPostprocessing" = 0;
+};
+"43A098B05C43B6CE676DA934" = {
+"isa" = "PBXResourcesBuildPhase";
+"buildActionMask" = 2147483647;
+"files" = ();
+"runOnlyForDeploymentPostprocessing" = 0;
+};
+"5A84779F73F7B6419BDB1882" = {
+"isa" = "PBXNativeTarget";
+"name" = "LightingSmokeTests";
+"productName" = "LightingSmokeTests";
+"productReference" = "A7C9FD69DA095A3BF0CB4587";
+"productType" = "com.apple.product-type.bundle.ui-testing";
+"buildConfigurationList" = "4066C808A2C9203280E5B59E";
+"buildPhases" = ("3F0002D04A541FE103F80CF6","8390B7595BCD2F6FEF17F197","43A098B05C43B6CE676DA934");
+"buildRules" = ();
+"dependencies" = ("655155E16B7E441A9189F8CC");
+};
+"98F54143AB4E86B28C3AFEE0" = {
+"isa" = "PBXProject";
+"attributes" = {
+"LastUpgradeCheck" = "1600";
+"TargetAttributes" = {
+"C13732C8E715C9BEE4FA51C9" = {
+"CreatedOnToolsVersion" = "16.0";
+"ProvisioningStyle" = "Automatic";
+};
+"CA67227E0198D50520DB978D" = {
+"CreatedOnToolsVersion" = "16.0";
+"TestTargetID" = "C13732C8E715C9BEE4FA51C9";
+};
+"5A84779F73F7B6419BDB1882" = {
+"CreatedOnToolsVersion" = "16.0";
+"TestTargetID" = "C13732C8E715C9BEE4FA51C9";
+};
+};
+};
+"buildConfigurationList" = "4CCF67E0217451C7B58AAC6C";
+"compatibilityVersion" = "Xcode 14.0";
+"developmentRegion" = "en";
+"hasScannedForEncodings" = 0;
+"knownRegions" = ("en","Base");
+"mainGroup" = "B28B7AF69320201D1CF206EB";
+"productRefGroup" = "FBDC4F23F93125BBEEAE800C";
+"projectDirPath" = "";
+"projectRoot" = "";
+"targets" = ("C13732C8E715C9BEE4FA51C9","CA67227E0198D50520DB978D","5A84779F73F7B6419BDB1882");
+};
+};
+"rootObject" = "98F54143AB4E86B28C3AFEE0";
+}
