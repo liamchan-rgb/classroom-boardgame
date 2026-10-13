@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import UIKit
 import ClassroomGameCore
 
 @MainActor
@@ -49,7 +50,7 @@ final class PVEAppSession: ObservableObject {
     }
     #if DEBUG
     func installVisualFixture(_ fixture:PVEPlaySession) {
-        active = false; cancelAI(); play = fixture; fixture.toggleReward("p2"); fixture.toggleReward("p3")
+        active = false; cancelAI(); presentation.suppressHistory(fixture.engine.history); play = fixture; fixture.toggleReward("p2"); fixture.toggleReward("p3")
         message = "视觉验证：7角色、3怪物、独立奖励、倒地和下轮资格。"; followPublicActor()
     }
     #endif
@@ -57,6 +58,9 @@ final class PVEAppSession: ObservableObject {
     var catalog: GameCatalog? { play?.engine.catalog }
     var actor: GameUnit? { play?.actor }
     var paused: Bool { state?.pauseReasons.isEmpty == false }
+    var presentingMovement: Bool {
+        !UIAccessibility.isReduceMotionEnabled && presentation.pending.contains { !$0.mapMoves.isEmpty && $0.end > Date() }
+    }
     var scenario: PVEScenario? { state?.verificationScenario.flatMap(PVEScenario.init(rawValue:)) }
     func activate() { presentation.clearVisible(); active = true; lastTick = ProcessInfo.processInfo.systemUptime; publish(); scheduleAI() }
     func deactivate() { pause(.manual,enabled:true); active = false; cancelAI(); display.playFrame = nil; display.playBook = false }
@@ -112,12 +116,12 @@ final class PVEAppSession: ObservableObject {
         itemPage = max(0,min(max(0,(count+3)/4-1),itemPage+amount)); publish()
     }
     func perform() {
-        guard let play, !aiRunning, !bookOpen, !modalOpen else { return }
+        guard let play, !aiRunning, !bookOpen, !modalOpen, !presentingMovement else { return }
         run { try play.perform() }
     }
     func award(_ value: ResourceReward) { guard let play else { return }; run { try play.reward(value) } }
     func endTurn() {
-        guard let actor, actor.kind == .player, state?.battle != nil, !modalOpen, !bookOpen else { return }
+        guard let actor, actor.kind == .player, state?.battle != nil, !modalOpen, !bookOpen, !presentingMovement else { return }
         apply(.endTurn(actor:actor.id,timedOut:false))
     }
     func apply(_ command: GameCommand) { guard let play else { return }; run { try play.apply(command) } }

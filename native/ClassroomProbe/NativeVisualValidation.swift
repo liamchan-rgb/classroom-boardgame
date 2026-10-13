@@ -99,6 +99,18 @@ enum NativeVisualValidation {
         try await capture("public-progress-midround-4x3",PVEPublicView(frame:try middlePlay.publicFrame(),image:nil,showingBook:false),CGSize(width:1440,height:1080))
         let teacher = TeacherSession.shared
         let model = PVEAppSession(display:teacher.display)
+        let gateState = try PVEGameFactory.make(players:players,scenario:.playerTwenty,seed:22,catalog:catalog)
+        let gatePlay = PVEPlaySession(engine:try GameEngine(catalog:catalog,state:gateState))
+        model.installVisualFixture(gatePlay)
+        model.apply(.move(actors:players.map(\.id),path:[1,2,4]))
+        model.choose(.attack); model.target(.unit("m1"))
+        let movementGateChecked = !UIAccessibility.isReduceMotionEnabled
+        if movementGateChecked {
+            guard gatePlay.preview.allowed, model.presentingMovement else { throw GameError("未能建立移动表现中的有效行动验证") }
+            let beforeBlockedAction = gatePlay.engine.archive
+            model.perform(); model.endTurn()
+            guard gatePlay.engine.archive == beforeBlockedAction else { throw GameError("移动未完成时重复确认改变了游戏") }
+        }
         model.installVisualFixture(play)
         let beforeCamera = play.engine.archive, selectedBeforeCamera = play.selectedPlayerID, rewardsBeforeCamera = play.rewardIDs
         model.focusPublicPlayer("p2"); model.zoomPublicMap(1.25); model.panPublicMap(x:0.1,y:-0.1)
@@ -115,7 +127,7 @@ enum NativeVisualValidation {
             let pair = key.split(separator:":",maxSplits:1).map(String.init)
             if GameArt.image(pair[0],pair[1]) == nil { missing.append(key) }
         }
-        let report:[String:Any] = ["screenshots":22,"assetCount":GameArt.bindings.count,"cameraControlsPure":cameraControlsPure,"missingAssets":missing,"names":names,"deviceVerified":false,"note":"Actual native SwiftUI simulator rendering; not physical iPad/TV feedback"]
+        let report:[String:Any] = ["screenshots":22,"assetCount":GameArt.bindings.count,"cameraControlsPure":cameraControlsPure,"movementGateChecked":movementGateChecked,"missingAssets":missing,"names":names,"deviceVerified":false,"note":"Actual native SwiftUI simulator rendering; not physical iPad/TV feedback"]
         try JSONSerialization.data(withJSONObject:report,options:[.prettyPrinted,.sortedKeys]).write(to:output.appendingPathComponent("report.json"))
         guard missing.isEmpty else { throw GameError("离线资产无法解码") }
         try Data("success".utf8).write(to:output.appendingPathComponent("complete.txt"))

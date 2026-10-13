@@ -244,9 +244,9 @@ private struct PVEActionPanel:View {
                             }
                         }
                     }
-                    Text(play.preview.message).font(.callout).foregroundStyle(play.preview.allowed ? GameTheme.muted : GameTheme.danger).fixedSize(horizontal:false,vertical:true)
+                    Text(model.presentingMovement ? "角色移动表现中，请稍后确认；查看与奖励仍可用。" : play.preview.message).font(.callout).foregroundStyle(play.preview.allowed ? GameTheme.muted : GameTheme.danger).fixedSize(horizontal:false,vertical:true)
                     Button("确认执行 · \(play.preview.cost)行动点") { model.perform() }.buttonStyle(ClassroomButtonStyle(primary:true))
-                        .frame(maxWidth:.infinity,minHeight:56).disabled(!play.preview.allowed || model.aiRunning)
+                        .frame(maxWidth:.infinity,minHeight:56).disabled(!play.preview.allowed || model.aiRunning || model.presentingMovement)
                     HStack(spacing:8) {
                         Menu {
                             ForEach(play.options.filter { if case .item = $0.action { return true }; return false }) { option in
@@ -255,7 +255,7 @@ private struct PVEActionPanel:View {
                         } label: { Text(play.options.contains { if case .item = $0.action { return true }; return false } ? "道具" : "暂无道具") }
                             .disabled(!play.options.contains { if case .item = $0.action { return true }; return false })
                         Button("救援") { model.choose(.rescue) }
-                        if play.engine.state.battle != nil { Button("结束(E)") { model.endTurn() }.accessibilityLabel("结束回合（E）") }
+                        if play.engine.state.battle != nil { Button("结束(E)") { model.endTurn() }.accessibilityLabel("结束回合（E）").disabled(model.presentingMovement) }
                     }.font(.callout).buttonStyle(ClassroomButtonStyle()).frame(maxWidth:.infinity,minHeight:44)
                 } else {
                     Text(model.aiRunning ? "怪物正在按技能优先级和选敌策略行动。" : "当前没有可行动玩家。可暂停、复活、调整资源或结束本场。")
