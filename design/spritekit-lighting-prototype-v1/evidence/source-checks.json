@@ -1,0 +1,45 @@
+{
+  "status": "static-checks-pass",
+  "swiftSyntax": [
+    {
+      "file": "Native/Sources/AssetStore.swift",
+      "syntax": "pass",
+      "sdkTypecheck": "not-run"
+    },
+    {
+      "file": "Native/Sources/DisplayModel.swift",
+      "syntax": "pass",
+      "sdkTypecheck": "not-run"
+    },
+    {
+      "file": "Native/Sources/GrassScene.swift",
+      "syntax": "pass",
+      "sdkTypecheck": "not-run"
+    },
+    {
+      "file": "Native/Sources/PrototypeApp.swift",
+      "syntax": "pass",
+      "sdkTypecheck": "not-run"
+    },
+    {
+      "file": "Native/Tests/DisplayGeometryTests.swift",
+      "syntax": "pass",
+      "sdkTypecheck": "not-run"
+    },
+    {
+      "file": "Native/UITests/LightingSmokeTests.swift",
+      "syntax": "pass",
+      "sdkTypecheck": "not-run"
+    }
+  ],
+  "projectObjectGraph": "pass",
+  "scheme": "pass",
+  "resourceRects": "pass",
+  "reusedAssetBytes": "pass",
+  "userIdealReferenceBytes": "pass",
+  "nativeBuild": "not-run-no-Xcode-or-Apple-SDK",
+  "nativeTests": "not-run",
+  "nativeScreenshots": "not-produced",
+  "nativePerformance": "not-measured",
+  "artApproved": false
+}

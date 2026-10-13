@@ -1,0 +1,10 @@
+{
+  "platform": "Linux",
+  "xcodebuildAvailable": false,
+  "nativeBuild": "not-run",
+  "nativeTests": "not-run",
+  "nativeScreenshots": [],
+  "ipaProduced": false,
+  "sourceSyntaxAndProjectChecks": "pass",
+  "nextAction": "Run scripts/verify_on_mac.sh on a Mac with full Xcode and an iPad simulator"
+}

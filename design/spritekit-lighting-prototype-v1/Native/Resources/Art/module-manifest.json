@@ -1,0 +1,484 @@
+{
+  "terrain": [
+    {
+      "id": "meadow",
+      "sourceRect": [
+        0,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "shade_grass",
+      "sourceRect": [
+        627,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "earth",
+      "sourceRect": [
+        0,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "meadow_earth",
+      "sourceRect": [
+        627,
+        627,
+        627,
+        627
+      ]
+    }
+  ],
+  "sceneryAndLandmarks": [
+    {
+      "id": "mixed_grove",
+      "kind": "scenery",
+      "cell": 0,
+      "sourceRect": [
+        51,
+        110,
+        463,
+        475
+      ],
+      "opaqueBounds": [
+        67,
+        126,
+        498,
+        569
+      ],
+      "anchorPx": [
+        231.5,
+        451
+      ],
+      "status": "candidate-awaiting-art-review",
+      "rectMethod": "measured major alpha component plus 16px padding"
+    },
+    {
+      "id": "rock_hill",
+      "kind": "scenery",
+      "cell": 1,
+      "sourceRect": [
+        548,
+        150,
+        448,
+        437
+      ],
+      "opaqueBounds": [
+        564,
+        166,
+        980,
+        571
+      ],
+      "anchorPx": [
+        224.0,
+        413
+      ],
+      "status": "candidate-awaiting-art-review",
+      "rectMethod": "measured major alpha component plus 16px padding"
+    },
+    {
+      "id": "fir_grove",
+      "kind": "scenery",
+      "cell": 2,
+      "sourceRect": [
+        1047,
+        67,
+        442,
+        522
+      ],
+      "opaqueBounds": [
+        1063,
+        83,
+        1473,
+        573
+      ],
+      "anchorPx": [
+        221.0,
+        498
+      ],
+      "status": "candidate-awaiting-art-review",
+      "rectMethod": "measured major alpha component plus 16px padding"
+    },
+    {
+      "id": "low_rocks",
+      "kind": "scenery",
+      "cell": 3,
+      "sourceRect": [
+        48,
+        690,
+        456,
+        278
+      ],
+      "opaqueBounds": [
+        64,
+        706,
+        488,
+        952
+      ],
+      "anchorPx": [
+        228.0,
+        254
+      ],
+      "status": "candidate-awaiting-art-review",
+      "rectMethod": "measured major alpha component plus 16px padding"
+    },
+    {
+      "id": "fence",
+      "kind": "scenery",
+      "cell": 4,
+      "sourceRect": [
+        549,
+        707,
+        434,
+        260
+      ],
+      "opaqueBounds": [
+        565,
+        723,
+        967,
+        951
+      ],
+      "anchorPx": [
+        217.0,
+        236
+      ],
+      "status": "candidate-awaiting-art-review",
+      "rectMethod": "measured major alpha component plus 16px padding"
+    },
+    {
+      "id": "flowers",
+      "kind": "scenery",
+      "cell": 5,
+      "sourceRect": [
+        1040,
+        693,
+        454,
+        283
+      ],
+      "opaqueBounds": [
+        1056,
+        709,
+        1478,
+        960
+      ],
+      "anchorPx": [
+        227.0,
+        259
+      ],
+      "status": "candidate-awaiting-art-review",
+      "rectMethod": "measured major alpha component plus 16px padding"
+    },
+    {
+      "id": "camp_a",
+      "kind": "landmark",
+      "cell": 0,
+      "sourceRect": [
+        58,
+        136,
+        482,
+        371
+      ],
+      "opaqueBounds": [
+        74,
+        152,
+        524,
+        491
+      ],
+      "anchorPx": [
+        241.0,
+        347
+      ],
+      "status": "candidate-awaiting-art-review",
+      "rectMethod": "measured major alpha component plus 16px padding"
+    },
+    {
+      "id": "tower_a",
+      "kind": "landmark",
+      "cell": 1,
+      "sourceRect": [
+        597,
+        81,
+        382,
+        417
+      ],
+      "opaqueBounds": [
+        613,
+        97,
+        963,
+        482
+      ],
+      "anchorPx": [
+        191.0,
+        393
+      ],
+      "status": "candidate-awaiting-art-review",
+      "rectMethod": "measured major alpha component plus 16px padding"
+    },
+    {
+      "id": "ruin_a",
+      "kind": "landmark",
+      "cell": 2,
+      "sourceRect": [
+        1050,
+        154,
+        435,
+        353
+      ],
+      "opaqueBounds": [
+        1066,
+        170,
+        1469,
+        491
+      ],
+      "anchorPx": [
+        217.5,
+        329
+      ],
+      "status": "candidate-awaiting-art-review",
+      "rectMethod": "measured major alpha component plus 16px padding"
+    },
+    {
+      "id": "camp_b",
+      "kind": "landmark",
+      "cell": 3,
+      "sourceRect": [
+        48,
+        625,
+        460,
+        322
+      ],
+      "opaqueBounds": [
+        64,
+        641,
+        492,
+        931
+      ],
+      "anchorPx": [
+        230.0,
+        298
+      ],
+      "status": "candidate-awaiting-art-review",
+      "rectMethod": "measured major alpha component plus 16px padding"
+    },
+    {
+      "id": "tower_b",
+      "kind": "landmark",
+      "cell": 4,
+      "sourceRect": [
+        576,
+        545,
+        395,
+        401
+      ],
+      "opaqueBounds": [
+        592,
+        561,
+        955,
+        930
+      ],
+      "anchorPx": [
+        197.5,
+        377
+      ],
+      "status": "candidate-awaiting-art-review",
+      "rectMethod": "measured major alpha component plus 16px padding"
+    },
+    {
+      "id": "ruin_b",
+      "kind": "landmark",
+      "cell": 5,
+      "sourceRect": [
+        1041,
+        588,
+        448,
+        363
+      ],
+      "opaqueBounds": [
+        1057,
+        604,
+        1473,
+        935
+      ],
+      "anchorPx": [
+        224.0,
+        339
+      ],
+      "status": "candidate-awaiting-art-review",
+      "rectMethod": "measured major alpha component plus 16px padding"
+    }
+  ],
+  "adventurerFrames": [
+    {
+      "index": 0,
+      "sourceRect": [
+        0,
+        0,
+        384,
+        512
+      ],
+      "opaqueBounds": [
+        121,
+        111,
+        331,
+        460
+      ],
+      "anchorPx": [
+        192,
+        460
+      ],
+      "state": "east-walk"
+    },
+    {
+      "index": 1,
+      "sourceRect": [
+        384,
+        0,
+        384,
+        512
+      ],
+      "opaqueBounds": [
+        119,
+        111,
+        290,
+        460
+      ],
+      "anchorPx": [
+        192,
+        460
+      ],
+      "state": "east-walk"
+    },
+    {
+      "index": 2,
+      "sourceRect": [
+        768,
+        0,
+        384,
+        512
+      ],
+      "opaqueBounds": [
+        90,
+        111,
+        308,
+        460
+      ],
+      "anchorPx": [
+        192,
+        460
+      ],
+      "state": "east-walk"
+    },
+    {
+      "index": 3,
+      "sourceRect": [
+        1152,
+        0,
+        384,
+        512
+      ],
+      "opaqueBounds": [
+        76,
+        111,
+        252,
+        460
+      ],
+      "anchorPx": [
+        192,
+        460
+      ],
+      "state": "east-walk"
+    },
+    {
+      "index": 4,
+      "sourceRect": [
+        0,
+        512,
+        384,
+        512
+      ],
+      "opaqueBounds": [
+        117,
+        50,
+        305,
+        404
+      ],
+      "anchorPx": [
+        192,
+        404
+      ],
+      "state": "south-idle"
+    },
+    {
+      "index": 5,
+      "sourceRect": [
+        384,
+        512,
+        384,
+        512
+      ],
+      "opaqueBounds": [
+        113,
+        46,
+        290,
+        404
+      ],
+      "anchorPx": [
+        192,
+        404
+      ],
+      "state": "north-idle"
+    },
+    {
+      "index": 6,
+      "sourceRect": [
+        768,
+        512,
+        384,
+        512
+      ],
+      "opaqueBounds": [
+        102,
+        52,
+        277,
+        407
+      ],
+      "anchorPx": [
+        192,
+        407
+      ],
+      "state": "west-idle"
+    },
+    {
+      "index": 7,
+      "sourceRect": [
+        1152,
+        512,
+        384,
+        512
+      ],
+      "opaqueBounds": [
+        96,
+        50,
+        268,
+        407
+      ],
+      "anchorPx": [
+        192,
+        407
+      ],
+      "state": "east-idle"
+    }
+  ],
+  "walkLoopMs": 600,
+  "pixelGridVerified": false,
+  "seamlessTilesVerified": false,
+  "rectPolicy": "Use measured source rectangles, not assumed equal grid cells"
+}
