@@ -1,0 +1,17 @@
+{
+  "verifiedAtUTC": "2026-10-13T15:19:36.067044+00:00",
+  "method": "independent remote verification checkout",
+  "snapshotCommit": "9d3caa3c37dd082be73878fe2b21188a87609f9d",
+  "tag": "archive-design-ideal-grass-map-slice-v6-20261013",
+  "zipSHA256": "c96238ab0377171f49f7fe2a5cf5752e32d3522fa1366d58aac6122bbea71575",
+  "zipBytes": 52786569,
+  "payloadFiles": 33,
+  "zipCRC": "pass",
+  "remoteAndLocalAndZIPMatch": true,
+  "tagPayloadMatch": true,
+  "userIdealReferenceSHA256": "f37522f5788ae7d22e570c85438ecc0e5503f8714c7893400de5609366a2d673",
+  "userIdealReferenceBytePreserved": true,
+  "nativeVerified": false,
+  "artApproved": false,
+  "appChanged": false
+}
