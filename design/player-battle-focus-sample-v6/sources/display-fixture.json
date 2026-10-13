@@ -1,0 +1,137 @@
+{
+  "status": "design-fixture-not-engine-receipt",
+  "actor": "P3",
+  "currentAP": 1,
+  "maximumAP": 8,
+  "units": [
+    [
+      "P1",
+      "class_adventurer_portrait",
+      "12/12",
+      ""
+    ],
+    [
+      "P2",
+      "class_ranger_portrait",
+      "18/18",
+      ""
+    ],
+    [
+      "P3",
+      "class_spellblade_portrait",
+      "20/24",
+      "active"
+    ],
+    [
+      "P4",
+      "class_dragon_knight_portrait",
+      "32/32",
+      ""
+    ],
+    [
+      "P5",
+      "class_adventurer_portrait",
+      "0/12",
+      "down"
+    ],
+    [
+      "P6",
+      "class_ranger_portrait",
+      "9/18",
+      "next"
+    ],
+    [
+      "P7",
+      "class_dragon_knight_portrait",
+      "32/32",
+      ""
+    ],
+    [
+      "M1",
+      "monster_slime_portrait",
+      "8/8",
+      "enemy"
+    ],
+    [
+      "M2",
+      "monster_goblin_archer_portrait",
+      "12/12",
+      "enemy"
+    ],
+    [
+      "M3",
+      "monster_cave_troll_portrait",
+      "48/48",
+      "enemy"
+    ]
+  ],
+  "details": [
+    {
+      "id": "runeSlash",
+      "kind": "skill",
+      "name": "符文斩",
+      "cost": "2行动点",
+      "target": "单敌 · 射程1 · 战斗 · 余2次",
+      "effect": "目标伤害2D12+2；自身恢复4生命、护盾4",
+      "reason": "行动点不足",
+      "available": false
+    },
+    {
+      "id": "runeWard",
+      "kind": "skill",
+      "name": "符文庇护",
+      "cost": "2行动点",
+      "target": "节点全部队友 · 射程1 · 余2次",
+      "effect": "目标恢复8生命、护盾6",
+      "reason": "行动点不足",
+      "available": false
+    },
+    {
+      "id": "battleRune",
+      "kind": "skill",
+      "name": "战斗符文",
+      "cost": "1行动点",
+      "target": "节点全部队友 · 射程1 · 余2次",
+      "effect": "目标护盾4；伤害+3，持续2轮",
+      "reason": "可用",
+      "available": true
+    },
+    {
+      "id": "smallPotion",
+      "kind": "item",
+      "name": "小治疗药水",
+      "cost": "1行动点",
+      "quantity": 2,
+      "asset": "item_small_potion",
+      "target": "自己/队友 · 射程1 · 持有2",
+      "effect": "恢复6生命；普通治疗不能救起倒地目标",
+      "reason": "可用",
+      "available": true
+    },
+    {
+      "id": "shieldPotion",
+      "kind": "item",
+      "name": "护盾药水",
+      "cost": "1行动点",
+      "quantity": 1,
+      "asset": "item_shield_potion",
+      "target": "自己/队友 · 射程1 · 持有1",
+      "effect": "护盾8，与旧护盾取较高值",
+      "reason": "可用",
+      "available": true
+    },
+    {
+      "id": "revivalStone",
+      "kind": "item",
+      "name": "复活石",
+      "cost": "2行动点",
+      "quantity": 1,
+      "asset": "item_revival_stone",
+      "target": "同节点倒地队友 · 持有1",
+      "effect": "复活半最大生命；当轮不能行动，下轮按原队列行动",
+      "reason": "行动点不足",
+      "available": false
+    }
+  ],
+  "noGameWrites": true
+}

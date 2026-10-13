@@ -1,0 +1,23 @@
+{
+  "status": "pass",
+  "browserOnly": true,
+  "nativeVerified": false,
+  "artApproved": false,
+  "hover": true,
+  "keyboardFocus": true,
+  "clickToPin": true,
+  "escapeToClose": true,
+  "clickAgainCloses": true,
+  "outsideClickCloses": true,
+  "offlineRequestsBlocked": true,
+  "canvas": [
+    1920,
+    1080
+  ],
+  "queueUnits": 10,
+  "healthBars": 10,
+  "visibleAPFilled": 1,
+  "visibleAPEmpty": 7,
+  "engineCalls": 0,
+  "overflow": []
+}
