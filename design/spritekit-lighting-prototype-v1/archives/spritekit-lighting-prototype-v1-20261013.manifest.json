@@ -1,0 +1,13 @@
+{
+  "snapshotCommit": "24778c3a317cae21cae03dcdf928c065dc2e946b",
+  "tag": "archive-design-spritekit-lighting-prototype-v1-20261013",
+  "zip": "spritekit-lighting-prototype-v1-20261013.zip",
+  "sha256": "e420931af57f6568e1573c7d85b1c183ff4f682c5e81b78ca1f316f43897ba6a",
+  "bytes": 28414346,
+  "payloadFiles": 41,
+  "zipEntries": 42,
+  "status": "native-build-not-run-awaiting-Xcode",
+  "nativeBuildCommit": null,
+  "nativeVerified": false,
+  "ipaProduced": false
+}
