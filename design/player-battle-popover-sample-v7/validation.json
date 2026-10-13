@@ -1,0 +1,174 @@
+{
+  "status": "pass",
+  "browserOnly": true,
+  "nativeVerified": false,
+  "artApproved": false,
+  "hover": true,
+  "keyboardFocus": true,
+  "clickToPin": true,
+  "escapeToClose": true,
+  "clickAgainCloses": true,
+  "outsideClickCloses": true,
+  "offlineRequestsBlocked": true,
+  "battleToMapRatio": "7:3 excluding the 24px gutter",
+  "popoverAnchorsChecked": 6,
+  "defaultGeometry": {
+    "map": {
+      "x": 96,
+      "y": 160.65625,
+      "w": 511.1875,
+      "h": 600,
+      "right": 607.1875,
+      "bottom": 760.65625
+    },
+    "battle": {
+      "x": 631.1875,
+      "y": 160.65625,
+      "w": 1192.796875,
+      "h": 600,
+      "right": 1823.984375,
+      "bottom": 760.65625
+    },
+    "ratio": 2.3333842768064557,
+    "track": {
+      "x": 96,
+      "y": 779.3125,
+      "w": 1728,
+      "h": 100,
+      "right": 1824,
+      "bottom": 879.3125
+    },
+    "panel": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "right": 0,
+      "bottom": 0
+    },
+    "card": null,
+    "summary": {
+      "x": 121,
+      "y": 920.46875,
+      "w": 390,
+      "h": 83,
+      "right": 511,
+      "bottom": 1003.46875
+    },
+    "hpInside": true
+  },
+  "skillGeometry": {
+    "map": {
+      "x": 96,
+      "y": 156,
+      "w": 511.1875,
+      "h": 460,
+      "right": 607.1875,
+      "bottom": 616
+    },
+    "battle": {
+      "x": 631.1875,
+      "y": 156,
+      "w": 1192.796875,
+      "h": 460,
+      "right": 1823.984375,
+      "bottom": 616
+    },
+    "ratio": 2.3333842768064557,
+    "track": {
+      "x": 96,
+      "y": 630,
+      "w": 1728,
+      "h": 100,
+      "right": 1824,
+      "bottom": 730
+    },
+    "panel": {
+      "x": 535,
+      "y": 781,
+      "w": 720,
+      "h": 160,
+      "right": 1255,
+      "bottom": 941
+    },
+    "card": {
+      "x": 535,
+      "y": 953,
+      "w": 159.34375,
+      "h": 54,
+      "right": 694.34375,
+      "bottom": 1007
+    },
+    "summary": {
+      "x": 121,
+      "y": 920.5,
+      "w": 390,
+      "h": 83,
+      "right": 511,
+      "bottom": 1003.5
+    },
+    "hpInside": true
+  },
+  "itemGeometry": {
+    "map": {
+      "x": 96,
+      "y": 156,
+      "w": 511.1875,
+      "h": 460,
+      "right": 607.1875,
+      "bottom": 616
+    },
+    "battle": {
+      "x": 631.1875,
+      "y": 156,
+      "w": 1192.796875,
+      "h": 460,
+      "right": 1823.984375,
+      "bottom": 616
+    },
+    "ratio": 2.3333842768064557,
+    "track": {
+      "x": 96,
+      "y": 630,
+      "w": 1728,
+      "h": 100,
+      "right": 1824,
+      "bottom": 730
+    },
+    "panel": {
+      "x": 1104,
+      "y": 781,
+      "w": 720,
+      "h": 160,
+      "right": 1824,
+      "bottom": 941
+    },
+    "card": {
+      "x": 1561.015625,
+      "y": 953,
+      "w": 237.984375,
+      "h": 54,
+      "right": 1799,
+      "bottom": 1007
+    },
+    "summary": {
+      "x": 121,
+      "y": 920.5,
+      "w": 390,
+      "h": 83,
+      "right": 511,
+      "bottom": 1003.5
+    },
+    "hpInside": true
+  },
+  "canvas": [
+    1920,
+    1080
+  ],
+  "queueUnits": 10,
+  "healthBars": 10,
+  "visibleAPFilled": 1,
+  "visibleAPEmpty": 7,
+  "engineCalls": 0,
+  "overflow": []
+}
