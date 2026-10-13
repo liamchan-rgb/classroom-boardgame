@@ -1,0 +1,60 @@
+name: SpriteKit Sample Review
+
+on:
+  pull_request:
+    paths:
+      - 'design/spritekit-lighting-review-v2/**'
+      - '.github/workflows/spritekit-native-review.yml'
+      - 'native/tools/select_ci_xcode.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: spritekit-review-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    name: Native screenshots and replay
+    runs-on: xcode-27
+    timeout-minutes: 35
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Initialize review diagnostics
+        env:
+          PROTOTYPE_REVIEW_OUTPUT_DIR: ${{ runner.temp }}/spritekit-review
+        run: |
+          set -euo pipefail
+          mkdir -p "$PROTOTYPE_REVIEW_OUTPUT_DIR"
+          printf 'PROTOTYPE_REVIEW_OUTPUT_DIR=%s\n' "$PROTOTYPE_REVIEW_OUTPUT_DIR" >> "$GITHUB_ENV"
+          printf '%s\n' "$GITHUB_SHA" > "$PROTOTYPE_REVIEW_OUTPUT_DIR/source-commit.txt"
+          sw_vers > "$PROTOTYPE_REVIEW_OUTPUT_DIR/runner.txt"
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Select Xcode for the independent sample
+        run: |
+          set -euo pipefail
+          python3 native/tools/select_ci_xcode.py \
+            --project design/spritekit-lighting-review-v2/Native/GrassLightingPrototype.xcodeproj \
+            --github-env "$GITHUB_ENV" \
+            2>&1 | tee "$PROTOTYPE_REVIEW_OUTPUT_DIR/xcode-selection.log"
+      - name: Check sample source and resource configuration
+        run: |
+          set -euo pipefail
+          python3 design/spritekit-lighting-review-v2/scripts/check_review.py \
+            2>&1 | tee "$PROTOTYPE_REVIEW_OUTPUT_DIR/source-checks.log"
+      - name: Test, capture native screenshots and record replay
+        run: |
+          set -euo pipefail
+          bash design/spritekit-lighting-review-v2/scripts/review_native.sh
+      - name: Upload screenshots, videos and diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: spritekit-native-review-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/spritekit-review/
+          retention-days: 14
+          if-no-files-found: warn

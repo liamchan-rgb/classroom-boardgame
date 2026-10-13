@@ -1,0 +1,19 @@
+{
+  "checkedAtUTC": "2026-10-13T17:05:32.001706+00:00",
+  "swiftGrammar": "pass",
+  "files": [
+    "Native/Sources/AssetStore.swift",
+    "Native/Sources/DisplayModel.swift",
+    "Native/Sources/GrassScene.swift",
+    "Native/Sources/PrototypeApp.swift",
+    "Native/Tests/DisplayGeometryTests.swift",
+    "Native/UITests/LightingSmokeTests.swift"
+  ],
+  "projectGeneratorResourceChecks": "pass",
+  "actionlint": "pass",
+  "shellSyntax": "pass",
+  "nativeBuild": "pending-first-PR",
+  "nativeScreenshots": [],
+  "nativeVideos": [],
+  "artApproved": false
+}
