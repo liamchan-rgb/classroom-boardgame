@@ -8,6 +8,8 @@
 
 先显式读取：main上的AGENTS.md、stage2/ui-feedback-round1-20261013/feedback.md、同目录visual-expectations.md、stage2/ui-integration/README.md和evidence/native-previews的v0.9实际原生截图。不要只看旧设计图。
 
+开发已先用现有素材推进v0.10地图/战斗程序结构，请同时读取stage2/map-ui-v0.10/README.md及其evidence/native-previews中的最新实际截图（构建证据完成后上传）。镜头、位置、连续轨道和技能物品接口以最新main为准；仍缺正式走路肢体帧与HD-2D场景层，新美术接入不回退此程序工作。
+
 原设计基线仍为design/ui-art-round1-20261012固定提交f43db0502bf3a9df9fef8bb7c699b6dce86c3425。读取该提交的design/AGENTS.md、ARCHIVE_INDEX、全部reviews、round2/round3 README/tokens/annotations、art-production-b-v1及map-art-b-v1清单/注解；同时读取main原需求和当前真实PublicProjection/PlayProjection/Presentation接口。
 
 本轮2026-10-13用户新反馈优先：查看IPA后功能无问题，但看不清人物在地图哪里；要参考火焰纹章经典2D战棋的大地图空间感，看到角色移动到节点后右侧再展开战斗；探索去掉战斗面板；视野外玩家用头像+方向箭头标位置，点头像切镜头。底部要连续进度轨道，不是独立头像排序；另设当前玩家技能与物品栏。商店入口未做，要记录并建议入口布局。

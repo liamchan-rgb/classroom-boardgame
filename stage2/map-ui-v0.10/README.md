@@ -16,3 +16,17 @@
 新增核心检查覆盖镜头坐标/边缘聚合、实际遇敌截断路径与多人移动、一次播放/恢复抑制、真实技能物品可用性和私有选择隔离。云端原生截图扩展为22张，包含两比例探索/玩家/怪物/绘本、离屏角色、18物品分页、到达前后与教师屏。构建/检查结果随后记录在evidence，未取得本版真机反馈。
 
 原GameEngine、Rules、GameState/GameArchive、Catalog、initial-content、原需求及开发步骤字节不改；纯显示DTO和镜头不进入存档格式。商店仍在原阶段3独立待办，本次没有加入购买、交易、仓库、换装或新地图规则。现有素材离线打包，原设计、旧ZIP和旧标签保留。新图审美、真机触控/电视可读性与硬件键盘分别待验证。
+
+## 实际接入与未接入
+
+继续本地66张独立PNG：4职业、6怪物、18物品、6资源图标、6个nodeVisual、14个地图状态/道路/地面/装饰层、12套八帧结果特效；另保留本地基础变换参数/动画manifest。均按模板ASCII ID绑定，设计来源固定f43提交，无整页PNG背景、运行时素材下载或姓名数字烘焙。详细逐图清单见[原接入记录](../ui-integration/README.md)和本版asset-verification.json。
+
+本次新增显示接入为地图角色/镜头/边缘头像、提交路径时间表现、探索和战斗面板切换、连续队列状态、真实技能与物品资源栏。尚未接入新行走肢体帧、HD-2D场景层及新战斗动作（尚未交付）；商店/交易/换装未开发，物品图仅服务已有背包与道具操作。候选素材最终审美未通过。
+
+## 本版交付结果
+
+最终Xcode27设备构建[38397057874](https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38397057874)通过，IPA内已核对版本0.10/构建10、arm64/iPad、原Bundle ID，需SideStore个人签名。IPA约10.6MB；实际编译提交 a94ad1cfb70104b8d6e980b86b0625c0829f65d9，源码/资料快照和长期存档提交另由archives记录。
+
+GameCore72项与ProbeCore6项共78项通过；[22张原生截图](evidence/native-previews/README.md)、[构建与校验](evidence/cloud-build-result-v0.10.json)、[离线素材/原规则字节检查](evidence/asset-verification.json)、[图像检查意见](evidence/visual-review.json)。未知Boss/奖励公开地图像素一致；移动期间下一动作被阻止且不改变存档；镜头不改变游戏/行动者/奖励；原键盘字节未改。此前构建失败或版本标识错误包保留追溯，见[构建过程](evidence/build-attempts.json)，均不作为当前推荐安装包。
+
+[真机检查步骤](验收与真机检查.md)：真机触控、电视阅读、无线恢复、硬件键盘、真实PPTX和候选素材审美待反馈。每步存档保留原设计、旧ZIP与旧标签，下载IPA无需下载整个恢复包。

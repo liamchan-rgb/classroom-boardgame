@@ -1,0 +1,27 @@
+{
+  "finalArtifactID": 11812199095,
+  "screenshotsReviewed": [
+    "public-player-4x3.png",
+    "teacher-offscreen-grouped-1180x820.png",
+    "public-exploration-16x9.png",
+    "public-progress-midround-4x3.png"
+  ],
+  "findings": [
+    "玩家战斗地图、右侧战斗及连续队列完整，底部三技能四物品可读；顶部12汉字全名完整",
+    "1180×820教师七角色与奖励/动作按钮一屏显示，视野外聚合并带方向，姓名换行",
+    "16:9探索右侧战斗区收起，地图与角色实际落点显示",
+    "回合中段已行动轨道/勾与当前指针可区分；倒地叉/救援下轮时钟可区分"
+  ],
+  "pixelIsolation": [
+    "public-unknown-boss.png",
+    "public-unknown-reward.png"
+  ],
+  "unknownPixelDifferenceZero": true,
+  "deviceVerified": false,
+  "newArtAestheticApproved": false,
+  "limitations": [
+    "现有图片路径平移，不是新行走肢体帧",
+    "未取得本版真机电视/触控/无线重连/键盘/PPTX反馈",
+    "HD-2D新场景与动作仍需独立美术交付"
+  ]
+}

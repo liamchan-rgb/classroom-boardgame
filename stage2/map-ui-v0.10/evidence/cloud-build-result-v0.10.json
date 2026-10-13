@@ -1,0 +1,132 @@
+{
+  "date": "2026-10-13",
+  "verifiedAt": "2026-10-13T12:31:59.084508+00:00",
+  "workflowURL": "https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38397057874",
+  "runID": 38397057874,
+  "jobID": 115294851253,
+  "artifactID": 11812199095,
+  "testedCommit": "a94ad1cfb70104b8d6e980b86b0625c0829f65d9",
+  "conclusion": "success",
+  "xcodeVersion": "Xcode 27.0\nBuild version 27A266a",
+  "coreTests": {
+    "GameCore": "72 passed, 0 failures",
+    "ProbeCore": "6 passed, 0 failures"
+  },
+  "appVersion": "0.10",
+  "buildNumber": "10",
+  "displayName": "ClassroomProbe",
+  "bundleName": "ClassroomProbe",
+  "bundleIdentifier": "org.personal.classroom.stage0",
+  "minimumOS": "27.0",
+  "sdk": "iphoneos27.0",
+  "deviceFamily": [
+    2
+  ],
+  "architecture": "arm64",
+  "designCommit": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+  "bundledPNGCount": 66,
+  "nativeScreenshotCount": 22,
+  "ipaBytes": 10562079,
+  "ipaSha256": "8b7af9f4967828e629c45310cd1fdb2f38486cfd31571f186c5d44aa7cd08d76",
+  "artifactArchiveBytes": 36701109,
+  "artifactArchiveSha256": "2ebe06508fbcb6f507a1a9d31eb4b32ab608bc6c23569a96ce58507f1facaccc",
+  "requiresPersonalSigning": true,
+  "newPVEDeviceVerified": false,
+  "newArtAestheticApproved": false,
+  "artifactExpiresAt": "2026-10-16T12:29:55Z",
+  "cameraControlsPure": true,
+  "movementGateChecked": true,
+  "unknownBossRewardPixelsIdentical": true,
+  "keyboardSourceUnchanged": true,
+  "originalRulesAndSaveFormatUnchanged": true,
+  "previewDimensions": {
+    "public-arrived-4x3.png": [
+      1440,
+      1080
+    ],
+    "public-arriving-4x3.png": [
+      1440,
+      1080
+    ],
+    "public-book-16x9.png": [
+      1920,
+      1080
+    ],
+    "public-book-4x3.png": [
+      1440,
+      1080
+    ],
+    "public-exploration-16x9.png": [
+      1920,
+      1080
+    ],
+    "public-exploration-4x3.png": [
+      1440,
+      1080
+    ],
+    "public-feedback-4x3.png": [
+      1440,
+      1080
+    ],
+    "public-many-items-page1-4x3.png": [
+      1440,
+      1080
+    ],
+    "public-many-items-page5-4x3.png": [
+      1440,
+      1080
+    ],
+    "public-monster-16x9.png": [
+      1920,
+      1080
+    ],
+    "public-monster-4x3.png": [
+      1440,
+      1080
+    ],
+    "public-offscreen-16x9.png": [
+      1920,
+      1080
+    ],
+    "public-offscreen-4x3.png": [
+      1440,
+      1080
+    ],
+    "public-player-16x9.png": [
+      1920,
+      1080
+    ],
+    "public-player-4x3.png": [
+      1440,
+      1080
+    ],
+    "public-progress-midround-4x3.png": [
+      1440,
+      1080
+    ],
+    "public-reduced-motion-4x3.png": [
+      1440,
+      1080
+    ],
+    "public-unknown-boss.png": [
+      596,
+      622
+    ],
+    "public-unknown-reward.png": [
+      596,
+      622
+    ],
+    "teacher-1180x820.png": [
+      1180,
+      820
+    ],
+    "teacher-1366x1024.png": [
+      1366,
+      1024
+    ],
+    "teacher-offscreen-grouped-1180x820.png": [
+      1180,
+      820
+    ]
+  }
+}

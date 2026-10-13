@@ -1,0 +1,66 @@
+[
+  {
+    "runID": 38371892132,
+    "commit": "03724197d4b7e93219b58f3639f94d4b94cd0d42",
+    "conclusion": "failure",
+    "note": "分页字段含inventory触发原隐私检查，改用itemPage",
+    "workflowURL": "https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38371892132",
+    "recommended": false
+  },
+  {
+    "runID": 38372388839,
+    "commit": "1a4a6014278c5e14ff4b1527bbe91239e0a330f1",
+    "conclusion": "success",
+    "note": "早期布局76测试20截图；未作为最终交付",
+    "workflowURL": "https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38372388839",
+    "recommended": false
+  },
+  {
+    "runID": 38374320546,
+    "commit": "035b90d78c41c0310c04d921220b4ffb3286ae54",
+    "conclusion": "success",
+    "note": "镜头与绕行路径77测试21截图；未作为最终交付",
+    "workflowURL": "https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38374320546",
+    "recommended": false
+  },
+  {
+    "runID": 38375146647,
+    "commit": "b3a4ad13257f166bc8ed075a81cec7375e18c4bd",
+    "conclusion": "success",
+    "note": "标签布局77测试21截图；未作为最终交付",
+    "workflowURL": "https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38375146647",
+    "recommended": false
+  },
+  {
+    "runID": 38376784961,
+    "commit": "f87e1ec5a8ae966d67528dd9cd07ff3f209f42d2",
+    "conclusion": "success",
+    "note": "边缘聚合78测试22截图；未作为最终交付",
+    "workflowURL": "https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38376784961",
+    "recommended": false
+  },
+  {
+    "runID": 38380393225,
+    "commit": "49d72fbcda2d311a3e1b4cfb6d9b8657b7259cb2",
+    "conclusion": "success",
+    "note": "移动期间操作保护；IPA版本仍标0.9/9，保留追溯且不推荐安装",
+    "workflowURL": "https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38380393225",
+    "recommended": false
+  },
+  {
+    "runID": 38382192361,
+    "commit": "203947142b22e539adfe64f704add8e3f3e0612a",
+    "conclusion": "failure",
+    "note": "已修版本变量；defaults相对路径读取失败，改直接读取plist",
+    "workflowURL": "https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38382192361",
+    "recommended": false
+  },
+  {
+    "runID": 38397057874,
+    "commit": "a94ad1cfb70104b8d6e980b86b0625c0829f65d9",
+    "conclusion": "success",
+    "note": "最终交付：包内0.10/10，78测试与22原生截图通过",
+    "workflowURL": "https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38397057874",
+    "recommended": true
+  }
+]
