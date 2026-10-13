@@ -1,0 +1,39 @@
+{
+  "formatVersion": 1,
+  "logicalZIP": "classroom-stage2-ui-art-v0.9-20261013.zip",
+  "bytes": 290894459,
+  "sha256": "58738f4104e7c1c08cac02cadd4d8fc3f72af766c4e9a5d4a6ba67bb1826a6d7",
+  "parts": [
+    {
+      "file": "classroom-stage2-ui-art-v0.9-20261013.zip.part000",
+      "bytes": 50331648,
+      "sha256": "a5abb79b472112dddf186cba590f8666b225bc7c8d7e0c57676e99f1fad55e14"
+    },
+    {
+      "file": "classroom-stage2-ui-art-v0.9-20261013.zip.part001",
+      "bytes": 50331648,
+      "sha256": "85ef34b7c691230325827c710fa6319c5112610d7e3c26878c153fe2d7ae3298"
+    },
+    {
+      "file": "classroom-stage2-ui-art-v0.9-20261013.zip.part002",
+      "bytes": 50331648,
+      "sha256": "a550f956902c042dbdb5b3e91f7f49ac0741832986e4457655f3f851464f2021"
+    },
+    {
+      "file": "classroom-stage2-ui-art-v0.9-20261013.zip.part003",
+      "bytes": 50331648,
+      "sha256": "b2b1c74ea5fbd9d0fb147a427c51e70c512920ee52aefd0c464388c48d61c9f3"
+    },
+    {
+      "file": "classroom-stage2-ui-art-v0.9-20261013.zip.part004",
+      "bytes": 50331648,
+      "sha256": "18cc1faab1a39a1a73bc1c5069c0b2a588e624dcd1d6fc5b72ddb5d51a58cc3c"
+    },
+    {
+      "file": "classroom-stage2-ui-art-v0.9-20261013.zip.part005",
+      "bytes": 39236219,
+      "sha256": "818745a508e2de663eed7488a7e6451cf643eda4661a91f4b5bad587734116cd"
+    }
+  ],
+  "reason": "Lossless split; GitHub normal Git rejects files over 100MB"
+}
