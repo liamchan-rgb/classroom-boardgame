@@ -1,5 +1,6 @@
 import UIKit
 import SpriteKit
+import CoreImage
 
 struct AtlasRect: Decodable {
     let id: String
@@ -40,9 +41,10 @@ final class AssetStore {
     private let bundle: Bundle
     private var originals: [String: CGImage] = [:]
     private var sprites: [String: SpriteAsset] = [:]
-    private var normals: [String: SKTexture] = [:]
     private var shadows: [String: ShadowAsset] = [:]
     private var terrain: [Int: SKTexture] = [:]
+    private var highlights: [String: SKTexture] = [:]
+    private let ciContext = CIContext(options: [.cacheIntermediates: false])
     init(bundle: Bundle = .main) throws {
         self.bundle = bundle
         guard let url = bundle.url(forResource: "module-manifest", withExtension: "json", subdirectory: "Art") else { throw AssetError.missing("module-manifest") }
@@ -75,12 +77,6 @@ final class AssetStore {
         let texture = SKTexture(cgImage: image); texture.filteringMode = .nearest
         let asset = SpriteAsset(id: id, image: image, texture: texture, anchorTop: anchor)
         sprites[id] = asset; return asset
-    }
-    func normal(id: String, texture: SKTexture) -> SKTexture {
-        if let existing = normals[id] { return existing }
-        // A luminance-derived experimental normal map, not an artist-authored height map.
-        let normal = texture.generatingNormalMap(withSmoothness: 0.6, contrast: 0.15)
-        normal.filteringMode = .nearest; normals[id] = normal; return normal
     }
     func projectedShadow(_ asset: SpriteAsset) -> ShadowAsset {
         if let result = shadows[asset.id] { return result }
@@ -121,6 +117,68 @@ final class AssetStore {
         }
         let texture = SKTexture(image: output); texture.filteringMode = .nearest; terrain[key] = texture; return texture
     }
+    // One low-resolution world field is generated once; RGB stores detail, forest and sun.
+    // The texture is sampled continuously across terrain patches, independent of the camera.
+    func meadowField(_ field: MeadowField) -> SKTexture {
+        let side = 256
+        var rgba = [UInt8](repeating: 255, count: side*side*4)
+        for y in 0..<side { for x in 0..<side {
+            let p = CGPoint(x: field.bounds.minX + (CGFloat(x)+0.5)/CGFloat(side)*field.bounds.width,
+                            y: field.bounds.maxY - (CGFloat(y)+0.5)/CGFloat(side)*field.bounds.height)
+            let value = field.channels(p), index = (y*side+x)*4
+            rgba[index] = UInt8(value.detail*255)
+            rgba[index+1] = UInt8(value.forest*255)
+            rgba[index+2] = UInt8(value.sunlight*255)
+        } }
+        let data = Data(rgba) as CFData
+        let image = CGImage(width: side, height: side, bitsPerComponent: 8, bitsPerPixel: 32,
+                            bytesPerRow: side*4, space: CGColorSpaceCreateDeviceRGB(),
+                            bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue),
+                            provider: CGDataProvider(data: data)!, decode: nil, shouldInterpolate: true, intent: .defaultIntent)!
+        let texture = SKTexture(cgImage: image); texture.filteringMode = .linear
+        return texture
+    }
+    // Only effect textures are soft. Albedo/actors/roads retain nearest filtering.
+    func radialTexture(warm: Bool = false) -> SKTexture {
+        let format = UIGraphicsImageRendererFormat(); format.scale = 1
+        let image = UIGraphicsImageRenderer(size: CGSize(width: 128, height: 128), format: format).image { renderer in
+            let center = warm ? UIColor(red: 1, green: 0.86, blue: 0.55, alpha: 0.85) : UIColor(red: 0.04, green: 0.09, blue: 0.12, alpha: 0.9)
+            let edge = center.withAlphaComponent(0)
+            let gradient = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: [center.cgColor,edge.cgColor] as CFArray, locations: [0,1])!
+            renderer.cgContext.drawRadialGradient(gradient, startCenter: CGPoint(x: 64,y: 64), startRadius: 0,
+                                                 endCenter: CGPoint(x: 64,y: 64), endRadius: 64, options: [])
+        }
+        let texture = SKTexture(image: image); texture.filteringMode = .linear; return texture
+    }
+    // Downsampled highlight-only mask. Gaussian spread affects this additive layer,
+    // never the original pixel sprite; cached once per immutable asset.
+    func highlightBloom(_ asset: SpriteAsset) -> SKTexture? {
+        if let existing = highlights[asset.id] { return existing }
+        let width = 128, height = max(1, Int(Double(asset.image.height)/Double(asset.image.width)*128))
+        var rgba = [UInt8](repeating: 0, count: width*height*4)
+        let made = rgba.withUnsafeMutableBytes { buffer -> Bool in
+            guard let c = CGContext(data: buffer.baseAddress, width: width, height: height, bitsPerComponent: 8,
+                                    bytesPerRow: width*4, space: CGColorSpaceCreateDeviceRGB(),
+                                    bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return false }
+            c.interpolationQuality = .none
+            c.draw(asset.image, in: CGRect(x: 0,y: 0,width: width,height: height)); return true
+        }
+        guard made else { return nil }
+        for i in stride(from: 0, to: rgba.count, by: 4) {
+            let alpha = Double(rgba[i+3])/255
+            let lum = (Double(rgba[i])*0.2126+Double(rgba[i+1])*0.7152+Double(rgba[i+2])*0.0722)/255/max(0.001,alpha)
+            let glow = MeadowField.smooth(0.69,0.93,lum)*alpha
+            rgba[i] = UInt8(255*glow); rgba[i+1] = UInt8(226*glow); rgba[i+2] = UInt8(164*glow); rgba[i+3] = UInt8(255*glow)
+        }
+        let provider = CGDataProvider(data: Data(rgba) as CFData)!
+        guard let image = CGImage(width: width,height: height,bitsPerComponent: 8,bitsPerPixel: 32,bytesPerRow: width*4,
+                                  space: CGColorSpaceCreateDeviceRGB(),bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue),
+                                  provider: provider,decode: nil,shouldInterpolate: true,intent: .defaultIntent) else { return nil }
+        let input = CIImage(cgImage: image)
+        let soft = input.clampedToExtent().applyingFilter("CIGaussianBlur",parameters: [kCIInputRadiusKey: 1.4]).cropped(to: input.extent)
+        guard let output = ciContext.createCGImage(soft,from: input.extent) else { return nil }
+        let texture = SKTexture(cgImage: output); texture.filteringMode = .linear; highlights[asset.id] = texture; return texture
+    }
     func roadTexture(curve: RoadCurve, width: CGFloat = 25) throws -> (SKTexture, CGRect) {
         let samples = (0...150).map { curve.point(Double($0)/150) }
         let xs = samples.map(\.x), ys = samples.map(\.y)
@@ -132,6 +190,8 @@ final class AssetStore {
             // UIKit is down-positive. Convert the same world cubic used by movement.
             func local(_ p: CGPoint) -> CGPoint { CGPoint(x: p.x - bounds.minX, y: bounds.maxY - p.y) }
             let path = CGMutablePath(); path.move(to: local(curve.a)); path.addCurve(to: local(curve.b), control1: local(curve.c1), control2: local(curve.c2))
+            c.addPath(path); c.setStrokeColor(UIColor(red: 0.64,green: 0.55,blue: 0.32,alpha: 0.12).cgColor)
+            c.setLineWidth(width+18); c.setLineCap(.round); c.strokePath()
             c.addPath(path); c.setStrokeColor(UIColor(red: 0.46, green: 0.37, blue: 0.19, alpha: 0.20).cgColor); c.setLineWidth(width + 10); c.setLineCap(.round); c.strokePath()
             let polygon = CGMutablePath(); var sides: [[CGPoint]] = [[], []]
             for (i, p) in samples.enumerated() {

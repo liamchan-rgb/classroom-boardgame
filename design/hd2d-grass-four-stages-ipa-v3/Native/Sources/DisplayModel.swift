@@ -4,7 +4,7 @@ import CoreGraphics
 enum LightingMode: String, CaseIterable {
     case flat, sunlight, normal
     var title: String {
-        switch self { case .flat: return "原始素材"; case .sunlight: return "太阳光影"; case .normal: return "局部光照" }
+        switch self { case .flat: return "原始素材"; case .sunlight: return "暖阳草原"; case .normal: return "地形光影" }
     }
     var next: Self { Self.allCases[(Self.allCases.firstIndex(of: self)! + 1) % Self.allCases.count] }
 }
@@ -66,7 +66,9 @@ struct RoadCurve {
         return length > 0 ? CGPoint(x: (q.x-p.x)/length, y: (q.y-p.y)/length) : CGPoint(x: 1, y: 0)
     }
     func distance(to point: CGPoint) -> CGFloat {
-        (0...60).map { t in let p = self.point(Double(t)/60); return hypot(p.x-point.x, p.y-point.y) }.min() ?? .infinity
+        var minimum: CGFloat = .infinity
+        for t in 0...60 { let p = self.point(Double(t)/60); let dx = p.x-point.x, dy = p.y-point.y; minimum = min(minimum, dx*dx+dy*dy) }
+        return sqrt(minimum)
     }
 }
 

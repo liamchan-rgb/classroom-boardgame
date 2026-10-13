@@ -11,20 +11,19 @@ enum ReviewAspect: String, CaseIterable {
 @MainActor final class PrototypeController: ObservableObject {
     let scene = GrassScene(size: CGSize(width: 1600, height: 900))
     @Published var mode: LightingMode
-    @Published var strength: Double = 0.75
+    @Published var strength: Double = 0.85
+    @Published var effects = HD2DSettings()
     @Published var aspect: ReviewAspect
     @Published var isReady = false
     @Published var error: String?
     @Published var follows = false
     @Published var arrivalState = "node-1"
-    private var replayTask: Task<Void, Never>?
-    private var replayEvents: [[String: Any]] = []
     init() {
         let arguments = ProcessInfo.processInfo.arguments
-        mode = arguments.contains("--lighting=flat") || arguments.contains("--review-replay") ? .flat : .sunlight
+        mode = arguments.contains("--lighting=flat") ? .flat : .sunlight
         aspect = ProcessInfo.processInfo.environment["PROTOTYPE_RATIO"] == "4x3" ? .standard : .wide
         scene.onReady = { [weak self] in DispatchQueue.main.async {
-            self?.isReady = true; self?.startReviewReplayIfRequested()
+            self?.isReady = true
         } }
         scene.onError = { [weak self] error in DispatchQueue.main.async { self?.error = error } }
         scene.onArrival = { [weak self] in DispatchQueue.main.async { self?.arrivalState = "node-2" } }
@@ -34,42 +33,8 @@ enum ReviewAspect: String, CaseIterable {
     func setStrength(_ value: Double) { strength = value; scene.setLighting(mode, strength: CGFloat(value)) }
     func follow(_ value: Bool) { follows = value; scene.followHero(value) }
     func play() { arrivalState = "moving"; scene.playFixture() }
-    private func trace(_ phase: String) {
-        var event = scene.reviewState
-        event["phase"] = phase; event["timestamp"] = Date().timeIntervalSince1970
-        event["ratio"] = aspect.title
-        event["sourceCommit"] = ProcessInfo.processInfo.environment["PROTOTYPE_SOURCE_COMMIT"] ?? "local"
-        replayEvents.append(event)
-        do {
-            let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("review-replay.json")
-            try JSONSerialization.data(withJSONObject: replayEvents, options: [.prettyPrinted, .sortedKeys]).write(to: url, options: .atomic)
-        } catch { print("Review trace failed: \(error)") }
-    }
-    private func startReviewReplayIfRequested() {
-        guard ProcessInfo.processInfo.arguments.contains("--review-replay"), replayTask == nil else { return }
-        // An opt-in deterministic display fixture for CI video, with no game commands.
-        replayTask = Task { @MainActor [weak self] in
-            guard let self else { return }
-            self.setMode(.flat); self.trace("original")
-            try? await Task.sleep(nanoseconds: 2_000_000_000)
-            self.setMode(.sunlight); self.trace("sunlight")
-            try? await Task.sleep(nanoseconds: 2_000_000_000)
-            self.play(); self.trace("movement-start")
-            try? await Task.sleep(nanoseconds: 900_000_000)
-            self.trace("movement-middle")
-            try? await Task.sleep(nanoseconds: 1_200_000_000)
-            self.trace("arrival")
-            try? await Task.sleep(nanoseconds: 1_000_000_000)
-            self.follow(true); self.scene.setZoom(1.45); self.play(); self.trace("follow-start")
-            try? await Task.sleep(nanoseconds: 2_100_000_000)
-            self.trace("follow-arrival"); self.follow(false); self.scene.overview(); self.setMode(.normal)
-            try? await Task.sleep(nanoseconds: 2_000_000_000)
-            self.trace("local-light")
-            self.setMode(.sunlight)
-            try? await Task.sleep(nanoseconds: 2_000_000_000)
-            self.trace("complete")
-        }
-    }
+    func updateEffects(_ value: HD2DSettings) { effects = value.bounded(); scene.setEffects(effects) }
+
 }
 
 struct PrototypeGlass: ViewModifier {
@@ -140,12 +105,43 @@ struct PrototypeGlass: ViewModifier {
                             ForEach(ReviewAspect.allCases, id: \.self) { aspect in Text(aspect.title).tag(aspect) }
                         }.pickerStyle(.segmented)
                         Toggle("跟随人物", isOn: Binding(get: { model.follows }, set: { model.follow($0) }))
-                        Text("原始素材保留图内已有光照；太阳光影增加投影与遮阴；局部光照用于比较灯光效果。")
-                            .font(.footnote).foregroundStyle(.secondary)
+                        Section("光照与材质") {
+                            effectToggle("左上暖阳", \.directionalLight)
+                            effectToggle("自然色彩", \.colorGrade)
+                            effectToggle("接触阴影", \.contactShadows)
+                            effectSlider("投影强度", \.shadowStrength)
+                            effectToggle("自然草地群落", \.vegetation)
+                            effectSlider("草地细节", \.vegetationContrast)
+                            effectToggle("地形明暗层次", \.relief)
+                        }
+                        Section("环境氛围") {
+                            effectToggle("局部柔光", \.bloom)
+                            effectSlider("柔光强度", \.bloomStrength)
+                            effectToggle("远景空气透视", \.atmosphere)
+                            effectSlider("空气透视", \.atmosphereStrength)
+                            effectToggle("边缘景深", \.edgeDepth)
+                            effectSlider("景深半径", \.depthRadius, range: 0...2.2)
+                            effectToggle("环境微动", \.environmentalMotion)
+                            effectSlider("微动幅度", \.motionStrength)
+                        }
+                        Button("恢复推荐效果") { model.updateEffects(HD2DSettings()); model.setStrength(0.85); model.setMode(.sunlight) }
                     }.navigationTitle("小样查看设置")
                         .toolbar { ToolbarItem(placement: .confirmationAction) { Button("完成") { settings = false } } }
                 }
             }
+    }
+    private func effectToggle(_ name: String, _ key: WritableKeyPath<HD2DSettings, Bool>) -> some View {
+        Toggle(name, isOn: Binding(get: { model.effects[keyPath: key] }, set: { value in
+            var settings = model.effects; settings[keyPath: key] = value; model.updateEffects(settings)
+        }))
+    }
+    private func effectSlider(_ name: String, _ key: WritableKeyPath<HD2DSettings, Double>, range: ClosedRange<Double> = 0...1) -> some View {
+        VStack(alignment: .leading) {
+            Text(name)
+            Slider(value: Binding(get: { model.effects[keyPath: key] }, set: { value in
+                var settings = model.effects; settings[keyPath: key] = value; model.updateEffects(settings)
+            }), in: range)
+        }
     }
     private func glassButton(_ symbol: String, label: String, id: String, action: @escaping () -> Void) -> some View {
         Button(action: action) { Image(systemName: symbol).font(.system(size: 20, weight: .medium)).frame(width: 48, height: 48) }

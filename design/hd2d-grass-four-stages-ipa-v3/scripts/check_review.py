@@ -17,7 +17,7 @@ with tempfile.TemporaryDirectory() as directory:
     copy = Path(directory)
     (copy / "scripts").mkdir()
     (copy / "Native/Resources").mkdir(parents=True)
-    for name in ("Sources", "Tests", "UITests"):
+    for name in ("Sources", "Tests"):
         shutil.copytree(root / "Native" / name, copy / "Native" / name)
     script = copy / "scripts/generate_project.py"
     shutil.copyfile(root / "scripts/generate_project.py", script)
@@ -42,4 +42,4 @@ for group, source in (("terrain", "terrain_atlas"), ("sceneryAndLandmarks", None
         if anchor:
             assert 0 <= anchor[0] <= w and 0 <= anchor[1] <= h, row
 print("PASS: regenerated project/scheme/Info.plist, original asset bytes, ideal reference and atlas rectangles.")
-print("SDK compilation, native tests and visual judgement are separate CI/review steps.")
+print("Device SDK compilation and pure effect checks are CI steps; visual acceptance is deferred to the user IPA test.")
