@@ -8,6 +8,7 @@
 
 | 存档 | 状态 | 长期位置 |
 |---|---|---|
+| [战斗风格补充 / 近似八方旅人 / 2026-10-13](archive-stage2-hd2d-direction-20261013/README.md) | 仅资料更新；286项载荷及279份源码远端恢复通过 | [私有项目存档](https://github.com/liamchan-rgb/classroom-boardgame/tree/be7b1bbe85617536c8b1037ec36f8d28329563ae/archive-stage2-hd2d-direction-20261013) |
 | [v0.9查看反馈与设计交接 / 2026-10-13](archive-stage2-ui-feedback-r1-20261013/README.md) | 仅资料/待办更新；281项载荷、远端六分片和274份源码恢复通过 | [私有项目存档](https://github.com/liamchan-rgb/classroom-boardgame/tree/456fc816e2d1b1e5bbbaebef1f1c6cbb1003f742/archive-stage2-ui-feedback-r1-20261013) |
 | [阶段2美术/UI接入 / v0.9 / 2026-10-13](archive-stage2-ui-art-v0.9-20261013/README.md) | 270项载荷、71项核心测试、12张原生截图；远端六分片及266份源码恢复通过 | [私有项目存档](https://github.com/liamchan-rgb/classroom-boardgame/tree/33939b09476e2a36cd77cb1487c9199197bd336f/archive-stage2-ui-art-v0.9-20261013) |
 | [阶段0—2 / v0.8 / 2026-10-12](archive-stage2-v0.8-20261012-r2/README.md) | 153项载荷、35份交付；远端SHA256和116份源码恢复通过 | [私有项目存档](https://github.com/liamchan-rgb/classroom-boardgame/tree/bfa1c745821b255ff0ef6a65ae305b8614dcfbaa/archive-stage2-v0.8-20261012-r2) |

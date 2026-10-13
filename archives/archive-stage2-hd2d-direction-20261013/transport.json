@@ -1,0 +1,39 @@
+{
+  "formatVersion": 1,
+  "logicalZIP": "classroom-stage2-hd2d-direction-20261013.zip",
+  "bytes": 291000687,
+  "sha256": "a2ea07d350760016e9be4749d2e5b7d2cef858b264a7229ca1c8428380cbb78d",
+  "parts": [
+    {
+      "file": "classroom-stage2-hd2d-direction-20261013.zip.part000",
+      "bytes": 50331648,
+      "sha256": "43b0898f4c17dbe831ae4151767b3e99f7c2a4f81d0340d69dbe552ee84cba58"
+    },
+    {
+      "file": "classroom-stage2-hd2d-direction-20261013.zip.part001",
+      "bytes": 50331648,
+      "sha256": "5786def75c41bebe679644ee268c0157cd6d59dcedaab0b69a28f3f2e891e8c3"
+    },
+    {
+      "file": "classroom-stage2-hd2d-direction-20261013.zip.part002",
+      "bytes": 50331648,
+      "sha256": "9654770c7d1fa07c88170d9e6b2e1d787cc9aa9a928a9e145d17c5baa275ab97"
+    },
+    {
+      "file": "classroom-stage2-hd2d-direction-20261013.zip.part003",
+      "bytes": 50331648,
+      "sha256": "d634ccf6adeecc0d519665dd3b7ec024e95b3ec8c8870968f516c9418c2d7c02"
+    },
+    {
+      "file": "classroom-stage2-hd2d-direction-20261013.zip.part004",
+      "bytes": 50331648,
+      "sha256": "910f8db7a48fa995b6d98fe1306fb92302a96302575c35a0c61c4479aa1dfd74"
+    },
+    {
+      "file": "classroom-stage2-hd2d-direction-20261013.zip.part005",
+      "bytes": 39342447,
+      "sha256": "cac948c7ab42390554e9fe7c492c0af95575d19cdb25110879691cbdd279d750"
+    }
+  ],
+  "reason": "Lossless split; GitHub normal Git rejects files over 100MB"
+}
