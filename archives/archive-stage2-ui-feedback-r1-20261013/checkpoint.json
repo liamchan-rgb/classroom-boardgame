@@ -1,0 +1,72 @@
+{
+  "formatVersion": 1,
+  "milestone": "archive-stage2-ui-feedback-r1-20261013",
+  "date": "2026-10-13",
+  "status": "archived-and-remote-verified",
+  "scope": "v0.9用户查看反馈、下一版大地图/战斗底栏要求、商店待办、美术独立提示词、成品画面预期；本次不改App或构建IPA",
+  "sourceSnapshotCommit": "34e4c274deddb38b1f73433cbc015dfa37aa35fc",
+  "sourceTag": "archive-stage2-ui-feedback-r1-20261013",
+  "compiledCommit": "1379bd2e174d88c582bb19fa8ea1f64c180a74da",
+  "currentAppVersion": "0.9",
+  "thisStepAppChanged": false,
+  "thisStepNewIPABuild": false,
+  "userFeedbackFunctionallyPositive": true,
+  "newDeviceSpecificValidation": false,
+  "newArtAestheticApproved": false,
+  "payloadFiles": 281,
+  "sourceFiles": 274,
+  "deliveryFiles": 5,
+  "archive": {
+    "name": "classroom-stage2-ui-feedback-r1-20261013.zip",
+    "bytes": 290966164,
+    "sha256": "efdc1c37c8d1fcd50f4edc7735297787f95b8fdcf1e84816f0f810e701ac7017",
+    "transportParts": 6,
+    "transportManifest": "transport.json"
+  },
+  "storage": {
+    "repositoryPrivate": true,
+    "type": "isolated-git-branch-split-zip",
+    "branch": "archive-assets",
+    "commit": "456fc816e2d1b1e5bbbaebef1f1c6cbb1003f742",
+    "directoryURL": "https://github.com/liamchan-rgb/classroom-boardgame/tree/456fc816e2d1b1e5bbbaebef1f1c6cbb1003f742/archive-stage2-ui-feedback-r1-20261013",
+    "restorationScript": "restore_zip.py"
+  },
+  "githubIssues": [
+    "https://github.com/liamchan-rgb/classroom-boardgame/issues/1",
+    "https://github.com/liamchan-rgb/classroom-boardgame/issues/2"
+  ],
+  "verification": {
+    "verifiedAt": "2026-10-13T08:11:15.983776+00:00",
+    "remoteArchiveCommit": "456fc816e2d1b1e5bbbaebef1f1c6cbb1003f742",
+    "freshRemoteSparseClone": true,
+    "transportParts": 6,
+    "transportPartChecksums": true,
+    "zipBytes": 290966164,
+    "zipSHA256": "efdc1c37c8d1fcd50f4edc7735297787f95b8fdcf1e84816f0f810e701ac7017",
+    "zipCRC": true,
+    "allPayloadChecksums": true,
+    "payloadFiles": 281,
+    "sourceSnapshotCommit": "34e4c274deddb38b1f73433cbc015dfa37aa35fc",
+    "compiledCommit": "1379bd2e174d88c582bb19fa8ea1f64c180a74da",
+    "gitBundleVerified": true,
+    "gitBundleCompleteHistory": true,
+    "gitBundleExcludesArchiveAssets": true,
+    "restoredSourceFiles": 274,
+    "allRestoredSourceChecksums": true,
+    "compiledAppSourcesUnchanged": true,
+    "thisStepAppChanged": false,
+    "thisStepNewIPABuild": false,
+    "remoteDocumentReadbacks": 3,
+    "githubIssues": [
+      1,
+      2
+    ],
+    "previousV09CoreTests": 71,
+    "previousV09NativePreviews": 12,
+    "userFeedbackFunctionallyPositive": true,
+    "newDeviceSpecificValidation": false,
+    "newArtAestheticApproved": false
+  },
+  "currentIPAArchive": "../archive-stage2-ui-art-v0.9-20261013/README.md",
+  "notIncluded": "教师未交付的课堂资料、本机进度、签名/配对材料。原设计、旧ZIP与标签保留。"
+}

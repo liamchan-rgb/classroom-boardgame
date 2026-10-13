@@ -1,0 +1,32 @@
+{
+  "verifiedAt": "2026-10-13T08:11:15.983776+00:00",
+  "remoteArchiveCommit": "456fc816e2d1b1e5bbbaebef1f1c6cbb1003f742",
+  "freshRemoteSparseClone": true,
+  "transportParts": 6,
+  "transportPartChecksums": true,
+  "zipBytes": 290966164,
+  "zipSHA256": "efdc1c37c8d1fcd50f4edc7735297787f95b8fdcf1e84816f0f810e701ac7017",
+  "zipCRC": true,
+  "allPayloadChecksums": true,
+  "payloadFiles": 281,
+  "sourceSnapshotCommit": "34e4c274deddb38b1f73433cbc015dfa37aa35fc",
+  "compiledCommit": "1379bd2e174d88c582bb19fa8ea1f64c180a74da",
+  "gitBundleVerified": true,
+  "gitBundleCompleteHistory": true,
+  "gitBundleExcludesArchiveAssets": true,
+  "restoredSourceFiles": 274,
+  "allRestoredSourceChecksums": true,
+  "compiledAppSourcesUnchanged": true,
+  "thisStepAppChanged": false,
+  "thisStepNewIPABuild": false,
+  "remoteDocumentReadbacks": 3,
+  "githubIssues": [
+    1,
+    2
+  ],
+  "previousV09CoreTests": 71,
+  "previousV09NativePreviews": 12,
+  "userFeedbackFunctionallyPositive": true,
+  "newDeviceSpecificValidation": false,
+  "newArtAestheticApproved": false
+}
