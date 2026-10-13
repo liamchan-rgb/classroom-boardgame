@@ -1,0 +1,10 @@
+{
+  "snapshotCommit": "3c264de88afac2b19f65774bf16b662a9dee2740",
+  "tag": "archive-design-player-battle-cursor-link-v1-20261013",
+  "zip": "player-battle-cursor-link-handoff-v1-20261013.zip",
+  "sha256": "3bad163a499e1d033ce5c6c120c6aca3bea631434fa9638b8e645a6254954ab0",
+  "bytes": 5737,
+  "payloadFiles": 3,
+  "zipEntries": 4,
+  "status": "documentation-handoff-not-implemented"
+}
