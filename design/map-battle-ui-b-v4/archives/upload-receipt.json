@@ -1,0 +1,21 @@
+{
+  "verifiedAtUTC": "2026-10-13T09:09:45.696952+00:00",
+  "method": "independent fresh depth-1 clone of published branch and independent tag fetch",
+  "remoteBranchCommit": "5a8cbee212a619a08f0014b450f3edefc9cc38b7",
+  "snapshotCommit": "02e67bce7f75d67d975d65e2fdf7a61688891c05",
+  "tag": "archive-design-map-battle-ui-b-v4-20261013",
+  "tagObjectExists": true,
+  "zipSHA256": "65e57d96d25fb4647c77d04509ecc4938a077e32ce83401758226a33dcd1928f",
+  "zipBytes": 9181634,
+  "zipCRC": "pass",
+  "payloadSHA256": "pass",
+  "remoteFilesMatchZIP": "pass",
+  "localFilesMatchRemote": "pass",
+  "tagTreeMatchesPayload": "pass",
+  "payloadFiles": 138,
+  "zipEntries": 139,
+  "mainUntouchedObserved": "1a4a6014278c5e14ff4b1527bbe91239e0a330f1",
+  "oldArtifactsOverwritten": false,
+  "designStatus": "awaiting-review",
+  "notes": "Index/upload receipt completion is the same milestone; not another asset revision."
+}
