@@ -1,0 +1,32 @@
+{
+  "formatVersion": 1,
+  "date": "2026-10-13",
+  "milestone": "b-map-v1-20261013",
+  "branch": "design/ui-art-round1-20261012",
+  "sourceSnapshotCommit": "a0d1fcedfed71099832551c25a975071c6a9cce0",
+  "archiveCommit": "aa38180bdaf503896e14b4ef311085627650d928",
+  "archive": {
+    "name": "classroom-b-map-v1-20261013.zip",
+    "bytes": 6732875,
+    "sha256": "5848538233e0b87f13dde3ee85caf7687c1e94957470f68c7b17935a3f760f10",
+    "gitBlobSHA": "43d9e06734b1a34d92817c129beec8a56603e5bd",
+    "url": "https://github.com/liamchan-rgb/classroom-boardgame/blob/aa38180bdaf503896e14b4ef311085627650d928/design/archives/classroom-b-map-v1-20261013.zip"
+  },
+  "verification": {
+    "remoteSourceFiles": 69,
+    "allRemoteSourceBlobSHAs": "matched local bytes",
+    "independentRemoteZIPDownload": "passed",
+    "remoteZIP_SHA256": "passed",
+    "remoteZIP_CRC": "passed",
+    "all68PayloadSHA256": "passed",
+    "nodeDimensionsAlphaInset": "passed",
+    "unknownPublicPixelEquality": "passed"
+  },
+  "plannedTag": "archive-design-b-map-v1-20261013",
+  "tagCreated": false,
+  "tagLimitation": "GitHub connection exposes no create-tag/ref endpoint; no local Git authentication. Immutable source and archive commits are used for recovery.",
+  "appOrRulesModified": false,
+  "newIPA": false,
+  "deviceVerified": false,
+  "artReview": "new candidates awaiting final review"
+}

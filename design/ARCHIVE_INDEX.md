@@ -129,3 +129,14 @@
 - 原App、GameCore、main和工作流不改，无IPA；系统原生/真机及逐图审美未验证。旧版本/ZIP/标签保留。
 
 本动画完整批另含10实体6状态的基础变换参数、12套八帧透明贴图（96帧）、离线动画演示/检查与原生交接；不是骨骼/手绘逐帧肢体。新素材仍待最终审美，原生未验证。
+
+
+## B 地图素材续作 b-map-v1 · 2026-10-13
+
+- 目录：[map-art-b-v1/README.md](map-art-b-v1/README.md)。原6个nodeVisual已补齐；另交6状态层、迷雾、3道路表现与两比例地面／通用装饰，共20张独立PNG，7张检查预览。新素材待最终审美确认。
+- 设计快照：`a0d1fcedfed71099832551c25a975071c6a9cce0`；只写design，旧UI／实体／动画与App、GameCore、main、工作流不改，无新IPA。
+- ZIP：[classroom-b-map-v1-20261013.zip](archives/classroom-b-map-v1-20261013.zip)，6732875字节；SHA256：`5848538233e0b87f13dde3ee85caf7687c1e94957470f68c7b17935a3f760f10`。
+- 固定远端存档：[完整ZIP及清单](https://github.com/liamchan-rgb/classroom-boardgame/tree/aa38180bdaf503896e14b4ef311085627650d928/design/archives)。ZIP内部ui-art-delivery包含本批68份载荷，另有FILE_CHECKSUMS.json；外部manifest记录设计快照。
+- 远端核验：69份源码／设计文件Git blob哈希与本地一致；独立下载ZIP后SHA256、ZIP CRC及68份载荷SHA256均通过。回执：[map-art-b-v1-upload-receipt.json](archives/map-art-b-v1-upload-receipt.json)。大原图传输截断已纠正，错误对象未进入设计快照。
+- 计划标签：`archive-design-b-map-v1-20261013`；**未创建**。当前连接没有创建标签接口，本地Git无认证；恢复使用上述不可变提交与完整ZIP，不虚称标签完成。
+- 仍未验证：用户最终逐图审美、SwiftUI／App接入、原生采样、实际电视最远距离、无线隐私与真机交互。
