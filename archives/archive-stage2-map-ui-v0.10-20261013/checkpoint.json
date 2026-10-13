@@ -1,0 +1,81 @@
+{
+  "formatVersion": 1,
+  "milestone": "archive-stage2-map-ui-v0.10-20261013",
+  "date": "2026-10-13",
+  "status": "archived-and-remote-verified",
+  "scope": "v0.10现有素材上的地图镜头/角色路径/阶段布局/连续回合轨道/真实技能物品栏；不等待新美术",
+  "sourceSnapshotCommit": "eef7171d23e2402923bf9f35fe462b21356ae968",
+  "sourceTag": "archive-stage2-map-ui-v0.10-20261013",
+  "compiledCommit": "a94ad1cfb70104b8d6e980b86b0625c0829f65d9",
+  "currentAppVersion": "0.10",
+  "buildNumber": "10",
+  "thisStepAppChanged": true,
+  "thisStepNewIPABuild": true,
+  "payloadFiles": 332,
+  "sourceFiles": 326,
+  "deliveryFiles": 4,
+  "archive": {
+    "name": "classroom-stage2-map-ui-v0.10-20261013.zip",
+    "bytes": 350352160,
+    "sha256": "58822250b8cf5af4e242ae8229c14edc26dad73cdf52f5892990d65d3c677432",
+    "transportParts": 7,
+    "transportManifest": "transport.json"
+  },
+  "storage": {
+    "repositoryPrivate": true,
+    "type": "isolated-git-branch-split-zip",
+    "branch": "archive-assets",
+    "commit": "4e27caff67a4c85c6ad064598fe5ab61c2704421",
+    "directoryURL": "https://github.com/liamchan-rgb/classroom-boardgame/tree/4e27caff67a4c85c6ad064598fe5ab61c2704421/archive-stage2-map-ui-v0.10-20261013",
+    "restorationScript": "restore_zip.py"
+  },
+  "currentIPA": {
+    "url": "https://github.com/liamchan-rgb/classroom-boardgame/blob/4e27caff67a4c85c6ad064598fe5ab61c2704421/archive-stage2-map-ui-v0.10-20261013/ClassroomStage2-v0.10-unsigned.ipa",
+    "bytes": 10562079,
+    "sha256": "8b7af9f4967828e629c45310cd1fdb2f38486cfd31571f186c5d44aa7cd08d76",
+    "requiresPersonalSigning": true
+  },
+  "cloudBuild": "https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38397057874",
+  "coreTests": {
+    "GameCore": "72 passed, 0 failures",
+    "ProbeCore": "6 passed, 0 failures"
+  },
+  "nativePreviews": 22,
+  "newPVEDeviceVerified": false,
+  "newArtAestheticApproved": false,
+  "verification": {
+    "verifiedAt": "2026-10-13T12:40:39.026072+00:00",
+    "remoteArchiveCommit": "4e27caff67a4c85c6ad064598fe5ab61c2704421",
+    "freshRemoteSparseClone": true,
+    "transportParts": 7,
+    "transportPartChecksums": true,
+    "zipBytes": 350352160,
+    "zipSHA256": "58822250b8cf5af4e242ae8229c14edc26dad73cdf52f5892990d65d3c677432",
+    "zipCRC": true,
+    "allPayloadChecksums": true,
+    "payloadFiles": 332,
+    "sourceSnapshotCommit": "eef7171d23e2402923bf9f35fe462b21356ae968",
+    "compiledCommit": "a94ad1cfb70104b8d6e980b86b0625c0829f65d9",
+    "gitBundleVerified": true,
+    "gitBundleCompleteHistory": true,
+    "gitBundleExcludesArchiveAssets": true,
+    "restoredSourceFiles": 326,
+    "allRestoredSourceChecksums": true,
+    "compiledAppSourcesUnchanged": true,
+    "previousArchiveDirectoriesUnchanged": true,
+    "oldSourceTagsPreserved": true,
+    "directIPARemoteHashVerified": true,
+    "ipaSha256": "8b7af9f4967828e629c45310cd1fdb2f38486cfd31571f186c5d44aa7cd08d76",
+    "ipaBytes": 10562079,
+    "appVersion": "0.10",
+    "buildNumber": "10",
+    "coreTests": {
+      "GameCore": "72 passed, 0 failures",
+      "ProbeCore": "6 passed, 0 failures"
+    },
+    "nativePreviews": 22,
+    "deviceVerified": false,
+    "newArtAestheticApproved": false
+  },
+  "notIncluded": "未交付的教师本机课堂资料/游戏进度、个人签名与账号材料；新行走帧/HD-2D场景和商店待后续。"
+}

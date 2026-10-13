@@ -1,0 +1,44 @@
+{
+  "formatVersion": 1,
+  "logicalZIP": "classroom-stage2-map-ui-v0.10-20261013.zip",
+  "bytes": 350352160,
+  "sha256": "58822250b8cf5af4e242ae8229c14edc26dad73cdf52f5892990d65d3c677432",
+  "parts": [
+    {
+      "file": "classroom-stage2-map-ui-v0.10-20261013.zip.part000",
+      "bytes": 50331648,
+      "sha256": "71a30c80e79c20f37a3a5dc13f7860ddc53c621f85edecd66780ec6fc94a9178"
+    },
+    {
+      "file": "classroom-stage2-map-ui-v0.10-20261013.zip.part001",
+      "bytes": 50331648,
+      "sha256": "7704c1a134e360f3916a7389400ecf3bb7c4c33edf4b27a90f84d8c896e2e99e"
+    },
+    {
+      "file": "classroom-stage2-map-ui-v0.10-20261013.zip.part002",
+      "bytes": 50331648,
+      "sha256": "e1fd5b105e5139f763fde3d9bf469074ec6f03297d339d65ba8850b1736e1e65"
+    },
+    {
+      "file": "classroom-stage2-map-ui-v0.10-20261013.zip.part003",
+      "bytes": 50331648,
+      "sha256": "3cd6796dc072ce0de759094170273f0ba8a70d207efd5f7b1f0e99ebef5de01b"
+    },
+    {
+      "file": "classroom-stage2-map-ui-v0.10-20261013.zip.part004",
+      "bytes": 50331648,
+      "sha256": "a54110e466248f07f4c0048bb009310923e6942d4c0272dcc4e61953954baab8"
+    },
+    {
+      "file": "classroom-stage2-map-ui-v0.10-20261013.zip.part005",
+      "bytes": 50331648,
+      "sha256": "a2d0cffe7ccfa1b81f18004a4a21de41032c13a8ffb1958214324dbb3db3d6e9"
+    },
+    {
+      "file": "classroom-stage2-map-ui-v0.10-20261013.zip.part006",
+      "bytes": 48362272,
+      "sha256": "f387e747d872dcfcc850e96992e1a3702833c97103e449a86fd6958a762b0636"
+    }
+  ],
+  "reason": "Lossless split; GitHub normal Git rejects files over 100MB"
+}
