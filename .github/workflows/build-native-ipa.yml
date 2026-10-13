@@ -17,18 +17,19 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - name: Confirm iOS 27 SDK
+      - name: Select compatible Xcode and confirm SDKs
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p artifacts
-          xcodebuild -version | tee artifacts/xcode-version.txt
-          xcodebuild -showsdks | tee artifacts/xcode-sdks.txt
-          sdk_version="$(xcrun --sdk iphoneos --show-sdk-version)"
-          case "$sdk_version" in
-            27.*) ;;
-            *) echo "iOS 27 SDK is required; found $sdk_version"; exit 1 ;;
-          esac
+          python3 native/tools/select_ci_xcode.py --github-env "$GITHUB_ENV" \
+            2>&1 | tee artifacts/xcode-selection.log
+      - name: Record selected toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild -version 2>&1 | tee artifacts/xcode-version.txt
+          xcodebuild -showsdks 2>&1 | tee artifacts/xcode-sdks.txt
       - name: Test offline core
         shell: bash
         run: |
@@ -70,7 +71,7 @@ jobs:
           xcrun simctl bootstatus "$device_id" -b
           xcodebuild -project native/ClassroomProbe.xcodeproj -scheme ClassroomProbe \
             -configuration Debug -destination "id=$device_id" -derivedDataPath native/simulator-build \
-            CODE_SIGNING_ALLOWED=NO ARCHS=arm64 ONLY_ACTIVE_ARCH=YES build > artifacts/simulator-build.log 2>&1
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO build > artifacts/simulator-build.log 2>&1
           xcrun simctl install "$device_id" native/simulator-build/Build/Products/Debug-iphonesimulator/ClassroomProbe.app
           xcrun simctl launch --console-pty "$device_id" org.personal.classroom.stage0 --visual-check > artifacts/visual-validation-console.log 2>&1 &
           visual_console_pid=$!

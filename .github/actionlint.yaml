@@ -1,0 +1,4 @@
+# Repository-specific macOS/Xcode runner label, verified by native build runs.
+self-hosted-runner:
+  labels:
+    - xcode-27

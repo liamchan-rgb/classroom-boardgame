@@ -43,6 +43,8 @@ def main():
     parser.add_argument("--deliveries-root", type=Path, required=True)
     parser.add_argument("--delivery-list", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--source-only", action="store_true",
+                        help="Archive CI/source work and diagnostics without requiring an IPA.")
     args = parser.parse_args()
     if not re.fullmatch(r"[A-Za-z0-9._-]+", args.milestone):
         raise ValueError("Milestone ID must use ASCII letters, digits, '.', '_' or '-'.")
@@ -60,7 +62,13 @@ def main():
     record_name = safe_relative(args.build_record).as_posix()
     record = json.loads(git(repo, "show", snapshot + ":" + record_name))
     tested = record["testedCommit"]
-    git(repo, "merge-base", "--is-ancestor", tested, snapshot)
+    if args.source_only:
+        # PR CI normally checks out a synthetic merge commit, not the head SHA.
+        source_commit = record.get("sourceCommit", tested)
+        git(repo, "merge-base", "--is-ancestor", source_commit, snapshot)
+        git(repo, "merge-base", "--is-ancestor", source_commit, tested)
+    else:
+        git(repo, "merge-base", "--is-ancestor", tested, snapshot)
     selected = json.loads(args.delivery_list.read_text(encoding="utf-8"))
     if not isinstance(selected, list) or not selected or not all(isinstance(x, str) for x in selected) or len(set(selected)) != len(selected):
         raise ValueError("Delivery list must contain unique, explicit relative file names.")
@@ -92,13 +100,13 @@ def main():
                     raise ValueError(f"Corrupt delivery ZIP: {name}")
         payload["deliveries/" + relative.as_posix()] = data
         delivery_rows.append(dict(file=relative.as_posix(), bytes=len(data), sha256=digest(data)))
-    matching_ipa = [row for row in delivery_rows if row["file"].endswith(".ipa") and row["sha256"] == record["ipaSha256"]]
-    if len(matching_ipa) != 1:
+    matching_ipa = [] if args.source_only else [row for row in delivery_rows if row["file"].endswith(".ipa") and row["sha256"] == record["ipaSha256"]]
+    if not args.source_only and len(matching_ipa) != 1:
         raise ValueError("The current build's verified IPA must be included exactly once.")
     matching_artifact = [row for row in delivery_rows if row["file"].endswith(".zip") and row["sha256"] == record["artifactArchiveSha256"]]
     if len(matching_artifact) != 1:
         raise ValueError("The current build's complete diagnostics ZIP must be included exactly once.")
-    current_ipa = matching_ipa[0]["file"]
+    current_ipa = matching_ipa[0]["file"] if matching_ipa else None
     guide = f'''# {args.milestone} 恢复说明
 
 本存档包含该步源码、项目资料、设计、测试和明确选定的交付文件；范围以清单为准。首次阶段0—2存档同时保存此前全部现存交付。
@@ -130,6 +138,24 @@ Git bundle保存源码分支/标签和历史，排除二进制archive-assets分�
 
 本存档不是教师iPad本机课堂进度备份；尚未取得的真实PPTX、游戏存档和设备签名材料不在包内。
 '''
+    if args.source_only:
+        guide = f'''# {args.milestone} 源码/CI恢复说明
+
+本次包含完整源码、选定CI诊断交付、逐文件校验与Git历史包；不包含新的IPA。
+
+- 源码快照：{snapshot}；唯一标签：{args.milestone}。
+- CI验证提交：{tested}，状态以source/{record_name}为准；不将其当作IPA编译提交。
+- Git bundle仅包含源码refs，排除archive-assets。下载全部分片后按transport目录内restore_zip.py还原ZIP。
+- 核对外部ZIP SHA256及manifest.json所有载荷；源码位于source/。
+
+```sh
+git clone git-history.bundle classroom-boardgame-restored
+cd classroom-boardgame-restored
+git checkout {snapshot}
+```
+
+云端编译不能替代真机验收。原安装包及旧存档保持原样，不包含教师未交付的课堂数据、账号或签名材料。
+'''
     payload["恢复说明.md"] = guide.encode("utf-8")
     output.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="classroom-milestone-") as temporary:
@@ -149,9 +175,12 @@ Git bundle保存源码分支/标签和历史，排除二进制archive-assets分�
     manifest = dict(formatVersion=1, milestone=args.milestone, createdAt=datetime.now(timezone.utc).isoformat(),
                     repository="https://github.com/liamchan-rgb/classroom-boardgame", sourceSnapshotCommit=snapshot,
                     snapshotTag=args.milestone, currentAppVersion=record["appVersion"], compiledCommit=tested,
-                    currentIPA="deliveries/" + current_ipa, buildEvidence="source/" + record_name,
+                    currentIPA="deliveries/" + current_ipa if current_ipa else None, buildEvidence="source/" + record_name,
                     coreTests=record["coreTests"], currentDeviceVerified=record.get("newPVEDeviceVerified", False),
                     gitBundleRefs=refs, deliveries=delivery_rows, manifestSelfExcluded=True, entries=entries)
+    if args.source_only:
+        manifest.update(archiveKind="source-and-ci-diagnostics", ciTestedCommit=tested,
+                        compiledCommit=None, ipaProduced=False)
     manifest_data = (json.dumps(manifest, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
     partial = output.with_suffix(output.suffix + ".partial")
     try:
@@ -175,7 +204,7 @@ Git bundle保存源码分支/标签和历史，排除二进制archive-assets分�
     guide_path.write_text(guide, encoding="utf-8")
     sha_path.write_text(archive_sha + "  " + output.name + "\n", encoding="utf-8")
     print(json.dumps(dict(archive=str(output), bytes=output.stat().st_size, sha256=archive_sha,
-                          sourceCommit=snapshot, compiledCommit=tested, payloadFiles=len(entries),
+                          sourceCommit=snapshot, compiledCommit=None if args.source_only else tested, payloadFiles=len(entries),
                           deliveryFiles=len(delivery_rows), checks="ZIP and all payload checksums passed"),
                      ensure_ascii=False, indent=2))
 
