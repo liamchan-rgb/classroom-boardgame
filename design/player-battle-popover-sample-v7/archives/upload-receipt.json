@@ -1,0 +1,14 @@
+{
+  "verifiedAtUTC": "2026-10-13T10:19:49.469365+00:00",
+  "method": "independent verification checkout fetched published branch and tag",
+  "snapshotCommit": "fc5b88010f15eba308431829133f9e3a1a2fd018",
+  "remoteBranchCommit": "cdd0bb85818116af29de3bd5ef5c344567db10dd",
+  "tag": "archive-design-player-battle-popover-v7-20261013",
+  "zipSHA256": "a1ef05e1cdc6a667e9ea256a04a3096a3f0dc2d536a66accbd64ac1647c02fbe",
+  "zipCRC": "pass",
+  "payloadFiles": 31,
+  "remoteAndLocalAndZIPMatch": true,
+  "tagPayloadMatch": true,
+  "nativeVerified": false,
+  "artApproved": false
+}
