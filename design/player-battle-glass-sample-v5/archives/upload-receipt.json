@@ -1,0 +1,14 @@
+{
+  "verifiedAtUTC": "2026-10-13T09:36:26.226834+00:00",
+  "method": "independent verification checkout fetched published branch and tag",
+  "snapshotCommit": "eb500facd15395469ac9064298dd8ed038a79805",
+  "remoteBranchCommit": "047d47517a7a3ae9989b350e0df06f9a7ff1e39f",
+  "tag": "archive-design-player-battle-glass-v5-20261013",
+  "zipSHA256": "2d34f335b80fb4520f2718a9876f6c1b45a2fe8d6b7ddf49d09c6959cbf5826c",
+  "zipCRC": "pass",
+  "payloadFiles": 27,
+  "remoteAndLocalAndZIPMatch": true,
+  "tagPayloadMatch": true,
+  "nativeVerified": false,
+  "artApproved": false
+}
