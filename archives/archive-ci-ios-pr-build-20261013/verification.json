@@ -1,0 +1,20 @@
+{
+  "verifiedAtUTC": "2026-10-13T16:48:11.218665+00:00",
+  "archiveAssetsCommit": "c1d444d161bbb6ec76a9c43378e5991a14e5cf26",
+  "sourceSnapshotCommit": "b66ec36dbebc347e2fc77a509ff6a15b44e8344b",
+  "sourceTag": "archive-ci-ios-pr-build-20261013",
+  "ciTestedMergeCommit": "1c1a47a89eb912daa25068c887cc71a6da66e5e8",
+  "remoteFileBytesMatchLocal": true,
+  "parts": 3,
+  "partSHA256": "pass",
+  "zipSHA256": "cd2cef1b2e46b7fddfc8d06db3bf823a7e5ea06ae6a6a2a4f956c8cb50a61f86",
+  "zipBytes": 100852308,
+  "zipCRC": "pass",
+  "payloadFileChecks": 345,
+  "restoredSourceFileChecks": 340,
+  "bundleVerification": "pass-full-source-history-and-tested-merge",
+  "archiveAssetsExcludedFromSourceBundle": true,
+  "oldArchiveRootEntriesUnchanged": true,
+  "newIPAProduced": false,
+  "nativeDeviceVerified": false
+}

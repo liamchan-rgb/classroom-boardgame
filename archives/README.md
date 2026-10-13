@@ -8,6 +8,7 @@
 
 | 存档 | 状态 | 长期位置 |
 |---|---|---|
+| [iOS PR自动编译 / 2026-10-13](archive-ci-ios-pr-build-20261013/README.md) | Xcode27.2编译、78核心测试及失败日志上传通过；345载荷/340源码恢复通过，无新IPA | [私有长期存档](https://github.com/liamchan-rgb/classroom-boardgame/tree/c1d444d161bbb6ec76a9c43378e5991a14e5cf26/archive-ci-ios-pr-build-20261013) |
 | [地图与战斗程序结构 / v0.10 / 2026-10-13](archive-stage2-map-ui-v0.10-20261013/README.md) | 78测试、22原生截图；332载荷及326份源码远端恢复通过，真机/审美待验 | [私有长期存档](https://github.com/liamchan-rgb/classroom-boardgame/tree/4e27caff67a4c85c6ad064598fe5ab61c2704421/archive-stage2-map-ui-v0.10-20261013) |
 | [战斗风格补充 / 近似八方旅人 / 2026-10-13](archive-stage2-hd2d-direction-20261013/README.md) | 仅资料更新；286项载荷及279份源码远端恢复通过 | [私有项目存档](https://github.com/liamchan-rgb/classroom-boardgame/tree/be7b1bbe85617536c8b1037ec36f8d28329563ae/archive-stage2-hd2d-direction-20261013) |
 | [v0.9查看反馈与设计交接 / 2026-10-13](archive-stage2-ui-feedback-r1-20261013/README.md) | 仅资料/待办更新；281项载荷、远端六分片和274份源码恢复通过 | [私有项目存档](https://github.com/liamchan-rgb/classroom-boardgame/tree/456fc816e2d1b1e5bbbaebef1f1c6cbb1003f742/archive-stage2-ui-feedback-r1-20261013) |
