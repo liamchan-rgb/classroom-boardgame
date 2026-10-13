@@ -1,0 +1,84 @@
+Fetching https://github.com/weichsel/ZIPFoundation.git
+[1/6471] Fetching zipfoundation
+Fetched https://github.com/weichsel/ZIPFoundation.git (1.00s)
+Computing version for https://github.com/weichsel/ZIPFoundation.git
+warning: 'zipfoundation': /Package@swift-5.9.swift:23:61: warning: 'v4' is deprecated: watchOS 9.0 is the oldest supported version [#DeprecatedDeclaration]
+21 |     name: "ZIPFoundation",
+22 |     platforms: [
+23 |         .macOS(.v10_13), .iOS(.v12), .tvOS(.v12), .watchOS(.v4), .visionOS(.v1)
+   |                                                             `- warning: 'v4' is deprecated: watchOS 9.0 is the oldest supported version [#DeprecatedDeclaration]
+24 |     ],
+25 |     products: [
+
+[#DeprecatedDeclaration]: <https://docs.swift.org/compiler/documentation/diagnostics/deprecated-declaration>
+Computed https://github.com/weichsel/ZIPFoundation.git at 0.9.20 (1.62s)
+Creating working copy for https://github.com/weichsel/ZIPFoundation.git
+Working copy of https://github.com/weichsel/ZIPFoundation.git resolved at 0.9.20
+warning: 'zipfoundation': /Users/runner/work/classroom-boardgame/classroom-boardgame/native/Packages/ProbeCore/.build/checkouts/ZIPFoundation/Package@swift-5.9.swift:23:61: warning: 'v4' is deprecated: watchOS 9.0 is the oldest supported version [#DeprecatedDeclaration]
+21 |     name: "ZIPFoundation",
+22 |     platforms: [
+23 |         .macOS(.v10_13), .iOS(.v12), .tvOS(.v12), .watchOS(.v4), .visionOS(.v1)
+   |                                                             `- warning: 'v4' is deprecated: watchOS 9.0 is the oldest supported version [#DeprecatedDeclaration]
+24 |     ],
+25 |     products: [
+
+[#DeprecatedDeclaration]: <https://docs.swift.org/compiler/documentation/diagnostics/deprecated-declaration>
+Building for debugging...
+[Pre-planning 1 / 184]
+[Planning deferred tasks]
+[55 / 95]
+[61 / 95]
+[62 / 96] ZIPFoundation
+[71 / 138]
+[74 / 138]
+[79 / 138]
+[82 / 138]
+[87 / 138]
+[90 / 138]
+[95 / 138]
+[97 / 138]
+[98 / 138]
+[104 / 138] ZIPFoundation
+[105 / 138] ZIPFoundation
+[113 / 139] ClassroomProbeCore
+[116 / 142] ClassroomProbeCore
+[124 / 142] ClassroomProbeCore
+[126 / 142] ClassroomProbeCore
+[132 / 143] ClassroomProbeCoreTests-product
+[142 / 180]
+[149 / 180]
+[155 / 180]
+[158 / 180]
+[160 / 180]
+[161 / 180]
+[164 / 180]
+[165 / 180]
+[169 / 180] ClassroomProbeCoreTests-product
+[174 / 180] ClassroomProbeCoreTests-product
+[176 / 180] ClassroomProbeCoreTests-product
+Build complete! (13.75 sec)
+Test Suite 'All tests' started at 2026-10-13 04:18:53.224.
+Test Suite 'ClassroomProbeCoreTests.xctest' started at 2026-10-13 04:18:53.226.
+Test Suite 'ProbeCoreTests' started at 2026-10-13 04:18:53.226.
+Test Case '-[ClassroomProbeCoreTests.ProbeCoreTests testActualPPTXOrderImagesEmptyAndLongNotes]' started.
+Test Case '-[ClassroomProbeCoreTests.ProbeCoreTests testActualPPTXOrderImagesEmptyAndLongNotes]' passed (0.010 seconds).
+Test Case '-[ClassroomProbeCoreTests.ProbeCoreTests testBackupRoundTripIncludesAssetsButRestoresPaused]' started.
+Test Case '-[ClassroomProbeCoreTests.ProbeCoreTests testBackupRoundTripIncludesAssetsButRestoresPaused]' passed (0.001 seconds).
+Test Case '-[ClassroomProbeCoreTests.ProbeCoreTests testInvalidBackupIsRejectedBeforeUse]' started.
+Test Case '-[ClassroomProbeCoreTests.ProbeCoreTests testInvalidBackupIsRejectedBeforeUse]' passed (0.000 seconds).
+Test Case '-[ClassroomProbeCoreTests.ProbeCoreTests testNotesExcludeSlideNumberAndFooter]' started.
+Test Case '-[ClassroomProbeCoreTests.ProbeCoreTests testNotesExcludeSlideNumberAndFooter]' passed (0.000 seconds).
+Test Case '-[ClassroomProbeCoreTests.ProbeCoreTests testPauseReasonsRemainIndependentAndTimeFreezes]' started.
+Test Case '-[ClassroomProbeCoreTests.ProbeCoreTests testPauseReasonsRemainIndependentAndTimeFreezes]' passed (0.000 seconds).
+Test Case '-[ClassroomProbeCoreTests.ProbeCoreTests testUnsafePathBadZipAndDTDRejected]' started.
+Test Case '-[ClassroomProbeCoreTests.ProbeCoreTests testUnsafePathBadZipAndDTDRejected]' passed (0.014 seconds).
+Test Suite 'ProbeCoreTests' passed at 2026-10-13 04:18:53.253.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.026 (0.026) seconds
+Test Suite 'ClassroomProbeCoreTests.xctest' passed at 2026-10-13 04:18:53.253.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.026 (0.026) seconds
+Test Suite 'All tests' passed at 2026-10-13 04:18:53.253.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.026 (0.028) seconds
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+✔ Test run with 0 tests in 0 suites passed after 0.001 seconds.

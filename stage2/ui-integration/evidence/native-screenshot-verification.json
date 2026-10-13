@@ -1,0 +1,23 @@
+{
+  "assetCount": 66,
+  "deviceVerified": false,
+  "missingAssets": [],
+  "names": [
+    "晨曦森林守护者小队长安然",
+    "AlexandriaWinterbrookJoy",
+    "小禾",
+    "星星",
+    "阿乐",
+    "小满",
+    "林老师"
+  ],
+  "note": "Actual native SwiftUI simulator rendering; not physical iPad/TV feedback",
+  "screenshots": 12,
+  "unknownMapPixelIdentical": true,
+  "longNameColumnsReviewed": true,
+  "bookAllEdgesVisible": true,
+  "teacherRewardsAndActionControlsVisibleAt1180x820": true,
+  "publicStatusExcludesAP": true,
+  "readOnlyChoicesIsolated": true,
+  "physicalDeviceVerified": false
+}

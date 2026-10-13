@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-13",
+  "workflowURL": "https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38345790065",
+  "runID": 38345790065,
+  "jobID": 115126775791,
+  "artifactID": 11788639172,
+  "testedCommit": "1379bd2e174d88c582bb19fa8ea1f64c180a74da",
+  "conclusion": "success",
+  "xcodeVersion": "Xcode 27.0\nBuild version 27A266a",
+  "coreTests": {
+    "GameCore": "65 passed, 0 failures",
+    "ProbeCore": "6 passed, 0 failures"
+  },
+  "appVersion": "0.9",
+  "buildNumber": "9",
+  "displayName": "ClassroomProbe",
+  "bundleName": "ClassroomProbe",
+  "bundleIdentifier": "org.personal.classroom.stage0",
+  "minimumOS": "27.0.0",
+  "sdk": "27.0.0",
+  "deviceFamily": [
+    2
+  ],
+  "architecture": "arm64",
+  "designCommit": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+  "bundledPNGCount": 66,
+  "nativeScreenshotCount": 12,
+  "ipaBytes": 10445942,
+  "ipaSha256": "7d3a6e27184e5a07876ba769f8f54df8d7651d303c68f034c9e838147945a601",
+  "artifactArchiveSha256": "47c360cc5afd01a90b8504e77f45812b8e36cba36198c23b7fbb30c88d7f094c",
+  "requiresPersonalSigning": true,
+  "newPVEDeviceVerified": false,
+  "newArtAestheticApproved": false,
+  "artifactExpiresAt": "2026-10-16T04:22:46Z"
+}

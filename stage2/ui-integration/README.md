@@ -9,7 +9,7 @@
 ## 实际接入
 
 - 4职业、6怪物：manifest模板ID绑定头像，教师玩家/敌人/当前行动者与公开队列/战斗展示。
-- 18物品：全部本地打包；现有个人道具、救援、实际背包与掉落文字使用对应资产，不增加商店、交易、换装。
+- 18物品：全部本地打包；教师只读初始资料和公开实际背包按ID绑定。现有教师道具菜单显示真实持有数量，掉落差额只用一次文字反馈，不增加商店、交易、换装。
 - 6资源图标：生命、护盾、行动点、金币、积分、倒地；公开状态不绘制行动点图标。
 - 6nodeVisual：未知先选择node_unknown，隐藏Boss/奖励插画不加载；已揭示节点按真实类型和原名绘制。
 - 节点current/path/enemy/claimed/crowded/target、中性迷雾与地面/通用装饰：原生地图分层，教师路径/合法目标不进入公开投影。
@@ -25,4 +25,8 @@
 
 ## 结果与存档
 
-构建、检查、截图、IPA信息和不可变存档位置将在核验后填入evidence与开发侧archives索引。原规则JSON、职业技能数值、费用、GameState/GameArchive存档格式保持原样。
+[最终云端构建](https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38345790065)成功，编译提交1379bd2e174d88c582bb19fa8ea1f64c180a74da，Xcode27.0/27A266a、iphoneos27.0。GameCore65与ProbeCore6项测试全部通过。IPA 0.9/9、arm64、iPad设备族2、最低27.0，Bundle ID沿用org.personal.classroom.stage0，须SideStore个人签名；10445942字节，SHA256 7d3a6e27184e5a07876ba769f8f54df8d7651d303c68f034c9e838147945a601。
+
+原生12张截图与66张Bundle素材解码通过，已修正4:3英文长名与小尺寸教师屏奖励栏问题，未知Boss/奖励输入的公开地图像素完全相同。详见[检查及真机步骤](验收与真机检查.md)、[原生截图](evidence/native-previews/README.md)、[构建证据](evidence/cloud-build-result-v0.9.json)、[离线包校验](evidence/asset-verification.json)。公开投影没有AP状态条，技能费用保留本局实际定义；教师未提交选人/技能/目标/路径/奖励勾选不公开。原规则JSON、职业技能数值、费用、GameState/GameArchive存档格式保持原样。
+
+唯一存档标签archive-stage2-ui-art-v0.9-20261013固定源码快照，开发侧[存档索引](../../archives/README.md)记录长期私有archive-assets位置、ZIP与分片校验及独立恢复回执。已交付设计、旧ZIP和旧标签保留。

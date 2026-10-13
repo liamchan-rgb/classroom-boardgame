@@ -740,5 +740,7 @@
       "bytes": 8428,
       "sha256": "5ba7a7beb87146de6f0af55d77b766300fffb4e19baa87b8ee5f1df86ef7f65f"
     }
-  ]
+  ],
+  "ipaBundledAssetsVerified": 66,
+  "ipaSha256": "7d3a6e27184e5a07876ba769f8f54df8d7651d303c68f034c9e838147945a601"
 }
