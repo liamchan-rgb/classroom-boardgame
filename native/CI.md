@@ -1,6 +1,6 @@
 # iOS Pull Request 编译检查
 
-`.github/workflows/ios-pr-build.yml`在每个PR的打开、更新和重新打开时自动运行，包括草稿PR；不设分支或路径过滤。使用GitHub的`macos-latest` Runner，也支持在合并后从Actions手动运行。本配置位于独立CI分支，合并PR后成为后续PR的默认检查。
+`.github/workflows/ios-pr-build.yml`在每个PR的打开、更新和重新打开时自动运行，包括草稿PR；不设分支或路径过滤。使用本仓库已经成功构建正式App的macOS/Xcode27 Runner标签`xcode-27`，也支持在合并后从Actions手动运行。本配置位于独立CI分支，合并PR后成为后续PR的默认检查。
 
 ## 实际工程
 
@@ -22,10 +22,10 @@
 
 ## 静态配置修正
 
-- 原手动IPA workflow的`xcode-27`专用标签改为标准macOS Runner；以前的成功构建仍可追溯，但该标签不能作为标准托管Runner的可移植配置。
+- 首次PR验证实际发现`macos-latest`最高仅含iOS26.5 SDK，选择器明确失败且日志Artifact成功上传，因此最终保留本仓库已验证的macOS/Xcode27标签`xcode-27`。这是仓库特定标签，不宣称所有GitHub仓库均可使用；`.github/actionlint.yaml`允许静态检查此标签。
 - 两条workflow共同使用工具链选择器，按工程实际最低系统版本选择SDK；原来仅接受`27.*`的判断已移除，支持更高兼容SDK。
 - 手动截图构建不再强制模拟器`ARCHS=arm64`，由Runner与目的地决定架构；补齐`CODE_SIGNING_REQUIRED=NO`和模拟器构建缓存忽略规则。
-- 不修改App源代码、规则或最低部署版本。若`macos-latest`暂未包含iOS27及以上SDK，选择器会明确失败并保留诊断；需要更换具有相应SDK的macOS Runner镜像，不能把这一失败描述为Swift编译错误。
+- 不修改App源代码、规则或最低部署版本。Runner必须具备iOS27及以上设备/模拟器SDK；复制到其他仓库时需选择提供相应SDK的macOS Runner，不能把工具链缺失描述为Swift编译错误。
 
 ## 查看结果和本地复现
 
