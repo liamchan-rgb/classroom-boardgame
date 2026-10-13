@@ -171,9 +171,19 @@ struct PVEHistoryView:View {
         NavigationStack {
             List {
                 if let play = model.play {
-                    ForEach(Array(play.engine.history.suffix(30).reversed())) { receipt in
+                    ForEach(Array(play.engine.history.reversed())) { receipt in
                         VStack(alignment:.leading,spacing:8) {
                             Text("第\(receipt.sequence)步").font(.headline)
+                            DisclosureGroup("资源前后值、费用与原事件") {
+                                ForEach(receipt.after.units.keys.sorted(),id:\.self) { id in
+                                    if let before = receipt.before.units[id], let after = receipt.after.units[id], before != after {
+                                        Text("\(after.name)：生命\(before.health)→\(after.health)，护盾\(before.shield)→\(after.shield)，AP\(before.ap)→\(after.ap)，金币\(before.coins)→\(after.coins)，积分\(before.score)→\(after.score)")
+                                    }
+                                }
+                                ForEach(Array(receipt.events.enumerated()),id:\.offset) { _,event in
+                                    Text("\(event.kind)：\(event.amount) · \(event.detail)").font(.caption)
+                                }
+                            }
                             ForEach(Array(OperationSummary.lines(receipt,catalog:play.engine.catalog,publicOnly:false).enumerated()),id:\.offset) { _,line in Text(line) }
                             ForEach(Array(receipt.dice.enumerated()),id:\.offset) { _,dice in
                                 Text(dice.formula.label + "：" + dice.values.map(String.init).joined(separator:"、") + (dice.naturalTwenty ? " · 自然20" : "")).font(.callout.bold())
@@ -181,7 +191,7 @@ struct PVEHistoryView:View {
                         }.padding(.vertical,6)
                     }
                 }
-            }.navigationTitle("最近30步 · 只读记录")
+            }.navigationTitle("整场游戏 · 只读记录")
                 .toolbar { ToolbarItem(placement:.confirmationAction) { Button("完成") { dismiss() } } }
         }
     }

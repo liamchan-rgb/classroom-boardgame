@@ -18,7 +18,7 @@ struct PVEPlayView:View {
                 Text(model.message).font(.callout).lineLimit(2).frame(maxWidth:.infinity,alignment:.leading)
                 if let play = model.play, let board = try? play.engine.state.teacherBoard(catalog:play.engine.catalog) {
                     HStack(alignment:.top,spacing:14) {
-                        playerRail(play:play).frame(width:geometry.size.width*0.19)
+                        playerRail(play:play,compact:geometry.size.height < 850).frame(width:max(228,min(268,geometry.size.width*0.20)))
                         mapPanel(play:play,board:board).frame(maxWidth:.infinity,maxHeight:.infinity)
                         PVEActionPanel(model:model).frame(width:min(350,geometry.size.width*0.29))
                     }.frame(maxHeight:.infinity)
@@ -40,7 +40,7 @@ struct PVEPlayView:View {
     }
     private var header:some View {
         HStack(spacing:14) {
-            Text("PVE课堂 · v0.8").font(.title2.bold())
+            Text("晴空学园 · v0.9").font(.title2.bold())
             if let state = model.state {
                 Text(state.phase.displayName).font(.headline)
                 if let battle = state.battle {
@@ -50,50 +50,67 @@ struct PVEPlayView:View {
                 if model.paused { Text("已暂停").foregroundStyle(GameTheme.accent) }
             }
             Spacer()
-            Button(model.state?.pauseReasons.contains(.manual) == true ? "继续（空格）" : "暂停（空格）") { model.togglePause() }.buttonStyle(.borderedProminent)
-            Button("绘本") { teacher.concealNotes(); model.setBook(true); showBook = true }.buttonStyle(.bordered)
+            Button(model.state?.pauseReasons.contains(.manual) == true ? "继续（空格）" : "暂停（空格）") { model.togglePause() }.buttonStyle(ClassroomButtonStyle(primary:true))
+            Button("编辑") { model.setModal(true); showEditor = true }.buttonStyle(ClassroomButtonStyle())
+            Button("记录") { model.setModal(true,reason:.history); showHistory = true }.buttonStyle(ClassroomButtonStyle())
+            Button("撤销") { model.undo() }.buttonStyle(ClassroomButtonStyle()).disabled(model.play?.engine.history.isEmpty != false)
+            Button("绘本") { teacher.concealNotes(); model.setBook(true); showBook = true }.buttonStyle(ClassroomButtonStyle())
             Menu {
                 Button("创建新局") { model.setModal(true); showSetup = true }
                 Button("调整资源 / 教师复活") { model.setModal(true); showEditor = true }
                 Button("延长15秒") { model.extendTime() }
                 Button("探索补足基础行动点") { model.apply(.refillExploration) }.disabled(model.state?.phase != .exploration)
-                Button("最近战斗记录") { model.setModal(true,reason:.history); showHistory = true }
+                Button("整场游戏记录") { model.setModal(true,reason:.history); showHistory = true }
                 Button("保存到本机") { model.save() }
                 Button("恢复本机进度（暂停）") { model.restore() }
                 Button("撤销完整一步（暂停）") { model.undo() }.disabled(model.play?.engine.history.isEmpty != false)
                 if model.state?.battle != nil { Button("结束本场PVE") { showEndBattle = true } }
-            } label:{ Label("教师操作",systemImage:"slider.horizontal.3") }.buttonStyle(.bordered)
-            Button("返回") { dismiss() }.buttonStyle(.bordered)
+            } label:{ Label("教师操作",systemImage:"slider.horizontal.3") }.buttonStyle(ClassroomButtonStyle())
+            Button("返回") { dismiss() }.buttonStyle(ClassroomButtonStyle())
         }
     }
-    private func playerRail(play:PVEPlaySession) -> some View {
+    private func playerRail(play:PVEPlaySession,compact:Bool) -> some View {
         GamePanel {
-            VStack(alignment:.leading,spacing:8) {
-                Text("玩家 · 奖励可多选").font(.headline)
-                ScrollView {
-                    VStack(spacing:9) {
-                        ForEach(play.engine.state.players) { player in
-                            let stats = try? GameRules.attributes(player,catalog:play.engine.catalog)
-                            let current = play.engine.state.battle?.current == player.id
-                            VStack(alignment:.leading,spacing:5) {
-                                HStack {
-                                    Button(player.name + (player.host ? " · 主持人" : "")) { model.selectPlayer(player.id) }
-                                        .font(.headline).disabled(play.engine.state.battle != nil)
-                                    Spacer(minLength:4)
-                                    Button { model.toggleReward(player.id) } label:{
-                                        Image(systemName:play.rewardIDs.contains(player.id) ? "checkmark.square.fill" : "square").font(.title2).frame(width:44,height:44)
-                                    }.accessibilityLabel("奖励对象：\(player.name)")
+            VStack(alignment:.leading,spacing:6) {
+                Text("角色 · 右侧勾选发奖").font(.system(size:compact ? 14 : 17,weight:.bold))
+                ForEach(play.engine.state.players) { player in
+                    let stats = try? GameRules.attributes(player,catalog:play.engine.catalog)
+                    let current = play.actor?.id == player.id
+                    let reward = play.rewardIDs.contains(player.id)
+                    HStack(spacing:4) {
+                        Button { model.selectPlayer(player.id) } label: {
+                            VStack(alignment:.leading,spacing:3) {
+                                Text(player.name).font(.system(size:compact ? 15 : 17,weight:.bold)).fixedSize(horizontal:false,vertical:true)
+                                HStack(spacing:4) {
+                                    ResourceValue(id:"health",text:"\(player.health)/\(stats?.maximumHealth ?? player.health)",iconSize:14)
+                                    ResourceValue(id:"shield",text:String(player.shield),iconSize:14)
+                                    ResourceValue(id:"action",text:String(player.ap),iconSize:14)
                                 }
-                                Text("生命\(player.health)/\(stats?.maximumHealth ?? player.health) · 护盾\(player.shield)")
-                                Text("AP\(player.ap) · 金币\(player.coins) · 分\(player.score)")
-                                if current { Text("行动中").font(.caption.bold()).foregroundStyle(GameTheme.accent) }
-                                if player.health == 0 { Text("已倒地").foregroundStyle(GameTheme.danger) }
-                                if let battle = play.engine.state.battle, player.canActFromRound > battle.round, player.isAlive { Text("第\(player.canActFromRound)轮可行动").font(.caption) }
-                            }.font(.callout).padding(10).background(GameTheme.background,in:RoundedRectangle(cornerRadius:12))
-                                .overlay(RoundedRectangle(cornerRadius:12).stroke(current ? GameTheme.accent : .clear,lineWidth:2))
+                                HStack(spacing:4) {
+                                    ResourceValue(id:"coin",text:String(player.coins),iconSize:14)
+                                    ResourceValue(id:"score",text:String(player.score),iconSize:14)
+                                    TeamMark(id:player.teamID)
+                                    Text(play.engine.state.teams.first { $0.id == player.teamID }?.name ?? "未分队")
+                                }
+                            }.font(.system(size:compact ? 13 : 15)).frame(maxWidth:.infinity,minHeight:44,alignment:.leading)
+                        }.buttonStyle(.plain).disabled(play.engine.state.battle != nil)
+                        VStack(spacing:0) {
+                            ArtImage(type:"classes",id:player.templateID).frame(width:28,height:28)
+                                .overlay(alignment:.topTrailing) {
+                                    if current { Image(systemName:"arrowtriangle.right.fill").foregroundStyle(GameTheme.primary).accessibilityLabel("行动中") }
+                                    if player.health == 0 { Image(systemName:"xmark.circle.fill").foregroundStyle(GameTheme.danger).accessibilityLabel("倒地") }
+                                    else if let battle = play.engine.state.battle, player.canActFromRound > battle.round { Image(systemName:"clock.fill").accessibilityLabel("下轮可行动") }
+                                }
+                            Button { model.toggleReward(player.id) } label: {
+                                Image(systemName:reward ? "checkmark.square.fill" : "square").font(.title2).frame(width:44,height:44)
+                            }.buttonStyle(.plain).foregroundStyle(reward ? GameTheme.accent : GameTheme.muted)
+                                .accessibilityLabel("奖励对象：\(player.name)").accessibilityValue(reward ? "已选中" : "未选中")
                         }
-                    }
+                    }.padding(compact ? 4 : 8).frame(maxWidth:.infinity,alignment:.leading)
+                        .background(.white.opacity(0.85),in:RoundedRectangle(cornerRadius:12))
+                        .overlay(RoundedRectangle(cornerRadius:12).stroke(current ? GameTheme.primary : reward ? GameTheme.accent : GameTheme.primary.opacity(0.1),lineWidth:current || reward ? 2 : 1))
                 }
+                Spacer(minLength:0)
             }
         }
     }
@@ -111,11 +128,11 @@ struct PVEPlayView:View {
                         .font(.callout).lineLimit(2)
                     Text("暂停原因：" + play.engine.state.pauseReasons.map(\.displayName).sorted().joined(separator:"、")).font(.caption)
                 } else { Text("探索不自动计时；沿道路规划连续路径。").font(.callout) }
-                PVEMapView(nodes:board.nodes,roads:board.roads,units:board.units,path:play.action == .move ? play.path : [],interactive:play.humanMayAct && !model.aiRunning,onNode:model.tapNode)
-                    .frame(minHeight:280,maxHeight:.infinity)
+                PVEMapView(nodes:board.nodes,roads:board.roads,units:board.units,path:play.action == .move ? play.path : [],interactive:play.humanMayAct && !model.aiRunning,onNode:model.tapNode,actorNode:play.actor?.nodeID,legalNodes:play.legalTargetNodes,planAllowed:play.preview.allowed)
+                    .frame(maxHeight:.infinity)
                 if play.engine.state.phase == .exploration, let actor = play.actor,
                    play.engine.state.units.values.contains(where:{ $0.kind == .monster && $0.isAlive && $0.nodeID == actor.nodeID }) {
-                    Button("与当前位置敌人开战") { model.startHere() }.buttonStyle(.borderedProminent)
+                    Button("与当前位置敌人开战") { model.startHere() }.buttonStyle(ClassroomButtonStyle(primary:true))
                 }
                 ScrollView(.horizontal) {
                     HStack(spacing:8) {
@@ -125,15 +142,18 @@ struct PVEPlayView:View {
                                 if case .skill(let skillID) = play.action, let skill = try? play.engine.catalog.skill(skillID), [.enemiesAtNode,.alliesAtNode].contains(skill.target) { model.target(.node(unit.nodeID)) }
                                 else { model.target(.unit(unit.id)) }
                             } label:{
+                                HStack {
+                                UnitPortrait(unit:unit).frame(width:48,height:48)
                                 VStack(alignment:.leading,spacing:4) {
                                     Text(unit.name).font(.headline)
                                     Text("地点\(unit.nodeID) · 生命\(unit.health)/\(unit.maximumHealth)")
                                     Text("护盾\(unit.shield) · AP\(unit.ap)" + (unit.health == 0 ? " · 已击败" : ""))
-                                }.font(.caption).foregroundStyle(GameTheme.ink).padding(10).background(GameTheme.background,in:RoundedRectangle(cornerRadius:12))
+                                }}.font(.caption).foregroundStyle(GameTheme.ink).padding(6).background(GameTheme.background,in:RoundedRectangle(cornerRadius:12))
                             }.buttonStyle(.plain)
                         }
                     }
-                }.frame(height:86)
+                }.frame(height:70)
+                Text("已提交：" + model.message).font(.callout).lineLimit(3)
             }
         }
     }
@@ -149,7 +169,7 @@ struct PVEPlayView:View {
                     Button("AP＋1（A）") { model.award(ResourceReward(ap:1)) }
                     Button("积分＋2（S）") { model.award(ResourceReward(score:2)) }
                     Button("发练习补给") { model.award(ResourceReward(items:["smallPotion":2,"largePotion":1,"shieldPotion":1,"revivalStone":1])) }
-                }.buttonStyle(.bordered).disabled(play.rewardIDs.isEmpty)
+                }.buttonStyle(ClassroomButtonStyle()).disabled(play.rewardIDs.isEmpty)
             }
         }
     }
@@ -162,42 +182,58 @@ private struct PVEActionPanel:View {
         GamePanel {
             VStack(alignment:.leading,spacing:12) {
                 Text("当前行动者：\(model.actor?.name ?? "等待教师处理")").font(.headline)
+                if let actor = model.actor, let catalog = model.catalog, let stats = try? GameRules.attributes(actor,catalog:catalog) {
+                    HStack {
+                        ArtImage(type:actor.kind == .player ? "classes" : "monsters",id:actor.templateID).frame(width:48,height:48)
+                        VStack(alignment:.leading,spacing:3) {
+                            Text("生命\(actor.health)/\(stats.maximumHealth) · 护盾\(actor.shield)")
+                            Text("行动点\(actor.ap)/\(stats.maximumAP)")
+                        }.font(.callout)
+                    }
+                }
                 if let play = model.play, play.humanMayAct {
                     ScrollView {
                         VStack(alignment:.leading,spacing:10) {
                             ForEach(play.options) { option in
                                 Button { model.choose(option.action) } label:{
+                                    HStack(spacing:6) {
+                                    if case .item(let id) = option.action { ArtImage(type:"items",id:id).frame(width:32,height:32) }
+                                    if option.action == .rescue { ArtImage(type:"items",id:"revivalStone").frame(width:32,height:32) }
                                     VStack(alignment:.leading,spacing:3) {
                                         Text(option.title).font(.headline)
                                         Text(option.detail).font(.caption)
-                                    }.frame(maxWidth:.infinity,alignment:.leading).padding(10)
+                                    }}.frame(maxWidth:.infinity,alignment:.leading).padding(10)
                                         .foregroundStyle(play.action == option.action ? .white : GameTheme.ink)
                                         .background(play.action == option.action ? GameTheme.primary : GameTheme.background,in:RoundedRectangle(cornerRadius:12))
                                 }.buttonStyle(.plain)
                             }
                             if play.action == .move {
                                 Text("路径：" + play.path.map { id in play.engine.state.map.nodes.first { $0.id == id }?.name ?? "地点\(id)" }.joined(separator:" → ")).font(.callout)
-                                Button("清除路径") { model.clearPath() }.buttonStyle(.bordered)
+                                Button("清除路径") { model.clearPath() }.buttonStyle(ClassroomButtonStyle())
                                 if play.engine.state.battle == nil, let actor = play.actor {
                                     Text("同地点同行玩家").font(.headline)
                                     ForEach(play.engine.state.players.filter { $0.nodeID == actor.nodeID && $0.isAlive && $0.id != actor.id }) { unit in
                                         Button { model.toggleTravel(unit.id) } label:{ Label(unit.name,systemImage:play.travelIDs.contains(unit.id) ? "checkmark.circle.fill" : "circle") }
-                                            .buttonStyle(.bordered)
+                                            .buttonStyle(ClassroomButtonStyle())
                                     }
                                 }
                             } else {
                                 ForEach(Array(play.possibleTargets.enumerated()),id:\.offset) { _,target in
+                                    let legality = play.previewForTarget(target)
                                     Button { model.target(target) } label:{
-                                        HStack { Text(label(target,play:play)); Spacer(); if play.target == target { Image(systemName:"checkmark.circle.fill") } }
-                                    }.buttonStyle(.bordered)
+                                        VStack(alignment:.leading) {
+                                            HStack { Label(label(target,play:play),systemImage:legality.allowed ? "scope" : "exclamationmark.circle"); Spacer(); if play.target == target { Image(systemName:"checkmark.circle.fill") } }
+                                            if !legality.allowed { Text(legality.message).font(.caption) }
+                                        }
+                                    }.buttonStyle(ClassroomButtonStyle())
                                 }
                             }
                         }
                     }
                     Text(play.preview.message).font(.callout).foregroundStyle(play.preview.allowed ? GameTheme.muted : GameTheme.danger).fixedSize(horizontal:false,vertical:true)
-                    Button("确认执行 · \(play.preview.cost)行动点") { model.perform() }.buttonStyle(.borderedProminent)
-                        .frame(maxWidth:.infinity,minHeight:50).disabled(!play.preview.allowed || model.aiRunning)
-                    if play.engine.state.battle != nil { Button("结束回合（E）") { model.endTurn() }.buttonStyle(.bordered).frame(maxWidth:.infinity,minHeight:44) }
+                    Button("确认执行 · \(play.preview.cost)行动点") { model.perform() }.buttonStyle(ClassroomButtonStyle(primary:true))
+                        .frame(maxWidth:.infinity,minHeight:56).disabled(!play.preview.allowed || model.aiRunning)
+                    if play.engine.state.battle != nil { Button("结束回合（E）") { model.endTurn() }.buttonStyle(ClassroomButtonStyle()).frame(maxWidth:.infinity,minHeight:44) }
                 } else {
                     Text(model.aiRunning ? "怪物正在按技能优先级和选敌策略行动。" : "当前没有可行动玩家。可暂停、复活、调整资源或结束本场。")
                         .foregroundStyle(GameTheme.muted).frame(maxHeight:.infinity)

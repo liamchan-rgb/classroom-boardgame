@@ -4,6 +4,8 @@ public struct PublicPlayFrame: Codable, Equatable {
     public var snapshot: PublicGameSnapshot
     public var log: [String]
     public var verification: Bool
+    public var currentDetails: PublicTurnDetails? = nil
+    public var presentations: [CommittedPresentation] = []
     public init(snapshot: PublicGameSnapshot, log: [String], verification: Bool) {
         self.snapshot = snapshot; self.log = log; self.verification = verification
     }
@@ -53,8 +55,12 @@ extension PVEPlaySession {
     public func publicFrame() throws -> PublicPlayFrame {
         let dice = engine.history.last?.dice ?? []
         let log = engine.history.suffix(4).flatMap { OperationSummary.lines($0, catalog: engine.catalog) }
-        return PublicPlayFrame(snapshot: try engine.state.publicSnapshot(catalog: engine.catalog, dice: dice),
-                               log: Array(log.suffix(8)), verification: engine.state.verificationScenario != nil)
+        var frame = PublicPlayFrame(snapshot: try engine.state.publicSnapshot(catalog: engine.catalog, dice: dice),
+                                    log: Array(log.suffix(8)), verification: engine.state.verificationScenario != nil)
+        if let actor, actor.kind == .player {
+            frame.currentDetails = try PublicTurnDetails(unit: actor, catalog: engine.catalog)
+        }
+        return frame
     }
 }
 

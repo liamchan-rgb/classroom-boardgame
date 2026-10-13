@@ -126,6 +126,26 @@
 			"isa" = "PBXBuildFile";
 			"fileRef" = "B5421907CB9D8A66E9193821";
 		};
+		"874498D15E2C4ECD714CAC49" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "PVEArt.swift";
+			"sourceTree" = "<group>";
+		};
+		"0F511239DFFC2841F9517BE1" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "874498D15E2C4ECD714CAC49";
+		};
+		"D72241D2E71AF360D92ED3F4" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "NativeVisualValidation.swift";
+			"sourceTree" = "<group>";
+		};
+		"C69FA66D78140FC3F5EC9086" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "D72241D2E71AF360D92ED3F4";
+		};
 		"06271BAF49532C879AA3C58B" = {
 			"isa" = "PBXFileReference";
 			"lastKnownFileType" = "text.plist.xml";
@@ -162,6 +182,16 @@
 			"isa" = "PBXBuildFile";
 			"fileRef" = "54AE073B4791810725C73209";
 		};
+		"20BEAC8F8173541DA9BDC303" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "folder";
+			"path" = "Resources/Art";
+			"sourceTree" = "<group>";
+		};
+		"7356E94E3A52E57C04B36D33" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "20BEAC8F8173541DA9BDC303";
+		};
 		"A8792157CB4F27FB949C035F" = {
 			"isa" = "PBXFileReference";
 			"explicitFileType" = "wrapper.application";
@@ -184,10 +214,13 @@
 				"6D05EA9CF3115E304EB5E6A4",
 				"8FCBDC717CA54A4D73F56A98",
 				"B5421907CB9D8A66E9193821",
+				"874498D15E2C4ECD714CAC49",
+				"D72241D2E71AF360D92ED3F4",
 				"06271BAF49532C879AA3C58B",
 				"6BFC76380CC79F82566884C6",
 				"2BF35B3FB72A3D4E876979D6",
 				"54AE073B4791810725C73209",
+				"20BEAC8F8173541DA9BDC303",
 			);
 			"path" = "ClassroomProbe";
 			"sourceTree" = "<group>";
@@ -250,6 +283,8 @@
 				"6F9981CF519EF3267506AD2A",
 				"18BEA6D452A0D5BF25AE1168",
 				"47F8E596E5EE7C98D64D5460",
+				"0F511239DFFC2841F9517BE1",
+				"C69FA66D78140FC3F5EC9086",
 			);
 			"runOnlyForDeploymentPostprocessing" = "0";
 		};
@@ -260,6 +295,7 @@
 				"4D846A8C621CBB1D64264EF4",
 				"A782B7B15BD1CF048DF4D43E",
 				"BB38697EEA1B34302C3C92D1",
+				"7356E94E3A52E57C04B36D33",
 			);
 			"runOnlyForDeploymentPostprocessing" = "0";
 		};
@@ -309,8 +345,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				"CURRENT_PROJECT_VERSION" = "8";
-				"MARKETING_VERSION" = "0.8";
+				"CURRENT_PROJECT_VERSION" = "9";
+				"MARKETING_VERSION" = "0.9";
 			};
 		};
 		"07CA1E69F6068DEA30A4DA6B" = {
@@ -349,8 +385,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				"CURRENT_PROJECT_VERSION" = "8";
-				"MARKETING_VERSION" = "0.8";
+				"CURRENT_PROJECT_VERSION" = "9";
+				"MARKETING_VERSION" = "0.9";
 			};
 		};
 		"7ED5184A5487DF185E3420D0" = {

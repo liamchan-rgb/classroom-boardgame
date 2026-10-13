@@ -12,11 +12,11 @@ enum GameTheme {
         let value = colors[name].flatMap { UInt32($0.trimmingCharacters(in:CharacterSet(charactersIn:"#")),radix:16) } ?? fallback
         return Color(red:Double((value >> 16) & 255)/255,green:Double((value >> 8) & 255)/255,blue:Double(value & 255)/255)
     }
-    static let background = color("background",fallback:0xF5F1E8)
-    static let ink = color("ink",fallback:0x183B36)
-    static let muted = color("muted",fallback:0x526B64)
-    static let primary = color("primary",fallback:0x176B5B)
-    static let accent = color("accent",fallback:0xB76A08)
+    static let background = color("background",fallback:0xF5FAFC)
+    static let ink = color("ink",fallback:0x173F50)
+    static let muted = color("muted",fallback:0x4C6875)
+    static let primary = color("primary",fallback:0x176A86)
+    static let accent = color("accent",fallback:0x995207)
     static let danger = color("danger",fallback:0xB93838)
     static let shield = color("shield",fallback:0x315E9C)
     static let action = color("action",fallback:0x6650A4)
@@ -34,10 +34,28 @@ extension GamePause {
     }
 }
 struct GamePanel<Content:View>:View {
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     let content:Content
     init(@ViewBuilder _ content:()->Content) { self.content = content() }
-    var body:some View { content.padding(16).background(.white,in:RoundedRectangle(cornerRadius:16)) }
+    var body:some View { content.padding(16)
+        .background {
+            if reduceTransparency { RoundedRectangle(cornerRadius:16).fill(.white) }
+            else { RoundedRectangle(cornerRadius:16).fill(.regularMaterial) }
+        }
+        .overlay(RoundedRectangle(cornerRadius:16).stroke(GameTheme.primary.opacity(0.12),lineWidth:1)) }
 }
 func nodeIcon(_ kind:NodeKind?) -> String {
     switch kind { case .start:return "house.fill"; case .combat:return "flame.fill"; case .boss:return "crown.fill"; case .reward:return "gift.fill"; case .empty:return "leaf.fill"; case nil:return "questionmark" }
+}
+
+struct ClassroomButtonStyle:ButtonStyle {
+    @Environment(\.isEnabled) private var enabled
+    var primary = false
+    func makeBody(configuration:Configuration) -> some View {
+        configuration.label.padding(.horizontal,10).frame(minWidth:44,minHeight:44)
+            .foregroundStyle(primary && enabled ? .white : GameTheme.ink)
+            .background(primary && enabled ? GameTheme.primary : Color.white.opacity(enabled ? 0.9 : 0.45),in:RoundedRectangle(cornerRadius:12))
+            .overlay(RoundedRectangle(cornerRadius:12).stroke(GameTheme.primary.opacity(0.2),lineWidth:1))
+            .opacity(configuration.isPressed ? 0.7 : enabled ? 1 : 0.55)
+    }
 }

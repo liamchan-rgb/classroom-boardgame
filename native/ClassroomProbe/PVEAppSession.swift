@@ -15,6 +15,7 @@ final class PVEAppSession: ObservableObject {
     private var active = false
     private var timer: Timer?
     private var aiTask: Task<Void,Never>?
+    private var presentation = PresentationLedger()
     private var lastTick = ProcessInfo.processInfo.systemUptime
 
     init(display: PublicDisplayModel) {
@@ -36,16 +37,24 @@ final class PVEAppSession: ObservableObject {
                 message = "森林地图已准备。点击相邻地点规划移动，或创建新局设置玩家。"
             }
         } catch { message = "读取游戏失败，原存档保留：\(error.localizedDescription)" }
+        if let play { presentation.suppressHistory(play.engine.history) }
         timer = Timer.scheduledTimer(withTimeInterval:0.2,repeats:true) { [weak self] _ in Task { @MainActor in self?.tick() } }
     }
+    #if DEBUG
+    func installVisualFixture(_ fixture:PVEPlaySession) {
+        active = false; cancelAI(); play = fixture; fixture.toggleReward("p2"); fixture.toggleReward("p3")
+        message = "视觉验证：7角色、3怪物、独立奖励、倒地和下轮资格。"; publish()
+    }
+    #endif
     var state: GameState? { play?.engine.state }
     var catalog: GameCatalog? { play?.engine.catalog }
     var actor: GameUnit? { play?.actor }
     var paused: Bool { state?.pauseReasons.isEmpty == false }
     var scenario: PVEScenario? { state?.verificationScenario.flatMap(PVEScenario.init(rawValue:)) }
-    func activate() { active = true; lastTick = ProcessInfo.processInfo.systemUptime; publish(); scheduleAI() }
+    func activate() { presentation.clearVisible(); active = true; lastTick = ProcessInfo.processInfo.systemUptime; publish(); scheduleAI() }
     func deactivate() { pause(.manual,enabled:true); active = false; cancelAI(); display.playFrame = nil; display.playBook = false }
     func pause(_ reason: GamePause, enabled: Bool) {
+        if enabled { presentation.clearVisible() }
         guard let play else { return }
         if enabled { cancelAI() }
         do { try captureElapsed(); try play.engine.setPause(reason,enabled:enabled) }
@@ -96,6 +105,7 @@ final class PVEAppSession: ObservableObject {
             try play.engine.setPause(.manual,enabled:true)
             let receipt = try play.engine.undo()
             try play.engine.setPause(.manual,enabled:true)
+            presentation.suppressHistory(play.engine.history)
             play.synchronize(); message = "已撤销完整一步，保持暂停：" + OperationSummary.lines(receipt,catalog:play.engine.catalog,publicOnly:false).joined(separator:"；")
         } catch { message = error.localizedDescription }
         lastTick = ProcessInfo.processInfo.systemUptime; publish()
@@ -113,6 +123,7 @@ final class PVEAppSession: ObservableObject {
             let engine = try GameEngine(catalog:archive.catalog,state:archive.state,history:archive.history,persist:store.save)
             if modalOpen { try engine.setPause(.editor,enabled:true) }
             if bookOpen { try engine.setPause(.book,enabled:true) }
+            presentation.suppressHistory(engine.history)
             play = PVEPlaySession(engine:engine); message = "已恢复保存的PVE，保持暂停。"
         } catch { message = "恢复失败，当前进度保留：\(error.localizedDescription)" }
         lastTick = ProcessInfo.processInfo.systemUptime; publish()
@@ -128,6 +139,7 @@ final class PVEAppSession: ObservableObject {
             if let previous = play { try AtomicGameStore(url:store.url.deletingLastPathComponent().appendingPathComponent("previous-session.json")).save(previous.engine.archive) }
             let engine = try GameEngine(catalog:catalog,state:state,persist:store.save)
             try store.save(engine.archive)
+            presentation.suppressHistory([])
             play = PVEPlaySession(engine:engine); message = "新局已建立：\(scenario.title)。"; lastTick = ProcessInfo.processInfo.systemUptime
             publish(); scheduleAI(); return true
         } catch { message = "新局未建立，当前进度保留：\(error.localizedDescription)"; publish(); return false }
@@ -153,7 +165,10 @@ final class PVEAppSession: ObservableObject {
         do {
             try captureElapsed()
             let receipt = try operation()
-            if let play { message = OperationSummary.lines(receipt,catalog:play.engine.catalog,publicOnly:false).joined(separator:"；") }
+            if let play {
+                try presentation.submit(receipt,catalog:play.engine.catalog,now:Date())
+                message = OperationSummary.lines(receipt,catalog:play.engine.catalog,publicOnly:false).joined(separator:"；")
+            }
         } catch { message = "操作未执行：\(error.localizedDescription)" }
         lastTick = ProcessInfo.processInfo.systemUptime; play?.synchronize(); publish(); scheduleAI()
     }
@@ -161,7 +176,10 @@ final class PVEAppSession: ObservableObject {
         let now = ProcessInfo.processInfo.systemUptime
         defer { lastTick = now }
         guard active, let play else { return }
-        if let receipt = try play.engine.advanceClock(by:max(0,now-lastTick)) {
+        let date = Date()
+        let elapsed = presentation.elapsedDecisionTime(from:date.addingTimeInterval(-max(0,now-lastTick)),to:date)
+        if let receipt = try play.engine.advanceClock(by:elapsed) {
+            try presentation.submit(receipt,catalog:play.engine.catalog,now:date)
             message = OperationSummary.lines(receipt,catalog:play.engine.catalog).joined(separator:"；")
         }
         play.synchronize()
@@ -189,6 +207,7 @@ final class PVEAppSession: ObservableObject {
                 guard !Task.isCancelled, play.engine.state.pauseReasons.isEmpty else { return }
                 do {
                     let receipt = try play.apply(.monsterStep)
+                    try self.presentation.submit(receipt,catalog:play.engine.catalog,now:Date())
                     self.message = OperationSummary.lines(receipt,catalog:play.engine.catalog,publicOnly:false).joined(separator:"；")
                 } catch {
                     try? play.engine.setPause(.manual,enabled:true)
@@ -202,7 +221,11 @@ final class PVEAppSession: ObservableObject {
     private func publish() {
         revision &+= 1
         guard active, let play else { return }
-        do { display.playFrame = try play.publicFrame(); display.playBook = bookOpen }
+        do {
+            var frame = try play.publicFrame()
+            frame.presentations = presentation.pending
+            display.playFrame = frame; display.playBook = bookOpen
+        }
         catch { message = "公开画面未更新：\(error.localizedDescription)" }
     }
 }

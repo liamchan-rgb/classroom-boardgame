@@ -14,6 +14,10 @@ public struct PublicGameUnit: Codable, Equatable, Identifiable {
     public var team: String
     public var nodeID: Int
     public var current: Bool
+    public var templateID: String = ""
+    public var teamID: String? = nil
+    public var canActFromRound: Int = 1
+    public var acted: Bool = false
 }
 public struct PublicGameNode: Codable, Equatable, Identifiable {
     public var id: Int
@@ -22,6 +26,7 @@ public struct PublicGameNode: Codable, Equatable, Identifiable {
     public var x: Double
     public var y: Double
     public var revealed: Bool
+    public var claimed: Bool = false
 }
 public struct PublicGameSnapshot: Codable, Equatable {
     public var phase: GamePhase
@@ -34,6 +39,7 @@ public struct PublicGameSnapshot: Codable, Equatable {
     public var nodes: [PublicGameNode]
     public var roads: [MapRoad]
     public var dice: [DiceResult]
+    public var queueIDs: [String] = []
 }
 
 extension GameState {
@@ -47,11 +53,14 @@ extension GameState {
                            health: unit.health, maximumHealth: try GameRules.attributes(unit, catalog: catalog).maximumHealth,
                            shield: unit.shield, ap: unit.ap, coins: unit.coins, score: unit.score,
                            team: teams.first(where: { $0.id == unit.teamID })?.name ?? (unit.kind == .monster ? "敌方" : "未分队"),
-                           nodeID: unit.nodeID, current: battle?.current == unit.id)
+                           nodeID: unit.nodeID, current: battle?.current == unit.id,
+                           templateID: unit.templateID, teamID: unit.teamID,
+                           canActFromRound: unit.canActFromRound, acted: battle?.acted.contains(unit.id) == true)
         }
         let publicNodes = map.nodes.filter { known.contains($0.id) }.map { node in
             PublicGameNode(id: node.id, name: map.revealed.contains(node.id) ? node.name : "未探索地点\(node.id)",
-                           kind: map.revealed.contains(node.id) ? node.kind : nil, x: node.x, y: node.y, revealed: map.revealed.contains(node.id))
+                           kind: map.revealed.contains(node.id) ? node.kind : nil, x: node.x, y: node.y, revealed: map.revealed.contains(node.id),
+                           claimed: map.revealed.contains(node.id) && node.rewardCompleted)
         }
         let names = Dictionary(uniqueKeysWithValues: rows.map { ($0.id, $0.name) })
         return PublicGameSnapshot(phase: phase, round: battle?.round ?? 0,
@@ -59,6 +68,7 @@ extension GameState {
                                   queue: battle?.queue.map { names[$0] ?? "未揭示单位" } ?? [],
                                   remainingSeconds: remainingSeconds, paused: !pauseReasons.isEmpty,
                                   units: rows, nodes: publicNodes,
-                                  roads: map.roads.filter { map.revealed.contains($0.a) || map.revealed.contains($0.b) }, dice: dice)
+                                  roads: map.roads.filter { map.revealed.contains($0.a) || map.revealed.contains($0.b) }, dice: dice,
+                                  queueIDs: battle?.queue.filter { names[$0] != nil } ?? [])
     }
 }

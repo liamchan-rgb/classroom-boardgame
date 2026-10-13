@@ -34,6 +34,17 @@ final class TeacherHostController: UIViewController {
     private var registration: UISceneAccessoryRegistration?
     private var heldKeys: Set<String> = []
     override var canBecomeFirstResponder: Bool { true }
+    #if DEBUG
+    override func viewDidAppear(_ animated:Bool) {
+        super.viewDidAppear(animated)
+        if ProcessInfo.processInfo.arguments.contains("--visual-check"), let window = view.window {
+            Task { @MainActor in
+                do { try await NativeVisualValidation.run(in:window) }
+                catch { print("VISUAL_VALIDATION_FAILED: \(error)") }
+            }
+        }
+    }
+    #endif
     override func viewDidLoad() {
         super.viewDidLoad()
         let host = UIHostingController(rootView: TeacherConsole(session: .shared))

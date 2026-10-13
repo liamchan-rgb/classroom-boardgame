@@ -190,6 +190,24 @@ public final class PVEPlaySession {
         case .rescue: return units.filter { !$0.isAlive && $0.kind == .player && GameRules.allies(actor,$0,in:engine.state) }.map { .unit($0.id) }
         }
     }
+    /// Read-only target legality for visual markers. Does not alter selection or random state.
+    public func previewForTarget(_ value: ActionTarget) -> ActionPreview {
+        guard let actor else { return ActionPreview(allowed:false,message:"当前没有行动者") }
+        let command: GameCommand
+        switch action {
+        case .attack: guard case .unit(let id) = value else { return ActionPreview(allowed:false,message:"请选择单位") }; command = .attack(actor:actor.id,target:id)
+        case .skill(let id): command = .cast(actor:actor.id,skill:id,target:value)
+        case .item(let item): guard case .unit(let id) = value else { return ActionPreview(allowed:false,message:"请选择队友") }; command = .useItem(actor:actor.id,item:item,target:id)
+        case .rescue: guard case .unit(let id) = value else { return ActionPreview(allowed:false,message:"请选择倒地队友") }; command = .rescue(actor:actor.id,target:id)
+        case .move: return ActionPreview(allowed:false,message:"沿道路选择路径")
+        }
+        return engine.preview(command)
+    }
+    public var legalTargetNodes: Set<Int> {
+        Set(possibleTargets.filter { previewForTarget($0).allowed }.compactMap {
+            switch $0 { case .node(let id):return id; case .unit(let id):return engine.state.units[id]?.nodeID }
+        })
+    }
     @discardableResult public func perform() throws -> OperationReceipt {
         guard let command else { throw GameError("当前行动者已变化或尚未选择目标。") }
         let receipt = try engine.apply(command); synchronize(); return receipt

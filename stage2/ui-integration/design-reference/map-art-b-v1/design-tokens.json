@@ -1,0 +1,219 @@
+{
+  "formatVersion": 1,
+  "status": "approved-style-b-ui-baseline-plus-map-candidates",
+  "reference": {
+    "teacherWidthPt": 1366,
+    "teacherHeightPt": 1024,
+    "publicWidthUnits": 1920,
+    "publicHeightUnits": 1080,
+    "publicAspectFallback": "4:3"
+  },
+  "colors": {
+    "background": "#F5FAFC",
+    "surface": "#FFFFFF",
+    "ink": "#173F50",
+    "muted": "#4C6875",
+    "primary": "#176A86",
+    "onPrimary": "#FFFFFF",
+    "accent": "#995207",
+    "danger": "#B93838",
+    "shield": "#315E9C",
+    "action": "#6650A4",
+    "onAccent": "#FFFFFF",
+    "onDanger": "#FFFFFF",
+    "teamBlue": "#315E9C",
+    "teamOrange": "#995207",
+    "teamViolet": "#6650A4",
+    "border": "#CCDDE6",
+    "disabledSurface": "#EAF0F3"
+  },
+  "spacingPt": [
+    8,
+    12,
+    16,
+    24,
+    32
+  ],
+  "cornerRadiusPt": {
+    "panel": 16,
+    "button": 12,
+    "badge": 8
+  },
+  "teacherTypographyPt": {
+    "title": 28,
+    "section": 22,
+    "body": 18,
+    "secondary": 15,
+    "resource": 20,
+    "name": 17
+  },
+  "publicTypographyUnits": {
+    "title": 44,
+    "body": 30,
+    "name": 28,
+    "resource": 26,
+    "secondary": 24,
+    "focus": 44,
+    "queue": 24
+  },
+  "font": {
+    "family": "system",
+    "chinese": "system fallback",
+    "numeric": "monospaced digits",
+    "offline": true,
+    "preview": "Noto Sans CJK SC installed in design environment; not a runtime requirement"
+  },
+  "touch": {
+    "minimumWidthPt": 44,
+    "minimumHeightPt": 44,
+    "primaryHeightPt": 56
+  },
+  "publicContentInsetFraction": 0.05,
+  "motionMs": {
+    "press": 150,
+    "panel": 220,
+    "resourceChange": 350,
+    "diceMaximum": 900
+  },
+  "accessibility": {
+    "normalTextContrastMinimum": 4.5,
+    "largeTextContrastMinimum": 3.0,
+    "stateRequiresNonColorMarker": true,
+    "reducedMotion": true
+  },
+  "deliveryVersion": "2026-10-13-b-map-v1",
+  "materials": {
+    "largePanels": {
+      "native": "SwiftUI Material.regular",
+      "preferredAppearance": "light",
+      "clipRadiusPt": 16,
+      "backdrop": "低对比度非语义装饰，避免高饱和穿透文字",
+      "textProtection": "数值区域以浅色底衬控制对比度",
+      "preview": "SVG白色83–96%渐变是静态毛玻璃近似；真实模糊、振动和系统降低透明度由原生环境验证"
+    },
+    "smallControls": {
+      "primary": "solid primary + white label",
+      "secondary": "iPadOS27 system liquid glass when supported, otherwise solid surface",
+      "reward": "solid warm tint; accent border and explicit checkmark",
+      "reduceTransparency": "solid surface"
+    }
+  },
+  "styleVariants": {
+    "a": {
+      "label": "晨光森林",
+      "background": "#F5F1E8",
+      "land": "#D4DFCA",
+      "tint": "#E4EDD9"
+    },
+    "b": {
+      "label": "晴空学园",
+      "background": "#F5FAFC",
+      "land": "#C9E0EB",
+      "tint": "#E4F1F6"
+    }
+  },
+  "layoutReferences": {
+    "teacher": {
+      "width": 1366,
+      "height": 1024,
+      "margin": 24,
+      "columnGap": 16,
+      "leftWidth": 268,
+      "centerWidth": 666,
+      "rightWidth": 352
+    },
+    "public16x9": {
+      "width": 1920,
+      "height": 1080,
+      "safeInsets": [
+        54,
+        96,
+        54,
+        96
+      ],
+      "mapWidth": 760,
+      "battleWidth": 944,
+      "mapY": 138,
+      "mapHeight": 622,
+      "playerStripY": 784,
+      "playerStripHeight": 80,
+      "legendHeight": 0,
+      "playerColumns": 7,
+      "queueStyle": "mixed-unit-portrait-track",
+      "queueAttachedToPlayers": true,
+      "headerHeight": 60,
+      "currentPlayerDetailY": 882,
+      "currentPlayerDetailHeight": 144,
+      "showSevenNameCards": false,
+      "showCurrentNameInHeader": true,
+      "showPlayerDetailsOnlyDuringPlayerTurn": true
+    },
+    "public4x3": {
+      "width": 1440,
+      "height": 1080,
+      "safeInsets": [
+        54,
+        72,
+        54,
+        72
+      ],
+      "mapWidth": 596,
+      "battleWidth": 676,
+      "mapY": 138,
+      "mapHeight": 622,
+      "playerStripY": 784,
+      "playerStripHeight": 80,
+      "legendHeight": 0,
+      "playerColumns": 7,
+      "longNameColumnWidths": [
+        222,
+        222
+      ],
+      "queueStyle": "mixed-unit-portrait-track",
+      "queueAttachedToPlayers": true,
+      "headerHeight": 60,
+      "currentPlayerDetailY": 882,
+      "currentPlayerDetailHeight": 144,
+      "showSevenNameCards": false,
+      "showCurrentNameInHeader": true,
+      "showPlayerDetailsOnlyDuringPlayerTurn": true
+    }
+  },
+  "teamMarkers": {
+    "blue": "circle",
+    "orange": "diamond",
+    "violet": "triangle",
+    "notes": "颜色加矢量形状，去掉常驻队伍/资源图例；绑定实际队伍ID，非颜色区分；详情仍保留真实队名"
+  },
+  "selectedStyle": "b",
+  "storybookLayout": {
+    "playerStripY": 840,
+    "playerStripHeight": 186,
+    "legendHeight": 0,
+    "playerColumns": 7,
+    "pageFit": "aspectFit",
+    "timerVisibleOnlyWhenEnabled": true,
+    "timerDoesNotChangePauseState": true,
+    "pageTopWithoutTimer": 54,
+    "pageTopWithTimer": 94
+  },
+  "publicFeedback": {
+    "fadeInMs": 150,
+    "holdMs": 900,
+    "fadeOutMs": 250,
+    "durationMs": 1300,
+    "playsPerCommittedEvent": 1,
+    "replayOnRerender": false,
+    "persistentResultSummary": false,
+    "storybookNeverIncludesAP": true,
+    "teacherFullHistory": true
+  },
+  "mapAssetContract": {
+    "nodeCanvasPx": 512,
+    "minimumSafeInsetPx": 51,
+    "unknownUsesSingleAsset": true,
+    "runtimeTextBaked": false,
+    "roadRendering": "actual-node-anchors",
+    "sourceLayoutUnchanged": true
+  }
+}
