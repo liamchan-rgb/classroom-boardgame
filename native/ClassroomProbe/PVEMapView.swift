@@ -40,7 +40,7 @@ struct PVEMapView:View {
                         if interactive {
                             Button { onNode?(node.id) } label: { nodeContent(node,here:here,current:current,artSize:artSize,labelSize:labelSize) }.buttonStyle(.plain)
                         } else { nodeContent(node,here:here,current:current,artSize:artSize,labelSize:labelSize) }
-                    }.frame(width:publicDisplay ? 144 : 126,minHeight:44)
+                    }.frame(width:publicDisplay ? 144 : 126).frame(minHeight:44)
                         .position(point(node,size:geometry.size,marginX:marginX,marginY:marginY))
                 }
             }

@@ -98,7 +98,7 @@ struct PVEPlayView:View {
                             ArtImage(type:"classes",id:player.templateID).frame(width:28,height:28)
                                 .overlay(alignment:.topTrailing) {
                                     if current { Image(systemName:"arrowtriangle.right.fill").foregroundStyle(GameTheme.primary).accessibilityLabel("行动中") }
-                                    if player.health == 0 { Image(systemName:"xmark.circle.fill").foregroundStyle(GameTheme.danger).accessibilityLabel("倒地") }
+                                    if player.health == 0 { ArtImage(type:"uiResource",id:"downed").frame(width:18,height:18).accessibilityLabel("倒地") }
                                     else if let battle = play.engine.state.battle, player.canActFromRound > battle.round { Image(systemName:"clock.fill").accessibilityLabel("下轮可行动") }
                                 }
                             Button { model.toggleReward(player.id) } label: {

@@ -1,0 +1,742 @@
+{
+  "designCommit": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+  "checkedAssets": 66,
+  "allBytesAndPNGHeadersPassed": true,
+  "unchangedRulesAndSaveFormat": [
+    "native/Packages/GameCore/Sources/ClassroomGameCore/Resources/initial-content.json",
+    "native/Packages/GameCore/Sources/ClassroomGameCore/GameState.swift",
+    "native/Packages/GameCore/Sources/ClassroomGameCore/GameEngine.swift",
+    "native/Packages/GameCore/Sources/ClassroomGameCore/Rules.swift",
+    "native/Packages/GameCore/Sources/ClassroomGameCore/Catalog.swift",
+    "docs/课堂桌游_需求设计_v1.md",
+    "docs/课堂桌游_开发步骤_v1.md"
+  ],
+  "assets": [
+    {
+      "type": "classes",
+      "id": "adventurer",
+      "file": "class_adventurer_portrait.png",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "bytes": 327672,
+      "sha256": "0a1509c010698f329b7568eb85766a69497d738e13adbdd2c007f1515bc34c21"
+    },
+    {
+      "type": "classes",
+      "id": "ranger",
+      "file": "class_ranger_portrait.png",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "bytes": 446278,
+      "sha256": "d7ad17351283aff1c2d55ef1b470309f65245442355946aa7ad917c8d796cd50"
+    },
+    {
+      "type": "classes",
+      "id": "spellblade",
+      "file": "class_spellblade_portrait.png",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "bytes": 443237,
+      "sha256": "639b1ac1c3f8d97246fc0e90008ccabd50d59ea4e2910b240c3869886bdca5dd"
+    },
+    {
+      "type": "classes",
+      "id": "dragonKnight",
+      "file": "class_dragon_knight_portrait.png",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "bytes": 666761,
+      "sha256": "aae2dcd5771df7c0be37ee237e451ccc3418d9fa2974a7aae9c394c58b96dc0d"
+    },
+    {
+      "type": "monsters",
+      "id": "slime",
+      "file": "monster_slime_portrait.png",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "bytes": 349437,
+      "sha256": "f43af2575443831de7241708e34b08af66c93c7fbfb790d09719917154e0e356"
+    },
+    {
+      "type": "monsters",
+      "id": "wolf",
+      "file": "monster_wolf_portrait.png",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "bytes": 436955,
+      "sha256": "4426192208ba8ad205c07ad40e718f941d9ee48d1db8a3b743d2f9523e39cc65"
+    },
+    {
+      "type": "monsters",
+      "id": "goblinArcher",
+      "file": "monster_goblin_archer_portrait.png",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "bytes": 423008,
+      "sha256": "8f881cf8dde8e6889c487ec2504a6fd213768062c7e51967882a5b0d1912dca0"
+    },
+    {
+      "type": "monsters",
+      "id": "stoneGuardian",
+      "file": "monster_stone_guardian_portrait.png",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "bytes": 703191,
+      "sha256": "e52fd126cdae4a6c8bf4758550f8096f284ce2cb345d45e4730fa9ce67e3869b"
+    },
+    {
+      "type": "monsters",
+      "id": "caveTroll",
+      "file": "monster_cave_troll_portrait.png",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "bytes": 613813,
+      "sha256": "debe3c3f7dd9dd102ff9a056c45440464aadbb1b6117842da0b346792c897cdc"
+    },
+    {
+      "type": "monsters",
+      "id": "ruinDragon",
+      "file": "monster_ruin_dragon_portrait.png",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "bytes": 645611,
+      "sha256": "7ce49c5d081d977810a28c970f73a1b73cf15c17ec99a360853c435b6e1e2fb2"
+    },
+    {
+      "type": "items",
+      "id": "trainingSword",
+      "file": "item_training_sword.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 98462,
+      "sha256": "0a9adb9c988f637e8cfe0ccf398ba569b007703d4c904f6bfe1aad0b1c01d75a"
+    },
+    {
+      "type": "items",
+      "id": "huntingBow",
+      "file": "item_hunting_bow.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 65150,
+      "sha256": "3fee4deeb573172ebac211a2d2bf01425e36baae1bf11e6099deeb5152b832f5"
+    },
+    {
+      "type": "items",
+      "id": "greatSword",
+      "file": "item_great_sword.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 102290,
+      "sha256": "4346576b8de25b1ef4ef7ec78fcafb063ad52f28b3a0c2bca8611d72961bafcd"
+    },
+    {
+      "type": "items",
+      "id": "legendaryStaff",
+      "file": "item_legendary_staff.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 87801,
+      "sha256": "58c5ec4a1f53d6667bffbb46536d000a36020ae85331ab30c3c2a8329ef8d7e1"
+    },
+    {
+      "type": "items",
+      "id": "leatherArmor",
+      "file": "item_leather_armor.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 222409,
+      "sha256": "4f70408011bd6151b490ec1f577162d6ec17c78fa93cac7f8bee705c8d57d837"
+    },
+    {
+      "type": "items",
+      "id": "runeArmor",
+      "file": "item_rune_armor.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 265966,
+      "sha256": "0f5004f8b2b835c07afc3f4c57a1aaf8e7e2a38dcaf8224f9aadc2cc2de4cec4"
+    },
+    {
+      "type": "items",
+      "id": "powerBadge",
+      "file": "item_power_badge.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 174156,
+      "sha256": "f34fffcdee2946e9d8810e6267c83748eece205f733027fbdd2a0d40fd29fed2"
+    },
+    {
+      "type": "items",
+      "id": "actionRing",
+      "file": "item_action_ring.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 217324,
+      "sha256": "092378d8b93850065d65812f225ec15fd347e3aaf1790d5912223eb464df70da"
+    },
+    {
+      "type": "items",
+      "id": "smallPotion",
+      "file": "item_small_potion.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 128451,
+      "sha256": "cbca94a567e6175d1dfee79b20f66029c48458287fbe5b50b2907ba822d5934e"
+    },
+    {
+      "type": "items",
+      "id": "largePotion",
+      "file": "item_large_potion.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 168000,
+      "sha256": "9641bb5def250456414108822f279cc9e90a7775e27e756947f8b103cc2e8c72"
+    },
+    {
+      "type": "items",
+      "id": "shieldPotion",
+      "file": "item_shield_potion.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 145186,
+      "sha256": "c57f86636af263cf8d22931d0e13630ca959dde5806865c6296df3f3f035ca22"
+    },
+    {
+      "type": "items",
+      "id": "revivalStone",
+      "file": "item_revival_stone.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 113877,
+      "sha256": "1d3d594fb9fdb46781eaa6434b3d409cd3195b4ffa0fd03ed3cb22eef29c5803"
+    },
+    {
+      "type": "items",
+      "id": "starlightBlade",
+      "file": "item_starlight_blade.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 102499,
+      "sha256": "18bc18bf6774b211b239d2a09c16cdd30634073fe2cb9b0102e4a22da3b30b97"
+    },
+    {
+      "type": "items",
+      "id": "starlightArmor",
+      "file": "item_starlight_armor.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 281407,
+      "sha256": "3b4f924992683ea05d4157e15ea9e453b2e2e65481b40248b00d03233ec18296"
+    },
+    {
+      "type": "items",
+      "id": "starlightCharm",
+      "file": "item_starlight_charm.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 120079,
+      "sha256": "d8571049fa8d39aaabbccb6046c9f6038f6ef5c66cede038ad06ae168b9ed5ca"
+    },
+    {
+      "type": "items",
+      "id": "dragonFangSword",
+      "file": "item_dragon_fang_sword.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 131638,
+      "sha256": "8f90a4816e2cf0c89bfc7bb93c5b51cc09b4a44e3fcfe1ae7040a615c3f230ac"
+    },
+    {
+      "type": "items",
+      "id": "dragonArmor",
+      "file": "item_dragon_armor.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 270058,
+      "sha256": "6873c458dcc6e9cc4764f6177b8e2c696ec8886fd1b93faa2adfdea53b35fbc9"
+    },
+    {
+      "type": "items",
+      "id": "dragonCharm",
+      "file": "item_dragon_charm.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 146869,
+      "sha256": "c7f2d5c529b7295b0419d48e879b5ba1fb88030edc244b633315daab0a94d677"
+    },
+    {
+      "type": "uiResource",
+      "id": "health",
+      "file": "icon_health.png",
+      "dimensions": [
+        256,
+        256
+      ],
+      "bytes": 4910,
+      "sha256": "5c8a7e342f21c040811a2275cb495e40915bbd8fc4a58c30eb6b4c84f70c65a2"
+    },
+    {
+      "type": "uiResource",
+      "id": "shield",
+      "file": "icon_shield.png",
+      "dimensions": [
+        256,
+        256
+      ],
+      "bytes": 3867,
+      "sha256": "0b1155ba83bfa485d40b35fff30d0c231013ee4938cdc5396a1a4b50f5434c1c"
+    },
+    {
+      "type": "uiResource",
+      "id": "action",
+      "file": "icon_action.png",
+      "dimensions": [
+        256,
+        256
+      ],
+      "bytes": 4207,
+      "sha256": "0241713c81477af51f58688b4cb7b6c4adef337797a9cf0a35519b9276568893"
+    },
+    {
+      "type": "uiResource",
+      "id": "coin",
+      "file": "icon_coin.png",
+      "dimensions": [
+        256,
+        256
+      ],
+      "bytes": 10201,
+      "sha256": "3f80ff65d715874b65d87b65a965581537c513ff5412bf1b8b1120b0aba4461c"
+    },
+    {
+      "type": "uiResource",
+      "id": "score",
+      "file": "icon_score.png",
+      "dimensions": [
+        256,
+        256
+      ],
+      "bytes": 4970,
+      "sha256": "b39bd62794927697f12f5c9385aedb2df97dafee375e3a4de44d931d351c216c"
+    },
+    {
+      "type": "uiResource",
+      "id": "downed",
+      "file": "icon_downed.png",
+      "dimensions": [
+        256,
+        256
+      ],
+      "bytes": 6398,
+      "sha256": "b6b0b469217f318a078550a51d8d1082dde160022cc8e9573ee688be90418029"
+    },
+    {
+      "type": "nodeVisual",
+      "id": "start",
+      "file": "node_start.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 133306,
+      "sha256": "0af7a86ace9e8ca766ff4883dde05a121fff8afbe4c26f62dc1f1f58484ba87c"
+    },
+    {
+      "type": "nodeVisual",
+      "id": "combat",
+      "file": "node_combat.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 160245,
+      "sha256": "c677d7e9daa6dfb5b29fa7213ccfb20123a73a0d51ea532507efc45078639978"
+    },
+    {
+      "type": "nodeVisual",
+      "id": "boss",
+      "file": "node_boss.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 170810,
+      "sha256": "8e079f05a6930e9c01ddccccbcf10cb732393250af2088914a18e1da51c0d20b"
+    },
+    {
+      "type": "nodeVisual",
+      "id": "reward",
+      "file": "node_reward.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 128849,
+      "sha256": "e56e9e1a5e6be8f7638c904cf1b5d698ba7a4402ad0dceac279e17abae2a966c"
+    },
+    {
+      "type": "nodeVisual",
+      "id": "empty",
+      "file": "node_empty.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 132635,
+      "sha256": "22af9a9cbc1428530526fcdd72e6228a45acd583bcea60618afd66eba9d336b8"
+    },
+    {
+      "type": "nodeVisual",
+      "id": "unknown",
+      "file": "node_unknown.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 19055,
+      "sha256": "fe3dbb985b4777a77314d4ef025d958934c0aeb7e29b85417a868658c326dbf3"
+    },
+    {
+      "type": "visualLayer",
+      "id": "map_decoration_1440",
+      "file": "map_decoration_1440.png",
+      "dimensions": [
+        1440,
+        1080
+      ],
+      "bytes": 7407,
+      "sha256": "69b9d8382740c6aca902eeb11c4439ec3af44103938c2b821699587a563249d6"
+    },
+    {
+      "type": "visualLayer",
+      "id": "map_decoration_1920",
+      "file": "map_decoration_1920.png",
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "bytes": 9419,
+      "sha256": "378f3d270abc7f51ff42b7fb59fffa75120fba7d27e6079a12e754c79e86a6ea"
+    },
+    {
+      "type": "visualLayer",
+      "id": "map_ground_1440",
+      "file": "map_ground_1440.png",
+      "dimensions": [
+        1440,
+        1080
+      ],
+      "bytes": 22249,
+      "sha256": "0b0d6fea54876ed97d5a5193ae6e2b73aae9651ed787bbcc16c6e924f197614d"
+    },
+    {
+      "type": "visualLayer",
+      "id": "map_ground_1920",
+      "file": "map_ground_1920.png",
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "bytes": 25720,
+      "sha256": "40c98ded4958700d757a5037798632a4b164936327858aebfc42fbe877de4368"
+    },
+    {
+      "type": "visualLayer",
+      "id": "fog_unknown",
+      "file": "fog_unknown.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 7122,
+      "sha256": "aa6f7a24a34d1fe74bdb3f0ba21c25df3a1c575a370195bc0e100d1380d0d7ed"
+    },
+    {
+      "type": "visualLayer",
+      "id": "node_state_claimed",
+      "file": "node_state_claimed.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 8772,
+      "sha256": "bda970adc3207da209d0b0d2cea88f8e57dc7cdd76f31932ecd0cd5263cc06d0"
+    },
+    {
+      "type": "visualLayer",
+      "id": "node_state_crowded",
+      "file": "node_state_crowded.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 7561,
+      "sha256": "51d17ca366edfb02309c84ca9f69c47b5d78f4b084bbcd0a3a58311b412c486d"
+    },
+    {
+      "type": "visualLayer",
+      "id": "node_state_current",
+      "file": "node_state_current.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 17749,
+      "sha256": "5ab61429c1531070d82dfcc40c932d6ff94563ef7b44d05bf988298e10bd4fd7"
+    },
+    {
+      "type": "visualLayer",
+      "id": "node_state_enemy",
+      "file": "node_state_enemy.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 18408,
+      "sha256": "b1daaf30c813c3fc65645a8f90e3a3cfd5067e371203c10af30da80511cd8504"
+    },
+    {
+      "type": "visualLayer",
+      "id": "node_state_path",
+      "file": "node_state_path.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 16665,
+      "sha256": "c46329c07cba7d9cb139551252e1244b8fd71f895ab0183fe0f330287e315d61"
+    },
+    {
+      "type": "visualLayer",
+      "id": "node_state_target",
+      "file": "node_state_target.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 1817,
+      "sha256": "3a9ba4ca5eaa561841aa5b39d57fcb6ac91097a7033c072d5284b9b16df0c81d"
+    },
+    {
+      "type": "visualLayer",
+      "id": "road_normal",
+      "file": "road_normal.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 1727,
+      "sha256": "6c0542e7fe00ff152b0c698204f2e8b0391bf8919b794b1d93104ddd2bddb238"
+    },
+    {
+      "type": "visualLayer",
+      "id": "road_plan_unavailable",
+      "file": "road_plan_unavailable.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 1812,
+      "sha256": "fc1d9ea9eb682793107a9311bc958e54d6b1e02a514431351c29dcb2db04da73"
+    },
+    {
+      "type": "visualLayer",
+      "id": "road_planned",
+      "file": "road_planned.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 1730,
+      "sha256": "2a090e0a891fa5871c3677390ab78623657718c9dd68fcffff5add0d9006d693"
+    },
+    {
+      "type": "effect",
+      "id": "impact",
+      "file": "fx_impact_sheet.png",
+      "dimensions": [
+        2048,
+        256
+      ],
+      "bytes": 39990,
+      "sha256": "96a7dc42310b79d263c62c765fa3417363266006d321c4423f30b13672a56fe1"
+    },
+    {
+      "type": "effect",
+      "id": "shield",
+      "file": "fx_shield_sheet.png",
+      "dimensions": [
+        2048,
+        256
+      ],
+      "bytes": 30914,
+      "sha256": "da99194a1628ed0a8c20a6efd10fbcd5ce8c4ebb1ecfd21e4ad559eebce09361"
+    },
+    {
+      "type": "effect",
+      "id": "heal",
+      "file": "fx_heal_sheet.png",
+      "dimensions": [
+        2048,
+        256
+      ],
+      "bytes": 18457,
+      "sha256": "1fe1d737342ac61a941b39e44b4ab8d05fb93cc800cea0168e6c276d9af7ddae"
+    },
+    {
+      "type": "effect",
+      "id": "revive",
+      "file": "fx_revive_sheet.png",
+      "dimensions": [
+        2048,
+        256
+      ],
+      "bytes": 49351,
+      "sha256": "c9188b62ec63616d6e36bea83eb68bfb347e4dac7e5f8536e809dae3657a0a18"
+    },
+    {
+      "type": "effect",
+      "id": "coin",
+      "file": "fx_coin_sheet.png",
+      "dimensions": [
+        2048,
+        256
+      ],
+      "bytes": 33726,
+      "sha256": "a4662c1c2ccb69d9325be0284b76a002a98111382162e331e02abb752de6ebfe"
+    },
+    {
+      "type": "effect",
+      "id": "score",
+      "file": "fx_score_sheet.png",
+      "dimensions": [
+        2048,
+        256
+      ],
+      "bytes": 28864,
+      "sha256": "abe3985f5aa6af1ab5db8fc6e6def24615d3b364960e3428e6c45b6d2686e758"
+    },
+    {
+      "type": "effect",
+      "id": "natural20",
+      "file": "fx_natural20_sheet.png",
+      "dimensions": [
+        2048,
+        256
+      ],
+      "bytes": 43233,
+      "sha256": "ca48dc15175c7a68d177b4e9c9f3e33e862cfb8e0b249a37600857c8248c42ad"
+    },
+    {
+      "type": "effect",
+      "id": "dice6",
+      "file": "fx_dice6_sheet.png",
+      "dimensions": [
+        2048,
+        256
+      ],
+      "bytes": 59312,
+      "sha256": "1ba77eb9cced1312f8d995893d85c4791ded1913aba5671f67b89370348ce1d2"
+    },
+    {
+      "type": "effect",
+      "id": "dice20",
+      "file": "fx_dice20_sheet.png",
+      "dimensions": [
+        2048,
+        256
+      ],
+      "bytes": 100575,
+      "sha256": "e985e0512f67a71bbf637c4fb8b5e25e07531a5cda8b6b444330e915aed684fe"
+    },
+    {
+      "type": "effect",
+      "id": "rune",
+      "file": "fx_rune_sheet.png",
+      "dimensions": [
+        2048,
+        256
+      ],
+      "bytes": 45898,
+      "sha256": "5f816edfa9b781d9fc991e0dd1e8caab1d49eb16cf79c27b3432cf654298a61c"
+    },
+    {
+      "type": "effect",
+      "id": "flame",
+      "file": "fx_flame_sheet.png",
+      "dimensions": [
+        2048,
+        256
+      ],
+      "bytes": 27464,
+      "sha256": "e8388421db359dc66de3134032580a595c6ad7f67609a07440adad570c86a37c"
+    },
+    {
+      "type": "effect",
+      "id": "projectile",
+      "file": "fx_projectile_sheet.png",
+      "dimensions": [
+        2048,
+        256
+      ],
+      "bytes": 8428,
+      "sha256": "5ba7a7beb87146de6f0af55d77b766300fffb4e19baa87b8ee5f1df86ef7f65f"
+    }
+  ]
+}

@@ -63,11 +63,12 @@ struct PVEPublicView:View {
     private var queue:some View {
         let byID = Dictionary(uniqueKeysWithValues:frame.snapshot.units.map { ($0.id,$0) })
         let ids = frame.snapshot.queueIDs.isEmpty ? frame.snapshot.units.map(\.id) : frame.snapshot.queueIDs
-        return HStack(spacing:12) {
+        return TimelineView(.animation(minimumInterval:1.0/30,paused:frame.presentations.isEmpty)) { context in
+        HStack(spacing:12) {
             ForEach(ids,id:\.self) { id in
                 if let unit = byID[id] {
                     ZStack(alignment:.top) {
-                        UnitPortrait(unit:unit).frame(width:64,height:64)
+                        UnitPortrait(unit:unit,event:frame.presentations.first { $0.isVisible(at:context.date) },animate:!frame.presentations.isEmpty).frame(width:64,height:64)
                             .background(.white,in:Circle()).overlay(Circle().stroke(unit.current ? GameTheme.primary : GameTheme.primary.opacity(0.3),lineWidth:unit.current ? 4 : 1))
                         if unit.current { Image(systemName:"arrowtriangle.down.fill").offset(y:-8) }
                         if unit.health == 0 { Image(systemName:"xmark").font(.system(size:28,weight:.heavy)).foregroundStyle(GameTheme.danger) }
@@ -81,6 +82,7 @@ struct PVEPublicView:View {
                 }
             }
         }.padding(8).background(.regularMaterial,in:RoundedRectangle(cornerRadius:16))
+        }
     }
     private func identity(_ unit:PublicGameUnit) -> String {
         let peers = frame.snapshot.units.filter { $0.player == unit.player }.sorted { $0.id < $1.id }

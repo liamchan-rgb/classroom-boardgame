@@ -75,6 +75,9 @@ public struct PresentationLedger {
         consumed.formUnion(history.map { $0.after.gameID + ":" + $0.id })
         pending = []
     }
+    @discardableResult public mutating func removeExpired(at date:Date) -> Bool {
+        let count = pending.count; pending.removeAll { $0.end <= date }; return count != pending.count
+    }
     public mutating func clearVisible() { pending = [] }
     @discardableResult
     public mutating func submit(_ receipt: OperationReceipt, catalog: GameCatalog, now: Date) throws -> CommittedPresentation? {

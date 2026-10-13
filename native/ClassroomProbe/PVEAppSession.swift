@@ -54,10 +54,9 @@ final class PVEAppSession: ObservableObject {
     func activate() { presentation.clearVisible(); active = true; lastTick = ProcessInfo.processInfo.systemUptime; publish(); scheduleAI() }
     func deactivate() { pause(.manual,enabled:true); active = false; cancelAI(); display.playFrame = nil; display.playBook = false }
     func pause(_ reason: GamePause, enabled: Bool) {
-        if enabled { presentation.clearVisible() }
         guard let play else { return }
         if enabled { cancelAI() }
-        do { try captureElapsed(); try play.engine.setPause(reason,enabled:enabled) }
+        do { try captureElapsed(); if enabled { presentation.clearVisible() }; try play.engine.setPause(reason,enabled:enabled) }
         catch {
             if enabled { try? play.engine.setPause(reason,enabled:true) }
             message = "计时状态保存失败：\(error.localizedDescription)"
@@ -192,7 +191,8 @@ final class PVEAppSession: ObservableObject {
             cancelAI(); try? play.engine.setPause(.manual,enabled:true)
             message = "自动结算保存失败，已暂停：\(error.localizedDescription)"
         }
-        if play.engine.state != previous { publish(); scheduleAI() }
+        let expired = presentation.removeExpired(at:Date())
+        if play.engine.state != previous || expired { publish(); scheduleAI() }
     }
     private func cancelAI() { aiTask?.cancel(); aiTask = nil; aiRunning = false }
     private func scheduleAI() {
