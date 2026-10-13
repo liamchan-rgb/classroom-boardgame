@@ -1,0 +1,14 @@
+{
+  "verifiedAtUTC": "2026-10-13T09:56:16.598637+00:00",
+  "method": "independent verification checkout fetched published branch and tag",
+  "snapshotCommit": "511c9b1ca2561064ac27648120063f0bb9861f5d",
+  "remoteBranchCommit": "b9e67c09ac1fc90a2d3288a66488a4878a137e10",
+  "tag": "archive-design-player-battle-focus-v6-20261013-verified",
+  "zipSHA256": "5301a566fba9f4eecd40af9c4cd1d37522fea0ca0519884188b0c7506cdf017d",
+  "zipCRC": "pass",
+  "payloadFiles": 31,
+  "remoteAndLocalAndZIPMatch": true,
+  "tagPayloadMatch": true,
+  "nativeVerified": false,
+  "artApproved": false
+}
