@@ -72,7 +72,9 @@ struct UnitPortrait:View {
     let unit:PublicGameUnit
     var event:CommittedPresentation? = nil
     var animate = false
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    @Environment(\.presentationReduceMotion) private var forcedReduceMotion
+    private var reduceMotion:Bool { systemReduceMotion || forcedReduceMotion }
     var body:some View {
         TimelineView(.animation(minimumInterval:1.0/30,paused:!animate || reduceMotion)) { context in
             GeometryReader { geometry in
@@ -119,7 +121,9 @@ private struct FXImage:View {
 }
 struct CommittedFeedback:View {
     let events:[CommittedPresentation]
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    @Environment(\.presentationReduceMotion) private var forcedReduceMotion
+    private var reduceMotion:Bool { systemReduceMotion || forcedReduceMotion }
     var body:some View {
         TimelineView(.animation(minimumInterval:1.0/30,paused:events.isEmpty)) { context in
             if let event = events.first(where: { $0.isVisible(at:context.date) }) {
@@ -159,5 +163,14 @@ struct InlineFlow:Layout {
     func placeSubviews(in bounds:CGRect,proposal:ProposedViewSize,subviews:Subviews,cache:inout ()) {
         let points = positions(subviews,width:bounds.width).1
         for index in subviews.indices { subviews[index].place(at:CGPoint(x:bounds.minX+points[index].x,y:bounds.minY+points[index].y),anchor:.topLeading,proposal:.unspecified) }
+    }
+}
+
+private struct PresentationReduceMotionKey:EnvironmentKey { static let defaultValue = false }
+extension EnvironmentValues {
+    /// Writable fixture override; production always also honors the system setting.
+    var presentationReduceMotion:Bool {
+        get { self[PresentationReduceMotionKey.self] }
+        set { self[PresentationReduceMotionKey.self] = newValue }
     }
 }

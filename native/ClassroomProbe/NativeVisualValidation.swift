@@ -51,7 +51,7 @@ enum NativeVisualValidation {
             for i in monster.snapshot.units.indices { monster.snapshot.units[i].current = monster.snapshot.units[i].id == "m1" }
             try await capture("public-monster-"+ratio,PVEPublicView(frame:monster,image:nil,showingBook:false),size)
         }
-        try await capture("public-reduced-motion-4x3",PVEPublicView(frame:try play.publicFrame(),image:nil,showingBook:false).environment(\.accessibilityReduceMotion,true),CGSize(width:1440,height:1080))
+        try await capture("public-reduced-motion-4x3",PVEPublicView(frame:try play.publicFrame(),image:nil,showingBook:false).environment(\.presentationReduceMotion,true),CGSize(width:1440,height:1080))
         var ledger = PresentationLedger()
         let reward = try play.reward(ResourceReward(coins:10,score:2))
         try ledger.submit(reward,catalog:catalog,now:Date().addingTimeInterval(-0.2))
