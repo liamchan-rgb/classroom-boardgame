@@ -1,0 +1,13 @@
+{
+  "verifiedAtUTC": "2026-10-13T12:29:54.789506+00:00",
+  "method": "independent verification checkout fetched published branch and tag",
+  "snapshotCommit": "3c264de88afac2b19f65774bf16b662a9dee2740",
+  "remoteBranchCommit": "3738d267260dd5d8439cfc2a35e18dc920ace2a4",
+  "tag": "archive-design-player-battle-cursor-link-v1-20261013",
+  "zipSHA256": "3bad163a499e1d033ce5c6c120c6aca3bea631434fa9638b8e645a6254954ab0",
+  "zipCRC": "pass",
+  "payloadFiles": 3,
+  "remoteAndLocalAndZIPMatch": true,
+  "tagPayloadMatch": true,
+  "appImplemented": false
+}
