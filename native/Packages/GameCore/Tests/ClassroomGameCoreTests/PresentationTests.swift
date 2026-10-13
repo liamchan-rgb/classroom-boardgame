@@ -95,4 +95,27 @@ final class PresentationTests: XCTestCase {
             XCTAssertEqual(play.engine.state.remainingSeconds,17)
         }
     }
+    func testRescueProjectionKeepsNextRoundAndOneResultGroup() throws {
+        let (catalog, initial) = try fixture()
+        var state = initial
+        state.units["p2"]?.health = 0; state.units["p2"]?.baseAttributes.maximumHealth = 13
+        state.units["p1"]?.ap = 5; state.units["p1"]?.inventory = ["revivalStone":1]
+        let play = PVEPlaySession(engine:try GameEngine(catalog:catalog,state:state))
+        play.choose(.rescue); play.selectTarget(.unit("p2"))
+        let receipt = try play.perform()
+        let frame = try play.publicFrame()
+        let rescued = try XCTUnwrap(frame.snapshot.units.first { $0.id == "p2" })
+        XCTAssertEqual(rescued.health,7); XCTAssertEqual(rescued.canActFromRound,2)
+        XCTAssertEqual(frame.snapshot.queueIDs,state.battle?.queue)
+        var ledger = PresentationLedger()
+        let event = try XCTUnwrap(ledger.submit(receipt,catalog:catalog,now:Date()))
+        XCTAssertEqual(event.units.first { $0.id == "p2" }?.motion,"revive")
+        XCTAssertEqual(event.units.first { $0.id == "p2" }?.effects,["revive"])
+        XCTAssertTrue(event.text.contains("生命+7")); XCTAssertTrue(event.text.contains("积分+2"))
+        let archive = play.engine.archive
+        ledger.suppressHistory(play.engine.history)
+        XCTAssertNil(try ledger.submit(receipt,catalog:catalog,now:Date()))
+        XCTAssertEqual(play.engine.archive,archive)
+    }
+
 }

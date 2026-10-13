@@ -37,7 +37,7 @@ struct PVEPublicView:View {
                 if let details = frame.currentDetails,
                    let player = frame.snapshot.units.first(where: { $0.id == details.unitID }), player.player,
                    frame.snapshot.round == 0 || player.current {
-                    turnDetails(details,player:player).frame(height:details.skills.count > 3 ? 250 : 224)
+                    turnDetails(details,player:player).frame(height:(details.skills.count > 3 ? 250.0 : 224.0)+Double(max(0,(details.items.count+4)/5-1))*38)
                 }
             }
         }.padding(.horizontal,width*0.05).padding(.vertical,54)
@@ -111,7 +111,7 @@ struct PVEPublicView:View {
         return LazyVGrid(columns:Array(repeating:GridItem(.flexible(),spacing:6),count:columns),spacing:4) {
             ForEach(units) { unit in
                 VStack(spacing:2) {
-                    UnitPortrait(unit:unit,event:event,animate:true).frame(height:units.count > 3 ? 90 : 140)
+                    UnitPortrait(unit:unit,event:event,animate:true).frame(height:units.count > 4 ? 64 : units.count > 3 ? 90 : 140)
                     ResourceValue(id:"health",text:"\(unit.health)/\(unit.maximumHealth)")
                     ResourceValue(id:"shield",text:String(unit.shield))
                     if unit.health == 0 { Text(unit.player ? "倒地" : "战败").foregroundStyle(GameTheme.danger) }
@@ -140,12 +140,14 @@ struct PVEPublicView:View {
                             .background(GameTheme.primary.opacity(0.06),in:RoundedRectangle(cornerRadius:12))
                     }
                 }
-                HStack(spacing:8) {
+                InlineFlow(spacing:8) {
                     Text("个人道具").bold()
                     if detail.items.isEmpty { Text("暂无") }
                     ForEach(detail.items) { item in
-                        ArtImage(type:"items",id:item.id).frame(width:28,height:28)
-                        Text("\(item.name)×\(item.quantity)")
+                        HStack(spacing:4) {
+                            ArtImage(type:"items",id:item.id).frame(width:28,height:28)
+                            Text("\(item.name)×\(item.quantity)")
+                        }
                     }
                 }.font(.system(size:24)).fixedSize(horizontal:false,vertical:true)
             }

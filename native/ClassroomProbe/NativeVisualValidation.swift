@@ -51,6 +51,18 @@ enum NativeVisualValidation {
             for i in monster.snapshot.units.indices { monster.snapshot.units[i].current = monster.snapshot.units[i].id == "m1" }
             try await capture("public-monster-"+ratio,PVEPublicView(frame:monster,image:nil,showingBook:false),size)
         }
+        try await capture("public-reduced-motion-4x3",PVEPublicView(frame:try play.publicFrame(),image:nil,showingBook:false).environment(\.accessibilityReduceMotion,true),CGSize(width:1440,height:1080))
+        var ledger = PresentationLedger()
+        let reward = try play.reward(ResourceReward(coins:10,score:2))
+        try ledger.submit(reward,catalog:catalog,now:Date().addingTimeInterval(-0.2))
+        var feedback = try play.publicFrame(); feedback.presentations = ledger.pending
+        try await capture("public-feedback-4x3",PVEPublicView(frame:feedback,image:nil,showingBook:false),CGSize(width:1440,height:1080))
+        var boss = state; boss.map.nodes[4].kind = .boss; boss.map.nodes[4].name = "隐藏Boss"
+        var hiddenReward = boss; hiddenReward.map.nodes[4].kind = .reward; hiddenReward.map.nodes[4].name = "隐藏奖励"
+        for (name,source) in [("boss",boss),("reward",hiddenReward)] {
+            let publicMap = try source.publicSnapshot(catalog:catalog)
+            try await capture("public-unknown-"+name,PVEMapView(nodes:publicMap.nodes,roads:publicMap.roads,units:publicMap.units,publicDisplay:true),CGSize(width:596,height:622))
+        }
         let teacher = TeacherSession.shared
         let model = PVEAppSession(display:teacher.display)
         model.installVisualFixture(play)
@@ -62,7 +74,7 @@ enum NativeVisualValidation {
             let pair = key.split(separator:":",maxSplits:1).map(String.init)
             if GameArt.image(pair[0],pair[1]) == nil { missing.append(key) }
         }
-        let report:[String:Any] = ["screenshots":8,"assetCount":GameArt.bindings.count,"missingAssets":missing,"names":names,"deviceVerified":false,"note":"Actual native SwiftUI simulator rendering; not physical iPad/TV feedback"]
+        let report:[String:Any] = ["screenshots":12,"assetCount":GameArt.bindings.count,"missingAssets":missing,"names":names,"deviceVerified":false,"note":"Actual native SwiftUI simulator rendering; not physical iPad/TV feedback"]
         try JSONSerialization.data(withJSONObject:report,options:[.prettyPrinted,.sortedKeys]).write(to:output.appendingPathComponent("report.json"))
         guard missing.isEmpty else { throw GameError("离线资产无法解码") }
         try Data("success".utf8).write(to:output.appendingPathComponent("complete.txt"))

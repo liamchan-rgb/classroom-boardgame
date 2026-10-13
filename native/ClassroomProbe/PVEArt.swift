@@ -140,3 +140,24 @@ struct CommittedFeedback:View {
         }.allowsHitTesting(false)
     }
 }
+
+/// Keep complete item names and quantities; never overflow a television card.
+struct InlineFlow:Layout {
+    var spacing:CGFloat = 8
+    private func positions(_ subviews:Subviews,width:CGFloat) -> (CGSize,[CGPoint]) {
+        var points:[CGPoint] = [], x:CGFloat = 0, y:CGFloat = 0, rowHeight:CGFloat = 0
+        for view in subviews {
+            let size = view.sizeThatFits(.unspecified)
+            if x > 0 && x+size.width > width { y += rowHeight+spacing; x = 0; rowHeight = 0 }
+            points.append(CGPoint(x:x,y:y)); x += size.width+spacing; rowHeight = max(rowHeight,size.height)
+        }
+        return (CGSize(width:width,height:y+rowHeight),points)
+    }
+    func sizeThatFits(proposal:ProposedViewSize,subviews:Subviews,cache:inout ()) -> CGSize {
+        positions(subviews,width:proposal.width ?? 1000).0
+    }
+    func placeSubviews(in bounds:CGRect,proposal:ProposedViewSize,subviews:Subviews,cache:inout ()) {
+        let points = positions(subviews,width:bounds.width).1
+        for index in subviews.indices { subviews[index].place(at:CGPoint(x:bounds.minX+points[index].x,y:bounds.minY+points[index].y),anchor:.topLeading,proposal:.unspecified) }
+    }
+}
