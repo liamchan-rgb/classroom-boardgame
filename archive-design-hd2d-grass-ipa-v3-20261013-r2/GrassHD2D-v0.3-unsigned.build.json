@@ -1,0 +1,16 @@
+{
+  "bundleIdentifier": "com.classroomboardgame.design.grasshd2dv3",
+  "version": "0.3",
+  "displayName": "GrassHD2D",
+  "bundleName": "GrassLightingPrototype",
+  "minimumOS": "17.0",
+  "platform": [
+    "iPhoneOS"
+  ],
+  "architecture": "arm64",
+  "machOPlatform": 2,
+  "signedForDevice": false,
+  "requiresPersonalSigning": true,
+  "originalAssetsVerified": true,
+  "sha256": "64d72f559dde68515197dd2bcf8edb4adb803c66d05cd20a1f2629e085859f9d"
+}
