@@ -1,0 +1,251 @@
+{
+  "status": "modular-kit-awaiting-art-review",
+  "assets": [
+    {
+      "id": "grass_modules",
+      "file": "assets/atlases/grass_modules.png",
+      "sha256": "cdf3dace73b2d9d8b04ad60ac6c75804a6f527bf5ac5907f719951cd31b392cb",
+      "width": 1536,
+      "height": 1024,
+      "mode": "RGBA",
+      "alphaRange": [
+        0,
+        254
+      ]
+    },
+    {
+      "id": "snow_modules",
+      "file": "assets/atlases/snow_modules.png",
+      "sha256": "01758456c798d5ece180b8b2022b2b0e9dce9eec59aa4ecbad90a7b2e66566cd",
+      "width": 1536,
+      "height": 1024,
+      "mode": "RGBA",
+      "alphaRange": [
+        0,
+        254
+      ]
+    },
+    {
+      "id": "volcano_modules",
+      "file": "assets/atlases/volcano_modules.png",
+      "sha256": "efb9e365898e20124dc8d14c0a35260bf028aad27743e8edc84565132390fc15",
+      "width": 1536,
+      "height": 1024,
+      "mode": "RGBA",
+      "alphaRange": [
+        0,
+        254
+      ]
+    },
+    {
+      "id": "class_adventurer_portrait",
+      "file": "assets/characters/class_adventurer_portrait.png",
+      "sha256": "5fb9c6de1c72dab2f9ffe15b7f996378c43ffe9bc91c2321663a9cb4309fae42",
+      "width": 192,
+      "height": 192,
+      "mode": "RGBA",
+      "alphaRange": [
+        0,
+        255
+      ],
+      "reuse": "unchanged full-canvas reference"
+    },
+    {
+      "id": "class_dragon_knight_portrait",
+      "file": "assets/characters/class_dragon_knight_portrait.png",
+      "sha256": "d7194a32d795f49381d7a69319b5f15874cb914c9501ec2662a3650ef8e57591",
+      "width": 192,
+      "height": 192,
+      "mode": "RGBA",
+      "alphaRange": [
+        0,
+        255
+      ],
+      "reuse": "unchanged full-canvas reference"
+    },
+    {
+      "id": "class_ranger_portrait",
+      "file": "assets/characters/class_ranger_portrait.png",
+      "sha256": "bf6306c1b1034b900d1e63b478b320cc11382418615292453b4d23f8aaa56f45",
+      "width": 192,
+      "height": 192,
+      "mode": "RGBA",
+      "alphaRange": [
+        0,
+        255
+      ],
+      "reuse": "unchanged full-canvas reference"
+    },
+    {
+      "id": "class_spellblade_portrait",
+      "file": "assets/characters/class_spellblade_portrait.png",
+      "sha256": "8f0f59b217039c012a2a8ff8e0ff475c80c33bed76f231e028966b5f3d259d10",
+      "width": 192,
+      "height": 192,
+      "mode": "RGBA",
+      "alphaRange": [
+        0,
+        255
+      ],
+      "reuse": "unchanged full-canvas reference"
+    },
+    {
+      "id": "grass_curve",
+      "file": "assets/roads/grass_curve.png",
+      "sha256": "99226f6ddd718c0327a7e082e62b79914e722439dbd735889f551be93e61d23e",
+      "width": 384,
+      "height": 256,
+      "mode": "RGBA",
+      "alphaRange": [
+        0,
+        255
+      ]
+    },
+    {
+      "id": "grass_curve",
+      "file": "assets/roads/grass_curve.svg",
+      "sha256": "3ffc5d8c9fbb815d736e142a50bd670fc180fa5c152824bfb0e4ea39e73d6e88"
+    },
+    {
+      "id": "grass_junction",
+      "file": "assets/roads/grass_junction.png",
+      "sha256": "a67b6bb192dd4633828e9dff611c673d45f5f30f99f96f897f268916c2e2f1fc",
+      "width": 384,
+      "height": 256,
+      "mode": "RGBA",
+      "alphaRange": [
+        0,
+        255
+      ]
+    },
+    {
+      "id": "grass_junction",
+      "file": "assets/roads/grass_junction.svg",
+      "sha256": "0f910d5e70bae3b286d43b8fef5253115bf84bfae18088ae8e09c64d68b467d5"
+    },
+    {
+      "id": "grass_straight",
+      "file": "assets/roads/grass_straight.png",
+      "sha256": "05ad9da77d98b7633ce77fc3a6075b80ec95b20deefe2b680b0dcf78c7d26dc8",
+      "width": 384,
+      "height": 256,
+      "mode": "RGBA",
+      "alphaRange": [
+        0,
+        255
+      ]
+    },
+    {
+      "id": "grass_straight",
+      "file": "assets/roads/grass_straight.svg",
+      "sha256": "9be7a030c4cc7bc77bf6997dfd1c15844eee60fd6369691fc4235a9094fbec0e"
+    },
+    {
+      "id": "snow_curve",
+      "file": "assets/roads/snow_curve.png",
+      "sha256": "09b98ffd3b18106b5140818465ef06e3ccf75261a3d731e0a559252267da0bd3",
+      "width": 384,
+      "height": 256,
+      "mode": "RGBA",
+      "alphaRange": [
+        0,
+        255
+      ]
+    },
+    {
+      "id": "snow_curve",
+      "file": "assets/roads/snow_curve.svg",
+      "sha256": "ef257656d0ca0635fcdc15c7eaf052f34a0ec7ff62d514b15cd768dd5fb38cc6"
+    },
+    {
+      "id": "snow_junction",
+      "file": "assets/roads/snow_junction.png",
+      "sha256": "c3c5b91473453c37fb8685878b169a110b4555b8af454473dabea9536db6846d",
+      "width": 384,
+      "height": 256,
+      "mode": "RGBA",
+      "alphaRange": [
+        0,
+        255
+      ]
+    },
+    {
+      "id": "snow_junction",
+      "file": "assets/roads/snow_junction.svg",
+      "sha256": "1f248e048437c64a3f786cbc4b345ed3d74a15298556c683807208da01811a10"
+    },
+    {
+      "id": "snow_straight",
+      "file": "assets/roads/snow_straight.png",
+      "sha256": "6f57b6272371f3fc9121509eb6f1514583bc609f30e21c96a6de44905adf4e02",
+      "width": 384,
+      "height": 256,
+      "mode": "RGBA",
+      "alphaRange": [
+        0,
+        255
+      ]
+    },
+    {
+      "id": "snow_straight",
+      "file": "assets/roads/snow_straight.svg",
+      "sha256": "247822e51cb1d8ae621208cf5642b70eaeabbb4fd14b05118855ca8fbbd5b133"
+    },
+    {
+      "id": "volcano_curve",
+      "file": "assets/roads/volcano_curve.png",
+      "sha256": "b5b04e17cc49b876f7f5f943f74a3b8514937bd496d5be9efbcf7e5140472892",
+      "width": 384,
+      "height": 256,
+      "mode": "RGBA",
+      "alphaRange": [
+        0,
+        255
+      ]
+    },
+    {
+      "id": "volcano_curve",
+      "file": "assets/roads/volcano_curve.svg",
+      "sha256": "567efca18f5a7824cf9ae46a6f8d55aea850eec88d671dd17a47c62113d169b0"
+    },
+    {
+      "id": "volcano_junction",
+      "file": "assets/roads/volcano_junction.png",
+      "sha256": "dc1e9c918617aac0bbe8ddf390d78a3acfc087c0029a2b388a2182d6c2724398",
+      "width": 384,
+      "height": 256,
+      "mode": "RGBA",
+      "alphaRange": [
+        0,
+        255
+      ]
+    },
+    {
+      "id": "volcano_junction",
+      "file": "assets/roads/volcano_junction.svg",
+      "sha256": "e51d3d844cd3132d9c7229db93b80361f5385892d2c3fcfbfe0edeeb5bad80c8"
+    },
+    {
+      "id": "volcano_straight",
+      "file": "assets/roads/volcano_straight.png",
+      "sha256": "8140583d6ce69c28f3eb53d91606a18e831f5be6b37588e6ce1bb6816b82732f",
+      "width": 384,
+      "height": 256,
+      "mode": "RGBA",
+      "alphaRange": [
+        0,
+        255
+      ]
+    },
+    {
+      "id": "volcano_straight",
+      "file": "assets/roads/volcano_straight.svg",
+      "sha256": "394d7af10345c6182c936edfb3044c01bedfd89776d78b356f205d996b08029c"
+    }
+  ],
+  "modules": 18,
+  "biomes": 3,
+  "roadVariants": 9,
+  "topologyGeneratorChanged": false,
+  "nativeVerified": false
+}

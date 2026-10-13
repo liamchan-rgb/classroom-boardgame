@@ -1,0 +1,48 @@
+{
+  "palettes": {
+    "grass": {
+      "ground": "#8daa48",
+      "edge": "#655338",
+      "road": "#c8ae78",
+      "highlight": "#e4cd97",
+      "rut": "#96834d",
+      "specks": [
+        "#dfc795",
+        "#b09866",
+        "#a38c57"
+      ]
+    },
+    "snow": {
+      "ground": "#e3e9ee",
+      "edge": "#91a9bc",
+      "road": "#c4d2db",
+      "highlight": "#edf1ed",
+      "rut": "#9badbd",
+      "specks": [
+        "#e9edef",
+        "#afc3d2",
+        "#d7e2e8"
+      ]
+    },
+    "volcano": {
+      "ground": "#524d4b",
+      "edge": "#302d2c",
+      "road": "#807267",
+      "highlight": "#a4917b",
+      "rut": "#665c55",
+      "specks": [
+        "#a1907c",
+        "#71665c",
+        "#968571"
+      ]
+    }
+  },
+  "widthDesignPx": 24,
+  "referenceWorldScale": 1138,
+  "edgeFeatherDesignPx": 5,
+  "rutOffsetDesignPx": 4,
+  "curveBendLimit": 0.12,
+  "texture": "seeded small pixel clusters; visual seed only",
+  "movement": "same cubic centreline as road",
+  "cost": "original graph edge count, never visual spline length"
+}

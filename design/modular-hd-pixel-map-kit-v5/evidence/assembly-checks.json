@@ -1,0 +1,482 @@
+{
+  "status": "pass",
+  "runs": [
+    {
+      "biome": "grass",
+      "seed": 17,
+      "layout": "A",
+      "publicRoads": [
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "landmarks": [
+        {
+          "nodeID": 1,
+          "nodeAnchor": [
+            504.61538461538464,
+            628.1538461538462
+          ],
+          "landmarkGround": [
+            504.61538461538464,
+            583.1538461538462
+          ]
+        },
+        {
+          "nodeID": 2,
+          "nodeAnchor": [
+            800.6153846153846,
+            628.1538461538462
+          ],
+          "landmarkGround": [
+            700.6153846153846,
+            583.1538461538462
+          ]
+        },
+        {
+          "nodeID": 3,
+          "nodeAnchor": [
+            1096.6153846153845,
+            298
+          ],
+          "landmarkGround": [
+            1096.6153846153845,
+            253
+          ]
+        }
+      ],
+      "movingFoot": [
+        667.4886446153846,
+        632.6043911538461
+      ],
+      "movingCurveParameter": 0.55,
+      "decorCount": 31,
+      "topologyUnchanged": true,
+      "groundMethod": "overlap feather; not seamless butt join",
+      "aspect": "16x9"
+    },
+    {
+      "biome": "snow",
+      "seed": 43,
+      "layout": "B",
+      "publicRoads": [
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "landmarks": [
+        {
+          "nodeID": 1,
+          "nodeAnchor": [
+            538.7692307692308,
+            759.0769230769231
+          ],
+          "landmarkGround": [
+            438.76923076923083,
+            714.0769230769231
+          ]
+        },
+        {
+          "nodeID": 2,
+          "nodeAnchor": [
+            834.7692307692308,
+            542.7692307692308
+          ],
+          "landmarkGround": [
+            734.7692307692308,
+            497.76923076923083
+          ]
+        },
+        {
+          "nodeID": 3,
+          "nodeAnchor": [
+            1142.1538461538462,
+            269.5384615384616
+          ],
+          "landmarkGround": [
+            1142.1538461538462,
+            224.5384615384616
+          ]
+        }
+      ],
+      "movingFoot": [
+        704.8948121153848,
+        644.5047011538462
+      ],
+      "movingCurveParameter": 0.55,
+      "decorCount": 25,
+      "topologyUnchanged": true,
+      "groundMethod": "overlap feather; not seamless butt join",
+      "aspect": "16x9"
+    },
+    {
+      "biome": "volcano",
+      "seed": 91,
+      "layout": "C",
+      "publicRoads": [
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "landmarks": [
+        {
+          "nodeID": 1,
+          "nodeAnchor": [
+            516,
+            440.3076923076923
+          ],
+          "landmarkGround": [
+            516,
+            395.3076923076923
+          ]
+        },
+        {
+          "nodeID": 2,
+          "nodeAnchor": [
+            846.1538461538462,
+            667.9999999999999
+          ],
+          "landmarkGround": [
+            721.1538461538462,
+            622.9999999999999
+          ]
+        },
+        {
+          "nodeID": 3,
+          "nodeAnchor": [
+            1142.1538461538462,
+            303.69230769230774
+          ],
+          "landmarkGround": [
+            1142.1538461538462,
+            258.69230769230774
+          ]
+        }
+      ],
+      "movingFoot": [
+        694.2428323076924,
+        570.5588848076923
+      ],
+      "movingCurveParameter": 0.55,
+      "decorCount": 29,
+      "topologyUnchanged": true,
+      "groundMethod": "overlap feather; not seamless butt join",
+      "aspect": "16x9"
+    },
+    {
+      "biome": "grass",
+      "seed": 30,
+      "layout": "A",
+      "publicRoads": [
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "landmarks": [
+        {
+          "nodeID": 1,
+          "nodeAnchor": [
+            504.61538461538464,
+            628.1538461538462
+          ],
+          "landmarkGround": [
+            504.61538461538464,
+            583.1538461538462
+          ]
+        },
+        {
+          "nodeID": 2,
+          "nodeAnchor": [
+            800.6153846153846,
+            628.1538461538462
+          ],
+          "landmarkGround": [
+            700.6153846153846,
+            583.1538461538462
+          ]
+        },
+        {
+          "nodeID": 3,
+          "nodeAnchor": [
+            1096.6153846153845,
+            298
+          ],
+          "landmarkGround": [
+            1096.6153846153845,
+            253
+          ]
+        }
+      ],
+      "movingFoot": [
+        667.4886446153846,
+        632.6043911538461
+      ],
+      "movingCurveParameter": 0.55,
+      "decorCount": 35,
+      "topologyUnchanged": true,
+      "groundMethod": "overlap feather; not seamless butt join",
+      "aspect": "16x9"
+    },
+    {
+      "biome": "grass",
+      "seed": 17,
+      "layout": "A",
+      "publicRoads": [
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "landmarks": [
+        {
+          "nodeID": 1,
+          "nodeAnchor": [
+            264.61538461538464,
+            628.1538461538462
+          ],
+          "landmarkGround": [
+            264.61538461538464,
+            583.1538461538462
+          ]
+        },
+        {
+          "nodeID": 2,
+          "nodeAnchor": [
+            560.6153846153846,
+            628.1538461538462
+          ],
+          "landmarkGround": [
+            460.61538461538464,
+            583.1538461538462
+          ]
+        },
+        {
+          "nodeID": 3,
+          "nodeAnchor": [
+            856.6153846153845,
+            298
+          ],
+          "landmarkGround": [
+            856.6153846153845,
+            253
+          ]
+        }
+      ],
+      "movingFoot": [
+        427.4886446153847,
+        632.6043911538461
+      ],
+      "movingCurveParameter": 0.55,
+      "decorCount": 31,
+      "topologyUnchanged": true,
+      "groundMethod": "overlap feather; not seamless butt join",
+      "aspect": "4x3"
+    },
+    {
+      "biome": "snow",
+      "seed": 43,
+      "layout": "B",
+      "publicRoads": [
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "landmarks": [
+        {
+          "nodeID": 1,
+          "nodeAnchor": [
+            298.76923076923083,
+            759.0769230769231
+          ],
+          "landmarkGround": [
+            198.76923076923083,
+            714.0769230769231
+          ]
+        },
+        {
+          "nodeID": 2,
+          "nodeAnchor": [
+            594.7692307692308,
+            542.7692307692308
+          ],
+          "landmarkGround": [
+            494.76923076923083,
+            497.76923076923083
+          ]
+        },
+        {
+          "nodeID": 3,
+          "nodeAnchor": [
+            902.1538461538462,
+            269.5384615384616
+          ],
+          "landmarkGround": [
+            902.1538461538462,
+            224.5384615384616
+          ]
+        }
+      ],
+      "movingFoot": [
+        464.8948121153847,
+        644.5047011538462
+      ],
+      "movingCurveParameter": 0.55,
+      "decorCount": 25,
+      "topologyUnchanged": true,
+      "groundMethod": "overlap feather; not seamless butt join",
+      "aspect": "4x3"
+    },
+    {
+      "biome": "volcano",
+      "seed": 91,
+      "layout": "C",
+      "publicRoads": [
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "landmarks": [
+        {
+          "nodeID": 1,
+          "nodeAnchor": [
+            276.00000000000006,
+            440.3076923076923
+          ],
+          "landmarkGround": [
+            276.00000000000006,
+            395.3076923076923
+          ]
+        },
+        {
+          "nodeID": 2,
+          "nodeAnchor": [
+            606.1538461538462,
+            667.9999999999999
+          ],
+          "landmarkGround": [
+            481.1538461538462,
+            622.9999999999999
+          ]
+        },
+        {
+          "nodeID": 3,
+          "nodeAnchor": [
+            902.1538461538462,
+            303.69230769230774
+          ],
+          "landmarkGround": [
+            902.1538461538462,
+            258.69230769230774
+          ]
+        }
+      ],
+      "movingFoot": [
+        454.24283230769237,
+        570.5588848076923
+      ],
+      "movingCurveParameter": 0.55,
+      "decorCount": 29,
+      "topologyUnchanged": true,
+      "groundMethod": "overlap feather; not seamless butt join",
+      "aspect": "4x3"
+    },
+    {
+      "biome": "grass",
+      "seed": 30,
+      "layout": "A",
+      "publicRoads": [
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "landmarks": [
+        {
+          "nodeID": 1,
+          "nodeAnchor": [
+            264.61538461538464,
+            628.1538461538462
+          ],
+          "landmarkGround": [
+            264.61538461538464,
+            583.1538461538462
+          ]
+        },
+        {
+          "nodeID": 2,
+          "nodeAnchor": [
+            560.6153846153846,
+            628.1538461538462
+          ],
+          "landmarkGround": [
+            460.61538461538464,
+            583.1538461538462
+          ]
+        },
+        {
+          "nodeID": 3,
+          "nodeAnchor": [
+            856.6153846153845,
+            298
+          ],
+          "landmarkGround": [
+            856.6153846153845,
+            253
+          ]
+        }
+      ],
+      "movingFoot": [
+        427.4886446153847,
+        632.6043911538461
+      ],
+      "movingCurveParameter": 0.55,
+      "decorCount": 35,
+      "topologyUnchanged": true,
+      "groundMethod": "overlap feather; not seamless butt join",
+      "aspect": "4x3"
+    }
+  ],
+  "roadEndpoints": "node anchors shared with movement cubic",
+  "privateRoadsRendered": false,
+  "offline": true,
+  "engineCalls": 0,
+  "limits": "display fixtures, not native map generator validation"
+}

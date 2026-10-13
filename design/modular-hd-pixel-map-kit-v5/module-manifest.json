@@ -1,0 +1,321 @@
+{
+  "version": 5,
+  "modules": [
+    {
+      "id": "grass_ground",
+      "atlas": "assets/atlases/grass_modules.png",
+      "sourceRect": [
+        90,
+        90,
+        350,
+        350
+      ],
+      "anchorPx": [
+        175,
+        175
+      ],
+      "use": "overlapping feathered texture patch",
+      "semantic": "decorative terrain",
+      "status": "awaiting-art-review"
+    },
+    {
+      "id": "grass_vegetation",
+      "atlas": "assets/atlases/grass_modules.png",
+      "sourceRect": [
+        512,
+        0,
+        512,
+        512
+      ],
+      "anchorPx": [
+        256,
+        448
+      ],
+      "use": "full cell transparent sprite",
+      "semantic": "decorative terrain",
+      "status": "awaiting-art-review"
+    },
+    {
+      "id": "grass_rock",
+      "atlas": "assets/atlases/grass_modules.png",
+      "sourceRect": [
+        1024,
+        0,
+        512,
+        512
+      ],
+      "anchorPx": [
+        256,
+        448
+      ],
+      "use": "full cell transparent sprite",
+      "semantic": "decorative terrain",
+      "status": "awaiting-art-review"
+    },
+    {
+      "id": "grass_camp",
+      "atlas": "assets/atlases/grass_modules.png",
+      "sourceRect": [
+        0,
+        512,
+        512,
+        512
+      ],
+      "anchorPx": [
+        256,
+        448
+      ],
+      "use": "full cell transparent sprite",
+      "semantic": "revealed node visual candidate only",
+      "status": "awaiting-art-review"
+    },
+    {
+      "id": "grass_watchtower",
+      "atlas": "assets/atlases/grass_modules.png",
+      "sourceRect": [
+        512,
+        512,
+        512,
+        512
+      ],
+      "anchorPx": [
+        256,
+        448
+      ],
+      "use": "full cell transparent sprite",
+      "semantic": "revealed node visual candidate only",
+      "status": "awaiting-art-review"
+    },
+    {
+      "id": "grass_ruin",
+      "atlas": "assets/atlases/grass_modules.png",
+      "sourceRect": [
+        1024,
+        512,
+        512,
+        512
+      ],
+      "anchorPx": [
+        256,
+        448
+      ],
+      "use": "full cell transparent sprite",
+      "semantic": "revealed node visual candidate only",
+      "status": "awaiting-art-review"
+    },
+    {
+      "id": "snow_ground",
+      "atlas": "assets/atlases/snow_modules.png",
+      "sourceRect": [
+        90,
+        90,
+        350,
+        350
+      ],
+      "anchorPx": [
+        175,
+        175
+      ],
+      "use": "overlapping feathered texture patch",
+      "semantic": "decorative terrain",
+      "status": "awaiting-art-review"
+    },
+    {
+      "id": "snow_vegetation",
+      "atlas": "assets/atlases/snow_modules.png",
+      "sourceRect": [
+        512,
+        0,
+        512,
+        512
+      ],
+      "anchorPx": [
+        256,
+        448
+      ],
+      "use": "full cell transparent sprite",
+      "semantic": "decorative terrain",
+      "status": "awaiting-art-review"
+    },
+    {
+      "id": "snow_rock",
+      "atlas": "assets/atlases/snow_modules.png",
+      "sourceRect": [
+        1024,
+        0,
+        512,
+        512
+      ],
+      "anchorPx": [
+        256,
+        448
+      ],
+      "use": "full cell transparent sprite",
+      "semantic": "decorative terrain",
+      "status": "awaiting-art-review"
+    },
+    {
+      "id": "snow_camp",
+      "atlas": "assets/atlases/snow_modules.png",
+      "sourceRect": [
+        0,
+        512,
+        512,
+        512
+      ],
+      "anchorPx": [
+        256,
+        448
+      ],
+      "use": "full cell transparent sprite",
+      "semantic": "revealed node visual candidate only",
+      "status": "awaiting-art-review"
+    },
+    {
+      "id": "snow_watchtower",
+      "atlas": "assets/atlases/snow_modules.png",
+      "sourceRect": [
+        512,
+        512,
+        512,
+        512
+      ],
+      "anchorPx": [
+        256,
+        448
+      ],
+      "use": "full cell transparent sprite",
+      "semantic": "revealed node visual candidate only",
+      "status": "awaiting-art-review"
+    },
+    {
+      "id": "snow_ruin",
+      "atlas": "assets/atlases/snow_modules.png",
+      "sourceRect": [
+        1024,
+        512,
+        512,
+        512
+      ],
+      "anchorPx": [
+        256,
+        448
+      ],
+      "use": "full cell transparent sprite",
+      "semantic": "revealed node visual candidate only",
+      "status": "awaiting-art-review"
+    },
+    {
+      "id": "volcano_ground",
+      "atlas": "assets/atlases/volcano_modules.png",
+      "sourceRect": [
+        90,
+        90,
+        350,
+        350
+      ],
+      "anchorPx": [
+        175,
+        175
+      ],
+      "use": "overlapping feathered texture patch",
+      "semantic": "decorative terrain",
+      "status": "awaiting-art-review"
+    },
+    {
+      "id": "volcano_vegetation",
+      "atlas": "assets/atlases/volcano_modules.png",
+      "sourceRect": [
+        512,
+        0,
+        512,
+        512
+      ],
+      "anchorPx": [
+        256,
+        448
+      ],
+      "use": "full cell transparent sprite",
+      "semantic": "decorative terrain",
+      "status": "awaiting-art-review"
+    },
+    {
+      "id": "volcano_rock",
+      "atlas": "assets/atlases/volcano_modules.png",
+      "sourceRect": [
+        1024,
+        0,
+        512,
+        512
+      ],
+      "anchorPx": [
+        256,
+        448
+      ],
+      "use": "full cell transparent sprite",
+      "semantic": "decorative terrain",
+      "status": "awaiting-art-review"
+    },
+    {
+      "id": "volcano_camp",
+      "atlas": "assets/atlases/volcano_modules.png",
+      "sourceRect": [
+        0,
+        512,
+        512,
+        512
+      ],
+      "anchorPx": [
+        256,
+        448
+      ],
+      "use": "full cell transparent sprite",
+      "semantic": "revealed node visual candidate only",
+      "status": "awaiting-art-review"
+    },
+    {
+      "id": "volcano_watchtower",
+      "atlas": "assets/atlases/volcano_modules.png",
+      "sourceRect": [
+        512,
+        512,
+        512,
+        512
+      ],
+      "anchorPx": [
+        256,
+        448
+      ],
+      "use": "full cell transparent sprite",
+      "semantic": "revealed node visual candidate only",
+      "status": "awaiting-art-review"
+    },
+    {
+      "id": "volcano_ruin",
+      "atlas": "assets/atlases/volcano_modules.png",
+      "sourceRect": [
+        1024,
+        512,
+        512,
+        512
+      ],
+      "anchorPx": [
+        256,
+        448
+      ],
+      "use": "full cell transparent sprite",
+      "semantic": "revealed node visual candidate only",
+      "status": "awaiting-art-review"
+    }
+  ],
+  "atlasSize": [
+    1536,
+    1024
+  ],
+  "cellSize": [
+    512,
+    512
+  ],
+  "groundSeamlessVerified": false,
+  "assembly": "overlap ground patches with feather mask; never opaque butt-join tiles"
+}

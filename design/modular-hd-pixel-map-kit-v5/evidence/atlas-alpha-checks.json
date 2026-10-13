@@ -1,0 +1,101 @@
+[
+  {
+    "atlas": "volcano_modules.png",
+    "groundAlphaRange": [
+      249,
+      253
+    ],
+    "cellAlphaRanges": [
+      [
+        0,
+        253
+      ],
+      [
+        0,
+        253
+      ],
+      [
+        0,
+        253
+      ],
+      [
+        0,
+        254
+      ],
+      [
+        0,
+        253
+      ],
+      [
+        0,
+        253
+      ]
+    ]
+  },
+  {
+    "atlas": "snow_modules.png",
+    "groundAlphaRange": [
+      249,
+      253
+    ],
+    "cellAlphaRanges": [
+      [
+        0,
+        253
+      ],
+      [
+        0,
+        253
+      ],
+      [
+        0,
+        253
+      ],
+      [
+        0,
+        253
+      ],
+      [
+        0,
+        254
+      ],
+      [
+        0,
+        253
+      ]
+    ]
+  },
+  {
+    "atlas": "grass_modules.png",
+    "groundAlphaRange": [
+      248,
+      253
+    ],
+    "cellAlphaRanges": [
+      [
+        0,
+        253
+      ],
+      [
+        0,
+        253
+      ],
+      [
+        0,
+        253
+      ],
+      [
+        0,
+        253
+      ],
+      [
+        0,
+        253
+      ],
+      [
+        0,
+        254
+      ]
+    ]
+  }
+]
