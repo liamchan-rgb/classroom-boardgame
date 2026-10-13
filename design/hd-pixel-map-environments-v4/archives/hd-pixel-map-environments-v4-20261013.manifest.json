@@ -1,0 +1,10 @@
+{
+  "snapshotCommit": "b4c4e3d2dcca73ae5e54742939997a46a5b4fdff",
+  "tag": "archive-design-hd-pixel-map-environments-v4-20261013",
+  "zip": "hd-pixel-map-environments-v4-20261013.zip",
+  "sha256": "029d3f3ff24cd264dd46fab120c6e41d85d91bac547a0e2cad9363d5ca9ffc2e",
+  "bytes": 16807695,
+  "payloadFiles": 13,
+  "zipEntries": 14,
+  "status": "awaiting-art-review"
+}
