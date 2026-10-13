@@ -30,3 +30,7 @@
 原生12张截图与66张Bundle素材解码通过，已修正4:3英文长名与小尺寸教师屏奖励栏问题，未知Boss/奖励输入的公开地图像素完全相同。详见[检查及真机步骤](验收与真机检查.md)、[原生截图](evidence/native-previews/README.md)、[构建证据](evidence/cloud-build-result-v0.9.json)、[离线包校验](evidence/asset-verification.json)。公开投影没有AP状态条，技能费用保留本局实际定义；教师未提交选人/技能/目标/路径/奖励勾选不公开。原规则JSON、职业技能数值、费用、GameState/GameArchive存档格式保持原样。
 
 唯一存档标签archive-stage2-ui-art-v0.9-20261013固定源码快照，开发侧[存档索引](../../archives/README.md)记录长期私有archive-assets位置、ZIP与分片校验及独立恢复回执。已交付设计、旧ZIP和旧标签保留。
+
+## 2026-10-13查看反馈
+
+用户查看v0.9后反馈功能上无问题，地图空间、连续回合轨道与技能物品栏仍需修改；商店入口缺项已记录。见[最新反馈与下一版要求](../ui-feedback-round1-20261013/feedback.md)、[独立美术提示词](../ui-feedback-round1-20261013/art-direction-prompt.md)。本条作为下一版依据，旧稿和本版检查证据保留，本次未生成新版IPA。
