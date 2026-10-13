@@ -1,0 +1,24 @@
+{
+  "formatVersion": 1,
+  "logicalZIP": "archive-design-hd2d-grass-ipa-v3-20261013.zip",
+  "bytes": 141694985,
+  "sha256": "e89e81241489df2536496af38b5edd82d45eb259db0db2fd394d214370b8697e",
+  "parts": [
+    {
+      "file": "archive-design-hd2d-grass-ipa-v3-20261013.zip.part000",
+      "bytes": 50331648,
+      "sha256": "eb46a7f7d1a1f5e33116723a52b4da6f478936aa69eb31164d8b62ebafd82367"
+    },
+    {
+      "file": "archive-design-hd2d-grass-ipa-v3-20261013.zip.part001",
+      "bytes": 50331648,
+      "sha256": "45d35bfaba453e221be081391be26bb0fb4d7894115121e0ad202210c60a47a4"
+    },
+    {
+      "file": "archive-design-hd2d-grass-ipa-v3-20261013.zip.part002",
+      "bytes": 41031689,
+      "sha256": "94579b5c5a4763bf3fa1afd6cf56268ec791cde25f697b7b8a1be5390d188939"
+    }
+  ],
+  "reason": "Lossless split; GitHub normal Git rejects files over 100MB"
+}
