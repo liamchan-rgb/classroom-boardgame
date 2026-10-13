@@ -40,7 +40,7 @@ struct PVEPlayView:View {
     }
     private var header:some View {
         HStack(spacing:14) {
-            Text("晴空学园 · v0.9").font(.title2.bold())
+            Text("晴空学园 · v0.10").font(.title2.bold())
             if let state = model.state {
                 Text(state.phase.displayName).font(.headline)
                 if let battle = state.battle {
@@ -118,17 +118,15 @@ struct PVEPlayView:View {
         GamePanel {
             VStack(alignment:.leading,spacing:10) {
                 HStack {
-                    Text("森林小地图").font(.headline)
+                    Text("地图与公开镜头").font(.headline)
                     Spacer()
                     Text("教师可看全图").font(.caption).foregroundStyle(GameTheme.muted)
                 }
-                if let scenario = model.scenario { Text(scenario.title).font(.callout.bold()).foregroundStyle(GameTheme.accent) }
-                if let battle = play.engine.state.battle {
-                    Text("队列：" + battle.queue.compactMap { play.engine.state.units[$0]?.name }.joined(separator:" → "))
-                        .font(.callout).lineLimit(2)
-                    Text("暂停原因：" + play.engine.state.pauseReasons.map(\.displayName).sorted().joined(separator:"、")).font(.caption)
-                } else { Text("探索不自动计时；沿道路规划连续路径。").font(.callout) }
-                PVEMapView(nodes:board.nodes,roads:board.roads,units:board.units,path:play.action == .move ? play.path : [],interactive:play.humanMayAct && !model.aiRunning,onNode:model.tapNode,actorNode:play.actor?.nodeID,legalNodes:play.legalTargetNodes,planAllowed:play.preview.allowed)
+                if play.engine.state.battle != nil {
+                    Text("暂停：" + play.engine.state.pauseReasons.map(\.displayName).sorted().joined(separator:"、")).font(.caption).lineLimit(1)
+                } else { Text("点击地点规划；拖动地图只切换镜头。").font(.caption) }
+                cameraControls(play:play)
+                PVEMapView(nodes:board.nodes,roads:board.roads,units:board.units,path:play.action == .move ? play.path : [],interactive:play.humanMayAct && !model.aiRunning,onNode:model.tapNode,actorNode:play.actor?.nodeID,legalNodes:play.legalTargetNodes,planAllowed:play.preview.allowed,camera:model.publicCamera,onFocusUnit:model.focusPublicPlayer,round:board.round,onPan:{ x,y in model.panPublicMap(x:x,y:y) })
                     .frame(maxHeight:.infinity)
                 if play.engine.state.phase == .exploration, let actor = play.actor,
                    play.engine.state.units.values.contains(where:{ $0.kind == .monster && $0.isAlive && $0.nodeID == actor.nodeID }) {
@@ -156,6 +154,27 @@ struct PVEPlayView:View {
                 Text("已提交：" + model.message).font(.callout).lineLimit(3)
             }
         }
+    }
+    private func cameraControls(play:PVEPlaySession) -> some View {
+        HStack(spacing:5) {
+            Button("总览") { model.overviewPublicMap() }.buttonStyle(ClassroomButtonStyle())
+            Button("跟随") { model.followPublicActor() }.buttonStyle(ClassroomButtonStyle())
+            Button { model.zoomPublicMap(1/1.25) } label: { Image(systemName:"minus.magnifyingglass").frame(width:28) }.buttonStyle(ClassroomButtonStyle())
+            Button { model.zoomPublicMap(1.25) } label: { Image(systemName:"plus.magnifyingglass").frame(width:28) }.buttonStyle(ClassroomButtonStyle())
+            Menu {
+                ForEach(play.engine.state.players) { player in
+                    Button("查看 "+player.name) { model.focusPublicPlayer(player.id) }
+                }
+                Divider()
+                Button("镜头向左") { model.panPublicMap(x:-0.15/model.publicCamera.zoom,y:0) }
+                Button("镜头向右") { model.panPublicMap(x:0.15/model.publicCamera.zoom,y:0) }
+                Button("镜头向上") { model.panPublicMap(x:0,y:-0.15/model.publicCamera.zoom) }
+                Button("镜头向下") { model.panPublicMap(x:0,y:0.15/model.publicCamera.zoom) }
+                Divider()
+                Button("上一页公开物品") { model.turnInventoryPage(-1) }
+                Button("下一页公开物品") { model.turnInventoryPage(1) }
+            } label: { Image(systemName:"viewfinder").frame(width:28) }.buttonStyle(ClassroomButtonStyle())
+        }.font(.system(size:14)).accessibilityElement(children:.contain)
     }
     private func rewardBar(play:PVEPlaySession) -> some View {
         GamePanel {

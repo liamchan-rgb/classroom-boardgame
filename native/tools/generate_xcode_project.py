@@ -75,7 +75,7 @@ for name in ("Debug", "Release"):
                            SUPPORTS_MACCATALYST="NO", SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD="NO",
                            SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD="NO", SWIFT_EMIT_LOC_STRINGS="NO",
                            LD_RUNPATH_SEARCH_PATHS=["$(inherited)", "@executable_path/Frameworks"],
-                           CURRENT_PROJECT_VERSION="9", MARKETING_VERSION="0.9")
+                           CURRENT_PROJECT_VERSION="10", MARKETING_VERSION="0.10")
     target_configs.append(add("target:" + name, "XCBuildConfiguration", name=name, buildSettings=target_settings))
 project_config_list = add("project-config-list", "XCConfigurationList", buildConfigurations=project_configs,
                           defaultConfigurationIsVisible="0", defaultConfigurationName="Release")

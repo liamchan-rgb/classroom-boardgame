@@ -9,6 +9,11 @@ final class PVEAppSession: ObservableObject {
     @Published private(set) var message = "正在准备课堂游戏。"
     @Published private(set) var aiRunning = false
     @Published private(set) var bookOpen = false
+    @Published private(set) var publicCamera = MapCamera(zoom:1.35)
+    @Published private(set) var cameraFocusID: String?
+    @Published private(set) var cameraFollowsCurrent = true
+    @Published private(set) var inventoryPage = 0
+    private var detailActorID: String?
     private(set) var modalOpen = false
     private let display: PublicDisplayModel
     private var store: AtomicGameStore?
@@ -77,6 +82,24 @@ final class PVEAppSession: ObservableObject {
         publish()
     }
     func clearPath() { play?.clearPath(); publish() }
+    // Explicit view controls are independent of private action/reward selections.
+    func focusPublicPlayer(_ id:String) {
+        guard let player = state?.units[id], player.kind == .player,
+              let node = state?.map.nodes.first(where: { $0.id == player.nodeID }) else { return }
+        cameraFocusID = id; cameraFollowsCurrent = false
+        publicCamera = MapCamera(x:node.x,y:node.y,zoom:max(1.8,publicCamera.zoom)); publish()
+    }
+    func followPublicActor() { cameraFocusID = nil; cameraFollowsCurrent = true; publish() }
+    func overviewPublicMap() { cameraFocusID = nil; cameraFollowsCurrent = false; publicCamera = MapCamera(); publish() }
+    func zoomPublicMap(_ factor:Double) { publicCamera = publicCamera.scaled(by:factor); publish() }
+    func panPublicMap(x:Double,y:Double) {
+        cameraFocusID = nil; cameraFollowsCurrent = false
+        publicCamera = publicCamera.panned(x:x,y:y); publish()
+    }
+    func turnInventoryPage(_ amount:Int) {
+        let count = (try? play?.publicFrame().currentDetails?.items.count) ?? 0
+        inventoryPage = max(0,min(max(0,(count+3)/4-1),inventoryPage+amount)); publish()
+    }
     func perform() {
         guard let play, !aiRunning, !bookOpen, !modalOpen else { return }
         run { try play.perform() }
@@ -197,12 +220,12 @@ final class PVEAppSession: ObservableObject {
     private func cancelAI() { aiTask?.cancel(); aiTask = nil; aiRunning = false }
     private func scheduleAI() {
         guard active, !modalOpen, !bookOpen, aiTask == nil, let play,
-              play.engine.state.pauseReasons.isEmpty, play.actor?.kind == .monster else { return }
+              play.engine.state.pauseReasons.isEmpty, play.actor?.kind == .monster, presentation.pending.isEmpty else { return }
         aiRunning = true
         aiTask = Task { @MainActor [weak self] in
             guard let self else { return }
             while !Task.isCancelled, self.active, let play = self.play,
-                  !self.modalOpen, !self.bookOpen, play.engine.state.pauseReasons.isEmpty, play.actor?.kind == .monster {
+                  !self.modalOpen, !self.bookOpen, play.engine.state.pauseReasons.isEmpty, play.actor?.kind == .monster, self.presentation.pending.isEmpty {
                 do { try await Task.sleep(nanoseconds:300_000_000) } catch { return }
                 guard !Task.isCancelled, play.engine.state.pauseReasons.isEmpty else { return }
                 do {
@@ -224,6 +247,14 @@ final class PVEAppSession: ObservableObject {
         do {
             var frame = try play.publicFrame()
             frame.presentations = presentation.pending
+            let focus = cameraFollowsCurrent ? frame.snapshot.units.first(where: { $0.current }) : frame.snapshot.units.first(where: { $0.id == cameraFocusID })
+            if let focus, let node = frame.snapshot.nodes.first(where: { $0.id == focus.nodeID }) {
+                publicCamera = MapCamera(x:node.x,y:node.y,zoom:publicCamera.zoom)
+            }
+            if detailActorID != frame.currentDetails?.unitID { inventoryPage = 0; detailActorID = frame.currentDetails?.unitID }
+            inventoryPage = min(inventoryPage,max(0,((frame.currentDetails?.items.count ?? 0)+3)/4-1))
+            frame.camera = publicCamera; frame.cameraFocusID = cameraFocusID
+            frame.followsCurrent = cameraFollowsCurrent; frame.inventoryPage = inventoryPage
             display.playFrame = frame; display.playBook = bookOpen
         }
         catch { message = "公开画面未更新：\(error.localizedDescription)" }
