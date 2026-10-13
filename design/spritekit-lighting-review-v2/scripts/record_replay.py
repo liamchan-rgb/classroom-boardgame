@@ -13,6 +13,7 @@ app = build_dir / "Build/Products/Debug-iphonesimulator/GrassLightingPrototype.a
 subprocess.run(["xcrun", "simctl", "install", udid, str(app)], check=True)
 data = Path(subprocess.check_output(["xcrun", "simctl", "get_app_container", udid, bundle, "data"], text=True).strip())
 trace = data / "Documents/review-replay.json"
+(results / "screenshots").mkdir()
 for ratio in ("16x9", "4x3"):
     # This file belongs solely to the transient, independently identified CI app.
     trace.unlink(missing_ok=True)
@@ -28,15 +29,26 @@ for ratio in ("16x9", "4x3"):
                                env=env, stdout=launch_log, stderr=subprocess.STDOUT, check=True, timeout=30)
             deadline = time.monotonic() + 45
             events = []
+            captured = set()
+            capture_phases = {"original", "sunlight", "arrival", "local-light"}
             while time.monotonic() < deadline:
                 if recorder.poll() is not None:
                     raise RuntimeError("Video recorder exited early; see video log")
                 try:
                     events = json.loads(trace.read_text())
+                    phase = events[-1]["phase"]
+                    if phase in capture_phases and phase not in captured:
+                        time.sleep(0.3)  # Allow several native draw frames after the state change.
+                        subprocess.run(["xcrun", "simctl", "io", udid, "screenshot", "--type=png",
+                                        str(results / "screenshots" / f"{phase}-{ratio}.png")], check=True, timeout=15)
+                        captured.add(phase)
                     if events[-1]["phase"] == "complete": break
                 except (OSError, ValueError, IndexError): pass
-                time.sleep(1)
+                time.sleep(0.15)
             assert events and events[-1]["phase"] == "complete", "Native replay did not complete"
+            assert captured == capture_phases, "Missing native simulator screenshot phase"
+            expected_aspect = 16 / 9 if ratio == "16x9" else 4 / 3
+            assert all(abs(e["viewWidth"] / e["viewHeight"] - expected_aspect) < 0.02 for e in events), "Native scene viewport aspect differs"
             middle = next(e for e in events if e["phase"] == "movement-middle")
             arrival = next(e for e in events if e["phase"] == "arrival")
             assert middle["moving"] and not arrival["moving"] and middle["heroX"] != arrival["heroX"]

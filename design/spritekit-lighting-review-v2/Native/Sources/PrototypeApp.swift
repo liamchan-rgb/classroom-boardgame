@@ -59,6 +59,7 @@ enum ReviewAspect: String, CaseIterable {
             self.trace("movement-middle")
             try? await Task.sleep(nanoseconds: 1_200_000_000)
             self.trace("arrival")
+            try? await Task.sleep(nanoseconds: 1_000_000_000)
             self.follow(true); self.scene.setZoom(1.45); self.play(); self.trace("follow-start")
             try? await Task.sleep(nanoseconds: 2_100_000_000)
             self.trace("follow-arrival"); self.follow(false); self.scene.overview(); self.setMode(.normal)
@@ -122,7 +123,7 @@ struct PrototypeGlass: ViewModifier {
                 }
             }.frame(width: width, height: height)
                 .position(x: geometry.size.width/2, y: geometry.size.height/2)
-        }.background(Color(red: 0.04, green: 0.10, blue: 0.13)).ignoresSafeArea()
+        }.background(Color(red: 0.04, green: 0.10, blue: 0.13)).ignoresSafeArea().statusBarHidden(true)
             .onAppear { model.scene.setReducedMotion(reduceMotion || forcedReduceMotion) }
             .onChange(of: reduceMotion) { _, value in model.scene.setReducedMotion(value || forcedReduceMotion) }
             .sheet(isPresented: $settings) {

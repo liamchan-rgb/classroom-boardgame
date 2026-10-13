@@ -32,7 +32,8 @@ final class GrassScene: SKScene {
     var reviewState: [String: Any] {
         ["heroX": Double(hero?.position.x ?? 0), "heroY": Double(hero?.position.y ?? 0),
          "lighting": mode.rawValue, "zoom": Double(zoom), "follow": follow,
-         "moving": active != nil, "publicRoadCount": graph.publicEdges.count]
+         "moving": active != nil, "publicRoadCount": graph.publicEdges.count,
+         "viewWidth": Double(size.width), "viewHeight": Double(size.height)]
     }
     private var points: [Int: CGPoint] { Dictionary(uniqueKeysWithValues: graph.nodes.map { ($0.id, geometry.point($0.point)) }) }
 
