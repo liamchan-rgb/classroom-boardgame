@@ -1,0 +1,1949 @@
+{
+  "version": 4,
+  "status": "awaiting-art-review",
+  "assets": [
+    {
+      "id": "fx_coin_sheet",
+      "file": "assets/effects/fx_coin_sheet.png",
+      "widthPx": 2048,
+      "heightPx": 256,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        83,
+        58,
+        1744,
+        198
+      ],
+      "sha256": "a4662c1c2ccb69d9325be0284b76a002a98111382162e331e02abb752de6ebfe",
+      "decodedBytesRGBA": 2097152,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "effectID": "coin",
+      "source": "native/ClassroomProbe/Resources/Art/fx_coin_sheet.png",
+      "frames": [
+        8,
+        256,
+        256
+      ],
+      "durationMs": 650,
+      "stop": "transparent terminal frame",
+      "reducedMotion": "middle-frame static brief glyph then remove"
+    },
+    {
+      "id": "fx_dice20_sheet",
+      "file": "assets/effects/fx_dice20_sheet.png",
+      "widthPx": 2048,
+      "heightPx": 256,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        60,
+        49,
+        1732,
+        208
+      ],
+      "sha256": "e985e0512f67a71bbf637c4fb8b5e25e07531a5cda8b6b444330e915aed684fe",
+      "decodedBytesRGBA": 2097152,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "effectID": "dice20",
+      "source": "native/ClassroomProbe/Resources/Art/fx_dice20_sheet.png",
+      "frames": [
+        8,
+        256,
+        256
+      ],
+      "durationMs": 900,
+      "stop": "transparent terminal frame",
+      "reducedMotion": "middle-frame static brief glyph then remove"
+    },
+    {
+      "id": "fx_dice6_sheet",
+      "file": "assets/effects/fx_dice6_sheet.png",
+      "widthPx": 2048,
+      "heightPx": 256,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        55,
+        60,
+        1729,
+        200
+      ],
+      "sha256": "1ba77eb9cced1312f8d995893d85c4791ded1913aba5671f67b89370348ce1d2",
+      "decodedBytesRGBA": 2097152,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "effectID": "dice6",
+      "source": "native/ClassroomProbe/Resources/Art/fx_dice6_sheet.png",
+      "frames": [
+        8,
+        256,
+        256
+      ],
+      "durationMs": 900,
+      "stop": "transparent terminal frame",
+      "reducedMotion": "middle-frame static brief glyph then remove"
+    },
+    {
+      "id": "fx_flame_sheet",
+      "file": "assets/effects/fx_flame_sheet.png",
+      "widthPx": 2048,
+      "heightPx": 256,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        83,
+        54,
+        1744,
+        198
+      ],
+      "sha256": "e8388421db359dc66de3134032580a595c6ad7f67609a07440adad570c86a37c",
+      "decodedBytesRGBA": 2097152,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "effectID": "flame",
+      "source": "native/ClassroomProbe/Resources/Art/fx_flame_sheet.png",
+      "frames": [
+        8,
+        256,
+        256
+      ],
+      "durationMs": 650,
+      "stop": "transparent terminal frame",
+      "reducedMotion": "middle-frame static brief glyph then remove"
+    },
+    {
+      "id": "fx_heal_sheet",
+      "file": "assets/effects/fx_heal_sheet.png",
+      "widthPx": 2048,
+      "heightPx": 256,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        83,
+        58,
+        1744,
+        198
+      ],
+      "sha256": "1fe1d737342ac61a941b39e44b4ab8d05fb93cc800cea0168e6c276d9af7ddae",
+      "decodedBytesRGBA": 2097152,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "effectID": "heal",
+      "source": "native/ClassroomProbe/Resources/Art/fx_heal_sheet.png",
+      "frames": [
+        8,
+        256,
+        256
+      ],
+      "durationMs": 650,
+      "stop": "transparent terminal frame",
+      "reducedMotion": "middle-frame static brief glyph then remove"
+    },
+    {
+      "id": "fx_impact_sheet",
+      "file": "assets/effects/fx_impact_sheet.png",
+      "widthPx": 2048,
+      "heightPx": 256,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        83,
+        54,
+        1744,
+        202
+      ],
+      "sha256": "96a7dc42310b79d263c62c765fa3417363266006d321c4423f30b13672a56fe1",
+      "decodedBytesRGBA": 2097152,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "effectID": "impact",
+      "source": "native/ClassroomProbe/Resources/Art/fx_impact_sheet.png",
+      "frames": [
+        8,
+        256,
+        256
+      ],
+      "durationMs": 650,
+      "stop": "transparent terminal frame",
+      "reducedMotion": "middle-frame static brief glyph then remove"
+    },
+    {
+      "id": "fx_natural20_sheet",
+      "file": "assets/effects/fx_natural20_sheet.png",
+      "widthPx": 2048,
+      "heightPx": 256,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        83,
+        54,
+        1744,
+        198
+      ],
+      "sha256": "ca48dc15175c7a68d177b4e9c9f3e33e862cfb8e0b249a37600857c8248c42ad",
+      "decodedBytesRGBA": 2097152,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "effectID": "natural20",
+      "source": "native/ClassroomProbe/Resources/Art/fx_natural20_sheet.png",
+      "frames": [
+        8,
+        256,
+        256
+      ],
+      "durationMs": 900,
+      "stop": "transparent terminal frame",
+      "reducedMotion": "middle-frame static brief glyph then remove"
+    },
+    {
+      "id": "fx_projectile_sheet",
+      "file": "assets/effects/fx_projectile_sheet.png",
+      "widthPx": 2048,
+      "heightPx": 256,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        33,
+        114,
+        1740,
+        142
+      ],
+      "sha256": "5ba7a7beb87146de6f0af55d77b766300fffb4e19baa87b8ee5f1df86ef7f65f",
+      "decodedBytesRGBA": 2097152,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "effectID": "projectile",
+      "source": "native/ClassroomProbe/Resources/Art/fx_projectile_sheet.png",
+      "frames": [
+        8,
+        256,
+        256
+      ],
+      "durationMs": 650,
+      "stop": "transparent terminal frame",
+      "reducedMotion": "middle-frame static brief glyph then remove"
+    },
+    {
+      "id": "fx_revive_sheet",
+      "file": "assets/effects/fx_revive_sheet.png",
+      "widthPx": 2048,
+      "heightPx": 256,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        77,
+        53,
+        1744,
+        203
+      ],
+      "sha256": "c9188b62ec63616d6e36bea83eb68bfb347e4dac7e5f8536e809dae3657a0a18",
+      "decodedBytesRGBA": 2097152,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "effectID": "revive",
+      "source": "native/ClassroomProbe/Resources/Art/fx_revive_sheet.png",
+      "frames": [
+        8,
+        256,
+        256
+      ],
+      "durationMs": 650,
+      "stop": "transparent terminal frame",
+      "reducedMotion": "middle-frame static brief glyph then remove"
+    },
+    {
+      "id": "fx_rune_sheet",
+      "file": "assets/effects/fx_rune_sheet.png",
+      "widthPx": 2048,
+      "heightPx": 256,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        64,
+        58,
+        1744,
+        198
+      ],
+      "sha256": "5f816edfa9b781d9fc991e0dd1e8caab1d49eb16cf79c27b3432cf654298a61c",
+      "decodedBytesRGBA": 2097152,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "effectID": "rune",
+      "source": "native/ClassroomProbe/Resources/Art/fx_rune_sheet.png",
+      "frames": [
+        8,
+        256,
+        256
+      ],
+      "durationMs": 650,
+      "stop": "transparent terminal frame",
+      "reducedMotion": "middle-frame static brief glyph then remove"
+    },
+    {
+      "id": "fx_score_sheet",
+      "file": "assets/effects/fx_score_sheet.png",
+      "widthPx": 2048,
+      "heightPx": 256,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        75,
+        58,
+        1744,
+        198
+      ],
+      "sha256": "abe3985f5aa6af1ab5db8fc6e6def24615d3b364960e3428e6c45b6d2686e758",
+      "decodedBytesRGBA": 2097152,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "effectID": "score",
+      "source": "native/ClassroomProbe/Resources/Art/fx_score_sheet.png",
+      "frames": [
+        8,
+        256,
+        256
+      ],
+      "durationMs": 650,
+      "stop": "transparent terminal frame",
+      "reducedMotion": "middle-frame static brief glyph then remove"
+    },
+    {
+      "id": "fx_shield_sheet",
+      "file": "assets/effects/fx_shield_sheet.png",
+      "widthPx": 2048,
+      "heightPx": 256,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        65,
+        54,
+        1744,
+        207
+      ],
+      "sha256": "da99194a1628ed0a8c20a6efd10fbcd5ce8c4ebb1ecfd21e4ad559eebce09361",
+      "decodedBytesRGBA": 2097152,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "effectID": "shield",
+      "source": "native/ClassroomProbe/Resources/Art/fx_shield_sheet.png",
+      "frames": [
+        8,
+        256,
+        256
+      ],
+      "durationMs": 650,
+      "stop": "transparent terminal frame",
+      "reducedMotion": "middle-frame static brief glyph then remove"
+    },
+    {
+      "id": "battle_back",
+      "file": "assets/layers/battle_back.png",
+      "widthPx": 1024,
+      "heightPx": 640,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": false,
+      "alphaBoundsPx": [
+        0,
+        0,
+        1024,
+        640
+      ],
+      "sha256": "a5b8165f6f39bb44d2bcb853d1a6a15cf41c942153c3c20c77a6ce6613a9cbcf",
+      "decodedBytesRGBA": 2621440,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "nonsemantic environment may crop",
+      "source": "assets/layers/battle_back.svg",
+      "sceneManifest": "scene-manifest.json"
+    },
+    {
+      "id": "battle_front",
+      "file": "assets/layers/battle_front.png",
+      "widthPx": 1024,
+      "heightPx": 640,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        0,
+        560,
+        1024,
+        640
+      ],
+      "sha256": "b032034d242940eff6bc57db45c3a5f6166cdc6ff8d900d95d720df22b9cb765",
+      "decodedBytesRGBA": 2621440,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "nonsemantic environment may crop",
+      "source": "assets/layers/battle_front.svg",
+      "sceneManifest": "scene-manifest.json"
+    },
+    {
+      "id": "battle_ground",
+      "file": "assets/layers/battle_ground.png",
+      "widthPx": 1024,
+      "heightPx": 640,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        0,
+        262,
+        1024,
+        640
+      ],
+      "sha256": "0f21fe7379097081529949e97dfcea61492a5ac70e5e476b92d8dbb4657a4743",
+      "decodedBytesRGBA": 2621440,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "nonsemantic environment may crop",
+      "source": "assets/layers/battle_ground.svg",
+      "sceneManifest": "scene-manifest.json"
+    },
+    {
+      "id": "battle_mid",
+      "file": "assets/layers/battle_mid.png",
+      "widthPx": 1024,
+      "heightPx": 640,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        0,
+        107,
+        1024,
+        540
+      ],
+      "sha256": "59591df5169b592db8e8884669d48430f5cb0dfaab8fc93a70d3eeedf582a3b3",
+      "decodedBytesRGBA": 2621440,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "nonsemantic environment may crop",
+      "source": "assets/layers/battle_mid.svg",
+      "sceneManifest": "scene-manifest.json"
+    },
+    {
+      "id": "contact_shadow",
+      "file": "assets/layers/contact_shadow.png",
+      "widthPx": 128,
+      "heightPx": 48,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        18,
+        12,
+        110,
+        36
+      ],
+      "sha256": "cb54f2755fbdec1eee5d5845ae7e2dc14c2c784007e9d0b159bd113d376ac3cb",
+      "decodedBytesRGBA": 24576,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "source": "assets/layers/contact_shadow.svg",
+      "sceneManifest": "scene-manifest.json"
+    },
+    {
+      "id": "ground_module",
+      "file": "assets/layers/ground_module.png",
+      "widthPx": 256,
+      "heightPx": 128,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        13,
+        30,
+        243,
+        110
+      ],
+      "sha256": "0fa1c67eafe04c0071967a30ae61a7da22a28a3c05666b39ab3ebeed357270e6",
+      "decodedBytesRGBA": 131072,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "nonsemantic environment may crop",
+      "source": "assets/layers/ground_module.svg",
+      "sceneManifest": "scene-manifest.json"
+    },
+    {
+      "id": "soft_halo",
+      "file": "assets/layers/soft_halo.png",
+      "widthPx": 128,
+      "heightPx": 128,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        2,
+        2,
+        126,
+        126
+      ],
+      "sha256": "e899faebbc36542e32a5a53b663d5e3cb24bf17270188a862a62a2fbc12d540a",
+      "decodedBytesRGBA": 65536,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "source": "assets/layers/soft_halo.svg",
+      "sceneManifest": "scene-manifest.json"
+    },
+    {
+      "id": "class_adventurer_portrait",
+      "file": "assets/runtime/class_adventurer_portrait.png",
+      "widthPx": 192,
+      "heightPx": 192,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        46,
+        32,
+        135,
+        162
+      ],
+      "sha256": "5fb9c6de1c72dab2f9ffe15b7f996378c43ffe9bc91c2321663a9cb4309fae42",
+      "decodedBytesRGBA": 147456,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "class:adventurer",
+      "source": "native/ClassroomProbe/Resources/Art/class_adventurer_portrait.png",
+      "sourceSHA256": "0a1509c010698f329b7568eb85766a69497d738e13adbdd2c007f1515bc34c21",
+      "anchorPx": [
+        96.0,
+        162
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "class_dragon_knight_portrait",
+      "file": "assets/runtime/class_dragon_knight_portrait.png",
+      "widthPx": 192,
+      "heightPx": 192,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        47,
+        29,
+        150,
+        165
+      ],
+      "sha256": "d7194a32d795f49381d7a69319b5f15874cb914c9501ec2662a3650ef8e57591",
+      "decodedBytesRGBA": 147456,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "class:dragonKnight",
+      "source": "native/ClassroomProbe/Resources/Art/class_dragon_knight_portrait.png",
+      "sourceSHA256": "aae2dcd5771df7c0be37ee237e451ccc3418d9fa2974a7aae9c394c58b96dc0d",
+      "anchorPx": [
+        96.0,
+        165
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "class_ranger_portrait",
+      "file": "assets/runtime/class_ranger_portrait.png",
+      "widthPx": 192,
+      "heightPx": 192,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        53,
+        28,
+        139,
+        164
+      ],
+      "sha256": "bf6306c1b1034b900d1e63b478b320cc11382418615292453b4d23f8aaa56f45",
+      "decodedBytesRGBA": 147456,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "class:ranger",
+      "source": "native/ClassroomProbe/Resources/Art/class_ranger_portrait.png",
+      "sourceSHA256": "d7ad17351283aff1c2d55ef1b470309f65245442355946aa7ad917c8d796cd50",
+      "anchorPx": [
+        96.0,
+        164
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "class_spellblade_portrait",
+      "file": "assets/runtime/class_spellblade_portrait.png",
+      "widthPx": 192,
+      "heightPx": 192,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        40,
+        35,
+        143,
+        165
+      ],
+      "sha256": "8f0f59b217039c012a2a8ff8e0ff475c80c33bed76f231e028966b5f3d259d10",
+      "decodedBytesRGBA": 147456,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "class:spellblade",
+      "source": "native/ClassroomProbe/Resources/Art/class_spellblade_portrait.png",
+      "sourceSHA256": "639b1ac1c3f8d97246fc0e90008ccabd50d59ea4e2910b240c3869886bdca5dd",
+      "anchorPx": [
+        96.0,
+        165
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "icon_action",
+      "file": "assets/runtime/icon_action.png",
+      "widthPx": 48,
+      "heightPx": 48,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        7,
+        2,
+        41,
+        46
+      ],
+      "sha256": "7051c7f1c54de1cc41b9073ea665aee94a08dd118952740308ee077ff38c221c",
+      "decodedBytesRGBA": 9216,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "resource:action",
+      "source": "native/ClassroomProbe/Resources/Art/icon_action.png",
+      "sourceSHA256": "0241713c81477af51f58688b4cb7b6c4adef337797a9cf0a35519b9276568893",
+      "anchorPx": [
+        24.0,
+        46
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "icon_coin",
+      "file": "assets/runtime/icon_coin.png",
+      "widthPx": 48,
+      "heightPx": 48,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        3,
+        3,
+        45,
+        45
+      ],
+      "sha256": "b3b2dd38fa754073c73582c616ae84d4cd8fcd3aa8614d2676a6bfeedba9e741",
+      "decodedBytesRGBA": 9216,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "resource:coin",
+      "source": "native/ClassroomProbe/Resources/Art/icon_coin.png",
+      "sourceSHA256": "3f80ff65d715874b65d87b65a965581537c513ff5412bf1b8b1120b0aba4461c",
+      "anchorPx": [
+        24.0,
+        45
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "icon_downed",
+      "file": "assets/runtime/icon_downed.png",
+      "widthPx": 48,
+      "heightPx": 48,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        3,
+        3,
+        45,
+        45
+      ],
+      "sha256": "ea826f832f7f6bbfad77cd6d0bb563dd21cc17504490df34fbeea4dc2a8d1e89",
+      "decodedBytesRGBA": 9216,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "resource:downed",
+      "source": "native/ClassroomProbe/Resources/Art/icon_downed.png",
+      "sourceSHA256": "b6b0b469217f318a078550a51d8d1082dde160022cc8e9573ee688be90418029",
+      "anchorPx": [
+        24.0,
+        45
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "icon_health",
+      "file": "assets/runtime/icon_health.png",
+      "widthPx": 48,
+      "heightPx": 48,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        2,
+        8,
+        46,
+        42
+      ],
+      "sha256": "27f4851cb377a0313d69cd1355d3b4252b924dd3d4226f61fd88b2feeccae3e4",
+      "decodedBytesRGBA": 9216,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "resource:health",
+      "source": "native/ClassroomProbe/Resources/Art/icon_health.png",
+      "sourceSHA256": "5c8a7e342f21c040811a2275cb495e40915bbd8fc4a58c30eb6b4c84f70c65a2",
+      "anchorPx": [
+        24.0,
+        42
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "icon_score",
+      "file": "assets/runtime/icon_score.png",
+      "widthPx": 48,
+      "heightPx": 48,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        2,
+        3,
+        46,
+        43
+      ],
+      "sha256": "bf409273e78804bf3d883404ed8b2c43f046c1de6ce22f28915a565faae2e9b1",
+      "decodedBytesRGBA": 9216,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "resource:score",
+      "source": "native/ClassroomProbe/Resources/Art/icon_score.png",
+      "sourceSHA256": "b39bd62794927697f12f5c9385aedb2df97dafee375e3a4de44d931d351c216c",
+      "anchorPx": [
+        24.0,
+        43
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "icon_shield",
+      "file": "assets/runtime/icon_shield.png",
+      "widthPx": 48,
+      "heightPx": 48,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        4,
+        2,
+        44,
+        46
+      ],
+      "sha256": "af85c8020ff42cbb4000b623aefa73e93be15c764fff2d4d71867200f1ae2ccc",
+      "decodedBytesRGBA": 9216,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "resource:shield",
+      "source": "native/ClassroomProbe/Resources/Art/icon_shield.png",
+      "sourceSHA256": "0b1155ba83bfa485d40b35fff30d0c231013ee4938cdc5396a1a4b50f5434c1c",
+      "anchorPx": [
+        24.0,
+        46
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "item_action_ring",
+      "file": "assets/runtime/item_action_ring.png",
+      "widthPx": 96,
+      "heightPx": 96,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        10,
+        12,
+        86,
+        84
+      ],
+      "sha256": "ca9a7b4149a12d3b58324a5a45ca7d4e1f71547385a240c27683079f66f942fd",
+      "decodedBytesRGBA": 36864,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "item:actionRing",
+      "source": "native/ClassroomProbe/Resources/Art/item_action_ring.png",
+      "sourceSHA256": "092378d8b93850065d65812f225ec15fd347e3aaf1790d5912223eb464df70da",
+      "anchorPx": [
+        48.0,
+        84
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "item_dragon_armor",
+      "file": "assets/runtime/item_dragon_armor.png",
+      "widthPx": 96,
+      "heightPx": 96,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        10,
+        10,
+        86,
+        86
+      ],
+      "sha256": "13dbf95a203d27ed399450db693ee493694ab22ddfefedc1e62374f900291d33",
+      "decodedBytesRGBA": 36864,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "item:dragonArmor",
+      "source": "native/ClassroomProbe/Resources/Art/item_dragon_armor.png",
+      "sourceSHA256": "6873c458dcc6e9cc4764f6177b8e2c696ec8886fd1b93faa2adfdea53b35fbc9",
+      "anchorPx": [
+        48.0,
+        86
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "item_dragon_charm",
+      "file": "assets/runtime/item_dragon_charm.png",
+      "widthPx": 96,
+      "heightPx": 96,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        23,
+        10,
+        73,
+        86
+      ],
+      "sha256": "2213547454345e01754250b17d348b8fd3a37932baa4b884371d93bd68f7a0f0",
+      "decodedBytesRGBA": 36864,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "item:dragonCharm",
+      "source": "native/ClassroomProbe/Resources/Art/item_dragon_charm.png",
+      "sourceSHA256": "c7f2d5c529b7295b0419d48e879b5ba1fb88030edc244b633315daab0a94d677",
+      "anchorPx": [
+        48.0,
+        86
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "item_dragon_fang_sword",
+      "file": "assets/runtime/item_dragon_fang_sword.png",
+      "widthPx": 96,
+      "heightPx": 96,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        13,
+        10,
+        83,
+        86
+      ],
+      "sha256": "a4a100a287c6008369663c0aa5b92eaff948471cf888b421d2324d92b4c7dc2f",
+      "decodedBytesRGBA": 36864,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "item:dragonFangSword",
+      "source": "native/ClassroomProbe/Resources/Art/item_dragon_fang_sword.png",
+      "sourceSHA256": "8f90a4816e2cf0c89bfc7bb93c5b51cc09b4a44e3fcfe1ae7040a615c3f230ac",
+      "anchorPx": [
+        48.0,
+        86
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "item_great_sword",
+      "file": "assets/runtime/item_great_sword.png",
+      "widthPx": 96,
+      "heightPx": 96,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        18,
+        10,
+        78,
+        86
+      ],
+      "sha256": "a4bc533a542e4f140607283bacd4e054e6b4e19fc43aca580f5e90f42359a23f",
+      "decodedBytesRGBA": 36864,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "item:greatSword",
+      "source": "native/ClassroomProbe/Resources/Art/item_great_sword.png",
+      "sourceSHA256": "4346576b8de25b1ef4ef7ec78fcafb063ad52f28b3a0c2bca8611d72961bafcd",
+      "anchorPx": [
+        48.0,
+        86
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "item_hunting_bow",
+      "file": "assets/runtime/item_hunting_bow.png",
+      "widthPx": 96,
+      "heightPx": 96,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        23,
+        10,
+        73,
+        86
+      ],
+      "sha256": "098d87d3b28cd6bba3dbeed4502ee5de90a94a3bcd2627ba8bc18d7a86d1469d",
+      "decodedBytesRGBA": 36864,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "item:huntingBow",
+      "source": "native/ClassroomProbe/Resources/Art/item_hunting_bow.png",
+      "sourceSHA256": "3fee4deeb573172ebac211a2d2bf01425e36baae1bf11e6099deeb5152b832f5",
+      "anchorPx": [
+        48.0,
+        86
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "item_large_potion",
+      "file": "assets/runtime/item_large_potion.png",
+      "widthPx": 96,
+      "heightPx": 96,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        16,
+        10,
+        80,
+        86
+      ],
+      "sha256": "17cb55f8daed042d78ae896f8c424d75864fe9110170872666928ff25c0530cd",
+      "decodedBytesRGBA": 36864,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "item:largePotion",
+      "source": "native/ClassroomProbe/Resources/Art/item_large_potion.png",
+      "sourceSHA256": "9641bb5def250456414108822f279cc9e90a7775e27e756947f8b103cc2e8c72",
+      "anchorPx": [
+        48.0,
+        86
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "item_leather_armor",
+      "file": "assets/runtime/item_leather_armor.png",
+      "widthPx": 96,
+      "heightPx": 96,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        11,
+        10,
+        85,
+        86
+      ],
+      "sha256": "8f60da4d72e44cd8894fce4c5f42d2a9a7cf8d818465c1a689466aecf5b7c5e2",
+      "decodedBytesRGBA": 36864,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "item:leatherArmor",
+      "source": "native/ClassroomProbe/Resources/Art/item_leather_armor.png",
+      "sourceSHA256": "4f70408011bd6151b490ec1f577162d6ec17c78fa93cac7f8bee705c8d57d837",
+      "anchorPx": [
+        48.0,
+        86
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "item_legendary_staff",
+      "file": "assets/runtime/item_legendary_staff.png",
+      "widthPx": 96,
+      "heightPx": 96,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        19,
+        10,
+        77,
+        86
+      ],
+      "sha256": "c11c6fec3f4baaa46f4058a012ae4c3c84ca960c07ca49eaa8ff9e03affe367b",
+      "decodedBytesRGBA": 36864,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "item:legendaryStaff",
+      "source": "native/ClassroomProbe/Resources/Art/item_legendary_staff.png",
+      "sourceSHA256": "58c5ec4a1f53d6667bffbb46536d000a36020ae85331ab30c3c2a8329ef8d7e1",
+      "anchorPx": [
+        48.0,
+        86
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "item_power_badge",
+      "file": "assets/runtime/item_power_badge.png",
+      "widthPx": 96,
+      "heightPx": 96,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        17,
+        10,
+        79,
+        86
+      ],
+      "sha256": "88ff6b2b46ca89e70be3bdf91121051e33c35b96157aa49d2901cde80516130e",
+      "decodedBytesRGBA": 36864,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "item:powerBadge",
+      "source": "native/ClassroomProbe/Resources/Art/item_power_badge.png",
+      "sourceSHA256": "f34fffcdee2946e9d8810e6267c83748eece205f733027fbdd2a0d40fd29fed2",
+      "anchorPx": [
+        48.0,
+        86
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "item_revival_stone",
+      "file": "assets/runtime/item_revival_stone.png",
+      "widthPx": 96,
+      "heightPx": 96,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        24,
+        10,
+        72,
+        86
+      ],
+      "sha256": "5a1b35c7ab54bcebbcc8518ea1dcc65c2c744f55a25a1d131b6aa091564628a9",
+      "decodedBytesRGBA": 36864,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "item:revivalStone",
+      "source": "native/ClassroomProbe/Resources/Art/item_revival_stone.png",
+      "sourceSHA256": "1d3d594fb9fdb46781eaa6434b3d409cd3195b4ffa0fd03ed3cb22eef29c5803",
+      "anchorPx": [
+        48.0,
+        86
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "item_rune_armor",
+      "file": "assets/runtime/item_rune_armor.png",
+      "widthPx": 96,
+      "heightPx": 96,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        11,
+        10,
+        85,
+        86
+      ],
+      "sha256": "cf4e3e8249a8cfff300b1b7703ac96832126ba348f2f1ff99f5e9d066606635e",
+      "decodedBytesRGBA": 36864,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "item:runeArmor",
+      "source": "native/ClassroomProbe/Resources/Art/item_rune_armor.png",
+      "sourceSHA256": "0f5004f8b2b835c07afc3f4c57a1aaf8e7e2a38dcaf8224f9aadc2cc2de4cec4",
+      "anchorPx": [
+        48.0,
+        86
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "item_shield_potion",
+      "file": "assets/runtime/item_shield_potion.png",
+      "widthPx": 96,
+      "heightPx": 96,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        20,
+        10,
+        76,
+        86
+      ],
+      "sha256": "050cb2da8100d523de5ea015c38b531993053d9529ab108803a4d58072fd87a5",
+      "decodedBytesRGBA": 36864,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "item:shieldPotion",
+      "source": "native/ClassroomProbe/Resources/Art/item_shield_potion.png",
+      "sourceSHA256": "c57f86636af263cf8d22931d0e13630ca959dde5806865c6296df3f3f035ca22",
+      "anchorPx": [
+        48.0,
+        86
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "item_small_potion",
+      "file": "assets/runtime/item_small_potion.png",
+      "widthPx": 96,
+      "heightPx": 96,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        24,
+        10,
+        72,
+        86
+      ],
+      "sha256": "bcd2eade5e34eb2e3e6cc3b0f929d2d9db99b73be1e10a06ce23dab4162bcdd2",
+      "decodedBytesRGBA": 36864,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "item:smallPotion",
+      "source": "native/ClassroomProbe/Resources/Art/item_small_potion.png",
+      "sourceSHA256": "cbca94a567e6175d1dfee79b20f66029c48458287fbe5b50b2907ba822d5934e",
+      "anchorPx": [
+        48.0,
+        86
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "item_starlight_armor",
+      "file": "assets/runtime/item_starlight_armor.png",
+      "widthPx": 96,
+      "heightPx": 96,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        10,
+        10,
+        86,
+        86
+      ],
+      "sha256": "6de42f636363b357db6fb15bd089aed984d6806a68cf7860c1a4c44024251b14",
+      "decodedBytesRGBA": 36864,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "item:starlightArmor",
+      "source": "native/ClassroomProbe/Resources/Art/item_starlight_armor.png",
+      "sourceSHA256": "3b4f924992683ea05d4157e15ea9e453b2e2e65481b40248b00d03233ec18296",
+      "anchorPx": [
+        48.0,
+        86
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "item_starlight_blade",
+      "file": "assets/runtime/item_starlight_blade.png",
+      "widthPx": 96,
+      "heightPx": 96,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        17,
+        10,
+        79,
+        86
+      ],
+      "sha256": "d2690deb459b90ae28012724cad9614ece945c867c9245ae79973e063cfc0fd7",
+      "decodedBytesRGBA": 36864,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "item:starlightBlade",
+      "source": "native/ClassroomProbe/Resources/Art/item_starlight_blade.png",
+      "sourceSHA256": "18bc18bf6774b211b239d2a09c16cdd30634073fe2cb9b0102e4a22da3b30b97",
+      "anchorPx": [
+        48.0,
+        86
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "item_starlight_charm",
+      "file": "assets/runtime/item_starlight_charm.png",
+      "widthPx": 96,
+      "heightPx": 96,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        22,
+        10,
+        74,
+        86
+      ],
+      "sha256": "b2015cdfd2db1f5dac1c72bdc8ebcebe429b0ec30701b5a1fd29406c21d693a8",
+      "decodedBytesRGBA": 36864,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "item:starlightCharm",
+      "source": "native/ClassroomProbe/Resources/Art/item_starlight_charm.png",
+      "sourceSHA256": "d8571049fa8d39aaabbccb6046c9f6038f6ef5c66cede038ad06ae168b9ed5ca",
+      "anchorPx": [
+        48.0,
+        86
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "item_training_sword",
+      "file": "assets/runtime/item_training_sword.png",
+      "widthPx": 96,
+      "heightPx": 96,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        17,
+        10,
+        79,
+        86
+      ],
+      "sha256": "7844418b067ac1ddd9ca35011e8d81622e57e9a9ae2d7d10814b0033dda0bbad",
+      "decodedBytesRGBA": 36864,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "item:trainingSword",
+      "source": "native/ClassroomProbe/Resources/Art/item_training_sword.png",
+      "sourceSHA256": "0a9adb9c988f637e8cfe0ccf398ba569b007703d4c904f6bfe1aad0b1c01d75a",
+      "anchorPx": [
+        48.0,
+        86
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "monster_cave_troll_portrait",
+      "file": "assets/runtime/monster_cave_troll_portrait.png",
+      "widthPx": 192,
+      "heightPx": 192,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        29,
+        40,
+        155,
+        154
+      ],
+      "sha256": "8dbffb45b611dad49f39ddf5702ac41a0348765577c502e561bdab1ca5e2a9e7",
+      "decodedBytesRGBA": 147456,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "monster:caveTroll",
+      "source": "native/ClassroomProbe/Resources/Art/monster_cave_troll_portrait.png",
+      "sourceSHA256": "debe3c3f7dd9dd102ff9a056c45440464aadbb1b6117842da0b346792c897cdc",
+      "anchorPx": [
+        96.0,
+        154
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "monster_goblin_archer_portrait",
+      "file": "assets/runtime/monster_goblin_archer_portrait.png",
+      "widthPx": 192,
+      "heightPx": 192,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        47,
+        44,
+        148,
+        154
+      ],
+      "sha256": "2d6bbd055c85150a47ec15fa0cf9451a773d117611800c8e699aeb164645d989",
+      "decodedBytesRGBA": 147456,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "monster:goblinArcher",
+      "source": "native/ClassroomProbe/Resources/Art/monster_goblin_archer_portrait.png",
+      "sourceSHA256": "8f881cf8dde8e6889c487ec2504a6fd213768062c7e51967882a5b0d1912dca0",
+      "anchorPx": [
+        96.0,
+        154
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "monster_ruin_dragon_portrait",
+      "file": "assets/runtime/monster_ruin_dragon_portrait.png",
+      "widthPx": 192,
+      "heightPx": 192,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        34,
+        43,
+        165,
+        153
+      ],
+      "sha256": "b80a746086efae34abf283a71828438d5f310b7b49d3d5fca4f047a81b06896f",
+      "decodedBytesRGBA": 147456,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "monster:ruinDragon",
+      "source": "native/ClassroomProbe/Resources/Art/monster_ruin_dragon_portrait.png",
+      "sourceSHA256": "7ce49c5d081d977810a28c970f73a1b73cf15c17ec99a360853c435b6e1e2fb2",
+      "anchorPx": [
+        96.0,
+        153
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "monster_slime_portrait",
+      "file": "assets/runtime/monster_slime_portrait.png",
+      "widthPx": 192,
+      "heightPx": 192,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        36,
+        43,
+        156,
+        159
+      ],
+      "sha256": "c8e6d16188d35097557084f24853accc2fb4c6c00296640da79ab185330fa80a",
+      "decodedBytesRGBA": 147456,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "monster:slime",
+      "source": "native/ClassroomProbe/Resources/Art/monster_slime_portrait.png",
+      "sourceSHA256": "f43af2575443831de7241708e34b08af66c93c7fbfb790d09719917154e0e356",
+      "anchorPx": [
+        96.0,
+        159
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "monster_stone_guardian_portrait",
+      "file": "assets/runtime/monster_stone_guardian_portrait.png",
+      "widthPx": 192,
+      "heightPx": 192,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        34,
+        33,
+        164,
+        159
+      ],
+      "sha256": "165bcf91de0e6d5c4d52368f8853cb89eaf12023997d035d74179e1c0d01303b",
+      "decodedBytesRGBA": 147456,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "monster:stoneGuardian",
+      "source": "native/ClassroomProbe/Resources/Art/monster_stone_guardian_portrait.png",
+      "sourceSHA256": "e52fd126cdae4a6c8bf4758550f8096f284ce2cb345d45e4730fa9ce67e3869b",
+      "anchorPx": [
+        96.0,
+        159
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "monster_wolf_portrait",
+      "file": "assets/runtime/monster_wolf_portrait.png",
+      "widthPx": 192,
+      "heightPx": 192,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        35,
+        42,
+        161,
+        151
+      ],
+      "sha256": "0146eae6af3c85c1d3f111d3521647142868e0fd967e284824705286a0e3b896",
+      "decodedBytesRGBA": 147456,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "monster:wolf",
+      "source": "native/ClassroomProbe/Resources/Art/monster_wolf_portrait.png",
+      "sourceSHA256": "4426192208ba8ad205c07ad40e718f941d9ee48d1db8a3b743d2f9523e39cc65",
+      "anchorPx": [
+        96.0,
+        151
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "node_boss",
+      "file": "assets/runtime/node_boss.png",
+      "widthPx": 192,
+      "heightPx": 192,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        38,
+        36,
+        165,
+        161
+      ],
+      "sha256": "67b5ccdb9ff5b58c4e95908de8b244df5785146429af1bd1459c5a164c4ca7e0",
+      "decodedBytesRGBA": 147456,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "nodeVisual:boss",
+      "source": "native/ClassroomProbe/Resources/Art/node_boss.png",
+      "sourceSHA256": "8e079f05a6930e9c01ddccccbcf10cb732393250af2088914a18e1da51c0d20b",
+      "anchorPx": [
+        96.0,
+        161
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "node_combat",
+      "file": "assets/runtime/node_combat.png",
+      "widthPx": 192,
+      "heightPx": 192,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        27,
+        39,
+        163,
+        155
+      ],
+      "sha256": "47e46efc7c1f79fef2a9eae68f7a7ca045f8632ed2c09ccf3906d9051b8f174b",
+      "decodedBytesRGBA": 147456,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "nodeVisual:combat",
+      "source": "native/ClassroomProbe/Resources/Art/node_combat.png",
+      "sourceSHA256": "c677d7e9daa6dfb5b29fa7213ccfb20123a73a0d51ea532507efc45078639978",
+      "anchorPx": [
+        96.0,
+        155
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "node_empty",
+      "file": "assets/runtime/node_empty.png",
+      "widthPx": 192,
+      "heightPx": 192,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        36,
+        41,
+        155,
+        170
+      ],
+      "sha256": "3bdbef9bab55357f39b88943cb59a10f7edc3f372b5156e9c83414028e1d7f0f",
+      "decodedBytesRGBA": 147456,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "nodeVisual:empty",
+      "source": "native/ClassroomProbe/Resources/Art/node_empty.png",
+      "sourceSHA256": "22af9a9cbc1428530526fcdd72e6228a45acd583bcea60618afd66eba9d336b8",
+      "anchorPx": [
+        96.0,
+        170
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "node_reward",
+      "file": "assets/runtime/node_reward.png",
+      "widthPx": 192,
+      "heightPx": 192,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        23,
+        33,
+        160,
+        171
+      ],
+      "sha256": "20efa976ee8c937dbe84b3d2e58671df7d7568fa7f9674da0f6bbee50a836ada",
+      "decodedBytesRGBA": 147456,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "nodeVisual:reward",
+      "source": "native/ClassroomProbe/Resources/Art/node_reward.png",
+      "sourceSHA256": "e56e9e1a5e6be8f7638c904cf1b5d698ba7a4402ad0dceac279e17abae2a966c",
+      "anchorPx": [
+        96.0,
+        171
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "node_start",
+      "file": "assets/runtime/node_start.png",
+      "widthPx": 192,
+      "heightPx": 192,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        42,
+        34,
+        150,
+        157
+      ],
+      "sha256": "b9e596d314a8ec54c3e9d84b3be2caf08ba0fbe44322389781bdeef6d7ab4435",
+      "decodedBytesRGBA": 147456,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "nodeVisual:start",
+      "source": "native/ClassroomProbe/Resources/Art/node_start.png",
+      "sourceSHA256": "0af7a86ace9e8ca766ff4883dde05a121fff8afbe4c26f62dc1f1f58484ba87c",
+      "anchorPx": [
+        96.0,
+        157
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "node_unknown",
+      "file": "assets/runtime/node_unknown.png",
+      "widthPx": 192,
+      "heightPx": 192,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        25,
+        50,
+        167,
+        154
+      ],
+      "sha256": "1761985422e87bcaf4244e780da34f235888074285298031318292e7962e788b",
+      "decodedBytesRGBA": 147456,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "templateBinding": "nodeVisual:unknown",
+      "source": "native/ClassroomProbe/Resources/Art/node_unknown.png",
+      "sourceSHA256": "fe3dbb985b4777a77314d4ef025d958934c0aeb7e29b85417a868658c326dbf3",
+      "anchorPx": [
+        96.0,
+        154
+      ],
+      "reuseMethod": "full-canvas uniform resample; no semantic cropping",
+      "animation": "static fallback, no direction/limb frames"
+    },
+    {
+      "id": "map_adventurer_idle",
+      "file": "assets/sprites/map_adventurer_idle.png",
+      "widthPx": 64,
+      "heightPx": 64,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        18,
+        10,
+        53,
+        57
+      ],
+      "sha256": "a79ca305cb0b488af27480aa8dffec83b5bbdad9ee9adb640beaede027cf9572",
+      "decodedBytesRGBA": 16384,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "source": "assets/sprites/map_adventurer_idle.svg",
+      "anchorPx": [
+        32,
+        57
+      ],
+      "directions": [
+        "east"
+      ],
+      "animationManifest": "animation-manifest.json"
+    },
+    {
+      "id": "map_adventurer_sheet",
+      "file": "assets/sprites/map_adventurer_sheet.png",
+      "widthPx": 1024,
+      "heightPx": 256,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        18,
+        9,
+        1013,
+        249
+      ],
+      "sha256": "28c3db8c326346a0d2a2b2fa1b78b5c9cca39c700dbe83d812d32cfaec13faf6",
+      "decodedBytesRGBA": 1048576,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "source": "assets/sprites/map_adventurer_sheet.svg",
+      "anchorPx": [
+        32,
+        57
+      ],
+      "directions": [
+        "south",
+        "east",
+        "north",
+        "west"
+      ],
+      "animationManifest": "animation-manifest.json"
+    },
+    {
+      "id": "map_slime_idle",
+      "file": "assets/sprites/map_slime_idle.png",
+      "widthPx": 64,
+      "heightPx": 64,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        13,
+        16,
+        55,
+        57
+      ],
+      "sha256": "e462d663a98af04b290805622fce727d9a1e674e413636825bea7c846c98e0fa",
+      "decodedBytesRGBA": 16384,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "source": "assets/sprites/map_slime_idle.svg",
+      "anchorPx": [
+        32,
+        57
+      ],
+      "directions": [
+        "west"
+      ],
+      "animationManifest": "animation-manifest.json"
+    },
+    {
+      "id": "map_slime_sheet",
+      "file": "assets/sprites/map_slime_sheet.png",
+      "widthPx": 1024,
+      "heightPx": 256,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        13,
+        10,
+        1015,
+        249
+      ],
+      "sha256": "f17728499e69062d7ee80bf7d0ada4f4dbb7212f66ce754d7d7e9214a5490593",
+      "decodedBytesRGBA": 1048576,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "source": "assets/sprites/map_slime_sheet.svg",
+      "anchorPx": [
+        32,
+        57
+      ],
+      "directions": [
+        "south",
+        "east",
+        "north",
+        "west"
+      ],
+      "animationManifest": "animation-manifest.json"
+    },
+    {
+      "id": "camera_focus",
+      "file": "assets/ui/camera_focus.png",
+      "widthPx": 64,
+      "heightPx": 64,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        6,
+        6,
+        58,
+        58
+      ],
+      "sha256": "7e5326a593a1d1f1c55cdf92ad88e0ae1306eb0a9c6d33d6f1a31387887314d1",
+      "decodedBytesRGBA": 16384,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "source": "assets/ui/camera_focus.svg",
+      "anchorPx": [
+        32,
+        32
+      ],
+      "direction": "east base arrow, rotate to world ray if arrow; otherwise neutral",
+      "stop": "static",
+      "reducedMotion": "same static glyph"
+    },
+    {
+      "id": "edge_arrow",
+      "file": "assets/ui/edge_arrow.png",
+      "widthPx": 64,
+      "heightPx": 64,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        11,
+        13,
+        56,
+        51
+      ],
+      "sha256": "9364ce72db6116f3bfb4c14f8abea7b31e4937b8036526ae8a11c25ad74374ed",
+      "decodedBytesRGBA": 16384,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "source": "assets/ui/edge_arrow.svg",
+      "anchorPx": [
+        32,
+        32
+      ],
+      "direction": "east base arrow, rotate to world ray if arrow; otherwise neutral",
+      "stop": "static",
+      "reducedMotion": "same static glyph"
+    },
+    {
+      "id": "shop_entry",
+      "file": "assets/ui/shop_entry.png",
+      "widthPx": 64,
+      "heightPx": 64,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        5,
+        8,
+        59,
+        55
+      ],
+      "sha256": "1bf419665d103bea6e84662e610b2b5400fc23f8e177b08cae0da1a5f2b1f3d8",
+      "decodedBytesRGBA": 16384,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "source": "assets/ui/shop_entry.svg",
+      "anchorPx": [
+        32,
+        32
+      ],
+      "direction": "east base arrow, rotate to world ray if arrow; otherwise neutral",
+      "stop": "static",
+      "reducedMotion": "same static glyph"
+    },
+    {
+      "id": "track_cap",
+      "file": "assets/ui/track_cap.png",
+      "widthPx": 64,
+      "heightPx": 64,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        9,
+        9,
+        55,
+        55
+      ],
+      "sha256": "61f45affc410752e30b9849db1ea939ec0e8b83110fde0a7a2f1711f7a6a808a",
+      "decodedBytesRGBA": 16384,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "source": "assets/ui/track_cap.svg",
+      "anchorPx": [
+        32,
+        32
+      ],
+      "direction": "east base arrow, rotate to world ray if arrow; otherwise neutral",
+      "stop": "static",
+      "reducedMotion": "same static glyph"
+    },
+    {
+      "id": "track_pointer",
+      "file": "assets/ui/track_pointer.png",
+      "widthPx": 64,
+      "heightPx": 64,
+      "mode": "RGBA",
+      "colorSpace": "sRGB",
+      "hasTransparentPixels": true,
+      "alphaBoundsPx": [
+        13,
+        15,
+        51,
+        49
+      ],
+      "sha256": "159c21986b4426a1eee72e4e2a5cc0157b4a78c4e7ecabd4e4dc8bf5db397e25",
+      "decodedBytesRGBA": 16384,
+      "status": "candidate-awaiting-art-review",
+      "bakedDynamicText": false,
+      "semanticFit": "aspectFit full canvas",
+      "source": "assets/ui/track_pointer.svg",
+      "anchorPx": [
+        32,
+        32
+      ],
+      "direction": "east base arrow, rotate to world ray if arrow; otherwise neutral",
+      "stop": "static",
+      "reducedMotion": "same static glyph"
+    }
+  ],
+  "counts": {
+    "runtimeReuse": 40,
+    "bytePreservedEffects": 12,
+    "newPNG": 16
+  },
+  "noAppOrRuleWrites": true,
+  "manifestDirectionsAreNot16Way": true
+}

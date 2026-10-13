@@ -1,0 +1,12 @@
+[
+  {
+    "file": "stage2/ui-integration/evidence/native-previews/public-book-16x9.png",
+    "sha256": "a4009a647ee614bf305c1a699150fd04fa5e16e9144f86d9190bc4f18c2a6d11",
+    "modified": false
+  },
+  {
+    "file": "stage2/ui-integration/evidence/native-previews/public-book-4x3.png",
+    "sha256": "be5528bf7135f9f8e62e3fa41e398455bc3f417f5904548512ba17a4a01b06de",
+    "modified": false
+  }
+]

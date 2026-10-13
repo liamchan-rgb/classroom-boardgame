@@ -1,0 +1,197 @@
+{
+  "status": "awaiting-review",
+  "colors": {
+    "ink": "#173F50",
+    "primary": "#176A86",
+    "muted": "#496977",
+    "cream": "#FFFCF2",
+    "gold": "#B7863E"
+  },
+  "layouts": {
+    "exploration_16x9": {
+      "canvas": [
+        1920,
+        1080
+      ],
+      "header": [
+        96,
+        54,
+        1728,
+        88
+      ],
+      "map": [
+        96,
+        166,
+        1728,
+        860
+      ],
+      "battle": null,
+      "track": null,
+      "details": null
+    },
+    "player_16x9": {
+      "canvas": [
+        1920,
+        1080
+      ],
+      "header": [
+        96,
+        54,
+        1728,
+        88
+      ],
+      "map": [
+        96,
+        166,
+        960,
+        480
+      ],
+      "battle": [
+        1080,
+        166,
+        744,
+        480
+      ],
+      "track": [
+        96,
+        664,
+        1728,
+        104
+      ],
+      "details": [
+        96,
+        786,
+        1728,
+        240
+      ]
+    },
+    "monster_16x9": {
+      "canvas": [
+        1920,
+        1080
+      ],
+      "header": [
+        96,
+        54,
+        1728,
+        88
+      ],
+      "map": [
+        96,
+        166,
+        960,
+        738
+      ],
+      "battle": [
+        1080,
+        166,
+        744,
+        738
+      ],
+      "track": [
+        96,
+        922,
+        1728,
+        104
+      ],
+      "details": null
+    },
+    "exploration_4x3": {
+      "canvas": [
+        1440,
+        1080
+      ],
+      "header": [
+        72,
+        54,
+        1296,
+        88
+      ],
+      "map": [
+        72,
+        166,
+        1296,
+        860
+      ],
+      "battle": null,
+      "track": null,
+      "details": null
+    },
+    "player_4x3": {
+      "canvas": [
+        1440,
+        1080
+      ],
+      "header": [
+        72,
+        54,
+        1296,
+        88
+      ],
+      "map": [
+        72,
+        166,
+        600,
+        480
+      ],
+      "battle": [
+        696,
+        166,
+        672,
+        480
+      ],
+      "track": [
+        72,
+        664,
+        1296,
+        104
+      ],
+      "details": [
+        72,
+        786,
+        1296,
+        240
+      ]
+    },
+    "monster_4x3": {
+      "canvas": [
+        1440,
+        1080
+      ],
+      "header": [
+        72,
+        54,
+        1296,
+        88
+      ],
+      "map": [
+        72,
+        166,
+        600,
+        738
+      ],
+      "battle": [
+        696,
+        166,
+        672,
+        738
+      ],
+      "track": [
+        72,
+        922,
+        1296,
+        104
+      ],
+      "details": null
+    }
+  },
+  "publicMinimumFontPx": 24,
+  "teacherTouchMinimumPt": 44,
+  "material": "native regular Material; preview solid approximation",
+  "camera": {
+    "worldScaleIsotropic": true,
+    "minimumBodyDisplayPx": 64,
+    "offscreenMarginPx": 48,
+    "markerSpacingPx": 90
+  }
+}

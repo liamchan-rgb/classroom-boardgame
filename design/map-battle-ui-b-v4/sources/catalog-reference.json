@@ -1,0 +1,1603 @@
+{
+  "formatVersion": 1,
+  "rules": {
+    "decisionSeconds": 30,
+    "rescueCost": 2,
+    "rescueScore": 2,
+    "pvpKnockoutScore": 2,
+    "starterWeapon": "trainingSword",
+    "revivalStone": "revivalStone",
+    "defaultRewardCoins": 10,
+    "defaultRewardScore": 2,
+    "mapNodeCount": 10,
+    "mapDistribution": {
+      "start": 1,
+      "combat": 4,
+      "boss": 1,
+      "reward": 3,
+      "empty": 1
+    }
+  },
+  "classes": [
+    {
+      "id": "adventurer",
+      "name": "冒险者",
+      "attributes": {
+        "maximumHealth": 12,
+        "damage": 0,
+        "baseAP": 3,
+        "maximumAP": 8,
+        "range": 0
+      },
+      "skills": [
+        "heavyStrike",
+        "breather",
+        "simpleGuard"
+      ]
+    },
+    {
+      "id": "ranger",
+      "name": "游侠",
+      "attributes": {
+        "maximumHealth": 18,
+        "damage": 0,
+        "baseAP": 3,
+        "maximumAP": 8,
+        "range": 0
+      },
+      "skills": [
+        "ambush",
+        "support",
+        "rally"
+      ]
+    },
+    {
+      "id": "spellblade",
+      "name": "魔剑士",
+      "attributes": {
+        "maximumHealth": 24,
+        "damage": 0,
+        "baseAP": 3,
+        "maximumAP": 8,
+        "range": 0
+      },
+      "skills": [
+        "runeSlash",
+        "runeWard",
+        "battleRune"
+      ]
+    },
+    {
+      "id": "dragonKnight",
+      "name": "龙骑士",
+      "attributes": {
+        "maximumHealth": 32,
+        "damage": 0,
+        "baseAP": 3,
+        "maximumAP": 8,
+        "range": 0
+      },
+      "skills": [
+        "dragonFlame",
+        "dragonScaleWard",
+        "dragonOrder"
+      ]
+    }
+  ],
+  "skills": [
+    {
+      "id": "heavyStrike",
+      "name": "强击",
+      "cost": 1,
+      "target": "enemy",
+      "range": 0,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "damage",
+          "scope": "targets",
+          "amount": 0,
+          "rounds": 0,
+          "dice": {
+            "sides": 6,
+            "count": 1,
+            "flat": 2
+          }
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "breather",
+      "name": "喘息",
+      "cost": 1,
+      "target": "selfOnly",
+      "range": 0,
+      "stage": "both",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "heal",
+          "scope": "targets",
+          "amount": 4,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "simpleGuard",
+      "name": "简易防护",
+      "cost": 1,
+      "target": "selfOnly",
+      "range": 0,
+      "stage": "both",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "shield",
+          "scope": "targets",
+          "amount": 4,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "ambush",
+      "name": "突袭",
+      "cost": 2,
+      "target": "enemy",
+      "range": 1,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "damage",
+          "scope": "targets",
+          "amount": 0,
+          "rounds": 0,
+          "dice": {
+            "sides": 8,
+            "count": 2,
+            "flat": 2
+          }
+        },
+        {
+          "kind": "heal",
+          "scope": "caster",
+          "amount": 3,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "support",
+      "name": "援护",
+      "cost": 1,
+      "target": "ally",
+      "range": 1,
+      "stage": "both",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "heal",
+          "scope": "targets",
+          "amount": 6,
+          "rounds": 0,
+          "dice": null
+        },
+        {
+          "kind": "shield",
+          "scope": "targets",
+          "amount": 4,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "rally",
+      "name": "振奋",
+      "cost": 1,
+      "target": "alliesAtNode",
+      "range": 0,
+      "stage": "both",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "damageBuff",
+          "scope": "targets",
+          "amount": 2,
+          "rounds": 1,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "runeSlash",
+      "name": "符文斩",
+      "cost": 2,
+      "target": "enemy",
+      "range": 1,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "damage",
+          "scope": "targets",
+          "amount": 0,
+          "rounds": 0,
+          "dice": {
+            "sides": 12,
+            "count": 2,
+            "flat": 2
+          }
+        },
+        {
+          "kind": "heal",
+          "scope": "caster",
+          "amount": 4,
+          "rounds": 0,
+          "dice": null
+        },
+        {
+          "kind": "shield",
+          "scope": "caster",
+          "amount": 4,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "runeWard",
+      "name": "符文庇护",
+      "cost": 2,
+      "target": "alliesAtNode",
+      "range": 1,
+      "stage": "both",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "heal",
+          "scope": "targets",
+          "amount": 8,
+          "rounds": 0,
+          "dice": null
+        },
+        {
+          "kind": "shield",
+          "scope": "targets",
+          "amount": 6,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "battleRune",
+      "name": "战斗符文",
+      "cost": 1,
+      "target": "alliesAtNode",
+      "range": 1,
+      "stage": "both",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "shield",
+          "scope": "targets",
+          "amount": 4,
+          "rounds": 0,
+          "dice": null
+        },
+        {
+          "kind": "damageBuff",
+          "scope": "targets",
+          "amount": 3,
+          "rounds": 2,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "dragonFlame",
+      "name": "龙焰",
+      "cost": 2,
+      "target": "enemiesAtNode",
+      "range": 1,
+      "stage": "battle",
+      "uses": 1,
+      "effects": [
+        {
+          "kind": "damage",
+          "scope": "targets",
+          "amount": 0,
+          "rounds": 0,
+          "dice": {
+            "sides": 20,
+            "count": 1,
+            "flat": 6
+          }
+        },
+        {
+          "kind": "heal",
+          "scope": "caster",
+          "amount": 6,
+          "rounds": 0,
+          "dice": null
+        },
+        {
+          "kind": "shield",
+          "scope": "caster",
+          "amount": 6,
+          "rounds": 0,
+          "dice": null
+        },
+        {
+          "kind": "damageBuff",
+          "scope": "caster",
+          "amount": 2,
+          "rounds": 2,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "dragonScaleWard",
+      "name": "龙鳞庇护",
+      "cost": 2,
+      "target": "alliesAtNode",
+      "range": 1,
+      "stage": "both",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "heal",
+          "scope": "targets",
+          "amount": 12,
+          "rounds": 0,
+          "dice": null
+        },
+        {
+          "kind": "shield",
+          "scope": "targets",
+          "amount": 10,
+          "rounds": 0,
+          "dice": null
+        },
+        {
+          "kind": "damageBuff",
+          "scope": "targets",
+          "amount": 2,
+          "rounds": 1,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "dragonOrder",
+      "name": "龙之号令",
+      "cost": 2,
+      "target": "alliesAtNode",
+      "range": 1,
+      "stage": "both",
+      "uses": 1,
+      "effects": [
+        {
+          "kind": "heal",
+          "scope": "targets",
+          "amount": 6,
+          "rounds": 0,
+          "dice": null
+        },
+        {
+          "kind": "shield",
+          "scope": "targets",
+          "amount": 8,
+          "rounds": 0,
+          "dice": null
+        },
+        {
+          "kind": "damageBuff",
+          "scope": "targets",
+          "amount": 4,
+          "rounds": 2,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "starlightPulse",
+      "name": "星辉脉冲",
+      "cost": 2,
+      "target": "enemiesAtNode",
+      "range": 1,
+      "stage": "battle",
+      "uses": 1,
+      "effects": [
+        {
+          "kind": "damage",
+          "scope": "targets",
+          "amount": 0,
+          "rounds": 0,
+          "dice": {
+            "sides": 12,
+            "count": 1,
+            "flat": 4
+          }
+        },
+        {
+          "kind": "heal",
+          "scope": "caster",
+          "amount": 6,
+          "rounds": 0,
+          "dice": null
+        },
+        {
+          "kind": "shield",
+          "scope": "caster",
+          "amount": 6,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "dragonSoulWard",
+      "name": "龙魂庇护",
+      "cost": 2,
+      "target": "alliesAtNode",
+      "range": 1,
+      "stage": "battle",
+      "uses": 1,
+      "effects": [
+        {
+          "kind": "heal",
+          "scope": "targets",
+          "amount": 10,
+          "rounds": 0,
+          "dice": null
+        },
+        {
+          "kind": "shield",
+          "scope": "targets",
+          "amount": 10,
+          "rounds": 0,
+          "dice": null
+        },
+        {
+          "kind": "damageBuff",
+          "scope": "targets",
+          "amount": 3,
+          "rounds": 2,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "stoneSkin",
+      "name": "石肤",
+      "cost": 1,
+      "target": "selfOnly",
+      "range": 0,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "shield",
+          "scope": "targets",
+          "amount": 6,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 1,
+      "condition": "shieldEmpty",
+      "oncePerTurn": true
+    },
+    {
+      "id": "regeneration",
+      "name": "再生",
+      "cost": 1,
+      "target": "selfOnly",
+      "range": 0,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "heal",
+          "scope": "targets",
+          "amount": 8,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 1,
+      "condition": "healthHalfOrLess",
+      "oncePerTurn": true
+    },
+    {
+      "id": "sweep",
+      "name": "横扫",
+      "cost": 2,
+      "target": "enemiesAtNode",
+      "range": 0,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "damage",
+          "scope": "targets",
+          "amount": 0,
+          "rounds": 0,
+          "dice": {
+            "sides": 12,
+            "count": 1,
+            "flat": 0
+          }
+        }
+      ],
+      "priority": 2,
+      "condition": "twoEnemiesAtNode",
+      "oncePerTurn": false
+    },
+    {
+      "id": "monsterDragonScale",
+      "name": "龙鳞",
+      "cost": 1,
+      "target": "selfOnly",
+      "range": 0,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "shield",
+          "scope": "targets",
+          "amount": 10,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 1,
+      "condition": "shieldEmpty",
+      "oncePerTurn": true
+    },
+    {
+      "id": "monsterDragonFlame",
+      "name": "龙焰",
+      "cost": 2,
+      "target": "enemiesAtNode",
+      "range": 1,
+      "stage": "battle",
+      "uses": 1,
+      "effects": [
+        {
+          "kind": "damage",
+          "scope": "targets",
+          "amount": 0,
+          "rounds": 0,
+          "dice": {
+            "sides": 20,
+            "count": 1,
+            "flat": 0
+          }
+        }
+      ],
+      "priority": 2,
+      "condition": "twoEnemiesAtNode",
+      "oncePerTurn": false
+    }
+  ],
+  "items": [
+    {
+      "id": "trainingSword",
+      "name": "训练短剑",
+      "kind": "equipment",
+      "slot": "weapon",
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": {
+        "dice": {
+          "sides": 6,
+          "count": 1,
+          "flat": 0
+        },
+        "range": 0
+      },
+      "purchasePrice": 10,
+      "sellPrice": 5,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "huntingBow",
+      "name": "猎弓",
+      "kind": "equipment",
+      "slot": "weapon",
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": {
+        "dice": {
+          "sides": 8,
+          "count": 1,
+          "flat": 0
+        },
+        "range": 1
+      },
+      "purchasePrice": 50,
+      "sellPrice": 25,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "greatSword",
+      "name": "重剑",
+      "kind": "equipment",
+      "slot": "weapon",
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": {
+        "dice": {
+          "sides": 12,
+          "count": 1,
+          "flat": 0
+        },
+        "range": 0
+      },
+      "purchasePrice": 100,
+      "sellPrice": 50,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "legendaryStaff",
+      "name": "传奇权杖",
+      "kind": "equipment",
+      "slot": "weapon",
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": {
+        "dice": {
+          "sides": 20,
+          "count": 1,
+          "flat": 0
+        },
+        "range": 1
+      },
+      "purchasePrice": 200,
+      "sellPrice": 100,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "leatherArmor",
+      "name": "皮甲",
+      "kind": "equipment",
+      "slot": "armor",
+      "attributes": {
+        "maximumHealth": 4,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": 30,
+      "sellPrice": 15,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "runeArmor",
+      "name": "符文甲",
+      "kind": "equipment",
+      "slot": "armor",
+      "attributes": {
+        "maximumHealth": 8,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": 60,
+      "sellPrice": 30,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "powerBadge",
+      "name": "力量徽章",
+      "kind": "equipment",
+      "slot": "accessory",
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 2,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": 50,
+      "sellPrice": 25,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "actionRing",
+      "name": "行动戒指",
+      "kind": "equipment",
+      "slot": "accessory",
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 1,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": 100,
+      "sellPrice": 50,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "smallPotion",
+      "name": "小治疗药水",
+      "kind": "consumable",
+      "slot": null,
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": 10,
+      "sellPrice": 5,
+      "setID": null,
+      "heal": 6,
+      "shield": 0,
+      "range": 1
+    },
+    {
+      "id": "largePotion",
+      "name": "大治疗药水",
+      "kind": "consumable",
+      "slot": null,
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": 20,
+      "sellPrice": 10,
+      "setID": null,
+      "heal": 12,
+      "shield": 0,
+      "range": 1
+    },
+    {
+      "id": "shieldPotion",
+      "name": "护盾药水",
+      "kind": "consumable",
+      "slot": null,
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": 15,
+      "sellPrice": 7,
+      "setID": null,
+      "heal": 0,
+      "shield": 8,
+      "range": 1
+    },
+    {
+      "id": "revivalStone",
+      "name": "复活石",
+      "kind": "revivalStone",
+      "slot": null,
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": 30,
+      "sellPrice": 15,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "starlightBlade",
+      "name": "星辉刃",
+      "kind": "equipment",
+      "slot": "weapon",
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": {
+        "dice": {
+          "sides": 12,
+          "count": 1,
+          "flat": 0
+        },
+        "range": 1
+      },
+      "purchasePrice": null,
+      "sellPrice": 80,
+      "setID": "starlight",
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "starlightArmor",
+      "name": "星辉甲",
+      "kind": "equipment",
+      "slot": "armor",
+      "attributes": {
+        "maximumHealth": 8,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": null,
+      "sellPrice": 45,
+      "setID": "starlight",
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "starlightCharm",
+      "name": "星辉饰品",
+      "kind": "equipment",
+      "slot": "accessory",
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 2,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": null,
+      "sellPrice": 45,
+      "setID": "starlight",
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "dragonFangSword",
+      "name": "龙牙剑",
+      "kind": "equipment",
+      "slot": "weapon",
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": {
+        "dice": {
+          "sides": 20,
+          "count": 1,
+          "flat": 0
+        },
+        "range": 0
+      },
+      "purchasePrice": null,
+      "sellPrice": 130,
+      "setID": "dragonMark",
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "dragonArmor",
+      "name": "龙纹甲",
+      "kind": "equipment",
+      "slot": "armor",
+      "attributes": {
+        "maximumHealth": 12,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": null,
+      "sellPrice": 75,
+      "setID": "dragonMark",
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "dragonCharm",
+      "name": "龙纹饰品",
+      "kind": "equipment",
+      "slot": "accessory",
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 3,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": null,
+      "sellPrice": 75,
+      "setID": "dragonMark",
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    }
+  ],
+  "sets": [
+    {
+      "id": "starlight",
+      "name": "星辉",
+      "items": [
+        "starlightBlade",
+        "starlightArmor",
+        "starlightCharm"
+      ],
+      "twoPieces": {
+        "maximumHealth": 4,
+        "damage": 1,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "threePieces": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 1,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "skill": "starlightPulse"
+    },
+    {
+      "id": "dragonMark",
+      "name": "龙纹",
+      "items": [
+        "dragonFangSword",
+        "dragonArmor",
+        "dragonCharm"
+      ],
+      "twoPieces": {
+        "maximumHealth": 6,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 2,
+        "range": 0
+      },
+      "threePieces": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 1,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "skill": "dragonSoulWard"
+    }
+  ],
+  "monsters": [
+    {
+      "id": "slime",
+      "name": "捣蛋史莱姆",
+      "boss": false,
+      "attributes": {
+        "maximumHealth": 8,
+        "damage": 0,
+        "baseAP": 1,
+        "maximumAP": 8,
+        "range": 0
+      },
+      "shield": 0,
+      "attack": {
+        "dice": {
+          "sides": 4,
+          "count": 1,
+          "flat": 0
+        },
+        "range": 0
+      },
+      "strategy": "nearest",
+      "skills": [],
+      "score": 1,
+      "drops": [
+        {
+          "itemID": null,
+          "coins": 5,
+          "count": 1,
+          "percent": 50
+        },
+        {
+          "itemID": "smallPotion",
+          "coins": 0,
+          "count": 1,
+          "percent": 20
+        },
+        {
+          "itemID": "trainingSword",
+          "coins": 0,
+          "count": 1,
+          "percent": 10
+        },
+        {
+          "itemID": "starlightBlade",
+          "coins": 0,
+          "count": 1,
+          "percent": 1
+        },
+        {
+          "itemID": "starlightArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 1
+        },
+        {
+          "itemID": "starlightCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 1
+        },
+        {
+          "itemID": "dragonFangSword",
+          "coins": 0,
+          "count": 1,
+          "percent": 1
+        },
+        {
+          "itemID": "dragonArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 1
+        },
+        {
+          "itemID": "dragonCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 1
+        }
+      ]
+    },
+    {
+      "id": "wolf",
+      "name": "森林狼",
+      "boss": false,
+      "attributes": {
+        "maximumHealth": 12,
+        "damage": 0,
+        "baseAP": 2,
+        "maximumAP": 8,
+        "range": 0
+      },
+      "shield": 0,
+      "attack": {
+        "dice": {
+          "sides": 6,
+          "count": 1,
+          "flat": 0
+        },
+        "range": 0
+      },
+      "strategy": "lowestHealthRatio",
+      "skills": [],
+      "score": 1,
+      "drops": [
+        {
+          "itemID": null,
+          "coins": 5,
+          "count": 1,
+          "percent": 50
+        },
+        {
+          "itemID": "smallPotion",
+          "coins": 0,
+          "count": 1,
+          "percent": 20
+        },
+        {
+          "itemID": "leatherArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 10
+        },
+        {
+          "itemID": "starlightBlade",
+          "coins": 0,
+          "count": 1,
+          "percent": 1
+        },
+        {
+          "itemID": "starlightArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 1
+        },
+        {
+          "itemID": "starlightCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 1
+        },
+        {
+          "itemID": "dragonFangSword",
+          "coins": 0,
+          "count": 1,
+          "percent": 1
+        },
+        {
+          "itemID": "dragonArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 1
+        },
+        {
+          "itemID": "dragonCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 1
+        }
+      ]
+    },
+    {
+      "id": "goblinArcher",
+      "name": "哥布林弓手",
+      "boss": false,
+      "attributes": {
+        "maximumHealth": 12,
+        "damage": 0,
+        "baseAP": 2,
+        "maximumAP": 8,
+        "range": 0
+      },
+      "shield": 0,
+      "attack": {
+        "dice": {
+          "sides": 6,
+          "count": 1,
+          "flat": 0
+        },
+        "range": 1
+      },
+      "strategy": "nearest",
+      "skills": [],
+      "score": 1,
+      "drops": [
+        {
+          "itemID": null,
+          "coins": 5,
+          "count": 1,
+          "percent": 50
+        },
+        {
+          "itemID": "shieldPotion",
+          "coins": 0,
+          "count": 1,
+          "percent": 15
+        },
+        {
+          "itemID": "huntingBow",
+          "coins": 0,
+          "count": 1,
+          "percent": 10
+        },
+        {
+          "itemID": "starlightBlade",
+          "coins": 0,
+          "count": 1,
+          "percent": 1
+        },
+        {
+          "itemID": "starlightArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 1
+        },
+        {
+          "itemID": "starlightCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 1
+        },
+        {
+          "itemID": "dragonFangSword",
+          "coins": 0,
+          "count": 1,
+          "percent": 1
+        },
+        {
+          "itemID": "dragonArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 1
+        },
+        {
+          "itemID": "dragonCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 1
+        }
+      ]
+    },
+    {
+      "id": "stoneGuardian",
+      "name": "石像守卫",
+      "boss": false,
+      "attributes": {
+        "maximumHealth": 24,
+        "damage": 0,
+        "baseAP": 2,
+        "maximumAP": 8,
+        "range": 0
+      },
+      "shield": 6,
+      "attack": {
+        "dice": {
+          "sides": 8,
+          "count": 1,
+          "flat": 0
+        },
+        "range": 0
+      },
+      "strategy": "nearest",
+      "skills": [
+        "stoneSkin"
+      ],
+      "score": 1,
+      "drops": [
+        {
+          "itemID": null,
+          "coins": 5,
+          "count": 1,
+          "percent": 50
+        },
+        {
+          "itemID": "largePotion",
+          "coins": 0,
+          "count": 1,
+          "percent": 20
+        },
+        {
+          "itemID": "runeArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 10
+        },
+        {
+          "itemID": "starlightBlade",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        },
+        {
+          "itemID": "starlightArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        },
+        {
+          "itemID": "starlightCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        },
+        {
+          "itemID": "dragonFangSword",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        },
+        {
+          "itemID": "dragonArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        },
+        {
+          "itemID": "dragonCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        }
+      ]
+    },
+    {
+      "id": "caveTroll",
+      "name": "洞穴巨魔",
+      "boss": true,
+      "attributes": {
+        "maximumHealth": 48,
+        "damage": 0,
+        "baseAP": 3,
+        "maximumAP": 8,
+        "range": 0
+      },
+      "shield": 0,
+      "attack": {
+        "dice": {
+          "sides": 10,
+          "count": 1,
+          "flat": 0
+        },
+        "range": 0
+      },
+      "strategy": "lowestHealthRatio",
+      "skills": [
+        "regeneration",
+        "sweep"
+      ],
+      "score": 5,
+      "drops": [
+        {
+          "itemID": null,
+          "coins": 30,
+          "count": 1,
+          "percent": 100
+        },
+        {
+          "itemID": "largePotion",
+          "coins": 0,
+          "count": 1,
+          "percent": 50
+        },
+        {
+          "itemID": "revivalStone",
+          "coins": 0,
+          "count": 1,
+          "percent": 25
+        },
+        {
+          "itemID": "greatSword",
+          "coins": 0,
+          "count": 1,
+          "percent": 20
+        },
+        {
+          "itemID": "actionRing",
+          "coins": 0,
+          "count": 1,
+          "percent": 10
+        },
+        {
+          "itemID": "starlightBlade",
+          "coins": 0,
+          "count": 1,
+          "percent": 8
+        },
+        {
+          "itemID": "starlightArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 8
+        },
+        {
+          "itemID": "starlightCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 8
+        },
+        {
+          "itemID": "dragonFangSword",
+          "coins": 0,
+          "count": 1,
+          "percent": 4
+        },
+        {
+          "itemID": "dragonArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 4
+        },
+        {
+          "itemID": "dragonCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 4
+        }
+      ]
+    },
+    {
+      "id": "ruinDragon",
+      "name": "遗迹魔龙",
+      "boss": true,
+      "attributes": {
+        "maximumHealth": 72,
+        "damage": 0,
+        "baseAP": 3,
+        "maximumAP": 8,
+        "range": 0
+      },
+      "shield": 10,
+      "attack": {
+        "dice": {
+          "sides": 12,
+          "count": 1,
+          "flat": 0
+        },
+        "range": 1
+      },
+      "strategy": "nearest",
+      "skills": [
+        "monsterDragonScale",
+        "monsterDragonFlame"
+      ],
+      "score": 5,
+      "drops": [
+        {
+          "itemID": null,
+          "coins": 30,
+          "count": 1,
+          "percent": 100
+        },
+        {
+          "itemID": "shieldPotion",
+          "coins": 0,
+          "count": 1,
+          "percent": 50
+        },
+        {
+          "itemID": "revivalStone",
+          "coins": 0,
+          "count": 1,
+          "percent": 35
+        },
+        {
+          "itemID": "legendaryStaff",
+          "coins": 0,
+          "count": 1,
+          "percent": 15
+        },
+        {
+          "itemID": "powerBadge",
+          "coins": 0,
+          "count": 1,
+          "percent": 20
+        },
+        {
+          "itemID": "starlightBlade",
+          "coins": 0,
+          "count": 1,
+          "percent": 4
+        },
+        {
+          "itemID": "starlightArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 4
+        },
+        {
+          "itemID": "starlightCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 4
+        },
+        {
+          "itemID": "dragonFangSword",
+          "coins": 0,
+          "count": 1,
+          "percent": 8
+        },
+        {
+          "itemID": "dragonArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 8
+        },
+        {
+          "itemID": "dragonCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 8
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "normal": {
+    "plays": 1,
+    "attackPlays": 1,
+    "suppressed": 2,
+    "phase": "battle",
+    "order": [
+      "committed",
+      "path",
+      "arrival",
+      "panel-open",
+      "restore-terminal-no-play"
+    ],
+    "down": true,
+    "camera": {
+      "x": 0.36,
+      "y": 0.55,
+      "scale": 1250
+    }
+  },
+  "offlineExternalRequestsBlocked": true,
+  "publicImageWhitelistCount": 10,
+  "reducedMotion": {
+    "plays": 1,
+    "attackPlays": 1,
+    "suppressed": 0,
+    "phase": "battle",
+    "order": [
+      "committed",
+      "arrival",
+      "panel-open"
+    ],
+    "down": true,
+    "camera": {
+      "x": 0.36,
+      "y": 0.55,
+      "scale": 1250
+    }
+  },
+  "restoreBeforePlay": {
+    "plays": 0,
+    "attackPlays": 0,
+    "suppressed": 2,
+    "phase": "battle",
+    "order": [
+      "restore-terminal-no-play"
+    ],
+    "down": true,
+    "camera": {
+      "x": 0.36,
+      "y": 0.55,
+      "scale": 1250
+    }
+  }
+}

@@ -1,0 +1,802 @@
+[
+  {
+    "binding": "class:adventurer",
+    "file": "assets/runtime/class_adventurer_portrait.png",
+    "widthPx": 192,
+    "heightPx": 192,
+    "anchorPx": [
+      96.0,
+      162
+    ],
+    "alphaBoundsPx": [
+      46,
+      32,
+      135,
+      162
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/class_adventurer_portrait.png",
+    "sourceSHA256": "0a1509c010698f329b7568eb85766a69497d738e13adbdd2c007f1515bc34c21",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "class:ranger",
+    "file": "assets/runtime/class_ranger_portrait.png",
+    "widthPx": 192,
+    "heightPx": 192,
+    "anchorPx": [
+      96.0,
+      164
+    ],
+    "alphaBoundsPx": [
+      53,
+      28,
+      139,
+      164
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/class_ranger_portrait.png",
+    "sourceSHA256": "d7ad17351283aff1c2d55ef1b470309f65245442355946aa7ad917c8d796cd50",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "class:spellblade",
+    "file": "assets/runtime/class_spellblade_portrait.png",
+    "widthPx": 192,
+    "heightPx": 192,
+    "anchorPx": [
+      96.0,
+      165
+    ],
+    "alphaBoundsPx": [
+      40,
+      35,
+      143,
+      165
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/class_spellblade_portrait.png",
+    "sourceSHA256": "639b1ac1c3f8d97246fc0e90008ccabd50d59ea4e2910b240c3869886bdca5dd",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "class:dragonKnight",
+    "file": "assets/runtime/class_dragon_knight_portrait.png",
+    "widthPx": 192,
+    "heightPx": 192,
+    "anchorPx": [
+      96.0,
+      165
+    ],
+    "alphaBoundsPx": [
+      47,
+      29,
+      150,
+      165
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/class_dragon_knight_portrait.png",
+    "sourceSHA256": "aae2dcd5771df7c0be37ee237e451ccc3418d9fa2974a7aae9c394c58b96dc0d",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "monster:slime",
+    "file": "assets/runtime/monster_slime_portrait.png",
+    "widthPx": 192,
+    "heightPx": 192,
+    "anchorPx": [
+      96.0,
+      159
+    ],
+    "alphaBoundsPx": [
+      36,
+      43,
+      156,
+      159
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/monster_slime_portrait.png",
+    "sourceSHA256": "f43af2575443831de7241708e34b08af66c93c7fbfb790d09719917154e0e356",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "monster:wolf",
+    "file": "assets/runtime/monster_wolf_portrait.png",
+    "widthPx": 192,
+    "heightPx": 192,
+    "anchorPx": [
+      96.0,
+      151
+    ],
+    "alphaBoundsPx": [
+      35,
+      42,
+      161,
+      151
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/monster_wolf_portrait.png",
+    "sourceSHA256": "4426192208ba8ad205c07ad40e718f941d9ee48d1db8a3b743d2f9523e39cc65",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "monster:goblinArcher",
+    "file": "assets/runtime/monster_goblin_archer_portrait.png",
+    "widthPx": 192,
+    "heightPx": 192,
+    "anchorPx": [
+      96.0,
+      154
+    ],
+    "alphaBoundsPx": [
+      47,
+      44,
+      148,
+      154
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/monster_goblin_archer_portrait.png",
+    "sourceSHA256": "8f881cf8dde8e6889c487ec2504a6fd213768062c7e51967882a5b0d1912dca0",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "monster:stoneGuardian",
+    "file": "assets/runtime/monster_stone_guardian_portrait.png",
+    "widthPx": 192,
+    "heightPx": 192,
+    "anchorPx": [
+      96.0,
+      159
+    ],
+    "alphaBoundsPx": [
+      34,
+      33,
+      164,
+      159
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/monster_stone_guardian_portrait.png",
+    "sourceSHA256": "e52fd126cdae4a6c8bf4758550f8096f284ce2cb345d45e4730fa9ce67e3869b",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "monster:caveTroll",
+    "file": "assets/runtime/monster_cave_troll_portrait.png",
+    "widthPx": 192,
+    "heightPx": 192,
+    "anchorPx": [
+      96.0,
+      154
+    ],
+    "alphaBoundsPx": [
+      29,
+      40,
+      155,
+      154
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/monster_cave_troll_portrait.png",
+    "sourceSHA256": "debe3c3f7dd9dd102ff9a056c45440464aadbb1b6117842da0b346792c897cdc",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "monster:ruinDragon",
+    "file": "assets/runtime/monster_ruin_dragon_portrait.png",
+    "widthPx": 192,
+    "heightPx": 192,
+    "anchorPx": [
+      96.0,
+      153
+    ],
+    "alphaBoundsPx": [
+      34,
+      43,
+      165,
+      153
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/monster_ruin_dragon_portrait.png",
+    "sourceSHA256": "7ce49c5d081d977810a28c970f73a1b73cf15c17ec99a360853c435b6e1e2fb2",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "item:trainingSword",
+    "file": "assets/runtime/item_training_sword.png",
+    "widthPx": 96,
+    "heightPx": 96,
+    "anchorPx": [
+      48.0,
+      86
+    ],
+    "alphaBoundsPx": [
+      17,
+      10,
+      79,
+      86
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/item_training_sword.png",
+    "sourceSHA256": "0a9adb9c988f637e8cfe0ccf398ba569b007703d4c904f6bfe1aad0b1c01d75a",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "item:huntingBow",
+    "file": "assets/runtime/item_hunting_bow.png",
+    "widthPx": 96,
+    "heightPx": 96,
+    "anchorPx": [
+      48.0,
+      86
+    ],
+    "alphaBoundsPx": [
+      23,
+      10,
+      73,
+      86
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/item_hunting_bow.png",
+    "sourceSHA256": "3fee4deeb573172ebac211a2d2bf01425e36baae1bf11e6099deeb5152b832f5",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "item:greatSword",
+    "file": "assets/runtime/item_great_sword.png",
+    "widthPx": 96,
+    "heightPx": 96,
+    "anchorPx": [
+      48.0,
+      86
+    ],
+    "alphaBoundsPx": [
+      18,
+      10,
+      78,
+      86
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/item_great_sword.png",
+    "sourceSHA256": "4346576b8de25b1ef4ef7ec78fcafb063ad52f28b3a0c2bca8611d72961bafcd",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "item:legendaryStaff",
+    "file": "assets/runtime/item_legendary_staff.png",
+    "widthPx": 96,
+    "heightPx": 96,
+    "anchorPx": [
+      48.0,
+      86
+    ],
+    "alphaBoundsPx": [
+      19,
+      10,
+      77,
+      86
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/item_legendary_staff.png",
+    "sourceSHA256": "58c5ec4a1f53d6667bffbb46536d000a36020ae85331ab30c3c2a8329ef8d7e1",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "item:leatherArmor",
+    "file": "assets/runtime/item_leather_armor.png",
+    "widthPx": 96,
+    "heightPx": 96,
+    "anchorPx": [
+      48.0,
+      86
+    ],
+    "alphaBoundsPx": [
+      11,
+      10,
+      85,
+      86
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/item_leather_armor.png",
+    "sourceSHA256": "4f70408011bd6151b490ec1f577162d6ec17c78fa93cac7f8bee705c8d57d837",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "item:runeArmor",
+    "file": "assets/runtime/item_rune_armor.png",
+    "widthPx": 96,
+    "heightPx": 96,
+    "anchorPx": [
+      48.0,
+      86
+    ],
+    "alphaBoundsPx": [
+      11,
+      10,
+      85,
+      86
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/item_rune_armor.png",
+    "sourceSHA256": "0f5004f8b2b835c07afc3f4c57a1aaf8e7e2a38dcaf8224f9aadc2cc2de4cec4",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "item:powerBadge",
+    "file": "assets/runtime/item_power_badge.png",
+    "widthPx": 96,
+    "heightPx": 96,
+    "anchorPx": [
+      48.0,
+      86
+    ],
+    "alphaBoundsPx": [
+      17,
+      10,
+      79,
+      86
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/item_power_badge.png",
+    "sourceSHA256": "f34fffcdee2946e9d8810e6267c83748eece205f733027fbdd2a0d40fd29fed2",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "item:actionRing",
+    "file": "assets/runtime/item_action_ring.png",
+    "widthPx": 96,
+    "heightPx": 96,
+    "anchorPx": [
+      48.0,
+      84
+    ],
+    "alphaBoundsPx": [
+      10,
+      12,
+      86,
+      84
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/item_action_ring.png",
+    "sourceSHA256": "092378d8b93850065d65812f225ec15fd347e3aaf1790d5912223eb464df70da",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "item:smallPotion",
+    "file": "assets/runtime/item_small_potion.png",
+    "widthPx": 96,
+    "heightPx": 96,
+    "anchorPx": [
+      48.0,
+      86
+    ],
+    "alphaBoundsPx": [
+      24,
+      10,
+      72,
+      86
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/item_small_potion.png",
+    "sourceSHA256": "cbca94a567e6175d1dfee79b20f66029c48458287fbe5b50b2907ba822d5934e",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "item:largePotion",
+    "file": "assets/runtime/item_large_potion.png",
+    "widthPx": 96,
+    "heightPx": 96,
+    "anchorPx": [
+      48.0,
+      86
+    ],
+    "alphaBoundsPx": [
+      16,
+      10,
+      80,
+      86
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/item_large_potion.png",
+    "sourceSHA256": "9641bb5def250456414108822f279cc9e90a7775e27e756947f8b103cc2e8c72",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "item:shieldPotion",
+    "file": "assets/runtime/item_shield_potion.png",
+    "widthPx": 96,
+    "heightPx": 96,
+    "anchorPx": [
+      48.0,
+      86
+    ],
+    "alphaBoundsPx": [
+      20,
+      10,
+      76,
+      86
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/item_shield_potion.png",
+    "sourceSHA256": "c57f86636af263cf8d22931d0e13630ca959dde5806865c6296df3f3f035ca22",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "item:revivalStone",
+    "file": "assets/runtime/item_revival_stone.png",
+    "widthPx": 96,
+    "heightPx": 96,
+    "anchorPx": [
+      48.0,
+      86
+    ],
+    "alphaBoundsPx": [
+      24,
+      10,
+      72,
+      86
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/item_revival_stone.png",
+    "sourceSHA256": "1d3d594fb9fdb46781eaa6434b3d409cd3195b4ffa0fd03ed3cb22eef29c5803",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "item:starlightBlade",
+    "file": "assets/runtime/item_starlight_blade.png",
+    "widthPx": 96,
+    "heightPx": 96,
+    "anchorPx": [
+      48.0,
+      86
+    ],
+    "alphaBoundsPx": [
+      17,
+      10,
+      79,
+      86
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/item_starlight_blade.png",
+    "sourceSHA256": "18bc18bf6774b211b239d2a09c16cdd30634073fe2cb9b0102e4a22da3b30b97",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "item:starlightArmor",
+    "file": "assets/runtime/item_starlight_armor.png",
+    "widthPx": 96,
+    "heightPx": 96,
+    "anchorPx": [
+      48.0,
+      86
+    ],
+    "alphaBoundsPx": [
+      10,
+      10,
+      86,
+      86
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/item_starlight_armor.png",
+    "sourceSHA256": "3b4f924992683ea05d4157e15ea9e453b2e2e65481b40248b00d03233ec18296",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "item:starlightCharm",
+    "file": "assets/runtime/item_starlight_charm.png",
+    "widthPx": 96,
+    "heightPx": 96,
+    "anchorPx": [
+      48.0,
+      86
+    ],
+    "alphaBoundsPx": [
+      22,
+      10,
+      74,
+      86
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/item_starlight_charm.png",
+    "sourceSHA256": "d8571049fa8d39aaabbccb6046c9f6038f6ef5c66cede038ad06ae168b9ed5ca",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "item:dragonFangSword",
+    "file": "assets/runtime/item_dragon_fang_sword.png",
+    "widthPx": 96,
+    "heightPx": 96,
+    "anchorPx": [
+      48.0,
+      86
+    ],
+    "alphaBoundsPx": [
+      13,
+      10,
+      83,
+      86
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/item_dragon_fang_sword.png",
+    "sourceSHA256": "8f90a4816e2cf0c89bfc7bb93c5b51cc09b4a44e3fcfe1ae7040a615c3f230ac",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "item:dragonArmor",
+    "file": "assets/runtime/item_dragon_armor.png",
+    "widthPx": 96,
+    "heightPx": 96,
+    "anchorPx": [
+      48.0,
+      86
+    ],
+    "alphaBoundsPx": [
+      10,
+      10,
+      86,
+      86
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/item_dragon_armor.png",
+    "sourceSHA256": "6873c458dcc6e9cc4764f6177b8e2c696ec8886fd1b93faa2adfdea53b35fbc9",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "item:dragonCharm",
+    "file": "assets/runtime/item_dragon_charm.png",
+    "widthPx": 96,
+    "heightPx": 96,
+    "anchorPx": [
+      48.0,
+      86
+    ],
+    "alphaBoundsPx": [
+      23,
+      10,
+      73,
+      86
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/item_dragon_charm.png",
+    "sourceSHA256": "c7f2d5c529b7295b0419d48e879b5ba1fb88030edc244b633315daab0a94d677",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "resource:health",
+    "file": "assets/runtime/icon_health.png",
+    "widthPx": 48,
+    "heightPx": 48,
+    "anchorPx": [
+      24.0,
+      42
+    ],
+    "alphaBoundsPx": [
+      2,
+      8,
+      46,
+      42
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/icon_health.png",
+    "sourceSHA256": "5c8a7e342f21c040811a2275cb495e40915bbd8fc4a58c30eb6b4c84f70c65a2",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "resource:shield",
+    "file": "assets/runtime/icon_shield.png",
+    "widthPx": 48,
+    "heightPx": 48,
+    "anchorPx": [
+      24.0,
+      46
+    ],
+    "alphaBoundsPx": [
+      4,
+      2,
+      44,
+      46
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/icon_shield.png",
+    "sourceSHA256": "0b1155ba83bfa485d40b35fff30d0c231013ee4938cdc5396a1a4b50f5434c1c",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "resource:action",
+    "file": "assets/runtime/icon_action.png",
+    "widthPx": 48,
+    "heightPx": 48,
+    "anchorPx": [
+      24.0,
+      46
+    ],
+    "alphaBoundsPx": [
+      7,
+      2,
+      41,
+      46
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/icon_action.png",
+    "sourceSHA256": "0241713c81477af51f58688b4cb7b6c4adef337797a9cf0a35519b9276568893",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "resource:coin",
+    "file": "assets/runtime/icon_coin.png",
+    "widthPx": 48,
+    "heightPx": 48,
+    "anchorPx": [
+      24.0,
+      45
+    ],
+    "alphaBoundsPx": [
+      3,
+      3,
+      45,
+      45
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/icon_coin.png",
+    "sourceSHA256": "3f80ff65d715874b65d87b65a965581537c513ff5412bf1b8b1120b0aba4461c",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "resource:score",
+    "file": "assets/runtime/icon_score.png",
+    "widthPx": 48,
+    "heightPx": 48,
+    "anchorPx": [
+      24.0,
+      43
+    ],
+    "alphaBoundsPx": [
+      2,
+      3,
+      46,
+      43
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/icon_score.png",
+    "sourceSHA256": "b39bd62794927697f12f5c9385aedb2df97dafee375e3a4de44d931d351c216c",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "resource:downed",
+    "file": "assets/runtime/icon_downed.png",
+    "widthPx": 48,
+    "heightPx": 48,
+    "anchorPx": [
+      24.0,
+      45
+    ],
+    "alphaBoundsPx": [
+      3,
+      3,
+      45,
+      45
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/icon_downed.png",
+    "sourceSHA256": "b6b0b469217f318a078550a51d8d1082dde160022cc8e9573ee688be90418029",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "nodeVisual:start",
+    "file": "assets/runtime/node_start.png",
+    "widthPx": 192,
+    "heightPx": 192,
+    "anchorPx": [
+      96.0,
+      157
+    ],
+    "alphaBoundsPx": [
+      42,
+      34,
+      150,
+      157
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/node_start.png",
+    "sourceSHA256": "0af7a86ace9e8ca766ff4883dde05a121fff8afbe4c26f62dc1f1f58484ba87c",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "nodeVisual:combat",
+    "file": "assets/runtime/node_combat.png",
+    "widthPx": 192,
+    "heightPx": 192,
+    "anchorPx": [
+      96.0,
+      155
+    ],
+    "alphaBoundsPx": [
+      27,
+      39,
+      163,
+      155
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/node_combat.png",
+    "sourceSHA256": "c677d7e9daa6dfb5b29fa7213ccfb20123a73a0d51ea532507efc45078639978",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "nodeVisual:boss",
+    "file": "assets/runtime/node_boss.png",
+    "widthPx": 192,
+    "heightPx": 192,
+    "anchorPx": [
+      96.0,
+      161
+    ],
+    "alphaBoundsPx": [
+      38,
+      36,
+      165,
+      161
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/node_boss.png",
+    "sourceSHA256": "8e079f05a6930e9c01ddccccbcf10cb732393250af2088914a18e1da51c0d20b",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "nodeVisual:reward",
+    "file": "assets/runtime/node_reward.png",
+    "widthPx": 192,
+    "heightPx": 192,
+    "anchorPx": [
+      96.0,
+      171
+    ],
+    "alphaBoundsPx": [
+      23,
+      33,
+      160,
+      171
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/node_reward.png",
+    "sourceSHA256": "e56e9e1a5e6be8f7638c904cf1b5d698ba7a4402ad0dceac279e17abae2a966c",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "nodeVisual:empty",
+    "file": "assets/runtime/node_empty.png",
+    "widthPx": 192,
+    "heightPx": 192,
+    "anchorPx": [
+      96.0,
+      170
+    ],
+    "alphaBoundsPx": [
+      36,
+      41,
+      155,
+      170
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/node_empty.png",
+    "sourceSHA256": "22af9a9cbc1428530526fcdd72e6228a45acd583bcea60618afd66eba9d336b8",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  },
+  {
+    "binding": "nodeVisual:unknown",
+    "file": "assets/runtime/node_unknown.png",
+    "widthPx": 192,
+    "heightPx": 192,
+    "anchorPx": [
+      96.0,
+      154
+    ],
+    "alphaBoundsPx": [
+      25,
+      50,
+      167,
+      154
+    ],
+    "source": "native/ClassroomProbe/Resources/Art/node_unknown.png",
+    "sourceSHA256": "fe3dbb985b4777a77314d4ef025d958934c0aeb7e29b85417a868658c326dbf3",
+    "method": "full-canvas uniform resample; no semantic cropping",
+    "animation": "static fallback, no direction/limb frames"
+  }
+]

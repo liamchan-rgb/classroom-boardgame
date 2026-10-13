@@ -1,0 +1,24 @@
+{
+  "status": "pass",
+  "errors": [],
+  "mainBaseline": "1a4a6014278c5e14ff4b1527bbe91239e0a330f1",
+  "assetsDecoded": 68,
+  "previewCount": 11,
+  "corePreviewCount": 6,
+  "textOutsideCanvas": 0,
+  "pilotCellsChecked": 128,
+  "runtimeReuseRGBABytes": 3078144,
+  "allAssetsRGBABytes": 41162752,
+  "payloadBytes": 1198112,
+  "sourceScope": "new design/map-battle-ui-b-v4 only",
+  "storyBookBaselineUnchanged": true,
+  "appTests": false,
+  "nativeTests": false,
+  "physicalDeviceVerified": false,
+  "artApproved": false,
+  "notes": [
+    "RGBA sums are an estimate if every asset were decoded, not measured live memory.",
+    "Text bbox report is canvas bounds; visual safe regions/HUD require review.",
+    "No IPA build; browser checks are offline display design only."
+  ]
+}

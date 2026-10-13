@@ -1,0 +1,72 @@
+{
+  "canvas": [
+    1024,
+    640
+  ],
+  "layers": [
+    {
+      "id": "battle_back",
+      "z": 0,
+      "file": "assets/layers/battle_back.png",
+      "fit": "crop only nonsemantic environment",
+      "parallaxFactor": 0.03
+    },
+    {
+      "id": "battle_mid",
+      "z": 1,
+      "file": "assets/layers/battle_mid.png",
+      "fit": "crop only nonsemantic environment",
+      "parallaxFactor": 0.05
+    },
+    {
+      "id": "battle_ground",
+      "z": 2,
+      "file": "assets/layers/battle_ground.png",
+      "fit": "crop only nonsemantic environment",
+      "parallaxFactor": 0
+    },
+    {
+      "id": "battle_front",
+      "z": 5,
+      "file": "assets/layers/battle_front.png",
+      "fit": "crop only nonsemantic environment",
+      "parallaxFactor": 0.08
+    }
+  ],
+  "shadow": {
+    "file": "assets/layers/contact_shadow.png",
+    "anchor": [
+      0.5,
+      0.5
+    ],
+    "widthRelativeToSprite": 0.72,
+    "opacity": 0.65
+  },
+  "halo": {
+    "file": "assets/layers/soft_halo.png",
+    "opacity": 0.2,
+    "only": "committed cast/heal/shield, behind actor"
+  },
+  "particles": {
+    "seed": "receiptID",
+    "maximum": 8,
+    "sizePx": [
+      2,
+      4
+    ],
+    "alpha": 0.15,
+    "lifetimeMs": 450,
+    "color": "#D4AC5E",
+    "area": "environment side margins, never text/face"
+  },
+  "reducedMotion": {
+    "parallax": 0,
+    "particles": 0,
+    "shake": 0,
+    "actorTranslation": 0,
+    "halo": 0,
+    "terminal": "immediate committed pose"
+  },
+  "blur": "environment only; none applied to text/icons/actor silhouettes",
+  "downTerminal": "frame or whole-static-art 90deg pivot at feet; keep HUD clear"
+}

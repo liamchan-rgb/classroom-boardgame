@@ -1,0 +1,346 @@
+{
+  "feedbackPriority": "2026-10-13 latest feedback, including layered 2D supplement",
+  "files": [
+    {
+      "ref": "5a7910eadd66dbb492ef9641c7deca937eee30ad",
+      "path": "AGENTS.md",
+      "sha256": "676dec96aaa536a2973fbbd4a185a98770aa4c2b70da958248aa1ef55bc1f76d"
+    },
+    {
+      "ref": "5a7910eadd66dbb492ef9641c7deca937eee30ad",
+      "path": "docs/课堂桌游_需求设计_v1.md",
+      "sha256": "7ebd819fe1f57fd0b2a20121dd025c3ad649cd34be867ac52ca6f280cc708f4d"
+    },
+    {
+      "ref": "5a7910eadd66dbb492ef9641c7deca937eee30ad",
+      "path": "stage2/ui-integration/README.md",
+      "sha256": "cfe391d32dec09f3e0a96a58e0767af6b7827b3882ff655ace9966ae105574d5"
+    },
+    {
+      "ref": "5a7910eadd66dbb492ef9641c7deca937eee30ad",
+      "path": "stage2/ui-feedback-round1-20261013/art-direction-prompt.md",
+      "sha256": "68ff9130003114c1dc4083a7abae9a884d37749f4bbb0c6965721e80b3598985"
+    },
+    {
+      "ref": "5a7910eadd66dbb492ef9641c7deca937eee30ad",
+      "path": "stage2/ui-feedback-round1-20261013/feedback.md",
+      "sha256": "69018b253f6b8f752d7cbaea9b79eb924ade90b457cda4e21cf90227ce205170"
+    },
+    {
+      "ref": "5a7910eadd66dbb492ef9641c7deca937eee30ad",
+      "path": "stage2/ui-feedback-round1-20261013/visual-expectations.md",
+      "sha256": "451f9b5cd40aff3555359278aa6e85affa7f9a93ceedeb9c9400bd68c821271f"
+    },
+    {
+      "ref": "5a7910eadd66dbb492ef9641c7deca937eee30ad",
+      "path": "stage2/ui-integration/evidence/native-previews/teacher-1366x1024.png",
+      "sha256": "c5fc705db884b7e37708e28466171433d19c32de731a8c293c72a25f85ccde86"
+    },
+    {
+      "ref": "5a7910eadd66dbb492ef9641c7deca937eee30ad",
+      "path": "stage2/ui-integration/evidence/native-previews/public-monster-16x9.png",
+      "sha256": "79b64c14c2eedd1abfaaba22ce0f131a3bcf26d5b4e93cd5ffd96a34128b5640"
+    },
+    {
+      "ref": "5a7910eadd66dbb492ef9641c7deca937eee30ad",
+      "path": "stage2/ui-integration/evidence/native-previews/public-feedback-4x3.png",
+      "sha256": "81e62bf88ad292c4cf1646018bd00e00fce502a20caf2a9311af90f82a141765"
+    },
+    {
+      "ref": "5a7910eadd66dbb492ef9641c7deca937eee30ad",
+      "path": "stage2/ui-integration/evidence/native-previews/public-monster-4x3.png",
+      "sha256": "d955e7d8865cf1263a34544a462d1776640c0a3245ed0f69c8394562d51b35e0"
+    },
+    {
+      "ref": "5a7910eadd66dbb492ef9641c7deca937eee30ad",
+      "path": "stage2/ui-integration/evidence/native-previews/report.json",
+      "sha256": "fe66e99bcc521ef9f2b373a2444bc10a837a4d784f0b24c3735c4320ff6498e4"
+    },
+    {
+      "ref": "5a7910eadd66dbb492ef9641c7deca937eee30ad",
+      "path": "stage2/ui-integration/evidence/native-previews/README.md",
+      "sha256": "fb1291c1c619b8754d9a4f31d53d5155f59895da27d319f7fb8f84216bb85e8b"
+    },
+    {
+      "ref": "5a7910eadd66dbb492ef9641c7deca937eee30ad",
+      "path": "stage2/ui-integration/evidence/native-previews/public-reduced-motion-4x3.png",
+      "sha256": "1a0f54deb77f5bf843aa2e894fc47282e005fdaba3075b56748d3e781420251a"
+    },
+    {
+      "ref": "5a7910eadd66dbb492ef9641c7deca937eee30ad",
+      "path": "stage2/ui-integration/evidence/native-previews/public-book-4x3.png",
+      "sha256": "be5528bf7135f9f8e62e3fa41e398455bc3f417f5904548512ba17a4a01b06de"
+    },
+    {
+      "ref": "5a7910eadd66dbb492ef9641c7deca937eee30ad",
+      "path": "stage2/ui-integration/evidence/native-previews/public-player-4x3.png",
+      "sha256": "d1745a310557de72778f97ec1061193012942f759f1b056fd151fdc1f34bd08c"
+    },
+    {
+      "ref": "5a7910eadd66dbb492ef9641c7deca937eee30ad",
+      "path": "stage2/ui-integration/evidence/native-previews/public-unknown-reward.png",
+      "sha256": "16128a76ac1e2c23743f91b82505b953d30bd6c41af16fd229fe3a89798e2925"
+    },
+    {
+      "ref": "5a7910eadd66dbb492ef9641c7deca937eee30ad",
+      "path": "stage2/ui-integration/evidence/native-previews/complete.txt",
+      "sha256": "aee408847d35e44e99430f0979c3357b85fe8dbb4535a494301198adbee85f27"
+    },
+    {
+      "ref": "5a7910eadd66dbb492ef9641c7deca937eee30ad",
+      "path": "stage2/ui-integration/evidence/native-previews/public-player-16x9.png",
+      "sha256": "6656819742264229c44735fc068122c6c92d6c6e7b3a9ba8b2bee31d01c2b203"
+    },
+    {
+      "ref": "5a7910eadd66dbb492ef9641c7deca937eee30ad",
+      "path": "stage2/ui-integration/evidence/native-previews/teacher-1180x820.png",
+      "sha256": "0fbf4493d74cc5ab70e2dd5aa748410a03179946c36a5eee5b6a3fee09716042"
+    },
+    {
+      "ref": "5a7910eadd66dbb492ef9641c7deca937eee30ad",
+      "path": "stage2/ui-integration/evidence/native-previews/public-book-16x9.png",
+      "sha256": "a4009a647ee614bf305c1a699150fd04fa5e16e9144f86d9190bc4f18c2a6d11"
+    },
+    {
+      "ref": "5a7910eadd66dbb492ef9641c7deca937eee30ad",
+      "path": "stage2/ui-integration/evidence/native-previews/public-unknown-boss.png",
+      "sha256": "16128a76ac1e2c23743f91b82505b953d30bd6c41af16fd229fe3a89798e2925"
+    },
+    {
+      "ref": "5a7910eadd66dbb492ef9641c7deca937eee30ad",
+      "path": "native/Packages/GameCore/Sources/ClassroomGameCore/PublicProjection.swift",
+      "sha256": "96431486e4da5739333973eb395b52a6865166aaa408d8cafdcc0b883b3709e8"
+    },
+    {
+      "ref": "5a7910eadd66dbb492ef9641c7deca937eee30ad",
+      "path": "native/Packages/GameCore/Sources/ClassroomGameCore/PlayProjection.swift",
+      "sha256": "d9ee01ecbdb068be11442353705b02d1099c5fd4fdbcfbbda998db5ae2bd39e2"
+    },
+    {
+      "ref": "5a7910eadd66dbb492ef9641c7deca937eee30ad",
+      "path": "native/Packages/GameCore/Sources/ClassroomGameCore/Presentation.swift",
+      "sha256": "42707ab1a006f389086811085cc27ac0034f7753056cdcfd5b6bbbb7e013733a"
+    },
+    {
+      "ref": "5a7910eadd66dbb492ef9641c7deca937eee30ad",
+      "path": "native/ClassroomProbe/PVEMapView.swift",
+      "sha256": "ac3de2c883c8911f3bbd1a2f8afa8cd2f37c1c649fad5c0e010270bbd92c9474"
+    },
+    {
+      "ref": "5a7910eadd66dbb492ef9641c7deca937eee30ad",
+      "path": "native/ClassroomProbe/PVEPublicView.swift",
+      "sha256": "301408d788635f0a725dc36b5684c13319f168aa8af9c505a086d61b6e61fdf9"
+    },
+    {
+      "ref": "5a7910eadd66dbb492ef9641c7deca937eee30ad",
+      "path": "native/ClassroomProbe/NativeVisualValidation.swift",
+      "sha256": "091f7669aad3aaabefbcc744c38fc212b36c3a44525514ce2bb6852e7bfd7c26"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/AGENTS.md",
+      "sha256": "2c19e29d208b67b69cb09a2520cd42fc8c54f2e24f55e90735c7ead1adc4e816"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/ARCHIVE_INDEX.md",
+      "sha256": "d5daa4c6c1250dcaebee1aaaf124514cfd8ec5aeb986c99252954bae31522689"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/reviews/round3-review03_compact-active-turn_20261012.md",
+      "sha256": "10da306d41ed79c5d07e9aa445fe34f9570ea666cb5f62baf3de5de8e6068fc1"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/reviews/round2-review02_public-changes_20261012.md",
+      "sha256": "e29e51c178c2f2978d7a2020e3fee6b03cc751b5851a2e044a581bc808c952ce"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/reviews/round3-review04_public16x9-approved_20261012.md",
+      "sha256": "176d4a50a9c0b3513d9dfac69ecfc07699f469e7634d17bd24974cf94bf8d44c"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/reviews/round3-review05_production-authorized_20261012.md",
+      "sha256": "33fb582e8ad7810835bbc8ed6cf41cfc01e6f73e954779458c5c5ab426af2391"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/reviews/round1-review-feedback_20261012.md",
+      "sha256": "0969cb2ddf83042644d138189c8eb567bd2512234288f5ef1024e28c43c68924"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/reviews/round2-review01_teacher-approved_20261012.md",
+      "sha256": "5d245cb6b19a351f5cd3bc32d46f5e66235f7aec062f0b1b7e33553981b352ab"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/ui-art-delivery-round2/README.md",
+      "sha256": "fd70e73495974503f545cc3568e1a54b569dc79aa9efafa8b031f85afbdd4875"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/ui-art-delivery-round2/annotations/00_review_feedback.md",
+      "sha256": "0969cb2ddf83042644d138189c8eb567bd2512234288f5ef1024e28c43c68924"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/ui-art-delivery-round2/annotations/01_changes_and_handoff.md",
+      "sha256": "09718ce435949a1b6c302cbb078d980fe642459bdf272aa782541c8ebfbe2f60"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/ui-art-delivery-round2/annotations/02_recovery_and_limits.md",
+      "sha256": "befc0b5b48786687836d0dee03bb4700e6394820062db94c4070c0598ac360a1"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/ui-art-delivery-round2/asset-manifest.json",
+      "sha256": "3185041b966659519603228ad16d786e0e4a6af20636dd77d8c947e347dbd744"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/ui-art-delivery-round2/design-tokens.json",
+      "sha256": "30ab748f0207867c306be0a302b198d0e055f75e969fdd8912eb2ef0a155548b"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/ui-art-delivery-round3/README.md",
+      "sha256": "074805ac74e806206d192818362e7225b5d8d952e64ab1d791c13a82532cb6f9"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/ui-art-delivery-round3/annotations/00_review_feedback.md",
+      "sha256": "0969cb2ddf83042644d138189c8eb567bd2512234288f5ef1024e28c43c68924"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/ui-art-delivery-round3/annotations/01_changes_and_handoff.md",
+      "sha256": "456fcdaaee271facb887cde494d17f5452b88eafd74b6170c76a5097986b3c45"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/ui-art-delivery-round3/annotations/02_recovery_and_limits.md",
+      "sha256": "2a7d392d0f97f97f386eb0ddb60c782ca7958032879ce1de12b9ecf08ec1fe24"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/ui-art-delivery-round3/annotations/03_public_review_feedback.md",
+      "sha256": "e29e51c178c2f2978d7a2020e3fee6b03cc751b5851a2e044a581bc808c952ce"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/ui-art-delivery-round3/annotations/04_latest_compact_feedback.md",
+      "sha256": "10da306d41ed79c5d07e9aa445fe34f9570ea666cb5f62baf3de5de8e6068fc1"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/ui-art-delivery-round3/asset-manifest.json",
+      "sha256": "26b7ebf650b06c93fd5a80b6a0342ef44fc93155db9cc217e63b94a77904f98f"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/ui-art-delivery-round3/design-tokens.json",
+      "sha256": "61130e683812ec75d2e3c357f6ae47e0d295bc9f28ab6ebf24f2ea80594f799a"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/art-production-b-v1/README.md",
+      "sha256": "528d5988343bc04f01f9554757ec55b979c6c86372f3391d6ca6ba8bc7e9bc26"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/art-production-b-v1/annotations/asset_sources_and_status.md",
+      "sha256": "4fc6b3be9cff477a1917de563f545eca743d1ad020de28c5c1943d9e8b829724"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/art-production-b-v1/annotations/animation_handoff.md",
+      "sha256": "bf2e256c3a375f90b255bc59ff5ef28c31c97a32ed2b5183f8a2493c0ffb422a"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/art-production-b-v1/animation-manifest.json",
+      "sha256": "648213fd8b8d33235f12c7ac2517b7b9b221ab0cd7ebe73caa0eb40976534f16"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/art-production-b-v1/asset-manifest.json",
+      "sha256": "0b6539308ccd16708fba849b444d1cde31696f63fb6540cf5cefea4886fd57c7"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/map-art-b-v1/README.md",
+      "sha256": "07edaaa219a186333cdfe932a8f920d1e6001d5b84e6af1e83b6b882bd634b56"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/map-art-b-v1/annotations/01_layers_and_states.md",
+      "sha256": "fa8f9acc50cebc0a3148c09b95c3779b0375f0cc0ba4d13988fcc8e27d3e6869"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/map-art-b-v1/annotations/03_sources_and_license.md",
+      "sha256": "5702b67b271095895fa8045314c2c59b29b7c3ba8a1352c4fc1c197e4389830e"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/map-art-b-v1/annotations/02_sizes_and_adaptation.md",
+      "sha256": "c84785ac655fd13fea56040ab567697a2f5b4063e5d848f860a39ff82c23707e"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/map-art-b-v1/annotations/04_validation_and_recovery.md",
+      "sha256": "807cca805b313dc9ce5911997905acad5069b02e9caf8c9bc8c01da687d44bc3"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/map-art-b-v1/asset-manifest.json",
+      "sha256": "f52aae2b4f06612e25a53c6327c31f7a4b96bfad464d5656047f71af20292d48"
+    },
+    {
+      "ref": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+      "path": "design/map-art-b-v1/design-tokens.json",
+      "sha256": "f3da0906f099948e9aaf562b571d408c06ee087c672bcf7300b454ef6a5aa1a8"
+    },
+    {
+      "ref": "1a4a6014278c5e14ff4b1527bbe91239e0a330f1",
+      "path": "stage2/map-ui-v0.10/README.md",
+      "sha256": "fc34d695bebf00b0ca117064bdabe88c1673396806ff624b791200e94e19b609"
+    },
+    {
+      "ref": "1a4a6014278c5e14ff4b1527bbe91239e0a330f1",
+      "path": "native/Packages/GameCore/Sources/ClassroomGameCore/MapPresentation.swift",
+      "sha256": "3e6bf5758ff0ac0e8e08056569018af961f48da8a9ee4642b63f312abce20ed7"
+    },
+    {
+      "ref": "1a4a6014278c5e14ff4b1527bbe91239e0a330f1",
+      "path": "native/Packages/GameCore/Sources/ClassroomGameCore/PlayProjection.swift",
+      "sha256": "14beb013b2623115a0d4957b60115101940d732fd6286a2ba3916bf267588170"
+    },
+    {
+      "ref": "1a4a6014278c5e14ff4b1527bbe91239e0a330f1",
+      "path": "native/Packages/GameCore/Sources/ClassroomGameCore/Presentation.swift",
+      "sha256": "f9ed0eb76d4c07c4a25af1ff83e8d8af6c897efa219a7221e981335324e4f836"
+    },
+    {
+      "ref": "1a4a6014278c5e14ff4b1527bbe91239e0a330f1",
+      "path": "native/ClassroomProbe/PVEPublicView.swift",
+      "sha256": "f17366ae4e4446241b4439a0178aec0928da1154bb6af29bca6e6e5151d37a1b"
+    },
+    {
+      "ref": "1a4a6014278c5e14ff4b1527bbe91239e0a330f1",
+      "path": "native/ClassroomProbe/PVEMapView.swift",
+      "sha256": "9947691f3510252daba972109bece0fdf8adac4ea19cc51f8ea56a808fd6e166"
+    },
+    {
+      "ref": "1a4a6014278c5e14ff4b1527bbe91239e0a330f1",
+      "path": "native/ClassroomProbe/NativeVisualValidation.swift",
+      "sha256": "8ef9198f29bac6f7c9bf544c2fa287a465363b639c9686b6a7ef0d043f898674"
+    }
+  ],
+  "parallelMainUpdate": "Preserved v0.10 via merge of main; delivery diff versus latest main is new design directory only."
+}

@@ -1,0 +1,558 @@
+{
+  "formatVersion": 1,
+  "root": "map-battle-ui-b-v4",
+  "files": {
+    "AGENTS.md": {
+      "sha256": "2c19e29d208b67b69cb09a2520cd42fc8c54f2e24f55e90735c7ead1adc4e816",
+      "bytes": 3281
+    },
+    "README.md": {
+      "sha256": "3a2c0c025709a077b83d747c7674288cff810ddf2ab4f8c0afadbb098c3b71f4",
+      "bytes": 6699
+    },
+    "animation-manifest.json": {
+      "sha256": "0153ef3e2c7335c40b196f1a948f0b72d626c9ea6e62b28fcd5b6e77ae299d04",
+      "bytes": 31978
+    },
+    "annotations/01_layout_and_camera.md": {
+      "sha256": "7ee8cb1a7255c6c89dc1fdccc9d1784d0f4d3eb72f2a355f07db880ee28ce456",
+      "bytes": 6017
+    },
+    "annotations/02_animation_and_layers.md": {
+      "sha256": "5bbad8af16d74dfda257846e0366d5fe58a9b552722526078e424a71aca6f614",
+      "bytes": 4999
+    },
+    "annotations/03_projection_and_privacy.md": {
+      "sha256": "31a8cd6ec472ddb50efab235b74b8ea4c93b2124c4f25e627791b1691336166f",
+      "bytes": 5578
+    },
+    "annotations/04_recovery_and_review.md": {
+      "sha256": "761a008011dd9306617378d6e128dc602b8f27c5d8ec4fd6ebde7767904c0828",
+      "bytes": 2384
+    },
+    "asset-manifest.json": {
+      "sha256": "02ef740f2956bfa6148b7b743a282fba1c6b0abd7a539ff2a0cb18ba35552f77",
+      "bytes": 60772
+    },
+    "assets/effects/fx_coin_sheet.png": {
+      "sha256": "a4662c1c2ccb69d9325be0284b76a002a98111382162e331e02abb752de6ebfe",
+      "bytes": 33726
+    },
+    "assets/effects/fx_dice20_sheet.png": {
+      "sha256": "e985e0512f67a71bbf637c4fb8b5e25e07531a5cda8b6b444330e915aed684fe",
+      "bytes": 100575
+    },
+    "assets/effects/fx_dice6_sheet.png": {
+      "sha256": "1ba77eb9cced1312f8d995893d85c4791ded1913aba5671f67b89370348ce1d2",
+      "bytes": 59312
+    },
+    "assets/effects/fx_flame_sheet.png": {
+      "sha256": "e8388421db359dc66de3134032580a595c6ad7f67609a07440adad570c86a37c",
+      "bytes": 27464
+    },
+    "assets/effects/fx_heal_sheet.png": {
+      "sha256": "1fe1d737342ac61a941b39e44b4ab8d05fb93cc800cea0168e6c276d9af7ddae",
+      "bytes": 18457
+    },
+    "assets/effects/fx_impact_sheet.png": {
+      "sha256": "96a7dc42310b79d263c62c765fa3417363266006d321c4423f30b13672a56fe1",
+      "bytes": 39990
+    },
+    "assets/effects/fx_natural20_sheet.png": {
+      "sha256": "ca48dc15175c7a68d177b4e9c9f3e33e862cfb8e0b249a37600857c8248c42ad",
+      "bytes": 43233
+    },
+    "assets/effects/fx_projectile_sheet.png": {
+      "sha256": "5ba7a7beb87146de6f0af55d77b766300fffb4e19baa87b8ee5f1df86ef7f65f",
+      "bytes": 8428
+    },
+    "assets/effects/fx_revive_sheet.png": {
+      "sha256": "c9188b62ec63616d6e36bea83eb68bfb347e4dac7e5f8536e809dae3657a0a18",
+      "bytes": 49351
+    },
+    "assets/effects/fx_rune_sheet.png": {
+      "sha256": "5f816edfa9b781d9fc991e0dd1e8caab1d49eb16cf79c27b3432cf654298a61c",
+      "bytes": 45898
+    },
+    "assets/effects/fx_score_sheet.png": {
+      "sha256": "abe3985f5aa6af1ab5db8fc6e6def24615d3b364960e3428e6c45b6d2686e758",
+      "bytes": 28864
+    },
+    "assets/effects/fx_shield_sheet.png": {
+      "sha256": "da99194a1628ed0a8c20a6efd10fbcd5ce8c4ebb1ecfd21e4ad559eebce09361",
+      "bytes": 30914
+    },
+    "assets/layers/battle_back.png": {
+      "sha256": "a5b8165f6f39bb44d2bcb853d1a6a15cf41c942153c3c20c77a6ce6613a9cbcf",
+      "bytes": 21250
+    },
+    "assets/layers/battle_back.svg": {
+      "sha256": "f5ebb3914c396c657879884062b071d1df73e1e6863a88b3c42e9f5a6317daa2",
+      "bytes": 3428
+    },
+    "assets/layers/battle_front.png": {
+      "sha256": "b032034d242940eff6bc57db45c3a5f6166cdc6ff8d900d95d720df22b9cb765",
+      "bytes": 7158
+    },
+    "assets/layers/battle_front.svg": {
+      "sha256": "9529aabb06dc4ce69a108fce1677caaefb66eaddbc12c8f9c842eb4004163e69",
+      "bytes": 2337
+    },
+    "assets/layers/battle_ground.png": {
+      "sha256": "0f21fe7379097081529949e97dfcea61492a5ac70e5e476b92d8dbb4657a4743",
+      "bytes": 17003
+    },
+    "assets/layers/battle_ground.svg": {
+      "sha256": "42fc5fcbca0567af5a6ae7a621ab086ba8c3780e3f3a19903d8dd99931145d37",
+      "bytes": 8373
+    },
+    "assets/layers/battle_mid.png": {
+      "sha256": "59591df5169b592db8e8884669d48430f5cb0dfaab8fc93a70d3eeedf582a3b3",
+      "bytes": 11586
+    },
+    "assets/layers/battle_mid.svg": {
+      "sha256": "56360c93c5ed1fb7d0c9e350c8383a2f51bc06837702984a3c4615dde1b79b60",
+      "bytes": 889
+    },
+    "assets/layers/contact_shadow.png": {
+      "sha256": "cb54f2755fbdec1eee5d5845ae7e2dc14c2c784007e9d0b159bd113d376ac3cb",
+      "bytes": 882
+    },
+    "assets/layers/contact_shadow.svg": {
+      "sha256": "cd1a9e8884a4127f4529d2237b6c195e664e1c9a2e9a4d1fd8f6957a4c3750c9",
+      "bytes": 193
+    },
+    "assets/layers/ground_module.png": {
+      "sha256": "0fa1c67eafe04c0071967a30ae61a7da22a28a3c05666b39ab3ebeed357270e6",
+      "bytes": 4982
+    },
+    "assets/layers/ground_module.svg": {
+      "sha256": "c4ce0fc76802ca419cf7e467af5030be79a27155a4a8b0908fe7e8420b8ba868",
+      "bytes": 312
+    },
+    "assets/layers/soft_halo.png": {
+      "sha256": "e899faebbc36542e32a5a53b663d5e3cb24bf17270188a862a62a2fbc12d540a",
+      "bytes": 15336
+    },
+    "assets/layers/soft_halo.svg": {
+      "sha256": "bf245c5aed8207e088f0b4ff62d2efa48dcb8e4d6e8f3bbae6b0230a71de50e8",
+      "bytes": 369
+    },
+    "assets/runtime/class_adventurer_portrait.png": {
+      "sha256": "5fb9c6de1c72dab2f9ffe15b7f996378c43ffe9bc91c2321663a9cb4309fae42",
+      "bytes": 20268
+    },
+    "assets/runtime/class_dragon_knight_portrait.png": {
+      "sha256": "d7194a32d795f49381d7a69319b5f15874cb914c9501ec2662a3650ef8e57591",
+      "bytes": 32354
+    },
+    "assets/runtime/class_ranger_portrait.png": {
+      "sha256": "bf6306c1b1034b900d1e63b478b320cc11382418615292453b4d23f8aaa56f45",
+      "bytes": 23617
+    },
+    "assets/runtime/class_spellblade_portrait.png": {
+      "sha256": "8f0f59b217039c012a2a8ff8e0ff475c80c33bed76f231e028966b5f3d259d10",
+      "bytes": 23674
+    },
+    "assets/runtime/icon_action.png": {
+      "sha256": "7051c7f1c54de1cc41b9073ea665aee94a08dd118952740308ee077ff38c221c",
+      "bytes": 2045
+    },
+    "assets/runtime/icon_coin.png": {
+      "sha256": "b3b2dd38fa754073c73582c616ae84d4cd8fcd3aa8614d2676a6bfeedba9e741",
+      "bytes": 3794
+    },
+    "assets/runtime/icon_downed.png": {
+      "sha256": "ea826f832f7f6bbfad77cd6d0bb563dd21cc17504490df34fbeea4dc2a8d1e89",
+      "bytes": 3028
+    },
+    "assets/runtime/icon_health.png": {
+      "sha256": "27f4851cb377a0313d69cd1355d3b4252b924dd3d4226f61fd88b2feeccae3e4",
+      "bytes": 2071
+    },
+    "assets/runtime/icon_score.png": {
+      "sha256": "bf409273e78804bf3d883404ed8b2c43f046c1de6ce22f28915a565faae2e9b1",
+      "bytes": 2207
+    },
+    "assets/runtime/icon_shield.png": {
+      "sha256": "af85c8020ff42cbb4000b623aefa73e93be15c764fff2d4d71867200f1ae2ccc",
+      "bytes": 2053
+    },
+    "assets/runtime/item_action_ring.png": {
+      "sha256": "ca9a7b4149a12d3b58324a5a45ca7d4e1f71547385a240c27683079f66f942fd",
+      "bytes": 12626
+    },
+    "assets/runtime/item_dragon_armor.png": {
+      "sha256": "13dbf95a203d27ed399450db693ee493694ab22ddfefedc1e62374f900291d33",
+      "bytes": 14511
+    },
+    "assets/runtime/item_dragon_charm.png": {
+      "sha256": "2213547454345e01754250b17d348b8fd3a37932baa4b884371d93bd68f7a0f0",
+      "bytes": 8055
+    },
+    "assets/runtime/item_dragon_fang_sword.png": {
+      "sha256": "a4a100a287c6008369663c0aa5b92eaff948471cf888b421d2324d92b4c7dc2f",
+      "bytes": 7915
+    },
+    "assets/runtime/item_great_sword.png": {
+      "sha256": "a4bc533a542e4f140607283bacd4e054e6b4e19fc43aca580f5e90f42359a23f",
+      "bytes": 6467
+    },
+    "assets/runtime/item_hunting_bow.png": {
+      "sha256": "098d87d3b28cd6bba3dbeed4502ee5de90a94a3bcd2627ba8bc18d7a86d1469d",
+      "bytes": 4901
+    },
+    "assets/runtime/item_large_potion.png": {
+      "sha256": "17cb55f8daed042d78ae896f8c424d75864fe9110170872666928ff25c0530cd",
+      "bytes": 9755
+    },
+    "assets/runtime/item_leather_armor.png": {
+      "sha256": "8f60da4d72e44cd8894fce4c5f42d2a9a7cf8d818465c1a689466aecf5b7c5e2",
+      "bytes": 12759
+    },
+    "assets/runtime/item_legendary_staff.png": {
+      "sha256": "c11c6fec3f4baaa46f4058a012ae4c3c84ca960c07ca49eaa8ff9e03affe367b",
+      "bytes": 5345
+    },
+    "assets/runtime/item_power_badge.png": {
+      "sha256": "88ff6b2b46ca89e70be3bdf91121051e33c35b96157aa49d2901cde80516130e",
+      "bytes": 9815
+    },
+    "assets/runtime/item_revival_stone.png": {
+      "sha256": "5a1b35c7ab54bcebbcc8518ea1dcc65c2c744f55a25a1d131b6aa091564628a9",
+      "bytes": 7005
+    },
+    "assets/runtime/item_rune_armor.png": {
+      "sha256": "cf4e3e8249a8cfff300b1b7703ac96832126ba348f2f1ff99f5e9d066606635e",
+      "bytes": 14371
+    },
+    "assets/runtime/item_shield_potion.png": {
+      "sha256": "050cb2da8100d523de5ea015c38b531993053d9529ab108803a4d58072fd87a5",
+      "bytes": 8482
+    },
+    "assets/runtime/item_small_potion.png": {
+      "sha256": "bcd2eade5e34eb2e3e6cc3b0f929d2d9db99b73be1e10a06ce23dab4162bcdd2",
+      "bytes": 7888
+    },
+    "assets/runtime/item_starlight_armor.png": {
+      "sha256": "6de42f636363b357db6fb15bd089aed984d6806a68cf7860c1a4c44024251b14",
+      "bytes": 15100
+    },
+    "assets/runtime/item_starlight_blade.png": {
+      "sha256": "d2690deb459b90ae28012724cad9614ece945c867c9245ae79973e063cfc0fd7",
+      "bytes": 6293
+    },
+    "assets/runtime/item_starlight_charm.png": {
+      "sha256": "b2015cdfd2db1f5dac1c72bdc8ebcebe429b0ec30701b5a1fd29406c21d693a8",
+      "bytes": 7161
+    },
+    "assets/runtime/item_training_sword.png": {
+      "sha256": "7844418b067ac1ddd9ca35011e8d81622e57e9a9ae2d7d10814b0033dda0bbad",
+      "bytes": 6587
+    },
+    "assets/runtime/monster_cave_troll_portrait.png": {
+      "sha256": "8dbffb45b611dad49f39ddf5702ac41a0348765577c502e561bdab1ca5e2a9e7",
+      "bytes": 31736
+    },
+    "assets/runtime/monster_goblin_archer_portrait.png": {
+      "sha256": "2d6bbd055c85150a47ec15fa0cf9451a773d117611800c8e699aeb164645d989",
+      "bytes": 24087
+    },
+    "assets/runtime/monster_ruin_dragon_portrait.png": {
+      "sha256": "b80a746086efae34abf283a71828438d5f310b7b49d3d5fca4f047a81b06896f",
+      "bytes": 34414
+    },
+    "assets/runtime/monster_slime_portrait.png": {
+      "sha256": "c8e6d16188d35097557084f24853accc2fb4c6c00296640da79ab185330fa80a",
+      "bytes": 25003
+    },
+    "assets/runtime/monster_stone_guardian_portrait.png": {
+      "sha256": "165bcf91de0e6d5c4d52368f8853cb89eaf12023997d035d74179e1c0d01303b",
+      "bytes": 36868
+    },
+    "assets/runtime/monster_wolf_portrait.png": {
+      "sha256": "0146eae6af3c85c1d3f111d3521647142868e0fd967e284824705286a0e3b896",
+      "bytes": 24694
+    },
+    "assets/runtime/node_boss.png": {
+      "sha256": "67b5ccdb9ff5b58c4e95908de8b244df5785146429af1bd1459c5a164c4ca7e0",
+      "bytes": 32297
+    },
+    "assets/runtime/node_combat.png": {
+      "sha256": "47e46efc7c1f79fef2a9eae68f7a7ca045f8632ed2c09ccf3906d9051b8f174b",
+      "bytes": 29969
+    },
+    "assets/runtime/node_empty.png": {
+      "sha256": "3bdbef9bab55357f39b88943cb59a10f7edc3f372b5156e9c83414028e1d7f0f",
+      "bytes": 26097
+    },
+    "assets/runtime/node_reward.png": {
+      "sha256": "20efa976ee8c937dbe84b3d2e58671df7d7568fa7f9674da0f6bbee50a836ada",
+      "bytes": 26617
+    },
+    "assets/runtime/node_start.png": {
+      "sha256": "b9e596d314a8ec54c3e9d84b3be2caf08ba0fbe44322389781bdeef6d7ab4435",
+      "bytes": 26387
+    },
+    "assets/runtime/node_unknown.png": {
+      "sha256": "1761985422e87bcaf4244e780da34f235888074285298031318292e7962e788b",
+      "bytes": 11280
+    },
+    "assets/sprites/map_adventurer_idle.png": {
+      "sha256": "a79ca305cb0b488af27480aa8dffec83b5bbdad9ee9adb640beaede027cf9572",
+      "bytes": 795
+    },
+    "assets/sprites/map_adventurer_idle.svg": {
+      "sha256": "5a5bd06559e28b55e043d326e832cdace84660076326394d876e8c9bcb988c44",
+      "bytes": 3354
+    },
+    "assets/sprites/map_adventurer_sheet.png": {
+      "sha256": "28c3db8c326346a0d2a2b2fa1b78b5c9cca39c700dbe83d812d32cfaec13faf6",
+      "bytes": 9828
+    },
+    "assets/sprites/map_adventurer_sheet.svg": {
+      "sha256": "39a2fff28169340c959416237d98d49d7e91fed090707c3a9be7a2733aa99ebf",
+      "bytes": 205900
+    },
+    "assets/sprites/map_slime_idle.png": {
+      "sha256": "e462d663a98af04b290805622fce727d9a1e674e413636825bea7c846c98e0fa",
+      "bytes": 558
+    },
+    "assets/sprites/map_slime_idle.svg": {
+      "sha256": "9f91fd1633b3de16e95069a87e47640387a1b3722a0475bae96126075b16719a",
+      "bytes": 1182
+    },
+    "assets/sprites/map_slime_sheet.png": {
+      "sha256": "f17728499e69062d7ee80bf7d0ada4f4dbb7212f66ce754d7d7e9214a5490593",
+      "bytes": 5986
+    },
+    "assets/sprites/map_slime_sheet.svg": {
+      "sha256": "d66fcda45eeb2da5ed94d49681b40cd0321d6b761c8d759b9277b163810ca355",
+      "bytes": 61057
+    },
+    "assets/ui/camera_focus.png": {
+      "sha256": "7e5326a593a1d1f1c55cdf92ad88e0ae1306eb0a9c6d33d6f1a31387887314d1",
+      "bytes": 1554
+    },
+    "assets/ui/camera_focus.svg": {
+      "sha256": "1aa4d2163e7fc1aa540eec9d142e0872dde2fcc41b71225ec1b3cf92253d8875",
+      "bytes": 664
+    },
+    "assets/ui/edge_arrow.png": {
+      "sha256": "9364ce72db6116f3bfb4c14f8abea7b31e4937b8036526ae8a11c25ad74374ed",
+      "bytes": 807
+    },
+    "assets/ui/edge_arrow.svg": {
+      "sha256": "1e6150658b814892fc04ad80ff2180469f9398167d05dbb59c0031a3a7ef45de",
+      "bytes": 226
+    },
+    "assets/ui/shop_entry.png": {
+      "sha256": "1bf419665d103bea6e84662e610b2b5400fc23f8e177b08cae0da1a5f2b1f3d8",
+      "bytes": 1416
+    },
+    "assets/ui/shop_entry.svg": {
+      "sha256": "05bf3c8f65af0ee73cf7ddf6714a8840c25c66b9d374169cccbf661d33d86c3a",
+      "bytes": 619
+    },
+    "assets/ui/track_cap.png": {
+      "sha256": "61f45affc410752e30b9849db1ea939ec0e8b83110fde0a7a2f1711f7a6a808a",
+      "bytes": 2225
+    },
+    "assets/ui/track_cap.svg": {
+      "sha256": "a9f2bf6f7d1f23878448be79c27b0bfdffaae2db5ab819c7826239f4428eaefe",
+      "bytes": 290
+    },
+    "assets/ui/track_pointer.png": {
+      "sha256": "159c21986b4426a1eee72e4e2a5cc0157b4a78c4e7ecabd4e4dc8bf5db397e25",
+      "bytes": 938
+    },
+    "assets/ui/track_pointer.svg": {
+      "sha256": "c3af91bc453dc85b03a994409b72b74fb2ce8db25daedc7535992aef7cf4a68f",
+      "bytes": 208
+    },
+    "evidence/browser-check.json": {
+      "sha256": "60a697031092da3130f61e3c31d56d3fc603706b3dfda14bb0ec476a0e1f0926",
+      "bytes": 940
+    },
+    "evidence/demo-terminal-browser.png": {
+      "sha256": "6bef3e2a6b8f0977342b5604e75d4a692dcc5395d4ee55e81b09dbb90b955cf9",
+      "bytes": 187050
+    },
+    "evidence/sprite-cell-bounds.json": {
+      "sha256": "98bec8aaa8c3c1f211414826e352c06b0b6858830129049f6faa7bf4f2c2d896",
+      "bytes": 18504
+    },
+    "evidence/storybook-baseline.json": {
+      "sha256": "70115b713a896c28260fe01d96b2acf8c645fd91cef86144d4d310ef8a189e62",
+      "bytes": 394
+    },
+    "evidence/text-bounds.json": {
+      "sha256": "bab25c4e100ad2c491d7b2c6f49a2333ffa40eb8bb903b23bd802f6ad5771e41",
+      "bytes": 77454
+    },
+    "evidence/validation.json": {
+      "sha256": "40df5922f62b5c735a6929392c0975e159db98e3763667529814f0e9e319372c",
+      "bytes": 775
+    },
+    "layout-tokens.json": {
+      "sha256": "7795991e6746216a7c2594cc98efb7433c671f428ede94b8ab485475470dc2f4",
+      "bytes": 2814
+    },
+    "previews/camera_transition_demo.html": {
+      "sha256": "99d21b38b70e9badd90469d992e88693f9915b97c8c0c14b5b6da911c13ffe40",
+      "bytes": 241792
+    },
+    "previews/edge_cases.png": {
+      "sha256": "aee394acf2fdcd37f396574cd40d44f140afe952251f5edd84d7ab594970f6e5",
+      "bytes": 199060
+    },
+    "previews/hd2d_layers.png": {
+      "sha256": "cb04b70cea6de93758fd3cf5ac2c37b7c2b4af3be15b95b1f26f02d893fac588",
+      "bytes": 104327
+    },
+    "previews/index.html": {
+      "sha256": "b92f9f1dc95ab6d56cb6d6226ff0b58fbffc191d95f6efe02d2ece77a910a447",
+      "bytes": 1861
+    },
+    "previews/long_skills_and_set.png": {
+      "sha256": "01f721b5de38bb258c35cfbd44dedb78811f887e4835d38169d24c90f1e848f0",
+      "bytes": 176639
+    },
+    "previews/public_exploration_16x9.png": {
+      "sha256": "86c4543dcd549a8d572dd74146f9ee9f07906372c996b86a25c518a2c97694be",
+      "bytes": 216558
+    },
+    "previews/public_exploration_4x3.png": {
+      "sha256": "37edef06728e8a238f1f81eac67ff8e36addce6a188ec58ff588be87d5d845f1",
+      "bytes": 211703
+    },
+    "previews/public_monster_16x9.png": {
+      "sha256": "e8786b0050414934cce92df52439b82f062769d9f3d40235823a9639471dce64",
+      "bytes": 359017
+    },
+    "previews/public_monster_4x3.png": {
+      "sha256": "f403444909da158533227fbc79692f0c2f44a44dad59bd139e7436eb64496c59",
+      "bytes": 337044
+    },
+    "previews/public_player_16x9.png": {
+      "sha256": "2f646c878424e113522bd7173513e76e282565d1a7cfb18e7026f27e7a8533bc",
+      "bytes": 431914
+    },
+    "previews/public_player_4x3.png": {
+      "sha256": "3b7f8dbace0204eb41b6a46da6038c9b4bb59287f3a133fdc820ff764a8d702f",
+      "bytes": 416197
+    },
+    "previews/sprite_scale_and_motion.png": {
+      "sha256": "aea6b45fdc7bcf8fc58466b5eb409acff7b48540c1a999cabc103f4be1286bbb",
+      "bytes": 80488
+    },
+    "previews/teacher_camera_and_shop.png": {
+      "sha256": "f6d7af0145131aca4d6c4c1c55b3f4c23a2501bf480ea82901fb294378320846",
+      "bytes": 240476
+    },
+    "reused-effects-manifest.json": {
+      "sha256": "2ae58864fff7ddc2a3d234fadf397d8629eb0ee95b7396a035da7d7ffe72e153",
+      "bytes": 8829
+    },
+    "scene-manifest.json": {
+      "sha256": "5f14fe7acc08152d15aa72cefee92af624551c81997f67588ac39b10021e055d",
+      "bytes": 1632
+    },
+    "sources/art-direction-prompt.md": {
+      "sha256": "68ff9130003114c1dc4083a7abae9a884d37749f4bbb0c6965721e80b3598985",
+      "bytes": 7872
+    },
+    "sources/build_delivery.py": {
+      "sha256": "d0969f3855b62172fbacd7eba281de2ff3af2f73cf68f1b197c903ff4a53b554",
+      "bytes": 34274
+    },
+    "sources/build_demo.py": {
+      "sha256": "1f779b5c6bf544d0d5e53f15c248109c568bbc42bfd51c362ce5f13c835e21a1",
+      "bytes": 11614
+    },
+    "sources/catalog-reference.json": {
+      "sha256": "aaab980fd5f3154ac813a02dc907a835ee0e0181c4149f2b7803d9594795f34a",
+      "bytes": 32227
+    },
+    "sources/design-fixture.json": {
+      "sha256": "8f8727e35ecf150082915e547754ce93bb54c731dcae829d31e998a03354d4ba",
+      "bytes": 4991
+    },
+    "sources/edge_cases.svg": {
+      "sha256": "93feffb5826976189a975b395a42553f380218e9eec705e4a7ddfbaf9114add7",
+      "bytes": 497069
+    },
+    "sources/export_and_check.py": {
+      "sha256": "227f5a3289c71964024648e7362ad4604f7b9962c2a4bd63c309d0748969d38b",
+      "bytes": 1711
+    },
+    "sources/feedback.md": {
+      "sha256": "69018b253f6b8f752d7cbaea9b79eb924ade90b457cda4e21cf90227ce205170",
+      "bytes": 9750
+    },
+    "sources/hd2d_layers.svg": {
+      "sha256": "c75c77e824c14d5d2c77d05f1941676ad1923de957701317091974bcaa2e2840",
+      "bytes": 100238
+    },
+    "sources/long_skills_and_set.svg": {
+      "sha256": "1cdad6e2c61e33c2ced24e61899a32a7847142176a21917ecd3f707feae4e608",
+      "bytes": 5417
+    },
+    "sources/package_delivery.py": {
+      "sha256": "7c7bba2dce9e2d1ea3695899996130b1e9637d64567cfe4174c78af589f1aed8",
+      "bytes": 2273
+    },
+    "sources/public_exploration_16x9.svg": {
+      "sha256": "8275b3510aefbde13c73cfe77789ecdb0491561f3de0de43b6253be61f25ae03",
+      "bytes": 390597
+    },
+    "sources/public_exploration_4x3.svg": {
+      "sha256": "7b63d246067c7334d7e11751c7928ed662954160420961f71f27dc58b3f9a3d1",
+      "bytes": 390052
+    },
+    "sources/public_monster_16x9.svg": {
+      "sha256": "d0a71e372e5471c771af32bb151705bc299a9f18c2a42c475bdcc84e6d7642d9",
+      "bytes": 1205244
+    },
+    "sources/public_monster_4x3.svg": {
+      "sha256": "be8aef6ea049ab4d3b0b05ff3990c97bf12217a45d021526df10f07b45c2ee5c",
+      "bytes": 1205173
+    },
+    "sources/public_player_16x9.svg": {
+      "sha256": "c02aae3a7b20d584c243c34c93fae49ddc8156c6860f7e55cb3ddc223aec7276",
+      "bytes": 1241050
+    },
+    "sources/public_player_4x3.svg": {
+      "sha256": "6cc151e3db249b90ad465ffc64331da9f365b13a88089ece5e037a4fe44cd1b4",
+      "bytes": 1241039
+    },
+    "sources/reference-read-list.json": {
+      "sha256": "1f4dc682e0b02d0b775870206b4aa90cfd1ba7c636b0adaaa2d9bc36d2b5040e",
+      "bytes": 15605
+    },
+    "sources/reuse-manifest.json": {
+      "sha256": "89e63fef80b44dd4777df521bd4eb80a1dc41f889854e0f3909dd3f4d7a1d7cb",
+      "bytes": 21815
+    },
+    "sources/reused-character-motion.json": {
+      "sha256": "479cd7966f814e5cd65efad75c7424d4895f5921d3e7682fa02e5b1ad6a69fb5",
+      "bytes": 8700
+    },
+    "sources/sprite_scale_and_motion.svg": {
+      "sha256": "236d68e44825f2429cf47b5077bbcf0ffdb03f0f4c4ce59743c4454415e2a206",
+      "bytes": 72071
+    },
+    "sources/teacher_camera_and_shop.svg": {
+      "sha256": "7ab2d194b5496ddef230475a48879ce1a99a10e8c7a44e109b974b03e473f776",
+      "bytes": 436357
+    },
+    "sources/verify_delivery.py": {
+      "sha256": "2859a2601bf580ee35ef604d97e4d26c705dbaea2717c14ea57f772cf7b8a769",
+      "bytes": 8852
+    },
+    "sources/visual-expectations.md": {
+      "sha256": "451f9b5cd40aff3555359278aa6e85affa7f9a93ceedeb9c9400bd68c821271f",
+      "bytes": 3270
+    }
+  }
+}
