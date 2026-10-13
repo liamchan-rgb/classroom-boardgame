@@ -56,14 +56,19 @@ struct PVEMapView:View {
                     ForEach(nodes) { node in
                         let here = units.filter { $0.nodeID == node.id }
                         let current = here.contains { $0.current } || actorNode == node.id
+                        let screenPoint = point(node,size:geometry.size)
+                        let artHalf = publicDisplay ? 47.0 : 34.0
+                        let lowest = here.filter(\.player).map { slot($0,size:portraitSize).y }.max()
+                        let labelOffset = lowest.map { $0+max(44,portraitSize)/2+32 } ??
+                            (!here.isEmpty || screenPoint.y < artHalf+40 ? artHalf+25 : -artHalf-25)
                         Group {
                             if interactive {
-                                Button { onNode?(node.id) } label: { nodeContent(node,here:here,current:current) }.buttonStyle(.plain)
-                            } else { nodeContent(node,here:here,current:current) }
+                                Button { onNode?(node.id) } label: { nodeContent(node,here:here,current:current,labelOffset:labelOffset) }.buttonStyle(.plain)
+                            } else { nodeContent(node,here:here,current:current,labelOffset:labelOffset) }
                         }.frame(width:publicDisplay ? 94 : 68,height:publicDisplay ? 94 : 68).position(point(node,size:geometry.size))
                     }
                     ForEach(units) { unit in
-                        if let position = positions[unit.id], position.x >= 24, position.x <= width-24, position.y >= 24, position.y <= height-24 {
+                        if let position = positions[unit.id], position.x >= (publicDisplay ? 60 : 52), position.x <= width-(publicDisplay ? 60 : 52), position.y >= (publicDisplay ? 60 : 52), position.y <= height-(publicDisplay ? 60 : 52) {
                             unitButton(unit,size:portraitSize).position(position)
                         }
                     }
@@ -114,7 +119,7 @@ struct PVEMapView:View {
         let peers = units.filter { $0.player == unit.player }.sorted { $0.id < $1.id }
         return (unit.player ? "" : "敌")+String((peers.firstIndex { $0.id == unit.id } ?? 0)+1)
     }
-    private func nodeContent(_ node:PublicGameNode,here:[PublicGameUnit],current:Bool) -> some View {
+    private func nodeContent(_ node:PublicGameNode,here:[PublicGameUnit],current:Bool,labelOffset:Double) -> some View {
         ZStack {
             // Unknown selection precedes lookup: no hidden kind image is loaded.
             ArtImage(type:"nodeVisual",id:node.revealed ? (node.kind?.rawValue ?? "unknown") : "unknown")
@@ -125,10 +130,10 @@ struct PVEMapView:View {
             if here.contains(where: { !$0.player && $0.health > 0 }) { ArtImage(type:"visualLayer",id:"node_state_enemy") }
             if node.claimed { ArtImage(type:"visualLayer",id:"node_state_claimed") }
             if here.count > 1 { ArtImage(type:"visualLayer",id:"node_state_crowded") }
-        }.overlay(alignment:.top) {
+        }.overlay {
             Text(node.name).font(.system(size:publicDisplay ? 22 : 13,weight:.semibold)).lineLimit(2)
                 .multilineTextAlignment(.center).padding(3).background(.white.opacity(0.90),in:RoundedRectangle(cornerRadius:5))
-                .frame(width:publicDisplay ? 154 : 110).offset(y:-36)
+                .frame(width:publicDisplay ? 154 : 110).offset(y:labelOffset)
         }.accessibilityLabel(node.name)
     }
     private func point(_ node:PublicGameNode,size:CGSize) -> CGPoint {

@@ -30,10 +30,10 @@ public struct MapEdgeMarker: Equatable, Identifiable {
 public enum MapDisplayGeometry {
     /// Only call with units from the public snapshot when drawing the public map.
     public static func edgeMarkers(points: [(String,MapPoint)], width: Double, height: Double, size: Double = 52) -> [MapEdgeMarker] {
-        guard width > size*2, height > size*2 else { return [] }
+        guard width > (size+8)*2, height > (size+8)*2 else { return [] }
         let margin = size+8, halfX = width/2-margin, halfY = height/2-margin
         var markers: [MapEdgeMarker] = []
-        for (id,p) in points where p.x < 24 || p.x > width-24 || p.y < 24 || p.y > height-24 {
+        for (id,p) in points where p.x < margin || p.x > width-margin || p.y < margin || p.y > height-margin {
             let dx = p.x-width/2, dy = p.y-height/2
             let tx = dx == 0 ? Double.infinity : halfX/abs(dx)
             let ty = dy == 0 ? Double.infinity : halfY/abs(dy)
