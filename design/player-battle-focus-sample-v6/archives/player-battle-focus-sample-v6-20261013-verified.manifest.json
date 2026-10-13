@@ -1,0 +1,10 @@
+{
+  "snapshotCommit": "511c9b1ca2561064ac27648120063f0bb9861f5d",
+  "tag": "archive-design-player-battle-focus-v6-20261013-verified",
+  "zip": "player-battle-focus-sample-v6-20261013-verified.zip",
+  "sha256": "5301a566fba9f4eecd40af9c4cd1d37522fea0ca0519884188b0c7506cdf017d",
+  "bytes": 4768245,
+  "payloadFiles": 31,
+  "zipEntries": 32,
+  "status": "awaiting-art-review"
+}
