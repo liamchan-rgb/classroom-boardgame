@@ -1,0 +1,32 @@
+{
+  "verifiedAt": "2026-10-13T07:17:02.195128+00:00",
+  "remoteArchiveCommit": "33939b09476e2a36cd77cb1487c9199197bd336f",
+  "freshRemoteClone": true,
+  "transportParts": 6,
+  "transportPartChecksums": true,
+  "zipBytes": 290894459,
+  "zipSHA256": "58738f4104e7c1c08cac02cadd4d8fc3f72af766c4e9a5d4a6ba67bb1826a6d7",
+  "zipCRC": true,
+  "payloadFiles": 270,
+  "allPayloadChecksums": true,
+  "gitBundleVerified": true,
+  "gitBundleCompleteHistory": true,
+  "gitBundleExcludesArchiveAssets": true,
+  "sourceSnapshotCommit": "893cc3021211492c4ecce4ecd852cec9702d032f",
+  "compiledCommit": "1379bd2e174d88c582bb19fa8ea1f64c180a74da",
+  "restoredSourceFiles": 266,
+  "allRestoredSourceChecksums": true,
+  "remoteIPABytes": 10445942,
+  "remoteIPASHA256": "7d3a6e27184e5a07876ba769f8f54df8d7651d303c68f034c9e838147945a601",
+  "designPinnedCommit": "f43db0502bf3a9df9fef8bb7c699b6dce86c3425",
+  "coreTests": {
+    "GameCore": 65,
+    "ProbeCore": 6,
+    "failures": 0
+  },
+  "nativePreviewCount": 12,
+  "newPVEDeviceVerified": false,
+  "newArtAestheticApproved": false,
+  "compiledAppSourcesUnchanged": true,
+  "postBuildSnapshotChanges": "仅检查说明、构建记录与模拟器截图证据"
+}

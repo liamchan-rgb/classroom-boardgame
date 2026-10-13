@@ -8,9 +8,10 @@
 
 | 存档 | 状态 | 长期位置 |
 |---|---|---|
+| [阶段2美术/UI接入 / v0.9 / 2026-10-13](archive-stage2-ui-art-v0.9-20261013/README.md) | 270项载荷、71项核心测试、12张原生截图；远端六分片及266份源码恢复通过 | [私有项目存档](https://github.com/liamchan-rgb/classroom-boardgame/tree/33939b09476e2a36cd77cb1487c9199197bd336f/archive-stage2-ui-art-v0.9-20261013) |
 | [阶段0—2 / v0.8 / 2026-10-12](archive-stage2-v0.8-20261012-r2/README.md) | 153项载荷、35份交付；远端SHA256和116份源码恢复通过 | [私有项目存档](https://github.com/liamchan-rgb/classroom-boardgame/tree/bfa1c745821b255ff0ef6a65ae305b8614dcfbaa/archive-stage2-v0.8-20261012-r2) |
 
-当前完整ZIP约8.5MB，包含历史及最终交付，当前推荐IPA是其中的ClassroomStage2_v0.8_unsigned.ipa。
+当前推荐IPA为v0.9的ClassroomStage2-v0.9-unsigned.ipa（约10.4MB，需SideStore个人签名）。本次完整ZIP约290.9MB，以六个无损分片长期保存，含固定设计与完整源码历史；旧v0.8约8.5MB ZIP及其35份历史交付继续保留。新版真机与逐图审美仍待教师反馈。
 
 ## 后续操作
 
@@ -28,7 +29,7 @@ python3 tools/archive_milestone.py \
   --output /workspace/shared/classroom-stage0-2-v0.8-20261012-r2.zip
 ```
 
-4. 在archive-assets孤立分支新增该标签目录，保存ZIP、SHA256、清单与恢复说明并推送；记录实际GitHub文件地址。后续追加目录，不覆盖旧目录，不将此分支合并到main。也可在附件接口可用时改用私有Release。
+4. 在archive-assets孤立分支新增该标签目录，保存ZIP（超过单文件限制时使用tools/split_milestone.py无损分片）、SHA256、清单与恢复说明并推送；记录实际GitHub文件地址。后续追加目录，不覆盖旧目录，不将此分支合并到main。也可在附件接口可用时改用私有Release。
 5. 验证文件完整性与恢复出的源码，再更新该步索引并推送。
 
 源码快照提交可能包含编译后的文档/归档工具更新；IPA实际编译提交从原构建证据读取，二者分别记录。阶段2v0.8通过云端编译与64项核心测试，新增设备交互仍等待教师反馈。
