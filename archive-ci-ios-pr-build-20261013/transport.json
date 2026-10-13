@@ -1,0 +1,24 @@
+{
+  "formatVersion": 1,
+  "logicalZIP": "classroom-ios-pr-ci-20261013.zip",
+  "bytes": 100852308,
+  "sha256": "cd2cef1b2e46b7fddfc8d06db3bf823a7e5ea06ae6a6a2a4f956c8cb50a61f86",
+  "parts": [
+    {
+      "file": "classroom-ios-pr-ci-20261013.zip.part000",
+      "bytes": 50331648,
+      "sha256": "5dd164147c864e806cc1f971299773e3711cf7ec1a2859877dabf8b3218ada80"
+    },
+    {
+      "file": "classroom-ios-pr-ci-20261013.zip.part001",
+      "bytes": 50331648,
+      "sha256": "b28b77f62a43cf0aaad2971503e46c7bcbd03555c39dbf1b8e5f3d253ea79750"
+    },
+    {
+      "file": "classroom-ios-pr-ci-20261013.zip.part002",
+      "bytes": 189012,
+      "sha256": "a858b2a7597ddc4d602e1f9cca615340c6256154ae5a17a5c138b4c9403b3489"
+    }
+  ],
+  "reason": "Lossless split; GitHub normal Git rejects files over 100MB"
+}
