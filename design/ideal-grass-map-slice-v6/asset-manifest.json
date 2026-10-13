@@ -1,0 +1,102 @@
+{
+  "status": "ideal-reference-based-grass-slice-awaiting-review",
+  "assets": [
+    {
+      "id": "adventurer_sheet",
+      "file": "assets/adventurer_sheet.png",
+      "width": 1536,
+      "height": 1024,
+      "mode": "RGBA",
+      "sha256": "2749cd9a78bb269d22b9177f92cabeeb6d816870bae74d1e40d06979d8585e8c",
+      "source": "/workspace/generated_images/exec-25e4b1b3-5e4a-4610-96a8-2c1baffbc93d.png",
+      "generated": true,
+      "bytePreserved": true,
+      "status": "new candidate or unchanged reference",
+      "alphaRange": [
+        0,
+        254
+      ]
+    },
+    {
+      "id": "class_ranger_portrait",
+      "file": "assets/class_ranger_portrait.png",
+      "width": 192,
+      "height": 192,
+      "mode": "RGBA",
+      "sha256": "bf6306c1b1034b900d1e63b478b320cc11382418615292453b4d23f8aaa56f45",
+      "source": "design/player-battle-popover-sample-v7/assets/class_ranger_portrait.png",
+      "generated": false,
+      "bytePreserved": true,
+      "status": "new candidate or unchanged reference",
+      "alphaRange": [
+        0,
+        255
+      ]
+    },
+    {
+      "id": "class_spellblade_portrait",
+      "file": "assets/class_spellblade_portrait.png",
+      "width": 192,
+      "height": 192,
+      "mode": "RGBA",
+      "sha256": "8f0f59b217039c012a2a8ff8e0ff475c80c33bed76f231e028966b5f3d259d10",
+      "source": "design/player-battle-popover-sample-v7/assets/class_spellblade_portrait.png",
+      "generated": false,
+      "bytePreserved": true,
+      "status": "new candidate or unchanged reference",
+      "alphaRange": [
+        0,
+        255
+      ]
+    },
+    {
+      "id": "landmark_atlas",
+      "file": "assets/landmark_atlas.png",
+      "width": 1536,
+      "height": 1024,
+      "mode": "RGBA",
+      "sha256": "f747e7ca9b31ae0bb9350c2a4ed1fac22cfdab20ec650bf4cf2b1782366304b4",
+      "source": "/workspace/generated_images/exec-2a722207-063e-4d75-b68a-6941e5d3c136.png",
+      "generated": true,
+      "bytePreserved": true,
+      "status": "new candidate or unchanged reference",
+      "alphaRange": [
+        0,
+        254
+      ]
+    },
+    {
+      "id": "scenery_atlas",
+      "file": "assets/scenery_atlas.png",
+      "width": 1536,
+      "height": 1024,
+      "mode": "RGBA",
+      "sha256": "31c244a8cf76c3e0a01af76b1e883a2be2a2317b21bf80dbf5134c8e6fcfda9d",
+      "source": "/workspace/generated_images/exec-5ccc3bbc-5b75-438a-98d0-1141eb731858.png",
+      "generated": true,
+      "bytePreserved": true,
+      "status": "new candidate or unchanged reference",
+      "alphaRange": [
+        0,
+        254
+      ]
+    },
+    {
+      "id": "terrain_atlas",
+      "file": "assets/terrain_atlas.png",
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGB",
+      "sha256": "8e180dd175ba9014aab0bb5dea26032aefcedb3f438721799d9fd94da3ca33dd",
+      "source": "/workspace/generated_images/exec-ee46371b-87ab-447d-aff5-2498cd0dc90b.png",
+      "generated": true,
+      "bytePreserved": true,
+      "status": "new candidate or unchanged reference",
+      "alphaRange": null
+    }
+  ],
+  "idealReference": "reference/ideal-effect-user.jpg",
+  "idealReferenceSHA256": "f37522f5788ae7d22e570c85438ecc0e5503f8714c7893400de5609366a2d673",
+  "nativeVerified": false,
+  "artApproved": false
+}

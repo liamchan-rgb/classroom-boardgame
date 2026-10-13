@@ -1,0 +1,260 @@
+{
+  "status": "pass",
+  "runs": [
+    {
+      "aspect": "16x9",
+      "biome": "grass",
+      "seed": 17,
+      "layout": "A",
+      "publicRoads": [
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "landmarks": [
+        {
+          "nodeID": 1,
+          "nodeAnchor": [
+            504.61538461538464,
+            628.1538461538462
+          ],
+          "landmarkGround": [
+            504.61538461538464,
+            583.1538461538462
+          ]
+        },
+        {
+          "nodeID": 2,
+          "nodeAnchor": [
+            800.6153846153846,
+            628.1538461538462
+          ],
+          "landmarkGround": [
+            700.6153846153846,
+            583.1538461538462
+          ]
+        },
+        {
+          "nodeID": 3,
+          "nodeAnchor": [
+            1096.6153846153845,
+            298
+          ],
+          "landmarkGround": [
+            1096.6153846153845,
+            253
+          ]
+        }
+      ],
+      "movingFoot": [
+        667.4886446153846,
+        632.6043911538461
+      ],
+      "movingCurveParameter": 0.55,
+      "decorCount": 88,
+      "topologyUnchanged": true,
+      "groundMethod": "cached world-space radial blend of measured material rectangles",
+      "spriteFrame": 7,
+      "idealReference": "reference/ideal-effect-user.jpg",
+      "nativeImplemented": false
+    },
+    {
+      "aspect": "16x9",
+      "biome": "grass",
+      "seed": 30,
+      "layout": "A",
+      "publicRoads": [
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "landmarks": [
+        {
+          "nodeID": 1,
+          "nodeAnchor": [
+            504.61538461538464,
+            628.1538461538462
+          ],
+          "landmarkGround": [
+            504.61538461538464,
+            583.1538461538462
+          ]
+        },
+        {
+          "nodeID": 2,
+          "nodeAnchor": [
+            800.6153846153846,
+            628.1538461538462
+          ],
+          "landmarkGround": [
+            700.6153846153846,
+            583.1538461538462
+          ]
+        },
+        {
+          "nodeID": 3,
+          "nodeAnchor": [
+            1096.6153846153845,
+            298
+          ],
+          "landmarkGround": [
+            1096.6153846153845,
+            253
+          ]
+        }
+      ],
+      "movingFoot": [
+        667.4886446153846,
+        632.6043911538461
+      ],
+      "movingCurveParameter": 0.55,
+      "decorCount": 100,
+      "topologyUnchanged": true,
+      "groundMethod": "cached world-space radial blend of measured material rectangles",
+      "spriteFrame": 7,
+      "idealReference": "reference/ideal-effect-user.jpg",
+      "nativeImplemented": false
+    },
+    {
+      "aspect": "4x3",
+      "biome": "grass",
+      "seed": 17,
+      "layout": "A",
+      "publicRoads": [
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "landmarks": [
+        {
+          "nodeID": 1,
+          "nodeAnchor": [
+            264.61538461538464,
+            628.1538461538462
+          ],
+          "landmarkGround": [
+            264.61538461538464,
+            583.1538461538462
+          ]
+        },
+        {
+          "nodeID": 2,
+          "nodeAnchor": [
+            560.6153846153846,
+            628.1538461538462
+          ],
+          "landmarkGround": [
+            460.61538461538464,
+            583.1538461538462
+          ]
+        },
+        {
+          "nodeID": 3,
+          "nodeAnchor": [
+            856.6153846153845,
+            298
+          ],
+          "landmarkGround": [
+            856.6153846153845,
+            253
+          ]
+        }
+      ],
+      "movingFoot": [
+        427.4886446153847,
+        632.6043911538461
+      ],
+      "movingCurveParameter": 0.55,
+      "decorCount": 88,
+      "topologyUnchanged": true,
+      "groundMethod": "cached world-space radial blend of measured material rectangles",
+      "spriteFrame": 7,
+      "idealReference": "reference/ideal-effect-user.jpg",
+      "nativeImplemented": false
+    },
+    {
+      "aspect": "4x3",
+      "biome": "grass",
+      "seed": 30,
+      "layout": "A",
+      "publicRoads": [
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "landmarks": [
+        {
+          "nodeID": 1,
+          "nodeAnchor": [
+            264.61538461538464,
+            628.1538461538462
+          ],
+          "landmarkGround": [
+            264.61538461538464,
+            583.1538461538462
+          ]
+        },
+        {
+          "nodeID": 2,
+          "nodeAnchor": [
+            560.6153846153846,
+            628.1538461538462
+          ],
+          "landmarkGround": [
+            460.61538461538464,
+            583.1538461538462
+          ]
+        },
+        {
+          "nodeID": 3,
+          "nodeAnchor": [
+            856.6153846153845,
+            298
+          ],
+          "landmarkGround": [
+            856.6153846153845,
+            253
+          ]
+        }
+      ],
+      "movingFoot": [
+        427.4886446153847,
+        632.6043911538461
+      ],
+      "movingCurveParameter": 0.55,
+      "decorCount": 100,
+      "topologyUnchanged": true,
+      "groundMethod": "cached world-space radial blend of measured material rectangles",
+      "spriteFrame": 7,
+      "idealReference": "reference/ideal-effect-user.jpg",
+      "nativeImplemented": false
+    }
+  ],
+  "movementArrival": "pass",
+  "arrivalEqualsTargetNode": "pass",
+  "reducedMotionTerminal": "pass",
+  "offline": true,
+  "engineCalls": 0,
+  "nativeVerified": false,
+  "artApproved": false
+}

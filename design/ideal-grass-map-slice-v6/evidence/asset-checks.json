@@ -1,0 +1,10 @@
+{
+  "status": "pass",
+  "userReferenceByteSHA": "pass",
+  "generatedImagesBytePreserved": true,
+  "sourceRectsWithinAtlas": true,
+  "measuredSceneryRects": 12,
+  "walkCandidateFrames": 4,
+  "idleCandidateDirections": 4,
+  "limitations": "Measured major alpha components plus padding; candidate sprites still need visual approval"
+}
