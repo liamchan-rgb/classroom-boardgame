@@ -1,0 +1,81 @@
+{
+  "appVersion": "GrassHD2D 0.3(3)",
+  "testedCommit": "a5078546fd4386d4dd37ca2bbf48269b8661be0e",
+  "sourceCommit": "218c2161476bd0217b18d885e30a1160fd4ae0a2",
+  "actualBuildDestination": "generic/platform=iOS",
+  "configuration": "Release",
+  "architecture": "arm64",
+  "machOPlatform": 2,
+  "minimumOS": "17.0",
+  "deviceWorkflowRun": 38446814120,
+  "deviceWorkflowURL": "https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38446814120",
+  "artifactId": 11838930568,
+  "artifactArchiveSha256": "7cf6c087ee7ec1b7e9fb640bb50d541291b049cf9eba77c8cad4114b657aab2a",
+  "ipaFile": "GrassHD2D-v0.3-unsigned.ipa",
+  "ipaSha256": "64d72f559dde68515197dd2bcf8edb4adb803c66d05cd20a1f2629e085859f9d",
+  "ipaBytes": 10020952,
+  "bundleIdentifier": "com.classroomboardgame.design.grasshd2dv3",
+  "signedForDevice": false,
+  "requiresPersonalSigning": true,
+  "coreTests": {
+    "effectAndGeometry": 18,
+    "GameCore": 72,
+    "ProbeCore": 6,
+    "failures": 0,
+    "formalWorkflowRun": 38446813947
+  },
+  "sourceChecks": {
+    "immutableArtAndIdealReference": true,
+    "projectRegeneration": true,
+    "atlasBounds": true,
+    "swiftSyntax": true,
+    "glesFragments": 2,
+    "actionlint": true,
+    "packageAdverseCases": 7,
+    "downloadedIpaCRC": true,
+    "downloadedIpaResourceSHA256": true
+  },
+  "visualReviewPerformed": false,
+  "screenshotsProduced": false,
+  "recordingsProduced": false,
+  "newPVEDeviceVerified": false,
+  "deviceVerified": false,
+  "completedOptimizationSteps": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "deferredOptimizationSteps": [
+    5
+  ],
+  "limitations": [
+    "SpriteKit shader translation, appearance and performance await user device testing.",
+    "Formal classroom App integration is outside this independent sample."
+  ],
+  "archiveCorrection": "r2: complete source history and independent empty-repository Git bundle/fsck validation; runtime/IPA unchanged.",
+  "archiveAssetsCommit": "18c9f33d4ec3ae5538efe38126ac1bc47f8d0aca",
+  "sourceSnapshot": "b1ffe63e51ecc29e96943f855abfa6b7e7e6ba11",
+  "compiledCommit": "a5078546fd4386d4dd37ca2bbf48269b8661be0e",
+  "archiveSha256": "2065cd9349517b9d2aaccf8442856a7d631df38d40b815f49d6286f998de7f18",
+  "archiveBytes": 141753697,
+  "remoteParts": 3,
+  "verifiedPayloadFiles": 396,
+  "restoredSourceFiles": 390,
+  "checks": [
+    "independent remote fetch",
+    "3 part SHA256 and reconstructed ZIP SHA256",
+    "ZIP CRC and every payload SHA256",
+    "standalone remote IPA byte equality",
+    "Git bundle verify/import/fsck in independently restored full repository",
+    "restored snapshot and all source file SHA256s",
+    "Native sources/resources/project exactly match actual compiled merge",
+    "no archive-assets ref in source bundle",
+    "every prior archive root tree unchanged"
+  ],
+  "tag": "archive-design-hd2d-grass-ipa-v3-20261013-r2",
+  "ipaDownloadURL": "https://github.com/liamchan-rgb/classroom-boardgame/blob/18c9f33d4ec3ae5538efe38126ac1bc47f8d0aca/archive-design-hd2d-grass-ipa-v3-20261013-r2/GrassHD2D-v0.3-unsigned.ipa?raw=true",
+  "archiveURL": "https://github.com/liamchan-rgb/classroom-boardgame/tree/18c9f33d4ec3ae5538efe38126ac1bc47f8d0aca/archive-design-hd2d-grass-ipa-v3-20261013-r2",
+  "archiveRevision": "r2-complete-history",
+  "originalIncompleteHistoryArchivePreserved": true
+}

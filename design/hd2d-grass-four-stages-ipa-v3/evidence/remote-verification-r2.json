@@ -1,0 +1,23 @@
+{
+  "archiveAssetsCommit": "18c9f33d4ec3ae5538efe38126ac1bc47f8d0aca",
+  "sourceSnapshot": "b1ffe63e51ecc29e96943f855abfa6b7e7e6ba11",
+  "compiledCommit": "a5078546fd4386d4dd37ca2bbf48269b8661be0e",
+  "archiveSha256": "2065cd9349517b9d2aaccf8442856a7d631df38d40b815f49d6286f998de7f18",
+  "archiveBytes": 141753697,
+  "remoteParts": 3,
+  "verifiedPayloadFiles": 396,
+  "restoredSourceFiles": 390,
+  "checks": [
+    "independent remote fetch",
+    "3 part SHA256 and reconstructed ZIP SHA256",
+    "ZIP CRC and every payload SHA256",
+    "standalone remote IPA byte equality",
+    "Git bundle verify/import/fsck in independently restored full repository",
+    "restored snapshot and all source file SHA256s",
+    "Native sources/resources/project exactly match actual compiled merge",
+    "no archive-assets ref in source bundle",
+    "every prior archive root tree unchanged"
+  ],
+  "visualReviewPerformed": false,
+  "deviceVerified": false
+}
