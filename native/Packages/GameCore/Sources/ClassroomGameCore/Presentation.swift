@@ -140,8 +140,12 @@ public struct PresentationLedger {
         // Parse the engine's committed stops, never the unsubmitted/requested path.
         if let move = receipt.events.first(where: { $0.kind == "move" }) {
             let stops = move.detail.split(separator:"→").compactMap { Int($0) }
+            let movingIDs: Set<String>
+            if case .move(let actors,_) = receipt.command { movingIDs = Set(actors) }
+            else { movingIDs = Set([move.actor].compactMap { $0 }) }
+            let beforeVisible = Set(try receipt.before.publicSnapshot(catalog:catalog).units.map(\.id))
             for unit in snapshot.units {
-                guard let before = receipt.before.units[unit.id], before.nodeID != unit.nodeID,
+                guard movingIDs.contains(unit.id), beforeVisible.contains(unit.id), let before = receipt.before.units[unit.id],
                       let first = nodes[before.nodeID], stops.last == unit.nodeID else { continue }
                 let points = [first] + stops.compactMap { nodes[$0] }
                 guard points.count == stops.count+1 else { continue }

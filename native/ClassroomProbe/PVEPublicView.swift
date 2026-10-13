@@ -40,8 +40,10 @@ struct PVEPublicView:View {
                         PVEMapView(nodes:frame.snapshot.nodes,roads:frame.snapshot.roads,units:frame.snapshot.units,
                                    publicDisplay:true,camera:camera,events:frame.presentations,round:frame.snapshot.round)
                     }.frame(maxWidth:.infinity,maxHeight:.infinity)
-                    if battleVisible { battlePanel.frame(width:(width*0.9-20)*0.56) }
-                }.frame(maxHeight:.infinity)
+                    if battleVisible {
+                        battlePanel.frame(width:(width*0.9-20)*0.56).transition(.move(edge:.trailing).combined(with:.opacity))
+                    }
+                }.frame(maxHeight:.infinity).animation(reduced ? nil : .easeInOut(duration:0.2),value:battleVisible)
                 if battleVisible {
                     queue.frame(height:104)
                     if let details = frame.currentDetails,
@@ -60,7 +62,7 @@ struct PVEPublicView:View {
             Text(showingBook ? "课堂绘本" : arriving ? "前往地点" : frame.snapshot.phase.displayName).font(.system(size:30,weight:.bold))
             if !showingBook {
                 Text(movingName.map { "移动："+$0 } ?? frame.snapshot.currentName.map { "行动中："+$0 } ??
-                     frame.snapshot.units.first(where: { $0.id == frame.cameraFocusID }).map { "查看："+$0.name } ?? "探索 · 沿道路前进")
+                     frame.snapshot.units.first(where: { $0.id == frame.cameraFocusID }).map { "查看："+$0.name } ?? "沿道路前进")
                     .font(.system(size:34,weight:.bold)).fixedSize(horizontal:false,vertical:true).frame(maxWidth:.infinity,alignment:.leading)
             } else { Spacer() }
             if frame.verification { Text("规则验证").font(.system(size:24)).foregroundStyle(GameTheme.accent) }

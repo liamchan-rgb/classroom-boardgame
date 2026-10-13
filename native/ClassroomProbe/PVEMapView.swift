@@ -78,7 +78,7 @@ struct PVEMapView:View {
                         }
                     }
                 }.frame(width:width,height:height).clipped()
-                    .simultaneousGesture(DragGesture(minimumDistance:12).onEnded { value in
+                    .highPriorityGesture(DragGesture(minimumDistance:12).onEnded { value in
                         onPan?(-Double(value.translation.width)/max(1,width-140)/camera.zoom,
                                -Double(value.translation.height)/max(1,height-140)/camera.zoom)
                     })

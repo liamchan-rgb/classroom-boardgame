@@ -14,6 +14,8 @@ final class PVEAppSession: ObservableObject {
     @Published private(set) var cameraFollowsCurrent = true
     @Published private(set) var itemPage = 0
     private var detailActorID: String?
+    private var lastPublicMoverID: String?
+    private var wasBattleForCamera = false
     private(set) var modalOpen = false
     private let display: PublicDisplayModel
     private var store: AtomicGameStore?
@@ -48,7 +50,7 @@ final class PVEAppSession: ObservableObject {
     #if DEBUG
     func installVisualFixture(_ fixture:PVEPlaySession) {
         active = false; cancelAI(); play = fixture; fixture.toggleReward("p2"); fixture.toggleReward("p3")
-        message = "视觉验证：7角色、3怪物、独立奖励、倒地和下轮资格。"; publish()
+        message = "视觉验证：7角色、3怪物、独立奖励、倒地和下轮资格。"; followPublicActor()
     }
     #endif
     var state: GameState? { play?.engine.state }
@@ -89,7 +91,16 @@ final class PVEAppSession: ObservableObject {
         cameraFocusID = id; cameraFollowsCurrent = false
         publicCamera = MapCamera(x:node.x,y:node.y,zoom:max(1.8,publicCamera.zoom)); publish()
     }
-    func followPublicActor() { cameraFocusID = nil; cameraFollowsCurrent = true; publish() }
+    func followPublicActor() {
+        cameraFocusID = nil; cameraFollowsCurrent = true
+        if let state, let catalog, let snapshot = try? state.publicSnapshot(catalog:catalog) {
+            let focus = snapshot.units.first(where: \.current) ?? snapshot.units.first(where: { $0.player && $0.id == lastPublicMoverID }) ?? snapshot.units.first(where: \.player)
+            if let focus, let node = snapshot.nodes.first(where: { $0.id == focus.nodeID }) {
+                publicCamera = MapCamera(x:node.x,y:node.y,zoom:max(state.battle == nil ? 1.35 : 1.8,publicCamera.zoom))
+            }
+        }
+        publish()
+    }
     func overviewPublicMap() { cameraFocusID = nil; cameraFollowsCurrent = false; publicCamera = MapCamera(); publish() }
     func zoomPublicMap(_ factor:Double) { publicCamera = publicCamera.scaled(by:factor); publish() }
     func panPublicMap(x:Double,y:Double) {
@@ -162,7 +173,7 @@ final class PVEAppSession: ObservableObject {
             let engine = try GameEngine(catalog:catalog,state:state,persist:store.save)
             try store.save(engine.archive)
             presentation.suppressHistory([])
-            cameraFocusID = nil; cameraFollowsCurrent = true; publicCamera = MapCamera(zoom:1.35); itemPage = 0
+            cameraFocusID = nil; cameraFollowsCurrent = true; lastPublicMoverID = nil; publicCamera = MapCamera(zoom:1.35); itemPage = 0
             play = PVEPlaySession(engine:engine); message = "新局已建立：\(scenario.title)。"; lastTick = ProcessInfo.processInfo.systemUptime
             publish(); scheduleAI(); return true
         } catch { message = "新局未建立，当前进度保留：\(error.localizedDescription)"; publish(); return false }
@@ -190,6 +201,7 @@ final class PVEAppSession: ObservableObject {
             let receipt = try operation()
             if let play {
                 try presentation.submit(receipt,catalog:play.engine.catalog,now:Date())
+                if let id = receipt.events.first(where: { $0.kind == "move" })?.actor, receipt.after.units[id]?.kind == .player { lastPublicMoverID = id }
                 message = OperationSummary.lines(receipt,catalog:play.engine.catalog,publicOnly:false).joined(separator:"；")
             }
         } catch { message = "操作未执行：\(error.localizedDescription)" }
@@ -248,10 +260,13 @@ final class PVEAppSession: ObservableObject {
         do {
             var frame = try play.publicFrame()
             frame.presentations = presentation.pending
-            let focus = cameraFollowsCurrent ? frame.snapshot.units.first(where: { $0.current }) : frame.snapshot.units.first(where: { $0.id == cameraFocusID })
+            let automaticFocus = frame.snapshot.units.first(where: { $0.current }) ??
+                frame.snapshot.units.first(where: { $0.player && $0.id == lastPublicMoverID }) ?? frame.snapshot.units.first(where: \.player)
+            let focus = cameraFollowsCurrent ? automaticFocus : frame.snapshot.units.first(where: { $0.id == cameraFocusID })
             if let focus, let node = frame.snapshot.nodes.first(where: { $0.id == focus.nodeID }) {
-                publicCamera = MapCamera(x:node.x,y:node.y,zoom:publicCamera.zoom)
+                publicCamera = MapCamera(x:node.x,y:node.y,zoom:cameraFollowsCurrent && frame.snapshot.round > 0 && !wasBattleForCamera ? max(1.8,publicCamera.zoom) : publicCamera.zoom)
             }
+            wasBattleForCamera = frame.snapshot.round > 0
             if detailActorID != frame.currentDetails?.unitID { itemPage = 0; detailActorID = frame.currentDetails?.unitID }
             itemPage = min(itemPage,max(0,((frame.currentDetails?.items.count ?? 0)+3)/4-1))
             frame.camera = publicCamera; frame.cameraFocusID = cameraFocusID

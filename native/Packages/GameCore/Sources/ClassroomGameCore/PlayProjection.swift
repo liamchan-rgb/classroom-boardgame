@@ -61,6 +61,9 @@ extension PVEPlaySession {
         let log = engine.history.suffix(4).flatMap { OperationSummary.lines($0, catalog: engine.catalog) }
         var frame = PublicPlayFrame(snapshot: try engine.state.publicSnapshot(catalog: engine.catalog, dice: dice),
                                     log: Array(log.suffix(8)), verification: engine.state.verificationScenario != nil)
+        if let current = frame.snapshot.units.first(where: \.current), let node = frame.snapshot.nodes.first(where: { $0.id == current.nodeID }) {
+            frame.camera = MapCamera(x:node.x,y:node.y,zoom:1.8)
+        }
         if engine.state.battle != nil, let actor, actor.kind == .player {
             var details = try PublicTurnDetails(unit: actor, catalog: engine.catalog)
             let publicUnits = frame.snapshot.units

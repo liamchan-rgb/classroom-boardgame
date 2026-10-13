@@ -93,9 +93,18 @@ enum NativeVisualValidation {
         try await capture("public-arriving-4x3",PVEPublicView(frame:moveFrame,image:nil,showingBook:false),CGSize(width:1440,height:1080))
         moveFrame.presentations = []
         try await capture("public-arrived-4x3",PVEPublicView(frame:moveFrame,image:nil,showingBook:false),CGSize(width:1440,height:1080))
+        var middle = state
+        middle.battle?.current = "p4"; middle.battle?.acted = Set(queue.prefix(5))
+        let middlePlay = PVEPlaySession(engine:try GameEngine(catalog:catalog,state:middle))
+        try await capture("public-progress-midround-4x3",PVEPublicView(frame:try middlePlay.publicFrame(),image:nil,showingBook:false),CGSize(width:1440,height:1080))
         let teacher = TeacherSession.shared
         let model = PVEAppSession(display:teacher.display)
         model.installVisualFixture(play)
+        let beforeCamera = play.engine.archive, selectedBeforeCamera = play.selectedPlayerID, rewardsBeforeCamera = play.rewardIDs
+        model.focusPublicPlayer("p2"); model.zoomPublicMap(1.25); model.panPublicMap(x:0.1,y:-0.1)
+        model.turnInventoryPage(1); model.overviewPublicMap(); model.followPublicActor()
+        let cameraControlsPure = play.engine.archive == beforeCamera && play.selectedPlayerID == selectedBeforeCamera && play.rewardIDs == rewardsBeforeCamera
+        guard cameraControlsPure else { throw GameError("镜头控制改变了游戏或私有选择") }
         try await capture("teacher-1366x1024",PVEPlayView(model:model,teacher:teacher),CGSize(width:1366,height:1024))
         try await capture("teacher-1180x820",PVEPlayView(model:model,teacher:teacher),CGSize(width:1180,height:820))
         // Every manifest PNG must decode using Bundle.main while the simulator has no asset server.
@@ -104,7 +113,7 @@ enum NativeVisualValidation {
             let pair = key.split(separator:":",maxSplits:1).map(String.init)
             if GameArt.image(pair[0],pair[1]) == nil { missing.append(key) }
         }
-        let report:[String:Any] = ["screenshots":20,"assetCount":GameArt.bindings.count,"missingAssets":missing,"names":names,"deviceVerified":false,"note":"Actual native SwiftUI simulator rendering; not physical iPad/TV feedback"]
+        let report:[String:Any] = ["screenshots":21,"assetCount":GameArt.bindings.count,"cameraControlsPure":cameraControlsPure,"missingAssets":missing,"names":names,"deviceVerified":false,"note":"Actual native SwiftUI simulator rendering; not physical iPad/TV feedback"]
         try JSONSerialization.data(withJSONObject:report,options:[.prettyPrinted,.sortedKeys]).write(to:output.appendingPathComponent("report.json"))
         guard missing.isEmpty else { throw GameError("离线资产无法解码") }
         try Data("success".utf8).write(to:output.appendingPathComponent("complete.txt"))

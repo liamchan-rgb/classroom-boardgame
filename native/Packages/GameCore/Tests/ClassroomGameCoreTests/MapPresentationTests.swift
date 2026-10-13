@@ -42,6 +42,22 @@ final class MapPresentationTests:XCTestCase {
         XCTAssertNil(try ledger.submit(receipt,catalog:catalog,now:now))
         XCTAssertEqual(engine.archive,archive)
     }
+    func testCommittedRoundTripStillAnimatesEveryActualStop() throws {
+        let (catalog,initial) = try fixture()
+        var state = initial
+        state.map.nodes[0].x = 0.1; state.map.nodes[0].y = 0.5
+        state.map.nodes[1].x = 0.5; state.map.nodes[1].y = 0.5
+        let engine = try GameEngine(catalog:catalog,state:state)
+        let receipt = try engine.apply(.move(actors:["p1"],path:[2,1,2]))
+        var ledger = PresentationLedger()
+        let event = try XCTUnwrap(ledger.submit(receipt,catalog:catalog,now:Date()))
+        let move = try XCTUnwrap(event.mapMoves.first)
+        XCTAssertEqual(move.points.count,3)
+        XCTAssertEqual(move.points.first,move.points.last)
+        XCTAssertEqual(move.position(progress:0.5)?.x ?? 0,0.1,accuracy:0.0001)
+        XCTAssertFalse(event.opensBattleAfterArrival)
+        XCTAssertEqual(engine.state.units["p1"]?.ap,1)
+    }
     func testAvailabilityAndInventoryReadActualStateWithoutPrivateSelectionOrDice() throws {
         let (catalog,initial) = try fixture()
         var state = initial
