@@ -1,0 +1,361 @@
+{
+  "formatVersion": 1,
+  "milestone": "b-map-v1-20261013",
+  "sourceBasisCommit": "7f18a56dbd63f23253edbb8292d333cb5eeeddea",
+  "scope": "design/map-art-b-v1 only; existing art and approved UI preserved",
+  "appBuildUnchanged": true,
+  "compiledCommitReference": "aff02aad17fc24b6f76c6ac3e8ce3b4269934f2d",
+  "plannedTag": "archive-design-b-map-v1-20261013",
+  "tagCreated": false,
+  "entries": [
+    {
+      "path": "ui-art-delivery/README.md",
+      "bytes": 2029,
+      "sha256": "07edaaa219a186333cdfe932a8f920d1e6001d5b84e6af1e83b6b882bd634b56"
+    },
+    {
+      "path": "ui-art-delivery/annotations/01_layers_and_states.md",
+      "bytes": 2171,
+      "sha256": "fa8f9acc50cebc0a3148c09b95c3779b0375f0cc0ba4d13988fcc8e27d3e6869"
+    },
+    {
+      "path": "ui-art-delivery/annotations/02_sizes_and_adaptation.md",
+      "bytes": 1237,
+      "sha256": "c84785ac655fd13fea56040ab567697a2f5b4063e5d848f860a39ff82c23707e"
+    },
+    {
+      "path": "ui-art-delivery/annotations/03_sources_and_license.md",
+      "bytes": 1202,
+      "sha256": "5702b67b271095895fa8045314c2c59b29b7c3ba8a1352c4fc1c197e4389830e"
+    },
+    {
+      "path": "ui-art-delivery/annotations/04_validation_and_recovery.md",
+      "bytes": 1311,
+      "sha256": "807cca805b313dc9ce5911997905acad5069b02e9caf8c9bc8c01da687d44bc3"
+    },
+    {
+      "path": "ui-art-delivery/asset-manifest.json",
+      "bytes": 11797,
+      "sha256": "f52aae2b4f06612e25a53c6327c31f7a4b96bfad464d5656047f71af20292d48"
+    },
+    {
+      "path": "ui-art-delivery/assets/backgrounds/map_decoration_1440.png",
+      "bytes": 7407,
+      "sha256": "69b9d8382740c6aca902eeb11c4439ec3af44103938c2b821699587a563249d6"
+    },
+    {
+      "path": "ui-art-delivery/assets/backgrounds/map_decoration_1440.svg",
+      "bytes": 1371,
+      "sha256": "66fc46172ca9c7c75bd8212f4c55616b98335fe3372c7f3605ebdadb826e1f32"
+    },
+    {
+      "path": "ui-art-delivery/assets/backgrounds/map_decoration_1920.png",
+      "bytes": 9419,
+      "sha256": "378f3d270abc7f51ff42b7fb59fffa75120fba7d27e6079a12e754c79e86a6ea"
+    },
+    {
+      "path": "ui-art-delivery/assets/backgrounds/map_decoration_1920.svg",
+      "bytes": 1371,
+      "sha256": "6b38c803f109b1868f4f77d0b5e2be5b99206adb973c4ce20bff6999ded0e387"
+    },
+    {
+      "path": "ui-art-delivery/assets/backgrounds/map_ground_1440.png",
+      "bytes": 22249,
+      "sha256": "0b0d6fea54876ed97d5a5193ae6e2b73aae9651ed787bbcc16c6e924f197614d"
+    },
+    {
+      "path": "ui-art-delivery/assets/backgrounds/map_ground_1440.svg",
+      "bytes": 225,
+      "sha256": "4db40d16633f7088cf1a6fd55555968d7fc4709ac51f56b4633788edab419447"
+    },
+    {
+      "path": "ui-art-delivery/assets/backgrounds/map_ground_1920.png",
+      "bytes": 25720,
+      "sha256": "40c98ded4958700d757a5037798632a4b164936327858aebfc42fbe877de4368"
+    },
+    {
+      "path": "ui-art-delivery/assets/backgrounds/map_ground_1920.svg",
+      "bytes": 225,
+      "sha256": "5f991eadfa8ebc4973aac1ced0b141b5a8a84caa7c329ff0a64ad34d3da84c5e"
+    },
+    {
+      "path": "ui-art-delivery/assets/nodes/node_boss.png",
+      "bytes": 170810,
+      "sha256": "8e079f05a6930e9c01ddccccbcf10cb732393250af2088914a18e1da51c0d20b"
+    },
+    {
+      "path": "ui-art-delivery/assets/nodes/node_combat.png",
+      "bytes": 160245,
+      "sha256": "c677d7e9daa6dfb5b29fa7213ccfb20123a73a0d51ea532507efc45078639978"
+    },
+    {
+      "path": "ui-art-delivery/assets/nodes/node_empty.png",
+      "bytes": 132635,
+      "sha256": "22af9a9cbc1428530526fcdd72e6228a45acd583bcea60618afd66eba9d336b8"
+    },
+    {
+      "path": "ui-art-delivery/assets/nodes/node_reward.png",
+      "bytes": 128849,
+      "sha256": "e56e9e1a5e6be8f7638c904cf1b5d698ba7a4402ad0dceac279e17abae2a966c"
+    },
+    {
+      "path": "ui-art-delivery/assets/nodes/node_start.png",
+      "bytes": 133306,
+      "sha256": "0af7a86ace9e8ca766ff4883dde05a121fff8afbe4c26f62dc1f1f58484ba87c"
+    },
+    {
+      "path": "ui-art-delivery/assets/nodes/node_unknown.png",
+      "bytes": 19055,
+      "sha256": "fe3dbb985b4777a77314d4ef025d958934c0aeb7e29b85417a868658c326dbf3"
+    },
+    {
+      "path": "ui-art-delivery/assets/nodes/node_unknown.svg",
+      "bytes": 326,
+      "sha256": "2a126132766e3dc95c49d487bf7a54e1bc91fa4d0c507efac3f064cecd192653"
+    },
+    {
+      "path": "ui-art-delivery/assets/overlays/fog_unknown.png",
+      "bytes": 7122,
+      "sha256": "aa6f7a24a34d1fe74bdb3f0ba21c25df3a1c575a370195bc0e100d1380d0d7ed"
+    },
+    {
+      "path": "ui-art-delivery/assets/overlays/fog_unknown.svg",
+      "bytes": 317,
+      "sha256": "24a48909ca8fd4f543c2b162f64021c609d55609c0bf634d5f554412fb606ee3"
+    },
+    {
+      "path": "ui-art-delivery/assets/overlays/node_state_claimed.png",
+      "bytes": 8772,
+      "sha256": "bda970adc3207da209d0b0d2cea88f8e57dc7cdd76f31932ecd0cd5263cc06d0"
+    },
+    {
+      "path": "ui-art-delivery/assets/overlays/node_state_claimed.svg",
+      "bytes": 261,
+      "sha256": "099508d30625c37694a0f6326dcd64bdbc88b0ad76d573b4b12a9dc0c3d3a0df"
+    },
+    {
+      "path": "ui-art-delivery/assets/overlays/node_state_crowded.png",
+      "bytes": 7561,
+      "sha256": "51d17ca366edfb02309c84ca9f69c47b5d78f4b084bbcd0a3a58311b412c486d"
+    },
+    {
+      "path": "ui-art-delivery/assets/overlays/node_state_crowded.svg",
+      "bytes": 176,
+      "sha256": "982f52036e9dbd35f9ddd8541320b7f2dec445f972a35d6bbde74c96814c4ced"
+    },
+    {
+      "path": "ui-art-delivery/assets/overlays/node_state_current.png",
+      "bytes": 17749,
+      "sha256": "5ab61429c1531070d82dfcc40c932d6ff94563ef7b44d05bf988298e10bd4fd7"
+    },
+    {
+      "path": "ui-art-delivery/assets/overlays/node_state_current.svg",
+      "bytes": 227,
+      "sha256": "f2644858941ad4fe3f835a399daf704e4b75a4b3bf3062dd36363caa18086436"
+    },
+    {
+      "path": "ui-art-delivery/assets/overlays/node_state_enemy.png",
+      "bytes": 18408,
+      "sha256": "b1daaf30c813c3fc65645a8f90e3a3cfd5067e371203c10af30da80511cd8504"
+    },
+    {
+      "path": "ui-art-delivery/assets/overlays/node_state_enemy.svg",
+      "bytes": 257,
+      "sha256": "7944ef6dd9958cac4b213d6f02cc45951a607afdadb1d79f51c2d91293b4ee78"
+    },
+    {
+      "path": "ui-art-delivery/assets/overlays/node_state_path.png",
+      "bytes": 16665,
+      "sha256": "c46329c07cba7d9cb139551252e1244b8fd71f895ab0183fe0f330287e315d61"
+    },
+    {
+      "path": "ui-art-delivery/assets/overlays/node_state_path.svg",
+      "bytes": 291,
+      "sha256": "a9409de73b2bc88c4d6f1cb980eaa22ed3147371e6244358c224dbc932e4379b"
+    },
+    {
+      "path": "ui-art-delivery/assets/overlays/node_state_target.png",
+      "bytes": 1817,
+      "sha256": "3a9ba4ca5eaa561841aa5b39d57fcb6ac91097a7033c072d5284b9b16df0c81d"
+    },
+    {
+      "path": "ui-art-delivery/assets/overlays/node_state_target.svg",
+      "bytes": 259,
+      "sha256": "8bfb1c51373a1fbdec0ea9afe43da9787719f4175896ada677b0be9cffada732"
+    },
+    {
+      "path": "ui-art-delivery/assets/roads/road_normal.png",
+      "bytes": 1727,
+      "sha256": "6c0542e7fe00ff152b0c698204f2e8b0391bf8919b794b1d93104ddd2bddb238"
+    },
+    {
+      "path": "ui-art-delivery/assets/roads/road_normal.svg",
+      "bytes": 192,
+      "sha256": "f5bf07fddb6152bb39e95972d58b79f6779e8ee3d87be7a983a8922a4b60cb60"
+    },
+    {
+      "path": "ui-art-delivery/assets/roads/road_plan_unavailable.png",
+      "bytes": 1812,
+      "sha256": "fc1d9ea9eb682793107a9311bc958e54d6b1e02a514431351c29dcb2db04da73"
+    },
+    {
+      "path": "ui-art-delivery/assets/roads/road_plan_unavailable.svg",
+      "bytes": 216,
+      "sha256": "44b99a50a5de0489ed7bb87606f3ba628211e6646fb5864e47be8c5aae997b94"
+    },
+    {
+      "path": "ui-art-delivery/assets/roads/road_planned.png",
+      "bytes": 1730,
+      "sha256": "2a090e0a891fa5871c3677390ab78623657718c9dd68fcffff5add0d9006d693"
+    },
+    {
+      "path": "ui-art-delivery/assets/roads/road_planned.svg",
+      "bytes": 192,
+      "sha256": "3045e044e0629c3db7cf468bf4fc3bf8300d33a01cf3d4115dc5aefccec32ff2"
+    },
+    {
+      "path": "ui-art-delivery/design-tokens.json",
+      "bytes": 5535,
+      "sha256": "f3da0906f099948e9aaf562b571d408c06ee087c672bcf7300b454ef6a5aa1a8"
+    },
+    {
+      "path": "ui-art-delivery/previews/index.html",
+      "bytes": 1607,
+      "sha256": "2666986993457b6706557d4308c30745fc16449f0c3c42670a2e5923ef9fd603"
+    },
+    {
+      "path": "ui-art-delivery/previews/map_adaptation_1440.png",
+      "bytes": 176149,
+      "sha256": "b1a7cf9a2e1554d8a3d07602f7bbf7b89d72e8aec16442959731224b346a10bc"
+    },
+    {
+      "path": "ui-art-delivery/previews/map_adaptation_1920.png",
+      "bytes": 187231,
+      "sha256": "2e56102cecfb2d137703005d54fe6170044e47c78da3b0faae87b9931b47d25d"
+    },
+    {
+      "path": "ui-art-delivery/previews/map_module_596.png",
+      "bytes": 65050,
+      "sha256": "db414436d22da704bce20d3204ac482756f2d6fdd8290d5146963b1664743816"
+    },
+    {
+      "path": "ui-art-delivery/previews/map_module_760.png",
+      "bytes": 73210,
+      "sha256": "5412a1bc094ddd95f2d6cc9ffceafca9cd720b0767a7e23a821840556125c82c"
+    },
+    {
+      "path": "ui-art-delivery/previews/node_contact_sheet.png",
+      "bytes": 327818,
+      "sha256": "f0a99d63b114779590105eaac49868b118848a44f36c248b5455a677e3c5511e"
+    },
+    {
+      "path": "ui-art-delivery/previews/node_state_board.png",
+      "bytes": 205578,
+      "sha256": "e03548de57df68969caadad6244fd4b04460059f3451a21a00032c830fcd738d"
+    },
+    {
+      "path": "ui-art-delivery/previews/unknown_privacy_check.png",
+      "bytes": 102757,
+      "sha256": "9eab77686a9e9665946ccc24f495e605109de8c58ba4dff898aa9d81837c5f5c"
+    },
+    {
+      "path": "ui-art-delivery/sources/build_assets.py",
+      "bytes": 11865,
+      "sha256": "0965e2b4569624c415da4043bb2b6d88ddab147696c1be6d994dff546ef40c10"
+    },
+    {
+      "path": "ui-art-delivery/sources/export_node_boss.svg",
+      "bytes": 241,
+      "sha256": "d3130db421d8dfa66b7f5b2673fe37525869cc987732e9c199a647dc232d5b1b"
+    },
+    {
+      "path": "ui-art-delivery/sources/export_node_combat.svg",
+      "bytes": 243,
+      "sha256": "a8a4109bcadbcf33ebf13c358415adc738eb701601e55d31740315fecad17d25"
+    },
+    {
+      "path": "ui-art-delivery/sources/export_node_empty.svg",
+      "bytes": 242,
+      "sha256": "63255aa47e29b2a57d1131b84ba91e9ccc6e0e8fc7fa7a75fd821f3e070d10fb"
+    },
+    {
+      "path": "ui-art-delivery/sources/export_node_reward.svg",
+      "bytes": 243,
+      "sha256": "299b3aa1f9a3ada1782744621e14737862e779ee014f769d5c7f1dd53ac05b7f"
+    },
+    {
+      "path": "ui-art-delivery/sources/export_node_start.svg",
+      "bytes": 242,
+      "sha256": "2ea43b18887879e8ed84c7358c1579541a2152e02d27007b09b38a7911cff496"
+    },
+    {
+      "path": "ui-art-delivery/sources/generated_node_boss.png",
+      "bytes": 1181961,
+      "sha256": "92e5ac1a4a00ed4031d5ff946732cc2e381f62c2c2d0ed07ef6aabc53a24d508"
+    },
+    {
+      "path": "ui-art-delivery/sources/generated_node_combat.png",
+      "bytes": 1113640,
+      "sha256": "f0be2409ca046139f77fa3331aae198464379b367cd4406a5c7be3d46c40e711"
+    },
+    {
+      "path": "ui-art-delivery/sources/generated_node_empty.png",
+      "bytes": 917374,
+      "sha256": "85d6ca372a6c1c46adbba97e76691b6d2850f6a9f56607715b7a77ad43c1e24e"
+    },
+    {
+      "path": "ui-art-delivery/sources/generated_node_reward.png",
+      "bytes": 861385,
+      "sha256": "3dddd247594cbd1c666101edac774b79e19a3889c2bcc34827758d432ca262b9"
+    },
+    {
+      "path": "ui-art-delivery/sources/generated_node_start.png",
+      "bytes": 911016,
+      "sha256": "4fb309a816affc52c482d7b04f408d068727c69b37e8c68cd1c85734d224c875"
+    },
+    {
+      "path": "ui-art-delivery/sources/node-fixture.json",
+      "bytes": 1019,
+      "sha256": "94e28a5565d5c1413575d5f2094ab68f59e359df666860292213780a1859db46"
+    },
+    {
+      "path": "ui-art-delivery/sources/prompt_node_boss.txt",
+      "bytes": 944,
+      "sha256": "a99fa8afbf48cd44418f077eb7acb37581d80e7443332651e4924ec31469772e"
+    },
+    {
+      "path": "ui-art-delivery/sources/prompt_node_combat.txt",
+      "bytes": 873,
+      "sha256": "9a5e82efa78c71ee60d64252bdcee26d8a1edb9e78675c123072fa582d3a1955"
+    },
+    {
+      "path": "ui-art-delivery/sources/prompt_node_empty.txt",
+      "bytes": 831,
+      "sha256": "e7ce46fcaa6f8800f591e51fc63eea58204b17f278cd603f5b567b90f2babe47"
+    },
+    {
+      "path": "ui-art-delivery/sources/prompt_node_reward.txt",
+      "bytes": 879,
+      "sha256": "f203666587bd87c6b8a6a1134886ab13db470e810a8c42e66ff1b05e9d9c3256"
+    },
+    {
+      "path": "ui-art-delivery/sources/prompt_node_start.txt",
+      "bytes": 851,
+      "sha256": "28e2ac24185536e8430f1aa1726e8903294ae82e20cf0af2036d05b97b127f45"
+    },
+    {
+      "path": "ui-art-delivery/sources/validation.json",
+      "bytes": 6848,
+      "sha256": "b50553232dbdfce8a7e2b555091a5aa33d2b52e3f13bb94d3b521db81ea4775b"
+    }
+  ],
+  "archive": {
+    "name": "classroom-b-map-v1-20261013.zip",
+    "bytes": 6732875,
+    "sha256": "5848538233e0b87f13dde3ee85caf7687c1e94957470f68c7b17935a3f760f10"
+  },
+  "sourceSnapshotCommit": "a0d1fcedfed71099832551c25a975071c6a9cce0",
+  "sourceSnapshotURL": "https://github.com/liamchan-rgb/classroom-boardgame/tree/a0d1fcedfed71099832551c25a975071c6a9cce0/design/map-art-b-v1",
+  "remoteSourceFilesVerified": 69,
+  "remoteZIPBlobSHA": "43d9e06734b1a34d92817c129beec8a56603e5bd"
+}
