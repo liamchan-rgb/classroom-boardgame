@@ -1,0 +1,87 @@
+name: iOS PR Build
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-pr-build-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build ClassroomProbe
+    runs-on: macos-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Initialize diagnostics
+        env:
+          IOS_CI_OUTPUT_DIR: ${{ runner.temp }}/ios-pr-build
+        run: |
+          set -euo pipefail
+          mkdir -p "$IOS_CI_OUTPUT_DIR"
+          printf 'IOS_CI_OUTPUT_DIR=%s\n' "$IOS_CI_OUTPUT_DIR" >> "$GITHUB_ENV"
+          printf '%s\n' "$GITHUB_SHA" > "$IOS_CI_OUTPUT_DIR/source-commit.txt"
+          sw_vers > "$IOS_CI_OUTPUT_DIR/runner.txt"
+          uname -m >> "$IOS_CI_OUTPUT_DIR/runner.txt"
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Validate checked-in Xcode configuration
+        run: |
+          set -euo pipefail
+          python3 native/tools/validate_xcode_project.py 2>&1 | tee "$IOS_CI_OUTPUT_DIR/configuration.log"
+          python3 -m unittest discover -s native/tools/tests -v \
+            2>&1 | tee "$IOS_CI_OUTPUT_DIR/configuration-tests.log"
+      - name: Select compatible Xcode
+        id: xcode
+        run: |
+          set -euo pipefail
+          python3 native/tools/select_ci_xcode.py --github-env "$GITHUB_ENV" \
+            2>&1 | tee "$IOS_CI_OUTPUT_DIR/xcode-selection.log"
+      - name: Record toolchain and resolve packages
+        run: |
+          set -euo pipefail
+          xcodebuild -version 2>&1 | tee "$IOS_CI_OUTPUT_DIR/xcode-version.log"
+          xcodebuild -showsdks 2>&1 | tee "$IOS_CI_OUTPUT_DIR/xcode-sdks.log"
+          swift --version 2>&1 | tee "$IOS_CI_OUTPUT_DIR/swift-version.log"
+          xcodebuild -resolvePackageDependencies \
+            -project native/ClassroomProbe.xcodeproj -scheme ClassroomProbe \
+            -clonedSourcePackagesDirPath "$RUNNER_TEMP/ios-pr-packages" \
+            2>&1 | tee "$IOS_CI_OUTPUT_DIR/package-resolution.log"
+      - name: Compile iPad app for simulator
+        run: |
+          set -euo pipefail
+          xcodebuild -project native/ClassroomProbe.xcodeproj -scheme ClassroomProbe \
+            -configuration Debug -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$RUNNER_TEMP/ios-pr-derived-data" \
+            -clonedSourcePackagesDirPath "$RUNNER_TEMP/ios-pr-packages" \
+            -resultBundlePath "$IOS_CI_OUTPUT_DIR/Build.xcresult" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO build \
+            2>&1 | tee "$IOS_CI_OUTPUT_DIR/xcode-build.log"
+      - name: Test GameCore
+        if: ${{ !cancelled() && steps.xcode.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          swift test --package-path native/Packages/GameCore \
+            --scratch-path "$RUNNER_TEMP/ios-pr-gamecore" \
+            2>&1 | tee "$IOS_CI_OUTPUT_DIR/gamecore-tests.log"
+      - name: Test ProbeCore
+        if: ${{ !cancelled() && steps.xcode.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          swift test --package-path native/Packages/ProbeCore \
+            --scratch-path "$RUNNER_TEMP/ios-pr-probecore" \
+            2>&1 | tee "$IOS_CI_OUTPUT_DIR/probecore-tests.log"
+      - name: Upload build logs and result bundle
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ios-pr-build-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/ios-pr-build/
+          retention-days: 14
+          if-no-files-found: warn

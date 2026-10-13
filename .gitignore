@@ -1,6 +1,7 @@
 # Build and editor state
 **/.build/
 native/build/
+native/simulator-build/
 artifacts/
 **/xcuserdata/
 **/*.xcuserstate

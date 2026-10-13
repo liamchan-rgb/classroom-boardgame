@@ -1,0 +1,15 @@
+{
+  "checkedAtUTC": "2026-10-13T16:37:24.124429+00:00",
+  "baseMainCommit": "576afd41403b3bfd0108ae5685a7a3e870c3281e",
+  "actionlintVersion": "1.7.12",
+  "workflowValidation": "pass-both-workflows",
+  "bashSyntax": "pass-all-run-blocks",
+  "generatedProjectAndPaths": "pass-14-Swift-sources",
+  "toolchainFailurePathTests": "4 passed",
+  "teeFailurePropagation": "pass-exit-65-and-log-retained",
+  "localXcodeBuild": "not-run-Linux-no-Apple-SDK",
+  "nativePackageTests": "not-run-local",
+  "cloudRun": "pending-first-PR",
+  "deploymentMinimumChanged": false,
+  "appAndRulesChanged": false
+}

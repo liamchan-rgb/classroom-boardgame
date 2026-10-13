@@ -11,6 +11,7 @@
 - `native/Packages/GameCore/`：独立规则计算、4职业/19技能/18物品/2套装/6怪物的校验数据、原子结算、版本化存档、完整历史与可控随机。
 - `native/Packages/ProbeCore/`：PPTX离线解析及原阶段0核心。
 - `.github/workflows/build-native-ipa.yml`：手动构建，测试两个核心库，再生成待个人签名的IPA。
+- `.github/workflows/ios-pr-build.yml`：每次PR自动用macOS/Xcode编译正式iPad工程，执行核心测试并上传编译日志，详见[CI说明](native/CI.md)。
 - [安装与真机验收](native/安装与真机验收.md)：SideStore覆盖更新与免费7天续签。
 
 安装名继续使用ASCII `ClassroomProbe`，保留中文界面和Bundle ID，避免v0.5中文appIdName签名失败，并用于覆盖更新。v0.7已通过Xcode27.0设备版编译及44项核心测试（游戏38、绘本6），IPA与内置规则资源已校验；教师本次已反馈v0.7“没有问题”，新增界面未提供分项测试日志。
