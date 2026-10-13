@@ -1,0 +1,15 @@
+{
+  "README.md": "f2cd4aa0bd27d5c592c526f11fb987eec140c538a769fef82676b4845b144a20",
+  "asset-manifest.json": "2e4aeb18106cdad3631647cd2542d43c31d63672dc064380b09fc489cfe3c4a0",
+  "assets/map_snow_environment.png": "f433d929d87cfeea58dc86d2d4f3ab96163d04654390b7849889b699014c478e",
+  "assets/map_volcano_environment.png": "401f0126fe2a48accb3efb522d6c4e3157c1e7d4c28eb08c2f9594ca4c88013c",
+  "evidence.json": "7c4b7e27fc547b13b4fb887b645cfd014045a4d75aa8cfd183d0a7efb75cddd1",
+  "feedback.md": "284203df549e3ec9688ae73423ea8bfde27672f3b79086ee207faf55ed505d6c",
+  "previews/index.html": "5a4b17ef8f570eb556e61d2d99f663735f793fb7a0b11f71c3c1fec0d89337b0",
+  "previews/snow_16x9.png": "9211fc48335068acb3e13e2ef376d70dbaba156e0552da9d1a0b07d7c4d41ec9",
+  "previews/snow_4x3.png": "a9b8d4c6461cf41a2713c5602a0edb5e9964ac930d9bf1064aa14cf6d488876c",
+  "previews/volcano_16x9.png": "b670476a738c13f58eaaa61876960b601ba9fc0df19600ae6522c3d8f01752c1",
+  "previews/volcano_4x3.png": "eb51858c22503b73f7b8777e2f8f366de5c708b6aed052af1cc71f55a0df3952",
+  "sources/archive_sample.py": "a82550635921724b4caaa200a839d0ad8f51ddccc0ad8727f68ba9674409b9a3",
+  "sources/build_previews.py": "c74021cf900e2bffe59e1e64bbe52528440468350834d887509b9e8b934baae6"
+}

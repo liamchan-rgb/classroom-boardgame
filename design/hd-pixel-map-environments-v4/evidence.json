@@ -1,0 +1,38 @@
+{
+  "status": "pass",
+  "previews": [
+    {
+      "scene": "snow",
+      "aspect": "16x9",
+      "width": 1920,
+      "height": 1080,
+      "fit": "uniform cover",
+      "offline": true
+    },
+    {
+      "scene": "snow",
+      "aspect": "4x3",
+      "width": 1440,
+      "height": 1080,
+      "fit": "uniform cover",
+      "offline": true
+    },
+    {
+      "scene": "volcano",
+      "aspect": "16x9",
+      "width": 1920,
+      "height": 1080,
+      "fit": "uniform cover",
+      "offline": true
+    },
+    {
+      "scene": "volcano",
+      "aspect": "4x3",
+      "width": 1440,
+      "height": 1080,
+      "fit": "uniform cover",
+      "offline": true
+    }
+  ],
+  "limits": "static decorative background only; not native integration or layered scene validation"
+}

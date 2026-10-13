@@ -1,0 +1,40 @@
+{
+  "version": 4,
+  "status": "two-environments-awaiting-review",
+  "assets": [
+    {
+      "id": "map_environment_snow",
+      "file": "assets/map_snow_environment.png",
+      "width": 1536,
+      "height": 1024,
+      "mode": "RGB",
+      "sha256": "f433d929d87cfeea58dc86d2d4f3ab96163d04654390b7849889b699014c478e",
+      "source": "/workspace/generated_images/exec-bd7887be-85c8-48fd-bbe6-36382ad719f6.png",
+      "method": "generated original HD pixel environment; byte-preserved copy",
+      "bakedUI": false,
+      "bakedRoads": false,
+      "layered": false,
+      "worldNodeBinding": null,
+      "fit": "uniform cover for non-semantic environment only",
+      "status": "awaiting-art-review"
+    },
+    {
+      "id": "map_environment_volcano",
+      "file": "assets/map_volcano_environment.png",
+      "width": 1536,
+      "height": 1024,
+      "mode": "RGB",
+      "sha256": "401f0126fe2a48accb3efb522d6c4e3157c1e7d4c28eb08c2f9594ca4c88013c",
+      "source": "/workspace/generated_images/exec-ae2bd5a9-cf75-4e09-b8bc-3d520d90ecae.png",
+      "method": "generated original HD pixel environment; byte-preserved copy",
+      "bakedUI": false,
+      "bakedRoads": false,
+      "layered": false,
+      "worldNodeBinding": null,
+      "fit": "uniform cover for non-semantic environment only",
+      "status": "awaiting-art-review"
+    }
+  ],
+  "appChanged": false,
+  "rulesChanged": false
+}
