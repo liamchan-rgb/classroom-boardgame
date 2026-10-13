@@ -194,18 +194,13 @@ private struct PVEActionPanel:View {
                 if let play = model.play, play.humanMayAct {
                     ScrollView {
                         VStack(alignment:.leading,spacing:10) {
-                            ForEach(play.options) { option in
-                                Button { model.choose(option.action) } label:{
-                                    HStack(spacing:6) {
-                                    if case .item(let id) = option.action { ArtImage(type:"items",id:id).frame(width:32,height:32) }
-                                    if option.action == .rescue { ArtImage(type:"items",id:"revivalStone").frame(width:32,height:32) }
-                                    VStack(alignment:.leading,spacing:3) {
-                                        Text(option.title).font(.headline)
-                                        Text(option.detail).font(.caption)
-                                    }}.frame(maxWidth:.infinity,alignment:.leading).padding(10)
-                                        .foregroundStyle(play.action == option.action ? .white : GameTheme.ink)
-                                        .background(play.action == option.action ? GameTheme.primary : GameTheme.background,in:RoundedRectangle(cornerRadius:12))
-                                }.buttonStyle(.plain)
+                            LazyVGrid(columns:[GridItem(.flexible()),GridItem(.flexible())],spacing:8) {
+                                ForEach(play.options.filter { option in
+                                    if case .item = option.action { return false }
+                                    return option.action != .rescue
+                                }) { option in
+                                    actionOption(option,play:play)
+                                }
                             }
                             if play.action == .move {
                                 Text("路径：" + play.path.map { id in play.engine.state.map.nodes.first { $0.id == id }?.name ?? "地点\(id)" }.joined(separator:" → ")).font(.callout)
@@ -233,13 +228,32 @@ private struct PVEActionPanel:View {
                     Text(play.preview.message).font(.callout).foregroundStyle(play.preview.allowed ? GameTheme.muted : GameTheme.danger).fixedSize(horizontal:false,vertical:true)
                     Button("确认执行 · \(play.preview.cost)行动点") { model.perform() }.buttonStyle(ClassroomButtonStyle(primary:true))
                         .frame(maxWidth:.infinity,minHeight:56).disabled(!play.preview.allowed || model.aiRunning)
-                    if play.engine.state.battle != nil { Button("结束回合（E）") { model.endTurn() }.buttonStyle(ClassroomButtonStyle()).frame(maxWidth:.infinity,minHeight:44) }
+                    HStack(spacing:8) {
+                        Menu {
+                            ForEach(play.options.filter { if case .item = $0.action { return true }; return false }) { option in
+                                Button(option.title + " · " + option.detail) { model.choose(option.action) }
+                            }
+                        } label: { Text(play.options.contains { if case .item = $0.action { return true }; return false } ? "道具" : "暂无道具") }
+                            .disabled(!play.options.contains { if case .item = $0.action { return true }; return false })
+                        Button("救援") { model.choose(.rescue) }
+                        if play.engine.state.battle != nil { Button("结束(E)") { model.endTurn() }.accessibilityLabel("结束回合（E）") }
+                    }.font(.callout).buttonStyle(ClassroomButtonStyle()).frame(maxWidth:.infinity,minHeight:44)
                 } else {
                     Text(model.aiRunning ? "怪物正在按技能优先级和选敌策略行动。" : "当前没有可行动玩家。可暂停、复活、调整资源或结束本场。")
                         .foregroundStyle(GameTheme.muted).frame(maxHeight:.infinity)
                 }
             }
         }
+    }
+    private func actionOption(_ option:PlayActionOption,play:PVEPlaySession) -> some View {
+        Button { model.choose(option.action) } label: {
+            VStack(alignment:.leading,spacing:3) {
+                Text(option.title).font(.headline)
+                Text(option.detail).font(.caption).fixedSize(horizontal:false,vertical:true)
+            }.frame(maxWidth:.infinity,minHeight:44,alignment:.leading).padding(6)
+                .foregroundStyle(play.action == option.action ? .white : GameTheme.ink)
+                .background(play.action == option.action ? GameTheme.primary : GameTheme.background,in:RoundedRectangle(cornerRadius:12))
+        }.buttonStyle(.plain)
     }
     private func label(_ target:ActionTarget,play:PVEPlaySession) -> String {
         switch target {
