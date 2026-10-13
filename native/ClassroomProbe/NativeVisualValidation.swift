@@ -63,6 +63,36 @@ enum NativeVisualValidation {
             let publicMap = try source.publicSnapshot(catalog:catalog)
             try await capture("public-unknown-"+name,PVEMapView(nodes:publicMap.nodes,roads:publicMap.roads,units:publicMap.units,publicDisplay:true),CGSize(width:596,height:622))
         }
+        var exploration = state
+        exploration.battle = nil; exploration.phase = .exploration
+        exploration.map.revealed = [1,2,3,4]
+        for (index,id) in exploration.players.map(\.id).enumerated() {
+            exploration.units[id]?.nodeID = [1,3,4,5,2,1,2][index]
+        }
+        for id in ["m1","m2","m3"] { exploration.units[id]?.active = false }
+        let exploring = PVEPlaySession(engine:try GameEngine(catalog:catalog,state:exploration))
+        for (ratio,size) in [("16x9",CGSize(width:1920,height:1080)),("4x3",CGSize(width:1440,height:1080))] {
+            var view = try exploring.publicFrame(); view.camera = MapCamera()
+            try await capture("public-exploration-"+ratio,PVEPublicView(frame:view,image:nil,showingBook:false),size)
+            view.camera = MapCamera(x:0.1,y:0.55,zoom:2.7); view.cameraFocusID = "p1"; view.followsCurrent = false
+            try await capture("public-offscreen-"+ratio,PVEPublicView(frame:view,image:nil,showingBook:false),size)
+        }
+        var inventory = state
+        inventory.units["p1"]?.inventory = Dictionary(uniqueKeysWithValues:catalog.items.map { ($0.id,2) })
+        let inventoryPlay = PVEPlaySession(engine:try GameEngine(catalog:catalog,state:inventory))
+        var inventoryFrame = try inventoryPlay.publicFrame()
+        try await capture("public-many-items-page1-4x3",PVEPublicView(frame:inventoryFrame,image:nil,showingBook:false),CGSize(width:1440,height:1080))
+        inventoryFrame.itemPage = 4
+        try await capture("public-many-items-page5-4x3",PVEPublicView(frame:inventoryFrame,image:nil,showingBook:false),CGSize(width:1440,height:1080))
+        let travelingState = try PVEGameFactory.make(players:players,seed:22,catalog:catalog)
+        let traveling = PVEPlaySession(engine:try GameEngine(catalog:catalog,state:travelingState))
+        let moveReceipt = try traveling.apply(.move(actors:players.map(\.id),path:[1,2,4]))
+        var moveLedger = PresentationLedger()
+        try moveLedger.submit(moveReceipt,catalog:catalog,now:Date().addingTimeInterval(0.2))
+        var moveFrame = try traveling.publicFrame(); moveFrame.presentations = moveLedger.pending
+        try await capture("public-arriving-4x3",PVEPublicView(frame:moveFrame,image:nil,showingBook:false),CGSize(width:1440,height:1080))
+        moveFrame.presentations = []
+        try await capture("public-arrived-4x3",PVEPublicView(frame:moveFrame,image:nil,showingBook:false),CGSize(width:1440,height:1080))
         let teacher = TeacherSession.shared
         let model = PVEAppSession(display:teacher.display)
         model.installVisualFixture(play)
@@ -74,7 +104,7 @@ enum NativeVisualValidation {
             let pair = key.split(separator:":",maxSplits:1).map(String.init)
             if GameArt.image(pair[0],pair[1]) == nil { missing.append(key) }
         }
-        let report:[String:Any] = ["screenshots":12,"assetCount":GameArt.bindings.count,"missingAssets":missing,"names":names,"deviceVerified":false,"note":"Actual native SwiftUI simulator rendering; not physical iPad/TV feedback"]
+        let report:[String:Any] = ["screenshots":20,"assetCount":GameArt.bindings.count,"missingAssets":missing,"names":names,"deviceVerified":false,"note":"Actual native SwiftUI simulator rendering; not physical iPad/TV feedback"]
         try JSONSerialization.data(withJSONObject:report,options:[.prettyPrinted,.sortedKeys]).write(to:output.appendingPathComponent("report.json"))
         guard missing.isEmpty else { throw GameError("离线资产无法解码") }
         try Data("success".utf8).write(to:output.appendingPathComponent("complete.txt"))

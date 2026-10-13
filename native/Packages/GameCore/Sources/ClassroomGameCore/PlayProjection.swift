@@ -6,6 +6,10 @@ public struct PublicPlayFrame: Codable, Equatable {
     public var verification: Bool
     public var currentDetails: PublicTurnDetails? = nil
     public var presentations: [CommittedPresentation] = []
+    public var camera: MapCamera = MapCamera()
+    public var cameraFocusID: String? = nil
+    public var itemPage: Int = 0
+    public var followsCurrent: Bool = true
     public init(snapshot: PublicGameSnapshot, log: [String], verification: Bool) {
         self.snapshot = snapshot; self.log = log; self.verification = verification
     }
@@ -58,7 +62,52 @@ extension PVEPlaySession {
         var frame = PublicPlayFrame(snapshot: try engine.state.publicSnapshot(catalog: engine.catalog, dice: dice),
                                     log: Array(log.suffix(8)), verification: engine.state.verificationScenario != nil)
         if engine.state.battle != nil, let actor, actor.kind == .player {
-            frame.currentDetails = try PublicTurnDetails(unit: actor, catalog: engine.catalog)
+            var details = try PublicTurnDetails(unit: actor, catalog: engine.catalog)
+            let publicUnits = frame.snapshot.units
+            func availability(_ commands: [GameCommand]) -> (Bool,String?) {
+                let previews = commands.map(engine.preview)
+                if previews.contains(where: { $0.allowed }) { return (true,nil) }
+                return (false,previews.first?.message ?? "没有已揭示的合法目标")
+            }
+            for i in details.skills.indices {
+                let skill = try engine.catalog.skill(details.skills[i].id)
+                let targets: [ActionTarget?]
+                switch skill.target {
+                case .selfOnly: targets = [nil]
+                case .enemy, .ally:
+                    targets = publicUnits.filter { row in
+                        guard let target = engine.state.units[row.id], target.isAlive else { return false }
+                        return skill.target == .enemy ? GameRules.enemies(actor,target,in:engine.state) : target.id != actor.id && GameRules.allies(actor,target,in:engine.state)
+                    }.map { .unit($0.id) }
+                case .enemiesAtNode, .alliesAtNode:
+                    targets = frame.snapshot.nodes.filter(\.revealed).map { .node($0.id) }
+                }
+                let (allowed,reason) = availability(targets.map { .cast(actor:actor.id,skill:skill.id,target:$0) })
+                details.skills[i].available = allowed
+                details.skills[i].unavailableReason = allowed ? nil : actor.ap < skill.cost ? "行动点不足" :
+                    skill.uses.map({ (actor.skillUses[skill.id] ?? 0) >= $0 }) == true ? "次数已用完" :
+                    skill.stage == .exploration ? "仅探索使用" : reason
+            }
+            for i in details.items.indices {
+                let item = try engine.catalog.item(details.items[i].id)
+                let commands: [GameCommand]
+                switch item.kind {
+                case .consumable:
+                    details.items[i].detail = "1行动点 · 射程\(item.range)"
+                    commands = publicUnits.filter { $0.player && $0.health > 0 }.map { .useItem(actor:actor.id,item:item.id,target:$0.id) }
+                case .revivalStone:
+                    details.items[i].detail = "2行动点 · 同节点"
+                    commands = publicUnits.filter { $0.player && $0.health == 0 }.map { .rescue(actor:actor.id,target:$0.id) }
+                case .equipment:
+                    details.items[i].detail = "装备"; commands = []
+                }
+                let (allowed,_) = availability(commands)
+                details.items[i].available = allowed
+                details.items[i].unavailableReason = allowed ? nil : item.kind == .equipment ? "战斗中不可换装" :
+                    actor.ap < (item.kind == .revivalStone ? engine.catalog.rules.rescueCost : 1) ? "行动点不足" :
+                    item.kind == .revivalStone ? "缺同节点倒地队友" : "没有合法队友目标"
+            }
+            frame.currentDetails = details
         }
         return frame
     }

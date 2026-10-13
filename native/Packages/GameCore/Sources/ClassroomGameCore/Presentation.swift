@@ -6,11 +6,16 @@ public struct PublicSkillDisplay: Codable, Equatable, Identifiable {
     public var name: String
     public var cost: Int
     public var detail: String
+    public var available: Bool? = nil
+    public var unavailableReason: String? = nil
 }
 public struct PublicItemDisplay: Codable, Equatable, Identifiable {
     public var id: String
     public var name: String
     public var quantity: Int
+    public var detail: String = ""
+    public var available: Bool? = nil
+    public var unavailableReason: String? = nil
 }
 public struct PublicTurnDetails: Codable, Equatable {
     public var unitID: String
@@ -61,6 +66,8 @@ public struct CommittedPresentation: Codable, Equatable, Identifiable {
     public var text: String
     public var units: [UnitPresentation]
     public var dice: [DiceResult]
+    public var mapMoves: [PublicMapMove] = []
+    public var opensBattleAfterArrival: Bool = false
     public var end: Date { start.addingTimeInterval(1.3) }
     public func isVisible(at date: Date) -> Bool { date >= start && date < end }
 }
@@ -128,7 +135,20 @@ public struct PresentationLedger {
         let dice = receipt.dice.filter { $0.source != "initiative" }
         if dice.contains(where: \.naturalTwenty) { changes.insert("自然20！",at:0) }
         guard !changes.isEmpty || !rows.isEmpty || !dice.isEmpty else { return nil }
-        let event = CommittedPresentation(id:key,start:max(now,pending.last?.end ?? now),text:changes.joined(separator:"；"),units:rows.values.sorted { $0.id < $1.id },dice:dice)
+        var event = CommittedPresentation(id:key,start:max(now,pending.last?.end ?? now),text:changes.joined(separator:"；"),units:rows.values.sorted { $0.id < $1.id },dice:dice)
+        let nodes = Dictionary(uniqueKeysWithValues:snapshot.nodes.map { ($0.id,MapPoint(x:$0.x,y:$0.y)) })
+        // Parse the engine's committed stops, never the unsubmitted/requested path.
+        if let move = receipt.events.first(where: { $0.kind == "move" }) {
+            let stops = move.detail.split(separator:"→").compactMap { Int($0) }
+            for unit in snapshot.units {
+                guard let before = receipt.before.units[unit.id], before.nodeID != unit.nodeID,
+                      let first = nodes[before.nodeID], stops.last == unit.nodeID else { continue }
+                let points = [first] + stops.compactMap { nodes[$0] }
+                guard points.count == stops.count+1 else { continue }
+                event.mapMoves.append(PublicMapMove(unitID:unit.id,points:points))
+            }
+            event.opensBattleAfterArrival = receipt.before.battle == nil && receipt.after.battle != nil && !event.mapMoves.isEmpty
+        }
         pending.append(event)
         return event
     }
