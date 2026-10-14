@@ -6,14 +6,14 @@ import simd
 final class HD2DRenderer {
     private var surfaces: [SurfaceKind: SKShader] = [:]
     private let ground: SKShader
-    init(field: SKTexture) {
+    init(field: SKTexture, terrainField: SKTexture) {
         ground = SKShader(source: Self.groundSource)
         ground.attributes = [SKAttribute(name: "a_origin", type: .vectorFloat2)]
-        ground.uniforms = [SKUniform(name: "u_field", texture: field),
+        ground.uniforms = [SKUniform(name: "u_field", texture: field), SKUniform(name: "u_terrainField", texture: terrainField), SKUniform(name: "u_terrain", float: 1),
                            SKUniform(name: "u_light", float: 1), SKUniform(name: "u_grade", float: 1),
                            SKUniform(name: "u_growth", float: 1), SKUniform(name: "u_contrast", float: 0.46),
                            SKUniform(name: "u_air", float: 0), SKUniform(name: "u_motion", float: 0)]
-        for kind in [SurfaceKind.foliage, .rock, .building, .actor, .road, .lowPlant] {
+        for kind in [SurfaceKind.foliage, .rock, .building, .actor, .road, .lowPlant, .terrain] {
             let shader = SKShader(source: Self.surfaceSource)
             shader.attributes = [SKAttribute(name: "a_depth", type: .float)]
             shader.uniforms = [SKUniform(name: "u_kind", float: kind.rawValue),
@@ -37,6 +37,7 @@ final class HD2DRenderer {
         let s = settings.bounded(), enabled: Float = mode == .flat ? 0 : Float(strength)
         // The second enhanced comparison has stronger relief; both share one sun direction.
         let relief: Float = mode == .normal ? 1.0 : 0.82
+        ground.uniformNamed("u_terrain")?.floatValue = s.terrain && s.relief && mode != .flat ? enabled : 0
         ground.uniformNamed("u_light")?.floatValue = s.directionalLight ? enabled : 0
         ground.uniformNamed("u_grade")?.floatValue = s.colorGrade ? enabled : 0
         ground.uniformNamed("u_growth")?.floatValue = mode != .flat && s.vegetation ? 1 : 0
@@ -69,6 +70,7 @@ final class HD2DRenderer {
         float rock = 1.0 - step(0.1, abs(u_kind - 2.0));
         float tree = 1.0 - step(0.1, abs(u_kind - 1.0));
         float road = 1.0 - step(0.1, abs(u_kind - 5.0));
+        float terrain = 1.0 - step(0.1, abs(u_kind - 7.0));
         float lum = dot(base, vec3(0.2126, 0.7152, 0.0722));
         vec3 color = mix(base, vec3(lum), u_grade * (0.13 - 0.10*actor));
         float top = smoothstep(0.30, 0.82, uv.y);
@@ -76,13 +78,15 @@ final class HD2DRenderer {
         float lit = clamp(top*0.65 + left*0.35, 0.0, 1.0);
         float dark = (1.0-lit) * (0.25 + 0.16*rock + 0.17*tree);
         float contact = (1.0-smoothstep(0.08, 0.34, uv.y))*(0.10+0.13*tree);
-        float power = u_light*(1.0-0.55*actor)*(1.0-0.65*road);
+        // Atlas art already models faces; avoid doubling its baked illumination.
+        float power = u_light*(1.0-0.62*actor)*(1.0-0.70*road)*0.58;
         color *= mix(vec3(1.0), vec3(0.62, 0.73, 0.79), dark*power*1.6);
         color += vec3(0.115, 0.068, 0.017)*lit*power*mix(0.55, 1.0, lum);
-        color *= 1.0 - contact*u_relief*(1.0-0.65*actor);
+        color *= 1.0 - contact*u_relief*(1.0-0.65*actor)*0.75;
         // Cooler lower stone faces and dark-green trunk/canopy undersides.
         color = mix(color, color*vec3(0.87,0.94,1.06), rock*(1.0-top)*u_relief*0.45);
-        color = mix(color, color*vec3(0.78,0.86,0.78), tree*(1.0-top)*u_relief*0.58);
+        color = mix(color, color*vec3(0.78,0.86,0.78), tree*(1.0-top)*u_relief*0.35);
+        color *= 1.0 - terrain*(1.0-top)*u_relief*0.13;
         float distance = smoothstep(850.0, 1750.0, a_depth);
         color = mix(color, vec3(0.55,0.62,0.59), distance*u_air*0.16);
         gl_FragColor = vec4(clamp(color,0.0,0.98)*alpha,alpha)*v_color_mix;
@@ -97,15 +101,22 @@ final class HD2DRenderer {
         vec3 field = texture2D(u_field, (world+vec2(768.0))/3072.0).rgb;
         float lum = dot(base,vec3(0.2126,0.7152,0.0722));
         vec3 quiet = mix(vec3(0.40,0.48,0.235),vec3(0.57,0.60,0.31),field.b);
-        quiet = mix(quiet,vec3(0.29,0.37,0.20),field.g*0.65);
+        quiet = mix(quiet,vec3(0.30,0.37,0.22),field.g*0.45);
         // Sparse colonies retain source pixel grain; clearings suppress high-contrast flowers.
-        float retained = mix(0.12,0.28+0.52*u_contrast,field.r);
+        float retained = mix(0.16,0.34+0.48*u_contrast,field.r);
         vec3 natural = mix(quiet,base,retained);
         vec3 color = mix(base,natural,u_growth);
         float luminance = dot(color,vec3(0.2126,0.7152,0.0722));
         color = mix(color,vec3(luminance),u_grade*0.11);
         color *= 1.0 + sin(u_time*0.55+world.x*0.012+world.y*0.004)*0.012*u_motion*field.r;
-        float shade = field.g*0.30*u_light;
+        vec3 hill = texture2D(u_terrainField,(world+vec2(768.0))/3072.0).rgb;
+        vec2 nxy = hill.rg*2.0-1.0;
+        vec3 normal = vec3(nxy,sqrt(max(0.04,1.0-dot(nxy,nxy))));
+        float diffuse = dot(normalize(normal),normalize(vec3(-0.60,0.70,0.75)));
+        float slope = clamp((diffuse-0.55)*0.38,-0.16,0.16)*u_terrain;
+        color *= 1.0+slope;
+        color += vec3(0.040,0.023,0.004)*max(slope,0.0)*2.0;
+        float shade = field.g*0.22*u_light;
         color *= mix(vec3(1.0),vec3(0.65,0.75,0.78),shade);
         color += vec3(0.06,0.032,0.005)*field.b*u_light;
         float far = smoothstep(1000.0,1950.0,world.y);

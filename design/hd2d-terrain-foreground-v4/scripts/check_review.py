@@ -10,7 +10,7 @@ import tempfile
 
 root = Path(__file__).resolve().parents[1]
 provenance = json.loads((root / "asset-provenance.json").read_text())
-for name, digest in provenance["assets"].items():
+for name, digest in {**provenance["assets"],**provenance.get("newAssets",{})}.items():
     assert hashlib.sha256((root / name).read_bytes()).hexdigest() == digest, name
 assert hashlib.sha256((root / "reference/ideal-effect-user.jpg").read_bytes()).hexdigest() == provenance["userIdealReferenceSHA256"]
 with tempfile.TemporaryDirectory() as directory:
@@ -43,3 +43,14 @@ for group, source in (("terrain", "terrain_atlas"), ("sceneryAndLandmarks", None
             assert 0 <= anchor[0] <= w and 0 <= anchor[1] <= h, row
 print("PASS: regenerated project/scheme/Info.plist, original asset bytes, ideal reference and atlas rectangles.")
 print("Device SDK compilation and pure effect checks are CI steps; visual acceptance is deferred to the user IPA test.")
+
+# New atlases are measured, not assumed to use equal cells. Validate all crops/feet.
+new=json.loads((art/'modular-manifest.json').read_text())
+for row in new['sceneModules']+new['actorFrames']:
+    source=row['kind']+'_atlas' if 'kind' in row else 'actor_frames_v4'
+    width,height=dimensions[source]
+    x,y,w,h=row['sourceRect'];ax,ay=row['anchorPx']
+    assert 0<=x<x+w<=width and 0<=y<y+h<=height,row
+    assert 0<=ax<=w and 0<=ay<=h,row
+assert len(new['sceneModules'])==9 and len(new['actorFrames'])==10
+print('PASS: new module checksums, 9 measured scene/landmark crops, 10 actor frames and foot anchors.')

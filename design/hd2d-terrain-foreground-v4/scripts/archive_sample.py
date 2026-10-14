@@ -41,7 +41,7 @@ def main():
 
 - 源码快照：{manifest['sourceSnapshotCommit']}；唯一标签：{manifest['snapshotTag']}。
 - 实际IPA编译提交（PR合成merge）：{manifest['compiledCommit']}；源head与工具链记录见{manifest['buildEvidence']}。
-- 安装包：{manifest['currentIPA']}；GrassHD2D 0.3(3)，iPadOS17及以上，arm64设备包，需使用已有SideStore方式个人签名。
+- 安装包：{manifest['currentIPA']}；GrassHD2D 0.4(4)，iPadOS17及以上，arm64设备包，需使用已有SideStore方式个人签名。
 - 与正式课堂App使用不同bundle ID，不包含账号、证书、配对材料或教师设备资料。
 - Xcode编译/数学检查已完成；本轮没有中间画面审核，视觉与帧率等待用户真机验证。
 
@@ -55,7 +55,7 @@ cd classroom-boardgame-restored
 git checkout {manifest['sourceSnapshotCommit']}
 ```
 
-也可以直接读取source/。独立项目在source/design/hd2d-grass-four-stages-ipa-v3/Native/GrassLightingPrototype.xcodeproj；共享scheme为GrassLightingPrototype。参数和尺寸/动画注解见同目录TECHNICAL_NOTES.md；安装查看说明见DEVICE_GUIDE.md。archive-assets不在源码Git bundle中，也不得合并到main。
+也可以直接读取source/。独立项目在source/design/hd2d-terrain-foreground-v4/Native/GrassLightingPrototype.xcodeproj；共享scheme为GrassLightingPrototype。参数和尺寸/动画注解见同目录TECHNICAL_NOTES.md；安装查看说明见DEVICE_GUIDE.md。archive-assets不在源码Git bundle中，也不得合并到main。
 '''.encode()
         payload['恢复说明.md']=recovery
         manifest['entries']=[dict(path=name,bytes=len(data),sha256=sha(data)) for name,data in sorted(payload.items())]

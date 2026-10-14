@@ -99,8 +99,8 @@ struct DisplayRandom {
 
 // A 2D projection of the opaque silhouette onto the ground. It is not a physics shadow.
 struct SunProjection {
-    let dx: CGFloat = 0.85
-    let dy: CGFloat = 0.40 // UIKit image space: positive down.
+    let dx: CGFloat = 0.42
+    let dy: CGFloat = 0.20 // UIKit image space: positive down.
     func transform(anchorTop: CGPoint) -> CGAffineTransform {
         CGAffineTransform(a: 1, b: 0, c: -dx, d: -dy, tx: dx * anchorTop.y, ty: dy * anchorTop.y)
     }

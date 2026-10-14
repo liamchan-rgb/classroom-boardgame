@@ -11,5 +11,13 @@
     "Native/Resources/Art/module-manifest.json": "bec3120b132049c0e0c35e186eb14f0dd4e43ecf23e0c7e16c4d8a4b6cd9133f"
   },
   "userIdealReferenceSHA256": "f37522f5788ae7d22e570c85438ecc0e5503f8714c7893400de5609366a2d673",
-  "artApproved": false
+  "artApproved": false,
+  "newAssets": {
+    "Native/Resources/Art/modules_clean_v4_atlas.png": "ed38e97ff0a2abd4c27b2549e35164f288fda221d113012aa8accd2c9ee13f3c",
+    "Native/Resources/Art/actor_frames_v4.png": "c706e4a24012405c2dc97fa9640aaf03a6b8c8f742bbb42cb061f0ef00d58cb3",
+    "Native/Resources/Art/landmarks_v4_atlas.png": "8432ab51e7f6ff464c0c28bb532a0a6dd7603eac7fe344703d5087a00f54ccb5",
+    "Native/Resources/Art/modular-manifest.json": "63d5292d2494a6aa2f9ff9d37f26c5a7b457735c11d09af3a282989564151384"
+  },
+  "newAssetSource": "image_gen: new modular scene and landmark sheets, cleaned-alpha scene edit, unified actor sheet; measured source rectangles and foot anchors",
+  "newVersion": "hd2d-terrain-foreground-v4"
 }

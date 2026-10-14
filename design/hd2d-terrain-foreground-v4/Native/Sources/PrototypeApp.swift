@@ -9,7 +9,7 @@ enum ReviewAspect: String, CaseIterable {
 }
 
 @MainActor final class PrototypeController: ObservableObject {
-    let scene = GrassScene(size: CGSize(width: 1600, height: 900))
+    let scene = GrassScene(size: CGSize(width: 1600, height: 1200))
     @Published var mode: LightingMode
     @Published var strength: Double = 0.85
     @Published var effects = HD2DSettings()
@@ -21,7 +21,7 @@ enum ReviewAspect: String, CaseIterable {
     init() {
         let arguments = ProcessInfo.processInfo.arguments
         mode = arguments.contains("--lighting=flat") ? .flat : .sunlight
-        aspect = ProcessInfo.processInfo.environment["PROTOTYPE_RATIO"] == "4x3" ? .standard : .wide
+        aspect = ProcessInfo.processInfo.environment["PROTOTYPE_RATIO"] == "16x9" ? .wide : .standard
         scene.onReady = { [weak self] in DispatchQueue.main.async {
             self?.isReady = true
         } }
@@ -106,6 +106,7 @@ struct PrototypeGlass: ViewModifier {
                         }.pickerStyle(.segmented)
                         Toggle("跟随人物", isOn: Binding(get: { model.follows }, set: { model.follow($0) }))
                         Section("光照与材质") {
+                            effectToggle("缓坡与岩壁", \.terrain)
                             effectToggle("左上暖阳", \.directionalLight)
                             effectToggle("自然色彩", \.colorGrade)
                             effectToggle("接触阴影", \.contactShadows)
@@ -119,6 +120,7 @@ struct PrototypeGlass: ViewModifier {
                             effectSlider("柔光强度", \.bloomStrength)
                             effectToggle("远景空气透视", \.atmosphere)
                             effectSlider("空气透视", \.atmosphereStrength)
+                            effectToggle("角落前景树", \.foregroundTrees)
                             effectToggle("边缘景深", \.edgeDepth)
                             effectSlider("景深半径", \.depthRadius, range: 0...2.2)
                             effectToggle("环境微动", \.environmentalMotion)

@@ -3,6 +3,8 @@ import CoreGraphics
 
 // Presentation-only parameters. No game seed, path or command is mutated.
 struct HD2DSettings: Equatable {
+    var terrain = true
+    var foregroundTrees = true
     var directionalLight = true
     var colorGrade = true
     var vegetation = true
@@ -12,11 +14,11 @@ struct HD2DSettings: Equatable {
     var atmosphere = true
     var edgeDepth = true
     var environmentalMotion = true
-    var shadowStrength: Double = 0.78
-    var vegetationContrast: Double = 0.46
-    var bloomStrength: Double = 0.32
+    var shadowStrength: Double = 0.62
+    var vegetationContrast: Double = 0.55
+    var bloomStrength: Double = 0.22
     var atmosphereStrength: Double = 0.30
-    var depthRadius: Double = 1.4
+    var depthRadius: Double = 0.9
     var motionStrength: Double = 0.45
     func bounded() -> Self {
         var value = self
@@ -32,14 +34,15 @@ struct HD2DSettings: Equatable {
 }
 
 enum SurfaceKind: Float {
-    case ground = 0, foliage = 1, rock = 2, building = 3, actor = 4, road = 5, lowPlant = 6
+    case ground = 0, foliage = 1, rock = 2, building = 3, actor = 4, road = 5, lowPlant = 6, terrain = 7
     static func asset(_ id: String) -> Self {
         if id.hasPrefix("ground-") { return .ground }
         if id.hasPrefix("road-") { return .road }
-        if id == "mixed_grove" || id == "fir_grove" { return .foliage }
+        if id == "oak_single" || id == "fir_single" || id == "mixed_grove" || id == "fir_grove" { return .foliage }
+        if id == "terrace" || id == "bank" { return .terrain }
         if id.contains("rock") { return .rock }
         if id.hasPrefix("camp") || id.hasPrefix("tower") || id.hasPrefix("ruin") || id == "fence" { return .building }
-        if id == "flowers" { return .lowPlant }
+        if id == "ground_tuft" || id == "flowers" { return .lowPlant }
         return .actor
     }
 }
@@ -69,8 +72,29 @@ struct MeadowField {
     func community(_ p: CGPoint) -> Double {
         0.62*noise(p, scale: 330) + 0.28*noise(p, scale: 125) + 0.10*noise(p, scale: 43)
     }
+    var forestCenters: [CGPoint] {
+        let shift = CGFloat(Int(seed % 23)-11)*4
+        return [CGPoint(x: 300+shift,y:1080),CGPoint(x:1040,y:1380+shift),CGPoint(x:1390-shift,y:940),
+                CGPoint(x:200,y:290-shift),CGPoint(x:1350+shift,y:350)]
+    }
     func forest(_ p: CGPoint) -> Double {
-        Self.smooth(0.52, 0.73, noise(CGPoint(x: p.x+411, y: p.y-217), scale: 270))
+        let cluster = forestCenters.map { center -> Double in
+            let x = Double(p.x-center.x)/220, y = Double(p.y-center.y)/175
+            return exp(-(x*x+y*y)*0.85)
+        }.max() ?? 0
+        let variation = noise(CGPoint(x:p.x+411,y:p.y-217),scale:150)
+        return min(1,cluster*(0.74+0.26*variation))
+    }
+    // Geometric low hills. This is a height field, not luminance from painted grass.
+    func height(_ p: CGPoint) -> Double {
+        38*noise(p,scale:570)+18*noise(CGPoint(x:p.x+280,y:p.y-115),scale:240)
+    }
+    func normal(_ p: CGPoint) -> (x: Double,y: Double,z: Double) {
+        let step: CGFloat = 12
+        let dx = (height(CGPoint(x:p.x+step,y:p.y))-height(CGPoint(x:p.x-step,y:p.y)))/Double(step*2)
+        let dy = (height(CGPoint(x:p.x,y:p.y+step))-height(CGPoint(x:p.x,y:p.y-step)))/Double(step*2)
+        let x = -dx*3.2,y = -dy*3.2,length = sqrt(x*x+y*y+1)
+        return (x/length,y/length,1/length)
     }
     func clearance(_ p: CGPoint) -> Double {
         let roadDistance = roads.map { $0.distance(to: p) }.min() ?? .infinity

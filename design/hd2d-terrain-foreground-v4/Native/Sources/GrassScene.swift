@@ -20,7 +20,12 @@ final class GrassScene: SKScene {
     private var heroContact: SKSpriteNode?
     private var contactTexture: SKTexture?
     private var glowTexture: SKTexture?
-    private let foreground = SKEffectNode()
+    private let foreground = SKNode()
+    private var foregroundEffects: [SKEffectNode] = []
+    private var foregroundSprites: [SKSpriteNode] = []
+    private var terrainNodes: [SKNode] = []
+    private var protectedRoads: [RoadCurve] = []
+    private var lastTick: TimeInterval?
     private var litSprites: [(SKSpriteNode, String)] = []
     private var shadowNodes: [SKSpriteNode] = []
     private var hero: SKSpriteNode?
@@ -66,12 +71,12 @@ final class GrassScene: SKScene {
             }
             let field = MeadowField(seed: graph.decorationSeed, roads: roads,
                                     landmarks: graph.nodes.filter(\.revealed).map { geometry.point($0.point) })
-            renderer = HD2DRenderer(field: store!.meadowField(field))
+            renderer = HD2DRenderer(field: store!.meadowField(field),terrainField:store!.terrainField(field))
             contactTexture = store!.radialTexture(); glowTexture = store!.radialTexture(warm: true)
             try populate(); try setupForeground()
-            for index in 0..<8 { _ = try store?.hero(index) }
+            for index in 0..<10 { _ = try store?.hero(index) }
             built = true; fitCamera(); applyLighting()
-            let textures = litSprites.compactMap { $0.0.texture } + (0..<8).compactMap { try? store?.hero($0).texture }
+            let textures = litSprites.compactMap { $0.0.texture } + (0..<10).compactMap { try? store?.hero($0).texture }
             SKTexture.preload(textures) { [weak self] in self?.onReady?() }
         } catch { onError?(error.localizedDescription) }
     }
@@ -79,7 +84,6 @@ final class GrassScene: SKScene {
     private func fitCamera() {
         let scale = geometry.fitScale(view: size) / zoom
         cameraNode.setScale(scale)
-        if !follow { cameraNode.position = CGPoint(x: 800, y: 768) }
         positionForeground()
     }
     func setZoom(_ value: CGFloat) { zoom = min(2.4, max(1, value)); fitCamera() }
@@ -88,10 +92,10 @@ final class GrassScene: SKScene {
         follow = false
         cameraNode.position.x = min(1600, max(0, cameraNode.position.x - dx * cameraNode.xScale))
         cameraNode.position.y = min(1600, max(0, cameraNode.position.y + dy * cameraNode.yScale))
-        protectForeground()
+        updateForeground()
     }
-    func overview() { follow = false; zoom = 1; fitCamera() }
-    func followHero(_ value: Bool) { follow = value; if value, let hero { cameraNode.position = hero.position }; protectForeground() }
+    func overview() { follow = false; zoom = 1; cameraNode.position=CGPoint(x:800,y:768);fitCamera() }
+    func followHero(_ value: Bool) { follow = value; if value, let hero { cameraNode.position = hero.position }; updateForeground() }
     func setReducedMotion(_ value: Bool) {
         reducedMotion = value
         if value, let event = active { finish(event) }
@@ -110,10 +114,13 @@ final class GrassScene: SKScene {
             renderer?.apply(to: sprite, id: id)
             if !enabled { sprite.shader = nil }
         }
-        for shadow in shadowNodes { shadow.isHidden = !effects.directionalLight; shadow.alpha = CGFloat(effects.shadowStrength)*0.35 }
+        for shadow in shadowNodes {
+            shadow.isHidden = !effects.directionalLight
+            shadow.alpha=CGFloat(effects.shadowStrength)*(shadow.userData?["opacity-base"] as? CGFloat ?? 0.23)
+        }
         for node in contactNodes { node.isHidden = !effects.contactShadows }
         heroShadow?.isHidden = !enabled || !effects.directionalLight
-        heroShadow?.alpha = CGFloat(effects.shadowStrength)*0.28
+        heroShadow?.alpha = CGFloat(effects.shadowStrength)*0.20
         heroContact?.isHidden = !effects.contactShadows
         atmosphereLayer.isHidden = !enabled || !effects.bloom
         atmosphereLayer.alpha = CGFloat(effects.bloomStrength)*strength
@@ -127,10 +134,17 @@ final class GrassScene: SKScene {
                 else { effect.isHidden = !effects.bloom }
             }
         }
-        foreground.isHidden = !enabled || !effects.edgeDepth
-        foreground.shouldEnableEffects = effects.edgeDepth && effects.depthRadius > 0
-        foreground.filter?.setValue(effects.depthRadius, forKey: kCIInputRadiusKey)
-        updateWind(); protectForeground()
+        // Lighting mode and blur toggles never remove the foreground geometry.
+        foreground.isHidden = !effects.foregroundTrees
+        for effect in foregroundEffects {
+            effect.shouldEnableEffects = effects.edgeDepth && effects.depthRadius > 0
+            effect.filter?.setValue(effects.depthRadius,forKey:kCIInputRadiusKey)
+        }
+        for node in terrainNodes {
+            node.isHidden = !effects.terrain
+            for effect in groundEffectsByEntity[ObjectIdentifier(node)] ?? [] { effect.isHidden = !effects.terrain || !effects.contactShadows }
+        }
+        updateWind(); updateForeground()
     }
     private func updateWind() {
         let moving = mode != .flat && effects.environmentalMotion && !reducedMotion
@@ -164,35 +178,28 @@ final class GrassScene: SKScene {
             let road = SKSpriteNode(texture: texture); road.size = bounds.size; road.anchorPoint = .zero
             road.position = bounds.origin; road.zPosition = 4; world.addChild(road); litSprites.append((road, "road-\(index)"))
         }
-        let field = MeadowField(seed: graph.decorationSeed, roads: roads, landmarks: Array(positions.values))
-        var random = DisplayRandom(seed: graph.decorationSeed)
-        let ids = ["mixed_grove", "rock_hill", "fir_grove", "low_rocks", "fence", "flowers"]
-        var occupied: [CGPoint] = []
-        for index in 0..<85 {
-            let point = CGPoint(x: -130 + random.next() * 1900, y: -80 + random.next() * 1600)
-            let low = index % 6 >= 3, width: CGFloat = low ? 75 + random.next() * 38 : 145 + random.next() * 55
-            // Keep open patches and cluster dark groves; do not allocate extra sprites.
-            let community = field.community(point), forest = field.forest(point)
-            let inCommunity = !(low && community < 0.45) && !(!low && community < 0.38 && forest < 0.32)
-                && !(index % 6 == 5 && (community < 0.66 || field.clearance(point) < 0.9))
-            if positions.values.contains(where: { hypot($0.x-point.x, $0.y-point.y) < (low ? 50 : 110) }) { continue }
-            if roads.contains(where: { $0.distance(to: point) < (low ? 32 : width * 0.65) }) { continue }
-            if !low && occupied.contains(where: { hypot($0.x-point.x, $0.y-point.y) < 100 }) { continue }
-            let id = !low && forest > 0.65 ? "fir_grove" : ids[index % ids.count]
-            let asset = try store.module(id)
-            let scale = width / CGFloat(asset.image.width)
-            // Reserve the full projected sprite rectangle so canopies cannot hide nodes or roads.
-            let rect = CGRect(x: point.x-asset.anchorTop.x*scale, y: point.y-(CGFloat(asset.image.height)-asset.anchorTop.y)*scale,
-                              width: width, height: CGFloat(asset.image.height)*scale).insetBy(dx: -16, dy: -16)
-            if positions.values.contains(where: rect.contains) || roads.contains(where: { curve in (0...50).contains { rect.contains(curve.point(Double($0)/50)) } }) { continue }
-            let node = try addEntity(asset, foot: point, width: width, casts: !low)
-            communityNodes.append((node, inCommunity))
-            if !low { occupied.append(point) }
+        protectedRoads = roads
+        let field = MeadowField(seed:graph.decorationSeed,roads:roads,landmarks:Array(positions.values))
+        var occupied:[CGPoint]=[]
+        for candidate in SceneryRecipe(field:field).candidates() {
+            let point=candidate.point,width=candidate.width,asset=try store.module(candidate.id)
+            let kind=SurfaceKind.asset(asset.id),low=kind == .lowPlant
+            let scale=width/CGFloat(asset.image.width)
+            let rect=CGRect(x:point.x-asset.anchorTop.x*scale,
+                            y:point.y-(CGFloat(asset.image.height)-asset.anchorTop.y)*scale,
+                            width:width,height:CGFloat(asset.image.height)*scale).insetBy(dx:-10,dy:-12)
+            if positions.values.contains(where:{ hypot($0.x-point.x,$0.y-point.y)<(low ? 38:74) || rect.contains($0) }) { continue }
+            if roads.contains(where:{ curve in (0...60).contains { rect.contains(curve.point(Double($0)/60)) } }) { continue }
+            if !low && !candidate.terrain && occupied.contains(where:{ hypot($0.x-point.x,$0.y-point.y)<43 }) { continue }
+            let entity=try addEntity(asset,foot:point,width:width,casts:kind == .foliage || kind == .rock)
+            if candidate.terrain { entity.zPosition=3;terrainNodes.append(entity) }
+            else if !low { occupied.append(point) }
+            communityNodes.append((entity,low ? field.community(point)>0.45:true))
         }
         for node in graph.nodes {
             guard let foot = positions[node.id] else { continue }
             let marker = SKShapeNode(circleOfRadius: node.revealed ? 13 : 18)
-            marker.position = foot; marker.zPosition = 12; marker.lineWidth = 2
+            marker.position = foot; marker.zPosition = 2800; marker.lineWidth = 2
             marker.fillColor = node.revealed ? SKColor(red: 0.76, green: 0.64, blue: 0.33, alpha: 1) : SKColor(red: 0.18, green: 0.32, blue: 0.38, alpha: 1)
             marker.strokeColor = SKColor(white: 0.94, alpha: 0.8); world.addChild(marker)
             if !node.revealed {
@@ -201,7 +208,7 @@ final class GrassScene: SKScene {
                 continue // No hidden visual lookup or shadow allocation.
             }
             guard let id = node.visual else { continue }
-            let asset = try store.module(id), width: CGFloat = node.id == 1 ? 190 : 140
+            let asset = try store.module(id), width: CGFloat = node.id == 1 ? 220 : 148
             let candidates = [CGPoint(x: foot.x, y: foot.y+48), CGPoint(x: foot.x-100, y: foot.y+48), CGPoint(x: foot.x+100, y: foot.y+48)]
             let scale = width / CGFloat(asset.image.width)
             let location = candidates.first { candidate in
@@ -209,16 +216,21 @@ final class GrassScene: SKScene {
                                   width: width, height: CGFloat(asset.image.height)*scale).insetBy(dx: -10, dy: -10)
                 return !roads.contains { curve in (0...80).contains { rect.contains(curve.point(Double($0)/80)) } }
             } ?? CGPoint(x: foot.x-125, y: foot.y+48)
-            try addEntity(asset, foot: location, width: width, casts: true)
+            let clearing=SKSpriteNode(texture:try store.campClearing())
+            clearing.position=location;clearing.size=CGSize(width:node.id==1 ? 330:210,height:node.id==1 ? 170:115)
+            clearing.zPosition=2;clearing.alpha=node.id==1 ? 0.78:0.50;world.addChild(clearing)
+            litSprites.append((clearing,"road-clearing"))
+            // Original graph keys resolve to new neutral-lit modules, without painted cast shadows.
+            try addEntity(asset,foot:location,width:width,casts:true)
         }
         if let p2 = positions[3] { try addActor(try store.referenceActor("ranger"), id: "P2", foot: p2) }
         if let p3 = positions[2] { try addActor(try store.referenceActor("spellblade"), id: "P3", foot: CGPoint(x: p3.x+34, y: p3.y-18)) }
         let first = try store.hero(7)
-        let player = SKSpriteNode(texture: first.texture); apply(first, to: player, scale: 0.22)
+        let player = SKSpriteNode(texture: first.texture); apply(first, to: player, scale: first.actorScale)
         player.position = positions[1] ?? .zero; world.addChild(player); hero = player
         litSprites.append((player, "hero-7"))
         let label = makeLabel("P1"); world.addChild(label); heroLabel = label
-        let shadow = makeShadow(first, foot: player.position, scale: 0.22, opacity: 0.23)
+        let shadow = makeShadow(first, foot: player.position, scale: first.actorScale, opacity: 0.14)
         sunLayer.addChild(shadow); heroShadow = shadow
         heroContact = addContact(foot: player.position, width: 27, opacity: 0.46)
         updateHeroDepth()
@@ -233,13 +245,14 @@ final class GrassScene: SKScene {
         world.addChild(sprite); litSprites.append((sprite, asset.id))
         let kind = SurfaceKind.asset(asset.id)
         var groundEffects: [SKNode] = []
-        groundEffects.append(addContact(foot: foot, width: width*(kind == .actor ? 0.24 : 0.72), opacity: kind == .foliage ? 0.43 : 0.36))
+        groundEffects.append(addContact(foot: foot, width: width*(kind == .foliage ? 0.30 : (kind == .actor ? 0.55:0.68)),opacity:kind == .foliage ? 0.38:0.30))
         if kind == .foliage { windNodes.append(sprite) }
         if casts {
-            let shadow = makeShadow(asset, foot: foot, scale: scale, opacity: 0.27)
+            let shadow = makeShadow(asset, foot: foot, scale: scale, opacity: kind == .foliage ? 0.15:0.12)
+            shadow.userData=["opacity-base":kind == .foliage ? CGFloat(0.25):CGFloat(0.20)]
             sunLayer.addChild(shadow); shadowNodes.append(shadow); groundEffects.append(shadow)
             if kind == .foliage {
-                groundEffects.append(addContact(foot: CGPoint(x: foot.x+width*0.18, y: foot.y-width*0.13), width: width*1.25, opacity: 0.14))
+                groundEffects.append(addContact(foot: CGPoint(x: foot.x+width*0.18, y: foot.y-width*0.13), width: width*0.85, opacity: 0.10))
             }
             if kind != .actor {
                 // Restrained, local diffuse highlights under the objects, never over the actors.
@@ -268,14 +281,16 @@ final class GrassScene: SKScene {
         return sprite
     }
     private func addActor(_ asset: SpriteAsset, id: String, foot: CGPoint) throws {
-        let width: CGFloat = 78; try addEntity(asset, foot: foot, width: width, casts: true)
+        let width=CGFloat(asset.image.width)*asset.actorScale
+        try addEntity(asset,foot:foot,width:width,casts:true)
         let label = makeLabel(id); label.position = CGPoint(x: foot.x, y: foot.y-18); world.addChild(label)
     }
     private func makeLabel(_ text: String) -> SKLabelNode {
-        let label = SKLabelNode(text: text); label.fontName = "HelveticaNeue-Medium"; label.fontSize = 16
+        let label = SKLabelNode(text: text); label.fontName = "AvenirNext-DemiBold"; label.fontSize = 14
         label.fontColor = .white; label.zPosition = 3000
         let plate = SKShapeNode(rectOf: CGSize(width: 30, height: 22), cornerRadius: 5)
-        plate.fillColor = SKColor(red: 0.13, green: 0.28, blue: 0.31, alpha: 0.9); plate.strokeColor = .clear
+        plate.fillColor=SKColor(red:0.12,green:0.20,blue:0.20,alpha:0.88)
+        plate.strokeColor=SKColor(red:0.73,green:0.64,blue:0.40,alpha:0.70);plate.lineWidth=0.8
         plate.position.y = 6; plate.zPosition = -1; label.addChild(plate); return label
     }
     private func depth(_ foot: CGPoint) -> CGFloat { 2500 - foot.y }
@@ -283,39 +298,46 @@ final class GrassScene: SKScene {
         guard let hero else { return }; hero.zPosition = depth(hero.position)
         hero.setValue(SKAttributeValue(float: Float(hero.position.y)), forAttribute: "a_depth")
         heroShadow?.position = hero.position; heroContact?.position = hero.position; heroLabel?.position = CGPoint(x: hero.position.x, y: hero.position.y-18)
-        if follow { cameraNode.position = hero.position }; protectForeground()
+        if follow { cameraNode.position = hero.position }; updateForeground()
     }
     private func setupForeground() throws {
         guard let store else { return }
-        foreground.filter = CIFilter(name: "CIGaussianBlur", parameters: [kCIInputRadiusKey: effects.depthRadius])
-        foreground.shouldRasterize = true; foreground.zPosition = 4000; cameraNode.addChild(foreground)
-        for (index, id) in ["fir_grove", "mixed_grove"].enumerated() {
-            let asset = try store.module(id), sprite = SKSpriteNode(texture: asset.texture)
-            apply(asset, to: sprite, scale: 190 / CGFloat(asset.image.width)); sprite.name = "front-\(index)"
-            foreground.addChild(sprite)
+        // Camera children have stable viewport dimensions. Only the tree receives edge blur.
+        foreground.zPosition=600;cameraNode.addChild(foreground)
+        for (index,id) in ["fir_single","oak_single"].enumerated() {
+            let asset=try store.module(id),tree=SKSpriteNode(texture:asset.texture),effect=SKEffectNode()
+            effect.filter=CIFilter(name:"CIGaussianBlur",parameters:[kCIInputRadiusKey:effects.depthRadius])
+            effect.shouldRasterize=false;effect.name="corner-\(index)";foreground.addChild(effect)
+            apply(asset,to:tree,scale:ForegroundGeometry.height(view:size)/CGFloat(asset.image.height))
+            tree.name="front-\(index)";tree.alpha=ForegroundGeometry.maximumOpacity
+            effect.addChild(tree);foregroundEffects.append(effect);foregroundSprites.append(tree)
+            // Same material shader as the meadow trees. No full-grove yellow sticker.
+            litSprites.append((tree,id));windNodes.append(tree)
         }
         positionForeground()
     }
     private func positionForeground() {
-        foreground.childNode(withName: "front-0")?.position = CGPoint(x: -size.width/2+45, y: -size.height/2-20)
-        foreground.childNode(withName: "front-1")?.position = CGPoint(x: size.width/2-45, y: -size.height/2-20)
-        protectForeground()
-    }
-    // Foreground blur is decoration only: hide it if a road, node or player enters its area.
-    private func protectForeground() {
-        let roads = graph.publicEdges.compactMap { edge -> RoadCurve? in
-            guard let a = points[edge.a], let b = points[edge.b] else { return nil }
-            return RoadCurve(a: a,b: b,bend: edge.a == 1 ? -28 : 20)
+        for (index,tree) in foregroundSprites.enumerated() {
+            let height=ForegroundGeometry.height(view:size),ratio=tree.size.width/max(1,tree.size.height)
+            tree.size=CGSize(width:height*ratio,height:height)
+            foregroundEffects[index].position=ForegroundGeometry.foot(index:index,view:size)
         }
-        let protected = Array(points.values) + [hero?.position ?? .zero]
-        for case let node as SKSpriteNode in foreground.children {
-            let rect = node.calculateAccumulatedFrame()
-            let bounds = CGRect(x: cameraNode.position.x+rect.minX*cameraNode.xScale,
-                                y: cameraNode.position.y+rect.minY*cameraNode.yScale,
-                                width: rect.width*cameraNode.xScale,height: rect.height*cameraNode.yScale).insetBy(dx:-75,dy:-90)
-            node.isHidden = protected.contains(where: bounds.contains) || roads.contains { curve in
-                (0...30).contains { bounds.contains(curve.point(Double($0)/30)) }
-            }
+        updateForeground()
+    }
+    private func updateForeground(delta:TimeInterval=0) {
+        let scale=cameraNode.xScale,position=cameraNode.position
+        var protected=points.values.map { ForegroundGeometry.screen($0,camera:position,scale:scale) }
+        if let hero { protected.append(ForegroundGeometry.screen(hero.position,camera:position,scale:scale)) }
+        for road in protectedRoads { for t in 0...30 { protected.append(ForegroundGeometry.screen(road.point(Double(t)/30),camera:position,scale:scale)) } }
+        for (index,tree) in foregroundSprites.enumerated() {
+            let foot=foregroundEffects[index].position
+            let rect=CGRect(x:foot.x-tree.size.width*tree.anchorPoint.x,
+                            y:foot.y-tree.size.height*tree.anchorPoint.y,
+                            width:tree.size.width,height:tree.size.height)
+            let target=ForegroundGeometry.opacity(rect:rect,protected:protected)
+            // No isHidden toggle when zooming/panning. Even overlap retains a soft frame.
+            if delta>0 { tree.alpha += (target-tree.alpha)*min(1,CGFloat(delta)*10) }
+            tree.setValue(SKAttributeValue(float:0),forAttribute:"a_depth")
         }
     }
     func playFixture() {
@@ -332,6 +354,8 @@ final class GrassScene: SKScene {
     // Call this on archive restoration before accepting display events; no history replay.
     func suppressRestoredEvents(_ ids: [String]) { gate.suppress(ids); active = nil }
     override func update(_ currentTime: TimeInterval) {
+        let delta=lastTick.map { min(0.1,max(0,currentTime-$0)) } ?? 1.0/30
+        lastTick=currentTime;updateForeground(delta:delta)
         guard let event = active, Date() >= event.start else { return }
         let age = max(0, Date().timeIntervalSince(event.start)), progress = min(1, age / event.duration)
         hero?.position = event.curve.point(progress)
@@ -342,13 +366,13 @@ final class GrassScene: SKScene {
     }
     private func updateHeroFrame(_ index: Int) {
         guard let store, let hero, let asset = try? store.hero(index) else { return }
-        heroFrameIndex = index; apply(asset, to: hero, scale: 0.22)
+        heroFrameIndex = index; apply(asset, to: hero, scale: asset.actorScale)
         renderer?.apply(to: hero, id: asset.id)
         if mode == .flat { hero.shader = nil }
         heroShadow?.removeFromParent()
-        let shadow = makeShadow(asset, foot: hero.position, scale: 0.22, opacity: 0.23)
+        let shadow = makeShadow(asset, foot: hero.position, scale: asset.actorScale, opacity: 0.14)
         shadow.isHidden = mode == .flat || !effects.directionalLight
-        shadow.alpha = CGFloat(effects.shadowStrength)*0.28
+        shadow.alpha = CGFloat(effects.shadowStrength)*0.20
         sunLayer.addChild(shadow); heroShadow = shadow
     }
     private func finish(_ event: DemoPresentation) {

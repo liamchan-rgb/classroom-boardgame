@@ -15,6 +15,10 @@ struct HeroFrame: Decodable {
     let anchorPx: [Double]
     var rect: CGRect { CGRect(x: sourceRect[0], y: sourceRect[1], width: sourceRect[2], height: sourceRect[3]) }
 }
+struct ModularManifest: Decodable {
+    let sceneModules: [AtlasRect]
+    let actorFrames: [HeroFrame]
+}
 struct AtlasManifest: Decodable {
     let terrain: [AtlasRect]
     let sceneryAndLandmarks: [AtlasRect]
@@ -25,6 +29,8 @@ struct SpriteAsset {
     let image: CGImage
     let texture: SKTexture
     let anchorTop: CGPoint
+    // Crops have small clear padding; keep all roles the same displayed height.
+    var actorScale: CGFloat { 74 / max(1,CGFloat(image.height)-12) }
     var anchor: CGPoint { CGPoint(x: anchorTop.x / CGFloat(image.width), y: 1 - anchorTop.y / CGFloat(image.height)) }
 }
 struct ShadowAsset { let texture: SKTexture; let size: CGSize; let anchor: CGPoint }
@@ -38,6 +44,7 @@ enum AssetError: LocalizedError {
 
 final class AssetStore {
     let manifest: AtlasManifest
+    let modularManifest: ModularManifest
     private let bundle: Bundle
     private var originals: [String: CGImage] = [:]
     private var sprites: [String: SpriteAsset] = [:]
@@ -49,6 +56,8 @@ final class AssetStore {
         self.bundle = bundle
         guard let url = bundle.url(forResource: "module-manifest", withExtension: "json", subdirectory: "Art") else { throw AssetError.missing("module-manifest") }
         manifest = try JSONDecoder().decode(AtlasManifest.self, from: Data(contentsOf: url))
+        guard let moduleURL=bundle.url(forResource:"modular-manifest",withExtension:"json",subdirectory:"Art") else { throw AssetError.missing("modular-manifest") }
+        modularManifest=try JSONDecoder().decode(ModularManifest.self,from:Data(contentsOf:moduleURL))
     }
     private func image(_ name: String) throws -> CGImage {
         if let image = originals[name] { return image }
@@ -57,22 +66,18 @@ final class AssetStore {
     }
     func module(_ id: String) throws -> SpriteAsset {
         if let asset = sprites[id] { return asset }
-        guard let row = manifest.sceneryAndLandmarks.first(where: { $0.id == id }), row.sourceRect.count == 4,
+        guard let row = modularManifest.sceneModules.first(where: { $0.id == id }) ?? manifest.sceneryAndLandmarks.first(where: { $0.id == id }), row.sourceRect.count == 4,
               let anchor = row.anchorPx, anchor.count == 2, let kind = row.kind,
               let cropped = try image(kind + "_atlas").cropping(to: row.rect) else { throw AssetError.malformed(id) }
         return cache(id, cropped, CGPoint(x: anchor[0], y: anchor[1]))
     }
     func hero(_ index: Int) throws -> SpriteAsset {
         let id = "hero-\(index)"; if let asset = sprites[id] { return asset }
-        guard let row = manifest.adventurerFrames.first(where: { $0.index == index }), row.anchorPx.count == 2,
-              let cropped = try image("adventurer_sheet").cropping(to: row.rect) else { throw AssetError.malformed(id) }
+        guard let row = modularManifest.actorFrames.first(where: { $0.index == index }), row.anchorPx.count == 2,
+              let cropped = try image("actor_frames_v4").cropping(to: row.rect) else { throw AssetError.malformed(id) }
         return cache(id, cropped, CGPoint(x: row.anchorPx[0], y: row.anchorPx[1]))
     }
-    func referenceActor(_ id: String) throws -> SpriteAsset {
-        if let asset = sprites[id] { return asset }
-        let source = try image("class_\(id)_portrait")
-        return cache(id, source, CGPoint(x: CGFloat(source.width) / 2, y: CGFloat(source.height) - 2))
-    }
+    func referenceActor(_ id: String) throws -> SpriteAsset { try hero(id == "ranger" ? 8 : 9) }
     private func cache(_ id: String, _ image: CGImage, _ anchor: CGPoint) -> SpriteAsset {
         let texture = SKTexture(cgImage: image); texture.filteringMode = .nearest
         let asset = SpriteAsset(id: id, image: image, texture: texture, anchorTop: anchor)
@@ -88,9 +93,13 @@ final class AssetStore {
             let c = renderer.cgContext
             c.translateBy(x: -bounds.minX, y: -bounds.minY); c.concatenate(transform)
             UIImage(cgImage: asset.image).draw(in: input)
-            c.setBlendMode(.sourceIn); c.setFillColor(UIColor(red: 0.05, green: 0.13, blue: 0.20, alpha: 1).cgColor); c.fill(input)
+            c.setBlendMode(.sourceIn); c.setFillColor(UIColor(red: 0.10, green: 0.16, blue: 0.15, alpha: 1).cgColor); c.fill(input)
         }
-        let texture = SKTexture(image: result); texture.filteringMode = .linear
+        // Small cached penumbra, never blur the source albedo.
+        let ci = CIImage(image:result)!
+        let softened=ci.clampedToExtent().applyingFilter("CIGaussianBlur",parameters:[kCIInputRadiusKey:1.6]).cropped(to:ci.extent)
+        let texture = ciContext.createCGImage(softened,from:ci.extent).map { SKTexture(cgImage:$0) } ?? SKTexture(image:result)
+        texture.filteringMode = .linear
         let foot = SunProjection().projectedFoot(anchorTop: asset.anchorTop)
         let shadow = ShadowAsset(texture: texture, size: bounds.size,
             anchor: CGPoint(x: (foot.x - bounds.minX) / bounds.width, y: 1 - (foot.y - bounds.minY) / bounds.height))
@@ -138,6 +147,34 @@ final class AssetStore {
         let texture = SKTexture(cgImage: image); texture.filteringMode = .linear
         return texture
     }
+    func terrainField(_ field: MeadowField) -> SKTexture {
+        let side=256;var pixels=[UInt8](repeating:255,count:side*side*4)
+        for y in 0..<side { for x in 0..<side {
+            let point=CGPoint(x:field.bounds.minX+(CGFloat(x)+0.5)/CGFloat(side)*field.bounds.width,
+                              y:field.bounds.maxY-(CGFloat(y)+0.5)/CGFloat(side)*field.bounds.height)
+            let normal=field.normal(point),index=(y*side+x)*4
+            pixels[index]=UInt8((normal.x*0.5+0.5)*255);pixels[index+1]=UInt8((normal.y*0.5+0.5)*255)
+            pixels[index+2]=UInt8(min(1,max(0,field.height(point)/56))*255)
+        } }
+        let cg=CGImage(width:side,height:side,bitsPerComponent:8,bitsPerPixel:32,bytesPerRow:side*4,
+            space:CGColorSpaceCreateDeviceRGB(),bitmapInfo:CGBitmapInfo(rawValue:CGImageAlphaInfo.premultipliedLast.rawValue),
+            provider:CGDataProvider(data:Data(pixels) as CFData)!,decode:nil,shouldInterpolate:true,intent:.defaultIntent)!
+        let texture=SKTexture(cgImage:cg);texture.filteringMode = .linear;return texture
+    }
+    func campClearing() throws -> SKTexture {
+        let size=CGSize(width:320,height:180),source=try material("earth")
+        let format=UIGraphicsImageRendererFormat();format.scale=1
+        let output=UIGraphicsImageRenderer(size:size,format:format).image { renderer in
+            let c=renderer.cgContext;c.interpolationQuality = .none
+            UIImage(cgImage:source).draw(in:CGRect(origin:.zero,size:size))
+            c.setBlendMode(.destinationIn)
+            let gradient=CGGradient(colorsSpace:CGColorSpaceCreateDeviceRGB(),colors:[UIColor(white:1,alpha:0.92).cgColor,UIColor.clear.cgColor] as CFArray,locations:[0.30,1])!
+            c.saveGState();c.scaleBy(x:1,y:0.5625)
+            c.drawRadialGradient(gradient,startCenter:CGPoint(x:160,y:160),startRadius:0,endCenter:CGPoint(x:160,y:160),endRadius:160,options:[])
+            c.restoreGState()
+        }
+        let texture=SKTexture(image:output);texture.filteringMode = .nearest;return texture
+    }
     // Only effect textures are soft. Albedo/actors/roads retain nearest filtering.
     func radialTexture(warm: Bool = false) -> SKTexture {
         let format = UIGraphicsImageRendererFormat(); format.scale = 1
@@ -179,7 +216,7 @@ final class AssetStore {
         guard let output = ciContext.createCGImage(soft,from: input.extent) else { return nil }
         let texture = SKTexture(cgImage: output); texture.filteringMode = .linear; highlights[asset.id] = texture; return texture
     }
-    func roadTexture(curve: RoadCurve, width: CGFloat = 25) throws -> (SKTexture, CGRect) {
+    func roadTexture(curve: RoadCurve, width: CGFloat = 30) throws -> (SKTexture, CGRect) {
         let samples = (0...150).map { curve.point(Double($0)/150) }
         let xs = samples.map(\.x), ys = samples.map(\.y)
         let bounds = CGRect(x: xs.min()! - 24, y: ys.min()! - 24, width: xs.max()! - xs.min()! + 48, height: ys.max()! - ys.min()! + 48).integral
