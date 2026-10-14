@@ -1,0 +1,5 @@
+PASS original Art/ideal reference immutable, new PNG/manifest checksums and measured crop/anchor bounds.
+PASS Swift syntax trees, GLES 1.00 fragments via glslangValidator12, actionlint1.7.12.
+PASS downloaded device IPA arm64/LC_BUILD_VERSION2, CRC, raw stored-entry read/CRC matching SideSign path, Payload/App dirs, executable modes, no embedded signature/provisioning, all Art SHA256s.
+PASS independent numeric layout audit: 74 accepted candidates, 48 single trees, 12 terrace/bank modules; roads and nodes unchanged.
+No scene screenshot, recording or intermediate visual acceptance performed.

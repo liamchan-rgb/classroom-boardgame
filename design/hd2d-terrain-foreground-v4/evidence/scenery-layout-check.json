@@ -1,0 +1,15 @@
+{
+  "candidateBudget": 85,
+  "acceptedStructuralCandidates": 74,
+  "counts": {
+    "oak_single": 39,
+    "fir_single": 9,
+    "rock_outcrop": 8,
+    "terrace": 8,
+    "bank": 4,
+    "ground_tuft": 6
+  },
+  "logicalNodesUnchanged": true,
+  "publicRoadsUnchanged": true,
+  "check": "Independent numeric layout audit with measured sprite extents; not a visual review."
+}

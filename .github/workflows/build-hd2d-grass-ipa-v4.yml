@@ -1,0 +1,86 @@
+name: HD2D Grass v4 Device IPA
+
+on:
+  pull_request:
+    paths:
+      - 'design/hd2d-terrain-foreground-v4/Native/**'
+      - 'design/hd2d-terrain-foreground-v4/scripts/**'
+      - 'design/hd2d-terrain-foreground-v4/asset-provenance.json'
+      - '.github/workflows/build-hd2d-grass-ipa-v4.yml'
+      - 'native/tools/select_ci_xcode.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hd2d-v4-device-ipa-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  device:
+    name: Compile and package independent grass sample
+    runs-on: xcode-27
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+    env:
+      SAMPLE_ROOT: design/hd2d-terrain-foreground-v4
+    steps:
+      - name: Initialize device diagnostics
+        env:
+          HD2D_OUTPUT_DIR: ${{ runner.temp }}/hd2d-v4-device-ipa
+          HD2D_SOURCE_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$HD2D_OUTPUT_DIR"
+          printf 'HD2D_OUTPUT_DIR=%s\n' "$HD2D_OUTPUT_DIR" >> "$GITHUB_ENV"
+          printf '%s\n' "$GITHUB_SHA" > "$HD2D_OUTPUT_DIR/compiled-commit.txt"
+          printf '%s\n' "$HD2D_SOURCE_HEAD" > "$HD2D_OUTPUT_DIR/source-head.txt"
+          sw_vers > "$HD2D_OUTPUT_DIR/runner.txt"
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Validate source assets and project
+        run: |
+          set -euo pipefail
+          python3 "$SAMPLE_ROOT/scripts/check_review.py" 2>&1 | tee "$HD2D_OUTPUT_DIR/source-checks.log"
+      - name: Select compatible Xcode
+        run: |
+          set -euo pipefail
+          python3 native/tools/select_ci_xcode.py --project "$SAMPLE_ROOT/Native/GrassLightingPrototype.xcodeproj" \
+            --github-env "$GITHUB_ENV" 2>&1 | tee "$HD2D_OUTPUT_DIR/xcode-selection.log"
+      - name: Check effect math without simulator or images
+        run: |
+          set -euo pipefail
+          swiftc -O "$SAMPLE_ROOT/Native/Sources/DisplayModel.swift" \
+            "$SAMPLE_ROOT/Native/Sources/HD2DSettings.swift" "$SAMPLE_ROOT/Native/Sources/ForegroundGeometry.swift" \
+            "$SAMPLE_ROOT/scripts/EffectMathChecks.swift" \
+            -o "$RUNNER_TEMP/hd2d-effect-checks" 2>&1 | tee "$HD2D_OUTPUT_DIR/effect-compile.log"
+          "$RUNNER_TEMP/hd2d-effect-checks" 2>&1 | tee "$HD2D_OUTPUT_DIR/effect-checks.log"
+      - name: Compile Release arm64 iOS device app
+        timeout-minutes: 10
+        run: |
+          set -euo pipefail
+          xcodebuild -version 2>&1 | tee "$HD2D_OUTPUT_DIR/xcode-version.log"
+          swift --version 2>&1 | tee "$HD2D_OUTPUT_DIR/swift-version.log"
+          xcodebuild -project "$SAMPLE_ROOT/Native/GrassLightingPrototype.xcodeproj" \
+            -scheme GrassLightingPrototype -configuration Release -destination 'generic/platform=iOS' \
+            -derivedDataPath "$RUNNER_TEMP/hd2d-v4-device-derived" \
+            -resultBundlePath "$HD2D_OUTPUT_DIR/DeviceBuild.xcresult" \
+            ARCHS=arm64 CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO build \
+            2>&1 | tee "$HD2D_OUTPUT_DIR/device-build.log"
+      - name: Package and verify device IPA
+        run: |
+          set -euo pipefail
+          python3 "$SAMPLE_ROOT/scripts/package_ipa.py" \
+            "$RUNNER_TEMP/hd2d-v4-device-derived/Build/Products/Release-iphoneos/GrassLightingPrototype.app" \
+            "$HD2D_OUTPUT_DIR/GrassHD2D-v0.4-unsigned.ipa" \
+            2>&1 | tee "$HD2D_OUTPUT_DIR/package-checks.log"
+      - name: Upload IPA and build logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: hd2d-grass-v4-device-ipa-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/hd2d-v4-device-ipa/
+          retention-days: 14
+          if-no-files-found: warn

@@ -1,0 +1,89 @@
+{
+  "appVersion": "GrassHD2D 0.4(4)",
+  "testedCommit": "8c888c062edcb9777c22fe577e315766e2cb7e5d",
+  "sourceCommit": "886f5780cda588d5eb909fdb81207c63d4919eaa",
+  "actualBuildDestination": "generic/platform=iOS",
+  "configuration": "Release",
+  "architecture": "arm64",
+  "machOPlatform": 2,
+  "minimumOS": "17.0",
+  "deviceWorkflowRun": 38499814667,
+  "deviceWorkflowURL": "https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/38499814667",
+  "artifactId": 11865067977,
+  "artifactArchiveSha256": "e3ef75d8929f8795670dee2dd45e0408c97926b845cb66a620e9bcea559c2126",
+  "ipaFile": "GrassHD2D-v0.4-unsigned.ipa",
+  "ipaSha256": "c647b0b08f69d187991062ff8805336f20f6fb4bfb526afcaba6b013df9dfabf",
+  "ipaBytes": 16235638,
+  "bundleIdentifier": "com.classroomboardgame.design.grasshd2dv3",
+  "updatesExistingV3Sample": true,
+  "signedForDevice": false,
+  "requiresPersonalSigning": true,
+  "zipCompression": "stored",
+  "explicitPayloadDirectories": true,
+  "coreTests": {
+    "effectAndGeometry": 29,
+    "GameCore": 72,
+    "ProbeCore": 6,
+    "failures": 0,
+    "formalWorkflowRun": 38499814533
+  },
+  "sourceChecks": {
+    "originalArtAndIdealReferenceSHA256": true,
+    "newArtSHA256": true,
+    "measuredSceneModules": 9,
+    "measuredActorFrames": 10,
+    "atlasBounds": true,
+    "projectRegeneration": true,
+    "swiftSyntax": true,
+    "glesFragments": 2,
+    "actionlint": true,
+    "downloadedIpaCRC": true,
+    "storedEntryOffsetsAndCRC": true
+  },
+  "foregroundFix": {
+    "noZoomTriggeredIsHidden": true,
+    "minimumOpacity": 0.34,
+    "maximumOpacity": 0.9,
+    "sharedLighting": true,
+    "blurToggleKeepsTrees": true,
+    "independentCornerFilters": true,
+    "defaultRatio": "4:3",
+    "panCenterPreservedOnZoom": true
+  },
+  "newArt": {
+    "sceneAtlases": 2,
+    "actorAtlas": 1,
+    "newPngFiles": 3,
+    "independentTrees": true,
+    "newCampAndTowers": true,
+    "terrainModules": true,
+    "normalizedActorHeight": 74,
+    "measuredActorSpacing": true,
+    "landmarkHeight": 155
+  },
+  "sceneryLayout": {
+    "candidateBudget": 85,
+    "acceptedStructuralCandidates": 74,
+    "counts": {
+      "oak_single": 39,
+      "fir_single": 9,
+      "rock_outcrop": 8,
+      "terrace": 8,
+      "bank": 4,
+      "ground_tuft": 6
+    },
+    "logicalNodesUnchanged": true,
+    "publicRoadsUnchanged": true,
+    "check": "Independent numeric layout audit with measured sprite extents; not a visual review."
+  },
+  "visualReviewPerformed": false,
+  "screenshotsProduced": false,
+  "recordingsProduced": false,
+  "newPVEDeviceVerified": false,
+  "deviceVerified": false,
+  "previousDeviceFeedback": "User v3 actual map screenshot: app runs, but scene looks flat/repetitive; corner trees disappear on zoom and have mismatched light. No v4 device feedback yet.",
+  "limitations": [
+    "Runtime appearance, SpriteKit shader translation and performance await user v4 device test.",
+    "Independent sample; formal classroom App integration not performed."
+  ]
+}

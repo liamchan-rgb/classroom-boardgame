@@ -1,0 +1,397 @@
+{
+  "sceneModules": [
+    {
+      "id": "oak_single",
+      "kind": "modules_clean_v4",
+      "sourceRect": [
+        21,
+        43,
+        617,
+        635
+      ],
+      "anchorPx": [
+        311.5,
+        627
+      ],
+      "opaqueBounds": [
+        27,
+        49,
+        638,
+        672
+      ],
+      "method": "alpha>32 measured subject region"
+    },
+    {
+      "id": "fir_single",
+      "kind": "modules_clean_v4",
+      "sourceRect": [
+        638,
+        29,
+        371,
+        657
+      ],
+      "anchorPx": [
+        182.5,
+        649
+      ],
+      "opaqueBounds": [
+        638,
+        35,
+        1003,
+        680
+      ],
+      "method": "alpha>32 measured subject region"
+    },
+    {
+      "id": "rock_outcrop",
+      "kind": "modules_clean_v4",
+      "sourceRect": [
+        1018,
+        313,
+        506,
+        364
+      ],
+      "anchorPx": [
+        253.0,
+        356
+      ],
+      "opaqueBounds": [
+        1024,
+        319,
+        1518,
+        671
+      ],
+      "method": "alpha>32 measured subject region"
+    },
+    {
+      "id": "terrace",
+      "kind": "modules_clean_v4",
+      "sourceRect": [
+        18,
+        698,
+        658,
+        296
+      ],
+      "anchorPx": [
+        332.0,
+        288
+      ],
+      "opaqueBounds": [
+        24,
+        703,
+        676,
+        988
+      ],
+      "method": "alpha>32 measured subject region"
+    },
+    {
+      "id": "bank",
+      "kind": "modules_clean_v4",
+      "sourceRect": [
+        676,
+        756,
+        579,
+        230
+      ],
+      "anchorPx": [
+        286.5,
+        222
+      ],
+      "opaqueBounds": [
+        676,
+        762,
+        1249,
+        980
+      ],
+      "method": "alpha>32 measured subject region"
+    },
+    {
+      "id": "ground_tuft",
+      "kind": "modules_clean_v4",
+      "sourceRect": [
+        1264,
+        783,
+        253,
+        177
+      ],
+      "anchorPx": [
+        126.5,
+        169
+      ],
+      "opaqueBounds": [
+        1270,
+        789,
+        1511,
+        954
+      ],
+      "method": "alpha>32 measured subject region"
+    },
+    {
+      "id": "camp_a",
+      "kind": "landmarks_v4",
+      "sourceRect": [
+        49,
+        103,
+        762,
+        640
+      ],
+      "anchorPx": [
+        381.0,
+        632
+      ],
+      "opaqueBounds": [
+        55,
+        109,
+        805,
+        737
+      ],
+      "method": "alpha>32 measured subject region"
+    },
+    {
+      "id": "tower_a",
+      "kind": "landmarks_v4",
+      "sourceRect": [
+        981,
+        5,
+        419,
+        749
+      ],
+      "anchorPx": [
+        209.5,
+        741
+      ],
+      "opaqueBounds": [
+        987,
+        11,
+        1394,
+        748
+      ],
+      "method": "alpha>32 measured subject region"
+    },
+    {
+      "id": "tower_b",
+      "kind": "landmarks_v4",
+      "sourceRect": [
+        1681,
+        124,
+        326,
+        628
+      ],
+      "anchorPx": [
+        163.0,
+        620
+      ],
+      "opaqueBounds": [
+        1687,
+        130,
+        2001,
+        746
+      ],
+      "method": "alpha>32 measured subject region"
+    }
+  ],
+  "actorFrames": [
+    {
+      "index": 0,
+      "sourceRect": [
+        92,
+        40,
+        218,
+        309
+      ],
+      "anchorPx": [
+        119.4700686507976,
+        302
+      ],
+      "opaqueBounds": [
+        98,
+        46,
+        304,
+        343
+      ],
+      "state": "east-walk"
+    },
+    {
+      "index": 1,
+      "sourceRect": [
+        460,
+        37,
+        171,
+        312
+      ],
+      "anchorPx": [
+        93.8333822438733,
+        305
+      ],
+      "opaqueBounds": [
+        466,
+        43,
+        625,
+        343
+      ],
+      "state": "east-walk"
+    },
+    {
+      "index": 2,
+      "sourceRect": [
+        806,
+        43,
+        218,
+        306
+      ],
+      "anchorPx": [
+        91.6647807095967,
+        299
+      ],
+      "opaqueBounds": [
+        812,
+        49,
+        1018,
+        343
+      ],
+      "state": "east-walk"
+    },
+    {
+      "index": 3,
+      "sourceRect": [
+        1179,
+        37,
+        169,
+        312
+      ],
+      "anchorPx": [
+        96.32667679504652,
+        305
+      ],
+      "opaqueBounds": [
+        1185,
+        43,
+        1342,
+        343
+      ],
+      "state": "east-walk"
+    },
+    {
+      "index": 4,
+      "sourceRect": [
+        124,
+        388,
+        152,
+        307
+      ],
+      "anchorPx": [
+        75.7114635860222,
+        300
+      ],
+      "opaqueBounds": [
+        130,
+        394,
+        270,
+        689
+      ],
+      "state": "idle"
+    },
+    {
+      "index": 5,
+      "sourceRect": [
+        472,
+        388,
+        147,
+        307
+      ],
+      "anchorPx": [
+        74.75119497657897,
+        300
+      ],
+      "opaqueBounds": [
+        478,
+        394,
+        613,
+        689
+      ],
+      "state": "idle"
+    },
+    {
+      "index": 6,
+      "sourceRect": [
+        836,
+        388,
+        144,
+        310
+      ],
+      "anchorPx": [
+        53.93121130566726,
+        303
+      ],
+      "opaqueBounds": [
+        842,
+        394,
+        974,
+        692
+      ],
+      "state": "idle"
+    },
+    {
+      "index": 7,
+      "sourceRect": [
+        1161,
+        388,
+        138,
+        310
+      ],
+      "anchorPx": [
+        83.22033508322579,
+        303
+      ],
+      "opaqueBounds": [
+        1167,
+        394,
+        1293,
+        692
+      ],
+      "state": "idle"
+    },
+    {
+      "index": 8,
+      "sourceRect": [
+        76,
+        728,
+        259,
+        335
+      ],
+      "anchorPx": [
+        117.85015415324813,
+        328
+      ],
+      "opaqueBounds": [
+        82,
+        734,
+        329,
+        1057
+      ],
+      "state": "ranger"
+    },
+    {
+      "index": 9,
+      "sourceRect": [
+        428,
+        736,
+        271,
+        330
+      ],
+      "anchorPx": [
+        131.64224265477299,
+        323
+      ],
+      "opaqueBounds": [
+        434,
+        742,
+        693,
+        1060
+      ],
+      "state": "spellblade"
+    }
+  ],
+  "actorWorldHeight": 74,
+  "walkLoopMs": 600
+}

@@ -1,0 +1,4 @@
+Independent project generated: /private/var/folders/5n/5t77mfb93jd7q8v9s6f0dn0m0000gn/T/tmplq64r4ct/Native/GrassLightingPrototype.xcodeproj
+PASS: regenerated project/scheme/Info.plist, original asset bytes, ideal reference and atlas rectangles.
+Device SDK compilation and pure effect checks are CI steps; visual acceptance is deferred to the user IPA test.
+PASS: new module checksums, 9 measured scene/landmark crops, 10 actor frames and foot anchors.
