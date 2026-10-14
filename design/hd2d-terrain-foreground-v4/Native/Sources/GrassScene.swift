@@ -31,6 +31,7 @@ final class GrassScene: SKScene {
     private var hero: SKSpriteNode?
     private var heroShadow: SKSpriteNode?
     private var heroLabel: SKLabelNode?
+    private var focusRing: SKShapeNode?
     private var gate = PresentationGate()
     private var active: DemoPresentation?
     private var built = false
@@ -201,7 +202,7 @@ final class GrassScene: SKScene {
             let marker = SKShapeNode(circleOfRadius: node.revealed ? 13 : 18)
             marker.position = foot; marker.zPosition = 2800; marker.lineWidth = 2
             marker.fillColor = node.revealed ? SKColor(red: 0.76, green: 0.64, blue: 0.33, alpha: 1) : SKColor(red: 0.18, green: 0.32, blue: 0.38, alpha: 1)
-            marker.strokeColor = SKColor(white: 0.94, alpha: 0.8); world.addChild(marker)
+            marker.strokeColor=SKColor(red:0.78,green:0.68,blue:0.44,alpha:0.92); world.addChild(marker)
             if !node.revealed {
                 let unknown = SKLabelNode(text: "?"); unknown.fontName = "HelveticaNeue-Medium"; unknown.fontSize = 20
                 unknown.verticalAlignmentMode = .center; marker.addChild(unknown)
@@ -230,6 +231,9 @@ final class GrassScene: SKScene {
         player.position = positions[1] ?? .zero; world.addChild(player); hero = player
         litSprites.append((player, "hero-7"))
         let label = makeLabel("P1"); world.addChild(label); heroLabel = label
+        let ring=SKShapeNode(ellipseOf:CGSize(width:34,height:12))
+        ring.fillColor = .clear;ring.strokeColor=SKColor(red:0.93,green:0.79,blue:0.42,alpha:0.65)
+        ring.lineWidth=1.4;ring.zPosition=10;world.addChild(ring);focusRing=ring
         let shadow = makeShadow(first, foot: player.position, scale: first.actorScale, opacity: 0.14)
         sunLayer.addChild(shadow); heroShadow = shadow
         heroContact = addContact(foot: player.position, width: 27, opacity: 0.46)
@@ -297,7 +301,7 @@ final class GrassScene: SKScene {
     private func updateHeroDepth() {
         guard let hero else { return }; hero.zPosition = depth(hero.position)
         hero.setValue(SKAttributeValue(float: Float(hero.position.y)), forAttribute: "a_depth")
-        heroShadow?.position = hero.position; heroContact?.position = hero.position; heroLabel?.position = CGPoint(x: hero.position.x, y: hero.position.y-18)
+        heroShadow?.position = hero.position; heroContact?.position = hero.position;focusRing?.position=hero.position; heroLabel?.position = CGPoint(x: hero.position.x, y: hero.position.y-18)
         if follow { cameraNode.position = hero.position }; updateForeground()
     }
     private func setupForeground() throws {
