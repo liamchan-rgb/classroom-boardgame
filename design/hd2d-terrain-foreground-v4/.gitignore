@@ -1,0 +1,7 @@
+DerivedData/
+Build/
+*.ipa
+*.p12
+*.mobileprovision
+review-results/
+__pycache__/
