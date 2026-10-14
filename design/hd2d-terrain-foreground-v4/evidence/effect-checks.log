@@ -1,0 +1,30 @@
+PASS: field channels finite and bounded across world
+PASS: seeded world field deterministic
+PASS: natural patches have multiple density levels
+PASS: decoration seed changes field
+PASS: road center has no dense detail
+PASS: camp center has no dense detail
+PASS: clearance recovers away from paths
+PASS: noise continuous at small camera-independent displacement
+PASS: shadow foot fixed
+PASS: upper-left sun casts lower-right
+PASS: finite bounded effects
+PASS: default settings already bounded
+PASS: pixel character excluded from environment kind
+PASS: only public edges rendered
+PASS: original five nodes unchanged
+PASS: road/movement endpoints unchanged
+PASS: duplicate display event not replayed
+PASS: 16:9 and 4:3 fits positive
+PASS: projection shorter than v3 while preserving direction
+PASS: geometric ground normals normalized
+PASS: ground height deterministic and bounded
+PASS: same decoration candidate budget
+PASS: modular grove recipe deterministic
+PASS: tree recipes use standalone assets
+PASS: terrain facets receive terrain material
+PASS: both corner trees remain nonzero through 1 to 2.4 zoom in both ratios
+PASS: foreground avoidance continuous during zoom
+PASS: no hard overlap opacity threshold
+PASS: overlap retains foreground silhouette
+PASS: 29 effect/geometry checks; no screenshots, simulator or visual review.
