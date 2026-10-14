@@ -1,0 +1,29 @@
+{
+  "formatVersion": 1,
+  "logicalZIP": "archive-design-hd2d-terrain-foreground-v4-20261014.zip",
+  "bytes": 179645125,
+  "sha256": "4104346400755cb52d95fa5f011367c2a276a3891afb598e294420c79ceb6df7",
+  "parts": [
+    {
+      "file": "archive-design-hd2d-terrain-foreground-v4-20261014.zip.part000",
+      "bytes": 50331648,
+      "sha256": "404f2756447d5fa8d8dae519822ef52e704b4be5cfc53143fae09d7a5461b079"
+    },
+    {
+      "file": "archive-design-hd2d-terrain-foreground-v4-20261014.zip.part001",
+      "bytes": 50331648,
+      "sha256": "fb4c35791ec0ad27d6b73ed9c9ecae38ed13b7d8d2bf28f45a96addf72e45079"
+    },
+    {
+      "file": "archive-design-hd2d-terrain-foreground-v4-20261014.zip.part002",
+      "bytes": 50331648,
+      "sha256": "58991c01609731e32f1dbbd97fcf0fb0d96298f17c34f270c223630fa3bf8fbb"
+    },
+    {
+      "file": "archive-design-hd2d-terrain-foreground-v4-20261014.zip.part003",
+      "bytes": 28650181,
+      "sha256": "d9fbd0ecfda9a06fd87e12ec87a70a190eabc7ab07fe84219934b948b99d6533"
+    }
+  ],
+  "reason": "Lossless split; GitHub normal Git rejects files over 100MB"
+}

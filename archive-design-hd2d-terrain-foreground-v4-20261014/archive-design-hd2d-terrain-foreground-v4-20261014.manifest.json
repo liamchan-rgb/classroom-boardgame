@@ -1,0 +1,2326 @@
+{
+  "formatVersion": 1,
+  "milestone": "archive-design-hd2d-terrain-foreground-v4-20261014",
+  "createdAt": "2026-10-14T02:23:42.072669+00:00",
+  "repository": "https://github.com/liamchan-rgb/classroom-boardgame",
+  "sourceSnapshotCommit": "4d30ecd428a43989625025d6381f9ddb95942387",
+  "snapshotTag": "archive-design-hd2d-terrain-foreground-v4-20261014",
+  "currentAppVersion": "GrassHD2D 0.4(4)",
+  "compiledCommit": "8c888c062edcb9777c22fe577e315766e2cb7e5d",
+  "currentIPA": "deliveries/GrassHD2D-v0.4-unsigned.ipa",
+  "buildEvidence": "source/design/hd2d-terrain-foreground-v4/evidence/device-build.json",
+  "coreTests": {
+    "effectAndGeometry": 29,
+    "GameCore": 72,
+    "ProbeCore": 6,
+    "failures": 0,
+    "formalWorkflowRun": 38499814533
+  },
+  "currentDeviceVerified": false,
+  "gitBundleRefs": [
+    "dc1a9d8a524ee91c6e49bd6cd49ec412a64333c9 refs/heads/design/hd2d-grass-four-stages-ipa-v3-20261013",
+    "4d30ecd428a43989625025d6381f9ddb95942387 refs/heads/design/hd2d-terrain-foreground-v4-20261014",
+    "dc1a9d8a524ee91c6e49bd6cd49ec412a64333c9 refs/remotes/origin/design/hd2d-grass-four-stages-ipa-v3-20261013",
+    "8c888c062edcb9777c22fe577e315766e2cb7e5d refs/remotes/origin/hd2d-v4-final-verified-merge",
+    "1128404b1d3e9a4e552d3cfb20d1711b0094e84e refs/remotes/origin/hd2d-v4-verified-merge",
+    "a083179c0e149c8f973b5a0c0e1e9e530ede628e refs/tags/archive-design-hd2d-terrain-foreground-v4-20261014"
+  ],
+  "deliveries": [
+    {
+      "file": "GrassHD2D-v0.4-unsigned.build.json",
+      "bytes": 515,
+      "sha256": "4f13a2f1b031fbd24a13a188ca99b5d552b69bc6367fbdc8b585cfea1b48cb04"
+    },
+    {
+      "file": "GrassHD2D-v0.4-unsigned.ipa",
+      "bytes": 16235638,
+      "sha256": "c647b0b08f69d187991062ff8805336f20f6fb4bfb526afcaba6b013df9dfabf"
+    },
+    {
+      "file": "GrassHD2D-v0.4-unsigned.ipa.sha256",
+      "bytes": 94,
+      "sha256": "23b4b19b59f7f74d670a4dfb0d3f102acbec483424a364d033e9daee2b7511bb"
+    },
+    {
+      "file": "hd2d-v4-final-device-diagnostics.zip",
+      "bytes": 15610221,
+      "sha256": "e3ef75d8929f8795670dee2dd45e0408c97926b845cb66a620e9bcea559c2126"
+    }
+  ],
+  "manifestSelfExcluded": true,
+  "entries": [
+    {
+      "path": "deliveries/GrassHD2D-v0.4-unsigned.build.json",
+      "bytes": 515,
+      "sha256": "4f13a2f1b031fbd24a13a188ca99b5d552b69bc6367fbdc8b585cfea1b48cb04"
+    },
+    {
+      "path": "deliveries/GrassHD2D-v0.4-unsigned.ipa",
+      "bytes": 16235638,
+      "sha256": "c647b0b08f69d187991062ff8805336f20f6fb4bfb526afcaba6b013df9dfabf"
+    },
+    {
+      "path": "deliveries/GrassHD2D-v0.4-unsigned.ipa.sha256",
+      "bytes": 94,
+      "sha256": "23b4b19b59f7f74d670a4dfb0d3f102acbec483424a364d033e9daee2b7511bb"
+    },
+    {
+      "path": "deliveries/hd2d-v4-final-device-diagnostics.zip",
+      "bytes": 15610221,
+      "sha256": "e3ef75d8929f8795670dee2dd45e0408c97926b845cb66a620e9bcea559c2126"
+    },
+    {
+      "path": "git-history.bundle",
+      "bytes": 67239220,
+      "sha256": "b5e116a786c0dcd400fe8c7aae6488292e81ecc46ed86c2ff0db9c968e18abbf"
+    },
+    {
+      "path": "source/.github/actionlint.yaml",
+      "bytes": 124,
+      "sha256": "69bc96c27dce88d5fe4cda6f843e9745e1533cbe8068f505354836e0168a2c8d"
+    },
+    {
+      "path": "source/.github/workflows/build-hd2d-grass-ipa-v4.yml",
+      "bytes": 3912,
+      "sha256": "af22bdc60cdcbf5b1954a0e30219a5a5de5602372b7d20e8db0fc3a71684fef7"
+    },
+    {
+      "path": "source/.github/workflows/build-hd2d-grass-ipa.yml",
+      "bytes": 3831,
+      "sha256": "a5e8f4e72df61a903736c3c452a0f04a599de70f273534c3fbaa672e7ecef541"
+    },
+    {
+      "path": "source/.github/workflows/build-native-ipa.yml",
+      "bytes": 4558,
+      "sha256": "172748c4a0dc806e551129147eb9f500c831727e1d7f911cdbbe9fe3404108b9"
+    },
+    {
+      "path": "source/.github/workflows/ios-pr-build.yml",
+      "bytes": 3819,
+      "sha256": "f4965fafeaffd0dfc684b136f77c3b3f6f1d5e81b17f4b8702862a8fcd8ba8a2"
+    },
+    {
+      "path": "source/.gitignore",
+      "bytes": 299,
+      "sha256": "802e96e60aeeff41912c024bd4970b6ec8375e43a47af1f3d440974d19fd5cfe"
+    },
+    {
+      "path": "source/AGENTS.md",
+      "bytes": 2648,
+      "sha256": "676dec96aaa536a2973fbbd4a185a98770aa4c2b70da958248aa1ef55bc1f76d"
+    },
+    {
+      "path": "source/README.md",
+      "bytes": 6111,
+      "sha256": "a554cc298984ad9648df74cd73a56f5087ecd9c6678cd739a3f93099c013b1ac"
+    },
+    {
+      "path": "source/archives/README.md",
+      "bytes": 5007,
+      "sha256": "c1e5310bae69fff33ed1ccc65514de99ff914b48cfec014dc7c67511b1f6d064"
+    },
+    {
+      "path": "source/archives/archive-ci-ios-pr-build-20261013/README.md",
+      "bytes": 1809,
+      "sha256": "f6646cf4e8b4696a23b1cada01eb7257ac4c8b4bd34b4f4c35833f85bb1a2186"
+    },
+    {
+      "path": "source/archives/archive-ci-ios-pr-build-20261013/activation.json",
+      "bytes": 703,
+      "sha256": "50cb3cf2407548765f8dcce76f9d413fb05921a955f3bcfe5e79251669aa75b8"
+    },
+    {
+      "path": "source/archives/archive-ci-ios-pr-build-20261013/verification.json",
+      "bytes": 803,
+      "sha256": "412b7d122476b5715ef570be051d23708ab200710e12fdf1d67f3ee2b09cdd76"
+    },
+    {
+      "path": "source/archives/archive-stage2-hd2d-direction-20261013/README.md",
+      "bytes": 2454,
+      "sha256": "035958a5eba24eab1b09c7f846551f9fa857a357911d44422073a16e33e5e593"
+    },
+    {
+      "path": "source/archives/archive-stage2-hd2d-direction-20261013/checkpoint.json",
+      "bytes": 2619,
+      "sha256": "5cc34dd13e11aa0e6c186bdc97ddc751499c867fb2693f8603a83876fe2bf17b"
+    },
+    {
+      "path": "source/archives/archive-stage2-hd2d-direction-20261013/manifest.json",
+      "bytes": 60183,
+      "sha256": "7e21de7bd8681a810894887ac6dc3f450cfaee11fe87febfebf88ada8844ecdb"
+    },
+    {
+      "path": "source/archives/archive-stage2-hd2d-direction-20261013/transport.json",
+      "bytes": 1428,
+      "sha256": "7026da0372ebd6736f0991c375b949df07477eb83e706d3040490f4f5115fc67"
+    },
+    {
+      "path": "source/archives/archive-stage2-hd2d-direction-20261013/verification.json",
+      "bytes": 1117,
+      "sha256": "9b8ddf792fb2bcf0b8713128d64081153084fa625304397d35999d84dece2e92"
+    },
+    {
+      "path": "source/archives/archive-stage2-map-ui-v0.10-20261013/README.md",
+      "bytes": 3541,
+      "sha256": "68f1b08182be9445397687f918862585015f922714c558a73fbf0d770c43565d"
+    },
+    {
+      "path": "source/archives/archive-stage2-map-ui-v0.10-20261013/checkpoint.json",
+      "bytes": 3374,
+      "sha256": "cd3c3f5e4f7af9ce679f1b5f4f06d8aa4e054c3a24c81df4bf40b655a208f0bf"
+    },
+    {
+      "path": "source/archives/archive-stage2-map-ui-v0.10-20261013/manifest.json",
+      "bytes": 69505,
+      "sha256": "07df4cabb42d3c26ae102f120be72168a15a63845db4512e424a9858deba53f8"
+    },
+    {
+      "path": "source/archives/archive-stage2-map-ui-v0.10-20261013/transport.json",
+      "bytes": 1603,
+      "sha256": "e1a0c06f4b61f943b2448d136c7511e039eb3c0664a8aeb40d4437d8b0755536"
+    },
+    {
+      "path": "source/archives/archive-stage2-map-ui-v0.10-20261013/verification.json",
+      "bytes": 1207,
+      "sha256": "df8024c45ab8aa7c39efe27d5fd56c842bcc7187b9fb576eb3a74a35a2e194fd"
+    },
+    {
+      "path": "source/archives/archive-stage2-ui-art-v0.9-20261013/README.md",
+      "bytes": 3327,
+      "sha256": "ba1e5478f0f101e80f964a2bd6ac945bc85fb4907193ec81c1c1014a9e548c37"
+    },
+    {
+      "path": "source/archives/archive-stage2-ui-art-v0.9-20261013/checkpoint.json",
+      "bytes": 3560,
+      "sha256": "09f4f85aa0ad8f5c7fc7add2341a8acb77c7c52d6dc216af2bf4bf7498f82bc9"
+    },
+    {
+      "path": "source/archives/archive-stage2-ui-art-v0.9-20261013/manifest.json",
+      "bytes": 56282,
+      "sha256": "8bb2a8f149572eb8e6870f2e1e0b0d9f08f57e46e541590f75128a2c35b5adf4"
+    },
+    {
+      "path": "source/archives/archive-stage2-ui-art-v0.9-20261013/transport.json",
+      "bytes": 1407,
+      "sha256": "260d49cea4193ceafe3b4126314aa00f31dbdf9f7cf1b95866249a9b89fe28ad"
+    },
+    {
+      "path": "source/archives/archive-stage2-ui-art-v0.9-20261013/verification.json",
+      "bytes": 1189,
+      "sha256": "2ceb2960f06d48d4abecdf4a5ed3dab4522b32323f77fe31acd16696c4b55f88"
+    },
+    {
+      "path": "source/archives/archive-stage2-ui-feedback-r1-20261013/README.md",
+      "bytes": 2836,
+      "sha256": "bccc3c85a6a55e0a5ac66b62bcae1a1f1542782800ef12df27124ce937e61997"
+    },
+    {
+      "path": "source/archives/archive-stage2-ui-feedback-r1-20261013/checkpoint.json",
+      "bytes": 2933,
+      "sha256": "11dbab0b20be212ccee88dbfc68cedcabe27133f5d54c6446cb527203e906398"
+    },
+    {
+      "path": "source/archives/archive-stage2-ui-feedback-r1-20261013/manifest.json",
+      "bytes": 59049,
+      "sha256": "2bc7a70cb5aebdb0f2f0445ebae92cfa1dda127188496fd5cacd6e935c7a1a5d"
+    },
+    {
+      "path": "source/archives/archive-stage2-ui-feedback-r1-20261013/transport.json",
+      "bytes": 1428,
+      "sha256": "66e6c52c378d33fb06d8bf58a6c021bb67f0a21bac78a89b345634da075404e2"
+    },
+    {
+      "path": "source/archives/archive-stage2-ui-feedback-r1-20261013/verification.json",
+      "bytes": 1061,
+      "sha256": "ca658d024e55100a8647758c560719d41a1738c0ec28282d6322f6e13d0ab791"
+    },
+    {
+      "path": "source/archives/archive-stage2-v0.8-20261012-r2/README.md",
+      "bytes": 1853,
+      "sha256": "e379caaedc6cfa90da9cd84a9204ea1e86fb009fffffaacc133b1fdf7ee0789d"
+    },
+    {
+      "path": "source/archives/archive-stage2-v0.8-20261012-r2/checkpoint.json",
+      "bytes": 4394,
+      "sha256": "42e4d0e72abb541e6930f950adf45fc2cbfd96ea1f1f601d9fc295127792fb31"
+    },
+    {
+      "path": "source/archives/archive-stage2-v0.8-20261012-r2/manifest.json",
+      "bytes": 35698,
+      "sha256": "39eda0780e6b029e875897251a777571a9049714c4e18890abf87dc3441f8a6f"
+    },
+    {
+      "path": "source/archives/archive-stage2-v0.8-20261012-r2/verification.json",
+      "bytes": 589,
+      "sha256": "4914cb2b58e6c6460c8d899f530a9f59240a3326ca0b53fd2f602787304c9c5a"
+    },
+    {
+      "path": "source/archives/design-hd2d-grass-ipa-v3-20261013/README.md",
+      "bytes": 2898,
+      "sha256": "0e935cec0a40df4f84b00c0207afadd6fd1da87664a7ae7fd8088345be984e59"
+    },
+    {
+      "path": "source/archives/design-hd2d-grass-ipa-v3-20261013/record.json",
+      "bytes": 3299,
+      "sha256": "bbef39a63cb5e215423551ddc53c7ebb51a66ffdedcbdfc7aa1ff6964bd2acb6"
+    },
+    {
+      "path": "source/archives/design-hd2d-grass-ipa-v3-20261013/remote-verification.json",
+      "bytes": 942,
+      "sha256": "4665ae6d04657c3c9d5cbc9893c22d9e4c55c17d5df0faaf2bcdc246cbf1b680"
+    },
+    {
+      "path": "source/design/README.md",
+      "bytes": 706,
+      "sha256": "d79f85659d9791785b4fb218e1c6eec45a35fa7fec94f2d989d2bacddf1a1a0e"
+    },
+    {
+      "path": "source/design/asset-manifest_v1.json",
+      "bytes": 13568,
+      "sha256": "c3a9a258708c0e24d95b91e9bb142cc4fca4a39675085378663267f1320d12e1"
+    },
+    {
+      "path": "source/design/design-tokens_v1.json",
+      "bytes": 1438,
+      "sha256": "fbf6634801a849cfe6ee207bedc34a31c98b56a2a134be2b66569254635c2838"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/.gitignore",
+      "bytes": 79,
+      "sha256": "ceb4d484280d11a99f831259d23728aeb292274c4322745862e141b3640564af"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/ARCHIVE_CORRECTION.md",
+      "bytes": 1049,
+      "sha256": "bf1dd5be4783cea686a2b5a8cb26dd36d46e4c4af3cf13dcc03c6a99507420b7"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/DELIVERY_RECEIPT.md",
+      "bytes": 2769,
+      "sha256": "a26b5aa53d21f39e68ddca22ddc3755818c10d4f6ec3a37c574883ae21ce7e64"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/DEVICE_GUIDE.md",
+      "bytes": 1059,
+      "sha256": "13f8a04919999c905ea0aff1875fed932a201689262474d3da2364df93407bd9"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/EXECUTION_PLAN.md",
+      "bytes": 3044,
+      "sha256": "f5286fd6ce74b92b1f3a5e21a0fb4e917be3d71b32876e3819383c4dff68cd32"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/Native/GrassLightingPrototype.xcodeproj/project.pbxproj",
+      "bytes": 11657,
+      "sha256": "cd0bdf3a40879c259d1ef898d5500b66e0d53664743fe96970e6ca1aee64bdd5"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/Native/GrassLightingPrototype.xcodeproj/xcshareddata/xcschemes/GrassLightingPrototype.xcscheme",
+      "bytes": 2247,
+      "sha256": "cfb23b5ea49b602326c9aa48a450c3d390568787b211144edf80e370e61ee4cd"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/Native/Resources/Art/adventurer_sheet.png",
+      "bytes": 1637666,
+      "sha256": "2749cd9a78bb269d22b9177f92cabeeb6d816870bae74d1e40d06979d8585e8c"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/Native/Resources/Art/class_ranger_portrait.png",
+      "bytes": 23617,
+      "sha256": "bf6306c1b1034b900d1e63b478b320cc11382418615292453b4d23f8aaa56f45"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/Native/Resources/Art/class_spellblade_portrait.png",
+      "bytes": 23674,
+      "sha256": "8f0f59b217039c012a2a8ff8e0ff475c80c33bed76f231e028966b5f3d259d10"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/Native/Resources/Art/landmark_atlas.png",
+      "bytes": 2249655,
+      "sha256": "f747e7ca9b31ae0bb9350c2a4ed1fac22cfdab20ec650bf4cf2b1782366304b4"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/Native/Resources/Art/module-manifest.json",
+      "bytes": 7971,
+      "sha256": "bec3120b132049c0e0c35e186eb14f0dd4e43ecf23e0c7e16c4d8a4b6cd9133f"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/Native/Resources/Art/scenery_atlas.png",
+      "bytes": 2575502,
+      "sha256": "31c244a8cf76c3e0a01af76b1e883a2be2a2317b21bf80dbf5134c8e6fcfda9d"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/Native/Resources/Art/terrain_atlas.png",
+      "bytes": 3428075,
+      "sha256": "8e180dd175ba9014aab0bb5dea26032aefcedb3f438721799d9fd94da3ca33dd"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/Native/Resources/Info.plist",
+      "bytes": 1071,
+      "sha256": "d0b7921714870a715686e78a18020d842e6f363e1f8248dbac069af7bf8347e3"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/Native/Sources/AssetStore.swift",
+      "bytes": 14209,
+      "sha256": "121b3699cdb5f4fccd3c663bb2d07bf8ce2ca1caeb41e229d38399800356b658"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/Native/Sources/DisplayModel.swift",
+      "bytes": 4606,
+      "sha256": "cb71ec5bb8104c85f99c6816a8d1e766f20622a4bca9bd9c3cf873e7b1b3ce42"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/Native/Sources/GrassScene.swift",
+      "bytes": 22433,
+      "sha256": "2375c3b96eece1e23184ced54484b3b26e9de930784f49455a3c86b32ae102ea"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/Native/Sources/HD2DRenderer.swift",
+      "bytes": 7100,
+      "sha256": "caa93b381c15bbe0fd814aa31d8478ad9f581cb62e4b44d95cfb7e008637d927"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/Native/Sources/HD2DSettings.swift",
+      "bytes": 3945,
+      "sha256": "3eca5b3f6e99832249a81047f1476f443980ed3ff2c656605185352f7e3ad81f"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/Native/Sources/PrototypeApp.swift",
+      "bytes": 9115,
+      "sha256": "5c27470211584a0bbf337c5c47f684ceb788c205d9fb3365a2253a914fc8d246"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/Native/Tests/DisplayGeometryTests.swift",
+      "bytes": 2313,
+      "sha256": "4ddcd285bd7520987965b18902bd29318664d7586ac8aa9ef101b2850961820d"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/README.md",
+      "bytes": 1351,
+      "sha256": "7d785009c68f34ccb799b167c264b3cfebdff80baa2ca0d0af2f7b70adc9c721"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/TECHNICAL_NOTES.md",
+      "bytes": 6359,
+      "sha256": "e44805c803ce38f1dfb8920bfd11cd8e1fbf34739d5be63e71411d480fb64b36"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/art-direction-prompt.md",
+      "bytes": 6056,
+      "sha256": "775ffcb5b87c17738bf7a27a587441cf54788ab35feb469196cc065b23cdd283"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/asset-provenance.json",
+      "bytes": 1086,
+      "sha256": "82b69cb3839b9d6244e9634e54fee3acda860670ce5f3fcdf993a483c85fee7b"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/evidence/compiled-commit.txt",
+      "bytes": 41,
+      "sha256": "b6a028bbde381b92ca8e2485934887e1faf85f3be6c0e7ccffaf60fcbb0c71ee"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/evidence/complete-device-action.log",
+      "bytes": 158912,
+      "sha256": "51cd9cb1eb34ba6eb83b9ec1351828ed9862b6eb15a6d6b7e93c09b29352068d"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/evidence/device-build.json",
+      "bytes": 1902,
+      "sha256": "1b69468eca2e4d52b71cd2e701f01b0546a4aaf3f52aacf420ae3c7101e9c62a"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/evidence/effect-checks.log",
+      "bytes": 806,
+      "sha256": "4c179cd1228fd326c6835f9775ea23ce5b2f8be11bd613600d65ed954f38b1e2"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/evidence/formal-app-regression-action.log",
+      "bytes": 624048,
+      "sha256": "81c3db3905ae17c2f8b6dde78eed9a0fea2e4cbd604e31ccf49b2954b8e4b428"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/evidence/local-checks.txt",
+      "bytes": 698,
+      "sha256": "1c378c0577d131a4c412dde0096e6ed4e2b1450541c16fa376cec0f55a7ff375"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/evidence/package-checks.log",
+      "bytes": 130,
+      "sha256": "bddbb7b7bd904a14869af01aa6bcba36dfb50ba7b6733c36f4d0acb43d6ee60e"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/evidence/remote-verification-r2.json",
+      "bytes": 942,
+      "sha256": "4665ae6d04657c3c9d5cbc9893c22d9e4c55c17d5df0faaf2bcdc246cbf1b680"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/evidence/source-checks.log",
+      "bytes": 357,
+      "sha256": "5c0d9ed075851050aea6fb47cecb004b0cc16ae598bbe7ea66db0c18cb3efc1c"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/evidence/source-head.txt",
+      "bytes": 41,
+      "sha256": "8537fbb3669d585d3996f8b6adcd7df5c8613e59c54d8ff052aef20948c6cd72"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/evidence/swift-version.log",
+      "bytes": 128,
+      "sha256": "30bb0d72a580e8e936ab32e24cab2876f82fa6b06d66fef876fe21a47e828acc"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/evidence/xcode-selection.log",
+      "bytes": 1898,
+      "sha256": "965a6dca80da1ae2aed6e960b71a3e06f1529071eb3bab0e7d27974765a10668"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/evidence/xcode-version.log",
+      "bytes": 34,
+      "sha256": "e03051800adc1b3ac9121a84ffa6824c3e701832d5377f93cb2bf132b09b5dae"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/reference/README.md",
+      "bytes": 206,
+      "sha256": "fc5985300a1ab0997a142212d0256d4f4f5937928c42a968c5a27791a468d41c"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/reference/ideal-effect-user.jpg",
+      "bytes": 485699,
+      "sha256": "f37522f5788ae7d22e570c85438ecc0e5503f8714c7893400de5609366a2d673"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/reference/reference-manifest.json",
+      "bytes": 300,
+      "sha256": "920c60300baed039cb04a514439c2f27a378cd2fa85aa396f7e73d61859d3884"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/scripts/EffectMathChecks.swift",
+      "bytes": 4243,
+      "sha256": "724bc25a34f1fe59ec6d6954b880630596dd5146cf5ccfab29cf0bb30009dd98"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/scripts/archive_sample.py",
+      "bytes": 5158,
+      "sha256": "42e6ca8d50d014958939f4ab112113bf1f6a47b15f67fae6c3c3d9e2c71487a5"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/scripts/check_review.py",
+      "bytes": 2374,
+      "sha256": "fc07aed922ac7e051a90fe7b0b6559ff1b04579d433b505a24e6df43c4e39821"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/scripts/check_shaders.py",
+      "bytes": 1224,
+      "sha256": "ae8ff87946e43e4b9eb08eaa114c9bbd3ce9fcd8daf687e8ff3914a963840603"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/scripts/generate_project.py",
+      "bytes": 8226,
+      "sha256": "b7382674b5f73f03368683e6777022cc341710bc6f1b8a1f85fc3d2b9f29eeda"
+    },
+    {
+      "path": "source/design/hd2d-grass-four-stages-ipa-v3/scripts/package_ipa.py",
+      "bytes": 4632,
+      "sha256": "1ff9a4bcc73f4e90bbf6d42430073b5d05e883c9ccc701dea276c71932e6aaf8"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/.gitignore",
+      "bytes": 79,
+      "sha256": "ceb4d484280d11a99f831259d23728aeb292274c4322745862e141b3640564af"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/DEVICE_GUIDE.md",
+      "bytes": 1106,
+      "sha256": "271dac9f061e9a0bab008fb20b503c6db362e6e6e26f34e857b34440bceca6be"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/Native/GrassLightingPrototype.xcodeproj/project.pbxproj",
+      "bytes": 11976,
+      "sha256": "f19e06a8b662be792d41b1117bc57be8d9f02645e573f056b9df3ebb6fb9c7ec"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/Native/GrassLightingPrototype.xcodeproj/xcshareddata/xcschemes/GrassLightingPrototype.xcscheme",
+      "bytes": 2247,
+      "sha256": "cfb23b5ea49b602326c9aa48a450c3d390568787b211144edf80e370e61ee4cd"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/Native/Resources/Art/actor_frames_v4.png",
+      "bytes": 962534,
+      "sha256": "c706e4a24012405c2dc97fa9640aaf03a6b8c8f742bbb42cb061f0ef00d58cb3"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/Native/Resources/Art/adventurer_sheet.png",
+      "bytes": 1637666,
+      "sha256": "2749cd9a78bb269d22b9177f92cabeeb6d816870bae74d1e40d06979d8585e8c"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/Native/Resources/Art/class_ranger_portrait.png",
+      "bytes": 23617,
+      "sha256": "bf6306c1b1034b900d1e63b478b320cc11382418615292453b4d23f8aaa56f45"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/Native/Resources/Art/class_spellblade_portrait.png",
+      "bytes": 23674,
+      "sha256": "8f0f59b217039c012a2a8ff8e0ff475c80c33bed76f231e028966b5f3d259d10"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/Native/Resources/Art/landmark_atlas.png",
+      "bytes": 2249655,
+      "sha256": "f747e7ca9b31ae0bb9350c2a4ed1fac22cfdab20ec650bf4cf2b1782366304b4"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/Native/Resources/Art/landmarks_v4_atlas.png",
+      "bytes": 2111185,
+      "sha256": "8432ab51e7f6ff464c0c28bb532a0a6dd7603eac7fe344703d5087a00f54ccb5"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/Native/Resources/Art/modular-manifest.json",
+      "bytes": 6076,
+      "sha256": "63d5292d2494a6aa2f9ff9d37f26c5a7b457735c11d09af3a282989564151384"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/Native/Resources/Art/module-manifest.json",
+      "bytes": 7971,
+      "sha256": "bec3120b132049c0e0c35e186eb14f0dd4e43ecf23e0c7e16c4d8a4b6cd9133f"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/Native/Resources/Art/modules_clean_v4_atlas.png",
+      "bytes": 2523085,
+      "sha256": "ed38e97ff0a2abd4c27b2549e35164f288fda221d113012aa8accd2c9ee13f3c"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/Native/Resources/Art/scenery_atlas.png",
+      "bytes": 2575502,
+      "sha256": "31c244a8cf76c3e0a01af76b1e883a2be2a2317b21bf80dbf5134c8e6fcfda9d"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/Native/Resources/Art/terrain_atlas.png",
+      "bytes": 3428075,
+      "sha256": "8e180dd175ba9014aab0bb5dea26032aefcedb3f438721799d9fd94da3ca33dd"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/Native/Resources/Info.plist",
+      "bytes": 1135,
+      "sha256": "51e63333e09eb961a816e4c3a91d801dbac92d31471c7dc48c80c63202cc434e"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/Native/Sources/AssetStore.swift",
+      "bytes": 17035,
+      "sha256": "1a52724112008ddbf49df0aa6e11a406e8fd0bfe3750d74eb3c9f846c1163ffb"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/Native/Sources/DisplayModel.swift",
+      "bytes": 4606,
+      "sha256": "ce0f95baa0834297b162a21f9665a6cc536ce9088610b94a233c3a7e1a6127a2"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/Native/Sources/ForegroundGeometry.swift",
+      "bytes": 2726,
+      "sha256": "ae65d4ade2aa84ec8fc3d24a8818e8fc30dc80d665b464a3ab2086d4b20ee3c2"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/Native/Sources/GrassScene.swift",
+      "bytes": 24583,
+      "sha256": "9b653472bccbe598e5a547cff4e0afbf9ff5c28b9fd927c520e4345224a81ecb"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/Native/Sources/HD2DRenderer.swift",
+      "bytes": 7970,
+      "sha256": "1a6b005aac9598f260af05cbce3381726993d821a93bf769f0aa813562d825f0"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/Native/Sources/HD2DSettings.swift",
+      "bytes": 5269,
+      "sha256": "a49f2f79eefc347e8c5e8acb688a700f4a72b05963bb6679c70d1b505710cc83"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/Native/Sources/PrototypeApp.swift",
+      "bytes": 9267,
+      "sha256": "46ddca116e17089e36fa839b97e8f2336618a63fa0822bd9fa6cda9142698b4a"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/Native/Tests/DisplayGeometryTests.swift",
+      "bytes": 2313,
+      "sha256": "4ddcd285bd7520987965b18902bd29318664d7586ac8aa9ef101b2850961820d"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/PLAN.md",
+      "bytes": 2499,
+      "sha256": "85285fc5d3ae7dfabd7d29e620bdee36c2d15843688afaa633c6b00d8306589e"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/README.md",
+      "bytes": 183,
+      "sha256": "973d6e6affa011640d6ee740907363510e569a785c6ac8dde6eb7de339b3e085"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/TECHNICAL_NOTES.md",
+      "bytes": 5070,
+      "sha256": "4fa0c66179cfe566ac95da80c1a8022d73ddd4764d7677053f4f32041362d904"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/asset-provenance.json",
+      "bytes": 1793,
+      "sha256": "be813c1e743cde9c7b6413389184ff4fdbd17fb294f7b3adc1f2fd6a9e02ac69"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/evidence/compiled-commit.txt",
+      "bytes": 41,
+      "sha256": "edaf062b0b64ae5b4031a899f7f8a23ebb9fb196a22300d5714a4615e7c242af"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/evidence/device-action.log",
+      "bytes": 162760,
+      "sha256": "e1e2d1f45d31c56f13f0336c487ed5ffef960d42987880b72ee0e0d99c4274e9"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/evidence/device-build.json",
+      "bytes": 2978,
+      "sha256": "9bddd6859da835e91474e8b32e37365e6b576446871b48be2b8672209d449075"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/evidence/effect-checks.log",
+      "bytes": 1331,
+      "sha256": "7fddd2d84c0a59ec5a4d8057497027aaf072d0a54b6d77ff77adda061a1a0032"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/evidence/formal-regression-action.log",
+      "bytes": 623788,
+      "sha256": "5dd6c8ff117f0511f7d8fedb24861e40d2157db4faaa0df2973eb78cfd64f82c"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/evidence/local-checks.txt",
+      "bytes": 596,
+      "sha256": "4f88821f021318d1ca2e5121e5c09d8243f7e9a9e72da60c679e967db0c0369b"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/evidence/package-checks.log",
+      "bytes": 130,
+      "sha256": "2927bd6683d153385ffb4d560425f4963df7f26352827a671d436444defacedc"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/evidence/scenery-layout-check.json",
+      "bytes": 368,
+      "sha256": "c79541ca24628e6bb52cceb30e11f87481c504fd41d1892b48bd99161a673fba"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/evidence/source-checks.log",
+      "bytes": 452,
+      "sha256": "1af8392f8efaf64cd1c029e45314940f1d07e2d30f491ea3343bdbbf0389a254"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/evidence/source-head.txt",
+      "bytes": 41,
+      "sha256": "124b24bbdbd7f7f6f3531826582b79b00b017dae4d8c73dbb3e95516c0a5fcea"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/evidence/swift-version.log",
+      "bytes": 128,
+      "sha256": "30bb0d72a580e8e936ab32e24cab2876f82fa6b06d66fef876fe21a47e828acc"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/evidence/xcode-selection.log",
+      "bytes": 1898,
+      "sha256": "965a6dca80da1ae2aed6e960b71a3e06f1529071eb3bab0e7d27974765a10668"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/evidence/xcode-version.log",
+      "bytes": 34,
+      "sha256": "e03051800adc1b3ac9121a84ffa6824c3e701832d5377f93cb2bf132b09b5dae"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/reference/README.md",
+      "bytes": 206,
+      "sha256": "fc5985300a1ab0997a142212d0256d4f4f5937928c42a968c5a27791a468d41c"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/reference/generated/modules-initial-draft.png",
+      "bytes": 2557777,
+      "sha256": "d1eaa995700199037a0e28c57cbeaa17ed4f7dc839d9a2e6daeb913d76041238"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/reference/ideal-effect-user.jpg",
+      "bytes": 485699,
+      "sha256": "f37522f5788ae7d22e570c85438ecc0e5503f8714c7893400de5609366a2d673"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/reference/reference-manifest.json",
+      "bytes": 300,
+      "sha256": "920c60300baed039cb04a514439c2f27a378cd2fa85aa396f7e73d61859d3884"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/scripts/EffectMathChecks.swift",
+      "bytes": 6821,
+      "sha256": "08dd19e088dbd5ba000c65107d3d15c3bd831e8ff5f613adec49abd0b12a3f5f"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/scripts/archive_sample.py",
+      "bytes": 5155,
+      "sha256": "9207f9ee42c3475c07c02527ba7808f39e1df939edf9967f27be5f59ae8fefdc"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/scripts/check_review.py",
+      "bytes": 3026,
+      "sha256": "f0f3cb392a6f76eab1f74072b282993726599061657881b30c92d3ce932dc902"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/scripts/check_shaders.py",
+      "bytes": 1276,
+      "sha256": "6c3ff78c8f413829a72e244b13508f69f3396e5de1092aea5bcc24f581566f79"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/scripts/generate_project.py",
+      "bytes": 8262,
+      "sha256": "a5bdf40a2da4f6efc307a4373e3954071bb37b911ee7a5653585d72844eaab49"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/scripts/measure_modules.py",
+      "bytes": 2921,
+      "sha256": "3659452accd6735542cdc18202ae6e131dfe275a7b427539e175c4962a9d1884"
+    },
+    {
+      "path": "source/design/hd2d-terrain-foreground-v4/scripts/package_ipa.py",
+      "bytes": 5437,
+      "sha256": "d008acd40747e741e54113c60e63c9104e756e23118ba78a9e58fc18dd131c27"
+    },
+    {
+      "path": "source/design/新对话启动提示词.md",
+      "bytes": 2558,
+      "sha256": "8e5701b3660a38f912b4acecb31b8d5b070be5005dcf3934c17d053d348c908f"
+    },
+    {
+      "path": "source/design/美术与UI设计标准_v1.md",
+      "bytes": 16087,
+      "sha256": "e6e2c4127ab2e6de5e8dab7bd9dd31cce82d99432aac86598c1dcf6800b59437"
+    },
+    {
+      "path": "source/docs/课堂桌游_开发步骤_v1.md",
+      "bytes": 21011,
+      "sha256": "5708c79bd35dca68bc714bedb80fcd7ea5deea46a31fb6571058b097c47601bc"
+    },
+    {
+      "path": "source/docs/课堂桌游_需求设计_v1.md",
+      "bytes": 47658,
+      "sha256": "7ebd819fe1f57fd0b2a20121dd025c3ad649cd34be867ac52ca6f280cc708f4d"
+    },
+    {
+      "path": "source/native/CI.md",
+      "bytes": 4522,
+      "sha256": "a14eedfd4c02b6c7527be50e5d6c8000a606a7246e7cb3069cffecd8a58b7a89"
+    },
+    {
+      "path": "source/native/ClassroomProbe.xcodeproj/project.pbxproj",
+      "bytes": 13208,
+      "sha256": "afdbb6546a36a80f211f83ca98d379077cd48418b508c71466bd207dc64bb715"
+    },
+    {
+      "path": "source/native/ClassroomProbe.xcodeproj/project.xcworkspace/contents.xcworkspacedata",
+      "bytes": 113,
+      "sha256": "5c2b91b67a72f0c341d6fa0eda978eee611ff4a1efee3017a5617c46284973b3"
+    },
+    {
+      "path": "source/native/ClassroomProbe.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved",
+      "bytes": 312,
+      "sha256": "8e1a1d7de570f9bacd587f56f70f41fa0da6d077505047bdf26ed31437e9dfc1"
+    },
+    {
+      "path": "source/native/ClassroomProbe.xcodeproj/xcshareddata/xcschemes/ClassroomProbe.xcscheme",
+      "bytes": 1616,
+      "sha256": "9309774e2e09073d9b77d74ccb445dc0165b36b2d6f98cb21e3498867c2692f0"
+    },
+    {
+      "path": "source/native/ClassroomProbe/App.swift",
+      "bytes": 7011,
+      "sha256": "6e322e875e664ab998e297526427f3bf89d3a41ec78eeec56fcac8a4ff5a34b3"
+    },
+    {
+      "path": "source/native/ClassroomProbe/DeckRenderer.swift",
+      "bytes": 4772,
+      "sha256": "6554fd3eac2189d5969865994e6f3c9bc05dab6782295ed5e2a0e5dd62b2fe0e"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Info.plist",
+      "bytes": 1258,
+      "sha256": "9d80a07f01416579a4638a544f06f7625f60a994f801592afa73dfded9aac18d"
+    },
+    {
+      "path": "source/native/ClassroomProbe/NativeVisualValidation.swift",
+      "bytes": 11001,
+      "sha256": "5cb17032830ed405563e938f5877cf6cd2d5222963f5a64df50050f2c80c3f03"
+    },
+    {
+      "path": "source/native/ClassroomProbe/PVEAppSession.swift",
+      "bytes": 16640,
+      "sha256": "d76ff200d1e38e6f4a7cea97c443a7bda5d0bea44338ff73d1829c9e414904e9"
+    },
+    {
+      "path": "source/native/ClassroomProbe/PVEArt.swift",
+      "bytes": 10387,
+      "sha256": "97485d551f00796a3020ced4bc9916e4c7778fc82b33a62736582b63a448b221"
+    },
+    {
+      "path": "source/native/ClassroomProbe/PVEKeyboard.swift",
+      "bytes": 3614,
+      "sha256": "0b9faa07888fe2457f26800d2d92fe21b608bec819e64f45f73c813645abeea5"
+    },
+    {
+      "path": "source/native/ClassroomProbe/PVEMapView.swift",
+      "bytes": 11103,
+      "sha256": "b844da6d8490001aafa080b8bec6483c85a050bd6e6477a8135887eff44e84ac"
+    },
+    {
+      "path": "source/native/ClassroomProbe/PVEPlayView.swift",
+      "bytes": 20820,
+      "sha256": "fc5eeea4eb6daab4f22930893d39c5e8eb5f004b72ed02497b182153ed8c28fe"
+    },
+    {
+      "path": "source/native/ClassroomProbe/PVEPublicView.swift",
+      "bytes": 17385,
+      "sha256": "edcd043c9b058b2239be8d706a3583b0ab1609e7593765a482ec930f1078f646"
+    },
+    {
+      "path": "source/native/ClassroomProbe/PVESheets.swift",
+      "bytes": 11614,
+      "sha256": "aceb4f4d46c6eb0038631011e3e3ed5a600fed3b7de227a9dcc4592e7301315c"
+    },
+    {
+      "path": "source/native/ClassroomProbe/PVEStyle.swift",
+      "bytes": 3648,
+      "sha256": "4a4fe44090bf97a0a03f49c7922adb72fee046736820013c42b6802f47f0a36f"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/animation-manifest.json",
+      "bytes": 7693,
+      "sha256": "648213fd8b8d33235f12c7ac2517b7b9b221ab0cd7ebe73caa0eb40976534f16"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/art-production-b-v1-manifest.json",
+      "bytes": 30968,
+      "sha256": "0b6539308ccd16708fba849b444d1cde31696f63fb6540cf5cefea4886fd57c7"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/bindings.json",
+      "bytes": 24300,
+      "sha256": "21f0dc1e187d2937877cc740662a10e2fbee32fd3fcbffd4ee94e26fe03e0979"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/character-motion.json",
+      "bytes": 8700,
+      "sha256": "479cd7966f814e5cd65efad75c7424d4895f5921d3e7682fa02e5b1ad6a69fb5"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/class_adventurer_portrait.png",
+      "bytes": 327672,
+      "sha256": "0a1509c010698f329b7568eb85766a69497d738e13adbdd2c007f1515bc34c21"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/class_dragon_knight_portrait.png",
+      "bytes": 666761,
+      "sha256": "aae2dcd5771df7c0be37ee237e451ccc3418d9fa2974a7aae9c394c58b96dc0d"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/class_ranger_portrait.png",
+      "bytes": 446278,
+      "sha256": "d7ad17351283aff1c2d55ef1b470309f65245442355946aa7ad917c8d796cd50"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/class_spellblade_portrait.png",
+      "bytes": 443237,
+      "sha256": "639b1ac1c3f8d97246fc0e90008ccabd50d59ea4e2910b240c3869886bdca5dd"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/fog_unknown.png",
+      "bytes": 7122,
+      "sha256": "aa6f7a24a34d1fe74bdb3f0ba21c25df3a1c575a370195bc0e100d1380d0d7ed"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/fx_coin_sheet.png",
+      "bytes": 33726,
+      "sha256": "a4662c1c2ccb69d9325be0284b76a002a98111382162e331e02abb752de6ebfe"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/fx_dice20_sheet.png",
+      "bytes": 100575,
+      "sha256": "e985e0512f67a71bbf637c4fb8b5e25e07531a5cda8b6b444330e915aed684fe"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/fx_dice6_sheet.png",
+      "bytes": 59312,
+      "sha256": "1ba77eb9cced1312f8d995893d85c4791ded1913aba5671f67b89370348ce1d2"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/fx_flame_sheet.png",
+      "bytes": 27464,
+      "sha256": "e8388421db359dc66de3134032580a595c6ad7f67609a07440adad570c86a37c"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/fx_heal_sheet.png",
+      "bytes": 18457,
+      "sha256": "1fe1d737342ac61a941b39e44b4ab8d05fb93cc800cea0168e6c276d9af7ddae"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/fx_impact_sheet.png",
+      "bytes": 39990,
+      "sha256": "96a7dc42310b79d263c62c765fa3417363266006d321c4423f30b13672a56fe1"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/fx_natural20_sheet.png",
+      "bytes": 43233,
+      "sha256": "ca48dc15175c7a68d177b4e9c9f3e33e862cfb8e0b249a37600857c8248c42ad"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/fx_projectile_sheet.png",
+      "bytes": 8428,
+      "sha256": "5ba7a7beb87146de6f0af55d77b766300fffb4e19baa87b8ee5f1df86ef7f65f"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/fx_revive_sheet.png",
+      "bytes": 49351,
+      "sha256": "c9188b62ec63616d6e36bea83eb68bfb347e4dac7e5f8536e809dae3657a0a18"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/fx_rune_sheet.png",
+      "bytes": 45898,
+      "sha256": "5f816edfa9b781d9fc991e0dd1e8caab1d49eb16cf79c27b3432cf654298a61c"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/fx_score_sheet.png",
+      "bytes": 28864,
+      "sha256": "abe3985f5aa6af1ab5db8fc6e6def24615d3b364960e3428e6c45b6d2686e758"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/fx_shield_sheet.png",
+      "bytes": 30914,
+      "sha256": "da99194a1628ed0a8c20a6efd10fbcd5ce8c4ebb1ecfd21e4ad559eebce09361"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/icon_action.png",
+      "bytes": 4207,
+      "sha256": "0241713c81477af51f58688b4cb7b6c4adef337797a9cf0a35519b9276568893"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/icon_coin.png",
+      "bytes": 10201,
+      "sha256": "3f80ff65d715874b65d87b65a965581537c513ff5412bf1b8b1120b0aba4461c"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/icon_downed.png",
+      "bytes": 6398,
+      "sha256": "b6b0b469217f318a078550a51d8d1082dde160022cc8e9573ee688be90418029"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/icon_health.png",
+      "bytes": 4910,
+      "sha256": "5c8a7e342f21c040811a2275cb495e40915bbd8fc4a58c30eb6b4c84f70c65a2"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/icon_score.png",
+      "bytes": 4970,
+      "sha256": "b39bd62794927697f12f5c9385aedb2df97dafee375e3a4de44d931d351c216c"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/icon_shield.png",
+      "bytes": 3867,
+      "sha256": "0b1155ba83bfa485d40b35fff30d0c231013ee4938cdc5396a1a4b50f5434c1c"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/item_action_ring.png",
+      "bytes": 217324,
+      "sha256": "092378d8b93850065d65812f225ec15fd347e3aaf1790d5912223eb464df70da"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/item_dragon_armor.png",
+      "bytes": 270058,
+      "sha256": "6873c458dcc6e9cc4764f6177b8e2c696ec8886fd1b93faa2adfdea53b35fbc9"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/item_dragon_charm.png",
+      "bytes": 146869,
+      "sha256": "c7f2d5c529b7295b0419d48e879b5ba1fb88030edc244b633315daab0a94d677"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/item_dragon_fang_sword.png",
+      "bytes": 131638,
+      "sha256": "8f90a4816e2cf0c89bfc7bb93c5b51cc09b4a44e3fcfe1ae7040a615c3f230ac"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/item_great_sword.png",
+      "bytes": 102290,
+      "sha256": "4346576b8de25b1ef4ef7ec78fcafb063ad52f28b3a0c2bca8611d72961bafcd"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/item_hunting_bow.png",
+      "bytes": 65150,
+      "sha256": "3fee4deeb573172ebac211a2d2bf01425e36baae1bf11e6099deeb5152b832f5"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/item_large_potion.png",
+      "bytes": 168000,
+      "sha256": "9641bb5def250456414108822f279cc9e90a7775e27e756947f8b103cc2e8c72"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/item_leather_armor.png",
+      "bytes": 222409,
+      "sha256": "4f70408011bd6151b490ec1f577162d6ec17c78fa93cac7f8bee705c8d57d837"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/item_legendary_staff.png",
+      "bytes": 87801,
+      "sha256": "58c5ec4a1f53d6667bffbb46536d000a36020ae85331ab30c3c2a8329ef8d7e1"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/item_power_badge.png",
+      "bytes": 174156,
+      "sha256": "f34fffcdee2946e9d8810e6267c83748eece205f733027fbdd2a0d40fd29fed2"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/item_revival_stone.png",
+      "bytes": 113877,
+      "sha256": "1d3d594fb9fdb46781eaa6434b3d409cd3195b4ffa0fd03ed3cb22eef29c5803"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/item_rune_armor.png",
+      "bytes": 265966,
+      "sha256": "0f5004f8b2b835c07afc3f4c57a1aaf8e7e2a38dcaf8224f9aadc2cc2de4cec4"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/item_shield_potion.png",
+      "bytes": 145186,
+      "sha256": "c57f86636af263cf8d22931d0e13630ca959dde5806865c6296df3f3f035ca22"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/item_small_potion.png",
+      "bytes": 128451,
+      "sha256": "cbca94a567e6175d1dfee79b20f66029c48458287fbe5b50b2907ba822d5934e"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/item_starlight_armor.png",
+      "bytes": 281407,
+      "sha256": "3b4f924992683ea05d4157e15ea9e453b2e2e65481b40248b00d03233ec18296"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/item_starlight_blade.png",
+      "bytes": 102499,
+      "sha256": "18bc18bf6774b211b239d2a09c16cdd30634073fe2cb9b0102e4a22da3b30b97"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/item_starlight_charm.png",
+      "bytes": 120079,
+      "sha256": "d8571049fa8d39aaabbccb6046c9f6038f6ef5c66cede038ad06ae168b9ed5ca"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/item_training_sword.png",
+      "bytes": 98462,
+      "sha256": "0a9adb9c988f637e8cfe0ccf398ba569b007703d4c904f6bfe1aad0b1c01d75a"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/map-art-b-v1-manifest.json",
+      "bytes": 11797,
+      "sha256": "f52aae2b4f06612e25a53c6327c31f7a4b96bfad464d5656047f71af20292d48"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/map_decoration_1440.png",
+      "bytes": 7407,
+      "sha256": "69b9d8382740c6aca902eeb11c4439ec3af44103938c2b821699587a563249d6"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/map_decoration_1920.png",
+      "bytes": 9419,
+      "sha256": "378f3d270abc7f51ff42b7fb59fffa75120fba7d27e6079a12e754c79e86a6ea"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/map_ground_1440.png",
+      "bytes": 22249,
+      "sha256": "0b0d6fea54876ed97d5a5193ae6e2b73aae9651ed787bbcc16c6e924f197614d"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/map_ground_1920.png",
+      "bytes": 25720,
+      "sha256": "40c98ded4958700d757a5037798632a4b164936327858aebfc42fbe877de4368"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/monster_cave_troll_portrait.png",
+      "bytes": 613813,
+      "sha256": "debe3c3f7dd9dd102ff9a056c45440464aadbb1b6117842da0b346792c897cdc"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/monster_goblin_archer_portrait.png",
+      "bytes": 423008,
+      "sha256": "8f881cf8dde8e6889c487ec2504a6fd213768062c7e51967882a5b0d1912dca0"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/monster_ruin_dragon_portrait.png",
+      "bytes": 645611,
+      "sha256": "7ce49c5d081d977810a28c970f73a1b73cf15c17ec99a360853c435b6e1e2fb2"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/monster_slime_portrait.png",
+      "bytes": 349437,
+      "sha256": "f43af2575443831de7241708e34b08af66c93c7fbfb790d09719917154e0e356"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/monster_stone_guardian_portrait.png",
+      "bytes": 703191,
+      "sha256": "e52fd126cdae4a6c8bf4758550f8096f284ce2cb345d45e4730fa9ce67e3869b"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/monster_wolf_portrait.png",
+      "bytes": 436955,
+      "sha256": "4426192208ba8ad205c07ad40e718f941d9ee48d1db8a3b743d2f9523e39cc65"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/node_boss.png",
+      "bytes": 170810,
+      "sha256": "8e079f05a6930e9c01ddccccbcf10cb732393250af2088914a18e1da51c0d20b"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/node_combat.png",
+      "bytes": 160245,
+      "sha256": "c677d7e9daa6dfb5b29fa7213ccfb20123a73a0d51ea532507efc45078639978"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/node_empty.png",
+      "bytes": 132635,
+      "sha256": "22af9a9cbc1428530526fcdd72e6228a45acd583bcea60618afd66eba9d336b8"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/node_reward.png",
+      "bytes": 128849,
+      "sha256": "e56e9e1a5e6be8f7638c904cf1b5d698ba7a4402ad0dceac279e17abae2a966c"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/node_start.png",
+      "bytes": 133306,
+      "sha256": "0af7a86ace9e8ca766ff4883dde05a121fff8afbe4c26f62dc1f1f58484ba87c"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/node_state_claimed.png",
+      "bytes": 8772,
+      "sha256": "bda970adc3207da209d0b0d2cea88f8e57dc7cdd76f31932ecd0cd5263cc06d0"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/node_state_crowded.png",
+      "bytes": 7561,
+      "sha256": "51d17ca366edfb02309c84ca9f69c47b5d78f4b084bbcd0a3a58311b412c486d"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/node_state_current.png",
+      "bytes": 17749,
+      "sha256": "5ab61429c1531070d82dfcc40c932d6ff94563ef7b44d05bf988298e10bd4fd7"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/node_state_enemy.png",
+      "bytes": 18408,
+      "sha256": "b1daaf30c813c3fc65645a8f90e3a3cfd5067e371203c10af30da80511cd8504"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/node_state_path.png",
+      "bytes": 16665,
+      "sha256": "c46329c07cba7d9cb139551252e1244b8fd71f895ab0183fe0f330287e315d61"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/node_state_target.png",
+      "bytes": 1817,
+      "sha256": "3a9ba4ca5eaa561841aa5b39d57fcb6ac91097a7033c072d5284b9b16df0c81d"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/node_unknown.png",
+      "bytes": 19055,
+      "sha256": "fe3dbb985b4777a77314d4ef025d958934c0aeb7e29b85417a868658c326dbf3"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/road_normal.png",
+      "bytes": 1727,
+      "sha256": "6c0542e7fe00ff152b0c698204f2e8b0391bf8919b794b1d93104ddd2bddb238"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/road_plan_unavailable.png",
+      "bytes": 1812,
+      "sha256": "fc1d9ea9eb682793107a9311bc958e54d6b1e02a514431351c29dcb2db04da73"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/Art/road_planned.png",
+      "bytes": 1730,
+      "sha256": "2a090e0a891fa5871c3677390ab78623657718c9dd68fcffff5add0d9006d693"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/ThirdPartyNotices.txt",
+      "bytes": 1169,
+      "sha256": "d30286a0aa06d4e9e2f31f972a4ade89d7501b4d637b8663dafaecd770c92d87"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/design-tokens.json",
+      "bytes": 5306,
+      "sha256": "61130e683812ec75d2e3c357f6ae47e0d295bc9f28ab6ebf24f2ea80594f799a"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Resources/sample.pptx",
+      "bytes": 37544,
+      "sha256": "74f28a3877d1999f1566ee7c78bb6d85ba17f1726b748abdef10a8c9a8d0ab9d"
+    },
+    {
+      "path": "source/native/ClassroomProbe/RulesLabView.swift",
+      "bytes": 12992,
+      "sha256": "b2b90beb4a2ffda10235a6f117d7ac5843a631901bb05aa76d0c7d6c7cd4a5ec"
+    },
+    {
+      "path": "source/native/ClassroomProbe/TeacherSession.swift",
+      "bytes": 11410,
+      "sha256": "db8eeafdfd7018533211deb389f6f2c36cbcfa40e0e67877cec73519054d4c21"
+    },
+    {
+      "path": "source/native/ClassroomProbe/Views.swift",
+      "bytes": 10281,
+      "sha256": "6036700d3614b83a3893cd9f1959770978ce8bec5b64d3c4da9a6d38a8acf989"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Package.swift",
+      "bytes": 429,
+      "sha256": "70f223621d686b263ed98486ee229bcce20f443b95436203808790166fab9bfe"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Sources/ClassroomGameCore/ActionPlanning.swift",
+      "bytes": 7347,
+      "sha256": "104976daefc47062997d4d190eab304eea4774c65605732d288c1ddf226957d7"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Sources/ClassroomGameCore/Catalog.swift",
+      "bytes": 10404,
+      "sha256": "e814e9a50e493988e5250a85bb7c7b0a936ae05d890c751350bb154fb9e0e354"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Sources/ClassroomGameCore/GameEngine.swift",
+      "bytes": 34396,
+      "sha256": "fd7af9210e625efcf508fe5cf3c1465b4af46479d523f6ab73887c8029f22c49"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Sources/ClassroomGameCore/GameState.swift",
+      "bytes": 10172,
+      "sha256": "0b0afe748f20a7ea0018b910a23bbfee8bdf79a7b7237bfa073dd7f2547073a6"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Sources/ClassroomGameCore/MapPresentation.swift",
+      "bytes": 5323,
+      "sha256": "c85bab177e9da7c5f2b59562add8dca40b48cb12f90f71d58e0d742a33cf1894"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Sources/ClassroomGameCore/MonsterAI.swift",
+      "bytes": 4818,
+      "sha256": "cdfa3df6182046f7f1c1f266c6a9bcd016fcccd67a188d792f1f96e184a53ffc"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Sources/ClassroomGameCore/PVEPlaySession.swift",
+      "bytes": 14632,
+      "sha256": "773a3c551953f9391856cb6ed7b8b4028183d2fafdb9f5ba74e19dc1f7043f4a"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Sources/ClassroomGameCore/PlayProjection.swift",
+      "bytes": 7887,
+      "sha256": "5eb34e456f666de21118dd87ff55105a03e5b69f7a7335e8d1eea0a6e3f78454"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Sources/ClassroomGameCore/Presentation.swift",
+      "bytes": 9320,
+      "sha256": "dc61fc1cd3ad7d5baea0c50cf064bb37dbb686b4c58251a90f3f2b52426e7fc1"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Sources/ClassroomGameCore/PublicProjection.swift",
+      "bytes": 3702,
+      "sha256": "96431486e4da5739333973eb395b52a6865166aaa408d8cafdcc0b883b3709e8"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Sources/ClassroomGameCore/Resources/initial-content.json",
+      "bytes": 32227,
+      "sha256": "aaab980fd5f3154ac813a02dc907a835ee0e0181c4149f2b7803d9594795f34a"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Sources/ClassroomGameCore/RuleExamples.swift",
+      "bytes": 11349,
+      "sha256": "b4cb5f728efa72ceafeb8aff0206ce38c47bc72e4ebc2ddf217fdc3363d5d1e1"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Sources/ClassroomGameCore/Rules.swift",
+      "bytes": 12399,
+      "sha256": "f87e42dcf0947f04be3a3fe649f8753c7b7073819c4fa6d53fad23d19bcb06d8"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Tests/ClassroomGameCoreTests/CatalogTests.swift",
+      "bytes": 4194,
+      "sha256": "f91c11ff374fd69cce810b7ef2ed9e607f848a979badbf7d8fd6b2e5b0bde94d"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Tests/ClassroomGameCoreTests/CombatTests.swift",
+      "bytes": 12879,
+      "sha256": "9abd8ba6667e6935cef7a3d81830bff71164f4bf1455ca9acd766128179945c9"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Tests/ClassroomGameCoreTests/EdgeRuleTests.swift",
+      "bytes": 5284,
+      "sha256": "f16fb159c35ea8ce49c00424181985afb2eb1755c3acdf0d6fd2970975bb0ee3"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Tests/ClassroomGameCoreTests/ExampleTests.swift",
+      "bytes": 809,
+      "sha256": "f91a626266695bcf3bc4492b47b2de70dfd906748f5e9518478685ba6d83df28"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Tests/ClassroomGameCoreTests/Fixtures.swift",
+      "bytes": 2389,
+      "sha256": "2beca79965c3853d996c88a159ab6c2558fa57f0ebf8d641af933aa8f0de450c"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Tests/ClassroomGameCoreTests/IntegrationBoundaryTests.swift",
+      "bytes": 4280,
+      "sha256": "735929c5ed765fee578173334d3a50cf6b01d71cf67a7efb1cd19a680e284072"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Tests/ClassroomGameCoreTests/MapPresentationTests.swift",
+      "bytes": 6450,
+      "sha256": "3a0e0642fe5e51f136e8e95ca4938312ae658c6af734473df05a5be5aa2a16d7"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Tests/ClassroomGameCoreTests/MonsterAITests.swift",
+      "bytes": 6608,
+      "sha256": "33ad53eb55af989a7723100ff1b1bb9210cb2df58dd6038f60267e5205ee3bbe"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Tests/ClassroomGameCoreTests/PVEFlowTests.swift",
+      "bytes": 9597,
+      "sha256": "c319012f8874a210d02562289dcd9f0174467d8ab9be29268fd1975526ba68c7"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Tests/ClassroomGameCoreTests/PresentationTests.swift",
+      "bytes": 8343,
+      "sha256": "9d933ac1623e6ef53af30bdb8d943911e65614ffe0b238a1cb6399f9f8209178"
+    },
+    {
+      "path": "source/native/Packages/GameCore/Tests/ClassroomGameCoreTests/StateAndScoringTests.swift",
+      "bytes": 14280,
+      "sha256": "db50c711bd661dcd9cb2e5b6c389cb5dd8be1701ad1e50fae16a21a17d6af7d6"
+    },
+    {
+      "path": "source/native/Packages/ProbeCore/Package.resolved",
+      "bytes": 312,
+      "sha256": "8e1a1d7de570f9bacd587f56f70f41fa0da6d077505047bdf26ed31437e9dfc1"
+    },
+    {
+      "path": "source/native/Packages/ProbeCore/Package.swift",
+      "bytes": 585,
+      "sha256": "5ae57ad3403b289fd76d84f046becbb167c7a6861d359116b1d5c7af1ba53890"
+    },
+    {
+      "path": "source/native/Packages/ProbeCore/Sources/ClassroomProbeCore/PPTXReader.swift",
+      "bytes": 14183,
+      "sha256": "27be3a634efb98fc4d84c98bdd6f448dd158eec5e83deb142e9d92e1d9611d96"
+    },
+    {
+      "path": "source/native/Packages/ProbeCore/Sources/ClassroomProbeCore/ProbeState.swift",
+      "bytes": 5858,
+      "sha256": "57bfc57a52b686ab9529f52cb1863aaab5af6b6934cda90e66d7ddfd4d30bda1"
+    },
+    {
+      "path": "source/native/Packages/ProbeCore/Tests/ClassroomProbeCoreTests/Fixtures/sample.pptx",
+      "bytes": 37544,
+      "sha256": "74f28a3877d1999f1566ee7c78bb6d85ba17f1726b748abdef10a8c9a8d0ab9d"
+    },
+    {
+      "path": "source/native/Packages/ProbeCore/Tests/ClassroomProbeCoreTests/ProbeCoreTests.swift",
+      "bytes": 4903,
+      "sha256": "d2ab2020b10d03cfd208d73c618e64a31d5edc51629b51c62cd1e4e898e22f9a"
+    },
+    {
+      "path": "source/native/evidence/ci-pr-cloud-success.json",
+      "bytes": 1191,
+      "sha256": "adf86b9037d65794fd611a89022b5b071da2ed0e25223edc8f41b098eb19f37e"
+    },
+    {
+      "path": "source/native/evidence/ci-pr-first-sdk-failure.json",
+      "bytes": 687,
+      "sha256": "76c9a95a4bdd3e74fb798694b182c249cf8eb0ec9a6281d3d38a34cc35fd8453"
+    },
+    {
+      "path": "source/native/evidence/ci-pr-static-checks.json",
+      "bytes": 612,
+      "sha256": "46bb09db5637cc5799cf756171a76002552842e8d7fbc014e278db3140587603"
+    },
+    {
+      "path": "source/native/evidence/cloud-build-result-v0.6.json",
+      "bytes": 861,
+      "sha256": "a6f6f3cba8ba3bb38569f5cb47c178f29b0968cdbc31bb6f7d916692bb251596"
+    },
+    {
+      "path": "source/native/evidence/cloud-build-result.json",
+      "bytes": 820,
+      "sha256": "7dc97e7627d508908073a9bdf9eaa7457ffb99c2a243ab785d9aca017ec49f08"
+    },
+    {
+      "path": "source/native/evidence/configuration-check.json",
+      "bytes": 787,
+      "sha256": "158b473c42db1db4aa1bd1ed4d78480ec6787e63d243151cddc1bc07dffd3a08"
+    },
+    {
+      "path": "source/native/evidence/core-tests-linux.log",
+      "bytes": 2296,
+      "sha256": "3cef9afbcb27f44fecd23598afdfbe08b9d8552117393928c90895f6a54a11f5"
+    },
+    {
+      "path": "source/native/evidence/core-tests-macos.log",
+      "bytes": 4772,
+      "sha256": "8b01636d76b8a2a3a37e31cc1d97d8e32800f02e2bb9b69242fb703e6e2fbb67"
+    },
+    {
+      "path": "source/native/evidence/github-build-attempt.json",
+      "bytes": 1177,
+      "sha256": "052cef157943f4b68f3ada73cb7a12376b42a453e517d906e8888d069461ed1f"
+    },
+    {
+      "path": "source/native/evidence/sidestore-name-fix.json",
+      "bytes": 824,
+      "sha256": "7fcdfb1ce3038c2b74b275e091c854ef5bfd07e73a60cbd3ad752e4553590e5f"
+    },
+    {
+      "path": "source/native/tools/generate_xcode_project.py",
+      "bytes": 8860,
+      "sha256": "eac8106260261020c9cda9e0e86c2a8cc4f1d3ce3ddefbae0e4166831dafafda"
+    },
+    {
+      "path": "source/native/tools/import_art_delivery.py",
+      "bytes": 2771,
+      "sha256": "4dc79eb2215b3a1c3d7bbcd29c01ec68ac98b14ba9ff8898584a52f0c28d2a8a"
+    },
+    {
+      "path": "source/native/tools/package_ipa.py",
+      "bytes": 3408,
+      "sha256": "48ae9c18dab2544ba077df4954d387d9822ff3ff1c65d891f4cbcd3b59b56d2a"
+    },
+    {
+      "path": "source/native/tools/select_ci_xcode.py",
+      "bytes": 3477,
+      "sha256": "77c104c84537e623b67872b6c20d5fee5f47802563c65d114480f107bb213548"
+    },
+    {
+      "path": "source/native/tools/tests/test_ci_tools.py",
+      "bytes": 2688,
+      "sha256": "7401d32a31b32fc6dcb3b6b7990f0f968ed2fd05b8751d568e194e9907716abc"
+    },
+    {
+      "path": "source/native/tools/validate_xcode_project.py",
+      "bytes": 2766,
+      "sha256": "cece1b83d7d9f87342b4d89b04664a1d3773a010c4cb53fc15b7dbcfc01d8da8"
+    },
+    {
+      "path": "source/native/tools/verify_art_integration.py",
+      "bytes": 3009,
+      "sha256": "a349efc2a39489f06eaea52dec7eba5793e964fa4955e4a0b5c368648f4a360b"
+    },
+    {
+      "path": "source/native/安装与真机验收.md",
+      "bytes": 8025,
+      "sha256": "e1db6aa78a6b66b1d709b26e70bbde2e876710980087112b9c1f8eefa89fd4ed"
+    },
+    {
+      "path": "source/native/首次安装_SideStore.md",
+      "bytes": 1855,
+      "sha256": "2d9888529be642dc0063577779a9481f61abc64926680ca585d5c68a22db2ab3"
+    },
+    {
+      "path": "source/stage0/evidence/generated-v02-import/deck-private.json",
+      "bytes": 10319,
+      "sha256": "a3454b8698a9e07b8c957f1085158813d325360def812b3b10486ee058daf07a"
+    },
+    {
+      "path": "source/stage0/evidence/generated-v02-import/deck-public.json",
+      "bytes": 600,
+      "sha256": "f0c78f96ac62cc9202245611df2fead94b18cd700ea13afea8ae13833f733937"
+    },
+    {
+      "path": "source/stage0/evidence/generated-v02-import/import-report.json",
+      "bytes": 3204,
+      "sha256": "6bb54e08ad717460a10d0f9688cf82ce25d7212520bc5ce82b5cbcc6e31fa890"
+    },
+    {
+      "path": "source/stage0/evidence/iPadOS27-api.json",
+      "bytes": 9427,
+      "sha256": "0bc02daca0a78127d0eeb93b54563fa11176d76ae69bd24b2a27d11c4cda7ce0"
+    },
+    {
+      "path": "source/stage0/evidence/synthetic-check.json",
+      "bytes": 326,
+      "sha256": "73432fc549f669e4f825a084378a5677475008cc5682f126108b896e11825c91"
+    },
+    {
+      "path": "source/stage0/evidence/synthetic-import/deck-private.json",
+      "bytes": 10192,
+      "sha256": "badb6c0a7c3fe9908ac3e105d8d6d4707c3b303f30cab64df3f18d617b781708"
+    },
+    {
+      "path": "source/stage0/evidence/synthetic-import/deck-public.json",
+      "bytes": 473,
+      "sha256": "cdb58f17389f0a978e5c741457ab025a6ce435fa3ae38763697c226eea7920a4"
+    },
+    {
+      "path": "source/stage0/evidence/synthetic-import/import-report.json",
+      "bytes": 3202,
+      "sha256": "033ccc95c8090cb719efb972d37666916e92185c8fa898b652798d3ca5605867"
+    },
+    {
+      "path": "source/stage0/evidence/v02-check.json",
+      "bytes": 400,
+      "sha256": "03cdc1c642d03ece7494d9f23c3f12cf644d0f2c1b33d28c884a8c88c3f0e891"
+    },
+    {
+      "path": "source/stage0/evidence/v03-check.json",
+      "bytes": 290,
+      "sha256": "89dd5c730cd597f1172a975b48cc2d670639f224c232829d92b66fbcc5a67c32"
+    },
+    {
+      "path": "source/stage0/evidence/合成测试绘本.pptx",
+      "bytes": 37321,
+      "sha256": "4bda60b7c2e9db6a7c035e2516935ae52d21488b770001379221fc0cef61728a"
+    },
+    {
+      "path": "source/stage0/evidence/阶段0_测试绘本.pptx",
+      "bytes": 37544,
+      "sha256": "74f28a3877d1999f1566ee7c78bb6d85ba17f1726b748abdef10a8c9a8d0ab9d"
+    },
+    {
+      "path": "source/stage0/evidence/验证输出.txt",
+      "bytes": 1644,
+      "sha256": "69159e3223cedcf8976ea6cd173e8e6fd3a9958dd390fde84b29985a48cde05f"
+    },
+    {
+      "path": "source/stage0/ipad/DisplayProbe.swiftpm/Package.swift",
+      "bytes": 783,
+      "sha256": "d3d7e97bbbf78a7dbd8eead30ee1504bc753a1aff1cd11f4d68c02729bd9dd7e"
+    },
+    {
+      "path": "source/stage0/ipad/DisplayProbe.swiftpm/Sources/AppModule/Probe.swift",
+      "bytes": 18319,
+      "sha256": "5a98bca55d7728cba0936560d35c4a90e1336736432cbd346d7fbf7e2031962c"
+    },
+    {
+      "path": "source/stage0/ipad/DisplayProbe.swiftpm/Sources/AppModule/SceneAccessoryBridge.swift",
+      "bytes": 3607,
+      "sha256": "2cbf3ce3abbac5fd137651d93a9dc21f60a67a33e11f755d2ef14cee26c8263e"
+    },
+    {
+      "path": "source/stage0/tests/test_inspect_pptx.py",
+      "bytes": 6291,
+      "sha256": "89b5ad3cf168f46b9d7605a4a3fd0a1a48a38a7b4cddac1accdda65ad1c188bd"
+    },
+    {
+      "path": "source/stage0/tools/inspect_pptx.py",
+      "bytes": 11280,
+      "sha256": "0bfbf3868ec68d5cb4ee8f62732bef539284de2aac77b6d10ac8be9ef4cb5d43"
+    },
+    {
+      "path": "source/stage0/tools/make_test_deck.py",
+      "bytes": 2540,
+      "sha256": "0ab5b509899886073b6a56e0592eb1a1995f48a3eb0713dacde05fa9be4f2e2f"
+    },
+    {
+      "path": "source/stage0/tools/package_probe.py",
+      "bytes": 2102,
+      "sha256": "a13722bdb305b869f48fe08001b9c516db039ee2cc12a8c954c3bbea1a4d4303"
+    },
+    {
+      "path": "source/stage0/免费原生App安装方案.md",
+      "bytes": 6973,
+      "sha256": "d87de838c0f0e461f567a712d3f82c855230bb4c50f9afcde9f9024534f759d0"
+    },
+    {
+      "path": "source/stage0/环境恢复步骤.md",
+      "bytes": 1362,
+      "sha256": "d4c354d0d8fae1d1de214c48d55f88e37cf65a095d86bc7e69658d856af06c4c"
+    },
+    {
+      "path": "source/stage0/真机验证步骤.md",
+      "bytes": 4751,
+      "sha256": "f8b241bd9fee1fb5539959493490f4eff7526187250fefbb1ae5fc4875c00894"
+    },
+    {
+      "path": "source/stage0/网页路线评估.md",
+      "bytes": 4002,
+      "sha256": "260c87ffc510b30f3c79d0f0c561274088f7c2dedfd770490e6bc702dea7680d"
+    },
+    {
+      "path": "source/stage0/设备与范围.md",
+      "bytes": 3586,
+      "sha256": "c88c9eb10841a922f8a3b643f1cf0f2f97b686db31f1606669e6a00ea0dee0fb"
+    },
+    {
+      "path": "source/stage1/evidence/cloud-build-result-v0.7.json",
+      "bytes": 1278,
+      "sha256": "255499b007fd55d9292f7abb485ba60d568f7cc1b408c7dc81bf250af3463427"
+    },
+    {
+      "path": "source/stage1/evidence/configuration-check.json",
+      "bytes": 569,
+      "sha256": "db339a46e7f8c5f7b2f92871f2acdd704362817c292f7f14be0f7d1d4a629f2a"
+    },
+    {
+      "path": "source/stage1/evidence/game-core-tests-linux.log",
+      "bytes": 10513,
+      "sha256": "f727d6031d4a9c9c84fb6b4a83cc3347dbd8eb8a5d9e9e142e23b9ac76d94fbc"
+    },
+    {
+      "path": "source/stage1/evidence/game-core-tests-macos.log",
+      "bytes": 11981,
+      "sha256": "d5f28e0d5dd992a5acd5c4743511526184d915e3f8fc77c52e3d5254c2551327"
+    },
+    {
+      "path": "source/stage1/evidence/probe-core-tests-linux.log",
+      "bytes": 2302,
+      "sha256": "ed6b9390604648ecdba35bc0fea8c7b4e01dcd437c532333d4dc0295a80ee44f"
+    },
+    {
+      "path": "source/stage1/evidence/probe-core-tests-macos.log",
+      "bytes": 4753,
+      "sha256": "129755e1ae3a04bde8c130d64dfe9b5b72a7468e9b151dd05452c55d64776225"
+    },
+    {
+      "path": "source/stage1/evidence/stage0-teacher-feedback.json",
+      "bytes": 439,
+      "sha256": "6c3a70c267967213abcc065b63c473ff0b8133629f94d7bb676b583c38a3a2d2"
+    },
+    {
+      "path": "source/stage1/evidence/v0.7-teacher-feedback.json",
+      "bytes": 473,
+      "sha256": "56d6e02f22b468f5c9b0a15a372949066baf1fa10782040bb2f9f712d1498ac0"
+    },
+    {
+      "path": "source/stage1/阶段1验收.md",
+      "bytes": 6558,
+      "sha256": "7ec6c54552dea2903ddf733c1c240b538fff48a33a99d5e8e2fb29692d6cd667"
+    },
+    {
+      "path": "source/stage2/evidence/cloud-build-result-v0.8-first.json",
+      "bytes": 1307,
+      "sha256": "f53006fa8a12c6d473698e015725e4e3233a4e84a26ae9bed82bf22683922446"
+    },
+    {
+      "path": "source/stage2/evidence/cloud-build-result-v0.8.json",
+      "bytes": 1307,
+      "sha256": "97d33f03230a93d5332a08fd891bbbd5a482334bbc32e6f1494ab2d701a5d69b"
+    },
+    {
+      "path": "source/stage2/evidence/configuration-check.json",
+      "bytes": 628,
+      "sha256": "184834b872c514f3f74733ab8df0ff4d3a9d7cde50133bfe18a40f048a009bad"
+    },
+    {
+      "path": "source/stage2/evidence/game-core-tests-linux.log",
+      "bytes": 16167,
+      "sha256": "8aa2f9b0ca4a63fa699850069de65e1dcc554eb2cf43d9f76b920963f28cc5da"
+    },
+    {
+      "path": "source/stage2/evidence/game-core-tests-macos.log",
+      "bytes": 17925,
+      "sha256": "a4e22cb83d6f67fb36928a7e9264c1a8b804ed22189b4f5b245f373f54db8dd2"
+    },
+    {
+      "path": "source/stage2/evidence/probe-core-tests-linux.log",
+      "bytes": 2049,
+      "sha256": "3d81cad3701fd6b389c8218fd52183689f3720d373c3590a79be4535c86feee2"
+    },
+    {
+      "path": "source/stage2/evidence/probe-core-tests-macos.log",
+      "bytes": 4805,
+      "sha256": "3ec4f296a250dca4e049ed65b331eb33cb1e226ee2d29e573c74ad71a133e9c6"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/README.md",
+      "bytes": 5006,
+      "sha256": "7f9dc40a2d081312bc1386cb2e5ebe03d0d26bd1e371a142993770c1e1a85e91"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/architectures.txt",
+      "bytes": 6,
+      "sha256": "c1669e1d8edca98769c37d494b76442a1d6e5ffffd7b4da1fb63aef8ebaf6f01"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/asset-verification.json",
+      "bytes": 19144,
+      "sha256": "3843db04d6cbc47989c9bbc39dd461f123313fd8fe8f344311b0611c8a9ea975"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/build-attempts.json",
+      "bytes": 2595,
+      "sha256": "c012d6ae9bbe8ec2218ef124fc494dd1503ec9aab99ae535f7dffe156732e9a5"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/cloud-build-result-v0.10.json",
+      "bytes": 2922,
+      "sha256": "e939ba9ddbb722979aadae9b497ef66a05739e8b2532d1202a4ab86c947cee69"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/core-tests.log",
+      "bytes": 4772,
+      "sha256": "f2944f4ce2d9736fd2cdbdcafb8d2aca4b490ce245e0fc858b8e0eee4e4781fb"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/game-core-tests.log",
+      "bytes": 22008,
+      "sha256": "4f1d93d12dd9c8cec86d17d5aeb01bb2e49cb9e11a0a1a9bd3666b3520cb740d"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/native-previews/README.md",
+      "bytes": 1795,
+      "sha256": "6fe7e623369b9a61a5e5affc20fdfe1bb873288f1624ed19c808e10aefc8eff6"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/native-previews/complete.txt",
+      "bytes": 7,
+      "sha256": "aee408847d35e44e99430f0979c3357b85fe8dbb4535a494301198adbee85f27"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/native-previews/public-arrived-4x3.png",
+      "bytes": 1439589,
+      "sha256": "05498b3796748e5a7edda52fdda0b68814b1f688a02a4d1528a31b85ccfc3423"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/native-previews/public-arriving-4x3.png",
+      "bytes": 615633,
+      "sha256": "d2b257bad2f7fc9a2461b46c3c35f8a5b8d975c0772cea6e21ceb12502c213fe"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/native-previews/public-book-16x9.png",
+      "bytes": 1067920,
+      "sha256": "0eab2048b9312a57b0c7dbed2f66e1cd6132554f1fd11beac6cae14db13bc471"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/native-previews/public-book-4x3.png",
+      "bytes": 957100,
+      "sha256": "e278e16621bcca61b784e2e43da51e030e2fe30db27bb3dda8931c6f00baf7a8"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/native-previews/public-exploration-16x9.png",
+      "bytes": 681693,
+      "sha256": "a859caef80cb2509635c3e2c66e2acffc50d27ad789ae9163b1522a6e924a6eb"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/native-previews/public-exploration-4x3.png",
+      "bytes": 628037,
+      "sha256": "c13cb30ecc9c63357d54627e0d19c6d901684a61bfff903915af18483ec9148f"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/native-previews/public-feedback-4x3.png",
+      "bytes": 1843820,
+      "sha256": "196834cbcb461e573057bcf9d1b9e0102e5865808c27cfaaa6a8ea31c3fe8e61"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/native-previews/public-many-items-page1-4x3.png",
+      "bytes": 1782290,
+      "sha256": "b2cfc1ec17df6138f6e1b4566821fba277b3592ed118ad4afaca73b26c91bd51"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/native-previews/public-many-items-page5-4x3.png",
+      "bytes": 1735828,
+      "sha256": "5d08deaacea425556b88e2365c72363b4d8451acbb3c850c5303059ca49cccbe"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/native-previews/public-monster-16x9.png",
+      "bytes": 1547598,
+      "sha256": "b8e455183ff61c02fae798b3defa1cb0b9fe59a847c300e5da8688a129fdbb0a"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/native-previews/public-monster-4x3.png",
+      "bytes": 1380203,
+      "sha256": "c39aecab8b12502c646f0bb57e5923ee17960d5a09c3e572b4d6e6ca36257ab2"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/native-previews/public-offscreen-16x9.png",
+      "bytes": 541810,
+      "sha256": "e025d48e026929fedcbcca1f587a34b295eacb8d550b6e380e9cb893f8af44c3"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/native-previews/public-offscreen-4x3.png",
+      "bytes": 506545,
+      "sha256": "e964fc3406849857d7823a1720bfd35a6eff82c33c29fe83daf3743ecc6e749d"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/native-previews/public-player-16x9.png",
+      "bytes": 1963868,
+      "sha256": "6ef7f24b53139f6aa2ac7f8376cf7ebbe9d41296948e1b39f930d532f0b8e939"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/native-previews/public-player-4x3.png",
+      "bytes": 1786681,
+      "sha256": "5a60d7f92312228b1e95288cafda075e3141fa890da8fcca8fd98309d4b6f933"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/native-previews/public-progress-midround-4x3.png",
+      "bytes": 1668178,
+      "sha256": "9bbf4f111f789e8f1336fa485af72c54002b08a5c7daf3b0a713a2969b9cc224"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/native-previews/public-reduced-motion-4x3.png",
+      "bytes": 1786681,
+      "sha256": "5a60d7f92312228b1e95288cafda075e3141fa890da8fcca8fd98309d4b6f933"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/native-previews/public-unknown-boss.png",
+      "bytes": 205325,
+      "sha256": "2f7d2c1dc95f686f154e10a2cd0ef18a14a476bdff53cb78c8b121eeb3a378bb"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/native-previews/public-unknown-reward.png",
+      "bytes": 205325,
+      "sha256": "2f7d2c1dc95f686f154e10a2cd0ef18a14a476bdff53cb78c8b121eeb3a378bb"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/native-previews/report.json",
+      "bytes": 419,
+      "sha256": "3909ef4d95a08e470b64b23a2c34b4de9616c51bf532b915636cf707c14a81f6"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/native-previews/teacher-1180x820.png",
+      "bytes": 1402387,
+      "sha256": "fad4ca0157e516ff6067f3ac7eae5e262ce01c34316582752828766009d5f177"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/native-previews/teacher-1366x1024.png",
+      "bytes": 1749098,
+      "sha256": "e76f4f9b9e86fc0a8e1f22722d8631c5059a339a3326e1d6d4e77501da5b82e4"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/native-previews/teacher-offscreen-grouped-1180x820.png",
+      "bytes": 1349367,
+      "sha256": "af75e44f18a5e9bf1a84d0445592183b18206a3be92f3564898c0900f92f2491"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/simulator-build.log",
+      "bytes": 239778,
+      "sha256": "dbc826667a72bc76855dba140aa7f0438f86610fd64217d47d23581eab52b134"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/source-commit.txt",
+      "bytes": 41,
+      "sha256": "27ddf9d16db9df9f54e007fec037149fa0e6ea6abcf6e31747b94873df140192"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/visual-review.json",
+      "bytes": 1052,
+      "sha256": "b8c908b8ee9d2f847a099e838d8d910c3311c57da7747999f2ae2ad000e97fa5"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/visual-validation-console.log",
+      "bytes": 86,
+      "sha256": "cb7c25657e7c4c2d691c67cd23fcfa39611dd09184a746cbf15a2e952a44da8b"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/xcode-build.log",
+      "bytes": 224919,
+      "sha256": "d55f55ed8c0971b9f1d29bb90f9cc624b4fe8c1b5092c3e41c7d3c3859d5ca20"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/xcode-sdks.txt",
+      "bytes": 745,
+      "sha256": "68b2cdfa4a24ff8ff2f6fbf2e01f0ad0ffe65ce46e5217fe39fb97e2b836902f"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/evidence/xcode-version.txt",
+      "bytes": 33,
+      "sha256": "694b44731d0b415c5b11d844151e466d7f5e200a95627efda377f232f1a6ab77"
+    },
+    {
+      "path": "source/stage2/map-ui-v0.10/验收与真机检查.md",
+      "bytes": 3546,
+      "sha256": "abf0150615b5a1114b1d84a212035e3717c030aa59a4196d7cd5b5278c9d550c"
+    },
+    {
+      "path": "source/stage2/ui-feedback-round1-20261013/art-direction-prompt.md",
+      "bytes": 8236,
+      "sha256": "1141bb78c0a1baec154e32af37e32fa54b0e3ecddc0c4782af076662d5ddd93a"
+    },
+    {
+      "path": "source/stage2/ui-feedback-round1-20261013/feedback.md",
+      "bytes": 9750,
+      "sha256": "69018b253f6b8f752d7cbaea9b79eb924ade90b457cda4e21cf90227ce205170"
+    },
+    {
+      "path": "source/stage2/ui-feedback-round1-20261013/visual-expectations.md",
+      "bytes": 3270,
+      "sha256": "451f9b5cd40aff3555359278aa6e85affa7f9a93ceedeb9c9400bd68c821271f"
+    },
+    {
+      "path": "source/stage2/ui-integration/README.md",
+      "bytes": 4671,
+      "sha256": "cfe391d32dec09f3e0a96a58e0767af6b7827b3882ff655ace9966ae105574d5"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/AGENTS.md",
+      "bytes": 3281,
+      "sha256": "2c19e29d208b67b69cb09a2520cd42fc8c54f2e24f55e90735c7ead1adc4e816"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/ARCHIVE_INDEX.md",
+      "bytes": 12515,
+      "sha256": "d5daa4c6c1250dcaebee1aaaf124514cfd8ec5aeb986c99252954bae31522689"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/art-production-b-v1/README.md",
+      "bytes": 3387,
+      "sha256": "528d5988343bc04f01f9554757ec55b979c6c86372f3391d6ca6ba8bc7e9bc26"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/art-production-b-v1/animation-manifest.json",
+      "bytes": 7693,
+      "sha256": "648213fd8b8d33235f12c7ac2517b7b9b221ab0cd7ebe73caa0eb40976534f16"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/art-production-b-v1/animations/character-motion.json",
+      "bytes": 8700,
+      "sha256": "479cd7966f814e5cd65efad75c7424d4895f5921d3e7682fa02e5b1ad6a69fb5"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/art-production-b-v1/annotations/animation_handoff.md",
+      "bytes": 3549,
+      "sha256": "bf2e256c3a375f90b255bc59ff5ef28c31c97a32ed2b5183f8a2493c0ffb422a"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/art-production-b-v1/annotations/asset_sources_and_status.md",
+      "bytes": 1559,
+      "sha256": "4fc6b3be9cff477a1917de563f545eca743d1ad020de28c5c1943d9e8b829724"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/art-production-b-v1/asset-manifest.json",
+      "bytes": 30968,
+      "sha256": "0b6539308ccd16708fba849b444d1cde31696f63fb6540cf5cefea4886fd57c7"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/map-art-b-v1/README.md",
+      "bytes": 2029,
+      "sha256": "07edaaa219a186333cdfe932a8f920d1e6001d5b84e6af1e83b6b882bd634b56"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/map-art-b-v1/annotations/01_layers_and_states.md",
+      "bytes": 2171,
+      "sha256": "fa8f9acc50cebc0a3148c09b95c3779b0375f0cc0ba4d13988fcc8e27d3e6869"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/map-art-b-v1/annotations/02_sizes_and_adaptation.md",
+      "bytes": 1237,
+      "sha256": "c84785ac655fd13fea56040ab567697a2f5b4063e5d848f860a39ff82c23707e"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/map-art-b-v1/annotations/03_sources_and_license.md",
+      "bytes": 1202,
+      "sha256": "5702b67b271095895fa8045314c2c59b29b7c3ba8a1352c4fc1c197e4389830e"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/map-art-b-v1/annotations/04_validation_and_recovery.md",
+      "bytes": 1311,
+      "sha256": "807cca805b313dc9ce5911997905acad5069b02e9caf8c9bc8c01da687d44bc3"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/map-art-b-v1/asset-manifest.json",
+      "bytes": 11797,
+      "sha256": "f52aae2b4f06612e25a53c6327c31f7a4b96bfad464d5656047f71af20292d48"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/map-art-b-v1/design-tokens.json",
+      "bytes": 5535,
+      "sha256": "f3da0906f099948e9aaf562b571d408c06ee087c672bcf7300b454ef6a5aa1a8"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/reviews/round1-review-feedback_20261012.md",
+      "bytes": 4031,
+      "sha256": "0969cb2ddf83042644d138189c8eb567bd2512234288f5ef1024e28c43c68924"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/reviews/round2-review01_teacher-approved_20261012.md",
+      "bytes": 602,
+      "sha256": "5d245cb6b19a351f5cd3bc32d46f5e66235f7aec062f0b1b7e33553981b352ab"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/reviews/round2-review02_public-changes_20261012.md",
+      "bytes": 2568,
+      "sha256": "e29e51c178c2f2978d7a2020e3fee6b03cc751b5851a2e044a581bc808c952ce"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/reviews/round3-review03_compact-active-turn_20261012.md",
+      "bytes": 1743,
+      "sha256": "10da306d41ed79c5d07e9aa445fe34f9570ea666cb5f62baf3de5de8e6068fc1"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/reviews/round3-review04_public16x9-approved_20261012.md",
+      "bytes": 656,
+      "sha256": "176d4a50a9c0b3513d9dfac69ecfc07699f469e7634d17bd24974cf94bf8d44c"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/reviews/round3-review05_production-authorized_20261012.md",
+      "bytes": 1829,
+      "sha256": "33fb582e8ad7810835bbc8ed6cf41cfc01e6f73e954779458c5c5ab426af2391"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/ui-art-delivery-round2/README.md",
+      "bytes": 3342,
+      "sha256": "fd70e73495974503f545cc3568e1a54b569dc79aa9efafa8b031f85afbdd4875"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/ui-art-delivery-round2/annotations/00_review_feedback.md",
+      "bytes": 4031,
+      "sha256": "0969cb2ddf83042644d138189c8eb567bd2512234288f5ef1024e28c43c68924"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/ui-art-delivery-round2/annotations/01_changes_and_handoff.md",
+      "bytes": 3024,
+      "sha256": "09718ce435949a1b6c302cbb078d980fe642459bdf272aa782541c8ebfbe2f60"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/ui-art-delivery-round2/annotations/02_recovery_and_limits.md",
+      "bytes": 1625,
+      "sha256": "befc0b5b48786687836d0dee03bb4700e6394820062db94c4070c0598ac360a1"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/ui-art-delivery-round2/asset-manifest.json",
+      "bytes": 21632,
+      "sha256": "3185041b966659519603228ad16d786e0e4a6af20636dd77d8c947e347dbd744"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/ui-art-delivery-round2/design-tokens.json",
+      "bytes": 4375,
+      "sha256": "30ab748f0207867c306be0a302b198d0e055f75e969fdd8912eb2ef0a155548b"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/ui-art-delivery-round3/README.md",
+      "bytes": 3142,
+      "sha256": "074805ac74e806206d192818362e7225b5d8d952e64ab1d791c13a82532cb6f9"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/ui-art-delivery-round3/annotations/00_review_feedback.md",
+      "bytes": 4031,
+      "sha256": "0969cb2ddf83042644d138189c8eb567bd2512234288f5ef1024e28c43c68924"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/ui-art-delivery-round3/annotations/01_changes_and_handoff.md",
+      "bytes": 4266,
+      "sha256": "456fcdaaee271facb887cde494d17f5452b88eafd74b6170c76a5097986b3c45"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/ui-art-delivery-round3/annotations/02_recovery_and_limits.md",
+      "bytes": 1124,
+      "sha256": "2a7d392d0f97f97f386eb0ddb60c782ca7958032879ce1de12b9ecf08ec1fe24"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/ui-art-delivery-round3/annotations/03_public_review_feedback.md",
+      "bytes": 2568,
+      "sha256": "e29e51c178c2f2978d7a2020e3fee6b03cc751b5851a2e044a581bc808c952ce"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/ui-art-delivery-round3/annotations/04_latest_compact_feedback.md",
+      "bytes": 1743,
+      "sha256": "10da306d41ed79c5d07e9aa445fe34f9570ea666cb5f62baf3de5de8e6068fc1"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/ui-art-delivery-round3/asset-manifest.json",
+      "bytes": 21854,
+      "sha256": "26b7ebf650b06c93fd5a80b6a0342ef44fc93155db9cc217e63b94a77904f98f"
+    },
+    {
+      "path": "source/stage2/ui-integration/design-reference/ui-art-delivery-round3/design-tokens.json",
+      "bytes": 5306,
+      "sha256": "61130e683812ec75d2e3c357f6ae47e0d295bc9f28ab6ebf24f2ea80594f799a"
+    },
+    {
+      "path": "source/stage2/ui-integration/evidence/architectures.txt",
+      "bytes": 6,
+      "sha256": "c1669e1d8edca98769c37d494b76442a1d6e5ffffd7b4da1fb63aef8ebaf6f01"
+    },
+    {
+      "path": "source/stage2/ui-integration/evidence/asset-verification.json",
+      "bytes": 19144,
+      "sha256": "2ec272084fd39d412e72688a8769e223b855501f719a6082789768f6bd87633d"
+    },
+    {
+      "path": "source/stage2/ui-integration/evidence/cloud-build-attempt-1.json",
+      "bytes": 223,
+      "sha256": "f8871e002e86c6c028bf087c6e79103f753b6399172210b00f2c8c701c6b7e29"
+    },
+    {
+      "path": "source/stage2/ui-integration/evidence/cloud-build-attempt-2.json",
+      "bytes": 223,
+      "sha256": "163723f53dae21c2498995a525a7b86ae5683b78299bb282647dee08ea755035"
+    },
+    {
+      "path": "source/stage2/ui-integration/evidence/cloud-build-attempt-3.json",
+      "bytes": 223,
+      "sha256": "0174a5df3267c4674a23b624969ffed2a5aafcce2c35c63f65bf925113f1c94f"
+    },
+    {
+      "path": "source/stage2/ui-integration/evidence/cloud-build-attempt-4.json",
+      "bytes": 223,
+      "sha256": "2e8e98e934299afd206316503e5dc047b6361ea1d91ace7061d4ffa826710a16"
+    },
+    {
+      "path": "source/stage2/ui-integration/evidence/cloud-build-initial-native-success.json",
+      "bytes": 223,
+      "sha256": "0f753a145556508bfdcc3dfb0d0c0720f2bac3ecf0bc81ebe72c83f4c010c61d"
+    },
+    {
+      "path": "source/stage2/ui-integration/evidence/cloud-build-layout-fix-success.json",
+      "bytes": 223,
+      "sha256": "fcef7756d8a1b60b96e5f04cdf30d905fe735b1e57399c2b853f969c1cde8256"
+    },
+    {
+      "path": "source/stage2/ui-integration/evidence/cloud-build-result-v0.9.json",
+      "bytes": 1191,
+      "sha256": "48f35de26e10e86c16bd00d0221d5cebf1edbd6b1313a8fa9665c215898a7b43"
+    },
+    {
+      "path": "source/stage2/ui-integration/evidence/core-tests.log",
+      "bytes": 4729,
+      "sha256": "bcf5841d7fe694fe4940c39b32a6f39c5355628835a2d32c1077a6b828080f27"
+    },
+    {
+      "path": "source/stage2/ui-integration/evidence/game-core-tests-attempt-2.log",
+      "bytes": 19361,
+      "sha256": "f2867f3484251e582d21613944d26da8fdf9544187a730b78c864b2126846a4f"
+    },
+    {
+      "path": "source/stage2/ui-integration/evidence/game-core-tests.log",
+      "bytes": 19820,
+      "sha256": "ab7c8ace5d1d89c406e6c422ec91cebafa8129577c64103c9a13e23fcb90b63e"
+    },
+    {
+      "path": "source/stage2/ui-integration/evidence/initial-screenshot-review.json",
+      "bytes": 328,
+      "sha256": "dd7eedc46b7479c568d976161c3939bbbd93fd5ada6568e94a9134df7e302393"
+    },
+    {
+      "path": "source/stage2/ui-integration/evidence/native-previews/README.md",
+      "bytes": 716,
+      "sha256": "fb1291c1c619b8754d9a4f31d53d5155f59895da27d319f7fb8f84216bb85e8b"
+    },
+    {
+      "path": "source/stage2/ui-integration/evidence/native-previews/complete.txt",
+      "bytes": 7,
+      "sha256": "aee408847d35e44e99430f0979c3357b85fe8dbb4535a494301198adbee85f27"
+    },
+    {
+      "path": "source/stage2/ui-integration/evidence/native-previews/public-book-16x9.png",
+      "bytes": 1050712,
+      "sha256": "a4009a647ee614bf305c1a699150fd04fa5e16e9144f86d9190bc4f18c2a6d11"
+    },
+    {
+      "path": "source/stage2/ui-integration/evidence/native-previews/public-book-4x3.png",
+      "bytes": 943869,
+      "sha256": "be5528bf7135f9f8e62e3fa41e398455bc3f417f5904548512ba17a4a01b06de"
+    },
+    {
+      "path": "source/stage2/ui-integration/evidence/native-previews/public-feedback-4x3.png",
+      "bytes": 1930905,
+      "sha256": "81e62bf88ad292c4cf1646018bd00e00fce502a20caf2a9311af90f82a141765"
+    },
+    {
+      "path": "source/stage2/ui-integration/evidence/native-previews/public-monster-16x9.png",
+      "bytes": 1600728,
+      "sha256": "79b64c14c2eedd1abfaaba22ce0f131a3bcf26d5b4e93cd5ffd96a34128b5640"
+    },
+    {
+      "path": "source/stage2/ui-integration/evidence/native-previews/public-monster-4x3.png",
+      "bytes": 1459618,
+      "sha256": "d955e7d8865cf1263a34544a462d1776640c0a3245ed0f69c8394562d51b35e0"
+    },
+    {
+      "path": "source/stage2/ui-integration/evidence/native-previews/public-player-16x9.png",
+      "bytes": 2036296,
+      "sha256": "6656819742264229c44735fc068122c6c92d6c6e7b3a9ba8b2bee31d01c2b203"
+    },
+    {
+      "path": "source/stage2/ui-integration/evidence/native-previews/public-player-4x3.png",
+      "bytes": 1870856,
+      "sha256": "d1745a310557de72778f97ec1061193012942f759f1b056fd151fdc1f34bd08c"
+    },
+    {
+      "path": "source/stage2/ui-integration/evidence/native-previews/public-reduced-motion-4x3.png",
+      "bytes": 1869882,
+      "sha256": "1a0f54deb77f5bf843aa2e894fc47282e005fdaba3075b56748d3e781420251a"
+    },
+    {
+      "path": "source/stage2/ui-integration/evidence/native-previews/public-unknown-boss.png",
+      "bytes": 201774,
+      "sha256": "16128a76ac1e2c23743f91b82505b953d30bd6c41af16fd229fe3a89798e2925"
+    },
+    {
+      "path": "source/stage2/ui-integration/evidence/native-previews/public-unknown-reward.png",
+      "bytes": 201774,
+      "sha256": "16128a76ac1e2c23743f91b82505b953d30bd6c41af16fd229fe3a89798e2925"
+    },
+    {
+      "path": "source/stage2/ui-integration/evidence/native-previews/report.json",
+      "bytes": 356,
+      "sha256": "fe66e99bcc521ef9f2b373a2444bc10a837a4d784f0b24c3735c4320ff6498e4"
+    },
+    {
+      "path": "source/stage2/ui-integration/evidence/native-previews/teacher-1180x820.png",
+      "bytes": 1478836,
+      "sha256": "0fbf4493d74cc5ab70e2dd5aa748410a03179946c36a5eee5b6a3fee09716042"
+    },
+    {
+      "path": "source/stage2/ui-integration/evidence/native-previews/teacher-1366x1024.png",
+      "bytes": 1843501,
+      "sha256": "c5fc705db884b7e37708e28466171433d19c32de731a8c293c72a25f85ccde86"
+    },
+    {
+      "path": "source/stage2/ui-integration/evidence/native-screenshot-verification.json",
+      "bytes": 612,
+      "sha256": "ca6d0803ae10c703505ddf63c7219d744d065e5a3eb6a517ecb624804fbf35c6"
+    },
+    {
+      "path": "source/stage2/ui-integration/evidence/visual-validation-console.log",
+      "bytes": 86,
+      "sha256": "350845504eb0ef7d114738fb6623b0197c6a5ed31a1568eb0b74cfefe62a0bd2"
+    },
+    {
+      "path": "source/stage2/ui-integration/evidence/xcode-version.txt",
+      "bytes": 33,
+      "sha256": "694b44731d0b415c5b11d844151e466d7f5e200a95627efda377f232f1a6ab77"
+    },
+    {
+      "path": "source/stage2/ui-integration/验收与真机检查.md",
+      "bytes": 5052,
+      "sha256": "244ac5b0f92e39b8454ff93bb34d2136cd5ebd6f708bc06908d850a2a8e6548e"
+    },
+    {
+      "path": "source/stage2/快速开始.md",
+      "bytes": 2623,
+      "sha256": "7faa1d3a9a380b4ebd920bb240221dc5a275a981c1eccc2d99da467b45af8fba"
+    },
+    {
+      "path": "source/stage2/阶段2验收.md",
+      "bytes": 8365,
+      "sha256": "54cef4d17fa9f2b34ee78914a6958139d83d779fff909a979987c913a7019767"
+    },
+    {
+      "path": "source/tools/archive_milestone.py",
+      "bytes": 11664,
+      "sha256": "c78b88fb8e2d1fe0e55dbb3f86c2e4cf9ed1b980c0ddffb75957df579a827883"
+    },
+    {
+      "path": "source/tools/split_milestone.py",
+      "bytes": 1789,
+      "sha256": "eaeb994a54c3a216e0355e6d002b700f7d9ebf7dbec766beed8e7cf39702085a"
+    },
+    {
+      "path": "source/实施计划_v2.md",
+      "bytes": 8350,
+      "sha256": "e789936b133030d811f2af3a7d83c544cb487970e65648c316f696f081e116a0"
+    },
+    {
+      "path": "source/技术验证.md",
+      "bytes": 9427,
+      "sha256": "4faac9ecab7a05add521fde49cf67fa2656a374f757ad49a8b04d70d783bb825"
+    },
+    {
+      "path": "恢复说明.md",
+      "bytes": 1826,
+      "sha256": "dd4b1cd860f2744b1748a62298fb811f889fc5835806d56468de6a8f2a1ee1e9"
+    }
+  ],
+  "archiveKind": "independent-design-device-ipa",
+  "deviceMinimumOS": "17.0",
+  "visualReviewPerformed": false
+}
