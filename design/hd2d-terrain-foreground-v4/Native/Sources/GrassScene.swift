@@ -209,7 +209,9 @@ final class GrassScene: SKScene {
                 continue // No hidden visual lookup or shadow allocation.
             }
             guard let id = node.visual else { continue }
-            let asset = try store.module(id), width: CGFloat = node.id == 1 ? 220 : 148
+            let asset=try store.module(id)
+            // Normalize tall atlas silhouettes so flags stay inside both overview ratios.
+            let width:CGFloat=node.id==1 ? 220:155*CGFloat(asset.image.width)/CGFloat(asset.image.height)
             let candidates = [CGPoint(x: foot.x, y: foot.y+48), CGPoint(x: foot.x-100, y: foot.y+48), CGPoint(x: foot.x+100, y: foot.y+48)]
             let scale = width / CGFloat(asset.image.width)
             let location = candidates.first { candidate in
@@ -225,7 +227,11 @@ final class GrassScene: SKScene {
             try addEntity(asset,foot:location,width:width,casts:true)
         }
         if let p2 = positions[3] { try addActor(try store.referenceActor("ranger"), id: "P2", foot: p2) }
-        if let p3 = positions[2] { try addActor(try store.referenceActor("spellblade"), id: "P3", foot: CGPoint(x: p3.x+34, y: p3.y-18)) }
+        if let p3=positions[2] {
+            let mage=try store.referenceActor("spellblade"),focus=try store.hero(7)
+            let gap=(CGFloat(mage.image.width)*mage.actorScale+CGFloat(focus.image.width)*focus.actorScale)/2+12
+            try addActor(mage,id:"P3",foot:CGPoint(x:p3.x+gap,y:p3.y-18))
+        }
         let first = try store.hero(7)
         let player = SKSpriteNode(texture: first.texture); apply(first, to: player, scale: first.actorScale)
         player.position = positions[1] ?? .zero; world.addChild(player); hero = player
