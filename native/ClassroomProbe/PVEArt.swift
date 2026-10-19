@@ -13,6 +13,10 @@ enum GameArt {
     static func data(_ name:String) -> Data? {
         Bundle.main.url(forResource:name,withExtension:"json",subdirectory:"Art").flatMap { try? Data(contentsOf:$0) }
     }
+    static func prototypeImage(_ name:String) -> UIImage? {
+        guard let url = Bundle.main.url(forResource:name,withExtension:"png",subdirectory:"Art/prototypes") else { return nil }
+        return UIImage(contentsOfFile:url.path)
+    }
     private static let cache = NSCache<NSString,UIImage>()
     static func image(_ type:String,_ id:String) -> UIImage? {
         let key = type+":"+id

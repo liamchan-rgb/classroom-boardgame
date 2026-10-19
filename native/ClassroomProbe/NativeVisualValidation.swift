@@ -50,6 +50,7 @@ enum NativeVisualValidation {
             monster.currentDetails = nil; monster.snapshot.currentName = state.units["m1"]!.name
             for i in monster.snapshot.units.indices { monster.snapshot.units[i].current = monster.snapshot.units[i].id == "m1" }
             try await capture("public-monster-"+ratio,PVEPublicView(frame:monster,image:nil,showingBook:false),size)
+            try await capture("public-side-battle-scene-"+ratio,PVEPublicView(frame:frame,image:nil,showingBook:false),size)
         }
         try await capture("public-reduced-motion-4x3",PVEPublicView(frame:try play.publicFrame(),image:nil,showingBook:false).environment(\.presentationReduceMotion,true),CGSize(width:1440,height:1080))
         var ledger = PresentationLedger()
@@ -127,7 +128,8 @@ enum NativeVisualValidation {
             let pair = key.split(separator:":",maxSplits:1).map(String.init)
             if GameArt.image(pair[0],pair[1]) == nil { missing.append(key) }
         }
-        let report:[String:Any] = ["screenshots":22,"assetCount":GameArt.bindings.count,"cameraControlsPure":cameraControlsPure,"movementGateChecked":movementGateChecked,"missingAssets":missing,"names":names,"deviceVerified":false,"note":"Actual native SwiftUI simulator rendering; not physical iPad/TV feedback"]
+        if GameArt.prototypeImage("heavyStrike-trainingSword-side-contact-v1") == nil { missing.append("prototype:heavyStrike-trainingSword-side-contact-v1") }
+        let report:[String:Any] = ["screenshots":24,"assetCount":GameArt.bindings.count,"prototypeAssetCount":1,"cameraControlsPure":cameraControlsPure,"movementGateChecked":movementGateChecked,"missingAssets":missing,"names":names,"deviceVerified":false,"note":"Actual native SwiftUI simulator rendering; the side-view action image is a static contact-pose prototype, not a complete animation or physical iPad/TV feedback"]
         try JSONSerialization.data(withJSONObject:report,options:[.prettyPrinted,.sortedKeys]).write(to:output.appendingPathComponent("report.json"))
         guard missing.isEmpty else { throw GameError("离线资产无法解码") }
         try Data("success".utf8).write(to:output.appendingPathComponent("complete.txt"))

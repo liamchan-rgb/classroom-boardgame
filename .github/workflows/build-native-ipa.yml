@@ -1,4 +1,4 @@
-name: Build personal iPad app
+name: Build side-view battle prototype for iPad
 
 # Manual runs only. No Apple credentials, provisioning profiles or paid runners.
 on:
@@ -55,12 +55,13 @@ jobs:
           app_path='native/build/Build/Products/Release-iphoneos/ClassroomProbe.app'
           lipo -archs "$app_path/ClassroomProbe" | tee artifacts/architectures.txt
           test "$(lipo -archs "$app_path/ClassroomProbe")" = arm64
-          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app_path/Info.plist")" = "0.10"
-          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$app_path/Info.plist")" = "10"
-          python3 native/tools/package_ipa.py "$app_path" artifacts/ClassroomStage2-v0.10-unsigned.ipa
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app_path/Info.plist")" = "0.11"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$app_path/Info.plist")" = "11"
+          python3 native/tools/package_ipa.py "$app_path" artifacts/ClassroomStage2-v0.11-unsigned.ipa
           cp native/安装与真机验收.md artifacts/
           cp stage2/阶段2验收.md artifacts/
-          cp stage2/map-ui-v0.10/README.md artifacts/v0.10-integration.md
+          cp stage2/battle-prototype-v0.11/README.md artifacts/v0.11-side-battle.md
+          python3 native/tools/verify_art_integration.py --ipa artifacts/ClassroomStage2-v0.11-unsigned.ipa --output artifacts/asset-verification.json
           printf '%s\n' "$GITHUB_SHA" > artifacts/source-commit.txt
       - name: Render native visual fixtures on simulator
         shell: bash
@@ -87,7 +88,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: ClassroomStage2-v0.10-build
+          name: ClassroomStage2-v0.11-side-battle-build
           path: artifacts/
           retention-days: 3
           if-no-files-found: warn

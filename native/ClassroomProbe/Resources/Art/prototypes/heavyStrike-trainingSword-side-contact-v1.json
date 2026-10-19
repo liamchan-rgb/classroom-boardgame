@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "boardgame-side-view-heavyStrike-trainingSword-contact-v1",
+  "status": "approved-single-contact-pose-prototype",
+  "skillID": "heavyStrike",
+  "equipmentID": "trainingSword",
+  "effectID": "impact",
+  "view": "horizontal lateral profile facing screen-right",
+  "assetRole": "static battle-scene composition prototype; not a production frame or animation",
+  "file": "heavyStrike-trainingSword-side-contact-v1.png",
+  "sha256": "92621973da4d352c625f20660bae5303aae25e68c4f557632535030330dd2e4a",
+  "dimensionsPx": [
+    1254,
+    1254
+  ],
+  "sourceRepository": "experiment",
+  "sourcePath": "Art/Animations/P1-Skills/battle-side/heavyStrike-trainingSword-v1/side-view-contact-candidate.png",
+  "sourceSha256": "92621973da4d352c625f20660bae5303aae25e68c4f557632535030330dd2e4a",
+  "approval": {
+    "reviewer": "user",
+    "statement": "这个可以的",
+    "scope": "one side-view action contact-pose concept for battle camera, profile silhouette and forward grip",
+    "limits": [
+      "Does not approve a full heavyStrike action animation or additional poses.",
+      "Does not approve trainingSword animation, impact placement, enemy art, or the complete battle background.",
+      "The 1254x1254 image is shown as a static composition prototype and is not production scale."
+    ]
+  }
+}

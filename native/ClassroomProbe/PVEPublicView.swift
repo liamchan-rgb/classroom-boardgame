@@ -134,38 +134,56 @@ struct PVEPublicView:View {
         let current = frame.snapshot.units.first(where:\.current)
         let node = current?.nodeID ?? frame.snapshot.units.first(where:\.player)?.nodeID
         let local = frame.snapshot.units.filter { $0.nodeID == node }
+        let allies = local.filter(\.player).sorted {
+            if $0.current != $1.current { return $0.current }
+            return $0.id < $1.id
+        }
+        let enemies = local.filter { !$0.player }
         return GamePanel {
             VStack(alignment:.leading,spacing:8) {
-                Text((frame.snapshot.nodes.first { $0.id == node }?.name ?? "已揭示地点")+" · 战斗").font(.system(size:30,weight:.bold))
-                TimelineView(.animation(minimumInterval:1.0/30,paused:frame.presentations.isEmpty || reduced)) { context in
-                    let event = frame.presentations.first { $0.isVisible(at:context.date) }
-                    HStack(alignment:.center,spacing:8) {
-                        unitGroup(local.filter(\.player),event:event)
-                        unitGroup(local.filter { !$0.player },event:event)
-                    }.frame(maxWidth:.infinity,maxHeight:.infinity)
+                HStack(alignment:.firstTextBaseline) {
+                    Text((frame.snapshot.nodes.first { $0.id == node }?.name ?? "已揭示地点")+" · 战斗").font(.system(size:30,weight:.bold))
+                    Spacer(minLength:4)
+                    Text("横向战场实验").font(.system(size:17,weight:.semibold)).foregroundStyle(GameTheme.muted)
                 }
+                SideViewBattleStage(allies:allies,enemies:enemies,round:frame.snapshot.round)
+                    .frame(maxWidth:.infinity,maxHeight:.infinity).frame(minHeight:260)
+                HStack(alignment:.top,spacing:8) {
+                    battleRoster("同行",units:allies)
+                    Rectangle().fill(GameTheme.primary.opacity(0.18)).frame(width:1)
+                    battleRoster("敌方",units:enemies)
+                }.frame(height:104)
             }
         }
     }
-    private func unitGroup(_ units:[PublicGameUnit],event:CommittedPresentation?) -> some View {
-        let columns = units.count > 4 ? 3 : units.count > 1 ? 2 : 1
-        return LazyVGrid(columns:Array(repeating:GridItem(.flexible(),spacing:6),count:columns),spacing:4) {
-            ForEach(units) { unit in
-                VStack(spacing:2) {
-                    UnitPortrait(unit:unit,event:event,animate:!frame.presentations.isEmpty).frame(height:units.count > 4 ? 60 : units.count > 3 ? 82 : 120)
-                        .overlay(alignment:.bottom) {
-                            Text(identity(unit)).font(.system(size:14,weight:.bold)).padding(.horizontal,6).background(.white,in:Capsule())
-                        }
-                        .overlay(alignment:.top) {
-                            if unit.current { Image(systemName:"arrowtriangle.down.fill").font(.system(size:14)).foregroundStyle(GameTheme.primary) }
-                        }
-                    ResourceValue(id:"health",text:"\(unit.health)/\(unit.maximumHealth)")
-                    ResourceValue(id:"shield",text:String(unit.shield))
-                    if unit.health == 0 { Text(unit.player ? "倒地" : "战败").foregroundStyle(GameTheme.danger) }
-                    else if unit.canActFromRound > frame.snapshot.round { Label("下轮",systemImage:"clock") }
-                }.font(.system(size:22,weight:.semibold)).padding(3)
+    private func battleRoster(_ title:String,units:[PublicGameUnit]) -> some View {
+        VStack(alignment:.leading,spacing:4) {
+            HStack(spacing:5) {
+                Text(title).font(.system(size:15,weight:.bold))
+                Text("\(units.count)").font(.system(size:13,weight:.semibold)).foregroundStyle(GameTheme.muted)
             }
-        }.frame(maxWidth:.infinity)
+            LazyVGrid(columns:Array(repeating:GridItem(.flexible(),spacing:4),count:min(4,max(1,units.count))),spacing:4) {
+            ForEach(units) { unit in
+                VStack(alignment:.leading,spacing:2) {
+                    HStack(spacing:3) {
+                        if unit.current { Image(systemName:"arrowtriangle.right.fill").foregroundStyle(GameTheme.primary) }
+                        Text(identity(unit)).fontWeight(.bold).lineLimit(1)
+                        Spacer(minLength:0)
+                        if unit.canActFromRound > frame.snapshot.round { Image(systemName:"clock.fill").foregroundStyle(GameTheme.muted) }
+                    }
+                    HStack(spacing:3) {
+                        Image(systemName:"heart.fill").foregroundStyle(GameTheme.danger)
+                        Text("\(unit.health)/\(unit.maximumHealth)").monospacedDigit()
+                        Image(systemName:"shield.fill").foregroundStyle(GameTheme.shield)
+                        Text(String(unit.shield)).monospacedDigit()
+                    }.font(.system(size:12,weight:.semibold)).lineLimit(1).minimumScaleFactor(0.75)
+                }.font(.system(size:13)).padding(.horizontal,5).padding(.vertical,4)
+                    .frame(maxWidth:.infinity,minHeight:35,alignment:.leading)
+                    .background(unit.current ? GameTheme.primary.opacity(0.10) : Color.white.opacity(0.72),in:RoundedRectangle(cornerRadius:8))
+                    .overlay(RoundedRectangle(cornerRadius:8).stroke(GameTheme.primary.opacity(unit.current ? 0.32 : 0.08),lineWidth:1))
+            }
+            }
+        }.frame(maxWidth:.infinity,alignment:.leading)
     }
     private func turnDetails(_ detail:PublicTurnDetails,player:PublicGameUnit) -> some View {
         let pages = max(1,(detail.items.count+3)/4)
@@ -231,6 +249,163 @@ struct PVEPublicView:View {
                 .lineLimit(2)
         }.padding(6).frame(maxWidth:.infinity,minHeight:79,alignment:.topLeading)
             .background(GameTheme.primary.opacity(0.06),in:RoundedRectangle(cornerRadius:10))
+    }
+}
+
+private struct SideViewBattleStage:View {
+    let allies:[PublicGameUnit]
+    let enemies:[PublicGameUnit]
+    let round:Int
+    private var hero:PublicGameUnit? { allies.first(where:\.current) ?? allies.first(where:{$0.health > 0}) ?? allies.first }
+    private var leadEnemy:PublicGameUnit? { enemies.first(where:{$0.health > 0}) ?? enemies.first }
+    private var usesContactPose:Bool { hero?.templateID == "adventurer" }
+    private let contactPoseName = "heavyStrike-trainingSword-side-contact-v1"
+    var body:some View {
+        GeometryReader { geometry in
+            let width = geometry.size.width, height = geometry.size.height
+            ZStack(alignment:.topLeading) {
+                BattleSceneBackdrop()
+                HStack(alignment:.bottom,spacing:0) {
+                    ZStack(alignment:.bottom) {
+                        Ellipse().fill(Color(red:0.06,green:0.10,blue:0.12).opacity(0.48))
+                            .frame(width:width*0.31,height:height*0.075).offset(y:3)
+                        if usesContactPose, let image = GameArt.prototypeImage(contactPoseName) {
+                            Image(uiImage:image).resizable().interpolation(.high).scaledToFit()
+                        } else if let hero {
+                            ArtImage(type:"classes",id:hero.templateID).frame(maxWidth:.infinity,maxHeight:.infinity)
+                        }
+                    }.frame(width:width*0.40,height:height*0.86,alignment:.bottom)
+                    Spacer(minLength:0)
+                    HStack(alignment:.bottom,spacing:-width*0.025) {
+                        ForEach(Array(enemies.prefix(3))) { enemy in
+                            let index = enemies.firstIndex { $0.id == enemy.id } ?? 0
+                            ZStack(alignment:.bottom) {
+                                Ellipse().fill(Color(red:0.06,green:0.10,blue:0.12).opacity(0.40))
+                                    .frame(width:width*0.12,height:height*0.06).offset(y:2)
+                                ArtImage(type:"monsters",id:enemy.templateID)
+                                    .scaleEffect(x:-1,y:1,anchor:.center)
+                                    .frame(maxWidth:.infinity,maxHeight:.infinity)
+                                    .opacity(enemy.health == 0 ? 0.52 : 1)
+                            }.frame(width:width*(enemies.count > 1 ? 0.16 : 0.24),height:height*(index == 0 ? 0.74 : 0.61),alignment:.bottom)
+                        }
+                    }
+                }.padding(.horizontal,width*0.035).padding(.bottom,height*0.045)
+                    .frame(maxWidth:.infinity,maxHeight:.infinity,alignment:.bottom)
+                HStack(alignment:.top,spacing:8) {
+                    Label("横向镜头",systemImage:"rectangle.landscape.fill")
+                    Spacer(minLength:4)
+                    Text("第\(round)轮")
+                }.font(.system(size:14,weight:.semibold)).foregroundStyle(.white)
+                    .padding(.horizontal,10).padding(.vertical,6)
+                    .background(Color.black.opacity(0.28),in:Capsule()).padding(10)
+                VStack {
+                    Spacer()
+                    HStack(alignment:.bottom,spacing:12) {
+                        stageName(hero?.name ?? "队伍",color:GameTheme.primary)
+                        Spacer(minLength:0)
+                        VStack(alignment:.trailing,spacing:3) {
+                            Text(usesContactPose ? "动作姿态样片 · 单帧" : "职业角色立绘 · 静态").font(.system(size:12,weight:.semibold))
+                                .padding(.horizontal,8).padding(.vertical,4)
+                                .background(.regularMaterial,in:Capsule())
+                            if let leadEnemy { stageName(leadEnemy.name,color:GameTheme.danger,trailing:true) }
+                        }
+                    }.padding(10)
+                }
+            }.frame(width:width,height:height).clipShape(RoundedRectangle(cornerRadius:13))
+                .overlay(RoundedRectangle(cornerRadius:13).stroke(Color.white.opacity(0.56),lineWidth:1))
+                .accessibilityElement(children:.combine)
+                .accessibilityLabel("横向战斗场景实验。左侧\(hero?.name ?? "队伍")，右侧\(leadEnemy?.name ?? "敌方")。展示的是单帧动作姿态样片，不是完整动画。")
+        }
+    }
+    private func stageName(_ name:String,color:Color,trailing:Bool = false) -> some View {
+        Text(name).font(.system(size:14,weight:.bold)).lineLimit(1).minimumScaleFactor(0.7)
+            .foregroundStyle(GameTheme.ink).padding(.horizontal,9).padding(.vertical,5)
+            .frame(maxWidth:220,alignment:trailing ? .trailing : .leading)
+            .background(.regularMaterial,in:Capsule())
+            .overlay(Capsule().stroke(color.opacity(0.4),lineWidth:1))
+    }
+}
+
+private struct BattleSceneBackdrop:View {
+    var body:some View {
+        GeometryReader { geometry in
+            let width = geometry.size.width, height = geometry.size.height
+            ZStack {
+                LinearGradient(colors:[Color(red:0.10,green:0.17,blue:0.25),Color(red:0.31,green:0.43,blue:0.46),Color(red:0.73,green:0.62,blue:0.43)],startPoint:.top,endPoint:.bottom)
+                Circle().fill(RadialGradient(colors:[Color(red:1,green:0.83,blue:0.56).opacity(0.74),Color(red:1,green:0.73,blue:0.44).opacity(0)],center:.center,startRadius:2,endRadius:width*0.18))
+                    .frame(width:width*0.44,height:height*0.90).position(x:width*0.70,y:height*0.28)
+                BattleRidge(points:[CGPoint(x:0,y:0.59),CGPoint(x:0.17,y:0.40),CGPoint(x:0.34,y:0.52),CGPoint(x:0.54,y:0.35),CGPoint(x:0.75,y:0.50),CGPoint(x:0.90,y:0.37),CGPoint(x:1,y:0.48)])
+                    .fill(Color(red:0.24,green:0.34,blue:0.39).opacity(0.62))
+                BattleRidge(points:[CGPoint(x:0,y:0.69),CGPoint(x:0.16,y:0.55),CGPoint(x:0.33,y:0.65),CGPoint(x:0.52,y:0.51),CGPoint(x:0.74,y:0.64),CGPoint(x:0.90,y:0.50),CGPoint(x:1,y:0.60)])
+                    .fill(Color(red:0.14,green:0.25,blue:0.29).opacity(0.78))
+                BattleForest(baseY:0.72,scale:0.80).fill(Color(red:0.10,green:0.20,blue:0.22).opacity(0.82))
+                BattleRuins().fill(Color(red:0.28,green:0.34,blue:0.34).opacity(0.78))
+                BattleGround().fill(LinearGradient(colors:[Color(red:0.38,green:0.35,blue:0.27),Color(red:0.17,green:0.22,blue:0.21)],startPoint:.top,endPoint:.bottom))
+                Path { path in
+                    path.move(to:CGPoint(x:0,y:height*0.72)); path.addLine(to:CGPoint(x:width,y:height*0.72))
+                }.stroke(Color(red:0.89,green:0.68,blue:0.40).opacity(0.46),lineWidth:2)
+                BattleForest(baseY:0.94,scale:0.48).fill(Color(red:0.08,green:0.15,blue:0.16).opacity(0.52))
+            }.frame(width:width,height:height).clipped()
+        }
+    }
+}
+
+private struct BattleRidge:Shape {
+    let points:[CGPoint]
+    func path(in rect:CGRect)->Path {
+        var path=Path()
+        guard let first=points.first else { return path }
+        path.move(to:CGPoint(x:0,y:rect.maxY))
+        path.addLine(to:CGPoint(x:first.x*rect.width,y:first.y*rect.height))
+        for point in points.dropFirst() { path.addLine(to:CGPoint(x:point.x*rect.width,y:point.y*rect.height)) }
+        path.addLine(to:CGPoint(x:rect.maxX,y:rect.maxY)); path.closeSubpath()
+        return path
+    }
+}
+
+private struct BattleForest:Shape {
+    let baseY:CGFloat
+    let scale:CGFloat
+    func path(in rect:CGRect)->Path {
+        var path=Path()
+        for index in 0..<17 {
+            let x=rect.width*(CGFloat(index)/16)
+            let jitter=CGFloat((index*7)%5)*0.012
+            let top=rect.height*(baseY-(0.11+jitter)*scale)
+            let base=rect.height*baseY
+            let halfWidth=rect.width*(0.018+CGFloat((index*3)%4)*0.002)*scale
+            path.move(to:CGPoint(x:x,y:top)); path.addLine(to:CGPoint(x:x-halfWidth,y:base)); path.addLine(to:CGPoint(x:x+halfWidth,y:base)); path.closeSubpath()
+            let lowerTop=top+rect.height*0.045*scale
+            path.move(to:CGPoint(x:x,y:lowerTop)); path.addLine(to:CGPoint(x:x-halfWidth*1.28,y:base)); path.addLine(to:CGPoint(x:x+halfWidth*1.28,y:base)); path.closeSubpath()
+            path.addRect(CGRect(x:x-halfWidth*0.16,y:base,width:halfWidth*0.32,height:rect.height*0.055*scale))
+        }
+        return path
+    }
+}
+
+private struct BattleRuins:Shape {
+    func path(in rect:CGRect)->Path {
+        var path=Path()
+        for x:CGFloat in [0.09,0.84] {
+            let left=rect.width*x, width=rect.width*0.045
+            path.addRoundedRect(in:CGRect(x:left,y:rect.height*0.31,width:width,height:rect.height*0.40),cornerSize:CGSize(width:width*0.12,height:width*0.12))
+            path.addRoundedRect(in:CGRect(x:left-width*0.18,y:rect.height*0.29,width:width*1.36,height:rect.height*0.035),cornerSize:CGSize(width:3,height:3))
+            for n in 0..<3 {
+                path.addRect(CGRect(x:left+width*0.16+CGFloat(n)*width*0.24,y:rect.height*0.43,width:width*0.07,height:rect.height*0.16))
+            }
+        }
+        path.addRoundedRect(in:CGRect(x:rect.width*0.12,y:rect.height*0.30,width:rect.width*0.20,height:rect.height*0.025),cornerSize:CGSize(width:4,height:4))
+        return path
+    }
+}
+
+private struct BattleGround:Shape {
+    func path(in rect:CGRect)->Path {
+        var path=Path()
+        path.move(to:CGPoint(x:0,y:rect.height*0.70))
+        path.addLine(to:CGPoint(x:rect.width,y:rect.height*0.70))
+        path.addLine(to:CGPoint(x:rect.width,y:rect.height)); path.addLine(to:CGPoint(x:0,y:rect.height)); path.closeSubpath()
+        return path
     }
 }
 struct PublicPlayerStrip:View {
