@@ -258,7 +258,6 @@ private struct SideViewBattleStage:View {
     let round:Int
     private var hero:PublicGameUnit? { allies.first(where:\.current) ?? allies.first(where:{$0.health > 0}) ?? allies.first }
     private var leadEnemy:PublicGameUnit? { enemies.first(where:{$0.health > 0}) ?? enemies.first }
-    private var usesContactPose:Bool { hero?.templateID == "adventurer" }
     private let contactPoseName = "heavyStrike-trainingSword-side-contact-v1"
     var body:some View {
         GeometryReader { geometry in
@@ -269,7 +268,7 @@ private struct SideViewBattleStage:View {
                     ZStack(alignment:.bottom) {
                         Ellipse().fill(Color(red:0.06,green:0.10,blue:0.12).opacity(0.48))
                             .frame(width:width*0.31,height:height*0.075).offset(y:3)
-                        if usesContactPose, let image = GameArt.prototypeImage(contactPoseName) {
+                        if let image = GameArt.prototypeImage(contactPoseName) {
                             Image(uiImage:image).resizable().interpolation(.high).scaledToFit()
                         } else if let hero {
                             ArtImage(type:"classes",id:hero.templateID).frame(maxWidth:.infinity,maxHeight:.infinity)
@@ -292,19 +291,19 @@ private struct SideViewBattleStage:View {
                 }.padding(.horizontal,width*0.035).padding(.bottom,height*0.045)
                     .frame(maxWidth:.infinity,maxHeight:.infinity,alignment:.bottom)
                 HStack(alignment:.top,spacing:8) {
-                    Label("横向镜头",systemImage:"rectangle.landscape.fill")
+                    Label("侧视动作样片",systemImage:"rectangle.landscape.fill")
                     Spacer(minLength:4)
-                    Text("第\(round)轮")
+                    Text("行动者：\(hero?.name ?? "暂无") · 第\(round)轮").lineLimit(1).minimumScaleFactor(0.7)
                 }.font(.system(size:14,weight:.semibold)).foregroundStyle(.white)
                     .padding(.horizontal,10).padding(.vertical,6)
                     .background(Color.black.opacity(0.28),in:Capsule()).padding(10)
                 VStack {
                     Spacer()
                     HStack(alignment:.bottom,spacing:12) {
-                        stageName(hero?.name ?? "队伍",color:GameTheme.primary)
+                        stageName("姿态样片 · 冒险者",color:GameTheme.primary)
                         Spacer(minLength:0)
                         VStack(alignment:.trailing,spacing:3) {
-                            Text(usesContactPose ? "动作姿态样片 · 单帧" : "职业角色立绘 · 静态").font(.system(size:12,weight:.semibold))
+                            Text("接触姿势 · 单帧").font(.system(size:12,weight:.semibold))
                                 .padding(.horizontal,8).padding(.vertical,4)
                                 .background(.regularMaterial,in:Capsule())
                             if let leadEnemy { stageName(leadEnemy.name,color:GameTheme.danger,trailing:true) }
@@ -314,7 +313,7 @@ private struct SideViewBattleStage:View {
             }.frame(width:width,height:height).clipShape(RoundedRectangle(cornerRadius:13))
                 .overlay(RoundedRectangle(cornerRadius:13).stroke(Color.white.opacity(0.56),lineWidth:1))
                 .accessibilityElement(children:.combine)
-                .accessibilityLabel("横向战斗场景实验。左侧\(hero?.name ?? "队伍")，右侧\(leadEnemy?.name ?? "敌方")。展示的是单帧动作姿态样片，不是完整动画。")
+                .accessibilityLabel("横向战斗场景实验。左侧固定展示冒险者的接触姿势单帧样片，不代表当前行动者的外观或技能触发；当前行动者是\(hero?.name ?? "暂无")，右侧是\(leadEnemy?.name ?? "敌方")。")
         }
     }
     private func stageName(_ name:String,color:Color,trailing:Bool = false) -> some View {
