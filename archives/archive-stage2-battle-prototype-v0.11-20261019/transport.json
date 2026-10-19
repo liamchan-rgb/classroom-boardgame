@@ -1,0 +1,79 @@
+{
+  "formatVersion": 1,
+  "logicalZIP": "classroom-stage2-battle-prototype-v0.11-20261019.zip",
+  "bytes": 667540296,
+  "sha256": "9fd5b19659a6e824673237e333512d19c10f504c8cc11ed17052493a74813bbc",
+  "parts": [
+    {
+      "file": "classroom-stage2-battle-prototype-v0.11-20261019.zip.part000",
+      "bytes": 50331648,
+      "sha256": "98397c0c2b54591b4e225a6e1c6d75ddf991277966dde9c5316c93db84f2ddd0"
+    },
+    {
+      "file": "classroom-stage2-battle-prototype-v0.11-20261019.zip.part001",
+      "bytes": 50331648,
+      "sha256": "c7d481207570a00190d01c1553292ddc1df19c58c7597f8cd15617abe4a02413"
+    },
+    {
+      "file": "classroom-stage2-battle-prototype-v0.11-20261019.zip.part002",
+      "bytes": 50331648,
+      "sha256": "319a6cac3351c1cc33a90ada741e5837be9779869d3f56aa57d48fbbab6de839"
+    },
+    {
+      "file": "classroom-stage2-battle-prototype-v0.11-20261019.zip.part003",
+      "bytes": 50331648,
+      "sha256": "b7f10d9e1d3365d867a93d5bbdf5b61cd70ee67775ce169b8a028fcc34404380"
+    },
+    {
+      "file": "classroom-stage2-battle-prototype-v0.11-20261019.zip.part004",
+      "bytes": 50331648,
+      "sha256": "8d5a6ef1788df0a1dd9274709b130d852024c67b5ba2d3ebda6f00bd67ed06ad"
+    },
+    {
+      "file": "classroom-stage2-battle-prototype-v0.11-20261019.zip.part005",
+      "bytes": 50331648,
+      "sha256": "ae0661a4eb80d7d3d5adb8d97b5e8ba59be71a2afbc60125f9734844d5acb3f0"
+    },
+    {
+      "file": "classroom-stage2-battle-prototype-v0.11-20261019.zip.part006",
+      "bytes": 50331648,
+      "sha256": "e190fc39dbd69b2fc769a18748807066f25138593dbad8af515034b14653b8c5"
+    },
+    {
+      "file": "classroom-stage2-battle-prototype-v0.11-20261019.zip.part007",
+      "bytes": 50331648,
+      "sha256": "28921eb271b806a3bcdd0dd7354d96e6bd94f264fef1656f1c37afe0c21c7b87"
+    },
+    {
+      "file": "classroom-stage2-battle-prototype-v0.11-20261019.zip.part008",
+      "bytes": 50331648,
+      "sha256": "a83fbc9e11c25e46002ab97f89d5f2c9d6f3b3bc428024e9ea85cf2195c25e96"
+    },
+    {
+      "file": "classroom-stage2-battle-prototype-v0.11-20261019.zip.part009",
+      "bytes": 50331648,
+      "sha256": "af6bd35290e475e0aef5a47abb1f922dc7ce3b9daf9eceb0576d5f89fecf48fa"
+    },
+    {
+      "file": "classroom-stage2-battle-prototype-v0.11-20261019.zip.part010",
+      "bytes": 50331648,
+      "sha256": "1bca1b7b98fa1a265b4735f77c23d23654365e8ac610c86ab03d430417fddafe"
+    },
+    {
+      "file": "classroom-stage2-battle-prototype-v0.11-20261019.zip.part011",
+      "bytes": 50331648,
+      "sha256": "091cb34b944b33228314fe6051581b9500fdedc811163b35f8a52ca2beb42cea"
+    },
+    {
+      "file": "classroom-stage2-battle-prototype-v0.11-20261019.zip.part012",
+      "bytes": 50331648,
+      "sha256": "805e8104bd74fb77eae5c46d51ac78e6c28ea52542b45b9fba3af65ae0a2fc1f"
+    },
+    {
+      "file": "classroom-stage2-battle-prototype-v0.11-20261019.zip.part013",
+      "bytes": 13228872,
+      "sha256": "4e580eb9cacd19dff18cc93b8a21255c0576ed1bcdf84a16f97d9cd1045c2de8"
+    }
+  ],
+  "reason": "Lossless split; GitHub normal Git rejects files over 100MB"
+}

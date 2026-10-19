@@ -22,6 +22,8 @@
 - 云构建： [GitHub Actions run 39229688707](https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/39229688707)，源码编译提交 `01265f2d504fe19a33d39843dc7c7e40791eba43`。GameCore 72项、ProbeCore 6项测试通过；66个素材校验通过；模拟器生成24张原生截图。
 - 完整构建证据：[cloud-build-result-v0.11.json](../../native/evidence/cloud-build-result-v0.11.json)。模拟器截图不是实体 iPad 验收；本包尚未在实体 iPad 上安装验证。
 
+长期备份已完成：[直接下载IPA](https://github.com/liamchan-rgb/classroom-boardgame/blob/83a0c1ca02badf0534ef7208084b11e90cb30e5d/archive-stage2-battle-prototype-v0.11-20261019/ClassroomStage2-v0.11-unsigned.ipa) · [完整源码与诊断存档](../../archives/archive-stage2-battle-prototype-v0.11-20261019/README.md) · [远端恢复校验](../../archives/archive-stage2-battle-prototype-v0.11-20261019/verification.json)。
+
 安装后恢复或新建一局，在地图中进入已有战斗，即可在地图旁看到横版场景。建议优先检查动作样片与敌人的距离、4:3/16:9下状态文字大小、场景亮暗对比，以及原有回合和技能面板是否容易操作。当前样片不播放慢动作。
 
 接下来先用实体 iPad 确认镜头比例和构图，再固定人物脚底、武器握点和目标锚点，制作待机、起手、挥砍、受击与收势关键帧，并逐项连接到真实战斗结果。当前用户反馈仍未获得。

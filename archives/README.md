@@ -8,6 +8,7 @@
 
 | 存档 | 状态 | 长期位置 |
 |---|---|---|
+| [侧视战斗场景实验 / v0.11 / 2026-10-19](archive-stage2-battle-prototype-v0.11-20261019/README.md) | Xcode27.2、78项核心测试、66项素材校验、24张原生截图通过；远端14分片、354项载荷、Git历史与IPA哈希恢复验证通过；实体iPad待验 | [私有长期存档](https://github.com/liamchan-rgb/classroom-boardgame/tree/83a0c1ca02badf0534ef7208084b11e90cb30e5d/archive-stage2-battle-prototype-v0.11-20261019) |
 | [iOS PR自动编译 / 2026-10-13](archive-ci-ios-pr-build-20261013/README.md) | Xcode27.2编译、78核心测试及失败日志上传通过；345载荷/340源码恢复通过，无新IPA | [私有长期存档](https://github.com/liamchan-rgb/classroom-boardgame/tree/c1d444d161bbb6ec76a9c43378e5991a14e5cf26/archive-ci-ios-pr-build-20261013) |
 | [地图与战斗程序结构 / v0.10 / 2026-10-13](archive-stage2-map-ui-v0.10-20261013/README.md) | 78测试、22原生截图；332载荷及326份源码远端恢复通过，真机/审美待验 | [私有长期存档](https://github.com/liamchan-rgb/classroom-boardgame/tree/4e27caff67a4c85c6ad064598fe5ab61c2704421/archive-stage2-map-ui-v0.10-20261013) |
 | [战斗风格补充 / 近似八方旅人 / 2026-10-13](archive-stage2-hd2d-direction-20261013/README.md) | 仅资料更新；286项载荷及279份源码远端恢复通过 | [私有项目存档](https://github.com/liamchan-rgb/classroom-boardgame/tree/be7b1bbe85617536c8b1037ec36f8d28329563ae/archive-stage2-hd2d-direction-20261013) |
@@ -15,7 +16,7 @@
 | [阶段2美术/UI接入 / v0.9 / 2026-10-13](archive-stage2-ui-art-v0.9-20261013/README.md) | 270项载荷、71项核心测试、12张原生截图；远端六分片及266份源码恢复通过 | [私有项目存档](https://github.com/liamchan-rgb/classroom-boardgame/tree/33939b09476e2a36cd77cb1487c9199197bd336f/archive-stage2-ui-art-v0.9-20261013) |
 | [阶段0—2 / v0.8 / 2026-10-12](archive-stage2-v0.8-20261012-r2/README.md) | 153项载荷、35份交付；远端SHA256和116份源码恢复通过 | [私有项目存档](https://github.com/liamchan-rgb/classroom-boardgame/tree/bfa1c745821b255ff0ef6a65ae305b8614dcfbaa/archive-stage2-v0.8-20261012-r2) |
 
-当前推荐IPA为[v0.10的ClassroomStage2-v0.10-unsigned.ipa](https://github.com/liamchan-rgb/classroom-boardgame/blob/4e27caff67a4c85c6ad064598fe5ab61c2704421/archive-stage2-map-ui-v0.10-20261013/ClassroomStage2-v0.10-unsigned.ipa)（约10.6MB，需SideStore个人签名），可独立下载。本次完整ZIP约350.4MB，七个无损分片长期保存，含固定设计、源码历史、当前IPA与完整构建证据。旧v0.9、v0.8及原设计/ZIP/标签继续保留。本版真机与逐图审美待反馈。
+当前推荐IPA为[v0.11的ClassroomStage2-v0.11-unsigned.ipa](https://github.com/liamchan-rgb/classroom-boardgame/blob/83a0c1ca02badf0534ef7208084b11e90cb30e5d/archive-stage2-battle-prototype-v0.11-20261019/ClassroomStage2-v0.11-unsigned.ipa)（约11.0MB，需SideStore个人签名），可独立下载。侧视战斗画面目前是静态接触姿势样片；本版尚待实体iPad反馈。v0.10、v0.9、v0.8及原设计/存档均继续保留。
 
 ## 后续操作
 
