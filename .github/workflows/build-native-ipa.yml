@@ -48,6 +48,12 @@ jobs:
             -derivedDataPath native/build \
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO build \
             2>&1 | tee artifacts/xcode-build.log
+      - name: Install pinned image validation dependency
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check --quiet \
+            --target "$RUNNER_TEMP/classroom-image-validation" Pillow==11.3.0
       - name: Package for free personal signing
         shell: bash
         run: |
@@ -61,7 +67,8 @@ jobs:
           cp native/安装与真机验收.md artifacts/
           cp stage2/阶段2验收.md artifacts/
           cp stage2/battle-prototype-v0.11/README.md artifacts/v0.11-side-battle.md
-          python3 native/tools/verify_art_integration.py --ipa artifacts/ClassroomStage2-v0.11-unsigned.ipa --output artifacts/asset-verification.json
+          PYTHONPATH="$RUNNER_TEMP/classroom-image-validation" python3 native/tools/verify_art_integration.py \
+            --ipa artifacts/ClassroomStage2-v0.11-unsigned.ipa --output artifacts/asset-verification.json
           printf '%s\n' "$GITHUB_SHA" > artifacts/source-commit.txt
       - name: Render native visual fixtures on simulator
         shell: bash
