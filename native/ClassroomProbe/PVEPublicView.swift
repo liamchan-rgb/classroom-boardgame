@@ -171,12 +171,12 @@ struct PVEPublicView:View {
                         Spacer(minLength:0)
                         if unit.canActFromRound > frame.snapshot.round { Image(systemName:"clock.fill").foregroundStyle(GameTheme.muted) }
                     }
-                    HStack(spacing:3) {
+                    HStack(spacing:2) {
                         Image(systemName:"heart.fill").foregroundStyle(GameTheme.danger)
                         Text("\(unit.health)/\(unit.maximumHealth)").monospacedDigit()
                         Image(systemName:"shield.fill").foregroundStyle(GameTheme.shield)
                         Text(String(unit.shield)).monospacedDigit()
-                    }.font(.system(size:12,weight:.semibold)).lineLimit(1).minimumScaleFactor(0.75)
+                    }.font(.system(size:10,weight:.semibold)).lineLimit(1).minimumScaleFactor(0.6)
                 }.font(.system(size:13)).padding(.horizontal,5).padding(.vertical,4)
                     .frame(maxWidth:.infinity,minHeight:35,alignment:.leading)
                     .background(unit.current ? GameTheme.primary.opacity(0.10) : Color.white.opacity(0.72),in:RoundedRectangle(cornerRadius:8))
