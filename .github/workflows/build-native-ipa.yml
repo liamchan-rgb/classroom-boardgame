@@ -81,6 +81,7 @@ jobs:
           xcrun simctl bootstatus "$device_id" -b
           xcodebuild -project native/ClassroomProbe.xcodeproj -scheme ClassroomProbe \
             -configuration Debug -destination "id=$device_id" -derivedDataPath native/simulator-build \
+            ARCHS=arm64 ONLY_ACTIVE_ARCH=YES \
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO build > artifacts/simulator-build.log 2>&1
           xcrun simctl install "$device_id" native/simulator-build/Build/Products/Debug-iphonesimulator/ClassroomProbe.app
           xcrun simctl launch --console-pty "$device_id" org.personal.classroom.stage0 --visual-check > artifacts/visual-validation-console.log 2>&1 &

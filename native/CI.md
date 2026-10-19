@@ -24,7 +24,7 @@
 
 - 首次PR验证实际发现`macos-latest`最高仅含iOS26.5 SDK，选择器明确失败且日志Artifact成功上传，因此最终保留本仓库已验证的macOS/Xcode27标签`xcode-27`。这是仓库特定标签，不宣称所有GitHub仓库均可使用；`.github/actionlint.yaml`允许静态检查此标签。
 - 两条workflow共同使用工具链选择器，按工程实际最低系统版本选择SDK；原来仅接受`27.*`的判断已移除，支持更高兼容SDK。
-- 手动截图构建不再强制模拟器`ARCHS=arm64`，由Runner与目的地决定架构；补齐`CODE_SIGNING_REQUIRED=NO`和模拟器构建缓存忽略规则。
+- 手动IPA流程的模拟器截图构建在当前Apple Silicon `xcode-27` Runner上显式使用`ARCHS=arm64 ONLY_ACTIVE_ARCH=YES`。2026-10-19的Xcode27.2 beta运行实际发现，默认同时编译x86_64会让Swift包的arm64模块无法供App的x86_64目标导入；正式设备IPA仍单独校验为arm64。PR通用模拟器编译仍使用目的地默认架构。两条流程均设置`CODE_SIGNING_REQUIRED=NO`并忽略模拟器构建缓存。
 - 不修改App源代码、规则或最低部署版本。Runner必须具备iOS27及以上设备/模拟器SDK；复制到其他仓库时需选择提供相应SDK的macOS Runner，不能把工具链缺失描述为Swift编译错误。
 
 ## 查看结果和本地复现
