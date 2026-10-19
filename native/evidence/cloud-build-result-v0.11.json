@@ -1,0 +1,57 @@
+{
+  "workflowURL": "https://github.com/liamchan-rgb/classroom-boardgame/actions/runs/39229688707",
+  "runID": 39229688707,
+  "jobID": 117984374326,
+  "artifactID": 12176464480,
+  "testedCommit": "01265f2d504fe19a33d39843dc7c7e40791eba43",
+  "sourceCommit": "01265f2d504fe19a33d39843dc7c7e40791eba43",
+  "conclusion": "success",
+  "xcodeVersion": "Xcode 27.2\nBuild version 27B5028f",
+  "coreTests": {
+    "GameCore": "72 passed, 0 failures",
+    "ProbeCore": "6 passed, 0 failures"
+  },
+  "appVersion": "0.11",
+  "buildNumber": "11",
+  "displayName": "ClassroomProbe",
+  "bundleName": "ClassroomProbe",
+  "bundleIdentifier": "org.personal.classroom.stage0",
+  "minimumOS": "27.0",
+  "sdk": "iphoneos27.0",
+  "platform": [
+    "iPhoneOS"
+  ],
+  "deviceFamily": [
+    2
+  ],
+  "architecture": "arm64",
+  "executableType": "Mach-O executable",
+  "ipaBytes": 10996063,
+  "ipaSha256": "e22dd2c5e5a59897d6a067b7ccf41e17661157bed1fd8a70d1cb89e843edd4ba",
+  "artifactArchiveBytes": 45663909,
+  "artifactArchiveSha256": "86dedb08f9199f4b8e87572a4f616edd28950d641c772c518a0fb4f0e2e828d9",
+  "artifactExpiresAt": "2026-10-22T09:33:11Z",
+  "requiresPersonalSigning": true,
+  "signedForDevice": false,
+  "deviceInstalled": false,
+  "newPVEDeviceVerified": false,
+  "newArtAestheticApproved": false,
+  "approvedPrototypeScope": "Static heavyStrike/trainingSword side-view contact pose only",
+  "originalRulesAndSaveFormatUnchanged": true,
+  "renderedOnSimulator": true,
+  "simulatorScreenshots": 24,
+  "prototypeAssetCount": 1,
+  "validatedAssetCount": 66,
+  "missingAssets": [],
+  "screenshotDimensions": {
+    "public-side-battle-scene-16x9.png": [
+      1920,
+      1080
+    ],
+    "public-side-battle-scene-4x3.png": [
+      1440,
+      1080
+    ]
+  },
+  "evidenceDirectory": "stage2/battle-prototype-v0.11/evidence"
+}
