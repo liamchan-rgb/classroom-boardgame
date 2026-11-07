@@ -1,0 +1,619 @@
+{
+  "kind": "synthetic camera rule review",
+  "notAppOrDeviceCapture": true,
+  "notPerformanceMeasurement": true,
+  "durationMS": 2400,
+  "sampleMS": 40,
+  "teacherTarget": [
+    960,
+    540,
+    30
+  ],
+  "publicTargetFPS": 60,
+  "frames": [
+    {
+      "time": 0.0,
+      "cameraCrop": [
+        0,
+        240,
+        1280,
+        960
+      ],
+      "syntheticDragY": 0
+    },
+    {
+      "time": 0.04,
+      "cameraCrop": [
+        0,
+        240,
+        1280,
+        960
+      ],
+      "syntheticDragY": 0
+    },
+    {
+      "time": 0.08,
+      "cameraCrop": [
+        0,
+        240,
+        1280,
+        960
+      ],
+      "syntheticDragY": 0
+    },
+    {
+      "time": 0.12,
+      "cameraCrop": [
+        0,
+        240,
+        1280,
+        960
+      ],
+      "syntheticDragY": 0
+    },
+    {
+      "time": 0.16,
+      "cameraCrop": [
+        0,
+        240,
+        1280,
+        960
+      ],
+      "syntheticDragY": 0
+    },
+    {
+      "time": 0.2,
+      "cameraCrop": [
+        0,
+        240,
+        1280,
+        960
+      ],
+      "syntheticDragY": 0
+    },
+    {
+      "time": 0.24,
+      "cameraCrop": [
+        0,
+        240,
+        1280,
+        960
+      ],
+      "syntheticDragY": 0
+    },
+    {
+      "time": 0.28,
+      "cameraCrop": [
+        0,
+        240,
+        1280,
+        960
+      ],
+      "syntheticDragY": 0
+    },
+    {
+      "time": 0.32,
+      "cameraCrop": [
+        0,
+        240,
+        1280,
+        960
+      ],
+      "syntheticDragY": 0
+    },
+    {
+      "time": 0.36,
+      "cameraCrop": [
+        0,
+        240,
+        1280,
+        960
+      ],
+      "syntheticDragY": 0.4589843749999995
+    },
+    {
+      "time": 0.4,
+      "cameraCrop": [
+        0,
+        238,
+        1280,
+        958
+      ],
+      "syntheticDragY": 1.7968750000000009
+    },
+    {
+      "time": 0.44,
+      "cameraCrop": [
+        0,
+        236,
+        1280,
+        956
+      ],
+      "syntheticDragY": 3.955078125
+    },
+    {
+      "time": 0.48,
+      "cameraCrop": [
+        0,
+        233,
+        1280,
+        953
+      ],
+      "syntheticDragY": 6.8749999999999964
+    },
+    {
+      "time": 0.52,
+      "cameraCrop": [
+        0,
+        230,
+        1280,
+        950
+      ],
+      "syntheticDragY": 10.498046875
+    },
+    {
+      "time": 0.56,
+      "cameraCrop": [
+        0,
+        225,
+        1280,
+        945
+      ],
+      "syntheticDragY": 14.765625000000007
+    },
+    {
+      "time": 0.6,
+      "cameraCrop": [
+        0,
+        220,
+        1280,
+        940
+      ],
+      "syntheticDragY": 19.619140624999993
+    },
+    {
+      "time": 0.64,
+      "cameraCrop": [
+        0,
+        215,
+        1280,
+        935
+      ],
+      "syntheticDragY": 25.0
+    },
+    {
+      "time": 0.68,
+      "cameraCrop": [
+        0,
+        209,
+        1280,
+        929
+      ],
+      "syntheticDragY": 30.849609375
+    },
+    {
+      "time": 0.72,
+      "cameraCrop": [
+        0,
+        203,
+        1280,
+        923
+      ],
+      "syntheticDragY": 37.10937499999999
+    },
+    {
+      "time": 0.76,
+      "cameraCrop": [
+        0,
+        196,
+        1280,
+        916
+      ],
+      "syntheticDragY": 43.720703125
+    },
+    {
+      "time": 0.8,
+      "cameraCrop": [
+        0,
+        189,
+        1280,
+        909
+      ],
+      "syntheticDragY": 50.625
+    },
+    {
+      "time": 0.84,
+      "cameraCrop": [
+        0,
+        182,
+        1280,
+        902
+      ],
+      "syntheticDragY": 57.763671875
+    },
+    {
+      "time": 0.88,
+      "cameraCrop": [
+        0,
+        175,
+        1280,
+        895
+      ],
+      "syntheticDragY": 65.07812500000001
+    },
+    {
+      "time": 0.92,
+      "cameraCrop": [
+        0,
+        167,
+        1280,
+        887
+      ],
+      "syntheticDragY": 72.50976562500001
+    },
+    {
+      "time": 0.96,
+      "cameraCrop": [
+        0,
+        160,
+        1280,
+        880
+      ],
+      "syntheticDragY": 79.99999999999997
+    },
+    {
+      "time": 1.0,
+      "cameraCrop": [
+        0,
+        153,
+        1280,
+        873
+      ],
+      "syntheticDragY": 87.49023437499999
+    },
+    {
+      "time": 1.04,
+      "cameraCrop": [
+        0,
+        145,
+        1280,
+        865
+      ],
+      "syntheticDragY": 94.921875
+    },
+    {
+      "time": 1.08,
+      "cameraCrop": [
+        0,
+        138,
+        1280,
+        858
+      ],
+      "syntheticDragY": 102.236328125
+    },
+    {
+      "time": 1.12,
+      "cameraCrop": [
+        0,
+        131,
+        1280,
+        851
+      ],
+      "syntheticDragY": 109.375
+    },
+    {
+      "time": 1.16,
+      "cameraCrop": [
+        0,
+        124,
+        1280,
+        844
+      ],
+      "syntheticDragY": 116.27929687499997
+    },
+    {
+      "time": 1.2,
+      "cameraCrop": [
+        0,
+        117,
+        1280,
+        837
+      ],
+      "syntheticDragY": 122.89062499999999
+    },
+    {
+      "time": 1.24,
+      "cameraCrop": [
+        0,
+        111,
+        1280,
+        831
+      ],
+      "syntheticDragY": 129.15039062499997
+    },
+    {
+      "time": 1.28,
+      "cameraCrop": [
+        0,
+        105,
+        1280,
+        825
+      ],
+      "syntheticDragY": 135.0
+    },
+    {
+      "time": 1.32,
+      "cameraCrop": [
+        0,
+        100,
+        1280,
+        820
+      ],
+      "syntheticDragY": 140.380859375
+    },
+    {
+      "time": 1.36,
+      "cameraCrop": [
+        0,
+        95,
+        1280,
+        815
+      ],
+      "syntheticDragY": 145.234375
+    },
+    {
+      "time": 1.4000000000000001,
+      "cameraCrop": [
+        0,
+        90,
+        1280,
+        810
+      ],
+      "syntheticDragY": 149.501953125
+    },
+    {
+      "time": 1.44,
+      "cameraCrop": [
+        0,
+        87,
+        1280,
+        807
+      ],
+      "syntheticDragY": 153.12499999999997
+    },
+    {
+      "time": 1.48,
+      "cameraCrop": [
+        0,
+        84,
+        1280,
+        804
+      ],
+      "syntheticDragY": 156.04492187499997
+    },
+    {
+      "time": 1.52,
+      "cameraCrop": [
+        0,
+        82,
+        1280,
+        802
+      ],
+      "syntheticDragY": 158.203125
+    },
+    {
+      "time": 1.56,
+      "cameraCrop": [
+        0,
+        80,
+        1280,
+        800
+      ],
+      "syntheticDragY": 159.541015625
+    },
+    {
+      "time": 1.6,
+      "cameraCrop": [
+        0,
+        80,
+        1280,
+        800
+      ],
+      "syntheticDragY": 160
+    },
+    {
+      "time": 1.6400000000000001,
+      "cameraCrop": [
+        0,
+        80,
+        1280,
+        800
+      ],
+      "syntheticDragY": 160
+    },
+    {
+      "time": 1.68,
+      "cameraCrop": [
+        0,
+        80,
+        1280,
+        800
+      ],
+      "syntheticDragY": 160
+    },
+    {
+      "time": 1.72,
+      "cameraCrop": [
+        0,
+        80,
+        1280,
+        800
+      ],
+      "syntheticDragY": 160
+    },
+    {
+      "time": 1.76,
+      "cameraCrop": [
+        0,
+        80,
+        1280,
+        800
+      ],
+      "syntheticDragY": 160
+    },
+    {
+      "time": 1.8,
+      "cameraCrop": [
+        0,
+        80,
+        1280,
+        800
+      ],
+      "syntheticDragY": 160
+    },
+    {
+      "time": 1.84,
+      "cameraCrop": [
+        0,
+        80,
+        1280,
+        800
+      ],
+      "syntheticDragY": 160
+    },
+    {
+      "time": 1.8800000000000001,
+      "cameraCrop": [
+        0,
+        80,
+        1280,
+        800
+      ],
+      "syntheticDragY": 160
+    },
+    {
+      "time": 1.92,
+      "cameraCrop": [
+        0,
+        80,
+        1280,
+        800
+      ],
+      "syntheticDragY": 160
+    },
+    {
+      "time": 1.96,
+      "cameraCrop": [
+        0,
+        80,
+        1280,
+        800
+      ],
+      "syntheticDragY": 160
+    },
+    {
+      "time": 2.0,
+      "cameraCrop": [
+        0,
+        80,
+        1280,
+        800
+      ],
+      "syntheticDragY": 160
+    },
+    {
+      "time": 2.04,
+      "cameraCrop": [
+        0,
+        80,
+        1280,
+        800
+      ],
+      "syntheticDragY": 160
+    },
+    {
+      "time": 2.08,
+      "cameraCrop": [
+        0,
+        80,
+        1280,
+        800
+      ],
+      "syntheticDragY": 160
+    },
+    {
+      "time": 2.12,
+      "cameraCrop": [
+        0,
+        80,
+        1280,
+        800
+      ],
+      "syntheticDragY": 160
+    },
+    {
+      "time": 2.16,
+      "cameraCrop": [
+        0,
+        80,
+        1280,
+        800
+      ],
+      "syntheticDragY": 160
+    },
+    {
+      "time": 2.2,
+      "cameraCrop": [
+        0,
+        80,
+        1280,
+        800
+      ],
+      "syntheticDragY": 160
+    },
+    {
+      "time": 2.24,
+      "cameraCrop": [
+        0,
+        80,
+        1280,
+        800
+      ],
+      "syntheticDragY": 160
+    },
+    {
+      "time": 2.2800000000000002,
+      "cameraCrop": [
+        0,
+        80,
+        1280,
+        800
+      ],
+      "syntheticDragY": 160
+    },
+    {
+      "time": 2.32,
+      "cameraCrop": [
+        0,
+        80,
+        1280,
+        800
+      ],
+      "syntheticDragY": 160
+    },
+    {
+      "time": 2.36,
+      "cameraCrop": [
+        0,
+        80,
+        1280,
+        800
+      ],
+      "syntheticDragY": 160
+    }
+  ],
+  "decodedGIFFrames": 33,
+  "decodedGIFDurationMS": 2400,
+  "primaryContactSheetReviewed": true,
+  "reviewLimit": "Offline synthetic map camera only; no App, UIKit touch replay, performance or external-screen validation."
+}
