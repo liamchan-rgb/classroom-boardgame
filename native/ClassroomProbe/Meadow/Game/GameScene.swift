@@ -23,6 +23,7 @@ final class GameScene: SKScene {
     }
     func refreshCampaign() {
         guard let campaign,world != nil else{return}
+        simulation.selected=campaign.playerIDs.firstIndex(of:campaign.selectedPlayerID) ?? 0
         for (index,d) in world.definition.discoveries.enumerated() {
             guard let id=d.nodeID,let node=campaign.engine.state.map.nodes.first(where:{$0.id==id}) else{continue}
             let cleared=node.rewardCompleted || ((node.kind == .combat || node.kind == .boss) && !campaign.engine.state.units.values.contains{$0.kind == .monster && $0.nodeID==id && $0.isAlive})
@@ -217,8 +218,9 @@ final class GameScene: SKScene {
     }
 
     private func buildActors() {
-        for index in 0..<3 {
-            if frames.count <= index { frames.append(HeroFrames.load(index + 1)) }
+        walks=Array(repeating:WalkCycle(),count:max(3,campaign?.playerIDs.count ?? 3))
+        for index in 0..<(campaign?.playerIDs.count ?? 3) {
+            if frames.count <= index { frames.append(HeroFrames.load(index%3 + 1)) }
             let directions = frames[index]
             let root = SKNode()
             root.name = "hero-\(index)"
@@ -418,7 +420,7 @@ final class GameScene: SKScene {
         if let campaign {
             simulation.selected=campaign.playerIDs.firstIndex(of:campaign.selectedPlayerID) ?? 0
             cameraCenter=CGPoint(x:campaign.snapshot.camera?.x ?? campaign.position(of:"p1").x,y:campaign.snapshot.camera?.y ?? campaign.position(of:"p1").y)
-            zoom=CGFloat(campaign.snapshot.camera?.zoom ?? 1);walks=[WalkCycle(),WalkCycle(),WalkCycle()];p1Locomotion.reset()
+            zoom=CGFloat(campaign.snapshot.camera?.zoom ?? 1);walks=Array(repeating:WalkCycle(),count:max(3,campaign.playerIDs.count));p1Locomotion.reset()
             layoutWorld();refreshCampaign();onPlaybackChanged?(campaign.isMoving);return
         }
         pendingDiscovery = nil
@@ -511,19 +513,19 @@ final class GameScene: SKScene {
         let heroIndices = campaign != nil ? Array(0..<campaign!.playerIDs.count):(layeredPreview ? [0, 1] : Array(actors.indices))
         let heroes = heroIndices.map { index -> MeadowHeroCaster in
             let pose = actorPose(index)
-            return MeadowHeroCaster(index: layeredPreview ? 0 : index, foot: actorPoint(index), facing: pose.facing,
+            return MeadowHeroCaster(index: layeredPreview ? 0 : index%3, foot: actorPoint(index), facing: pose.facing,
                                     frame: pose.frame, phase: pose.phase, appearanceIndex: index == 0 ? p1AppearanceIndex : 0,weaponID:index == 0 ? p1WeaponID:"trainingSword",armorID:index == 0 ? p1ArmorID:nil)
         }
         return MeadowFrameState(world: world, camera: MeadowViewport(world: world, scene: self, viewSize: viewSize), time: environmentTime, heroes: heroes, includeEnvironment: gaitTest == nil)
     }
 
     private func actorPoint(_ index: Int) -> CGPoint {
-        if let campaign,index<campaign.playerIDs.count {let p=campaign.position(of:campaign.playerIDs[index]);return CGPoint(x:p.x+Double(index==0 ? -10:10),y:p.y)}
+        if let campaign,index<campaign.playerIDs.count {let p=campaign.position(of:campaign.playerIDs[index]);return CGPoint(x:p.x+Double(campaign.playerIDs.count<=2 ? (index==0 ? -10:10):((index%3)-1)*24),y:p.y+Double(campaign.playerIDs.count<=2 ? 0:(index/3)*25))}
         return gaitTest?.point(for:index) ?? simulation.point(for:index)
     }
     private func actorPose(_ index: Int) -> HeroPose {
         let modular = index == 0 && HeroFrames.locomotionPlan != nil
-        return HeroPose(heroIndex: layeredPreview && index < 2 ? 0 : index,
+        return HeroPose(heroIndex: layeredPreview && index < 2 ? 0 : index%3,
                         facing: gaitTest?.facing ?? (modular ? p1Locomotion.facing : walks[index].facing),
                         frame: gaitTest?.frame ?? (modular ? p1Locomotion.frame : walks[index].frame),
                         phase: gaitTest?.phase ?? (modular ? p1Locomotion.phase : walks[index].phase))
@@ -725,7 +727,7 @@ final class GameScene: SKScene {
             let point = world.convert(local, to: self)
             return ["x": Double(point.x / size.width), "y": Double(1 - point.y / size.height)]
         }
-        let goal = simulation.routes[simulation.selected].points.last!
+        let goal = simulation.routes[min(simulation.routes.count-1,simulation.selected)].points.last!
         let orderPoint = world.convert(LivingWorld.position(CGPoint(x: 713, y: 252)), to: self)
         let memory = residentMemoryMiB()
         let metrics: [String: Any] = [

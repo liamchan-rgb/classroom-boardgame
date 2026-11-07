@@ -61,8 +61,14 @@ assert 'classroomFrameAvailable' in host and 'self?.publishMirrorFrame()' in hos
 assert 'MeadowTeacherPreviewFrame(map:map' in game and 'UIImage(cgImage:image).draw' not in game
 assert 'format.opaque=false' in game and 'ClassroomPreviewPolicy.refreshOverlay' in game
 assert 'frame.mapRect' in mirror and 'frame.overlay' in mirror
+scene=read('Meadow/Game/GameScene.swift');team=read('MeadowTeamConsole.swift');stage=read('Meadow/Game/MeadowPartyStageView.swift')
+assert 'MeadowTeamConsole' not in public and 'teamsOpen=true' in dashboard
+assert 'campaign?.playerIDs.count ?? 3' in scene and 'count:max(3,campaign?.playerIDs.count ?? 3)' in scene
+assert 'let ids=value.players.map' in stage and 'playerIDs+monsterIDs' in stage
+assert '(0..<7).map' in game
+assert 'transferTeamResource' in team and 'configureTeams' in team and 'mergeTeams' in team
 result=dict(kind='source-routing-audit',commit=a.commit,publicOnlyHasPlayerFacingPanels=True,oneTeacherOwnedSessionAndRenderer=True,
     mapAndBattleUseOriginalProductionComponents=True,publicModeDoesNotStartAnotherAIOrDecisionTimer=True,
     privateSheetsRoutedToTeacherWindow=True,legacySinglePlayerTrainingUnderlayRemoved=True,
-    publicGameInputsDisabled=True,publicGameCallbacksExplicitlyReadOnly=True,battleCompletionReturnsToExploration=True,fixedCanvasAndDrawablePolicy=True,teacherUsesActualGameOnlyMirror=True,teacherSimplifiedMapRemoved=True,actualProjectionUsedForInput=True,highResolution30FPSPolicy=True,layeredPreviewAvoidsMapRasterization=True,dragPanAndPinch=True,readbackOffMainQueue=True,hiddenPreviewStopsCopying=True,fullScreenTeacherInputWired=True,singlePageTeacherWindow=True,originalSkillCardsUseTeacherHitRouting=True,allClassroomSkillCardsFitWithoutScroll=True,encounterAllowsMapInput=True,nativeWindowRoutingVerified=False)
+    publicGameInputsDisabled=True,publicGameCallbacksExplicitlyReadOnly=True,battleCompletionReturnsToExploration=True,fixedCanvasAndDrawablePolicy=True,teacherUsesActualGameOnlyMirror=True,teacherSimplifiedMapRemoved=True,actualProjectionUsedForInput=True,highResolution30FPSPolicy=True,layeredPreviewAvoidsMapRasterization=True,dragPanAndPinch=True,readbackOffMainQueue=True,hiddenPreviewStopsCopying=True,fullScreenTeacherInputWired=True,sixStudentsAndReservedHostSeat=True,dynamicMapAndBattlePlayers=True,privateTeamAndWarehouseControls=True,singlePageTeacherWindow=True,originalSkillCardsUseTeacherHitRouting=True,allClassroomSkillCardsFitWithoutScroll=True,encounterAllowsMapInput=True,nativeWindowRoutingVerified=False)
 a.output.parent.mkdir(parents=True,exist_ok=True);a.output.write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2))

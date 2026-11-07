@@ -22,7 +22,13 @@ final class MeadowMapSettingsViewController: UIViewController {
 
     private let campaignClass=UISegmentedControl(items:["冒险者","游侠","魔剑士","龙骑士"])
     private let companionClass=UISegmentedControl(items:["冒险者","游侠","魔剑士","龙骑士"])
-    private let classSummaries=[UILabel(),UILabel()]
+    private let classSummaries=(0..<6).map{_ in UILabel()}
+    private let extraClasses=(0..<4).map{_ in UISegmentedControl(items:["冒险者","游侠","魔剑士","龙骑士"])}
+    private let studentCount=UIStepper()
+    private let studentCountLabel=UILabel()
+    private var classRows:[UIStackView]=[]
+    private var studentNames:[UITextField]=[]
+    private var classControls:[UISegmentedControl] {[campaignClass,companionClass]+extraClasses}
     private var result: GeneratedMeadowMap?
     private var revision = 0
     private let gold = UIColor(red:0.91,green:0.77,blue:0.43,alpha:1)
@@ -63,7 +69,7 @@ final class MeadowMapSettingsViewController: UIViewController {
         let seed=button("换个种子",action:#selector(newSeed));form.addArrangedSubview(seed)
         let close=button("返回原地图",action:#selector(close));form.addArrangedSubview(close)
         let heading=UILabel();heading.text="建筑与道路预览";heading.font = .boldSystemFont(ofSize:22);heading.textColor=gold
-        let note=UILabel();note.text="生成地图后开始双人行程；向下可分别选择P1、P2职业或继续旧档。实际怪物编队见页面末尾。"
+        let note=UILabel();note.text="生成地图后开始1—6名学生的行程；逐人选择职业，默认同队，进入后可调整分组。"
         note.font = .systemFont(ofSize:17,weight:.medium);note.textColor = .white;note.numberOfLines=0
         status.textColor=gold;status.numberOfLines=0;status.font = .boldSystemFont(ofSize:17)
         encounters.textColor = .white;encounters.numberOfLines=0;encounters.font = .systemFont(ofSize:16,weight:.semibold)
@@ -75,7 +81,11 @@ final class MeadowMapSettingsViewController: UIViewController {
         right.addArrangedSubview(status);right.addArrangedSubview(generateButton);if classroomCampaignReady == nil {right.addArrangedSubview(enterButton)}
         startCampaignButton.configuration=button("开始新行程",action:#selector(startCampaign)).configuration
         startCampaignButton.addTarget(self,action:#selector(startCampaign),for:.touchUpInside)
-        for (i,selector) in [campaignClass,companionClass].enumerated() {
+        studentCount.minimumValue=1;studentCount.maximumValue=6;studentCount.value=2
+        studentCount.addTarget(self,action:#selector(refreshPartySummary),for:.valueChanged)
+        let countRow=UIStackView(arrangedSubviews:[studentCountLabel,studentCount]);countRow.distribution = .equalSpacing
+        studentCountLabel.textColor=gold;right.addArrangedSubview(countRow)
+        for (i,selector) in classControls.enumerated() {
             let label=UILabel();label.text="P\(i+1)职业";label.font = .boldSystemFont(ofSize:17);label.textColor=gold
             selector.accessibilityLabel="P\(i+1)职业"
             selector.selectedSegmentIndex=i==0 ? 2:1
@@ -85,7 +95,9 @@ final class MeadowMapSettingsViewController: UIViewController {
             selector.heightAnchor.constraint(equalToConstant:44).isActive=true
             selector.addTarget(self,action:#selector(refreshPartySummary),for:.valueChanged)
             let summary=classSummaries[i];summary.numberOfLines=0;summary.textColor = .white;summary.font = .systemFont(ofSize:16,weight:.semibold)
-            right.addArrangedSubview(label);right.addArrangedSubview(selector);right.addArrangedSubview(summary)
+            let name=UITextField();name.placeholder="学生姓名（可选）";name.borderStyle = .roundedRect;name.textColor = .white;name.backgroundColor=UIColor(white:1,alpha:0.08);studentNames.append(name)
+            let row=UIStackView(arrangedSubviews:[label,name,selector,summary]);row.axis = .vertical;row.spacing=6
+            classRows.append(row);right.addArrangedSubview(row)
         }
         let partyNote=UILabel();partyNote.text="支持相同职业。以上为职业基础值，装备另计；职业与衣装、武器独立。继续存档沿用原队伍。";partyNote.numberOfLines=0;partyNote.font = .systemFont(ofSize:16);partyNote.textColor=gold
         right.addArrangedSubview(partyNote)
@@ -207,7 +219,8 @@ final class MeadowMapSettingsViewController: UIViewController {
     @objc private func refreshPartySummary() {
         do {
             let catalog=try MeadowCampaignSession.catalog(),config=partyConfiguration
-            for (i,id) in [config.playerClassID,config.companionClassID].enumerated(){classSummaries[i].text=try MeadowPartyConfiguration.summary(for:id,catalog:catalog)}
+            studentCountLabel.text="学生人数：\(Int(studentCount.value)) / 6"
+            for (i,control) in classControls.enumerated(){classRows[i].isHidden=i>=Int(studentCount.value);classSummaries[i].text=try MeadowPartyConfiguration.summary(for:MeadowPartyConfiguration.classIDs[max(0,control.selectedSegmentIndex)],catalog:catalog)}
         }catch{for label in classSummaries{label.text="职业信息读取失败："+error.localizedDescription}}
     }
     @objc private func startCampaign() {
@@ -225,7 +238,7 @@ final class MeadowMapSettingsViewController: UIViewController {
                     units=save.archive.state.units;appearance=save.appearanceID
                 }
                 try store.preserveCompletedCampaign()
-                let session=try MeadowCampaignSession.new(layout:result,appearanceID:appearance,playerClassID:config.playerClassID,companionClassID:config.companionClassID,loadouts:units,persist:store.write)
+                let session=try MeadowCampaignSession.new(layout:result,appearanceID:appearance,playerClassID:config.playerClassID,companionClassID:config.companionClassID,studentClasses:Array(self.classControls.prefix(Int(self.studentCount.value))).map{MeadowPartyConfiguration.classIDs[max(0,$0.selectedSegmentIndex)]},studentNames:self.studentNames.prefix(Int(self.studentCount.value)).map{$0.text ?? ""},loadouts:units,persist:store.write)
                 self.presentCampaign(session)
             } catch {self.status.text="未开始新行程："+error.localizedDescription}
         }

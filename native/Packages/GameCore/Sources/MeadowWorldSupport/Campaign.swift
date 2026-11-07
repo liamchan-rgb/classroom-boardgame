@@ -4,8 +4,8 @@ import ClassroomGameCore
 public enum MeadowMovementRules {
     public static let distancePerMaximumAP:Double=50
     public static let distancePerCoin:Double=50
-    public static func capacity(_ archive:GameArchive)->Double {
-        let values=archive.state.players.compactMap{try? GameRules.attributes($0,catalog:archive.catalog).maximumAP}
+    public static func capacity(_ archive:GameArchive,team:String?=nil)->Double {
+        let values=archive.state.players.filter{team==nil || $0.teamID==team}.compactMap{try? GameRules.attributes($0,catalog:archive.catalog).maximumAP}
         guard !values.isEmpty else{return 0}
         return values.map(Double.init).reduce(0,+)/Double(values.count)*distancePerMaximumAP
     }
@@ -40,6 +40,9 @@ public struct MeadowCampaignCompletion:Codable,Equatable {
     public let distance:Double,movementCoins:Int,historyCount:Int
 }
 public struct MeadowCampaignSave:Codable,Equatable {
+    public var movementBalances:[String:Double]?=nil
+    public var movementTeam:String {archive.state.units[selectedPlayerID ?? "p1"]?.teamID ?? "party"}
+    public var movementLimit:Double {MeadowMovementRules.capacity(archive,team:movementTeam)}
     public var completion:MeadowCampaignCompletion?=nil
     public var formatVersion=1
     public let layout:GeneratedMeadowMap
@@ -54,7 +57,8 @@ public struct MeadowCampaignSave:Codable,Equatable {
         guard formatVersion==1,layout.generatorVersion==3,["forester","wayfarer"].contains(appearanceID),
               layout.coordinateHeight.isFinite,layout.coordinateHeight>0,
               [.exploration,.pve].contains(archive.state.phase),archive.state.battle == nil || archive.state.battle?.kind == .pve,
-              Set(archive.state.players.map(\.id))==Set(["p1","p2"]),archive.catalog == (try MeadowCampaignSession.catalog()),
+              (1...6).contains(archive.state.players.filter{!$0.host}.count),archive.state.players.filter({$0.host}).count<=1,
+              archive.state.players.allSatisfy({$0.host ? $0.id=="p7":(1...6).map{"p\($0)"}.contains($0.id)}),archive.catalog == (try MeadowCampaignSession.catalog()),
               archive.state.map.nodes.map(\.id)==layout.map.nodes.map(\.id),archive.state.map.roads==layout.map.roads else {throw GameError("探索存档与当前地图或规则不匹配。")}
         let ids=Set(layout.map.nodes.map(\.id))
         let assets=Set(["CampTent","NodeCombatOutpost","NodeBossSanctum","NodeRewardCache","NodeWaystone","OakA","OakB","Pines","RockLow","RockHigh","RockSmall","Shrub","Flowers"])
@@ -67,8 +71,9 @@ public struct MeadowCampaignSave:Codable,Equatable {
             guard let original=layout.map.nodes.first(where:{$0.id==node.id}),node.x==original.x,node.y==original.y,node.kind==original.kind,
                   layout.props.filter({$0.nodeID==node.id}).count==1 else {throw GameError("探索节点不匹配。")}
         }
+        if let balances=movementBalances {guard balances.allSatisfy({!$0.key.isEmpty && $0.value.isFinite && $0.value>=0}) else{throw GameError("分队移动条无效。")}}
         if let movement {
-            guard movement.remaining.isFinite,movement.remaining>=0,movement.remaining<=MeadowMovementRules.capacity(archive)*(movement.scale ?? 150)/MeadowMovementRules.distancePerMaximumAP+0.000001,
+            guard movement.remaining.isFinite,movement.remaining>=0,movement.remaining<=movementLimit*(movement.scale ?? 150)/MeadowMovementRules.distancePerMaximumAP+0.000001,
                   (movement.scale ?? 150).isFinite,(movement.scale ?? 150)>0,movement.totalDistance.isFinite,movement.totalDistance>=0,movement.manualRefills>=0,movement.purchasedRefills>=0 else{throw GameError("移动条存档无效。")}
         }
         if let result=completion {
@@ -149,7 +154,9 @@ private final class CampaignWriter {
     func write(_ value:MeadowCampaignSave)throws {
         var next=value
         try next.camera?.validate()
-        if let amount=next.movement?.remaining {next.movement?.remaining=min(amount,MeadowMovementRules.capacity(next.archive))}
+        let key=next.movementTeam,limit=next.movementLimit
+        if next.movementBalances != nil,let amount=next.movement?.remaining {next.movementBalances?[key]=min(amount,limit)}
+        if let amount=next.movement?.remaining {next.movement?.remaining=min(amount,limit)}
         if let persist {try persist(next.encoded())};snapshot=next
     }
 }
@@ -215,12 +222,16 @@ public final class MeadowCampaignSession {
         var elder=try c.monster("caveTroll");elder.id="meadowElderStag";elder.name="古树鹿王"
         c.monsters += [stag,elder];try c.validate();return c
     }
-    public static func new(layout:GeneratedMeadowMap,appearanceID:String="forester",playerClassID:String="spellblade",companionClassID:String="ranger",loadouts:[String:GameUnit]?=nil,persist:((Data)throws->Void)?=nil)throws->MeadowCampaignSession {
+    public static func new(layout:GeneratedMeadowMap,appearanceID:String="forester",playerClassID:String="spellblade",companionClassID:String="ranger",studentClasses:[String]?=nil,studentNames:[String]?=nil,loadouts:[String:GameUnit]?=nil,persist:((Data)throws->Void)?=nil)throws->MeadowCampaignSession {
         let catalog=try self.catalog(),start=layout.map.nodes.first{$0.kind == .start}!.id
         try MeadowPartyConfiguration(playerClassID:playerClassID,companionClassID:companionClassID).validate(catalog:catalog)
+        let classes=studentClasses ?? [playerClassID,companionClassID]
+        guard (1...6).contains(classes.count),classes.allSatisfy(MeadowPartyConfiguration.classIDs.contains) else{throw GameError("请选择1至6名学生的职业。")}
         var units=[String:GameUnit]()
-        for (id,classID) in [("p1",playerClassID),("p2",companionClassID)] {
+        for (index,classID) in classes.enumerated() {
+            let id="p\(index+1)"
             var u=try GameFactory.player(id:id,name:id.uppercased()+" · "+catalog.playerClass(classID).name,classID:classID,teamID:"party",nodeID:start,catalog:catalog)
+            if let names=studentNames,names.indices.contains(index),!names[index].trimmingCharacters(in:.whitespacesAndNewlines).isEmpty{u.name=names[index].trimmingCharacters(in:.whitespacesAndNewlines)}
             u.inventory=["smallPotion":2,"largePotion":1,"shieldPotion":1,"revivalStone":1]
             if let source=loadouts?[id] {u.equipment=source.equipment;u.inventory=source.inventory}
             u.health=try GameRules.attributes(u,catalog:catalog).maximumHealth;try GameRules.refill(&u,catalog:catalog);units[id]=u
@@ -256,7 +267,8 @@ public final class MeadowCampaignSession {
                 guard archive.state.units==old.state.units,archive.state.map==old.state.map,archive.history==old.history,archive.state.battle==nil,archive.state.phase == .exploration else{throw GameError("已结算行程只供查看。")}
             }
             var next=writer.snapshot;next.archive=archive
-            if next.completion==nil,let remaining=next.movement?.remaining{next.movement?.remaining=min(remaining,MeadowMovementRules.capacity(archive))}
+            let limit=next.movementLimit
+            if next.completion==nil,let remaining=next.movement?.remaining{next.movement?.remaining=min(remaining,limit)}
             if writer.closingAsDefeat{next.travel=nil;next.completion=MeadowCampaignSession.makeCompletion(archive:archive,save:next,outcome:"defeat")}
             try writer.write(next)
         })
@@ -275,10 +287,11 @@ public final class MeadowCampaignSession {
         for (a,b) in zip(p,p.dropFirst()) {let l=hypot(b.x-a.x,b.y-a.y);if d<=l{return .init(b.x-a.x,b.y-a.y)};d-=l}
         return .init(0,0)
     }
-    public var movementCapacity:Double {MeadowMovementRules.capacity(engine.archive)}
+    public var movementCapacity:Double {MeadowMovementRules.capacity(engine.archive,team:engine.state.units[selectedPlayerID]?.teamID)}
     public var movementRemaining:Double {min(writer.snapshot.movement?.remaining ?? movementCapacity,movementCapacity)}
     public var movementRefillCost:Int {Int(ceil(max(0,movementCapacity-movementRemaining)/MeadowMovementRules.distancePerCoin))}
-    public var partyCoins:Int {engine.state.players.reduce(0){$0+$1.coins}}
+    public var travelingMembers:[GameUnit] {engine.state.players.filter{$0.teamID==engine.state.units[selectedPlayerID]?.teamID}}
+    public var partyCoins:Int {travelingMembers.reduce(0){$0+$1.coins}}
     public var movementPurchaseCoins:Int {min(movementRefillCost,partyCoins)}
     public var movementPurchaseDistance:Double {min(max(0,movementCapacity-movementRemaining),Double(movementPurchaseCoins)*MeadowMovementRules.distancePerCoin)}
     public func routeDistance(_ path:[Int])->Double {
@@ -288,13 +301,21 @@ public final class MeadowCampaignSession {
     public var selectedPlayerID:String {writer.snapshot.selectedPlayerID ?? "p1"}
     public func selectPlayer(_ id:String)throws {
         guard playerIDs.contains(id) else{throw GameError("成员不存在。")}
-        var next=snapshot;next.selectedPlayerID=id;try writer.write(next)
+        guard travel==nil else{throw GameError("请先结束当前道路行程再切换成员。")}
+        var next=snapshot
+        if next.movementBalances==nil{next.movementBalances=[next.movementTeam:movementRemaining]}
+        let oldKey=next.movementTeam
+        next.movementBalances?[oldKey]=movementRemaining
+        next.selectedPlayerID=id
+        let amount=min(next.movementBalances?[next.movementTeam] ?? movementRemaining,next.movementLimit)
+        next.movement?.remaining=amount
+        try writer.write(next)
     }
     func plannedTravel(node:Int?,point:MeadowWorldPoint?,actor:String,requireMovement:Bool=true)throws->(MeadowCampaignTravel,Double) {
         try requireOpenCampaign()
         guard engine.state.battle==nil,engine.state.phase == .exploration,let unit=engine.state.units[actor],unit.isAlive else{throw GameError("请先结束战斗并选择存活成员。")}
         guard !requireMovement || movementRemaining>0.000001 else{throw GameError("移动条已耗尽，请先补充移动。")}
-        let actors=travel?.actors ?? engine.state.players.filter{$0.isAlive && $0.nodeID==unit.nodeID}.map(\.id)
+        let actors=travel?.actors ?? engine.state.players.filter{$0.isAlive && $0.nodeID==unit.nodeID && $0.teamID==unit.teamID}.map(\.id)
         guard actors.contains(actor) else{throw GameError("请选择当前同行成员。")}
         var goals=[(Int,Int?,Double)]()
         if let node {goals=[(node,nil,0)]}
@@ -410,13 +431,13 @@ public final class MeadowCampaignSession {
         let newRemaining=usingCoins ? movementRemaining+movementPurchaseDistance:movementCapacity
         writer.snapshot.movement?.remaining=newRemaining
         if usingCoins{writer.snapshot.movement?.purchasedRefills+=1}else{writer.snapshot.movement?.manualRefills+=1}
-        do{return try engine.apply(.refillCampaignMovement(actors:playerIDs,coins:cost,manual:!usingCoins))}
+        do{return try engine.apply(.refillCampaignMovement(actors:travelingMembers.map(\.id),coins:cost,manual:!usingCoins))}
         catch{writer.snapshot=before;throw error}
     }
     @discardableResult public func interactCurrentNode(actor:String="p1")throws->OperationReceipt {
         try requireOpenCampaign()
         guard travel==nil,engine.state.battle==nil,let unit=engine.state.units[actor],unit.isAlive else{throw GameError("请先抵达地点并结束战斗。")}
-        let actors=engine.state.players.filter{$0.isAlive && $0.nodeID==unit.nodeID}.map(\.id)
+        let actors=engine.state.players.filter{$0.isAlive && $0.nodeID==unit.nodeID && $0.teamID==unit.teamID}.map(\.id)
         return try engine.apply(.interactCampaignNode(actors:actors))
     }
     public func pauseAfterFailure(){writer.snapshot.travel?.paused=true}

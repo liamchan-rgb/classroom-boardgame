@@ -95,8 +95,8 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     private let campaignRouteTitle=MeadowPreviewPalette.label("点击道路即时移动",size:17)
     private let campaignRouteDetail=MeadowPreviewPalette.label("",size:14)
     private let campaignMovement=MeadowBattleResourceBar()
-    private let campaignHealth=[MeadowBattleResourceBar(),MeadowBattleResourceBar()]
-    private let campaignAP=[MeadowBattleActionPointsView(),MeadowBattleActionPointsView()]
+    private let campaignHealth=(0..<7).map{_ in MeadowBattleResourceBar()}
+    private let campaignAP=(0..<7).map{_ in MeadowBattleActionPointsView()}
     private let encounterPreview=MeadowEncounterPreviewView()
     private var previewEncounterNode:Int?
     private let previewMap: GeneratedMeadowMap?
@@ -415,9 +415,9 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
             let footer=view.bounds.height-max(inset.bottom,10)-44
             let controlsX=max(inset.left,10)+4,controlsRight=view.bounds.width-max(inset.right,10)-8,gap:CGFloat=6
             let hudWidth=min(334,(controlsRight-controlsX)*0.42)
-            campaignHUD.frame=CGRect(x:controlsRight-hudWidth,y:footer-188,width:hudWidth,height:136)
+            campaignHUD.frame=CGRect(x:controlsRight-hudWidth,y:footer-52-CGFloat(56+40*(campaign?.playerIDs.count ?? 2)),width:hudWidth,height:CGFloat(56+40*(campaign?.playerIDs.count ?? 2)))
             campaignMovement.frame=CGRect(x:8,y:5,width:hudWidth-16,height:42)
-            for i in 0..<2 {campaignHealth[i].frame=CGRect(x:8,y:CGFloat(i)*40+53,width:hudWidth-16,height:36);campaignAP[i].isHidden=true}
+            for i in 0..<7 {campaignHealth[i].isHidden=i >= (campaign?.playerIDs.count ?? 2);campaignHealth[i].frame=CGRect(x:8,y:CGFloat(i)*40+53,width:hudWidth-16,height:36);campaignAP[i].isHidden=true}
             let buttonWidth=max(1,(controlsRight-controlsX-gap*3)/4),buttonY=footer-46
             campaignRefill.frame=CGRect(x:controlsX,y:buttonY,width:buttonWidth,height:38)
             campaignItems.frame=CGRect(x:controlsX+buttonWidth+gap,y:buttonY,width:buttonWidth,height:38)
@@ -889,7 +889,7 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         campaignRouteDetail.accessibilityIdentifier="campaignRouteResources"
         for label in [campaignRouteTitle,campaignRouteDetail]{label.adjustsFontSizeToFitWidth=true;label.minimumScaleFactor=0.8}
         campaignHUD.addSubview(campaignMovement)
-        for i in 0..<2 {campaignHUD.addSubview(campaignHealth[i]);campaignHUD.addSubview(campaignAP[i])}
+        for i in 0..<7 {campaignHUD.addSubview(campaignHealth[i]);campaignHUD.addSubview(campaignAP[i])}
         if !classroomMode {for b in [campaignRefill,campaignItems,campaignBattle,campaignEdit,campaignTeam,campaignEnd] {view.addSubview(b)}}
         view.addSubview(encounterPreview);encounterPreview.isHidden=true
         encounterPreview.onClose={ [weak self] in self?.selectEncounterPreview(nil) }
@@ -1190,7 +1190,7 @@ private func refreshCampaignStatus(allowBattleOpen:Bool=true) {
         playButton.isPlaying=campaign.isMoving
         for i in players.indices {
             let u=players[i],stats=(try? GameRules.attributes(u,catalog:campaign.engine.catalog)) ?? u.baseAttributes
-            campaignHealth[i].show(u.id.uppercased()+" · 行动上限 \(stats.maximumAP)",value:u.health,maximum:stats.maximumHealth,color:.systemGreen)
+            campaignHealth[i].show((u.host ? "师":u.id.uppercased())+" · "+(state.teams.first{$0.id==u.teamID}?.name ?? "未分队")+" · 上限 \(stats.maximumAP)",value:u.health,maximum:stats.maximumHealth,color:.systemGreen)
             campaignAP[i].show(value:u.ap,maximum:max(u.ap,stats.baseAP))
         }
         campaignEnd.configuration?.title=campaign.isCompleted ? "查看结算":"路线与目标"

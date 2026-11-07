@@ -206,6 +206,10 @@ final class MeadowTeacherCoordinator:ObservableObject {
         if let action {guard canUse(action),let target=try? backend.battleTarget(for:action,selected:selectedTarget,role:.teacher) else{return};try? renderer?.classroomFocus(action,target:target,role:.teacher)}
         else{try? renderer?.classroomFocus(nil,target:selectedTarget,role:.teacher)}
     }
+    func teamCommand(_ command:GameCommand){
+        guard !busy,let c=campaign,c.travel==nil else{message="请先抵达道路目的地，再调整组队或仓库。";return}
+        do{try c.checkpoint();try backend.apply(command,role:.teacher);renderer?.classroomRefresh();message="组队操作已保存。";revision += 1}catch{message=error.localizedDescription}
+    }
     func award(){
         guard !busy,let c=campaign else{return}
         do{try backend.apply(.reward(actors:[c.selectedPlayerID],value:ResourceReward(coins:10)),role:.teacher);renderer?.classroomRefresh();message="已向选中成员发放10金币。";revision += 1}catch{message=error.localizedDescription}

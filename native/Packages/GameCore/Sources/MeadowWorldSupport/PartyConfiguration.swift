@@ -22,6 +22,6 @@ public struct MeadowPartyConfiguration:Codable,Equatable {
 }
 public extension MeadowCampaignSession {
     var partyConfiguration:MeadowPartyConfiguration {
-        .init(playerClassID:engine.state.units["p1"]!.templateID,companionClassID:engine.state.units["p2"]!.templateID)
+        .init(playerClassID:engine.state.units["p1"]!.templateID,companionClassID:engine.state.units["p2"]?.templateID ?? engine.state.units["p1"]!.templateID)
     }
 }

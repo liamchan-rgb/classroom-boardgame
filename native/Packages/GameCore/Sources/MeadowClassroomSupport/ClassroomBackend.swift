@@ -78,6 +78,13 @@ public final class ClassroomGameBackend {
         guard preview.allowed else{throw GameError(preview.message)}
         return target
     }
+    /// Reserved separate host seat: never counts toward the six student seats.
+    public func joinTeacher(name:String,classID:String,team:String,role:ClassroomRole)throws {
+        try Self.requireTeacher(role)
+        guard let c=campaign,c.travel==nil,!c.isCompleted else{throw GameError("请先停止行程。")}
+        let node=c.engine.state.units[c.selectedPlayerID]!.nodeID
+        _=try c.engine.apply(.addHost(id:"p7",name:name,classID:classID,team:team,node:node))
+    }
     public func configureEncounter(node:Int,templates:[String],role:ClassroomRole)throws {
         try Self.requireTeacher(role);guard let c=campaign else{throw GameError("行程未开始。")}
         _=try c.configureEncounter(node:node,templates:templates)

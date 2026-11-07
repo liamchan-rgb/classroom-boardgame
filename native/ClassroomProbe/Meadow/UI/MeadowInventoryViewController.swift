@@ -215,7 +215,7 @@ final class MeadowCampaignInventoryViewController:UIViewController {
     private let header=UIView(),left=UIScrollView(),middle=UIView(),right=UIView()
     private let titleLabel=MeadowPreviewPalette.label("行程行囊",size:24,weight:.heavy)
     private let saveLabel=MeadowPreviewPalette.label("随操作自动保存到当前行程",size:14)
-    private let members=UISegmentedControl(items:["P1 行囊","P2 行囊"])
+    private let members=UISegmentedControl()
     private let close=MeadowPreviewPalette.button("返回行程")
     private let refillActions=MeadowPreviewPalette.button("手动整备")
     private let hero=UIImageView(),health=MeadowBattleResourceBar(),ap=MeadowBattleActionPointsView()
@@ -251,10 +251,11 @@ final class MeadowCampaignInventoryViewController:UIViewController {
         left.alwaysBounceVertical=true;list.alwaysBounceVertical=true;detail.alwaysBounceVertical=true
         middle.addSubview(filterButton);middle.addSubview(list);right.addSubview(detail);detail.addSubview(detailContent);right.addSubview(primary)
         close.addAction(UIAction{[weak self] _ in self?.dismiss(animated:true){self?.onClose?()}},for:.touchUpInside)
+        for (i,id) in session.playerIDs.enumerated(){members.insertSegment(withTitle:id.uppercased()+" 行囊",at:i,animated:false)}
         for state in [UIControl.State.normal,.selected] {members.setTitleTextAttributes([.font:MeadowPreviewPalette.font(16),.foregroundColor:MeadowPreviewPalette.ink],for:state)}
         members.selectedSegmentTintColor=UIColor(red:0.40,green:0.35,blue:0.19,alpha:1)
         members.addAction(UIAction{[weak self] _ in
-            guard let self else{return};self.actor=self.members.selectedSegmentIndex==1 ? "p2":"p1";self.target=self.actor;self.selected=nil;self.filter="all";self.onActorChanged?(self.actor);self.refresh()
+            guard let self else{return};self.actor=self.session.playerIDs[max(0,self.members.selectedSegmentIndex)];self.target=self.actor;self.selected=nil;self.filter="all";self.onActorChanged?(self.actor);self.refresh()
         },for:.valueChanged)
         for (i,slot) in ItemSlot.allCases.enumerated(){
             left.addSubview(slots[i]);slots[i].titleLabel?.numberOfLines=2
@@ -280,7 +281,7 @@ final class MeadowCampaignInventoryViewController:UIViewController {
             list.addSubview(row);rows.append(row)
         }
         if rows.isEmpty{let row=MeadowPreviewPalette.button("暂无此类物品");row.isEnabled=false;list.addSubview(row);rows=[row]}
-        members.selectedSegmentIndex=actor=="p2" ? 1:0
+        members.selectedSegmentIndex=session.playerIDs.firstIndex(of:actor) ?? 0
         refillActions.isEnabled=session.inventoryActionRefillNeeded;refillActions.alpha=refillActions.isEnabled ? 1:0.45
         let a=try? GameRules.attributes(unit,catalog:catalog)
         health.show("生命",value:unit.health,maximum:a?.maximumHealth ?? 1,color:.systemGreen);ap.show(value:unit.ap,maximum:a?.maximumAP ?? 8)
@@ -299,8 +300,8 @@ final class MeadowCampaignInventoryViewController:UIViewController {
         let l=CampInventoryLayout(width:Double(view.bounds.width),height:Double(view.bounds.height),left:Double(s.left),right:Double(s.right),top:Double(s.top),bottom:Double(s.bottom))
         func frame(_ r:InventoryRect)->CGRect{CGRect(x:r.x,y:r.y,width:r.width,height:r.height)}
         header.frame=frame(l.header);left.frame=frame(l.equipment);middle.frame=frame(l.bag);right.frame=frame(l.detail);footer.frame=frame(l.footer)
-        let w=header.bounds.width;titleLabel.frame=CGRect(x:12,y:2,width:max(1,w-325),height:29);saveLabel.frame=CGRect(x:12,y:31,width:max(1,w-325),height:22)
-        members.frame=CGRect(x:w-310,y:12,width:180,height:34);close.frame=CGRect(x:w-122,y:9,width:112,height:38)
+        let w=header.bounds.width;titleLabel.frame=CGRect(x:12,y:2,width:max(1,w-650),height:29);saveLabel.frame=CGRect(x:12,y:31,width:max(1,w-650),height:22)
+        members.frame=CGRect(x:w-634,y:12,width:500,height:34);close.frame=CGRect(x:w-122,y:9,width:112,height:38)
         let lw=left.bounds.width,hh:CGFloat=actor=="p1" ? 150:0
         refillActions.frame=CGRect(x:10,y:8,width:lw-20,height:38)
         hero.frame=CGRect(x:8,y:56,width:lw-16,height:hh);health.frame=CGRect(x:10,y:hh+64,width:lw-20,height:42);ap.frame=CGRect(x:10,y:hh+113,width:lw-20,height:38)
@@ -332,11 +333,11 @@ final class MeadowCampaignInventoryViewController:UIViewController {
                 text("换装不回血、不补行动或移动。地图移动上限按全队最大行动上限平均计算；基础行动加成不提高移动上限。",15);primary.isEnabled=true
             }catch{text(error.localizedDescription)}
         }else{
-            let targets=UISegmentedControl(items:["对 P1 使用","对 P2 使用"]);targets.selectedSegmentIndex=target=="p2" ? 1:0
+            let targets=UISegmentedControl(items:session.playerIDs.map{$0.uppercased()});targets.selectedSegmentIndex=session.playerIDs.firstIndex(of:target) ?? 0
             for state in [UIControl.State.normal,.selected] {targets.setTitleTextAttributes([.font:MeadowPreviewPalette.font(16),.foregroundColor:MeadowPreviewPalette.ink],for:state)}
             targets.selectedSegmentTintColor=UIColor(red:0.40,green:0.35,blue:0.19,alpha:1)
             targets.frame=CGRect(x:12,y:y,width:width-24,height:36);detailContent.addSubview(targets);y+=48
-            targets.addAction(UIAction{[weak self,weak targets] _ in self?.target=targets?.selectedSegmentIndex==1 ? "p2":"p1";self?.view.setNeedsLayout()},for:.valueChanged)
+            targets.addAction(UIAction{[weak self,weak targets] _ in guard let self else{return};self.target=self.session.playerIDs[max(0,targets?.selectedSegmentIndex ?? 0)];self.view.setNeedsLayout()},for:.valueChanged)
             primary.configuration?.title=item.kind == .revivalStone ? "复活队友 · 2 AP":"使用补给 · 1 AP"
             if let receiver=session.engine.state.units[target],let a=try? GameRules.attributes(receiver,catalog:session.engine.catalog){text("使用者：\(actor.uppercased())\n目标：\(target.uppercased())\n生命 \(receiver.health) → \(item.kind == .revivalStone ? (a.maximumHealth+1)/2:min(a.maximumHealth,receiver.health+item.heal))/\(a.maximumHealth)\n护盾 \(receiver.shield) → \(max(receiver.shield,item.shield))")}
             do{let command=try session.inventoryItemCommand(actor:actor,item:id,target:target),preview=session.engine.preview(command);primary.isEnabled=preview.allowed;if !preview.allowed{text(preview.message)}}catch{text(error.localizedDescription)}

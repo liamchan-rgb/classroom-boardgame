@@ -44,7 +44,7 @@ public enum PartyVisual {
         if id.hasPrefix("m-") {return id.hasSuffix("-3") ? "m3":id.hasSuffix("-2") ? "m2":"m1"};return id
     }
     public static func foot(_ id:String)->PartyPoint? {feet[slot(id)]}
-    public static let feet:[String:PartyPoint]=["p1":PartyPoint(165,420),"p2":PartyPoint(315,505),"m1":PartyPoint(650,395),"m2":PartyPoint(835,510),"m3":PartyPoint(600,585)]
+    public static let feet:[String:PartyPoint]=["p1":PartyPoint(165,420),"p2":PartyPoint(315,505),"p3":PartyPoint(80,300),"p4":PartyPoint(280,315),"p5":PartyPoint(75,555),"p6":PartyPoint(440,555),"p7":PartyPoint(460,290),"m1":PartyPoint(650,395),"m2":PartyPoint(835,510),"m3":PartyPoint(600,585)]
     public static func smooth(_ x:Double)->Double { let t=min(1,max(0,x));return t*t*(3-2*t) }
     public static func pulse(_ age:Double,_ start:Double,_ peak:Double,_ end:Double)->Double { age<peak ? smooth((age-start)/(peak-start)):1-smooth((age-peak)/(end-peak)) }
     public static func chest(_ id:String)->PartyPoint { let p=foot(id)!;return PartyPoint(p.x+5*heroScale,p.y-70*heroScale) }

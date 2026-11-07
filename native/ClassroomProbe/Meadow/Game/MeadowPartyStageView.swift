@@ -9,7 +9,8 @@ final class MeadowPartyStageView:UIView {
     private let clock=MeadowBattleSceneClock()
     private let fx=MeadowPartyEffectsView()
     private var monsterIDs=["m1","m2"]
-    private var renderIDs:[String] {["p1","p2"]+monsterIDs}
+    private var playerIDs=["p1","p2"]
+    private var renderIDs:[String] {playerIDs+monsterIDs}
     private var actors:[String:MeadowBattleActorView]=[:]
     private let afterimages=(0..<3).map { _ in UIImageView() }
     private var monsters:[String:UIImageView]=[:],winds:[String:UIImageView]=[:]
@@ -97,16 +98,27 @@ final class MeadowPartyStageView:UIView {
         let p=convert(point,to:world)
         for id in renderIDs.reversed() {
             if let label=labels[id],!label.isHidden,label.alpha>0,label.frame.contains(p){return id}
-            let unit:UIView?=actors[id].map{$0 as UIView} ?? monsters[id].map{$0 as UIView}
-            if let unit,!unit.isHidden,unit.alpha>0,unit.frame.contains(p){return id}
         }
-        return nil
+        let candidates=renderIDs.filter {id in
+            let unit:UIView?=actors[id].map{$0 as UIView} ?? monsters[id].map{$0 as UIView}
+            return unit.map{!$0.isHidden && $0.alpha>0 && $0.frame.contains(p)} ?? false
+        }
+        return candidates.min {a,b in
+            guard let x=PartyVisual.foot(a),let y=PartyVisual.foot(b) else{return false}
+            return hypot(p.x-x.x,p.y-(x.y-60))<hypot(p.x-y.x,p.y-(y.y-60))
+        }
     }
     func start() { MeadowBattleVFXAssets.prewarm();victoryAt=nil;sceneTime=0;recovery=[:];recoveryTier=[:];formation=[:];birth=[:];contact=[:];broken=[:];deaths=[:];hurt=[:];messages=[];emissions=[];skillVFX=[];pendingStatusCues=[];statusSnapshots=[:];poseKeys=[:];fallen=[:];diceAction=nil;diceConfirmedAt=nil;diceView.confirmationAge=nil;diceView.dice=[];diceSettledAt=nil;diceExitAt=nil;dimFrom=0;dimTarget=0;clock.start() }
     func classroomPause(_ value:Bool){if value{clock.stop()}else{clock.start()}}
     func stop() { MeadowMonsterFrames.retain([]);clock.stop();intent=nil;impact=nil;completion=nil;focus=nil;skillVFX=[];pendingStatusCues=[];statusSnapshots=[:] }
     func displayedVitals(for unitID:String,health:Int,shield:Int)->(health:Int,shield:Int) { statusSnapshots[unitID] ?? (health,shield) }
     func show(_ value:GameState,friend:String,foe:String,current:String?,catalog:GameCatalog) {
+        let ids=value.players.map(\.id)
+        if ids != playerIDs {
+            for id in playerIDs where !ids.contains(id){actors.removeValue(forKey:id)?.removeFromSuperview();shadows.removeValue(forKey:id)?.removeFromSuperview();attached.removeValue(forKey:id)?.removeFromSuperview();labels.removeValue(forKey:id)?.removeFromSuperview()}
+            for id in ids where actors[id]==nil{installUnit(id)}
+            playerIDs=ids
+        }
         state=value;self.current=current;self.catalog=catalog;fx.friend=friend;fx.foe=foe
         MeadowMonsterFrames.retain(Set(value.units.values.filter{$0.kind == .monster && renderIDs.contains($0.id)}.compactMap{MonsterVisualSpec.find($0.templateID)?.id}))
         for id in renderIDs where value.units[id]?.isAlive==false {
