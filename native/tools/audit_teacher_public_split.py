@@ -37,6 +37,8 @@ cover=dashboard[dashboard.index('.fullScreenCover'):dashboard.index('    private
 assert 'TeacherGamePreview(game:game,selectingNode:selectingNode)' in cover
 assert 'surface.acceptsMapInput' in host and 'surface == .exploration,let c=campaign' not in host
 assert 'game.previewVisibility(previewID,visible:true)' in dashboard and 'game.previewVisibility(previewID,visible:false)' in dashboard
+assert '.onScrollVisibilityChange(threshold:0.05)' in dashboard
+assert 'tracksScroll:true' in dashboard
 assert 'ClassroomPreviewPolicy.enabled' in host and 'defer{publishChanges();updateMirrorDemand()}' in host
 assert 'if next != lastUIState' in host
 assert 'format.scale=ClassroomPreviewPolicy.pixelScale' in game

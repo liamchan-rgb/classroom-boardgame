@@ -40,7 +40,7 @@ struct MeadowTeacherDashboard:View {
                         Button("↓"){game.operation(.pan(CGPoint(x:0,y:-60)))}
                     }.buttonStyle(.bordered).disabled(!game.ready || game.busy)
                     if game.renderer != nil && !fullPreview {
-                        TeacherGamePreview(game:game,selectingNode:selectingNode).aspectRatio(16/9,contentMode:.fit).clipShape(RoundedRectangle(cornerRadius:14))
+                        TeacherGamePreview(game:game,selectingNode:selectingNode,tracksScroll:true).aspectRatio(16/9,contentMode:.fit).clipShape(RoundedRectangle(cornerRadius:14))
                         Button("全屏查看公开游戏界面"){fullPreview=true}.buttonStyle(ClassroomButtonStyle(primary:true))
                     }
                     Text(selectingNode ? "点击上方游戏画面选择地点，修改表单只在教师端出现。":"点击上方实际游戏画面的道路即可移动。").font(.callout)
@@ -106,6 +106,7 @@ struct MeadowTeacherDashboard:View {
 private struct TeacherGamePreview:View {
     @ObservedObject var game:MeadowTeacherCoordinator
     let selectingNode:Bool
+    var tracksScroll=false
     @State private var previewID=UUID()
     var body:some View {
         PublicSurface(model:TeacherSession.shared.display,game:game,teacherPreview:true)
@@ -117,6 +118,7 @@ private struct TeacherGamePreview:View {
                     })
                 }
             }
+            .onScrollVisibilityChange(threshold:0.05){visible in if tracksScroll{game.previewVisibility(previewID,visible:visible)}}
             .onAppear{game.previewVisibility(previewID,visible:true)}
             .onDisappear{game.previewVisibility(previewID,visible:false)}
     }
