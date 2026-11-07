@@ -1,0 +1,54 @@
+{
+  "formatVersion": 1,
+  "logicalZIP": "archive-team-module-meadow-v0.14.0-20261107.zip",
+  "bytes": 437420782,
+  "sha256": "4ac61ae8eeab67ae7b2f7bb956e8a00f77af8c80b4b6b11221963281ae7018fd",
+  "parts": [
+    {
+      "file": "archive-team-module-meadow-v0.14.0-20261107.zip.part000",
+      "bytes": 50331648,
+      "sha256": "798042dd48e4ac5f9e409ed2a295e6b9fcb8701ab623b40103172896a562a5d4"
+    },
+    {
+      "file": "archive-team-module-meadow-v0.14.0-20261107.zip.part001",
+      "bytes": 50331648,
+      "sha256": "2b0d6bcef72f111034cd3991798ea8c36d7555eedd996937d1039935178a6dfe"
+    },
+    {
+      "file": "archive-team-module-meadow-v0.14.0-20261107.zip.part002",
+      "bytes": 50331648,
+      "sha256": "b9a9a9a4ffdd3e012ac256e453449540d9a66d629f4259ea38511d8364c067aa"
+    },
+    {
+      "file": "archive-team-module-meadow-v0.14.0-20261107.zip.part003",
+      "bytes": 50331648,
+      "sha256": "ae14ae27a34a07dd6e861573eec8275ccf76ebe48b673346fcbb4b5c3b87238e"
+    },
+    {
+      "file": "archive-team-module-meadow-v0.14.0-20261107.zip.part004",
+      "bytes": 50331648,
+      "sha256": "cd2711703975bf800d00c74cae96509dbf6e01afef8bd7a29da40eecf8177ce0"
+    },
+    {
+      "file": "archive-team-module-meadow-v0.14.0-20261107.zip.part005",
+      "bytes": 50331648,
+      "sha256": "32bedd5ba5b7882ddce0483b9b19f77abc3a2a3ca71fec259416fd74246c0b37"
+    },
+    {
+      "file": "archive-team-module-meadow-v0.14.0-20261107.zip.part006",
+      "bytes": 50331648,
+      "sha256": "5501b58caa198ce6e46b426eaf5fc232ce84a85e6e02104bd58907f68f6ce1ac"
+    },
+    {
+      "file": "archive-team-module-meadow-v0.14.0-20261107.zip.part007",
+      "bytes": 50331648,
+      "sha256": "bf9fa7c69749fa979674b775b318fc4a69af4b10aeacbcadb98f46fe5f0e1f85"
+    },
+    {
+      "file": "archive-team-module-meadow-v0.14.0-20261107.zip.part008",
+      "bytes": 34767598,
+      "sha256": "17aec812e7b64b0ed7364cc64e344e332175fe997389c081c49cc32e197c6641"
+    }
+  ],
+  "reason": "Lossless split; GitHub normal Git rejects files over 100MB"
+}
