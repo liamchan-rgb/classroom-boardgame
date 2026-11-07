@@ -9,15 +9,11 @@ import MeadowClassroomSupport
 final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     private let classroomMode:Bool
     private var classroomSuspended=false
-    var classroomMirrorEnabled=false {didSet{groundRenderer?.classroomMirrorEnabled=classroomMirrorEnabled;if !classroomMirrorEnabled{classroomMapFrame=nil}}}
+    var classroomMirrorEnabled=false {didSet{groundRenderer?.classroomMirrorEnabled=classroomMirrorEnabled}}
     private var classroomMapFrame:CGImage?
-    private var classroomFrameSerial=0
-    private var classroomCapturedSerial:Int?
     /// A clean game-only image; permission dialogs belong to another root.
     func classroomCaptureFrame()->UIImage? {
         guard classroomMode,classroomMirrorEnabled,isViewLoaded,view.window != nil else{return nil}
-        guard classroomCapturedSerial != classroomFrameSerial || classroomBusy || !ready else{return nil}
-        classroomCapturedSerial=classroomFrameSerial
         let format=UIGraphicsImageRendererFormat();format.scale=ClassroomPreviewPolicy.pixelScale;format.opaque=true
         return UIGraphicsImageRenderer(size:ClassroomCanvas.size,format:format).image{ context in
             view.backgroundColor?.setFill();context.cgContext.fill(CGRect(origin:.zero,size:ClassroomCanvas.size))
@@ -454,7 +450,7 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
                 self.groundRenderer = prepared.renderer
                 if self.classroomMode {
                     self.groundRenderer?.classroomMirrorEnabled=self.classroomMirrorEnabled
-                    self.groundRenderer?.onClassroomMapFrame={ [weak self] image in self?.classroomMapFrame=image;self?.classroomFrameSerial += 1 }
+                    self.groundRenderer?.onClassroomMapFrame={ [weak self] image in self?.classroomMapFrame=image }
                 }
                 self.scene.shadowMapSize = prepared.renderer?.shadowSize ?? 0
                 self.groundRenderer?.alignmentReview = ProcessInfo.processInfo.arguments.contains("-alignmentReview")
