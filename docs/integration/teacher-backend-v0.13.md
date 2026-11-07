@@ -14,7 +14,7 @@ ClassroomGameBackend 持有唯一 MeadowCampaignSession 和唯一 PartyEncounter
 
 只有一个实际 GameViewController 渲染器：未连接外屏时放入教师的只读预览，连接外屏后移到独立公开窗口。后台控制地图是操作工具；不会截图镜像整个教师界面，也不会创建第二个游戏会话。绘本/教师暂停保留同一会话，后台设置和所有私有弹窗有独立 teacher presenter；即使渲染器在外屏，编辑弹窗也只在教师窗口出现。
 
-ClassroomRole 在后台命令入口拒绝 publicDisplay 的生成、安装、编辑、发奖、补满、移动和投放选择请求；公开表面枚举只有 waiting/exploration/inventory/encounter/battle/book/results，没有编辑或权限界面。实际公开 UIView 不挂载管理按钮并禁用游戏输入，战斗按钮的操作由教师后台调用，悬停仍驱动相同骰子/压暗预览。
+ClassroomRole 在后台命令入口拒绝 publicDisplay 的生成、安装、编辑、发奖、补满、移动和投放选择请求；教师技能、物品和结束行动同时校验当前为玩家回合、个人AP/库存/次数、真实目标及引擎预览；按钮和键盘共用校验，预览不消耗RNG。公开表面枚举只有 waiting/exploration/inventory/encounter/battle/book/results，没有编辑或权限界面。实际公开 UIView 不挂载管理按钮并禁用游戏输入，战斗按钮的操作由教师后台调用，悬停仍驱动相同骰子/压暗预览。
 
 ## 数据与兼容
 

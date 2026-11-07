@@ -90,10 +90,10 @@ struct MeadowTeacherDashboard:View {
             LazyVGrid(columns:[GridItem(.adaptive(minimum:150))],spacing:10){
                 ForEach(game.actions,id:\.rawValue){action in
                     Button(action.title){game.battle(action)}.buttonStyle(.borderedProminent)
-                        .disabled(game.busy || !c.engine.state.pauseReasons.isEmpty).onHover{game.focus($0 ? action:nil)}
+                        .disabled(!game.canUse(action)).onHover{game.focus($0 ? action:nil)}
                 }
-                ForEach([PartyAction.smallPotion,.largePotion,.shieldPotion,.revivalStone],id:\.rawValue){a in Button(a.title){game.battle(a)}.disabled(game.busy || !c.engine.state.pauseReasons.isEmpty)}
-                Button("结束当前行动"){game.battle(.endTurn)}.disabled(game.busy || !c.engine.state.pauseReasons.isEmpty)
+                ForEach([PartyAction.smallPotion,.largePotion,.shieldPotion,.revivalStone],id:\.rawValue){a in Button(a.title){game.battle(a)}.disabled(!game.canUse(a))}
+                Button("结束当前行动"){game.battle(.endTurn)}.disabled(!game.canUse(.endTurn))
             }
         }.padding().background(.white.opacity(0.8),in:RoundedRectangle(cornerRadius:14))
     }

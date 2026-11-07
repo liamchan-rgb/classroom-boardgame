@@ -62,6 +62,22 @@ public final class ClassroomGameBackend {
         if let encounter,encounterKey==key{return encounter}
         let model=try PartyEncounter(engine:c.engine);encounter=model;encounterKey=key;return model
     }
+    /// Read/validate the same model used by the renderer, without preparing a
+    /// transaction or consuming RNG. Also protects keyboard/other teacher inputs.
+    public func battleTarget(for action:PartyAction,selected:String,role:ClassroomRole)throws->String {
+        try Self.requireTeacher(role)
+        let model=try battleModel(role:role)
+        guard model.state.pauseReasons.isEmpty else{throw GameError("请先继续战斗。")}
+        guard let actor=model.current,model.state.units[actor]?.kind == .player else{throw GameError("请等待怪物行动结束。")}
+        let items:[PartyAction]=[.smallPotion,.largePotion,.shieldPotion,.revivalStone,.endTurn]
+        guard model.playerActions().contains(action) || items.contains(action) else{throw GameError("当前角色没有此技能。")}
+        let ally=model.state.units[selected]?.kind == .player ? selected:actor
+        let enemy=model.state.units[selected]?.kind == .monster ? selected:(model.state.battle?.queue.first{model.state.units[$0]?.kind == .monster && model.state.units[$0]?.isAlive==true} ?? "")
+        let target=model.preferredTarget(for:action,ally:ally,enemy:enemy)
+        let preview=model.preview(action,target:target)
+        guard preview.allowed else{throw GameError(preview.message)}
+        return target
+    }
     public func configureEncounter(node:Int,templates:[String],role:ClassroomRole)throws {
         try Self.requireTeacher(role);guard let c=campaign else{throw GameError("行程未开始。")}
         _=try c.configureEncounter(node:node,templates:templates)

@@ -44,7 +44,10 @@ final class MeadowTeacherCoordinator:ObservableObject {
     var surface:ClassroomPublicSurface {backend.surface}
     var busy:Bool {renderer?.classroomBusy ?? false}
     var ready:Bool {renderer?.classroomReady ?? false}
-    var actions:[PartyAction] {renderer?.classroomActions ?? []}
+    var actions:[PartyAction] {
+        guard let c=campaign,let actor=c.engine.state.battle?.current,c.engine.state.units[actor]?.kind == .player else{return []}
+        return renderer?.classroomActions ?? []
+    }
     var externalConnected:Bool {!externalIDs.isEmpty}
     var modalOpen:Bool {privatePresenter?.presentedViewController != nil && !localOutputPreview}
     init(){
@@ -101,11 +104,19 @@ final class MeadowTeacherCoordinator:ObservableObject {
             revision += 1}
         catch{message=error.localizedDescription}
     }
-    func battle(_ action:PartyAction){
-        guard campaign?.engine.state.pauseReasons.isEmpty==true,!modalOpen else{message="请先关闭后台对话框并继续战斗。";return}
-        do{try renderer?.classroomAction(action,target:selectedTarget,role:.teacher);revision += 1}catch{message=error.localizedDescription}
+    func canUse(_ action:PartyAction)->Bool {
+        guard ready,!busy,!modalOpen else{return false}
+        return (try? backend.battleTarget(for:action,selected:selectedTarget,role:.teacher)) != nil
     }
-    func focus(_ action:PartyAction?){guard campaign?.engine.state.pauseReasons.isEmpty==true else{return};try? renderer?.classroomFocus(action,target:selectedTarget,role:.teacher)}
+    func battle(_ action:PartyAction){
+        guard !busy,!modalOpen,campaign?.engine.state.pauseReasons.isEmpty==true else{message="请先关闭后台对话框并继续战斗。";return}
+        do{let target=try backend.battleTarget(for:action,selected:selectedTarget,role:.teacher);try renderer?.classroomAction(action,target:target,role:.teacher);revision += 1}catch{message=error.localizedDescription}
+    }
+    func focus(_ action:PartyAction?){
+        guard campaign?.engine.state.pauseReasons.isEmpty==true else{return}
+        if let action {guard canUse(action),let target=try? backend.battleTarget(for:action,selected:selectedTarget,role:.teacher) else{return};try? renderer?.classroomFocus(action,target:target,role:.teacher)}
+        else{try? renderer?.classroomFocus(nil,target:selectedTarget,role:.teacher)}
+    }
     func award(){
         guard !busy,let c=campaign else{return}
         do{try backend.apply(.reward(actors:[c.selectedPlayerID],value:ResourceReward(coins:10)),role:.teacher);renderer?.classroomRefresh();message="已向选中成员发放10金币。";revision += 1}catch{message=error.localizedDescription}

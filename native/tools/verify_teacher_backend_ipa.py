@@ -18,7 +18,10 @@ outer=D/'artifact.zip';assert artifact['digest']=='sha256:'+sha(outer.read_bytes
 with zipfile.ZipFile(outer) as z:assert z.testzip() is None;z.extractall(D/'artifact')
 F=D/'artifact';ipa=F/'ClassroomStage2-v0.13-unsigned.ipa'
 assert (F/'source-commit.txt').read_text().strip()==run['head_sha']
-assert 'Executed 305 tests, with 0 failures' in (F/'game-core-tests.log').read_text()
+test_log=(F/'game-core-tests.log').read_text()
+suite_totals={name:int(count) for name,count in re.findall(r"Test Suite '(\w+Tests)\.xctest' passed[^\n]*\n[^\n]*Executed (\d+) tests, with 0 failures",test_log)}
+assert suite_totals=={'MeadowWorldSupportTests':116,'MeadowClassroomSupportTests':10,'MeadowBattleSupportTests':108,'ClassroomGameCoreTests':72},suite_totals
+assert sum(suite_totals.values())==306 and len(re.findall(r"Test Case '[^\n]+' passed",test_log))==306
 assert 'Executed 6 tests, with 0 failures' in (F/'core-tests.log').read_text()
 log=(F/'xcode-build.log').read_text();assert '** ARCHIVE SUCCEEDED **' in log
 for name in ['MeadowTeacherCoordinator.swift','MeadowTeacherDashboard.swift','MeadowPublicOutput.swift','GameViewController.swift']:assert name in log
@@ -44,14 +47,17 @@ with zipfile.ZipFile(ipa) as z,ipa.open('rb') as raw:
     assert z.read(prefix+'sample.pptx').startswith(b'PK')
     for name in ['SceneMap.json','hero-gait.json','meadow-port-provenance.json']:
         assert z.read(prefix+name)==source_file('native/ClassroomProbe/Resources/'+name)
+    for name in ['great-sword-v1.json','legendary-staff-v1.json','reviewed-bow-r7.json']:
+        paths=[n for n in z.namelist() if n.endswith('.bundle/'+name)]
+        assert len(paths)==1 and z.read(paths[0])==source_file('native/Packages/GameCore/Sources/MeadowBattleSupport/Resources/'+name),name
     metal=[n for n in z.namelist() if n.endswith('.metallib')];assert metal and all(z.read(n).startswith(b'MTLB') for n in metal)
     assert z.getinfo(prefix+'Assets.car').file_size>0
     assert not any('/Art/' in n or '/MeadowArt/' in n for n in z.namelist())
     assert not any('embedded.mobileprovision' in n or '_CodeSignature' in n for n in z.namelist())
 record=dict(appVersion='0.13/build14',testedCommit=run['head_sha'],sourceCommit=run['head_sha'],runID=run['id'],runAttempt=run['run_attempt'],artifactID=artifact['id'],
     artifactArchiveSha256=sha(outer.read_bytes()),artifactArchiveBytes=outer.stat().st_size,ipaSha256=sha(ipa.read_bytes()),ipaBytes=ipa.stat().st_size,
-    coreTests={'CurrentDemoAndClassroomBackend':305,'ClassroomProbeCore':6,'failures':0},deviceReleaseArchive=True,arm64=True,executableMode=oct(stat.S_IMODE(mode)),
-    executableSHA256=sha(exe),classicZIP2=True,CRC=True,artSource=manifest['commit'],sourceResourceHashesVerified=len(manifest['assets']),compiledAssetNamesVerified=len(expected),
+    coreTests={'CurrentDemoAndClassroomBackend':306,'ClassroomProbeCore':6,'failures':0,'nativeSuites':suite_totals},deviceReleaseArchive=True,arm64=True,executableMode=oct(stat.S_IMODE(mode)),
+    executableSHA256=sha(exe),classicZIP2=True,CRC=True,artSource=manifest['commit'],sourceResourceHashesVerified=len(manifest['assets']),compiledAssetNamesVerified=len(expected),rigResourceHashesVerified=3,
     metalLibraries={},minimumOS=info['MinimumOSVersion'],sdk=info['DTSDKName'],legacyGameUIRemoved=True,
     newPVEDeviceVerified=False,appLaunched=False,simulatorLaunched=False,externalDisplayVerified=False,
     limitations=['Teacher/public window attachment and native layout need user device screenshots.','Existing two-player Meadow campaign retained; larger classroom parties are not implemented.','Offline preview is a schematic/art composite, not UIKit capture.'])

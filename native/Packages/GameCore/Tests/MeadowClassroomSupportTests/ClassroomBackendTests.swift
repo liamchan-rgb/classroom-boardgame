@@ -82,6 +82,35 @@ final class ClassroomBackendTests:XCTestCase {
         XCTAssertThrowsError(try b.battleModel(role:.publicDisplay))
         XCTAssertEqual(c.snapshot,before)
     }
+    func testTeacherActionsValidateTurnAPTargetAndDoNotConsumeRandom()throws {
+        let b=try fixture(),c=try XCTUnwrap(b.campaign)
+        let node=try XCTUnwrap(c.engine.state.map.nodes.first{$0.kind == .combat})
+        try c.beginTravel(to:node.id)
+        while c.travel != nil {
+            if c.movementRemaining<0.000001{try b.refill(usingCoins:false,role:.teacher)}
+            if !c.isMoving{try c.setPaused(false)}
+            _=try b.advanceTravel(distance:10000,role:.teacher)
+        }
+        _=try c.interactCurrentNode()
+        let model=try b.battleModel(role:.teacher),actor=try XCTUnwrap(model.current)
+        XCTAssertEqual(model.state.units[actor]?.kind,.player)
+        let before=c.snapshot
+        let target=try b.battleTarget(for:.attack,selected:actor,role:.teacher)
+        XCTAssertEqual(model.state.units[target]?.kind,.monster)
+        XCTAssertThrowsError(try b.battleTarget(for:.attack,selected:actor,role:.publicDisplay))
+        XCTAssertEqual(c.snapshot,before);XCTAssertNil(model.pending)
+        try b.apply(.editResources(unit:actor,value:ResourcePatch(ap:0)),role:.teacher)
+        let exhausted=c.snapshot
+        XCTAssertThrowsError(try b.battleTarget(for:.attack,selected:target,role:.teacher))
+        XCTAssertEqual(c.snapshot,exhausted)
+        while let current=model.current,model.state.units[current]?.kind == .player {
+            _=try c.engine.apply(.endTurn(actor:current,timedOut:false))
+        }
+        let enemyTurn=c.snapshot
+        XCTAssertThrowsError(try b.battleTarget(for:.attack,selected:target,role:.teacher))
+        XCTAssertThrowsError(try b.battleTarget(for:.endTurn,selected:target,role:.teacher))
+        XCTAssertEqual(c.snapshot,enemyTurn);XCTAssertNil(model.pending)
+    }
     func testDisplayCannotAdvanceTravelOrClockThroughBackend()throws {
         let b=try fixture(),c=try XCTUnwrap(b.campaign),before=c.snapshot
         XCTAssertThrowsError(try b.advanceTravel(distance:10000,role:.publicDisplay))

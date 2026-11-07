@@ -1221,7 +1221,7 @@ private func refreshCampaignStatus(allowBattleOpen:Bool=true) {
     func classroomPreviewEncounter(_ node:Int?){selectEncounterPreview(node)}
     func classroomAction(_ action:PartyAction,target:String,role:ClassroomRole)throws {
         try ClassroomGameBackend.requireTeacher(role)
-        guard campaign?.engine.state.pauseReasons.isEmpty==true else{throw GameError("请先继续战斗。")}
+        guard !classroomBusy,let campaign,campaign.engine.state.pauseReasons.isEmpty,let actor=campaign.engine.state.battle?.current,campaign.engine.state.units[actor]?.kind == .player else{throw GameError("请等待当前动作结束并继续玩家回合。")}
         battlePreviewView?.classroomAction(action,target:target)
     }
     func classroomFocus(_ action:PartyAction?,target:String,role:ClassroomRole)throws {
