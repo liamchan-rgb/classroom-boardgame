@@ -135,6 +135,16 @@ struct MeadowPublicView:View {
                 }
                 art("MeadowCampForeground").scaledToFill().frame(width:g.size.width,height:g.size.height).clipped().allowsHitTesting(false)
                 VStack { HStack { Spacer();map(date:date).frame(width:230,height:125).opacity(0.85) };Spacer() }.padding(12)
+                if let event {
+                    HStack(spacing:12) {
+                        ForEach(Array(event.dice.enumerated()),id:\.offset) { _,die in
+                            ForEach(Array(die.values.enumerated()),id:\.offset) { _,value in
+                                Text(String(value)).font(.system(size:28,weight:.heavy)).frame(width:48,height:48)
+                                    .background(Color.red.opacity(0.85),in:RoundedRectangle(cornerRadius:9))
+                            }
+                        }
+                    }.frame(maxHeight:.infinity,alignment:.top).padding(.top,18)
+                }
             }.clipShape(RoundedRectangle(cornerRadius:20))
         }
     }
