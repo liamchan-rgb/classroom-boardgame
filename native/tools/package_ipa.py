@@ -30,12 +30,13 @@ def package(app, output):
     if (app / "embedded.mobileprovision").exists():
         raise ValueError("This workflow must package an unsigned app without personal credentials.")
     output.parent.mkdir(parents=True, exist_ok=True)
-    with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+    with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_STORED, allowZip64=False) as archive:
         for path in sorted(app.rglob("*")):
             name = "Payload/" + app.name + "/" + path.relative_to(app).as_posix()
             item = zipfile.ZipInfo(name + "/" if path.is_dir() and not path.is_symlink() else name)
             item.create_system = 3
-            item.compress_type = zipfile.ZIP_DEFLATED
+            item.compress_type = zipfile.ZIP_STORED
+            item.create_version = item.extract_version = 20
             if path.is_symlink():
                 item.external_attr = (stat.S_IFLNK | 0o777) << 16
                 import os

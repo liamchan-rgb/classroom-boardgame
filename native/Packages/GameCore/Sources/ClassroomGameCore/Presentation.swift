@@ -59,6 +59,8 @@ public struct UnitPresentation: Codable, Equatable, Identifiable {
     public var id: String
     public var motion: String
     public var effects: [String]
+    public var healthChange: Int = 0
+    public var shieldChange: Int = 0
 }
 public struct CommittedPresentation: Codable, Equatable, Identifiable {
     public var id: String
@@ -68,6 +70,9 @@ public struct CommittedPresentation: Codable, Equatable, Identifiable {
     public var dice: [DiceResult]
     public var mapMoves: [PublicMapMove] = []
     public var opensBattleAfterArrival: Bool = false
+    /// Sanitized pre-commit values for display timing. Never includes teacher-only state.
+    public var before: PublicGameSnapshot? = nil
+    public var skillID: String? = nil
     public var end: Date { start.addingTimeInterval(1.3) }
     public func isVisible(at date: Date) -> Bool { date >= start && date < end }
 }
@@ -118,6 +123,10 @@ public struct PresentationLedger {
             }
         }
         for unit in snapshot.units where unit.health == 0 && receipt.before.units[unit.id]?.isAlive == true { mark(unit.id,motion:"down") }
+        for id in Array(rows.keys) {
+            rows[id]?.healthChange = (receipt.after.units[id]?.health ?? 0)-(receipt.before.units[id]?.health ?? 0)
+            rows[id]?.shieldChange = (receipt.after.units[id]?.shield ?? 0)-(receipt.before.units[id]?.shield ?? 0)
+        }
         // Actual deltas only; no AP leaks and no guessed teacherReward amount.
         var changes: [String] = []
         for unit in snapshot.units {
@@ -136,6 +145,8 @@ public struct PresentationLedger {
         if dice.contains(where: \.naturalTwenty) { changes.insert("自然20！",at:0) }
         guard !changes.isEmpty || !rows.isEmpty || !dice.isEmpty else { return nil }
         var event = CommittedPresentation(id:key,start:max(now,pending.last?.end ?? now),text:changes.joined(separator:"；"),units:rows.values.sorted { $0.id < $1.id },dice:dice)
+        event.before = try receipt.before.publicSnapshot(catalog:catalog)
+        event.skillID = receipt.events.first(where: { $0.kind == "skill" })?.detail
         let nodes = Dictionary(uniqueKeysWithValues:snapshot.nodes.map { ($0.id,MapPoint(x:$0.x,y:$0.y)) })
         // Parse the engine's committed stops, never the unsubmitted/requested path.
         if let move = receipt.events.first(where: { $0.kind == "move" }) {

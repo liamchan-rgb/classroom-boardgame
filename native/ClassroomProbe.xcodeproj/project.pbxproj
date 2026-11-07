@@ -146,6 +146,36 @@
 			"isa" = "PBXBuildFile";
 			"fileRef" = "D72241D2E71AF360D92ED3F4";
 		};
+		"14E687683930A4A8586F2D28" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "MeadowBridgeActor.swift";
+			"sourceTree" = "<group>";
+		};
+		"AF06BB0A30C64F9F3D8A1C6B" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "14E687683930A4A8586F2D28";
+		};
+		"C14E0CE5BB256CBA7467B2F8" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "MeadowPublicView.swift";
+			"sourceTree" = "<group>";
+		};
+		"7941812D1853D2B85EFF6615" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "C14E0CE5BB256CBA7467B2F8";
+		};
+		"726B233C9A2A426A16E71C45" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "MeadowPresentationControls.swift";
+			"sourceTree" = "<group>";
+		};
+		"9F4859D727B7C57B3E2D5A27" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "726B233C9A2A426A16E71C45";
+		};
 		"06271BAF49532C879AA3C58B" = {
 			"isa" = "PBXFileReference";
 			"lastKnownFileType" = "text.plist.xml";
@@ -192,6 +222,16 @@
 			"isa" = "PBXBuildFile";
 			"fileRef" = "20BEAC8F8173541DA9BDC303";
 		};
+		"1E40454A5FA0D7361B95950A" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "folder";
+			"path" = "Resources/MeadowArt";
+			"sourceTree" = "<group>";
+		};
+		"7AF212852F99AFA6CA70647C" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "1E40454A5FA0D7361B95950A";
+		};
 		"A8792157CB4F27FB949C035F" = {
 			"isa" = "PBXFileReference";
 			"explicitFileType" = "wrapper.application";
@@ -216,11 +256,15 @@
 				"B5421907CB9D8A66E9193821",
 				"874498D15E2C4ECD714CAC49",
 				"D72241D2E71AF360D92ED3F4",
+				"14E687683930A4A8586F2D28",
+				"C14E0CE5BB256CBA7467B2F8",
+				"726B233C9A2A426A16E71C45",
 				"06271BAF49532C879AA3C58B",
 				"6BFC76380CC79F82566884C6",
 				"2BF35B3FB72A3D4E876979D6",
 				"54AE073B4791810725C73209",
 				"20BEAC8F8173541DA9BDC303",
+				"1E40454A5FA0D7361B95950A",
 			);
 			"path" = "ClassroomProbe";
 			"sourceTree" = "<group>";
@@ -285,6 +329,9 @@
 				"47F8E596E5EE7C98D64D5460",
 				"0F511239DFFC2841F9517BE1",
 				"C69FA66D78140FC3F5EC9086",
+				"AF06BB0A30C64F9F3D8A1C6B",
+				"7941812D1853D2B85EFF6615",
+				"9F4859D727B7C57B3E2D5A27",
 			);
 			"runOnlyForDeploymentPostprocessing" = "0";
 		};
@@ -296,6 +343,7 @@
 				"A782B7B15BD1CF048DF4D43E",
 				"BB38697EEA1B34302C3C92D1",
 				"7356E94E3A52E57C04B36D33",
+				"7AF212852F99AFA6CA70647C",
 			);
 			"runOnlyForDeploymentPostprocessing" = "0";
 		};
@@ -345,8 +393,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				"CURRENT_PROJECT_VERSION" = "10";
-				"MARKETING_VERSION" = "0.10";
+				"CURRENT_PROJECT_VERSION" = "12";
+				"MARKETING_VERSION" = "0.12";
 			};
 		};
 		"07CA1E69F6068DEA30A4DA6B" = {
@@ -385,8 +433,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				"CURRENT_PROJECT_VERSION" = "10";
-				"MARKETING_VERSION" = "0.10";
+				"CURRENT_PROJECT_VERSION" = "12";
+				"MARKETING_VERSION" = "0.12";
 			};
 		};
 		"7ED5184A5487DF185E3420D0" = {

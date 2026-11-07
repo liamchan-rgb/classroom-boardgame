@@ -8,7 +8,11 @@ struct PublicSurface: View {
     @ObservedObject var model: PublicDisplayModel
     var body: some View {
         if let frame = model.playFrame {
-            PVEPublicView(frame: frame, image: model.playBook ? model.image : nil, showingBook: model.playBook)
+            if model.meadowPresentation && !model.playBook {
+                MeadowPublicView(frame:frame)
+            } else {
+                PVEPublicView(frame: frame, image: model.playBook ? model.image : nil, showingBook: model.playBook)
+            }
         } else if let example = model.ruleExample {
             GameExamplePublicView(snapshot: example)
         } else {

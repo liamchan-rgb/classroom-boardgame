@@ -30,7 +30,7 @@ def encode(value, level=0):
 
 sources = []
 files = []
-for name in ("App.swift", "DeckRenderer.swift", "TeacherSession.swift", "Views.swift", "RulesLabView.swift", "PVEAppSession.swift", "PVEStyle.swift", "PVEMapView.swift", "PVEPublicView.swift", "PVEPlayView.swift", "PVESheets.swift", "PVEKeyboard.swift", "PVEArt.swift", "NativeVisualValidation.swift"):
+for name in ("App.swift", "DeckRenderer.swift", "TeacherSession.swift", "Views.swift", "RulesLabView.swift", "PVEAppSession.swift", "PVEStyle.swift", "PVEMapView.swift", "PVEPublicView.swift", "PVEPlayView.swift", "PVESheets.swift", "PVEKeyboard.swift", "PVEArt.swift", "NativeVisualValidation.swift", "MeadowBridgeActor.swift", "MeadowPublicView.swift", "MeadowPresentationControls.swift"):
     ref = add("file:" + name, "PBXFileReference", lastKnownFileType="sourcecode.swift", path=name, sourceTree="<group>")
     files.append(ref)
     sources.append(add("build:" + name, "PBXBuildFile", fileRef=ref))
@@ -44,6 +44,9 @@ for name in ("sample.pptx", "ThirdPartyNotices.txt", "design-tokens.json"):
 ref = add("resource:Art", "PBXFileReference", lastKnownFileType="folder", path="Resources/Art", sourceTree="<group>")
 files.append(ref)
 resource_builds.append(add("build:Art", "PBXBuildFile", fileRef=ref))
+ref = add("resource:MeadowArt", "PBXFileReference", lastKnownFileType="folder", path="Resources/MeadowArt", sourceTree="<group>")
+files.append(ref)
+resource_builds.append(add("build:MeadowArt", "PBXBuildFile", fileRef=ref))
 product = add("product", "PBXFileReference", explicitFileType="wrapper.application", includeInIndex="0", path="ClassroomProbe.app", sourceTree="BUILT_PRODUCTS_DIR")
 app_group = add("app-group", "PBXGroup", children=files, path="ClassroomProbe", sourceTree="<group>")
 products_group = add("products-group", "PBXGroup", children=[product], name="Products", sourceTree="<group>")
@@ -75,7 +78,7 @@ for name in ("Debug", "Release"):
                            SUPPORTS_MACCATALYST="NO", SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD="NO",
                            SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD="NO", SWIFT_EMIT_LOC_STRINGS="NO",
                            LD_RUNPATH_SEARCH_PATHS=["$(inherited)", "@executable_path/Frameworks"],
-                           CURRENT_PROJECT_VERSION="10", MARKETING_VERSION="0.10")
+                           CURRENT_PROJECT_VERSION="12", MARKETING_VERSION="0.12")
     target_configs.append(add("target:" + name, "XCBuildConfiguration", name=name, buildSettings=target_settings))
 project_config_list = add("project-config-list", "XCConfigurationList", buildConfigurations=project_configs,
                           defaultConfigurationIsVisible="0", defaultConfigurationName="Release")

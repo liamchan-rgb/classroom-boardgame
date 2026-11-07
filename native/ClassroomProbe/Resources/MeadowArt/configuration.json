@@ -1,0 +1,38 @@
+{
+  "canvasPx": [
+    256,
+    256
+  ],
+  "footAnchorPx": [
+    123,
+    214
+  ],
+  "referenceHeightPx": 132,
+  "layers": [
+    "MeadowBattleHeroWeapon",
+    "MeadowBattleHeroJointUnderlay",
+    "MeadowBattleHeroBodyCore",
+    "MeadowBattleHeroArmNearUpperBody",
+    "MeadowBattleHeroArmNearForearmBody",
+    "MeadowBattleHeroLegNearThighBody",
+    "MeadowBattleHeroLegNearShinBody",
+    "MeadowBattleHeroLegFarThighBody",
+    "MeadowBattleHeroLegFarShinBody",
+    "MeadowBattleHeroWardrobeCore",
+    "MeadowBattleHeroArmNearUpperWardrobe",
+    "MeadowBattleHeroArmNearForearmWardrobe",
+    "MeadowBattleHeroLegNearThighWardrobe",
+    "MeadowBattleHeroLegNearShinWardrobe",
+    "MeadowBattleHeroLegFarThighWardrobe",
+    "MeadowBattleHeroLegFarShinWardrobe",
+    "MeadowBattleHeroHair",
+    "MeadowBattleHeroFace",
+    "MeadowBattleHeroNearHand",
+    "MeadowBattleHeroFarHand"
+  ],
+  "status": "v2-common-joint-parts-candidate",
+  "source": "Art/Parts/P1-Battle/right-idle-v3/assembled.png",
+  "registration": "Art/Templates/P1-Neutral/battle-side/right-idle-r2/registration.json",
+  "jointMasks": "Art/Scenes/MeadowBattle/hero-combat-v2/source/joint-regions.json",
+  "underlay": "imagegen torso core, clipped to concealed source limb regions"
+}

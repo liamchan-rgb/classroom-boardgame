@@ -10,6 +10,7 @@ final class PublicDisplayModel: ObservableObject {
     @Published var ruleExample: PublicGameSnapshot?
     @Published var playFrame: PublicPlayFrame?
     @Published var playBook = false
+    @Published var meadowPresentation = true
 }
 
 @MainActor

@@ -1,0 +1,576 @@
+{
+  "repository": "liamchan-rgb/experiment",
+  "commit": "175c7dfc4a68e62cb9693da8d837b77081619a6b",
+  "files": [
+    {
+      "name": "Hero1Directions.png",
+      "source": "Assets.xcassets/Hero1Directions.imageset/Hero1Directions.png",
+      "sha256": "6f4c3dc116974b24799243d87f70ed483dc398aefc0d5ee81e214a9255a3b702"
+    },
+    {
+      "name": "Hero1Diagonals.png",
+      "source": "Assets.xcassets/Hero1Diagonals.imageset/Hero1Diagonals.png",
+      "sha256": "c5853ac0bfe8ed7fc9d8b7d0a6891638d0e2656d893d2243ecc5c39705ba19dd"
+    },
+    {
+      "name": "MeadowCampFarForest.png",
+      "source": "Assets.xcassets/MeadowCampFarForest.imageset/01-far-forest.png",
+      "sha256": "291fd390cdc894004b8c93370a486069d10527f3cca6bd523367dc5784c11e52"
+    },
+    {
+      "name": "MeadowCampGround.png",
+      "source": "Assets.xcassets/MeadowCampGround.imageset/02-ground.png",
+      "sha256": "f76f1ad3f83f5d6b8b8234f5708a2dc2c90bd42dd0b86de0847ac3176c4b3879"
+    },
+    {
+      "name": "MeadowCampMidground.png",
+      "source": "Assets.xcassets/MeadowCampMidground.imageset/03-midground.png",
+      "sha256": "7c46ac01aeb05956ed3ea9390c0fc07ed2951c551ce019c0523bb455b9f93d34"
+    },
+    {
+      "name": "MeadowCampForeground.png",
+      "source": "Assets.xcassets/MeadowCampForeground.imageset/04-foreground.png",
+      "sha256": "0def1d45ba05d6b316ef901071656d0ceb4310c35027d5c9ed1a68ffcd0b6050"
+    },
+    {
+      "name": "BattleVFXBurst.png",
+      "source": "Assets.xcassets/BattleVFXBurst.imageset/BattleVFXBurst.png",
+      "sha256": "49e110cce4d4ad1ba50115e13f31cb8533d8f95d6de218b963f1941b2728e579"
+    },
+    {
+      "name": "BattleVFXCyanShard.png",
+      "source": "Assets.xcassets/BattleVFXCyanShard.imageset/BattleVFXCyanShard.png",
+      "sha256": "131eb9510b4ba476919109f6089d20e61c1168b793926e587e1061d6d465e31a"
+    },
+    {
+      "name": "BattleVFXGoldEmber.png",
+      "source": "Assets.xcassets/BattleVFXGoldEmber.imageset/BattleVFXGoldEmber.png",
+      "sha256": "f7cd6824d26da3e7aba8a1393565da1e5d16b6d75ae7970b1cd4d22638fcc438"
+    },
+    {
+      "name": "BattleVFXRoundBarrier.png",
+      "source": "Assets.xcassets/BattleVFXRoundBarrier.imageset/BattleVFXRoundBarrier.png",
+      "sha256": "c0a2d67cddd503c9b246f27babe9dbb227d3b403ac3d20e17d2dc3e0bcef3948"
+    },
+    {
+      "name": "BattleVFXHealStar.png",
+      "source": "Assets.xcassets/BattleVFXHealStar.imageset/BattleVFXHealStar.png",
+      "sha256": "5b77229c116010ff4ba69e78729354bf77fdf4700921190a87baa36565e95c2e"
+    },
+    {
+      "name": "BattleVFXHealWisp.png",
+      "source": "Assets.xcassets/BattleVFXHealWisp.imageset/BattleVFXHealWisp.png",
+      "sha256": "5a646584217b283d90c805209a1aa69979da6d89ca71ba23204810130b379fcc"
+    },
+    {
+      "name": "MeadowBattleHeroWeapon.png",
+      "source": "Assets.xcassets/MeadowBattleHeroWeapon.imageset/MeadowBattleHeroWeapon.png",
+      "sha256": "a4a0122c73fba3120e9c4537fd55089195a61469a1c72e098b9f430d10ceaa5c"
+    },
+    {
+      "name": "MeadowBattleHeroJointUnderlay.png",
+      "source": "Assets.xcassets/MeadowBattleHeroJointUnderlay.imageset/MeadowBattleHeroJointUnderlay.png",
+      "sha256": "9ea53c1fe83f78f1270a19f163af29fef647b0db4e1684a975e6306a3897a2e7"
+    },
+    {
+      "name": "MeadowBattleHeroBodyCore.png",
+      "source": "Assets.xcassets/MeadowBattleHeroBodyCore.imageset/MeadowBattleHeroBodyCore.png",
+      "sha256": "40acbcd999ce879a445300755ef1ec25c0c2c38080325c6c5f14776fa94ddde1"
+    },
+    {
+      "name": "MeadowBattleHeroArmNearUpperBody.png",
+      "source": "Assets.xcassets/MeadowBattleHeroArmNearUpperBody.imageset/MeadowBattleHeroArmNearUpperBody.png",
+      "sha256": "1ba79fe1a919311c386f79f182ab77bee88fa3949dc318be3109cbeb664f22e0"
+    },
+    {
+      "name": "MeadowBattleHeroArmNearForearmBody.png",
+      "source": "Assets.xcassets/MeadowBattleHeroArmNearForearmBody.imageset/MeadowBattleHeroArmNearForearmBody.png",
+      "sha256": "e37bd6e21a55d7c8688756b41feee4a77c1126cbbceac93e653958b7102f64d7"
+    },
+    {
+      "name": "MeadowBattleHeroLegNearThighBody.png",
+      "source": "Assets.xcassets/MeadowBattleHeroLegNearThighBody.imageset/MeadowBattleHeroLegNearThighBody.png",
+      "sha256": "22f31602ce77c49aa71989fb63be514863f42ead41003d3b19acd570cfd34de0"
+    },
+    {
+      "name": "MeadowBattleHeroLegNearShinBody.png",
+      "source": "Assets.xcassets/MeadowBattleHeroLegNearShinBody.imageset/MeadowBattleHeroLegNearShinBody.png",
+      "sha256": "34218b1f89cf3c64ec807521cfebf8f3c3d1eb238a945e73f89c33e21ee20203"
+    },
+    {
+      "name": "MeadowBattleHeroLegFarThighBody.png",
+      "source": "Assets.xcassets/MeadowBattleHeroLegFarThighBody.imageset/MeadowBattleHeroLegFarThighBody.png",
+      "sha256": "50ec5f98c5933ab2936b38b081c977785592907e4302c6b69aa5b9019802c384"
+    },
+    {
+      "name": "MeadowBattleHeroLegFarShinBody.png",
+      "source": "Assets.xcassets/MeadowBattleHeroLegFarShinBody.imageset/MeadowBattleHeroLegFarShinBody.png",
+      "sha256": "69d05e9a44dffddfa0d7cc5f6af0afed02cfc589512812fb4268bf95a08a4016"
+    },
+    {
+      "name": "MeadowBattleHeroWardrobeCore.png",
+      "source": "Assets.xcassets/MeadowBattleHeroWardrobeCore.imageset/MeadowBattleHeroWardrobeCore.png",
+      "sha256": "1a946e0db6559c92e8eebcba70f62fccb2325c55afce85f42538625c66efb600"
+    },
+    {
+      "name": "MeadowBattleHeroArmNearUpperWardrobe.png",
+      "source": "Assets.xcassets/MeadowBattleHeroArmNearUpperWardrobe.imageset/MeadowBattleHeroArmNearUpperWardrobe.png",
+      "sha256": "eafcd179b21732f52582d1469f981d65e0a4ca6024cbe49d9de5473b7cb875ca"
+    },
+    {
+      "name": "MeadowBattleHeroArmNearForearmWardrobe.png",
+      "source": "Assets.xcassets/MeadowBattleHeroArmNearForearmWardrobe.imageset/MeadowBattleHeroArmNearForearmWardrobe.png",
+      "sha256": "4d5016f7899a08874c2c5d46fd0dd16f304ced2b5297e8cdb2b8374d9252ab0e"
+    },
+    {
+      "name": "MeadowBattleHeroLegNearThighWardrobe.png",
+      "source": "Assets.xcassets/MeadowBattleHeroLegNearThighWardrobe.imageset/MeadowBattleHeroLegNearThighWardrobe.png",
+      "sha256": "e1c91b3d4c836da3a72d0d311f043f63c48c684c8088e55097b6bace213aaf7e"
+    },
+    {
+      "name": "MeadowBattleHeroLegNearShinWardrobe.png",
+      "source": "Assets.xcassets/MeadowBattleHeroLegNearShinWardrobe.imageset/MeadowBattleHeroLegNearShinWardrobe.png",
+      "sha256": "7ec76ed5aa128a3b98008aa5ec5d03aedb7567211d23afb1fb55aae4f6fb37a5"
+    },
+    {
+      "name": "MeadowBattleHeroLegFarThighWardrobe.png",
+      "source": "Assets.xcassets/MeadowBattleHeroLegFarThighWardrobe.imageset/MeadowBattleHeroLegFarThighWardrobe.png",
+      "sha256": "b5b31b719b9dc5b85012da0f54d47616dadec763e6c5fdd881ea844698910af5"
+    },
+    {
+      "name": "MeadowBattleHeroLegFarShinWardrobe.png",
+      "source": "Assets.xcassets/MeadowBattleHeroLegFarShinWardrobe.imageset/MeadowBattleHeroLegFarShinWardrobe.png",
+      "sha256": "e2990029bf7fe14cd4af8215d8ed86b1623af288330049f197d28ba738027a2f"
+    },
+    {
+      "name": "MeadowBattleHeroHair.png",
+      "source": "Assets.xcassets/MeadowBattleHeroHair.imageset/MeadowBattleHeroHair.png",
+      "sha256": "144d8fa28d23319afe6a1e9560ccc14b8450da25d225361772b0f2cdad65a209"
+    },
+    {
+      "name": "MeadowBattleHeroFace.png",
+      "source": "Assets.xcassets/MeadowBattleHeroFace.imageset/MeadowBattleHeroFace.png",
+      "sha256": "11d54df5f734d6140919bd8f3bc1448795e55e35e3ad0981c05c7248eda28b64"
+    },
+    {
+      "name": "MeadowBattleHeroNearHand.png",
+      "source": "Assets.xcassets/MeadowBattleHeroNearHand.imageset/MeadowBattleHeroNearHand.png",
+      "sha256": "2d69ea1ef28c8209ca81556546e25bfc57bd9f471973c22e4474e0b9a00e3399"
+    },
+    {
+      "name": "MeadowBattleHeroFarHand.png",
+      "source": "Assets.xcassets/MeadowBattleHeroFarHand.imageset/MeadowBattleHeroFarHand.png",
+      "sha256": "c37cbd0984a8b68ffc6f1721997ba33455a2d2bc5d697c2c77f318ec72ca7661"
+    },
+    {
+      "name": "MeadowMonsterSlimeMotion.png",
+      "source": "Assets.xcassets/MeadowMonsterSlimeMotion.imageset/MeadowMonsterSlimeMotion.png",
+      "sha256": "fb422e2359f5785e6e70d4fd0c39f1b80ca314d95287983fea0afd9d2efc758e"
+    },
+    {
+      "name": "MeadowMonsterSlimeDeath.png",
+      "source": "Assets.xcassets/MeadowMonsterSlimeDeath.imageset/MeadowMonsterSlimeDeath.png",
+      "sha256": "609e371bf1e6d425273b131e3b7358a6dfd7f64458d54c40b302009aea4979ed"
+    },
+    {
+      "name": "MeadowMonsterWolfMotion.png",
+      "source": "Assets.xcassets/MeadowMonsterWolfMotion.imageset/MeadowMonsterWolfMotion.png",
+      "sha256": "93b6d0167dc5ae07705326757ec5049703e94094d9afe57d7ed1511ed4b73353"
+    },
+    {
+      "name": "MeadowMonsterWolfDeath.png",
+      "source": "Assets.xcassets/MeadowMonsterWolfDeath.imageset/MeadowMonsterWolfDeath.png",
+      "sha256": "f52ecb672ec7438c44611a14e7d5c619ddf93879e56e6707119423c8c7adb115"
+    },
+    {
+      "name": "MeadowMonsterGoblinArcherMotion.png",
+      "source": "Assets.xcassets/MeadowMonsterGoblinArcherMotion.imageset/MeadowMonsterGoblinArcherMotion.png",
+      "sha256": "91a1a4a5842ed788d347df7834780fadf99fa4e2654694e2b0f6be9525cdb4f7"
+    },
+    {
+      "name": "MeadowMonsterGoblinArcherDeath.png",
+      "source": "Assets.xcassets/MeadowMonsterGoblinArcherDeath.imageset/MeadowMonsterGoblinArcherDeath.png",
+      "sha256": "8bf9585ba67598cc3222b1e38da09c574ec6375bba4e17ba4fd8617c0896ff21"
+    },
+    {
+      "name": "MeadowMonsterStoneGuardianMotion.png",
+      "source": "Assets.xcassets/MeadowMonsterStoneGuardianMotion.imageset/MeadowMonsterStoneGuardianMotion.png",
+      "sha256": "7cd07d0e52e864ef05345573831871f554978ccf5df4a0f219f4d44c53b64530"
+    },
+    {
+      "name": "MeadowMonsterStoneGuardianDeath.png",
+      "source": "Assets.xcassets/MeadowMonsterStoneGuardianDeath.imageset/MeadowMonsterStoneGuardianDeath.png",
+      "sha256": "c7c0805f79c2fd8824178fcd53a6e7c574620e08ba8d9b94520e801137ceb248"
+    },
+    {
+      "name": "MeadowMonsterCaveTrollMotion.png",
+      "source": "Assets.xcassets/MeadowMonsterCaveTrollMotion.imageset/MeadowMonsterCaveTrollMotion.png",
+      "sha256": "15a43234ddd5b234b894aaa51e1578805b034e95c9c6f6aa77f4aa9decec3b44"
+    },
+    {
+      "name": "MeadowMonsterCaveTrollDeath.png",
+      "source": "Assets.xcassets/MeadowMonsterCaveTrollDeath.imageset/MeadowMonsterCaveTrollDeath.png",
+      "sha256": "5028c37ec88f9a85050909b86cbf1dc7f4cea13c2d0e7a8e8947b66ed1a9e0b2"
+    },
+    {
+      "name": "MeadowMonsterRuinDragonMotion.png",
+      "source": "Assets.xcassets/MeadowMonsterRuinDragonMotion.imageset/MeadowMonsterRuinDragonMotion.png",
+      "sha256": "6029cac4e84e3bbfcb559b241083b07fb031f86666fbe659ef8b67a20adea3b2"
+    },
+    {
+      "name": "MeadowMonsterRuinDragonDeath.png",
+      "source": "Assets.xcassets/MeadowMonsterRuinDragonDeath.imageset/MeadowMonsterRuinDragonDeath.png",
+      "sha256": "30191f8fdd08e9fc8ffddbeab73de1898f668d5535f9bd24342ff2a8b67dde20"
+    },
+    {
+      "name": "configuration.json",
+      "source": "Assets.xcassets/MeadowBattleHeroConfigurationV2.dataset/configuration.json",
+      "sha256": "54891fe5a3bcc9fba09bf0727d288286c3d939274d93bb8e4e0257f69885d865"
+    },
+    {
+      "name": "animation.json",
+      "source": "Assets.xcassets/MeadowBattleHeroAnimationV2.dataset/animation.json",
+      "sha256": "0a0c8383dfe6c2c26a7821c2f6a1342b174eb01015a8855fa1e062fbdfd1375c"
+    },
+    {
+      "name": "BattleVFXHealingMicroSheet.png",
+      "source": "Assets.xcassets/BattleVFXHealingMicroSheet.imageset/BattleVFXHealingMicroSheet.png",
+      "sha256": "4cdc69977c64ea81657a8b822ef34143dd62e4b59bed4f864d69aec07f0016f0"
+    },
+    {
+      "name": "BattleVFXHealingStandardSheet.png",
+      "source": "Assets.xcassets/BattleVFXHealingStandardSheet.imageset/BattleVFXHealingStandardSheet.png",
+      "sha256": "3c8413a80fa083e716738820a35dca6859c3f4713dc3d923e0a318274326cd11"
+    },
+    {
+      "name": "BattleVFXHealingStrongSheet.png",
+      "source": "Assets.xcassets/BattleVFXHealingStrongSheet.imageset/BattleVFXHealingStrongSheet.png",
+      "sha256": "04603c7392de3d1d378b075afe1e3a332f779aeac186a3ff221037344dee2b6d"
+    },
+    {
+      "name": "MeadowBattleVFXStarlightPulse.png",
+      "source": "Assets.xcassets/MeadowBattleVFXStarlightPulse.imageset/MeadowBattleVFXStarlightPulse.png",
+      "sha256": "63c7820b3f02d52a4aabb0bcab3626fe45c16f6344184beb65883ef052d905ad"
+    },
+    {
+      "name": "MeadowBattleVFXRally.png",
+      "source": "Assets.xcassets/MeadowBattleVFXRally.imageset/MeadowBattleVFXRally.png",
+      "sha256": "fa1f1bd05843d38d405b25cdd6ca1388a228214df25a79eb99a0604bf764caf8"
+    },
+    {
+      "name": "MeadowBattleVFXSweep.png",
+      "source": "Assets.xcassets/MeadowBattleVFXSweep.imageset/MeadowBattleVFXSweep.png",
+      "sha256": "818bdd0e00fce53322c586f44aeb279a9befe79c2ea410e63338aa6fe7201f8f"
+    },
+    {
+      "name": "MeadowBattleVFXDragonSoulWard.png",
+      "source": "Assets.xcassets/MeadowBattleVFXDragonSoulWard.imageset/MeadowBattleVFXDragonSoulWard.png",
+      "sha256": "ea35846f285765c16215b4fe1534aa00bfc63116c0cdfd2d523809aa74a68052"
+    },
+    {
+      "name": "MeadowBattleVFXDragonScaleWard.png",
+      "source": "Assets.xcassets/MeadowBattleVFXDragonScaleWard.imageset/MeadowBattleVFXDragonScaleWard.png",
+      "sha256": "1e138eb4579c5fefeb6973bcfcb134b7074f5907c6599845b0fbc77f77990875"
+    },
+    {
+      "name": "MeadowRuneSlashAttack01.png",
+      "source": "Assets.xcassets/MeadowRuneSlashAttack01.imageset/MeadowRuneSlashAttack01.png",
+      "sha256": "72c1391c2492321c2a4ce5352cd6afe191b1aee8d00c6ca665654dd6804428d1"
+    },
+    {
+      "name": "MeadowRuneSlashAttack02.png",
+      "source": "Assets.xcassets/MeadowRuneSlashAttack02.imageset/MeadowRuneSlashAttack02.png",
+      "sha256": "7746f775f9d95d35f79f42ecd66c31f59e851965e1570bcfa89b2319627bbd4b"
+    },
+    {
+      "name": "MeadowRuneSlashAttack03.png",
+      "source": "Assets.xcassets/MeadowRuneSlashAttack03.imageset/MeadowRuneSlashAttack03.png",
+      "sha256": "263125e906e8bb9ded0d5e0f6a6f7a5ccd72599cfe97977bd758501e97db3442"
+    },
+    {
+      "name": "MeadowRuneSlashAttack04.png",
+      "source": "Assets.xcassets/MeadowRuneSlashAttack04.imageset/MeadowRuneSlashAttack04.png",
+      "sha256": "beba8efabdafc1430325e8644e35258d455c66f4dda91ce2b7ccc16b55c22419"
+    },
+    {
+      "name": "MeadowRuneSlashAttack05.png",
+      "source": "Assets.xcassets/MeadowRuneSlashAttack05.imageset/MeadowRuneSlashAttack05.png",
+      "sha256": "996bedc5edaad3e4eb2722eb59a7282715dfaf9c1883a7caa3684fe19d978873"
+    },
+    {
+      "name": "MeadowRuneSlashAttack06.png",
+      "source": "Assets.xcassets/MeadowRuneSlashAttack06.imageset/MeadowRuneSlashAttack06.png",
+      "sha256": "823786a024762a8dca63072fe74b9fd057b1db110409239b8e4a99998cb01375"
+    },
+    {
+      "name": "MeadowRuneSlashAttack07.png",
+      "source": "Assets.xcassets/MeadowRuneSlashAttack07.imageset/MeadowRuneSlashAttack07.png",
+      "sha256": "ca0fd07af6e7081e115c73ebc9cc480a12b8cd3987cac18fc9e9dad215319412"
+    },
+    {
+      "name": "MeadowRuneSlashAttack08.png",
+      "source": "Assets.xcassets/MeadowRuneSlashAttack08.imageset/MeadowRuneSlashAttack08.png",
+      "sha256": "a0e9909338b84ad7c963e48506df3a0db03c19831fe7294681b6a1a0cf429653"
+    },
+    {
+      "name": "MeadowRuneSlashAttack09.png",
+      "source": "Assets.xcassets/MeadowRuneSlashAttack09.imageset/MeadowRuneSlashAttack09.png",
+      "sha256": "4bffc33340929be72a779a59f69e1f4fdef90cbf2ab0d7685273b66b2f65a75f"
+    },
+    {
+      "name": "MeadowRuneSlashAttack10.png",
+      "source": "Assets.xcassets/MeadowRuneSlashAttack10.imageset/MeadowRuneSlashAttack10.png",
+      "sha256": "18c439ece74bb50496a6187ce118e6793e6ef5bd24cefe1fe77db89ee5b24097"
+    },
+    {
+      "name": "MeadowRuneSlashAttack11.png",
+      "source": "Assets.xcassets/MeadowRuneSlashAttack11.imageset/MeadowRuneSlashAttack11.png",
+      "sha256": "19bdbccf3337399be4ee8f3fa91638f2f08803e29c1b2cf9adc06c503b5a9b78"
+    },
+    {
+      "name": "MeadowRuneSlashAttack12.png",
+      "source": "Assets.xcassets/MeadowRuneSlashAttack12.imageset/MeadowRuneSlashAttack12.png",
+      "sha256": "c6a35c3d59a095cc034864dd8cd3e7ed150113fe3a0cc85d086e71892eb4f1a8"
+    },
+    {
+      "name": "MeadowRuneSlashAttack13.png",
+      "source": "Assets.xcassets/MeadowRuneSlashAttack13.imageset/MeadowRuneSlashAttack13.png",
+      "sha256": "36dcb6f4e70d1b001d5ece01ceae5404a6ed279c693526e58c8548ebdb77c7b8"
+    },
+    {
+      "name": "MeadowRuneSlashAttack14.png",
+      "source": "Assets.xcassets/MeadowRuneSlashAttack14.imageset/MeadowRuneSlashAttack14.png",
+      "sha256": "81ea92bf262d7be25784c20b31aafe1f5fd918a1fcddf366a703117b9a774112"
+    },
+    {
+      "name": "MeadowRuneSlashAttack15.png",
+      "source": "Assets.xcassets/MeadowRuneSlashAttack15.imageset/MeadowRuneSlashAttack15.png",
+      "sha256": "27ca5c5315a55a46bac2d978e3ff5f0709144573b7a799f9b3530ced5ff3487a"
+    },
+    {
+      "name": "MeadowRuneSlashAttack16.png",
+      "source": "Assets.xcassets/MeadowRuneSlashAttack16.imageset/MeadowRuneSlashAttack16.png",
+      "sha256": "752dc0ce55c13b93b5453a5f7aad33d026a7806e19d54a4f62e36658d9359eca"
+    },
+    {
+      "name": "MeadowRuneSlashAttack17.png",
+      "source": "Assets.xcassets/MeadowRuneSlashAttack17.imageset/MeadowRuneSlashAttack17.png",
+      "sha256": "f4df81482b2c40caa8b0bef65ea79088ee3c574c5d48f0542b183939a0725742"
+    },
+    {
+      "name": "MeadowRuneSlashAttack18.png",
+      "source": "Assets.xcassets/MeadowRuneSlashAttack18.imageset/MeadowRuneSlashAttack18.png",
+      "sha256": "c59a1a42ab9e26311eda427474c9bedb51b806da408f6e14036178608e8dfa49"
+    },
+    {
+      "name": "MeadowRuneSlashAttack19.png",
+      "source": "Assets.xcassets/MeadowRuneSlashAttack19.imageset/MeadowRuneSlashAttack19.png",
+      "sha256": "488f4ed4a302a84c0d6b5ab6dd5aea7f31a03398880dff4d2181de22ed23464f"
+    },
+    {
+      "name": "MeadowRuneSlashAttack20.png",
+      "source": "Assets.xcassets/MeadowRuneSlashAttack20.imageset/MeadowRuneSlashAttack20.png",
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c"
+    },
+    {
+      "name": "MeadowRuneWardCast01.png",
+      "source": "Assets.xcassets/MeadowRuneWardCast01.imageset/MeadowRuneWardCast01.png",
+      "sha256": "adbcc37cf9ad2130b08a49058ecf19e346cb8913752bc8c3d949a59f1853df5b"
+    },
+    {
+      "name": "MeadowRuneWardCast02.png",
+      "source": "Assets.xcassets/MeadowRuneWardCast02.imageset/MeadowRuneWardCast02.png",
+      "sha256": "ef6899bbecf0f82b3a467a7829cb9b0b8005a3e5f054bd39f2afe1293b7d9828"
+    },
+    {
+      "name": "MeadowRuneWardCast03.png",
+      "source": "Assets.xcassets/MeadowRuneWardCast03.imageset/MeadowRuneWardCast03.png",
+      "sha256": "061320336020d18b2de1e3298e3b7d9cbfc5cfdda9c049fcdfa86e2ae40d409d"
+    },
+    {
+      "name": "MeadowRuneWardCast04.png",
+      "source": "Assets.xcassets/MeadowRuneWardCast04.imageset/MeadowRuneWardCast04.png",
+      "sha256": "d1e676ea46b34a2a170bf347bc900b9f36f3bd17d80ab025cfe788f6b8e8547a"
+    },
+    {
+      "name": "MeadowRuneWardCast05.png",
+      "source": "Assets.xcassets/MeadowRuneWardCast05.imageset/MeadowRuneWardCast05.png",
+      "sha256": "01fd746f9ca6b1985bbb15a9dec8a38e63f6d4fdf39e2fbad1e48166b7fdde4d"
+    },
+    {
+      "name": "MeadowRuneWardCast06.png",
+      "source": "Assets.xcassets/MeadowRuneWardCast06.imageset/MeadowRuneWardCast06.png",
+      "sha256": "6e1e69cbf60e752d396f68260df148f2d7d77d87c72acdc5779ab4c8733ee057"
+    },
+    {
+      "name": "MeadowRuneWardCast07.png",
+      "source": "Assets.xcassets/MeadowRuneWardCast07.imageset/MeadowRuneWardCast07.png",
+      "sha256": "85caa5c3989a2d5af7c2c7b183a4c2542c5cbed72ff01663742b7b025938fbd9"
+    },
+    {
+      "name": "MeadowRuneWardCast08.png",
+      "source": "Assets.xcassets/MeadowRuneWardCast08.imageset/MeadowRuneWardCast08.png",
+      "sha256": "ba6f2400bf8569a5dd46402a18b74145185d72b40d63581d0e3e812b7422469d"
+    },
+    {
+      "name": "MeadowRuneWardCast09.png",
+      "source": "Assets.xcassets/MeadowRuneWardCast09.imageset/MeadowRuneWardCast09.png",
+      "sha256": "473ce0987fcaae06a22a768b46188aa51107d088048a6f9b1d6ad3e2731696e4"
+    },
+    {
+      "name": "MeadowRuneWardCast10.png",
+      "source": "Assets.xcassets/MeadowRuneWardCast10.imageset/MeadowRuneWardCast10.png",
+      "sha256": "1c82da3eea13a4a47323b1d666651dfef09ee4cd0384f50efacf28a62b0a405d"
+    },
+    {
+      "name": "MeadowRuneWardCast11.png",
+      "source": "Assets.xcassets/MeadowRuneWardCast11.imageset/MeadowRuneWardCast11.png",
+      "sha256": "cea78bb7e9cce5d66bbe70f12e909c9458c29685140b4ab09f1eecf8e343f332"
+    },
+    {
+      "name": "MeadowRuneWardCast12.png",
+      "source": "Assets.xcassets/MeadowRuneWardCast12.imageset/MeadowRuneWardCast12.png",
+      "sha256": "ac9c266434ddb19a319915279f4375fadc26f34eeeb9d0bec61128e43041bc20"
+    },
+    {
+      "name": "MeadowRuneWardCast13.png",
+      "source": "Assets.xcassets/MeadowRuneWardCast13.imageset/MeadowRuneWardCast13.png",
+      "sha256": "a6ed081527fcede5ac1a2db634912dccc96d4fb98a43db8587512ac94f822c8f"
+    },
+    {
+      "name": "MeadowRuneWardCast14.png",
+      "source": "Assets.xcassets/MeadowRuneWardCast14.imageset/MeadowRuneWardCast14.png",
+      "sha256": "184d3a82b411c933a863f0524288dfb0dc9a0d946de5cd4107540748bfe2660d"
+    },
+    {
+      "name": "MeadowRuneWardCast15.png",
+      "source": "Assets.xcassets/MeadowRuneWardCast15.imageset/MeadowRuneWardCast15.png",
+      "sha256": "7508000063bc90f3f2c18f3692d48ebb2e5a986022d6b3415f3e9433b4093add"
+    },
+    {
+      "name": "MeadowRuneWardCast16.png",
+      "source": "Assets.xcassets/MeadowRuneWardCast16.imageset/MeadowRuneWardCast16.png",
+      "sha256": "350047b9c73727c9ab9cde665096461ca8524cfa527fc523126f89be3fde059f"
+    },
+    {
+      "name": "MeadowRuneWardCast17.png",
+      "source": "Assets.xcassets/MeadowRuneWardCast17.imageset/MeadowRuneWardCast17.png",
+      "sha256": "7735c0161695a50e52ac454babbfd796e025199233bf0e4864a964b1b3b92130"
+    },
+    {
+      "name": "MeadowRuneWardCast18.png",
+      "source": "Assets.xcassets/MeadowRuneWardCast18.imageset/MeadowRuneWardCast18.png",
+      "sha256": "3c21a9e5e2bcd141f31c772550043e3613e4e03c6292954507ad981447fbb211"
+    },
+    {
+      "name": "MeadowRuneWardCast19.png",
+      "source": "Assets.xcassets/MeadowRuneWardCast19.imageset/MeadowRuneWardCast19.png",
+      "sha256": "d1ff40215fb32b8ff260922c3fa771e0a98d0c5385f2a4928866f82c7f9d9e24"
+    },
+    {
+      "name": "MeadowRuneWardCast20.png",
+      "source": "Assets.xcassets/MeadowRuneWardCast20.imageset/MeadowRuneWardCast20.png",
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c"
+    },
+    {
+      "name": "MeadowDragonFlame01.png",
+      "source": "Assets.xcassets/MeadowDragonFlame01.imageset/MeadowDragonFlame01.png",
+      "sha256": "9878c7e5b5805a849f59466341b2e389f39513d9976ade6438769314757edc9d"
+    },
+    {
+      "name": "MeadowDragonFlame02.png",
+      "source": "Assets.xcassets/MeadowDragonFlame02.imageset/MeadowDragonFlame02.png",
+      "sha256": "f590e8f4c99f8208dd6af26b2b8a4df51e6fb9c7b2d9d0dd3862541827f8afed"
+    },
+    {
+      "name": "MeadowDragonFlame03.png",
+      "source": "Assets.xcassets/MeadowDragonFlame03.imageset/MeadowDragonFlame03.png",
+      "sha256": "e87ce5fc32f41d20ec02806bac9fe174c7e80b2ac9d86dbf73513c205f958856"
+    },
+    {
+      "name": "MeadowDragonFlame04.png",
+      "source": "Assets.xcassets/MeadowDragonFlame04.imageset/MeadowDragonFlame04.png",
+      "sha256": "949056be46815a7bf7dedf1bb287cc51b24e4c928ff0966be6d5839a6e3506c6"
+    },
+    {
+      "name": "MeadowDragonFlame05.png",
+      "source": "Assets.xcassets/MeadowDragonFlame05.imageset/MeadowDragonFlame05.png",
+      "sha256": "3b2601536254126e4322ccd37481f2f09b623c11ee13d94df9bed60f9a196a3a"
+    },
+    {
+      "name": "MeadowDragonFlame06.png",
+      "source": "Assets.xcassets/MeadowDragonFlame06.imageset/MeadowDragonFlame06.png",
+      "sha256": "4268541a356fad2b56ead83c479eed39553bd08623743e8278afb4cdee511f38"
+    },
+    {
+      "name": "MeadowDragonFlame07.png",
+      "source": "Assets.xcassets/MeadowDragonFlame07.imageset/MeadowDragonFlame07.png",
+      "sha256": "c59d42740998e63d3b9e80508b2d1bd28a48a0a04cf21f9383df8df5de6202f3"
+    },
+    {
+      "name": "MeadowDragonFlame08.png",
+      "source": "Assets.xcassets/MeadowDragonFlame08.imageset/MeadowDragonFlame08.png",
+      "sha256": "c1cc3994747a179b419b8e4326d43920b48e365de5b09123eac712b6829a7946"
+    },
+    {
+      "name": "MeadowDragonFlame09.png",
+      "source": "Assets.xcassets/MeadowDragonFlame09.imageset/MeadowDragonFlame09.png",
+      "sha256": "02dd5a8390ace12c996a272e4fc0d301d78d0978766ff1d50122184bc86dff4f"
+    },
+    {
+      "name": "MeadowDragonFlame10.png",
+      "source": "Assets.xcassets/MeadowDragonFlame10.imageset/MeadowDragonFlame10.png",
+      "sha256": "03f43d81c5d1b94f92316d4f2c6f6ed6563dadf2e224c284e5dde2f9725043ea"
+    },
+    {
+      "name": "MeadowDragonFlame11.png",
+      "source": "Assets.xcassets/MeadowDragonFlame11.imageset/MeadowDragonFlame11.png",
+      "sha256": "d5e24743933fad35fd2b7fc099970066733e687298e6749c3ced7dfe12fce52b"
+    },
+    {
+      "name": "MeadowDragonFlame12.png",
+      "source": "Assets.xcassets/MeadowDragonFlame12.imageset/MeadowDragonFlame12.png",
+      "sha256": "fe5d1c5ba9d0d0cba2a74faac380862c2e359cf2b438a0969e91b13950e7b70a"
+    },
+    {
+      "name": "MeadowDragonFlame13.png",
+      "source": "Assets.xcassets/MeadowDragonFlame13.imageset/MeadowDragonFlame13.png",
+      "sha256": "633b5e8dd143b167f1ed2ab290806523969d86461254fed729a8978b58505bce"
+    },
+    {
+      "name": "MeadowDragonFlame14.png",
+      "source": "Assets.xcassets/MeadowDragonFlame14.imageset/MeadowDragonFlame14.png",
+      "sha256": "0cd4fc1ec41451e130d0356f4a37e2ac95c2122fe5530e178fa2aff6ff3d55c1"
+    },
+    {
+      "name": "MeadowDragonFlame15.png",
+      "source": "Assets.xcassets/MeadowDragonFlame15.imageset/MeadowDragonFlame15.png",
+      "sha256": "961e13d52a7550a9cd2957848b924e64a0d7a5a54c61c16133e6c36cade04927"
+    },
+    {
+      "name": "MeadowDragonFlame16.png",
+      "source": "Assets.xcassets/MeadowDragonFlame16.imageset/MeadowDragonFlame16.png",
+      "sha256": "2ed819b3995f62985e231c971039b2d659839d82c50b9a12a092016daba6a7f2"
+    },
+    {
+      "name": "MeadowDragonFlame17.png",
+      "source": "Assets.xcassets/MeadowDragonFlame17.imageset/MeadowDragonFlame17.png",
+      "sha256": "660f4d89760c2cb3af3a2957c07ffd1eb34af029dd563284b4491f3c52cd721f"
+    },
+    {
+      "name": "MeadowDragonFlame18.png",
+      "source": "Assets.xcassets/MeadowDragonFlame18.imageset/MeadowDragonFlame18.png",
+      "sha256": "2ada36a83737861a5aa91a523085253412636e6aa614e05d3349f79178906c3b"
+    },
+    {
+      "name": "MeadowDragonFlame19.png",
+      "source": "Assets.xcassets/MeadowDragonFlame19.imageset/MeadowDragonFlame19.png",
+      "sha256": "bdb8d18c79e68c0ca4c944975a5d1c6e7565534242bfe8d6834173f2bb05bdee"
+    },
+    {
+      "name": "MeadowDragonFlame20.png",
+      "source": "Assets.xcassets/MeadowDragonFlame20.imageset/MeadowDragonFlame20.png",
+      "sha256": "b32aeee2fc20b805853ca9200ca075147023c5eb240c34a46e27966f9c45d323"
+    }
+  ]
+}

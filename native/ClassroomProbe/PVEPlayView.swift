@@ -15,6 +15,7 @@ struct PVEPlayView:View {
         GeometryReader { geometry in
             VStack(alignment:.leading,spacing:12) {
                 header
+                MeadowPresentationControls(display:teacher.display)
                 Text(model.message).font(.callout).lineLimit(2).frame(maxWidth:.infinity,alignment:.leading)
                 if let play = model.play, let board = try? play.engine.state.teacherBoard(catalog:play.engine.catalog) {
                     HStack(alignment:.top,spacing:14) {
@@ -40,7 +41,7 @@ struct PVEPlayView:View {
     }
     private var header:some View {
         HStack(spacing:14) {
-            Text("晴空学园 · v0.10").font(.title2.bold())
+            Text("晴空学园 · v0.12").font(.title2.bold())
             if let state = model.state {
                 Text(state.phase.displayName).font(.headline)
                 if let battle = state.battle {
