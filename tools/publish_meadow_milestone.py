@@ -37,7 +37,7 @@ with zipfile.ZipFile(archive) as z:
     ipa='ClassroomStage2-v0.12.1-unsigned.ipa';(D/ipa).write_bytes(z.read(ipa))
 assert sha(D/ipa)==record['ipaSha256']
 for name in ['meadow-public-normal.gif','meadow-public-contact-sheet.png','meadow-fixtures.json']:
-    shutil.copy2(R/'docs/integration/meadow-review-v0.12'/name,D/name)
+    shutil.copy2(R/'docs/integration/meadow-review-v0.12.1'/name,D/name)
 (D/'verification.json').write_text(json.dumps(record,indent=2)+'\n')
 selected=[p.name for p in D.iterdir()];selection=T/'selected.json';selection.write_text(json.dumps(selected))
 run('git','config','user.name','github-actions[bot]');run('git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com')

@@ -86,6 +86,8 @@ def draw_battle(age):
         cue=next((c for c in e['units'] if c['id']==u['id']),None)
         if u['id']=='p1':v=approach(age);x+=(tx-x-size*.65)*v;y+=(ty-y)*v
         d=ImageDraw.Draw(bg);d.ellipse((x-24,y+size*.34-4,x+24,y+size*.34+4),fill=(0,0,0,100))
+        if cue and u['id']=='p1' and age>=.72:
+            index=min(19,int((age-.72)/.58*20));heal=crop('BattleVFXHealingStandardSheet',index,5,4);stamp(bg,heal,(x,y),(size*1.8,size*1.8))
         if u['player']:
             clip='attack' if u['id']=='p1' else 'idle';progress=min(1,max(0,age/.9)) if clip=='attack' else (age%2.4)/2.4
             art=render(clip,progress);stamp(bg,art,(x,y-size*.16),(size*1.65,size*1.65))
@@ -95,10 +97,10 @@ def draw_battle(age):
             if not dead or age<1.26:stamp(bg,crop('MeadowMonsterSlime'+('Death' if dead else 'Motion'),index,8,5 if dead else 7),(x,y-size*.15),(size*1.7,size*1.7))
         if u['shield']>0:
             alpha=min(1,max(0,(age-.72)/.25));shield=Image.new('RGBA',stage);ImageDraw.Draw(shield).ellipse((x-size*.575,y-size*.675,x+size*.575,y+size*.475),outline=(50,190,255,round(alpha*220)),width=2);bg.alpha_composite(shield)
-        if cue and u['id']=='p1':
-            index=min(19,int(age/1.3*20));heal=crop('BattleVFXHealingStandardSheet',index,5,4);stamp(bg,heal,(x,y),(size*1.8,size*1.8))
+        if cue and not u['player'] and age>=.22:
+            progress=(age-.22)/.24*.5 if age<.46 else .5+(age-.46)/.84*.5
+            index=min(19,int(progress*20));fx=image(f'MeadowRuneSlashAttack{index+1:02d}');stamp(bg,fx,(x,y),(size*1.8,size*1.8))
         if cue and not u['player'] and age>=.46:
-            index=min(19,int((age-.46)/.84*20));fx=image(f'MeadowRuneSlashAttack{index+1:02d}');stamp(bg,fx,(x,y),(size*1.8,size*1.8))
             t=min(1,(age-.46)/.64);d=ImageDraw.Draw(bg)
             for i in range(18):
                 angle=i*2.399;radius=size*(.1+t*.9);px=x+math.cos(angle)*radius;py=y+math.sin(angle)*radius*.6-t*size*.25;d.rectangle((px,py,px+2,py+4),fill=(245,207,80,round(255*(1-t))) if i%3==0 else (80,205,255,round(255*(1-t))))
