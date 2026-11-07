@@ -9,11 +9,9 @@ struct MeadowTeacherDashboard:View {
     @ObservedObject var game:MeadowTeacherCoordinator
     @State private var selectingNode=false
     @State private var fullPreview=false
-    @State private var teamsOpen=false
     var body:some View {
         workspace(fullScreen:false).padding(8).background(GameTheme.background)
             .fullScreenCover(isPresented:$fullPreview){workspace(fullScreen:true).background(GameTheme.background)}
-            .sheet(isPresented:$teamsOpen){MeadowTeamConsole(game:game)}
             .onChange(of:fullPreview){_,value in game.localOutputPreview=value}
     }
     private var inBattle:Bool {game.campaign?.engine.state.battle != nil}
@@ -32,7 +30,7 @@ struct MeadowTeacherDashboard:View {
                     Divider()
                     Button("调整生命与资源"){game.editResources()}.disabled(game.busy || game.campaign==nil)
                     Button("奖励10金币"){game.award()}.disabled(game.busy || game.campaign==nil)
-                    Button("队伍与仓库"){teamsOpen=true}.disabled(!game.ready || game.busy)
+                    Button("队伍与仓库"){game.openTeamConsole()}.disabled(!game.ready || game.busy)
                     Button("路线与结算"){game.operation(.route)}.disabled(!game.ready || game.busy)
                     Divider()
                     Button("编辑选中地点"){if let id=game.selectedNode{game.operation(.editNode(id))}}.disabled(game.selectedNode==nil || game.campaign?.travel != nil || inBattle)

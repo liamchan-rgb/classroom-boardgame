@@ -5,6 +5,7 @@ import ClassroomGameCore
 /// only the resulting game state and never this form or its resource controls.
 struct MeadowTeamConsole:View {
     @ObservedObject var game:MeadowTeacherCoordinator
+    var onClose:(()->Void)?
     @Environment(\.dismiss) private var dismiss
     @State private var names:[String:String]=[:]
     @State private var members:[String:String]=[:]
@@ -72,7 +73,7 @@ struct MeadowTeamConsole:View {
                     }
                 }
                 Section{Text(game.message).foregroundStyle(.secondary)}
-            }.navigationTitle("队伍与仓库").toolbar{Button("完成"){dismiss()}}.onAppear{reload()}
+            }.navigationTitle("队伍与仓库").toolbar{Button("完成"){if let onClose{onClose()}else{dismiss()}}}.onAppear{reload()}
         }
     }
     private func reload(){names=Dictionary(uniqueKeysWithValues:teams.map{($0.id,$0.name)});members=Dictionary(uniqueKeysWithValues:players.map{($0.id,$0.teamID ?? "party")})}

@@ -62,7 +62,7 @@ assert 'MeadowTeacherPreviewFrame(map:map' in game and 'UIImage(cgImage:image).d
 assert 'format.opaque=false' in game and 'ClassroomPreviewPolicy.refreshOverlay' in game
 assert 'frame.mapRect' in mirror and 'frame.overlay' in mirror
 scene=read('Meadow/Game/GameScene.swift');team=read('MeadowTeamConsole.swift');stage=read('Meadow/Game/MeadowPartyStageView.swift')
-assert 'MeadowTeamConsole' not in public and 'teamsOpen=true' in dashboard
+assert 'MeadowTeamConsole' not in public and 'game.openTeamConsole()' in dashboard
 assert 'campaign?.playerIDs.count ?? 3' in scene and 'count:max(3,campaign?.playerIDs.count ?? 3)' in scene
 assert 'let ids=value.players.map' in stage and 'playerIDs+monsterIDs' in stage
 assert '(0..<7).map' in game

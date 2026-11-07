@@ -206,6 +206,12 @@ final class MeadowTeacherCoordinator:ObservableObject {
         if let action {guard canUse(action),let target=try? backend.battleTarget(for:action,selected:selectedTarget,role:.teacher) else{return};try? renderer?.classroomFocus(action,target:target,role:.teacher)}
         else{try? renderer?.classroomFocus(nil,target:selectedTarget,role:.teacher)}
     }
+    func openTeamConsole(){
+        guard !busy,!modalOpen,let presenter=presentationHost else{return}
+        let screen=UIHostingController(rootView:MeadowTeamConsole(game:self,onClose:{[weak self] in self?.presentationHost?.dismiss(animated:true)}))
+        screen.modalPresentationStyle = .formSheet;screen.preferredContentSize=CGSize(width:900,height:740)
+        presenter.present(screen,animated:true)
+    }
     func teamCommand(_ command:GameCommand){
         guard !busy,let c=campaign,c.travel==nil else{message="请先抵达道路目的地，再调整组队或仓库。";return}
         do{try c.checkpoint();try backend.apply(command,role:.teacher);renderer?.classroomRefresh();message="组队操作已保存。";revision += 1}catch{message=error.localizedDescription}
