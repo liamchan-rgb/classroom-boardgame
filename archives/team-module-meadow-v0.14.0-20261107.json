@@ -1,0 +1,58 @@
+{
+  "version": "0.14.0/build19",
+  "sourceBranch": "feat/teacher-backend-meadow-v0.13",
+  "sourceSnapshotCommit": "0d266cc2b1874a2a9c337a3fd4758a7f771a170f",
+  "compiledCommit": "99b25d16d0e40ed6ddfe094b91bbfa16945aa8e1",
+  "tag": "archive-team-module-meadow-v0.14.0-20261107",
+  "buildRun": 42375834060,
+  "archiveRun": 42376363859,
+  "archiveCommit": "5a314ebd8da584a173b7c2139cbfd328f3e3e1fa",
+  "archiveBytes": 437420782,
+  "archiveSHA256": "4ac61ae8eeab67ae7b2f7bb956e8a00f77af8c80b4b6b11221963281ae7018fd",
+  "coreTests": {
+    "CurrentDemoAndClassroomBackend": 329,
+    "ClassroomProbeCore": 6,
+    "failures": 0,
+    "nativeSuites": {
+      "MeadowWorldSupportTests": 116,
+      "MeadowClassroomSupportTests": 33,
+      "MeadowBattleSupportTests": 108,
+      "ClassroomGameCoreTests": 72
+    }
+  },
+  "additionalPythonCITests": 4,
+  "ipaBytes": 62227227,
+  "ipaSha256": "f60a1f9fb1b856554453316d5909b99a8da854acbbfe753b67c1b0410300dec9",
+  "minimumOS": "27.0",
+  "publicGETChecks": [
+    {
+      "url": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/5a314ebd8da584a173b7c2139cbfd328f3e3e1fa/archive-team-module-meadow-v0.14.0-20261107/ClassroomStage2-v0.14.0-unsigned.ipa",
+      "bytes": 62227227,
+      "sha256": "f60a1f9fb1b856554453316d5909b99a8da854acbbfe753b67c1b0410300dec9",
+      "status": 200
+    },
+    {
+      "url": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/5a314ebd8da584a173b7c2139cbfd328f3e3e1fa/archive-team-module-meadow-v0.14.0-20261107/team-module-normal.gif",
+      "bytes": 434322,
+      "sha256": "98a8a01f9a11b503fb2c69428f6825b645fd2a8f36a16dff35f887071ee14f23",
+      "status": 200
+    }
+  ],
+  "bundleRestoreVerified": true,
+  "allArchivePublicBytesVerified": true,
+  "ipaURL": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/5a314ebd8da584a173b7c2139cbfd328f3e3e1fa/archive-team-module-meadow-v0.14.0-20261107/ClassroomStage2-v0.14.0-unsigned.ipa",
+  "gifURL": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/5a314ebd8da584a173b7c2139cbfd328f3e3e1fa/archive-team-module-meadow-v0.14.0-20261107/team-module-normal.gif",
+  "archiveURL": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/5a314ebd8da584a173b7c2139cbfd328f3e3e1fa/archive-team-module-meadow-v0.14.0-20261107/README.md",
+  "scope": "One to six students, private atomic team configuration/split/merge, same-team resource transfers and warehouses, per-team averaged movement pools, dynamic map/battle/inventory participants and separate teacher-only p7 join API.",
+  "deferred": [
+    "Book player health/AP/coins total <=10% of public area.",
+    "Teacher AP/coin grants while on book page."
+  ],
+  "limitations": [
+    "No device CPU/GPU timing or touch responsiveness measurement was performed.",
+    "User-reported TV/disconnect misalignment is addressed in code; real AirPlay/TV/disconnect validation needs user screenshots.",
+    "P3-P7 reuse existing approved character resources; distinct character art remains missing. Host joining is a teacher-only backend API; no host enable UI in this version.",
+    "Offline review demonstrates fixed-canvas geometry; it is not UIKit capture or proof of device repair.",
+    "No App, simulator, device or external-display runtime validation."
+  ]
+}
