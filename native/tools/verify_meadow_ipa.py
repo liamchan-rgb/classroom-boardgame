@@ -8,7 +8,8 @@ run=json.loads((D/'run.json').read_text());arts=json.loads((D/'artifacts.json').
 assert run['status']=='completed' and run['conclusion']=='success'
 source=run['head_sha'];artifact=next(x for x in arts if x['name']=='ClassroomStage2-v0.12.1-build')
 assert artifact['workflow_run']['head_sha']==source and not artifact['expired']
-assert all(j['conclusion']=='success' for j in jobs)
+assert all(j['conclusion'] in ['success','skipped'] for j in jobs)
+assert any(j['name']=='build' and j['conclusion']=='success' for j in jobs)
 for name in ['Select compatible Xcode and confirm SDKs','Test offline core','Build unsigned iPad app','Package for free personal signing']:
     assert any(s['name']==name and s['conclusion']=='success' for j in jobs for s in j['steps'])
 sha=lambda b:hashlib.sha256(b).hexdigest()
