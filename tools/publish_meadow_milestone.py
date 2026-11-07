@@ -70,7 +70,7 @@ for suffix in ['.manifest.json','.zip.sha256','.恢复说明.md']:
     source=output.with_suffix(suffix) if suffix!='.zip.sha256' else output.with_suffix('.zip.sha256')
     shutil.copy2(source,transport/source.name)
 for p in D.iterdir():shutil.copy2(p,transport/p.name)
-(transport/'README.md').write_text(f'''# Meadow preview and drag v0.13.4
+(transport/'README.md').write_text(f'''# Meadow single-page teacher workspace v0.13.4
 
 Source snapshot/tag: `{current}` / `{milestone}`.
 Actual device Release compiled commit: `{record['testedCommit']}`.
@@ -95,7 +95,7 @@ for file in sorted(transport.iterdir()):
     run('git','update-index','--add','--cacheinfo','100644',blob,milestone+'/'+file.name,env=env)
     rows.append(dict(file=file.name,bytes=file.stat().st_size,sha256=sha(file)))
 tree=run('git','write-tree',env=env)
-commit=run('git','commit-tree',tree,'-p',parent,'-m','Archive verified Meadow preview and drag v0.13.4')
+commit=run('git','commit-tree',tree,'-p',parent,'-m','Archive verified single-page teacher workspace v0.13.4')
 run('git','push','origin',commit+':refs/heads/archive-assets')
 run('git','push','origin','refs/tags/'+milestone)
 # Verify all public bytes with a full, unauthenticated GET, including every part.

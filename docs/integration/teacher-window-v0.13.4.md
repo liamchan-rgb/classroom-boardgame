@@ -9,3 +9,7 @@
 本轮保持960×540/30Hz教师回传与电视原生60Hz目标。完整规则测试、设备Release归档和包检以teacher-window-v0.13.4-build.json成功记录为准。仅做静态布局/离线示意审核，不启动App/模拟器/实机，实际点击、投屏隔离和屏幕布局由用户安装复核。正常GIF明确是离线界面结构示意，不称UIKit截图。缺美术只登记。
 
 后两项仍为绘本生命/AP/金币状态总占画面≤10%；教师绘本页发放AP/金币，本轮未实施。
+
+## 实际构建核验
+
+run42365112217 attempt1、实际编译`2d6607489fa9f353c108d8b63fa98c616a0942b4`成功，317规则/后台+6绘本核心零失败、设备Release归档通过。版本0.13.4/build18、最低iPadOS27.0、SDKiphoneos27.2。arm64/755/经典ZIP2.0/CRC、568源资源SHA/281编译名称/3挂载JSON与Metal通过；可执行文件不同于build17。IPA 62106787字节，SHA256 `7293052f23de2149081c45304da1f70d7cd2762a919e3e12542bccff08ae3abc`。完整公开GET与存档结果在archives/teacher-window-meadow-v0.13.4-20261107.json收尾记录。
