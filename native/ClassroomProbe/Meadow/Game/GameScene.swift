@@ -2,6 +2,7 @@ import SpriteKit
 import Darwin
 import ClassroomGameCore
 import MeadowWorldSupport
+import MeadowClassroomSupport
 
 final class GameScene: SKScene {
     var classroomAdvanceTravel:((Double)throws->[OperationReceipt])?
@@ -628,6 +629,13 @@ final class GameScene: SKScene {
     func handleTap(inView point: CGPoint) {
         guard world != nil, gaitTest == nil else { return }
         handleWorldTap(world.convert(CGPoint(x: point.x, y: size.height - point.y), from: self))
+    }
+
+    func classroomWorldPoint(_ point:CGPoint)->CGPoint? {
+        guard let world else{return nil}
+        let projection=MeadowViewport(world:world,scene:self,viewSize:size)
+        return ClassroomCanvas.unproject(point,origin:projection.origin,
+            xAxis:CGPoint(x:projection.xAxis.dx,y:projection.xAxis.dy),yAxis:CGPoint(x:projection.yAxis.dx,y:projection.yAxis.dy))
     }
 
     private func handleWorldTap(_ location: CGPoint) {

@@ -63,17 +63,17 @@ jobs:
           lipo -archs "$app_path/ClassroomProbe" | tee artifacts/architectures.txt
           /usr/bin/assetutil --info "$app_path/Assets.car" > artifacts/assets-info.json
           test "$(lipo -archs "$app_path/ClassroomProbe")" = arm64
-          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app_path/Info.plist")" = "0.13"
-          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$app_path/Info.plist")" = "14"
-          python3 native/tools/package_ipa.py "$app_path" artifacts/ClassroomStage2-v0.13-unsigned.ipa
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app_path/Info.plist")" = "0.13.1"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$app_path/Info.plist")" = "15"
+          python3 native/tools/package_ipa.py "$app_path" artifacts/ClassroomStage2-v0.13.1-unsigned.ipa
           cp native/安装与真机验收.md artifacts/
-          cp docs/integration/teacher-backend-v0.13.md artifacts/v0.13-integration.md
+          cp docs/integration/display-mirror-v0.13.1.md artifacts/v0.13.1-integration.md
           printf '%s\n' "$GITHUB_SHA" > artifacts/source-commit.txt
       - name: Retain IPA and diagnostics briefly
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: ClassroomStage2-v0.13-build
+          name: ClassroomStage2-v0.13.1-build
           path: artifacts/
           retention-days: 14
           if-no-files-found: warn

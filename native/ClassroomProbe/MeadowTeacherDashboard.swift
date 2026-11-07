@@ -2,6 +2,7 @@ import SwiftUI
 import ClassroomGameCore
 import MeadowWorldSupport
 import MeadowBattleSupport
+import MeadowClassroomSupport
 
 struct MeadowTeacherDashboard:View {
     @ObservedObject var game:MeadowTeacherCoordinator
@@ -11,7 +12,7 @@ struct MeadowTeacherDashboard:View {
         ScrollView {
             VStack(alignment:.leading,spacing:16){
                 HStack {
-                    Text("教师游戏后台 · v0.13").font(.title.bold())
+                    Text("教师游戏后台 · v0.13.1").font(.title.bold())
                     Spacer();Text(game.externalConnected ? "公开屏幕已连接":"当前可在本机预览")
                 }
                 Text(game.message).foregroundStyle(.secondary)
@@ -21,13 +22,6 @@ struct MeadowTeacherDashboard:View {
                     Button("保存"){game.operation(.save)}.disabled(!game.ready || game.busy)
                     Button("暂停 / 继续移动"){game.operation(.pauseOrResume)}.disabled(!game.ready || game.busy)
                 }.buttonStyle(ClassroomButtonStyle())
-                if game.renderer != nil {
-                    if !game.externalConnected && !fullPreview {
-                        PublicSurface(model:TeacherSession.shared.display,game:game).aspectRatio(16/9,contentMode:.fit)
-                            .clipShape(RoundedRectangle(cornerRadius:16))
-                        Button("全屏查看公开游戏界面"){fullPreview=true}.buttonStyle(ClassroomButtonStyle(primary:true))
-                    }else{Text("下方是教师控制地图。投放端不显示这些操作按钮或编辑表单。").font(.callout)}
-                }
                 if let campaign=game.campaign {
                     HStack {
                         ForEach(campaign.engine.state.players){unit in
@@ -35,7 +29,7 @@ struct MeadowTeacherDashboard:View {
                         }
                         Spacer();Text("移动 \(Int(ceil(campaign.movementRemaining)))/\(Int(ceil(campaign.movementCapacity)))")
                     }.buttonStyle(.borderedProminent)
-                    Toggle("选取地点进行后台编辑",isOn:$selectingNode)
+                    Toggle("选取地点进行后台编辑",isOn:$selectingNode).onChange(of:selectingNode){_,value in if value{game.project(.exploration)}}
                     HStack {
                         Text("投放镜头")
                         Button("缩小"){game.operation(.zoom(-1))}
@@ -45,7 +39,12 @@ struct MeadowTeacherDashboard:View {
                         Button("↑"){game.operation(.pan(CGPoint(x:0,y:60)))}
                         Button("↓"){game.operation(.pan(CGPoint(x:0,y:-60)))}
                     }.buttonStyle(.bordered).disabled(!game.ready || game.busy)
-                    TeacherControlMap(game:game,selectingNode:selectingNode).frame(height:310)
+                    if game.renderer != nil && !fullPreview {
+                        TeacherGamePreview(game:game,selectingNode:selectingNode).aspectRatio(16/9,contentMode:.fit).clipShape(RoundedRectangle(cornerRadius:14))
+                        Button("全屏查看公开游戏界面"){fullPreview=true}.buttonStyle(ClassroomButtonStyle(primary:true))
+                    }
+                    Text(selectingNode ? "点击上方游戏画面选择地点，修改表单只在教师端出现。":"点击上方实际游戏画面的道路即可移动。").font(.callout)
+                    if let id=game.selectedNode {Text("后台选中：\(id) · \(campaign.engine.state.map.nodes.first{$0.id==id}?.name ?? "地点")").font(.callout.bold())}
                     HStack {
                         Button("投放探索地图"){game.project(.exploration)}
                         Button("投放选中怪物预览"){if let id=game.selectedNode{game.project(.encounter(id))}}.disabled(game.selectedNode==nil || campaign.engine.state.battle != nil)
@@ -73,11 +72,11 @@ struct MeadowTeacherDashboard:View {
         }.background(GameTheme.background).foregroundStyle(GameTheme.ink)
         .fullScreenCover(isPresented:$fullPreview){
             ZStack(alignment:.topTrailing){
-                PublicSurface(model:TeacherSession.shared.display,game:game).ignoresSafeArea()
+                PublicSurface(model:TeacherSession.shared.display,game:game,teacherPreview:true).ignoresSafeArea()
                 Button("返回教师后台"){fullPreview=false}.buttonStyle(.borderedProminent).padding()
             }
         }
-        .onChange(of:game.externalConnected){_,connected in if connected{fullPreview=false}}
+
         .onChange(of:fullPreview){_,value in game.localOutputPreview=value}
     }
     private func battleControls(_ c:MeadowCampaignSession)->some View {
@@ -99,40 +98,18 @@ struct MeadowTeacherDashboard:View {
     }
 }
 
-private struct TeacherControlMap:View {
+private struct TeacherGamePreview:View {
     @ObservedObject var game:MeadowTeacherCoordinator
     let selectingNode:Bool
     var body:some View {
-        GeometryReader{g in
-            if let c=game.campaign {
-                let layout=c.snapshot.layout
-                ZStack {
-                    Color(red:0.13,green:0.23,blue:0.17)
-                    Canvas{context,size in
-                        for road in layout.roads {
-                            var path=Path()
-                            for (i,p) in road.points.enumerated(){let point=CGPoint(x:p.x/1280*size.width,y:p.y/layout.coordinateHeight*size.height);if i==0{path.move(to:point)}else{path.addLine(to:point)}}
-                            context.stroke(path,with:.color(.yellow.opacity(0.6)),lineWidth:5)
-                        }
-                    }
-                    ForEach(c.engine.state.map.nodes){node in
-                        VStack(spacing:2){Image(systemName:nodeIcon(node.kind));Text("\(node.id) · "+node.name).font(.caption)}
-                            .foregroundStyle(game.selectedNode==node.id ? .yellow:.white).padding(5)
-                            .background(.black.opacity(0.55),in:RoundedRectangle(cornerRadius:8))
-                            .position(x:node.x*g.size.width,y:node.y*g.size.height)
-                    }
-                    ForEach(c.playerIDs,id:\.self){id in
-                        let point=c.position(of:id)
-                        Text(id.uppercased()).font(.caption.bold()).padding(5).background(.blue,in:Circle()).foregroundStyle(.white)
-                            .position(x:point.x/1280*g.size.width,y:point.y/layout.coordinateHeight*g.size.height)
-                    }
-                }.clipShape(RoundedRectangle(cornerRadius:14)).contentShape(Rectangle())
-                .gesture(SpatialTapGesture().onEnded{value in
-                    let x=min(1,max(0,value.location.x/g.size.width)),y=min(1,max(0,value.location.y/g.size.height))
-                    if selectingNode {game.selectedNode=c.engine.state.map.nodes.min{hypot($0.x-x,$0.y-y)<hypot($1.x-x,$1.y-y)}?.id}
-                    else{game.move(x:x,y:y)}
-                })
+        PublicSurface(model:TeacherSession.shared.display,game:game,teacherPreview:true)
+            .overlay {
+                GeometryReader { geometry in
+                    Color.clear.contentShape(Rectangle()).gesture(SpatialTapGesture().onEnded{ value in
+                        guard let point=ClassroomCanvas.point(value.location,in:geometry.size) else{return}
+                        game.canvasTap(point,selectingNode:selectingNode)
+                    })
+                }
             }
-        }
     }
 }

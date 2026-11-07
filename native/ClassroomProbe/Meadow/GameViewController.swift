@@ -9,6 +9,27 @@ import MeadowClassroomSupport
 final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     private let classroomMode:Bool
     private var classroomSuspended=false
+    var classroomMirrorEnabled=false {didSet{groundRenderer?.classroomMirrorEnabled=classroomMirrorEnabled;if !classroomMirrorEnabled{classroomMapFrame=nil}}}
+    private var classroomMapFrame:CGImage?
+    /// A clean game-only image; permission dialogs belong to another root.
+    func classroomCaptureFrame()->UIImage? {
+        guard classroomMode,classroomMirrorEnabled,isViewLoaded,view.window != nil else{return nil}
+        let format=UIGraphicsImageRendererFormat();format.scale=1;format.opaque=true
+        return UIGraphicsImageRenderer(size:ClassroomCanvas.size,format:format).image{ context in
+            view.backgroundColor?.setFill();context.cgContext.fill(CGRect(origin:.zero,size:ClassroomCanvas.size))
+            if let image=classroomMapFrame,let ground=groundView,image.width==Int(ground.drawableSize.width),image.height==Int(ground.drawableSize.height){UIImage(cgImage:image).draw(in:ground.frame)}
+            for subview in view.subviews where subview !== groundView && !subview.isHidden && subview.alpha>0 {
+                context.cgContext.saveGState();context.cgContext.translateBy(x:subview.frame.minX,y:subview.frame.minY)
+                (subview.layer.presentation() ?? subview.layer).render(in:context.cgContext)
+                context.cgContext.restoreGState()
+            }
+        }
+    }
+    func classroomWorldPoint(at point:CGPoint,role:ClassroomRole)throws->CGPoint? {
+        try ClassroomGameBackend.requireTeacher(role)
+        guard ready,!battlePreviewActive,gameView.frame.contains(point) else{return nil}
+        return scene.classroomWorldPoint(CGPoint(x:point.x-gameView.frame.minX,y:point.y-gameView.frame.minY))
+    }
     weak var classroomPrivatePresenter:UIViewController?
     var classroomAdvanceTravel:((Double)throws->[OperationReceipt])?
     var classroomBattleModel:(()throws->PartyEncounter)?
@@ -126,7 +147,9 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         if !ProcessInfo.processInfo.arguments.contains("-gaitReview"), let device = MTLCreateSystemDefaultDevice() {
             let ground = MTKView(frame: view.bounds, device: device)
             ground.preferredFramesPerSecond = 60
-            ground.autoResizeDrawable = true
+            ground.autoResizeDrawable = !classroomMode
+            ground.framebufferOnly = !classroomMode
+            if classroomMode {ground.contentScaleFactor=1;ground.drawableSize=ClassroomCanvas.size}
             ground.colorPixelFormat = .bgra8Unorm
             ground.isOpaque = true
             ground.clearColor = MTLClearColor(red: 0.15, green: 0.20, blue: 0.08, alpha: 1)
@@ -150,7 +173,7 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         gameView.accessibilityLabel = "林间地图，已选择 P1"
         gameView.accessibilityTraits = .allowsDirectInteraction
         scene.classroomAdvanceTravel=classroomAdvanceTravel
-        scene.scaleMode = .resizeFill
+        scene.scaleMode = classroomMode ? .aspectFit:.resizeFill
         scene.size = view.bounds.size
         if !classroomMode { for button in [titleButton, playButton, resetButton, zoomButton] { view.addSubview(button) } }
         var labStyle = UIButton.Configuration.filled()
@@ -302,7 +325,7 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         let mapFrame: CGRect
         if battlePreviewActive, let preview = battlePreviewView {
             preview.frame = view.bounds
-            mapFrame = preview.mapFrame
+            mapFrame = classroomMode ? preview.mapFrame.integral:preview.mapFrame
         } else {
             battlePreviewView?.frame = .zero
             mapFrame = view.bounds
@@ -310,11 +333,16 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         let mapWidth = mapFrame.width
         gameView.frame = mapFrame
         groundView?.frame = mapFrame
+        if classroomMode,let ground=groundView {
+            ground.contentScaleFactor=1
+            let pixels=CGSize(width:max(1,mapFrame.width.rounded(.up)),height:max(1,mapFrame.height.rounded(.up)))
+            if ground.drawableSize != pixels {classroomMapFrame=nil;ground.drawableSize=pixels}
+        }
         groundView?.layer.cornerRadius = battlePreviewActive ? 14 : 0
         groundView?.clipsToBounds = battlePreviewActive
         scene.resizeMapViewport(to: mapFrame.size, referenceSize: view.bounds.size)
         loadingView.frame = view.bounds
-        let inset = view.safeAreaInsets
+        let inset:UIEdgeInsets = classroomMode ? .zero:view.safeAreaInsets
         let top = max(inset.top, 6)
         let isPad = traitCollection.userInterfaceIdiom == .pad
         let button: CGFloat = isPad ? 44 : 34
@@ -414,6 +442,10 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
             switch result {
             case .success(let prepared):
                 self.groundRenderer = prepared.renderer
+                if self.classroomMode {
+                    self.groundRenderer?.classroomMirrorEnabled=self.classroomMirrorEnabled
+                    self.groundRenderer?.onClassroomMapFrame={ [weak self] image in self?.classroomMapFrame=image }
+                }
                 self.scene.shadowMapSize = prepared.renderer?.shadowSize ?? 0
                 self.groundRenderer?.alignmentReview = ProcessInfo.processInfo.arguments.contains("-alignmentReview")
                 self.groundRenderer?.onFirstFrameCompleted = { [weak self] in

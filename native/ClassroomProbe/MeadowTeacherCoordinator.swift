@@ -10,6 +10,8 @@ import MeadowClassroomSupport
 @MainActor
 final class MeadowTeacherCoordinator:ObservableObject {
     let backend=ClassroomGameBackend()
+    let frameMirror=MeadowFrameMirror()
+    private var mirrorTimer:Timer?
     @Published private(set) var revision=0
     @Published private(set) var externalIDs=Set<String>()
     @Published private(set) var message="先在教师后台生成地图，或继续已保存的行程。"
@@ -51,6 +53,12 @@ final class MeadowTeacherCoordinator:ObservableObject {
     var externalConnected:Bool {!externalIDs.isEmpty}
     var modalOpen:Bool {privatePresenter?.presentedViewController != nil && !localOutputPreview}
     init(){
+        mirrorTimer=Timer.scheduledTimer(withTimeInterval:1/30,repeats:true){[weak self] _ in
+            Task{@MainActor in
+                guard let self,self.externalConnected,UIApplication.shared.applicationState == .active,self.surface != .book,let image=self.renderer?.classroomCaptureFrame() else{return}
+                self.frameMirror.image=image
+            }
+        }
         timer=Timer.scheduledTimer(withTimeInterval:0.15,repeats:true){[weak self] _ in Task{@MainActor in self?.tick()}}
     }
     func install(_ session:MeadowCampaignSession){
@@ -60,6 +68,8 @@ final class MeadowTeacherCoordinator:ObservableObject {
             if let old=renderer {old.willMove(toParent:nil);old.view.removeFromSuperview();old.removeFromParent()}
             let controller=GameViewController(campaign:session,classroomMode:true)
             controller.classroomPrivatePresenter=privatePresenter
+            controller.classroomMirrorEnabled=externalConnected
+            frameMirror.image=nil
             controller.classroomAdvanceTravel={ [backend] distance in try backend.advanceTravel(distance:distance,role:.teacher) }
             controller.classroomBattleModel={ [backend] in try backend.battleModel(role:.teacher) }
             controller.classroomStatus={ [weak self] text in self?.message=text;self?.revision += 1 }
@@ -97,12 +107,18 @@ final class MeadowTeacherCoordinator:ObservableObject {
         }catch{message=error.localizedDescription}
     }
     func select(_ id:String){do{try backend.selectPlayer(id,role:.teacher);selectedTarget=id;renderer?.classroomRefresh();revision += 1}catch{message=error.localizedDescription}}
-    func move(x:Double,y:Double){
-        guard ready,!busy,let c=campaign else{return}
-        do{try backend.travel(to:.init(x*1280,y*c.snapshot.layout.coordinateHeight),role:.teacher);renderer?.classroomPreviewEncounter(nil);renderer?.classroomRefresh();message="已指定道路目标，移动条按实际距离扣除。"
-            if let node=c.engine.state.map.nodes.min(by:{hypot($0.x-x,$0.y-y)<hypot($1.x-x,$1.y-y)}),hypot(node.x-x,node.y-y)<0.06,(node.kind == .combat || node.kind == .boss){selectedNode=node.id;project(.encounter(node.id))}
-            revision += 1}
-        catch{message=error.localizedDescription}
+    func canvasTap(_ point:CGPoint,selectingNode:Bool){
+        guard ready,!busy,!modalOpen,surface == .exploration,let c=campaign,c.engine.state.battle==nil,!c.isCompleted else{return}
+        do {
+            guard let world=try renderer?.classroomWorldPoint(at:point,role:.teacher) else{return}
+            let wx=Double(world.x),wy=Double(world.y)
+            let closest=c.engine.state.map.nodes.min{hypot($0.x*1280-wx,$0.y*c.snapshot.layout.coordinateHeight-wy)<hypot($1.x*1280-wx,$1.y*c.snapshot.layout.coordinateHeight-wy)}
+            if selectingNode {selectedNode=closest?.id;message="已在实际画面中选中地点，编辑表单仅在后台打开。";revision += 1;return}
+            try backend.travel(to:.init(wx,wy),role:.teacher)
+            renderer?.classroomPreviewEncounter(nil);renderer?.classroomRefresh();message="已指定道路目标，移动条按实际距离扣除。"
+            if let node=closest,hypot(node.x*1280-wx,node.y*c.snapshot.layout.coordinateHeight-wy)<80,(node.kind == .combat || node.kind == .boss){selectedNode=node.id;project(.encounter(node.id))}
+            revision += 1
+        }catch{message=error.localizedDescription}
     }
     func canUse(_ action:PartyAction)->Bool {
         guard ready,!busy,!modalOpen else{return false}
@@ -141,11 +157,11 @@ final class MeadowTeacherCoordinator:ObservableObject {
             do{try self.backend.apply(.editResources(unit:unit.id,value:ResourcePatch(health:values[0],shield:values[1],ap:values[2],coins:values[3],score:values[4])),role:.teacher);self.renderer?.classroomRefresh();self.revision += 1}catch{self.message=error.localizedDescription}
         });presenter.present(sheet,animated:true)
     }
-    func setConnection(_ id:String,connected:Bool){if connected{externalIDs.insert(id)}else{externalIDs.remove(id)};revision += 1}
+    func setConnection(_ id:String,connected:Bool){if connected{externalIDs.insert(id)}else{externalIDs.remove(id)};renderer?.classroomMirrorEnabled=externalConnected;if !externalConnected{frameMirror.image=nil};revision += 1}
 }
 
-/// UIKit containment moves the one real renderer between local preview and the
-/// external output. No screenshot mirroring and no second engine/AI/Metal map.
+/// Only the clean game renderer moves between native hosts. Every host uses
+/// the same 1280×720 bounds; window size/Retina scale never enter map layout.
 struct MeadowRendererHost:UIViewControllerRepresentable {
     @ObservedObject var game:MeadowTeacherCoordinator
     func makeUIViewController(context:Context)->MeadowRendererContainer {MeadowRendererContainer()}
@@ -153,19 +169,30 @@ struct MeadowRendererHost:UIViewControllerRepresentable {
 }
 final class MeadowRendererContainer:UIViewController {
     private weak var installed:UIViewController?
-    override func loadView(){view=UIView();view.backgroundColor = .black}
+    override func loadView(){view=UIView();view.backgroundColor = .black;view.clipsToBounds=true}
     func install(_ controller:UIViewController?){
         guard installed !== controller || controller?.parent !== self else{return}
         if let old=installed,old.parent === self {old.willMove(toParent:nil);old.view.removeFromSuperview();old.removeFromParent()}
         installed=controller
         guard let controller else{return}
         if controller.parent != nil{controller.willMove(toParent:nil);controller.view.removeFromSuperview();controller.removeFromParent()}
-        addChild(controller);view.addSubview(controller.view);controller.view.frame=view.bounds;controller.view.autoresizingMask=[];controller.didMove(toParent:self)
+        // Reset BEFORE any geometry assignment; frame is undefined with an
+        // active transform. Do not stretch the previous TV-sized bounds.
+        controller.view.transform = .identity
+        controller.view.bounds=CGRect(origin:.zero,size:ClassroomCanvas.size)
+        controller.view.autoresizingMask=[]
+        controller.view.setNeedsLayout();controller.view.layoutIfNeeded()
+        addChild(controller);view.addSubview(controller.view);layoutCanvas(controller);controller.didMove(toParent:self)
     }
-    override func viewDidLayoutSubviews(){
-        super.viewDidLayoutSubviews();guard let child=installed,child.parent === self,view.bounds.width>0,view.bounds.height>0 else{return}
-        let factor=max(1,1280/view.bounds.width,720/view.bounds.height)
-        child.view.transform = .identity;child.view.bounds=CGRect(origin:.zero,size:CGSize(width:view.bounds.width*factor,height:view.bounds.height*factor));child.view.center=CGPoint(x:view.bounds.midX,y:view.bounds.midY)
-        child.view.transform=CGAffineTransform(scaleX:1/factor,y:1/factor)
+    private func layoutCanvas(_ child:UIViewController){
+        let rect=ClassroomCanvas.fitted(in:view.bounds.size)
+        guard rect.width>0 else{return}
+        child.view.transform = .identity
+        child.view.bounds=CGRect(origin:.zero,size:ClassroomCanvas.size)
+        child.view.center=CGPoint(x:rect.midX,y:rect.midY)
+        child.view.setNeedsLayout();child.view.layoutIfNeeded()
+        let scale=rect.width/ClassroomCanvas.size.width
+        child.view.transform=CGAffineTransform(scaleX:scale,y:scale)
     }
+    override func viewDidLayoutSubviews(){super.viewDidLayoutSubviews();if let child=installed,child.parent === self{layoutCanvas(child)}}
 }

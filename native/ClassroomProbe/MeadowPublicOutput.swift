@@ -9,12 +9,16 @@ import MeadowClassroomSupport
 struct PublicSurface:View {
     @ObservedObject var model:PublicDisplayModel
     @ObservedObject var game:MeadowTeacherCoordinator
+    var teacherPreview=false
     var body:some View {
         Group {
             if game.surface == .book {PublicBookPage(model:model)}
             else {
-                ZStack {
-                    if game.renderer != nil {MeadowRendererHost(game:game)}
+                GeometryReader { geometry in
+                    let rect=ClassroomCanvas.fitted(in:geometry.size)
+                    ZStack {
+                    if teacherPreview && game.externalConnected {MeadowTeacherMirror(mirror:game.frameMirror)}
+                    else if game.renderer != nil {MeadowRendererHost(game:game)}
                     else{Color(red:0.07,green:0.12,blue:0.08);Text("林间旅程 · 等待教师开始").font(.largeTitle.bold()).foregroundStyle(.white)}
                     if case .inventory(let id)=game.surface,let c=game.campaign,let unit=c.engine.state.units[id] {
                         PublicInventoryPanel(unit:unit,catalog:c.engine.catalog).padding(40)
@@ -23,6 +27,10 @@ struct PublicSurface:View {
                         VStack(spacing:20){Text(result.outcome=="victory" ? "行程完成":"本次旅程结束").font(.largeTitle.bold());ForEach(result.players){u in Text("\(u.name) · 积分 \(u.score) · 金币 \(u.coins)").font(.title2)}}
                             .padding(40).foregroundStyle(.white).background(Color(red:0.08,green:0.15,blue:0.1).opacity(0.96),in:RoundedRectangle(cornerRadius:20))
                     }
+                    }
+                    .frame(width:ClassroomCanvas.size.width,height:ClassroomCanvas.size.height)
+                    .scaleEffect(rect.width/ClassroomCanvas.size.width)
+                    .position(x:rect.midX,y:rect.midY)
                 }.allowsHitTesting(false)
             }
         }.background(.black)

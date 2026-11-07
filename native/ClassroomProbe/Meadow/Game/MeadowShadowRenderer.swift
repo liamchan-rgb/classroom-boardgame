@@ -50,6 +50,11 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
     private var textures: [String: MTLTexture] = [:]
     private var backgroundTarget: MTLTexture?
     private var foregroundRenderer: SKRenderer?
+    var classroomMirrorEnabled=false
+    var onClassroomMapFrame:((CGImage)->Void)?
+    private var mirrorBusy=false
+    private var lastMirrorTime:TimeInterval = -.infinity
+    private var mirrorBuffer:MTLBuffer?
     private weak var gameScene: GameScene?
     var alignmentReview = false
     var onFirstFrameCompleted: (() -> Void)?
@@ -313,6 +318,7 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
         do {
             let command = try MeadowGPUDiagnostics.command(queue: queue, label: "C02 单视图完整组合 #\(frameNumber)")
             try encodeComposite(command: command, target: pass, frame: frame, foreground: foreground)
+            let mirror=encodeClassroomMirror(command:command,texture:drawable.texture)
             let semaphore = inFlight
             command.addCompletedHandler { [weak self] buffer in
                 if let error = buffer.error {
@@ -320,7 +326,7 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
                         context: ["frame": frameNumber, "environmentTime": frame.time, "gaitTest": !frame.includeEnvironment,
                                   "shadowMap": self?.shadowSize ?? 0, "cameraPoints": [Double(frame.camera.size.width), Double(frame.camera.size.height)]])
                     DispatchQueue.main.async {
-                        self?.gpuStopped = true; self?.onFrameFailed?(failure); semaphore.signal()
+                        self?.mirrorBusy=false;self?.gpuStopped = true; self?.onFrameFailed?(failure); semaphore.signal()
                     }
                     return
                 }
@@ -328,6 +334,7 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
                 guard buffer.status == .completed else { return }
                 DispatchQueue.main.async {
                     guard let self else { return }
+                    if let mirror {self.finishClassroomMirror(mirror)}
                     let record = frameNumber <= 2 || frameNumber == 60
                     MeadowGPUDiagnostics.shared.passed("C02 组合帧 #\(frameNumber)", command: buffer, recordEvent: record, group: "liveComposite")
                     if !self.firstFrameReported {
@@ -341,6 +348,25 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
         } catch {
             inFlight.signal(); gpuStopped = true; onFrameFailed?(error)
         }
+    }
+
+    private struct MirrorCopy {let buffer:MTLBuffer;let width:Int,height:Int,row:Int}
+    private func encodeClassroomMirror(command:MTLCommandBuffer,texture:MTLTexture)->MirrorCopy? {
+        let now=CACurrentMediaTime()
+        guard classroomMirrorEnabled,onClassroomMapFrame != nil,!mirrorBusy,now-lastMirrorTime>=1/30 else{return nil}
+        let row=((texture.width*4+255)/256)*256,length=row*texture.height
+        if mirrorBuffer?.length != length {mirrorBuffer=device.makeBuffer(length:length,options:.storageModeShared)}
+        guard let buffer=mirrorBuffer,let blit=command.makeBlitCommandEncoder() else{return nil}
+        blit.copy(from:texture,sourceSlice:0,sourceLevel:0,sourceOrigin:MTLOrigin(x:0,y:0,z:0),sourceSize:MTLSize(width:texture.width,height:texture.height,depth:1),to:buffer,destinationOffset:0,destinationBytesPerRow:row,destinationBytesPerImage:length)
+        blit.endEncoding();mirrorBusy=true;lastMirrorTime=now
+        return MirrorCopy(buffer:buffer,width:texture.width,height:texture.height,row:row)
+    }
+    private func finishClassroomMirror(_ copy:MirrorCopy){
+        defer{mirrorBusy=false}
+        guard classroomMirrorEnabled,let callback=onClassroomMapFrame else{return}
+        let data=Data(bytes:copy.buffer.contents(),count:copy.row*copy.height)
+        guard let provider=CGDataProvider(data:data as CFData),let image=CGImage(width:copy.width,height:copy.height,bitsPerComponent:8,bitsPerPixel:32,bytesPerRow:copy.row,space:CGColorSpaceCreateDeviceRGB(),bitmapInfo:CGBitmapInfo.byteOrder32Little.union(CGBitmapInfo(rawValue:CGImageAlphaInfo.premultipliedFirst.rawValue)),provider:provider,decode:nil,shouldInterpolate:false,intent:.defaultIntent) else{return}
+        callback(image)
     }
 
     /// The offscreen repeated probe and the live drawable use this same path.
