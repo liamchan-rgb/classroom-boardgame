@@ -1,0 +1,17 @@
+{
+  "runs": [
+    {
+      "run": 42374828246,
+      "reason": "Cancelled for deterministic private full-screen team form presentation."
+    },
+    {
+      "run": 42375138598,
+      "reason": "Cancelled to retain visible amount labels."
+    },
+    {
+      "run": 42375216592,
+      "reason": "Core passed; native archive failed due to combined @State declarations, fixed in subsequent source."
+    }
+  ],
+  "neverPublished": true
+}

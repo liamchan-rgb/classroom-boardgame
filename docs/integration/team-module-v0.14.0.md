@@ -14,6 +14,15 @@
 
 ClassroomGameBackend.joinTeacher(name:classID:team:role:)仅教师角色可用：探索、无道路游标、无已结算行程时增加host=true的p7。最多6名非host学生+1名host；不能再加入第二个主持人。host沿用职业、装备、资源、计分和战斗规则，不取消教师后台权限，不进入学生计数。当前不提供启用主持人的UI；未来调用接口后重装同一会话渲染器以刷新人数。公开端不能调用该接口，也不能调整组队/仓库。
 
+接入示例（未来教师按钮内部，不能接到PublicSurface）：
+
+```swift
+try game.backend.joinTeacher(name:"老师",classID:"adventurer",team:"party",role:.teacher)
+if let session=game.campaign { game.install(session) }
+```
+
+加入后仍只有同一个campaign/engine；重装只刷新渲染器人数，不创建新行程或重新发奖。队伍ID应取当前真实队伍，不能假定始终为party。
+
 ## 验证与边界
 
 新增12项专项覆盖1—6人往返存档/人数非法、六人队列、老师独立名额与权限、换队字段/RNG不变、共享仓库守恒/合并/撤销、旧仓库保留、跨队/透支/战斗拦截、持久化失败回滚、不同队不跟随、分队余额与AP独立。此前317项规则/后台测试在Linux零失败，新12项与完整设备Release结果以team-module-v0.14.0-build.json为准。
@@ -21,3 +30,7 @@ ClassroomGameBackend.joinTeacher(name:classID:team:role:)仅教师角色可用�
 教师一屏工具栏、原技能卡点击/悬停、960×540/30Hz目标与电视原生60Hz目标保持。无App/模拟器/实机运行，仅纯规则测试、源码审计、离线资源/布局示意及设备Release归档；6人站位、标签密度、实际性能和电视隐私由用户安装复核。怪物数量沿用现有已确认地点配置，不自动改怪物属性或强度。新增独立角色美术不在本轮制作。
 
 后两项仍为绘本小型人物状态区≤画面10%；教师在绘本页发AP/金币。原需求绘本条不含AP已被用户最新明确要求覆盖；本轮不顺带实现。
+
+## 实际构建与包检
+
+最终run42375834060 attempt1、实际编译`99b25d16d0e40ed6ddfe094b91bbfa16945aa8e1`成功，329规则/后台+6绘本核心零失败，设备Release归档通过。版本0.14.0/build19、最低iPadOS27.0、SDKiphoneos27.2；arm64/755/经典ZIP2.0/CRC、568源资源SHA/281编译名称/3挂载JSON及Metal通过，二进制不同于build18。IPA 62227227字节，SHA256 `f60a1f9fb1b856554453316d5909b99a8da854acbbfe753b67c1b0410300dec9`。run42374828246/42375138598主动取消；run42375216592核心测试通过但因SwiftUI多@State声明编译失败，已修复，不发布。完整公开GET与可恢复存档在archives/team-module-meadow-v0.14.0-20261107.json收尾记录。

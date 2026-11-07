@@ -1,0 +1,55 @@
+[0/1] Planning build
+Building for debugging...
+[0/7] Write sources
+[2/7] Write swift-version--3C8F63DB8035BADF.txt
+[4/8] Emitting module MeadowWorldSupport
+[5/8] Compiling MeadowWorldSupport Campaign.swift
+[6/16] Write Objects.LinkFileList
+[8/18] Linking MeadowMapExport
+[9/18] Linking MeadowCampaignReview
+[11/18] Compiling MeadowClassroomSupportTests ClassroomTeamTests.swift
+[12/18] Emitting module MeadowClassroomSupportTests
+[13/18] /workspace/classroom-boardgame/native/Packages/GameCore/.build/x86_64-unknown-linux-gnu/debug/ClassroomGameCorePackageDiscoveredTests.derived/all-discovered-tests.swift
+[14/19] Write sources
+[16/24] Compiling ClassroomGameCorePackageDiscoveredTests MeadowClassroomSupportTests.swift
+[17/24] Compiling ClassroomGameCorePackageDiscoveredTests MeadowWorldSupportTests.swift
+[18/25] Compiling ClassroomGameCorePackageDiscoveredTests all-discovered-tests.swift
+[19/25] Compiling ClassroomGameCorePackageDiscoveredTests ClassroomGameCoreTests.swift
+[20/25] Compiling ClassroomGameCorePackageDiscoveredTests MeadowBattleSupportTests.swift
+[21/25] Emitting module ClassroomGameCorePackageDiscoveredTests
+[22/24] Write Objects.LinkFileList
+[23/24] Linking ClassroomGameCorePackageTests.xctest
+Build complete! (7.11s)
+Test Suite 'Selected tests' started at 2026-11-07 13:10:24.490
+Test Suite 'ClassroomTeamTests' started at 2026-11-07 13:10:24.491
+Test Case 'ClassroomTeamTests.testCrossTeamAndOverdrawAreAtomicAndDoNotConsumeRandom' started at 2026-11-07 13:10:24.491
+Test Case 'ClassroomTeamTests.testCrossTeamAndOverdrawAreAtomicAndDoNotConsumeRandom' passed (0.037 seconds)
+Test Case 'ClassroomTeamTests.testDifferentTeamDoesNotFollowSelectedParty' started at 2026-11-07 13:10:24.529
+Test Case 'ClassroomTeamTests.testDifferentTeamDoesNotFollowSelectedParty' passed (0.16 seconds)
+Test Case 'ClassroomTeamTests.testExplicitTeacherTransferCrossesTeamsButDisplayCannotInvokeIt' started at 2026-11-07 13:10:24.689
+Test Case 'ClassroomTeamTests.testExplicitTeacherTransferCrossesTeamsButDisplayCannotInvokeIt' passed (0.026 seconds)
+Test Case 'ClassroomTeamTests.testFailedPersistenceCannotPartiallyGroupOrTransfer' started at 2026-11-07 13:10:24.715
+Test Case 'ClassroomTeamTests.testFailedPersistenceCannotPartiallyGroupOrTransfer' passed (0.06 seconds)
+Test Case 'ClassroomTeamTests.testGroupingPreservesEveryPersonalFieldAndRandom' started at 2026-11-07 13:10:24.774
+Test Case 'ClassroomTeamTests.testGroupingPreservesEveryPersonalFieldAndRandom' passed (0.024 seconds)
+Test Case 'ClassroomTeamTests.testHostHasOneSeparateSeatAndPublicCannotJoin' started at 2026-11-07 13:10:24.798
+Test Case 'ClassroomTeamTests.testHostHasOneSeparateSeatAndPublicCannotJoin' passed (0.044 seconds)
+Test Case 'ClassroomTeamTests.testOldWarehouseStaysWithOldTeamOnSplit' started at 2026-11-07 13:10:24.842
+Test Case 'ClassroomTeamTests.testOldWarehouseStaysWithOldTeamOnSplit' passed (0.027 seconds)
+Test Case 'ClassroomTeamTests.testOneThroughSixStudentsRoundTripAndUseAverageCapacity' started at 2026-11-07 13:10:24.870
+Test Case 'ClassroomTeamTests.testOneThroughSixStudentsRoundTripAndUseAverageCapacity' passed (0.25 seconds)
+Test Case 'ClassroomTeamTests.testRejectZeroOrSevenStudentsAndUnknownClass' started at 2026-11-07 13:10:25.120
+Test Case 'ClassroomTeamTests.testRejectZeroOrSevenStudentsAndUnknownClass' passed (0.048 seconds)
+Test Case 'ClassroomTeamTests.testSixPlayerBattleQueueAndWarehouseLockout' started at 2026-11-07 13:10:25.167
+Test Case 'ClassroomTeamTests.testSixPlayerBattleQueueAndWarehouseLockout' passed (0.026 seconds)
+Test Case 'ClassroomTeamTests.testTeamMovementBalancesRemainIndependentAndDoNotTouchAP' started at 2026-11-07 13:10:25.193
+Test Case 'ClassroomTeamTests.testTeamMovementBalancesRemainIndependentAndDoNotTouchAP' passed (0.069 seconds)
+Test Case 'ClassroomTeamTests.testWarehouseTransferAndMergeConserveCoinsAndItemsAndUndo' started at 2026-11-07 13:10:25.262
+Test Case 'ClassroomTeamTests.testWarehouseTransferAndMergeConserveCoinsAndItemsAndUndo' passed (0.031 seconds)
+Test Suite 'ClassroomTeamTests' passed at 2026-11-07 13:10:25.293
+	 Executed 12 tests, with 0 failures (0 unexpected) in 0.801 (0.801) seconds
+Test Suite 'Selected tests' passed at 2026-11-07 13:10:25.293
+	 Executed 12 tests, with 0 failures (0 unexpected) in 0.801 (0.801) seconds
+◇ Test run started.
+↳ Testing Library Version: 6.0.3 (18c42c19cac3faf)
+✔ Test run with 0 tests passed after 0.001 seconds.

@@ -1,0 +1,45 @@
+{
+  "kind": "offline team module schematic",
+  "notAppCapture": true,
+  "notTouchReplay": true,
+  "notPerformanceMeasurement": true,
+  "samples": 100,
+  "sampleMS": 60,
+  "totalMS": 6000,
+  "decodedFrames": 4,
+  "maximumStudents": 6,
+  "reservedTeacherSeat": "p7",
+  "phases": [
+    "六名学生 · 默认同队",
+    "拆成红蓝两队 · 个人资产不变",
+    "同队存仓与转交 · 战斗禁取仓",
+    "合并队伍 · 成员与仓库一起归入目标队"
+  ],
+  "artMissing": "P3-P7 distinct appearances; existing resources reused",
+  "positions": {
+    "p1": [
+      165,
+      420
+    ],
+    "p2": [
+      315,
+      505
+    ],
+    "p3": [
+      80,
+      300
+    ],
+    "p4": [
+      280,
+      315
+    ],
+    "p5": [
+      75,
+      555
+    ],
+    "p6": [
+      440,
+      555
+    ]
+  }
+}

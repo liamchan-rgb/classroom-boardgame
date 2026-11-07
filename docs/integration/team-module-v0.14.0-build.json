@@ -1,0 +1,72 @@
+{
+  "appVersion": "0.14.0/build19",
+  "testedCommit": "99b25d16d0e40ed6ddfe094b91bbfa16945aa8e1",
+  "sourceCommit": "99b25d16d0e40ed6ddfe094b91bbfa16945aa8e1",
+  "runID": 42375834060,
+  "runAttempt": 1,
+  "artifactID": 13575995906,
+  "artifactArchiveSha256": "cd9e88dbb8389a57e4e60eed60c712a75da2e9aea4391f5aed8c2d873f319ced",
+  "artifactArchiveBytes": 57992528,
+  "ipaSha256": "f60a1f9fb1b856554453316d5909b99a8da854acbbfe753b67c1b0410300dec9",
+  "ipaBytes": 62227227,
+  "coreTests": {
+    "CurrentDemoAndClassroomBackend": 329,
+    "ClassroomProbeCore": 6,
+    "failures": 0,
+    "nativeSuites": {
+      "MeadowWorldSupportTests": 116,
+      "MeadowClassroomSupportTests": 33,
+      "MeadowBattleSupportTests": 108,
+      "ClassroomGameCoreTests": 72
+    }
+  },
+  "deviceReleaseArchive": true,
+  "arm64": true,
+  "executableMode": "0o755",
+  "executableSHA256": "817c75a9e13586ee7075dab4e9aa9673b12dde05083cfa3e6ce0403f6ddb9808",
+  "classicZIP2": true,
+  "CRC": true,
+  "artSource": "175c7dfc4a68e62cb9693da8d837b77081619a6b",
+  "sourceResourceHashesVerified": 568,
+  "compiledAssetNamesVerified": 281,
+  "rigResourceHashesVerified": 3,
+  "metalLibraries": {
+    "Payload/ClassroomProbe.app/default.metallib": "af74556814a875eb225eca5ed22720122ed9dc2a88daa8117b180298956b921f"
+  },
+  "minimumOS": "27.0",
+  "sdk": "iphoneos27.2",
+  "legacyGameUIRemoved": true,
+  "fixedLogicalCanvas": [
+    1280,
+    720
+  ],
+  "fixedMetalScale": 1,
+  "teacherUsesGameOnlyMirror": true,
+  "teacherMirrorMaximumFPS": 30,
+  "teacherMirrorPixelSize": [
+    960,
+    540
+  ],
+  "layeredPreview": true,
+  "dragAndPinchInput": true,
+  "maximumStudents": 6,
+  "reservedHostSeats": 1,
+  "teamManagement": true,
+  "sharedWarehouses": true,
+  "singlePageTeacherWindow": true,
+  "skillsUseOriginalCards": true,
+  "teacherOnlyToolbar": true,
+  "mirrorReadbackOffMain": true,
+  "theoreticalRawPixelBudgetBytesPerSecond": 62208000,
+  "publicRenderTargetFPS": 60,
+  "newPVEDeviceVerified": false,
+  "appLaunched": false,
+  "simulatorLaunched": false,
+  "externalDisplayVerified": false,
+  "limitations": [
+    "No device CPU/GPU timing or touch responsiveness measurement was performed.",
+    "User-reported TV/disconnect misalignment is addressed in code; real AirPlay/TV/disconnect validation needs user screenshots.",
+    "P3-P7 reuse existing approved character resources; distinct character art remains missing. Host joining is a teacher-only backend API; no host enable UI in this version.",
+    "Offline review demonstrates fixed-canvas geometry; it is not UIKit capture or proof of device repair."
+  ]
+}
