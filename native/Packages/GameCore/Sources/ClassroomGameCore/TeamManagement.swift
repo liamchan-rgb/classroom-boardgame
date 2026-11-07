@@ -40,10 +40,11 @@ extension Evaluation {
             if let item {let n=try checkedAdd(state.teams[i].inventory[item] ?? 0,count);guard n>=0 else{throw GameError("仓库物品不足。")};if n==0{state.teams[i].inventory.removeValue(forKey:item)}else{state.teams[i].inventory[item]=n}}
         }
     }
-    mutating func transferTeamResource(from:TeamResourceOwner,to:TeamResourceOwner,coins:Int,item:String?,count:Int)throws {
-        guard state.phase == .exploration,state.battle==nil,from != to,coins>=0,count>=0,(coins>0 || item != nil && count>0),try ownerTeam(from)==ownerTeam(to) else{throw GameError("仅探索允许同队存取或转交；跨队请由教师调整。")}
+    mutating func transferTeamResource(from:TeamResourceOwner,to:TeamResourceOwner,coins:Int,item:String?,count:Int,teacher:Bool=false)throws {
+        let fromTeam=try ownerTeam(from),toTeam=try ownerTeam(to)
+        guard state.phase == .exploration,state.battle==nil,from != to,coins>=0,count>=0,(coins>0 || item != nil && count>0),(teacher || fromTeam==toTeam) else{throw GameError("仅探索允许同队存取或转交；跨队请由教师调整。")}
         if let item {_=try catalog.item(item)}else{guard count==0 else{throw GameError("未选择物品。")}}
         try changeResource(from,coins:-coins,item:item,count:-count);try changeResource(to,coins:coins,item:item,count:count)
-        events.append(GameEvent("teamResourceTransferred",amount:coins,detail:item ?? "金币"))
+        events.append(GameEvent(teacher ? "teacherTeamResourceTransferred":"teamResourceTransferred",amount:coins,detail:item ?? "金币"))
     }
 }

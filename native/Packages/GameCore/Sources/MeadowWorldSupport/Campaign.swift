@@ -155,6 +155,11 @@ private final class CampaignWriter {
         var next=value
         try next.camera?.validate()
         let key=next.movementTeam,limit=next.movementLimit
+        if next.movementBalances==nil{next.movementBalances=[:]}
+        for team in next.archive.state.teams where next.movementBalances?[team.id]==nil {
+            let value=min(next.movement?.remaining ?? 0,MeadowMovementRules.capacity(next.archive,team:team.id))
+            next.movementBalances?[team.id]=value
+        }
         if next.movementBalances != nil,let amount=next.movement?.remaining {next.movementBalances?[key]=min(amount,limit)}
         if let amount=next.movement?.remaining {next.movement?.remaining=min(amount,limit)}
         if let persist {try persist(next.encoded())};snapshot=next

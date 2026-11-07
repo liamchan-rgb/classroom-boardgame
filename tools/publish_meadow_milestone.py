@@ -76,7 +76,7 @@ Source snapshot/tag: `{current}` / `{milestone}`.
 Actual device Release compiled commit: `{record['testedCommit']}`.
 Build run: https://github.com/{repo}/actions/runs/{record['runID']}
 IPA: `{ipa}`, SHA256 `{record['ipaSha256']}`, {record['ipaBytes']} bytes.
-328 GameCore/backend + 6 ProbeCore tests passed. No app, simulator or device was launched.
+329 GameCore/backend + 6 ProbeCore tests passed. No app, simulator or device was launched.
 GIF is an offline fixed-canvas layout demonstration, not a runtime screenshot or confirmation of device repair.
 Teacher owns the current demo rules, map generation and private controls. Public output uses the full existing Meadow map/battle renderer and read-only player panels; no old game fallback.
 Download all .part files, transport.json and restore_zip.py to restore the archive ZIP; follow its recovery guide.

@@ -89,6 +89,7 @@ final class ClassroomTeamTests:XCTestCase {
         try c.advanceTravel(distance:25)
         XCTAssertEqual(c.engine.state.units["p3"]?.nodeID,start)
         XCTAssertEqual(c.movementRemaining,c.movementCapacity-25,accuracy:0.001)
+        XCTAssertEqual(c.snapshot.movementBalances?["red"],400)
         let restored=try MeadowCampaignSession(save:.decoded(c.snapshot.encoded()))
         XCTAssertEqual(restored.movementRemaining,c.movementRemaining)
     }
@@ -102,6 +103,18 @@ final class ClassroomTeamTests:XCTestCase {
         XCTAssertEqual(restored.engine.state.players.map(\.ap),before)
         let copy=try MeadowCampaignSession(save:.decoded(restored.snapshot.encoded()))
         try copy.selectPlayer("p3");XCTAssertEqual(copy.movementRemaining,400)
+    }
+
+    func testExplicitTeacherTransferCrossesTeamsButDisplayCannotInvokeIt()throws {
+        let c=try campaign(),b=ClassroomGameBackend();try b.install(c,role:.teacher)
+        try c.engine.apply(.configureTeams(names:["red":"红队"],members:["p2":"red"]))
+        let command=GameCommand.teacherTransferTeamResource(from:.player("p1"),to:.player("p2"),coins:0,item:"smallPotion",count:1),before=c.snapshot
+        XCTAssertThrowsError(try b.apply(command,role:.publicDisplay));XCTAssertEqual(c.snapshot,before)
+        try b.apply(command,role:.teacher)
+        XCTAssertEqual(c.engine.state.units["p1"]?.inventory["smallPotion"],1)
+        XCTAssertEqual(c.engine.state.units["p2"]?.inventory["smallPotion"],3)
+        XCTAssertEqual(c.engine.state.random,before.archive.state.random)
+        XCTAssertEqual(c.engine.state.players.map(\.ap),before.archive.state.players.map(\.ap))
     }
 
 }

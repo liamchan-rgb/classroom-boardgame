@@ -171,6 +171,7 @@ public enum GameCommand: Codable, Equatable {
     case configureTeams(names:[String:String],members:[String:String])
     case mergeTeams(source:String,destination:String)
     case transferTeamResource(from:TeamResourceOwner,to:TeamResourceOwner,coins:Int,item:String?,count:Int)
+    case teacherTransferTeamResource(from:TeamResourceOwner,to:TeamResourceOwner,coins:Int,item:String?,count:Int)
     case addHost(id:String,name:String,classID:String,team:String,node:Int)
     case changeTeam(unit: String, team: String)
     case reorderQueue([String])

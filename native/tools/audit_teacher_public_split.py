@@ -66,6 +66,8 @@ assert 'MeadowTeamConsole' not in public and 'game.openTeamConsole()' in dashboa
 assert 'campaign?.playerIDs.count ?? 3' in scene and 'count:max(3,campaign?.playerIDs.count ?? 3)' in scene
 assert 'let ids=value.players.map' in stage and 'playerIDs+monsterIDs' in stage
 assert '(0..<7).map' in game
+assert not any('@State' in line and ',quantity=' in line for line in team.splitlines())
+assert 'teacherTransferTeamResource' in team
 assert 'transferTeamResource' in team and 'configureTeams' in team and 'mergeTeams' in team
 result=dict(kind='source-routing-audit',commit=a.commit,publicOnlyHasPlayerFacingPanels=True,oneTeacherOwnedSessionAndRenderer=True,
     mapAndBattleUseOriginalProductionComponents=True,publicModeDoesNotStartAnotherAIOrDecisionTimer=True,

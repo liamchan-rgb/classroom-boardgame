@@ -10,9 +10,14 @@ struct MeadowTeamConsole:View {
     @State private var names:[String:String]=[:]
     @State private var members:[String:String]=[:]
     @State private var newName=""
-    @State private var source="party",destination="party"
-    @State private var sender="p:p1",recipient="w:party"
-    @State private var coins="0",quantity="1",item=""
+    @State private var source="party"
+    @State private var destination="party"
+    @State private var sender="p:p1"
+    @State private var recipient="w:party"
+    @State private var teacherTransfer=false
+    @State private var coins="0"
+    @State private var quantity="1"
+    @State private var item=""
     private var teams:[GameTeam] {game.campaign?.engine.state.teams ?? []}
     private var players:[GameUnit] {game.campaign?.engine.state.players ?? []}
     private var owners:[(String,String)] {players.map{("p:"+$0.id,$0.name)}+teams.map{("w:"+$0.id,$0.name+" · 共享仓库")}}
@@ -55,11 +60,13 @@ struct MeadowTeamConsole:View {
                         ForEach(game.campaign?.engine.catalog.items ?? []){Text($0.name).tag($0.id)}
                     }
                     if !item.isEmpty {HStack{Text("物品数量");TextField("1",text:$quantity).keyboardType(.numberPad).multilineTextAlignment(.trailing)}}
-                    Button("确认转移"){
+                    Toggle("教师跨队调拨（记录后台操作）",isOn:$teacherTransfer)
+                    Button(teacherTransfer ? "确认教师调拨":"确认同队转移"){
                         guard let value=Int(coins),let count=Int(quantity) else{return}
-                        game.teamCommand(.transferTeamResource(from:owner(sender),to:owner(recipient),coins:value,item:item.isEmpty ? nil:item,count:item.isEmpty ? 0:count))
+                        let command:GameCommand=teacherTransfer ? .teacherTransferTeamResource(from:owner(sender),to:owner(recipient),coins:value,item:item.isEmpty ? nil:item,count:item.isEmpty ? 0:count):.transferTeamResource(from:owner(sender),to:owner(recipient),coins:value,item:item.isEmpty ? nil:item,count:item.isEmpty ? 0:count)
+                        game.teamCommand(command)
                     }.disabled(game.busy || game.campaign?.travel != nil || game.campaign?.engine.state.battle != nil || sender==recipient)
-                    Text("行动点不可转移；战斗不能取仓库物品。跨队资源由教师的资源调整处理。").font(.caption)
+                    Text("行动点不可转移；战斗不能取仓库物品。跨队资源需显式启用教师调拨。").font(.caption)
                 }
                 Section("仓库与实时队伍积分") {
                     ForEach(teams){team in
