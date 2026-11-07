@@ -11,13 +11,17 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     private var classroomSuspended=false
     var classroomMirrorEnabled=false {didSet{groundRenderer?.classroomMirrorEnabled=classroomMirrorEnabled;if !classroomMirrorEnabled{classroomMapFrame=nil}}}
     private var classroomMapFrame:CGImage?
+    private var classroomFrameSerial=0
+    private var classroomCapturedSerial:Int?
     /// A clean game-only image; permission dialogs belong to another root.
     func classroomCaptureFrame()->UIImage? {
         guard classroomMode,classroomMirrorEnabled,isViewLoaded,view.window != nil else{return nil}
-        let format=UIGraphicsImageRendererFormat();format.scale=1;format.opaque=true
+        guard classroomCapturedSerial != classroomFrameSerial || classroomBusy || !ready else{return nil}
+        classroomCapturedSerial=classroomFrameSerial
+        let format=UIGraphicsImageRendererFormat();format.scale=ClassroomPreviewPolicy.pixelScale;format.opaque=true
         return UIGraphicsImageRenderer(size:ClassroomCanvas.size,format:format).image{ context in
             view.backgroundColor?.setFill();context.cgContext.fill(CGRect(origin:.zero,size:ClassroomCanvas.size))
-            if let image=classroomMapFrame,let ground=groundView,image.width==Int(ground.drawableSize.width),image.height==Int(ground.drawableSize.height){UIImage(cgImage:image).draw(in:ground.frame)}
+            if let image=classroomMapFrame,let ground=groundView,image.width==Int(ClassroomPreviewPolicy.size(for:ground.drawableSize).width),image.height==Int(ClassroomPreviewPolicy.size(for:ground.drawableSize).height){UIImage(cgImage:image).draw(in:ground.frame)}
             for subview in view.subviews where subview !== groundView && !subview.isHidden && subview.alpha>0 {
                 context.cgContext.saveGState();context.cgContext.translateBy(x:subview.frame.minX,y:subview.frame.minY)
                 (subview.layer.presentation() ?? subview.layer).render(in:context.cgContext)
@@ -28,6 +32,7 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     func classroomWorldPoint(at point:CGPoint,role:ClassroomRole)throws->CGPoint? {
         try ClassroomGameBackend.requireTeacher(role)
         guard ready,!battlePreviewActive,gameView.frame.contains(point) else{return nil}
+        guard encounterPreview.isHidden || !encounterPreview.frame.contains(point) else{return nil}
         return scene.classroomWorldPoint(CGPoint(x:point.x-gameView.frame.minX,y:point.y-gameView.frame.minY))
     }
     func classroomNode(atWorldPoint point:CGPoint,role:ClassroomRole)throws->Int? {
@@ -449,7 +454,7 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
                 self.groundRenderer = prepared.renderer
                 if self.classroomMode {
                     self.groundRenderer?.classroomMirrorEnabled=self.classroomMirrorEnabled
-                    self.groundRenderer?.onClassroomMapFrame={ [weak self] image in self?.classroomMapFrame=image }
+                    self.groundRenderer?.onClassroomMapFrame={ [weak self] image in self?.classroomMapFrame=image;self?.classroomFrameSerial += 1 }
                 }
                 self.scene.shadowMapSize = prepared.renderer?.shadowSize ?? 0
                 self.groundRenderer?.alignmentReview = ProcessInfo.processInfo.arguments.contains("-alignmentReview")

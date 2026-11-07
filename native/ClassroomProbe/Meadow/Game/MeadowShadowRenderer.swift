@@ -1,6 +1,7 @@
 import MetalKit
 import SpriteKit
 import simd
+import MeadowClassroomSupport
 
 /// One MTKView, one queue and one submitted frame own both the native backdrop
 /// and SKRenderer foreground. No rendering is submitted from an SKScene callback.
@@ -55,6 +56,8 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
     private var mirrorBusy=false
     private var lastMirrorTime:TimeInterval = -.infinity
     private var mirrorBuffer:MTLBuffer?
+    private var mirrorTarget:MTLTexture?
+    private let mirrorReadback=DispatchQueue(label:"classroom.preview.readback",qos:.utility)
     private weak var gameScene: GameScene?
     var alignmentReview = false
     var onFirstFrameCompleted: (() -> Void)?
@@ -331,10 +334,18 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
                     return
                 }
                 semaphore.signal()
-                guard buffer.status == .completed else { return }
+                guard buffer.status == .completed else {DispatchQueue.main.async{self?.mirrorBusy=false};return}
+                if let mirror,let self {
+                    self.mirrorReadback.async { [weak self] in
+                        let image=Self.makeClassroomMirror(mirror)
+                        DispatchQueue.main.async {
+                            guard let self else{return};self.mirrorBusy=false
+                            if self.classroomMirrorEnabled,let image{self.onClassroomMapFrame?(image)}
+                        }
+                    }
+                }
                 DispatchQueue.main.async {
                     guard let self else { return }
-                    if let mirror {self.finishClassroomMirror(mirror)}
                     let record = frameNumber <= 2 || frameNumber == 60
                     MeadowGPUDiagnostics.shared.passed("C02 组合帧 #\(frameNumber)", command: buffer, recordEvent: record, group: "liveComposite")
                     if !self.firstFrameReported {
@@ -353,20 +364,31 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
     private struct MirrorCopy {let buffer:MTLBuffer;let width:Int,height:Int,row:Int}
     private func encodeClassroomMirror(command:MTLCommandBuffer,texture:MTLTexture)->MirrorCopy? {
         let now=CACurrentMediaTime()
-        guard classroomMirrorEnabled,onClassroomMapFrame != nil,!mirrorBusy,now-lastMirrorTime>=1/30 else{return nil}
-        let row=((texture.width*4+255)/256)*256,length=row*texture.height
+        guard classroomMirrorEnabled,onClassroomMapFrame != nil,!mirrorBusy,now-lastMirrorTime>=1/ClassroomPreviewPolicy.framesPerSecond else{return nil}
+        let size=ClassroomPreviewPolicy.size(for:CGSize(width:texture.width,height:texture.height)),width=Int(size.width),height=Int(size.height)
+        if mirrorTarget?.width != width || mirrorTarget?.height != height {
+            let descriptor=MTLTextureDescriptor.texture2DDescriptor(pixelFormat:.bgra8Unorm,width:width,height:height,mipmapped:false)
+            descriptor.storageMode = .private;descriptor.usage=[.renderTarget,.shaderRead]
+            mirrorTarget=device.makeTexture(descriptor:descriptor)
+        }
+        let row=((width*4+255)/256)*256,length=row*height
         if mirrorBuffer?.length != length {mirrorBuffer=device.makeBuffer(length:length,options:.storageModeShared)}
-        guard let buffer=mirrorBuffer,let blit=command.makeBlitCommandEncoder() else{return nil}
-        blit.copy(from:texture,sourceSlice:0,sourceLevel:0,sourceOrigin:MTLOrigin(x:0,y:0,z:0),sourceSize:MTLSize(width:texture.width,height:texture.height,depth:1),to:buffer,destinationOffset:0,destinationBytesPerRow:row,destinationBytesPerImage:length)
+        guard let target=mirrorTarget,let buffer=mirrorBuffer else{return nil}
+        let pass=MTLRenderPassDescriptor();pass.colorAttachments[0].texture=target
+        pass.colorAttachments[0].loadAction = .dontCare;pass.colorAttachments[0].storeAction = .store
+        guard let encoder=command.makeRenderCommandEncoder(descriptor:pass) else{return nil}
+        encoder.setRenderPipelineState(presentationPipeline);encoder.setFragmentTexture(texture,index:0)
+        encoder.drawPrimitives(type:.triangle,vertexStart:0,vertexCount:3);encoder.endEncoding()
+        guard let blit=command.makeBlitCommandEncoder() else{return nil}
+        blit.copy(from:target,sourceSlice:0,sourceLevel:0,sourceOrigin:MTLOrigin(x:0,y:0,z:0),sourceSize:MTLSize(width:width,height:height,depth:1),to:buffer,destinationOffset:0,destinationBytesPerRow:row,destinationBytesPerImage:length)
         blit.endEncoding();mirrorBusy=true;lastMirrorTime=now
-        return MirrorCopy(buffer:buffer,width:texture.width,height:texture.height,row:row)
+        return MirrorCopy(buffer:buffer,width:width,height:height,row:row)
     }
-    private func finishClassroomMirror(_ copy:MirrorCopy){
-        defer{mirrorBusy=false}
-        guard classroomMirrorEnabled,let callback=onClassroomMapFrame else{return}
+    /// Worker queue only: copy pixels/construct CGImage before returning to UI.
+    private static func makeClassroomMirror(_ copy:MirrorCopy)->CGImage? {
         let data=Data(bytes:copy.buffer.contents(),count:copy.row*copy.height)
-        guard let provider=CGDataProvider(data:data as CFData),let image=CGImage(width:copy.width,height:copy.height,bitsPerComponent:8,bitsPerPixel:32,bytesPerRow:copy.row,space:CGColorSpaceCreateDeviceRGB(),bitmapInfo:CGBitmapInfo.byteOrder32Little.union(CGBitmapInfo(rawValue:CGImageAlphaInfo.premultipliedFirst.rawValue)),provider:provider,decode:nil,shouldInterpolate:false,intent:.defaultIntent) else{return}
-        callback(image)
+        guard let provider=CGDataProvider(data:data as CFData) else{return nil}
+        return CGImage(width:copy.width,height:copy.height,bitsPerComponent:8,bitsPerPixel:32,bytesPerRow:copy.row,space:CGColorSpaceCreateDeviceRGB(),bitmapInfo:CGBitmapInfo.byteOrder32Little.union(CGBitmapInfo(rawValue:CGImageAlphaInfo.premultipliedFirst.rawValue)),provider:provider,decode:nil,shouldInterpolate:false,intent:.defaultIntent)
     }
 
     /// The offscreen repeated probe and the live drawable use this same path.

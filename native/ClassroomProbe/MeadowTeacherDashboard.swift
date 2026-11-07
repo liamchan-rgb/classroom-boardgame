@@ -12,7 +12,7 @@ struct MeadowTeacherDashboard:View {
         ScrollView {
             VStack(alignment:.leading,spacing:16){
                 HStack {
-                    Text("教师游戏后台 · v0.13.1").font(.title.bold())
+                    Text("教师游戏后台 · v0.13.2").font(.title.bold())
                     Spacer();Text(game.externalConnected ? "公开屏幕已连接":"当前可在本机预览")
                 }
                 Text(game.message).foregroundStyle(.secondary)
@@ -72,8 +72,13 @@ struct MeadowTeacherDashboard:View {
         }.background(GameTheme.background).foregroundStyle(GameTheme.ink)
         .fullScreenCover(isPresented:$fullPreview){
             ZStack(alignment:.topTrailing){
-                PublicSurface(model:TeacherSession.shared.display,game:game,teacherPreview:true).ignoresSafeArea()
-                Button("返回教师后台"){fullPreview=false}.buttonStyle(.borderedProminent).padding()
+                TeacherGamePreview(game:game,selectingNode:selectingNode).ignoresSafeArea()
+                HStack {
+                    if !game.surface.acceptsMapInput || game.surface != .exploration {
+                        Button("收起预览"){game.project(.exploration)}.disabled(game.campaign?.engine.state.battle != nil || game.surface == .book)
+                    }
+                    Button("返回教师后台"){fullPreview=false}
+                }.buttonStyle(.borderedProminent).padding()
             }
         }
 
@@ -101,6 +106,7 @@ struct MeadowTeacherDashboard:View {
 private struct TeacherGamePreview:View {
     @ObservedObject var game:MeadowTeacherCoordinator
     let selectingNode:Bool
+    @State private var previewID=UUID()
     var body:some View {
         PublicSurface(model:TeacherSession.shared.display,game:game,teacherPreview:true)
             .overlay {
@@ -111,5 +117,7 @@ private struct TeacherGamePreview:View {
                     })
                 }
             }
+            .onAppear{game.previewVisibility(previewID,visible:true)}
+            .onDisappear{game.previewVisibility(previewID,visible:false)}
     }
 }

@@ -33,8 +33,17 @@ assert 'waitUntilCompleted' not in metal[metal.index('private struct MirrorCopy'
 assert 'for subview in view.subviews where subview !== groundView' in game and 'classroomCaptureFrame' in host
 assert 'teacherPreview && game.externalConnected' in public and 'MeadowTeacherMirror(mirror:game.frameMirror)' in public
 assert 'UIWindow' not in mirror and 'campaign' not in mirror.replace('campaign/renderer','')
+cover=dashboard[dashboard.index('.fullScreenCover'):dashboard.index('    private func battleControls')]
+assert 'TeacherGamePreview(game:game,selectingNode:selectingNode)' in cover
+assert 'surface.acceptsMapInput' in host and 'surface == .exploration,let c=campaign' not in host
+assert 'game.previewVisibility(previewID,visible:true)' in dashboard and 'game.previewVisibility(previewID,visible:false)' in dashboard
+assert 'ClassroomPreviewPolicy.enabled' in host and 'defer{publishChanges();updateMirrorDemand()}' in host
+assert 'if next != lastUIState' in host
+assert 'format.scale=ClassroomPreviewPolicy.pixelScale' in game
+assert 'self.mirrorReadback.async' in metal and 'Self.makeClassroomMirror(mirror)' in metal
+assert 'sourceSize:MTLSize(width:width,height:height,depth:1)' in metal and 'setFragmentTexture(texture,index:0)' in metal
 result=dict(kind='source-routing-audit',commit=a.commit,publicOnlyHasPlayerFacingPanels=True,oneTeacherOwnedSessionAndRenderer=True,
     mapAndBattleUseOriginalProductionComponents=True,publicModeDoesNotStartAnotherAIOrDecisionTimer=True,
     privateSheetsRoutedToTeacherWindow=True,legacySinglePlayerTrainingUnderlayRemoved=True,
-    publicGameInputsDisabled=True,publicGameCallbacksExplicitlyReadOnly=True,battleCompletionReturnsToExploration=True,fixedCanvasAndDrawablePolicy=True,teacherUsesActualGameOnlyMirror=True,teacherSimplifiedMapRemoved=True,actualProjectionUsedForInput=True,nativeWindowRoutingVerified=False)
+    publicGameInputsDisabled=True,publicGameCallbacksExplicitlyReadOnly=True,battleCompletionReturnsToExploration=True,fixedCanvasAndDrawablePolicy=True,teacherUsesActualGameOnlyMirror=True,teacherSimplifiedMapRemoved=True,actualProjectionUsedForInput=True,halfResolutionPreviewBudget=True,readbackOffMainQueue=True,hiddenPreviewStopsCopying=True,fullScreenTeacherInputWired=True,encounterAllowsMapInput=True,nativeWindowRoutingVerified=False)
 a.output.parent.mkdir(parents=True,exist_ok=True);a.output.write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2))

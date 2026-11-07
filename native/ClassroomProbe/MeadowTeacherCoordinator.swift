@@ -12,6 +12,24 @@ final class MeadowTeacherCoordinator:ObservableObject {
     let backend=ClassroomGameBackend()
     let frameMirror=MeadowFrameMirror()
     private var mirrorTimer:Timer?
+    private var previewObservers=Set<UUID>()
+    private struct UIState:Equatable {
+        let gameID:String?,surface:ClassroomPublicSurface,historyID:String?,historyCount:Int,movement:Int,current:String?,pauses:Set<GamePause>,busy:Bool,ready:Bool,moving:Bool,travel:Bool,player:String?
+    }
+    private var lastUIState:UIState?
+    private func publishChanges(){
+        let c=campaign,state=c?.engine.state
+        let next=UIState(gameID:state?.gameID,surface:surface,historyID:c?.engine.history.last?.id,historyCount:c?.engine.history.count ?? 0,movement:Int(ceil(c?.movementRemaining ?? 0)),current:state?.battle?.current,pauses:state?.pauseReasons ?? [],busy:busy,ready:ready,moving:c?.isMoving ?? false,travel:c?.travel != nil,player:c?.selectedPlayerID)
+        if next != lastUIState {lastUIState=next;revision += 1}
+    }
+    private func updateMirrorDemand(){
+        let enabled=ClassroomPreviewPolicy.enabled(external:externalConnected,visible:!previewObservers.isEmpty,foreground:UIApplication.shared.applicationState == .active,privateModal:modalOpen,surface:surface)
+        if renderer?.classroomMirrorEnabled != enabled {renderer?.classroomMirrorEnabled=enabled}
+    }
+    func previewVisibility(_ id:UUID,visible:Bool){
+        if visible{previewObservers.insert(id)}else{previewObservers.remove(id)}
+        updateMirrorDemand()
+    }
     @Published private(set) var revision=0
     @Published private(set) var externalIDs=Set<String>()
     @Published private(set) var message="先在教师后台生成地图，或继续已保存的行程。"
@@ -26,7 +44,8 @@ final class MeadowTeacherCoordinator:ObservableObject {
     private var lastTick=ProcessInfo.processInfo.systemUptime
     private var aiKey:String?
     private func tick(){
-        let now=ProcessInfo.processInfo.systemUptime,delta=min(0.5,max(0,now-lastTick));lastTick=now;revision += 1
+        let now=ProcessInfo.processInfo.systemUptime,delta=min(0.5,max(0,now-lastTick));lastTick=now
+        defer{publishChanges();updateMirrorDemand()}
         renderer?.classroomFinishBattleIfReady()
         guard UIApplication.shared.applicationState == .active,ready,!modalOpen,let c=campaign,c.engine.state.battle != nil,surface != .book,c.engine.state.pauseReasons.isEmpty else{enemyWork?.cancel();enemyWork=nil;aiKey=nil;return}
         guard !busy else{return}
@@ -53,9 +72,9 @@ final class MeadowTeacherCoordinator:ObservableObject {
     var externalConnected:Bool {!externalIDs.isEmpty}
     var modalOpen:Bool {privatePresenter?.presentedViewController != nil && !localOutputPreview}
     init(){
-        mirrorTimer=Timer.scheduledTimer(withTimeInterval:1/30,repeats:true){[weak self] _ in
+        mirrorTimer=Timer.scheduledTimer(withTimeInterval:1/ClassroomPreviewPolicy.framesPerSecond,repeats:true){[weak self] _ in
             Task{@MainActor in
-                guard let self,self.externalConnected,UIApplication.shared.applicationState == .active,self.surface != .book,let image=self.renderer?.classroomCaptureFrame() else{return}
+                guard let self,self.renderer?.classroomMirrorEnabled==true,let image=self.renderer?.classroomCaptureFrame() else{return}
                 self.frameMirror.image=image
             }
         }
@@ -68,15 +87,15 @@ final class MeadowTeacherCoordinator:ObservableObject {
             if let old=renderer {old.willMove(toParent:nil);old.view.removeFromSuperview();old.removeFromParent()}
             let controller=GameViewController(campaign:session,classroomMode:true)
             controller.classroomPrivatePresenter=privatePresenter
-            controller.classroomMirrorEnabled=externalConnected
+            controller.classroomMirrorEnabled=false
             frameMirror.image=nil
             controller.classroomAdvanceTravel={ [backend] distance in try backend.advanceTravel(distance:distance,role:.teacher) }
             controller.classroomBattleModel={ [backend] in try backend.battleModel(role:.teacher) }
-            controller.classroomStatus={ [weak self] text in self?.message=text;self?.revision += 1 }
+            controller.classroomStatus={ [weak self] text in guard let self,self.message != text else{return};self.message=text;self.revision += 1 }
             controller.classroomInventoryChanged={ [weak self] id in self?.project(id.map{.inventory($0)} ?? .exploration) }
             controller.classroomReload={ [weak self,weak session] in if let session{self?.install(session)} }
             renderer=controller;installed=true;selectedNode=nil;selectedTarget=session.selectedPlayerID
-            message="地图已由后台准备，投放端只显示游戏。";revision += 1
+            message="地图已由后台准备，投放端只显示游戏。";updateMirrorDemand();revision += 1
         }catch{message=error.localizedDescription}
     }
     func restore(){
@@ -108,9 +127,11 @@ final class MeadowTeacherCoordinator:ObservableObject {
     }
     func select(_ id:String){do{try backend.selectPlayer(id,role:.teacher);selectedTarget=id;renderer?.classroomRefresh();revision += 1}catch{message=error.localizedDescription}}
     func canvasTap(_ point:CGPoint,selectingNode:Bool){
-        guard ready,!busy,!modalOpen,surface == .exploration,let c=campaign,c.engine.state.battle==nil,!c.isCompleted else{return}
+        guard ready else{message="画面还在准备，请稍候。";return}
+        guard !busy,!modalOpen else{message="请等待当前动作结束或关闭后台对话框。";return}
+        guard surface.acceptsMapInput,let c=campaign,c.engine.state.battle==nil,!c.isCompleted else{message="请先收起当前面板或返回探索地图。";return}
         do {
-            guard let world=try renderer?.classroomWorldPoint(at:point,role:.teacher) else{return}
+            guard let world=try renderer?.classroomWorldPoint(at:point,role:.teacher) else{message="请点击预览面板外的道路，或收起预览。";return}
             let wx=Double(world.x),wy=Double(world.y)
             let closest=c.engine.state.map.nodes.min{hypot($0.x*1280-wx,$0.y*c.snapshot.layout.coordinateHeight-wy)<hypot($1.x*1280-wx,$1.y*c.snapshot.layout.coordinateHeight-wy)}
             let hitID=try renderer?.classroomNode(atWorldPoint:world,role:.teacher)
@@ -160,7 +181,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
             do{try self.backend.apply(.editResources(unit:unit.id,value:ResourcePatch(health:values[0],shield:values[1],ap:values[2],coins:values[3],score:values[4])),role:.teacher);self.renderer?.classroomRefresh();self.revision += 1}catch{self.message=error.localizedDescription}
         });presenter.present(sheet,animated:true)
     }
-    func setConnection(_ id:String,connected:Bool){if connected{externalIDs.insert(id)}else{externalIDs.remove(id)};renderer?.classroomMirrorEnabled=externalConnected;if !externalConnected{frameMirror.image=nil};revision += 1}
+    func setConnection(_ id:String,connected:Bool){if connected{externalIDs.insert(id)}else{externalIDs.remove(id)};updateMirrorDemand();if !externalConnected{frameMirror.image=nil};revision += 1}
 }
 
 /// Only the clean game renderer moves between native hosts. Every host uses
