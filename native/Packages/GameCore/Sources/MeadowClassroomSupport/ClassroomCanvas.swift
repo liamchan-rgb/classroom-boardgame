@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(CoreGraphics)
+import CoreGraphics
+#endif
 
 /// Screen-independent game coordinates. Hosts letterbox; they never resize the
 /// simulation canvas or derive another camera from a television's pixel scale.

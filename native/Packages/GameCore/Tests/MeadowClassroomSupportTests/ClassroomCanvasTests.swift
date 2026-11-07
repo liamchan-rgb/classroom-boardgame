@@ -1,5 +1,8 @@
 import XCTest
 import Foundation
+#if canImport(CoreGraphics)
+import CoreGraphics
+#endif
 import MeadowWorldSupport
 @testable import MeadowClassroomSupport
 
