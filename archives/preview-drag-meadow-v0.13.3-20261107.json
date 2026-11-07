@@ -1,0 +1,58 @@
+{
+  "version": "0.13.3/build17",
+  "sourceBranch": "feat/teacher-backend-meadow-v0.13",
+  "sourceSnapshotCommit": "b9bc217f928cfd061f787f634328dd8b13fa6e62",
+  "compiledCommit": "a4a1f901a5b01bd11f3470c1c8a403ebf1616f05",
+  "tag": "archive-preview-drag-meadow-v0.13.3-20261107",
+  "buildRun": 42356713660,
+  "archiveRun": 42357179451,
+  "archiveCommit": "a0503327974cbb72525eeea26ea4bd20eeb98113",
+  "archiveBytes": 425511932,
+  "archiveSHA256": "cdd0f1982e0f9f02131d1b574680f2bb2c8713775dcd224f43ac5f99c28cb0b4",
+  "coreTests": {
+    "CurrentDemoAndClassroomBackend": 317,
+    "ClassroomProbeCore": 6,
+    "failures": 0,
+    "nativeSuites": {
+      "MeadowWorldSupportTests": 116,
+      "MeadowClassroomSupportTests": 21,
+      "MeadowBattleSupportTests": 108,
+      "ClassroomGameCoreTests": 72
+    }
+  },
+  "additionalPythonCITests": 4,
+  "ipaBytes": 62091075,
+  "ipaSha256": "35db2d3b18f79085a84977bd3ab0abfc6319c44144e953f1cbe18017f5fa3860",
+  "minimumOS": "27.0",
+  "publicGETChecks": [
+    {
+      "url": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/a0503327974cbb72525eeea26ea4bd20eeb98113/archive-preview-drag-meadow-v0.13.3-20261107/ClassroomStage2-v0.13.3-unsigned.ipa",
+      "bytes": 62091075,
+      "sha256": "35db2d3b18f79085a84977bd3ab0abfc6319c44144e953f1cbe18017f5fa3860",
+      "status": 200
+    },
+    {
+      "url": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/a0503327974cbb72525eeea26ea4bd20eeb98113/archive-preview-drag-meadow-v0.13.3-20261107/preview-drag-normal.gif",
+      "bytes": 13473233,
+      "sha256": "5e03c8eff9a2b3502530a2094beb7b15498a134a68e076c4e7c10b4523ae574a",
+      "status": 200
+    }
+  ],
+  "bundleRestoreVerified": true,
+  "allArchivePublicBytesVerified": true,
+  "ipaURL": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/a0503327974cbb72525eeea26ea4bd20eeb98113/archive-preview-drag-meadow-v0.13.3-20261107/ClassroomStage2-v0.13.3-unsigned.ipa",
+  "gifURL": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/a0503327974cbb72525eeea26ea4bd20eeb98113/archive-preview-drag-meadow-v0.13.3-20261107/preview-drag-normal.gif",
+  "archiveURL": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/a0503327974cbb72525eeea26ea4bd20eeb98113/archive-preview-drag-meadow-v0.13.3-20261107/README.md",
+  "scope": "Teacher preview 960x540 at 30Hz target with direct map CGImage and cached transparent public overlay; phase-aware bounded relay; native teacher map pan and anchored pinch using original scene camera.",
+  "deferred": [
+    "Book player health/AP/coins total <=10% of public area.",
+    "Teacher AP/coin grants while on book page."
+  ],
+  "limitations": [
+    "No device CPU/GPU timing or touch responsiveness measurement was performed.",
+    "User-reported TV/disconnect misalignment is addressed in code; real AirPlay/TV/disconnect validation needs user screenshots.",
+    "Existing two-player Meadow campaign retained; larger classroom parties are not implemented.",
+    "Offline review demonstrates fixed-canvas geometry; it is not UIKit capture or proof of device repair.",
+    "No App, simulator, device or external-display runtime validation."
+  ]
+}
