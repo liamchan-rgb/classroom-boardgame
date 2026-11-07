@@ -49,12 +49,12 @@ struct MeadowTeamConsole:View {
                 Section("同队转交 / 仓库存取 · 仅探索") {
                     Picker("从",selection:$sender){ForEach(owners,id:\.0){Text($0.1).tag($0.0)}}
                     Picker("到",selection:$recipient){ForEach(owners,id:\.0){Text($0.1).tag($0.0)}}
-                    TextField("金币数量",text:$coins).keyboardType(.numberPad)
+                    HStack{Text("金币数量");TextField("0",text:$coins).keyboardType(.numberPad).multilineTextAlignment(.trailing)}
                     Picker("物品",selection:$item){
                         Text("只转金币").tag("")
                         ForEach(game.campaign?.engine.catalog.items ?? []){Text($0.name).tag($0.id)}
                     }
-                    if !item.isEmpty {TextField("物品数量",text:$quantity).keyboardType(.numberPad)}
+                    if !item.isEmpty {HStack{Text("物品数量");TextField("1",text:$quantity).keyboardType(.numberPad).multilineTextAlignment(.trailing)}}
                     Button("确认转移"){
                         guard let value=Int(coins),let count=Int(quantity) else{return}
                         game.teamCommand(.transferTeamResource(from:owner(sender),to:owner(recipient),coins:value,item:item.isEmpty ? nil:item,count:item.isEmpty ? 0:count))
