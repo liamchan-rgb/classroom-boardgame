@@ -22,13 +22,26 @@ struct MeadowPublicView:View {
                         map(date:date).frame(maxHeight:.infinity)
                     }
                     playerBars(date:date)
-                    Text(MeadowPublicProjection.active(frame,at:date)?.text ?? frame.log.last ?? "沿道路探索 · 操作由教师控制")
+                    Text(feedback(date:date))
                         .font(.system(size:24,weight:.semibold)).lineLimit(2).frame(height:60).frame(maxWidth:.infinity)
                         .padding(.horizontal,20).background(Color.black.opacity(0.25),in:RoundedRectangle(cornerRadius:14))
                 }.padding(36).frame(width:width,height:1080).scaleEffect(scale)
                     .frame(width:geometry.size.width,height:geometry.size.height)
             }
         }.foregroundStyle(ink).background(Color(red:0.045,green:0.09,blue:0.065)).preferredColorScheme(.dark)
+    }
+    private func feedback(date:Date)->String {
+        if let cue=MeadowPublicProjection.active(frame,at:date) {
+            let age=date.timeIntervalSince(cue.start)
+            return age < 0.46 ? "动作演出":cue.text
+        }
+        return frame.log.last ?? "沿道路探索 · 操作由教师控制"
+    }
+    private func slot(_ unit:PublicGameUnit,units:[PublicGameUnit],size:CGSize)->CGPoint {
+        let peers=units.filter { $0.player == unit.player }.sorted { $0.id < $1.id }
+        let index=peers.firstIndex { $0.id == unit.id } ?? 0,row=index%4,col=index/4
+        return CGPoint(x:size.width*(unit.player ? 0.19:0.77)+Double(col)*(unit.player ? -100:100)+Double(row%2)*50,
+                       y:size.height*(peers.count>2 ? 0.34+Double(row)*0.15:0.60+Double(row)*0.18))
     }
     private func header(date:Date)->some View {
         HStack {
@@ -108,16 +121,17 @@ struct MeadowPublicView:View {
                 art("MeadowCampMidground").scaledToFill().frame(width:g.size.width,height:g.size.height).clipped()
                 Color.black.opacity(event?.units.contains(where: { $0.effects.contains("flame") || $0.effects.contains("projectile") }) == true ? 0.44:0.16)
                 ForEach(units) { unit in
-                    let peers=units.filter { $0.player == unit.player }.sorted { $0.id < $1.id }
-                    let index=peers.firstIndex { $0.id == unit.id } ?? 0
-                    let count=max(1,peers.count)
-                    let row=index%4,col=index/4
                     let height=min(210.0,g.size.height*0.43)
-                    let x=g.size.width*(unit.player ? 0.19:0.77)+Double(col)*(unit.player ? -100:100)+Double(row%2)*50
-                    let y=g.size.height*(count>2 ? 0.34+Double(row)*0.15:0.60+Double(row)*0.18)
+                    let point=slot(unit,units:units,size:g.size)
                     let cue=event?.units.first { $0.id == unit.id }
+                    let target=units.first { candidate in candidate.player != unit.player && event?.units.contains(where: { $0.id == candidate.id && ["hurt","down"].contains($0.motion) }) == true }
+                    let targetPoint=target.map { slot($0,units:units,size:g.size) } ?? point
+                    let melee=unit.player && ["adventurer","spellblade"].contains(unit.templateID) && cue?.motion == "attack"
+                    let approach=melee ? MeadowPublicProjection.approach(age):0
+                    let travelX=(targetPoint.x-point.x-height*0.65)*approach
+                    let travelY=(targetPoint.y-point.y)*approach
                     actor(unit,cue:cue,skillID:event?.skillID,age:age,time:date.timeIntervalSince1970,size:height)
-                        .position(x:x,y:y).zIndex(Double(row))
+                        .position(x:point.x+travelX,y:point.y+travelY).zIndex(point.y+travelY)
                 }
                 art("MeadowCampForeground").scaledToFill().frame(width:g.size.width,height:g.size.height).clipped().allowsHitTesting(false)
                 VStack { HStack { Spacer();map(date:date).frame(width:230,height:125).opacity(0.85) };Spacer() }.padding(12)
@@ -129,7 +143,7 @@ struct MeadowPublicView:View {
         let dead=unit.health<=0
         let species=MeadowPublicProjection.recognizedMonster(unit.templateID)
         let attacking=cue?.motion == "attack" && age>=0
-        let lunge=attacking && unit.player ? sin(min(1,max(0,age/0.92)) * .pi)*70:0
+        let lunge=0.0 // Registered body, status and shadow travel together in the stage.
         let clip=dead ? "defeat":cue?.motion == "hurt" && hit ? "hit":attacking ? "attack":"idle"
         let progress=clip == "idle" ? time.truncatingRemainder(dividingBy:2.4)/2.4 : min(1,max(0,(clip == "hit" || clip == "defeat" ? age-0.46:age)/0.9))
         return ZStack {

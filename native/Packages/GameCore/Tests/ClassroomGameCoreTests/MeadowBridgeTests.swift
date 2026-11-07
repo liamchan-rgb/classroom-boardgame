@@ -58,4 +58,27 @@ final class MeadowBridgeTests:XCTestCase {
         XCTAssertNil(MeadowPublicProjection.recognizedMonster("custom-boss"))
         XCTAssertEqual(MeadowPublicProjection.recognizedMonster("wolf"),"wolf")
     }
+    func testMixedRuneSlashDamageAndRecoveryHaveSeparateTimes() throws {
+        let (catalog,initial)=try fixture(classes:["spellblade","adventurer"],monsters:["caveTroll"],scripted:[3,4])
+        var state=initial;state.units["p1"]?.health=5
+        let engine=try GameEngine(catalog:catalog,state:state)
+        let receipt=try engine.apply(.cast(actor:"p1",skill:"runeSlash",target:.unit("m1")))
+        var ledger=PresentationLedger();try ledger.submit(receipt,catalog:catalog,now:now)
+        var frame=try PVEPlaySession(engine:engine).publicFrame();frame.presentations=ledger.pending
+        let middle=MeadowPublicProjection.units(frame,at:now.addingTimeInterval(0.6))
+        XCTAssertEqual(middle.first { $0.id == "m1" }?.health,receipt.after.units["m1"]?.health)
+        XCTAssertEqual(middle.first { $0.id == "p1" }?.health,5)
+        let later=MeadowPublicProjection.units(frame,at:now.addingTimeInterval(0.8))
+        XCTAssertEqual(later.first { $0.id == "p1" }?.health,9)
+        XCTAssertEqual(later.first { $0.id == "p1" }?.shield,4)
+        XCTAssertEqual(ledger.pending.first?.skillID,"runeSlash")
+    }
+    func testMeleeArrivesBeforeImpactAndReturnsSmoothly() {
+        XCTAssertEqual(MeadowPublicProjection.approach(0),0)
+        XCTAssertEqual(MeadowPublicProjection.approach(0.46),1)
+        XCTAssertEqual(MeadowPublicProjection.approach(1.3),0)
+        for boundary in [0.12,0.38,0.58,1.15] {
+            XCTAssertLessThan(abs(MeadowPublicProjection.approach(boundary-0.0001)-MeadowPublicProjection.approach(boundary+0.0001)),0.002)
+        }
+    }
 }

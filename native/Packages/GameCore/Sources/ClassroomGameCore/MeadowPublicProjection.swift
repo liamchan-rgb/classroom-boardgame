@@ -3,6 +3,13 @@ import Foundation
 /// Read-only bridge. It has no engine, commands, RNG or persistence access.
 public enum MeadowPublicProjection {
     public static let contactTime = 0.46
+    public static func approach(_ age:Double)->Double {
+        func smooth(_ t:Double)->Double { let x=min(1,max(0,t));return x*x*(3-2*x) }
+        if age<0.12 { return 0 }
+        if age<0.38 { return smooth((age-0.12)/0.26) }
+        if age<0.58 { return 1 }
+        return 1-smooth((age-0.58)/0.57)
+    }
     public static func active(_ frame: PublicPlayFrame, at date: Date) -> CommittedPresentation? {
         frame.presentations.first { $0.isVisible(at: date) }
     }

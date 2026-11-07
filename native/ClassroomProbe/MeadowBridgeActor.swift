@@ -50,10 +50,15 @@ final class MeadowBridgeHeroView: UIView {
         super.layoutSubviews()
         var order=names
         if pose.clip != "idle" {
-            order.removeAll { $0 == "MeadowBattleHeroWeapon" }
-            order.insert("MeadowBattleHeroWeapon",at:order.firstIndex(of:"MeadowBattleHeroHair") ?? order.count)
+            order=["MeadowBattleHeroJointUnderlay","MeadowBattleHeroBodyCore",
+                "MeadowBattleHeroLegFarThighBody","MeadowBattleHeroLegFarShinBody","MeadowBattleHeroLegNearThighBody","MeadowBattleHeroLegNearShinBody",
+                "MeadowBattleHeroArmNearUpperBody","MeadowBattleHeroArmNearForearmBody","MeadowBattleHeroWardrobeCore",
+                "MeadowBattleHeroLegFarThighWardrobe","MeadowBattleHeroLegFarShinWardrobe","MeadowBattleHeroLegNearThighWardrobe","MeadowBattleHeroLegNearShinWardrobe",
+                "MeadowBattleHeroArmNearUpperWardrobe","MeadowBattleHeroArmNearForearmWardrobe","MeadowBattleHeroWeapon",
+                "MeadowBattleHeroHair","MeadowBattleHeroFace","MeadowBattleHeroNearHand","MeadowBattleHeroFarHand"].filter { names.contains($0) }
         }
         UIView.performWithoutAnimation {
+            layer.sublayerTransform=CATransform3DMakeTranslation(pose.rootOffset.x*bounds.width/256,pose.rootOffset.y*bounds.height/256,0)
             for (index,name) in order.enumerated() {
                 guard let image=parts[name] else { continue }
                 image.layer.setAffineTransform(.identity);image.frame=bounds;image.layer.zPosition=CGFloat(index)
