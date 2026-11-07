@@ -1,0 +1,47 @@
+{
+  "version": "0.12.1/build13",
+  "sourceBranch": "feat/meadow-public-bridge-v0.12",
+  "sourceSnapshotCommit": "a011d69a4d85cb3832aea40f0e4264c594c68502",
+  "compiledCommit": "3f1b684f978df334d4ec0ec7cf52d31f9e85afa4",
+  "tag": "archive-meadow-public-bridge-v0.12.1-20261107",
+  "buildRun": 42319105836,
+  "archiveRun": 42319544558,
+  "archiveCommit": "b5923d3286cfe2a2e30b10148dfc7f690f8fc4b7",
+  "archiveBytes": 239879393,
+  "archiveSHA256": "f6bc26eccd41a0e24d3bc964918d0d24d19be2881429c891e757d3a8add808e9",
+  "coreTests": {
+    "ClassroomGameCore": 79,
+    "ClassroomProbeCore": 6,
+    "failures": 0
+  },
+  "additionalPythonCITests": 4,
+  "ipaBytes": 36150190,
+  "ipaSha256": "e8618ee986a6029f702b84b68fc1f8a8f5b50a83f1f6e2f28dd7f11830d21b71",
+  "minimumOS": "27.0",
+  "publicGETChecks": [
+    {
+      "url": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/b5923d3286cfe2a2e30b10148dfc7f690f8fc4b7/archive-meadow-public-bridge-v0.12.1-20261107/ClassroomStage2-v0.12.1-unsigned.ipa",
+      "bytes": 36150190,
+      "sha256": "e8618ee986a6029f702b84b68fc1f8a8f5b50a83f1f6e2f28dd7f11830d21b71",
+      "status": 200
+    },
+    {
+      "url": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/b5923d3286cfe2a2e30b10148dfc7f690f8fc4b7/archive-meadow-public-bridge-v0.12.1-20261107/meadow-public-normal.gif",
+      "bytes": 1365376,
+      "sha256": "00af31c5642e5fa8b2556edc343e6d8d246c4ea08949c4b918f023388785aa04",
+      "status": 200
+    }
+  ],
+  "bundleRestoreVerified": true,
+  "allArchivePublicBytesVerified": true,
+  "ipaURL": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/b5923d3286cfe2a2e30b10148dfc7f690f8fc4b7/archive-meadow-public-bridge-v0.12.1-20261107/ClassroomStage2-v0.12.1-unsigned.ipa",
+  "gifURL": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/b5923d3286cfe2a2e30b10148dfc7f690f8fc4b7/archive-meadow-public-bridge-v0.12.1-20261107/meadow-public-normal.gif",
+  "archiveURL": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/b5923d3286cfe2a2e30b10148dfc7f690f8fc4b7/archive-meadow-public-bridge-v0.12.1-20261107/README.md",
+  "scope": "Default two-player public-only Meadow renderer; original teacher controls, PPT and notes separation retained.",
+  "limitations": [
+    "External display, teacher/private notes and PPT behavior need user device verification.",
+    "Generic melee rig bound for adventurer/spellblade; other classes retain original art.",
+    "No App, simulator, device or external-display runtime validation.",
+    "Map terrain is a prototype backdrop, not the complete Meadow Metal map renderer."
+  ]
+}
