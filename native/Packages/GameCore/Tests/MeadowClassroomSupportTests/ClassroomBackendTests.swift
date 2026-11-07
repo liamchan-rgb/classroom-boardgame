@@ -88,4 +88,11 @@ final class ClassroomBackendTests:XCTestCase {
         XCTAssertThrowsError(try b.battleModel(role:.publicDisplay))
         XCTAssertEqual(c.snapshot,before)
     }
+    func testRestoringDoesNotKeepAnInvisibleBookPause()throws {
+        let b=try fixture(),c=try XCTUnwrap(b.campaign),units=c.engine.state.units,random=c.engine.state.random
+        try c.engine.setPause(.book,enabled:true)
+        try b.install(c,role:.teacher)
+        XCTAssertEqual(b.surface,.exploration);XCTAssertFalse(c.engine.state.pauseReasons.contains(.book))
+        XCTAssertEqual(c.engine.state.units,units);XCTAssertEqual(c.engine.state.random,random)
+    }
 }

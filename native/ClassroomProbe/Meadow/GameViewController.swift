@@ -1105,7 +1105,7 @@ private func refreshCampaignStatus(allowBattleOpen:Bool=true) {
         }else{
             campaignRouteTitle.text=campaign.isCompleted ? "行程已结算":campaign.completionProgress
             let supplies=state.map.nodes.filter{$0.kind == .reward && !$0.rewardCompleted}.count
-            campaignRouteDetail.text=campaign.isCompleted ? "可查看结算，或返回设置开始新行程":"剩余补给 \(supplies)处 · 全队金币 \(campaign.partyCoins) · 点击道路移动，抵达后主动交互"
+            campaignRouteDetail.text=campaign.isCompleted ? "可查看结算，或返回设置开始新行程":"剩余补给 \(supplies)处 · 全队金币 \(campaign.partyCoins) · 抵达后由教师选择交互"
             campaignRouteDetail.textColor=MeadowPreviewPalette.ink
         }
         playButton.isHidden=battlePreviewActive || !campaign.hasPendingTravel;resetButton.isHidden=true
@@ -1220,7 +1220,9 @@ private func refreshCampaignStatus(allowBattleOpen:Bool=true) {
     func classroomRefresh(){scene.refreshCampaign();refreshCampaignStatus();battlePreviewView?.classroomRefresh()}
     func classroomPreviewEncounter(_ node:Int?){selectEncounterPreview(node)}
     func classroomAction(_ action:PartyAction,target:String,role:ClassroomRole)throws {
-        try ClassroomGameBackend.requireTeacher(role);battlePreviewView?.classroomAction(action,target:target)
+        try ClassroomGameBackend.requireTeacher(role)
+        guard campaign?.engine.state.pauseReasons.isEmpty==true else{throw GameError("请先继续战斗。")}
+        battlePreviewView?.classroomAction(action,target:target)
     }
     func classroomFocus(_ action:PartyAction?,target:String,role:ClassroomRole)throws {
         try ClassroomGameBackend.requireTeacher(role);battlePreviewView?.classroomFocus(action,target:target)

@@ -22,7 +22,10 @@ public final class ClassroomGameBackend {
         try Self.requireTeacher(role);return try MeadowMapGenerator.generate(configuration)
     }
     public func install(_ session:MeadowCampaignSession,role:ClassroomRole)throws {
-        try Self.requireTeacher(role);campaign=session;encounter=nil;encounterKey=nil;requested = .exploration
+        try Self.requireTeacher(role)
+        // A saved PPT presentation is transient UI state, not a permanent game pause.
+        if session.engine.state.pauseReasons.contains(.book){try session.engine.setPause(.book,enabled:false)}
+        campaign=session;encounter=nil;encounterKey=nil;requested = .exploration
     }
     public func project(_ surface:ClassroomPublicSurface,role:ClassroomRole)throws {
         try Self.requireTeacher(role)

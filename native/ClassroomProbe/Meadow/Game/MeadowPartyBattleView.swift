@@ -145,7 +145,7 @@ final class MeadowPartyBattleView:UIView {
         title.text=model.terminal ? (state.players.contains(where: \.isAlive) ? "小队胜利":"小队倒地") : (campaignEngine == nil ? "小队支援":"林地遭遇")+" · 第\(model.round)轮"
         let showing=busy ? (stage.actorInAction ?? model.pending?.actor ?? current):current
         let name=showing.flatMap { state.units[$0]?.name } ?? "演练结束"
-        hint.text=busy ? "\(name) · 动作进行中" : "\(name)行动 · 友方 \(friend.uppercased()) / 敌方 \(model.state.units[foe]?.name ?? foe) · 点角色选目标"
+        hint.text=busy ? "\(name) · 动作进行中" : classroomMode ? "\(name)行动"+(state.pauseReasons.isEmpty ? "":" · 已暂停") : "\(name)行动 · 友方 \(friend.uppercased()) / 敌方 \(model.state.units[foe]?.name ?? foe) · 点角色选目标"
         let displayActor=showing ?? "p1"
         if let unit=state.units[displayActor] {
             let visible=stage.displayedVitals(for:displayActor,health:unit.health,shield:unit.shield)

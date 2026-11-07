@@ -15,6 +15,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
     @Published private(set) var message="先在教师后台生成地图，或继续已保存的行程。"
     @Published var selectedNode:Int?
     @Published var selectedTarget="p1"
+    var localOutputPreview=false
     private(set) var renderer:GameViewController?
     weak var privatePresenter:UIViewController? {didSet{renderer?.classroomPrivatePresenter=privatePresenter}}
     private var timer:Timer?
@@ -25,7 +26,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
     private func tick(){
         let now=ProcessInfo.processInfo.systemUptime,delta=min(0.5,max(0,now-lastTick));lastTick=now;revision += 1
         renderer?.classroomFinishBattleIfReady()
-        guard UIApplication.shared.applicationState == .active,ready,let c=campaign,c.engine.state.battle != nil,surface != .book,c.engine.state.pauseReasons.isEmpty else{enemyWork?.cancel();enemyWork=nil;aiKey=nil;return}
+        guard UIApplication.shared.applicationState == .active,ready,!modalOpen,let c=campaign,c.engine.state.battle != nil,surface != .book,c.engine.state.pauseReasons.isEmpty else{enemyWork?.cancel();enemyWork=nil;aiKey=nil;return}
         guard !busy else{return}
         do{
             if try c.engine.advanceClock(by:delta) != nil {renderer?.classroomRefresh()}
@@ -33,7 +34,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
             let key=c.engine.state.gameID+":"+actor+":"+String(c.engine.history.count)
             guard aiKey != key else{return};enemyWork?.cancel();aiKey=key
             let task=DispatchWorkItem{[weak self,weak c] in
-                guard let self,let c,self.campaign === c,!self.busy,c.engine.state.pauseReasons.isEmpty,self.surface != .book else{return}
+                guard let self,let c,self.campaign === c,!self.busy,!self.modalOpen,c.engine.state.pauseReasons.isEmpty,self.surface != .book else{return}
                 self.renderer?.classroomEnemyStep()
             }
             enemyWork=task;DispatchQueue.main.asyncAfter(deadline:.now()+0.65,execute:task)
@@ -45,7 +46,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
     var ready:Bool {renderer?.classroomReady ?? false}
     var actions:[PartyAction] {renderer?.classroomActions ?? []}
     var externalConnected:Bool {!externalIDs.isEmpty}
-    var modalOpen:Bool {privatePresenter?.presentedViewController != nil}
+    var modalOpen:Bool {privatePresenter?.presentedViewController != nil && !localOutputPreview}
     init(){
         timer=Timer.scheduledTimer(withTimeInterval:0.15,repeats:true){[weak self] _ in Task{@MainActor in self?.tick()}}
     }
@@ -101,9 +102,10 @@ final class MeadowTeacherCoordinator:ObservableObject {
         catch{message=error.localizedDescription}
     }
     func battle(_ action:PartyAction){
+        guard campaign?.engine.state.pauseReasons.isEmpty==true,!modalOpen else{message="请先关闭后台对话框并继续战斗。";return}
         do{try renderer?.classroomAction(action,target:selectedTarget,role:.teacher);revision += 1}catch{message=error.localizedDescription}
     }
-    func focus(_ action:PartyAction?){try? renderer?.classroomFocus(action,target:selectedTarget,role:.teacher)}
+    func focus(_ action:PartyAction?){guard campaign?.engine.state.pauseReasons.isEmpty==true else{return};try? renderer?.classroomFocus(action,target:selectedTarget,role:.teacher)}
     func award(){
         guard !busy,let c=campaign else{return}
         do{try backend.apply(.reward(actors:[c.selectedPlayerID],value:ResourceReward(coins:10)),role:.teacher);renderer?.classroomRefresh();message="已向选中成员发放10金币。";revision += 1}catch{message=error.localizedDescription}
