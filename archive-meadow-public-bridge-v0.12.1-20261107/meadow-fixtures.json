@@ -1,0 +1,778 @@
+{
+  "arrival" : {
+    "camera" : {
+      "center" : {
+        "x" : 0.36,
+        "y" : 0.55
+      },
+      "zoom" : 1.8
+    },
+    "currentDetails" : {
+      "className" : "魔剑士",
+      "items" : [
+
+      ],
+      "skills" : [
+        {
+          "available" : true,
+          "cost" : 2,
+          "detail" : "单敌 · 射程1 · 战斗 · 余2次\n目标伤害2D12+2；自身恢复4生命；自身护盾4",
+          "id" : "runeSlash",
+          "name" : "符文斩"
+        },
+        {
+          "available" : true,
+          "cost" : 2,
+          "detail" : "节点全部队友 · 射程1 · 通用 · 余2次\n目标恢复8生命；目标护盾6",
+          "id" : "runeWard",
+          "name" : "符文庇护"
+        },
+        {
+          "available" : true,
+          "cost" : 1,
+          "detail" : "节点全部队友 · 射程1 · 通用 · 余2次\n目标护盾4；目标伤害+3·2轮",
+          "id" : "battleRune",
+          "name" : "战斗符文"
+        }
+      ],
+      "unitID" : "p1"
+    },
+    "followsCurrent" : true,
+    "itemPage" : 0,
+    "log" : [
+      "PVE开战，先攻队列已确定",
+      "Student 1移动1条道路"
+    ],
+    "presentations" : [
+      {
+        "before" : {
+          "dice" : [
+
+          ],
+          "nodes" : [
+            {
+              "claimed" : false,
+              "id" : 1,
+              "kind" : "start",
+              "name" : "营地",
+              "revealed" : true,
+              "x" : 0.1,
+              "y" : 0.55
+            },
+            {
+              "claimed" : false,
+              "id" : 2,
+              "name" : "未探索地点2",
+              "revealed" : false,
+              "x" : 0.36,
+              "y" : 0.55
+            }
+          ],
+          "paused" : false,
+          "phase" : "exploration",
+          "queue" : [
+
+          ],
+          "queueIDs" : [
+
+          ],
+          "remainingSeconds" : 30,
+          "roads" : [
+            {
+              "a" : 1,
+              "b" : 2
+            }
+          ],
+          "round" : 0,
+          "units" : [
+            {
+              "acted" : false,
+              "ap" : 3,
+              "canActFromRound" : 1,
+              "coins" : 0,
+              "current" : false,
+              "health" : 5,
+              "host" : false,
+              "id" : "p1",
+              "maximumHealth" : 24,
+              "name" : "Student 1",
+              "nodeID" : 1,
+              "player" : true,
+              "score" : 0,
+              "shield" : 0,
+              "team" : "蓝队",
+              "teamID" : "blue",
+              "templateID" : "spellblade"
+            },
+            {
+              "acted" : false,
+              "ap" : 3,
+              "canActFromRound" : 1,
+              "coins" : 0,
+              "current" : false,
+              "health" : 12,
+              "host" : false,
+              "id" : "p2",
+              "maximumHealth" : 12,
+              "name" : "Student 2",
+              "nodeID" : 1,
+              "player" : true,
+              "score" : 0,
+              "shield" : 0,
+              "team" : "蓝队",
+              "teamID" : "blue",
+              "templateID" : "adventurer"
+            }
+          ]
+        },
+        "dice" : [
+
+        ],
+        "id" : "9CEA240C-7EC6-4548-8389-2D18F207BFBE:A177507A-F2AB-413C-9DA1-129244791E4A",
+        "mapMoves" : [
+          {
+            "points" : [
+              {
+                "x" : 0.1,
+                "y" : 0.55
+              },
+              {
+                "x" : 0.36,
+                "y" : 0.55
+              }
+            ],
+            "unitID" : "p1"
+          },
+          {
+            "points" : [
+              {
+                "x" : 0.1,
+                "y" : 0.55
+              },
+              {
+                "x" : 0.36,
+                "y" : 0.55
+              }
+            ],
+            "unitID" : "p2"
+          }
+        ],
+        "opensBattleAfterArrival" : true,
+        "start" : -978306200,
+        "text" : "",
+        "units" : [
+          {
+            "effects" : [
+
+            ],
+            "healthChange" : 0,
+            "id" : "p1",
+            "motion" : "move",
+            "shieldChange" : 0
+          }
+        ]
+      }
+    ],
+    "snapshot" : {
+      "currentName" : "Student 1",
+      "dice" : [
+        {
+          "formula" : {
+            "count" : 1,
+            "flat" : 0,
+            "sides" : 20
+          },
+          "naturalTwenty" : false,
+          "source" : "initiative",
+          "total" : 20,
+          "values" : [
+            20
+          ]
+        },
+        {
+          "formula" : {
+            "count" : 1,
+            "flat" : 0,
+            "sides" : 20
+          },
+          "naturalTwenty" : false,
+          "source" : "initiative",
+          "total" : 18,
+          "values" : [
+            18
+          ]
+        },
+        {
+          "formula" : {
+            "count" : 1,
+            "flat" : 0,
+            "sides" : 20
+          },
+          "naturalTwenty" : false,
+          "source" : "initiative",
+          "total" : 5,
+          "values" : [
+            5
+          ]
+        }
+      ],
+      "nodes" : [
+        {
+          "claimed" : false,
+          "id" : 1,
+          "kind" : "start",
+          "name" : "营地",
+          "revealed" : true,
+          "x" : 0.1,
+          "y" : 0.55
+        },
+        {
+          "claimed" : false,
+          "id" : 2,
+          "kind" : "combat",
+          "name" : "森林路口",
+          "revealed" : true,
+          "x" : 0.36,
+          "y" : 0.55
+        },
+        {
+          "claimed" : false,
+          "id" : 3,
+          "name" : "未探索地点3",
+          "revealed" : false,
+          "x" : 0.62,
+          "y" : 0.26
+        },
+        {
+          "claimed" : false,
+          "id" : 4,
+          "name" : "未探索地点4",
+          "revealed" : false,
+          "x" : 0.62,
+          "y" : 0.78
+        }
+      ],
+      "paused" : false,
+      "phase" : "pve",
+      "queue" : [
+        "Student 1",
+        "Student 2",
+        "捣蛋史莱姆"
+      ],
+      "queueIDs" : [
+        "p1",
+        "p2",
+        "m1"
+      ],
+      "remainingSeconds" : 30,
+      "roads" : [
+        {
+          "a" : 1,
+          "b" : 2
+        },
+        {
+          "a" : 2,
+          "b" : 3
+        },
+        {
+          "a" : 2,
+          "b" : 4
+        }
+      ],
+      "round" : 1,
+      "units" : [
+        {
+          "acted" : false,
+          "ap" : 1,
+          "canActFromRound" : 1,
+          "coins" : 0,
+          "current" : false,
+          "health" : 8,
+          "host" : false,
+          "id" : "m1",
+          "maximumHealth" : 8,
+          "name" : "捣蛋史莱姆",
+          "nodeID" : 2,
+          "player" : false,
+          "score" : 0,
+          "shield" : 0,
+          "team" : "敌方",
+          "templateID" : "slime"
+        },
+        {
+          "acted" : false,
+          "ap" : 3,
+          "canActFromRound" : 1,
+          "coins" : 0,
+          "current" : true,
+          "health" : 5,
+          "host" : false,
+          "id" : "p1",
+          "maximumHealth" : 24,
+          "name" : "Student 1",
+          "nodeID" : 2,
+          "player" : true,
+          "score" : 0,
+          "shield" : 0,
+          "team" : "蓝队",
+          "teamID" : "blue",
+          "templateID" : "spellblade"
+        },
+        {
+          "acted" : false,
+          "ap" : 3,
+          "canActFromRound" : 1,
+          "coins" : 0,
+          "current" : false,
+          "health" : 12,
+          "host" : false,
+          "id" : "p2",
+          "maximumHealth" : 12,
+          "name" : "Student 2",
+          "nodeID" : 2,
+          "player" : true,
+          "score" : 0,
+          "shield" : 0,
+          "team" : "蓝队",
+          "teamID" : "blue",
+          "templateID" : "adventurer"
+        }
+      ]
+    },
+    "verification" : false
+  },
+  "exploration" : {
+    "camera" : {
+      "center" : {
+        "x" : 0.5,
+        "y" : 0.5
+      },
+      "zoom" : 1
+    },
+    "followsCurrent" : true,
+    "itemPage" : 0,
+    "log" : [
+
+    ],
+    "presentations" : [
+
+    ],
+    "snapshot" : {
+      "dice" : [
+
+      ],
+      "nodes" : [
+        {
+          "claimed" : false,
+          "id" : 1,
+          "kind" : "start",
+          "name" : "营地",
+          "revealed" : true,
+          "x" : 0.1,
+          "y" : 0.55
+        },
+        {
+          "claimed" : false,
+          "id" : 2,
+          "name" : "未探索地点2",
+          "revealed" : false,
+          "x" : 0.36,
+          "y" : 0.55
+        }
+      ],
+      "paused" : false,
+      "phase" : "exploration",
+      "queue" : [
+
+      ],
+      "queueIDs" : [
+
+      ],
+      "remainingSeconds" : 30,
+      "roads" : [
+        {
+          "a" : 1,
+          "b" : 2
+        }
+      ],
+      "round" : 0,
+      "units" : [
+        {
+          "acted" : false,
+          "ap" : 3,
+          "canActFromRound" : 1,
+          "coins" : 0,
+          "current" : false,
+          "health" : 5,
+          "host" : false,
+          "id" : "p1",
+          "maximumHealth" : 24,
+          "name" : "Student 1",
+          "nodeID" : 1,
+          "player" : true,
+          "score" : 0,
+          "shield" : 0,
+          "team" : "蓝队",
+          "teamID" : "blue",
+          "templateID" : "spellblade"
+        },
+        {
+          "acted" : false,
+          "ap" : 3,
+          "canActFromRound" : 1,
+          "coins" : 0,
+          "current" : false,
+          "health" : 12,
+          "host" : false,
+          "id" : "p2",
+          "maximumHealth" : 12,
+          "name" : "Student 2",
+          "nodeID" : 1,
+          "player" : true,
+          "score" : 0,
+          "shield" : 0,
+          "team" : "蓝队",
+          "teamID" : "blue",
+          "templateID" : "adventurer"
+        }
+      ]
+    },
+    "verification" : false
+  },
+  "runeSlash" : {
+    "camera" : {
+      "center" : {
+        "x" : 0.5,
+        "y" : 0.5
+      },
+      "zoom" : 1
+    },
+    "followsCurrent" : true,
+    "itemPage" : 0,
+    "log" : [
+      "捣蛋史莱姆生命减少8，护盾减少0",
+      "Student 1恢复4生命",
+      "Student 1护盾增加4",
+      "Student 1积分+1",
+      "Student 1获得5金币",
+      "Student 1获得小治疗药水×1",
+      "Student 1使用符文斩",
+      "本场战斗结束，返回探索"
+    ],
+    "presentations" : [
+      {
+        "before" : {
+          "currentName" : "Student 1",
+          "dice" : [
+
+          ],
+          "nodes" : [
+            {
+              "claimed" : false,
+              "id" : 1,
+              "kind" : "start",
+              "name" : "营地",
+              "revealed" : true,
+              "x" : 0.1,
+              "y" : 0.55
+            },
+            {
+              "claimed" : false,
+              "id" : 2,
+              "kind" : "combat",
+              "name" : "森林路口",
+              "revealed" : true,
+              "x" : 0.36,
+              "y" : 0.55
+            },
+            {
+              "claimed" : false,
+              "id" : 3,
+              "name" : "未探索地点3",
+              "revealed" : false,
+              "x" : 0.62,
+              "y" : 0.26
+            },
+            {
+              "claimed" : false,
+              "id" : 4,
+              "name" : "未探索地点4",
+              "revealed" : false,
+              "x" : 0.62,
+              "y" : 0.78
+            }
+          ],
+          "paused" : false,
+          "phase" : "pve",
+          "queue" : [
+            "Student 1",
+            "Student 2",
+            "捣蛋史莱姆"
+          ],
+          "queueIDs" : [
+            "p1",
+            "p2",
+            "m1"
+          ],
+          "remainingSeconds" : 30,
+          "roads" : [
+            {
+              "a" : 1,
+              "b" : 2
+            },
+            {
+              "a" : 2,
+              "b" : 3
+            },
+            {
+              "a" : 2,
+              "b" : 4
+            }
+          ],
+          "round" : 1,
+          "units" : [
+            {
+              "acted" : false,
+              "ap" : 1,
+              "canActFromRound" : 1,
+              "coins" : 0,
+              "current" : false,
+              "health" : 8,
+              "host" : false,
+              "id" : "m1",
+              "maximumHealth" : 8,
+              "name" : "捣蛋史莱姆",
+              "nodeID" : 2,
+              "player" : false,
+              "score" : 0,
+              "shield" : 0,
+              "team" : "敌方",
+              "templateID" : "slime"
+            },
+            {
+              "acted" : false,
+              "ap" : 3,
+              "canActFromRound" : 1,
+              "coins" : 0,
+              "current" : true,
+              "health" : 5,
+              "host" : false,
+              "id" : "p1",
+              "maximumHealth" : 24,
+              "name" : "Student 1",
+              "nodeID" : 2,
+              "player" : true,
+              "score" : 0,
+              "shield" : 0,
+              "team" : "蓝队",
+              "teamID" : "blue",
+              "templateID" : "spellblade"
+            },
+            {
+              "acted" : false,
+              "ap" : 3,
+              "canActFromRound" : 1,
+              "coins" : 0,
+              "current" : false,
+              "health" : 12,
+              "host" : false,
+              "id" : "p2",
+              "maximumHealth" : 12,
+              "name" : "Student 2",
+              "nodeID" : 2,
+              "player" : true,
+              "score" : 0,
+              "shield" : 0,
+              "team" : "蓝队",
+              "teamID" : "blue",
+              "templateID" : "adventurer"
+            }
+          ]
+        },
+        "dice" : [
+          {
+            "formula" : {
+              "count" : 2,
+              "flat" : 2,
+              "sides" : 12
+            },
+            "naturalTwenty" : false,
+            "source" : "damage",
+            "total" : 9,
+            "values" : [
+              3,
+              4
+            ]
+          }
+        ],
+        "id" : "9CEA240C-7EC6-4548-8389-2D18F207BFBE:5AD463BF-DC8D-4E67-B025-A3BCA0EFEE10",
+        "mapMoves" : [
+
+        ],
+        "opensBattleAfterArrival" : false,
+        "skillID" : "runeSlash",
+        "start" : -978306198,
+        "text" : "捣蛋史莱姆：生命-8；Student 1：生命+4、护盾+4、金币+5、积分+1、小治疗药水+1",
+        "units" : [
+          {
+            "effects" : [
+              "impact"
+            ],
+            "healthChange" : -8,
+            "id" : "m1",
+            "motion" : "down",
+            "shieldChange" : 0
+          },
+          {
+            "effects" : [
+              "heal",
+              "shield",
+              "projectile"
+            ],
+            "healthChange" : 4,
+            "id" : "p1",
+            "motion" : "attack",
+            "shieldChange" : 4
+          }
+        ]
+      }
+    ],
+    "snapshot" : {
+      "dice" : [
+        {
+          "formula" : {
+            "count" : 2,
+            "flat" : 2,
+            "sides" : 12
+          },
+          "naturalTwenty" : false,
+          "source" : "damage",
+          "total" : 9,
+          "values" : [
+            3,
+            4
+          ]
+        }
+      ],
+      "nodes" : [
+        {
+          "claimed" : false,
+          "id" : 1,
+          "kind" : "start",
+          "name" : "营地",
+          "revealed" : true,
+          "x" : 0.1,
+          "y" : 0.55
+        },
+        {
+          "claimed" : false,
+          "id" : 2,
+          "kind" : "combat",
+          "name" : "森林路口",
+          "revealed" : true,
+          "x" : 0.36,
+          "y" : 0.55
+        },
+        {
+          "claimed" : false,
+          "id" : 3,
+          "name" : "未探索地点3",
+          "revealed" : false,
+          "x" : 0.62,
+          "y" : 0.26
+        },
+        {
+          "claimed" : false,
+          "id" : 4,
+          "name" : "未探索地点4",
+          "revealed" : false,
+          "x" : 0.62,
+          "y" : 0.78
+        }
+      ],
+      "paused" : false,
+      "phase" : "exploration",
+      "queue" : [
+
+      ],
+      "queueIDs" : [
+
+      ],
+      "remainingSeconds" : 30,
+      "roads" : [
+        {
+          "a" : 1,
+          "b" : 2
+        },
+        {
+          "a" : 2,
+          "b" : 3
+        },
+        {
+          "a" : 2,
+          "b" : 4
+        }
+      ],
+      "round" : 0,
+      "units" : [
+        {
+          "acted" : false,
+          "ap" : 1,
+          "canActFromRound" : 1,
+          "coins" : 0,
+          "current" : false,
+          "health" : 0,
+          "host" : false,
+          "id" : "m1",
+          "maximumHealth" : 8,
+          "name" : "捣蛋史莱姆",
+          "nodeID" : 2,
+          "player" : false,
+          "score" : 0,
+          "shield" : 0,
+          "team" : "敌方",
+          "templateID" : "slime"
+        },
+        {
+          "acted" : false,
+          "ap" : 1,
+          "canActFromRound" : 1,
+          "coins" : 5,
+          "current" : false,
+          "health" : 9,
+          "host" : false,
+          "id" : "p1",
+          "maximumHealth" : 24,
+          "name" : "Student 1",
+          "nodeID" : 2,
+          "player" : true,
+          "score" : 1,
+          "shield" : 4,
+          "team" : "蓝队",
+          "teamID" : "blue",
+          "templateID" : "spellblade"
+        },
+        {
+          "acted" : false,
+          "ap" : 3,
+          "canActFromRound" : 1,
+          "coins" : 0,
+          "current" : false,
+          "health" : 12,
+          "host" : false,
+          "id" : "p2",
+          "maximumHealth" : 12,
+          "name" : "Student 2",
+          "nodeID" : 2,
+          "player" : true,
+          "score" : 0,
+          "shield" : 0,
+          "team" : "蓝队",
+          "teamID" : "blue",
+          "templateID" : "adventurer"
+        }
+      ]
+    },
+    "verification" : false
+  }
+}

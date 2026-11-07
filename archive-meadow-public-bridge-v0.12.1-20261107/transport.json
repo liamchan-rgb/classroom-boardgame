@@ -1,0 +1,34 @@
+{
+  "formatVersion": 1,
+  "logicalZIP": "archive-meadow-public-bridge-v0.12.1-20261107.zip",
+  "bytes": 239879393,
+  "sha256": "f6bc26eccd41a0e24d3bc964918d0d24d19be2881429c891e757d3a8add808e9",
+  "parts": [
+    {
+      "file": "archive-meadow-public-bridge-v0.12.1-20261107.zip.part000",
+      "bytes": 50331648,
+      "sha256": "dfeddfa014e2787a4f9e3901c4488fc41a4fbae10fcaa60fe4685bd924c6f16a"
+    },
+    {
+      "file": "archive-meadow-public-bridge-v0.12.1-20261107.zip.part001",
+      "bytes": 50331648,
+      "sha256": "731c95921c5a4c04a534320b9de4c9f1d23b483495bf1694213ad86754c9f31e"
+    },
+    {
+      "file": "archive-meadow-public-bridge-v0.12.1-20261107.zip.part002",
+      "bytes": 50331648,
+      "sha256": "160e3dcb4f01eaa54d37a2508616f29be87e9a7d6e56b7d7dca904d9dbb29962"
+    },
+    {
+      "file": "archive-meadow-public-bridge-v0.12.1-20261107.zip.part003",
+      "bytes": 50331648,
+      "sha256": "0fc2af2a743fcdd01ba7adb781c05c1afbbce773f29a6f1e4c2bf5d1a457e9bd"
+    },
+    {
+      "file": "archive-meadow-public-bridge-v0.12.1-20261107.zip.part004",
+      "bytes": 38552801,
+      "sha256": "ad7bf350bd72284e7d866217e10796a4b2a279fa02b43e9901f12bd29ab9a438"
+    }
+  ],
+  "reason": "Lossless split; GitHub normal Git rejects files over 100MB"
+}
