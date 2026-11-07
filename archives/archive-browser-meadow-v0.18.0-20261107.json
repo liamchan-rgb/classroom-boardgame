@@ -1,0 +1,66 @@
+{
+  "version": "0.18.0/build23",
+  "sourceBranch": "feat/teacher-backend-meadow-v0.13",
+  "sourceSnapshotCommit": "70e286f08f768bc7d40fd3fe9525de6b66c931d4",
+  "compiledCommit": "7b27d32e01582a96f4611538d9db5561663388f9",
+  "tag": "archive-browser-meadow-v0.18.0-20261107",
+  "buildRun": 42396956759,
+  "archiveRun": 42397858759,
+  "archiveCommit": "ec0c544576c2b55da4b91f00b23b7edf668fa4e7",
+  "archiveBytes": 440859206,
+  "archiveSHA256": "f3ecdb5748fcd91ae2c9a1a6439d300e9af2cd9ad9d353b4613030fcafcc84eb",
+  "coreTests": {
+    "CurrentDemoAndClassroomBackend": 403,
+    "ClassroomProbeCore": 6,
+    "failures": 0,
+    "nativeSuites": {
+      "MeadowWorldSupportTests": 169,
+      "MeadowClassroomSupportTests": 54,
+      "MeadowBattleSupportTests": 108,
+      "ClassroomGameCoreTests": 72
+    }
+  },
+  "additionalLocalPythonTests": 8,
+  "ipaBytes": 62916115,
+  "ipaSha256": "79f4fc233667f31c85e681fe017094938282b8eac03d3dd703fb81e19c6d797a",
+  "minimumOS": "27.0",
+  "publicGETChecks": [
+    {
+      "url": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/ec0c544576c2b55da4b91f00b23b7edf668fa4e7/archive-browser-meadow-v0.18.0-20261107/ClassroomStage2-v0.18.0-unsigned.ipa",
+      "bytes": 62916115,
+      "sha256": "79f4fc233667f31c85e681fe017094938282b8eac03d3dd703fb81e19c6d797a",
+      "status": 200
+    },
+    {
+      "url": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/ec0c544576c2b55da4b91f00b23b7edf668fa4e7/archive-browser-meadow-v0.18.0-20261107/archive-browser-normal.gif",
+      "bytes": 265839,
+      "sha256": "7139ccb59afe0406d34ee84168aff99917c375aa740ec7ec9dc63fb70270c43b",
+      "status": 200
+    }
+  ],
+  "bundleRestoreVerified": true,
+  "allArchivePublicBytesVerified": true,
+  "ipaURL": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/ec0c544576c2b55da4b91f00b23b7edf668fa4e7/archive-browser-meadow-v0.18.0-20261107/ClassroomStage2-v0.18.0-unsigned.ipa",
+  "gifURL": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/ec0c544576c2b55da4b91f00b23b7edf668fa4e7/archive-browser-meadow-v0.18.0-20261107/archive-browser-normal.gif",
+  "archiveURL": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/ec0c544576c2b55da4b91f00b23b7edf668fa4e7/archive-browser-meadow-v0.18.0-20261107/README.md",
+  "scope": "Teacher-only campaign keyword/status/player-count filters and stable save-slot sorting; categorized history search with participants, immutable original IDs, background indexing and pagination; filtered rollback still removes every later operation; mirrored pinned experiment-art integration contract, template and read-only change planner; no runtime art changes.",
+  "nextSteps": [
+    "Reusable teacher classroom configuration presets.",
+    "Integrate the first actually delivered art batch using the pinned experiment SHA and paired assets, metadata and renderer code."
+  ],
+  "limitations": [
+    "No device CPU/GPU timing or touch responsiveness measurement was performed.",
+    "User-reported TV/disconnect misalignment is addressed in code; real AirPlay/TV/disconnect validation needs user screenshots.",
+    "P3-P7 reuse existing approved character resources; distinct character art remains missing. Teacher host has a private joining UI. Independent body variants in battle remain missing; approved rigs are reused.",
+    "Offline review demonstrates fixed-canvas geometry; it is not UIKit capture or proof of device repair.",
+    "No App, simulator, device or external-display runtime validation."
+  ],
+  "artIntegration": {
+    "classroomProtocolURL": "https://github.com/liamchan-rgb/classroom-boardgame/blob/feat/teacher-backend-meadow-v0.13/docs/integration/experiment-art-sync.md",
+    "experimentProtocolURL": "https://github.com/liamchan-rgb/experiment/blob/fix/build33-face-grounding-camera/docs/integration/classroom-art-sync.md",
+    "protocolSHA256": "5a5b67a6b0eb37d65324c635a6b0a0b20d97754dc4a3bcd1018fffdc1465020f",
+    "artBaseline": "175c7dfc4a68e62cb9693da8d837b77081619a6b",
+    "runtimeArtChanged": false,
+    "plannerIsReadOnly": true
+  }
+}
