@@ -1,0 +1,49 @@
+{
+  "formatVersion": 1,
+  "logicalZIP": "archive-display-mirror-meadow-v0.13.1-20261107.zip",
+  "bytes": 377681214,
+  "sha256": "01126f7d8c29e45dab98837b91e190c5e21d602e0c0135b9ebaa0dd43b95d8d7",
+  "parts": [
+    {
+      "file": "archive-display-mirror-meadow-v0.13.1-20261107.zip.part000",
+      "bytes": 50331648,
+      "sha256": "22358123623645a3855ac8592fd1b00c5c2ec4fad24b1c3dd3f120e7ff9b3e19"
+    },
+    {
+      "file": "archive-display-mirror-meadow-v0.13.1-20261107.zip.part001",
+      "bytes": 50331648,
+      "sha256": "7c48260a7498ed676a7a38d2037c294388bfd146becf225bf382152144c41bb2"
+    },
+    {
+      "file": "archive-display-mirror-meadow-v0.13.1-20261107.zip.part002",
+      "bytes": 50331648,
+      "sha256": "8efd15a735039c60c46bbee04d4c538ae93589c4ba11dd12758a61780a3e6a71"
+    },
+    {
+      "file": "archive-display-mirror-meadow-v0.13.1-20261107.zip.part003",
+      "bytes": 50331648,
+      "sha256": "2e40a208076bc956b7b2d5df34cf97c974837c7a3633999fed6d85cc5c6ed642"
+    },
+    {
+      "file": "archive-display-mirror-meadow-v0.13.1-20261107.zip.part004",
+      "bytes": 50331648,
+      "sha256": "0a735a03e770d9b3d32d403e5e94534cb3187b7127df0190c4819bced03b332d"
+    },
+    {
+      "file": "archive-display-mirror-meadow-v0.13.1-20261107.zip.part005",
+      "bytes": 50331648,
+      "sha256": "102866b19c7ec8ae359706bc1be02908f7a0ecda42cecb94407a196d5a66744a"
+    },
+    {
+      "file": "archive-display-mirror-meadow-v0.13.1-20261107.zip.part006",
+      "bytes": 50331648,
+      "sha256": "b06669126602af6f2fdc4513e6a7a349cb91ebfaf55c9aea3205c3f1f6d28bf0"
+    },
+    {
+      "file": "archive-display-mirror-meadow-v0.13.1-20261107.zip.part007",
+      "bytes": 25359678,
+      "sha256": "8fa0e6222fd3c0c6c5eeed16a58816bf89424986dd1850f0c49b1098ac41f919"
+    }
+  ],
+  "reason": "Lossless split; GitHub normal Git rejects files over 100MB"
+}

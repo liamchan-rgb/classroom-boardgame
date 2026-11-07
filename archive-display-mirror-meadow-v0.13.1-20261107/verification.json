@@ -1,0 +1,56 @@
+{
+  "appVersion": "0.13.1/build15",
+  "testedCommit": "7ffc6b13ab3f58c39ea21f63669e2c46440d6e2f",
+  "sourceCommit": "7ffc6b13ab3f58c39ea21f63669e2c46440d6e2f",
+  "runID": 42346131666,
+  "runAttempt": 1,
+  "artifactID": 13563219874,
+  "artifactArchiveSha256": "9ff3779899854ccea61284a2d185e16eda3bfdaf4b28cb240b56194851a87678",
+  "artifactArchiveBytes": 57920355,
+  "ipaSha256": "88b62f485759e72d606159497dcb1d3f74235b4f5987d675b59e950a1ef2f244",
+  "ipaBytes": 62053723,
+  "coreTests": {
+    "CurrentDemoAndClassroomBackend": 310,
+    "ClassroomProbeCore": 6,
+    "failures": 0,
+    "nativeSuites": {
+      "MeadowWorldSupportTests": 116,
+      "MeadowClassroomSupportTests": 14,
+      "MeadowBattleSupportTests": 108,
+      "ClassroomGameCoreTests": 72
+    }
+  },
+  "deviceReleaseArchive": true,
+  "arm64": true,
+  "executableMode": "0o755",
+  "executableSHA256": "2908b5ff5a4c5721fe9a53299897bb38803b9400f23bc9791f35de53cd691d29",
+  "classicZIP2": true,
+  "CRC": true,
+  "artSource": "175c7dfc4a68e62cb9693da8d837b77081619a6b",
+  "sourceResourceHashesVerified": 568,
+  "compiledAssetNamesVerified": 281,
+  "rigResourceHashesVerified": 3,
+  "metalLibraries": {
+    "Payload/ClassroomProbe.app/default.metallib": "af74556814a875eb225eca5ed22720122ed9dc2a88daa8117b180298956b921f"
+  },
+  "minimumOS": "27.0",
+  "sdk": "iphoneos27.2",
+  "legacyGameUIRemoved": true,
+  "fixedLogicalCanvas": [
+    1280,
+    720
+  ],
+  "fixedMetalScale": 1,
+  "teacherUsesGameOnlyMirror": true,
+  "teacherMirrorMaximumFPS": 30,
+  "publicRenderTargetFPS": 60,
+  "newPVEDeviceVerified": false,
+  "appLaunched": false,
+  "simulatorLaunched": false,
+  "externalDisplayVerified": false,
+  "limitations": [
+    "User-reported TV/disconnect misalignment is addressed in code; real AirPlay/TV/disconnect validation needs user screenshots.",
+    "Existing two-player Meadow campaign retained; larger classroom parties are not implemented.",
+    "Offline review demonstrates fixed-canvas geometry; it is not UIKit capture or proof of device repair."
+  ]
+}
