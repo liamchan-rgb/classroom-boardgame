@@ -1,0 +1,58 @@
+{
+  "version": "0.17.0/build22",
+  "sourceBranch": "feat/teacher-backend-meadow-v0.13",
+  "sourceSnapshotCommit": "611acfbadd47300c0da04279e6605f65e7be3c82",
+  "compiledCommit": "46ae062fbb17663f4b015b9ab847dbd4f67c8289",
+  "tag": "archive-save-transfer-meadow-v0.17.0-20261107",
+  "buildRun": 42392999420,
+  "archiveRun": 42393595270,
+  "archiveCommit": "10fcb0e9376f1c8ba7cf261955153a839aba5446",
+  "archiveBytes": 439370152,
+  "archiveSHA256": "6fd18bc1c58bb1b9a5fccade498a05a20968d4ae09e081e6906070f77a32593d",
+  "coreTests": {
+    "CurrentDemoAndClassroomBackend": 389,
+    "ClassroomProbeCore": 6,
+    "failures": 0,
+    "nativeSuites": {
+      "MeadowWorldSupportTests": 155,
+      "MeadowClassroomSupportTests": 54,
+      "MeadowBattleSupportTests": 108,
+      "ClassroomGameCoreTests": 72
+    }
+  },
+  "additionalLocalPythonTests": 4,
+  "ipaBytes": 62797083,
+  "ipaSha256": "76915e2623346b619791927b4d52c8a70979ab004f220a5429922987ac694af2",
+  "minimumOS": "27.0",
+  "publicGETChecks": [
+    {
+      "url": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/10fcb0e9376f1c8ba7cf261955153a839aba5446/archive-save-transfer-meadow-v0.17.0-20261107/ClassroomStage2-v0.17.0-unsigned.ipa",
+      "bytes": 62797083,
+      "sha256": "76915e2623346b619791927b4d52c8a70979ab004f220a5429922987ac694af2",
+      "status": 200
+    },
+    {
+      "url": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/10fcb0e9376f1c8ba7cf261955153a839aba5446/archive-save-transfer-meadow-v0.17.0-20261107/save-transfer-normal.gif",
+      "bytes": 280318,
+      "sha256": "a6db7fb7639d982213d41107ba4561b572fecac8a691c61f57e9be666cebf603",
+      "status": 200
+    }
+  ],
+  "bundleRestoreVerified": true,
+  "allArchivePublicBytesVerified": true,
+  "ipaURL": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/10fcb0e9376f1c8ba7cf261955153a839aba5446/archive-save-transfer-meadow-v0.17.0-20261107/ClassroomStage2-v0.17.0-unsigned.ipa",
+  "gifURL": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/10fcb0e9376f1c8ba7cf261955153a839aba5446/archive-save-transfer-meadow-v0.17.0-20261107/save-transfer-normal.gif",
+  "archiveURL": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/10fcb0e9376f1c8ba7cf261955153a839aba5446/archive-save-transfer-meadow-v0.17.0-20261107/README.md",
+  "scope": "Teacher-only single/batch JSON export of saved player and campaign slots; validated import preview, item selection, destination mapping and explicit overwrite confirmation; raw-original backups, pending transaction rollback and old JSON compatibility; no automatic live campaign switch.",
+  "nextSteps": [
+    "Filtering campaign saves and classifying operation history for long classroom sessions.",
+    "Reusable teacher classroom configuration presets."
+  ],
+  "limitations": [
+    "No device CPU/GPU timing or touch responsiveness measurement was performed.",
+    "User-reported TV/disconnect misalignment is addressed in code; real AirPlay/TV/disconnect validation needs user screenshots.",
+    "P3-P7 reuse existing approved character resources; distinct character art remains missing. Teacher host has a private joining UI. Independent body variants in battle remain missing; approved rigs are reused.",
+    "Offline review demonstrates fixed-canvas geometry; it is not UIKit capture or proof of device repair.",
+    "No App, simulator, device or external-display runtime validation."
+  ]
+}
