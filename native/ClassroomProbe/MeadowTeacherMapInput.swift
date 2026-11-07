@@ -27,7 +27,7 @@ final class MeadowMapInputView:UIView,UIGestureRecognizerDelegate {
     }
     required init?(coder:NSCoder){fatalError("init(coder:) has not been implemented")}
     private func point(_ gesture:UIGestureRecognizer)->CGPoint? {ClassroomCanvas.point(gesture.location(in:self),in:bounds.size)}
-    func gestureRecognizerShouldBegin(_ gestureRecognizer:UIGestureRecognizer)->Bool {
+    override func gestureRecognizerShouldBegin(_ gestureRecognizer:UIGestureRecognizer)->Bool {
         guard let p=gestureStarts[ObjectIdentifier(gestureRecognizer)] ?? point(gestureRecognizer) else{return false};return canBegin?(p) ?? false
     }
     func gestureRecognizer(_ gestureRecognizer:UIGestureRecognizer,shouldReceive touch:UITouch)->Bool {
