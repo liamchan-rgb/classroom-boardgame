@@ -1,0 +1,54 @@
+{
+  "formatVersion": 1,
+  "logicalZIP": "archive-teacher-window-meadow-v0.13.4-20261107.zip",
+  "bytes": 435745027,
+  "sha256": "429d70eefa28fb7fcc65785397cea6c89ac40a98812240f95fbb2fa88254d03d",
+  "parts": [
+    {
+      "file": "archive-teacher-window-meadow-v0.13.4-20261107.zip.part000",
+      "bytes": 50331648,
+      "sha256": "46535113cd9cd60d77a50fca899c9e5fde57c298780c88148d64ac9bf875b2d0"
+    },
+    {
+      "file": "archive-teacher-window-meadow-v0.13.4-20261107.zip.part001",
+      "bytes": 50331648,
+      "sha256": "18847f0016ad3e27a92bb329c5fa80c01f657c4298f0ed1774a71578e9b67007"
+    },
+    {
+      "file": "archive-teacher-window-meadow-v0.13.4-20261107.zip.part002",
+      "bytes": 50331648,
+      "sha256": "3379db84305ec5083a45875574859668fa6961feff7d47e9d1e97a8cbd7e9b03"
+    },
+    {
+      "file": "archive-teacher-window-meadow-v0.13.4-20261107.zip.part003",
+      "bytes": 50331648,
+      "sha256": "a87bfab7635b34f8272df1e2ed09cab1ac52aa7cbafe1cf4efa1a75ad8b5b699"
+    },
+    {
+      "file": "archive-teacher-window-meadow-v0.13.4-20261107.zip.part004",
+      "bytes": 50331648,
+      "sha256": "905aa24f38fd0b4dd4c8de97937bac59cc35ae8f34ccc351647fb02abc15dd4b"
+    },
+    {
+      "file": "archive-teacher-window-meadow-v0.13.4-20261107.zip.part005",
+      "bytes": 50331648,
+      "sha256": "e20d7c0ef71def4401f78c0c9d168e6d399fda2a4b63c78eaa89944ad8274556"
+    },
+    {
+      "file": "archive-teacher-window-meadow-v0.13.4-20261107.zip.part006",
+      "bytes": 50331648,
+      "sha256": "b55de7e128fa49df05e3db58322dc5456c9d85468f918888acd9025d0950aba5"
+    },
+    {
+      "file": "archive-teacher-window-meadow-v0.13.4-20261107.zip.part007",
+      "bytes": 50331648,
+      "sha256": "3f13cc8d60d92b4bbabe59f95b7de244f06c512fd5bf408533d605d73ede956a"
+    },
+    {
+      "file": "archive-teacher-window-meadow-v0.13.4-20261107.zip.part008",
+      "bytes": 33091843,
+      "sha256": "6dcef9f160932e9b9c24904e16129a3c4036b67f44ff0674ebbbdb09a1b43de9"
+    }
+  ],
+  "reason": "Lossless split; GitHub normal Git rejects files over 100MB"
+}

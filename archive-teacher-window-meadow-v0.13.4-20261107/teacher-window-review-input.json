@@ -1,0 +1,17 @@
+{
+  "kind": "offline single-page layout schematic",
+  "notAppCapture": true,
+  "notTouchReplay": true,
+  "notPerformanceMeasurement": true,
+  "sourceSamples": 118,
+  "sampleMS": 40,
+  "totalMS": 4720,
+  "decodedFrames": 118,
+  "publicCanvas": [
+    1280,
+    720
+  ],
+  "teacherToolbarCapturedByPublic": false,
+  "existingBattleSamples": "runeSlash-lethal",
+  "limits": "CPU layout approximate; actual UIKit and television must be checked by user."
+}
