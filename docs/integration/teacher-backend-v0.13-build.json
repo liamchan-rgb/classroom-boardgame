@@ -1,0 +1,48 @@
+{
+  "appVersion": "0.13/build14",
+  "testedCommit": "b20e3a95cf5c52d4724f66e5f88d219bdff48f58",
+  "sourceCommit": "b20e3a95cf5c52d4724f66e5f88d219bdff48f58",
+  "runID": 42341843315,
+  "runAttempt": 1,
+  "artifactID": 13561812517,
+  "artifactArchiveSha256": "95408c2746c0cc36615f510752538a8ea35dede2dd4e03fade527ed61477ef95",
+  "artifactArchiveBytes": 57914992,
+  "ipaSha256": "7eefd10008f2820807a909ecf4fd185816d067f3c0fdf39bd405c8823cbb714c",
+  "ipaBytes": 62037369,
+  "coreTests": {
+    "CurrentDemoAndClassroomBackend": 306,
+    "ClassroomProbeCore": 6,
+    "failures": 0,
+    "nativeSuites": {
+      "MeadowWorldSupportTests": 116,
+      "MeadowClassroomSupportTests": 10,
+      "MeadowBattleSupportTests": 108,
+      "ClassroomGameCoreTests": 72
+    }
+  },
+  "deviceReleaseArchive": true,
+  "arm64": true,
+  "executableMode": "0o755",
+  "executableSHA256": "3048a7f8d6c09584b422f1badb29ed7690b224a4f58e138d3ea8bd7c5a0f657f",
+  "classicZIP2": true,
+  "CRC": true,
+  "artSource": "175c7dfc4a68e62cb9693da8d837b77081619a6b",
+  "sourceResourceHashesVerified": 568,
+  "compiledAssetNamesVerified": 281,
+  "rigResourceHashesVerified": 3,
+  "metalLibraries": {
+    "Payload/ClassroomProbe.app/default.metallib": "af74556814a875eb225eca5ed22720122ed9dc2a88daa8117b180298956b921f"
+  },
+  "minimumOS": "27.0",
+  "sdk": "iphoneos27.2",
+  "legacyGameUIRemoved": true,
+  "newPVEDeviceVerified": false,
+  "appLaunched": false,
+  "simulatorLaunched": false,
+  "externalDisplayVerified": false,
+  "limitations": [
+    "Teacher/public window attachment and native layout need user device screenshots.",
+    "Existing two-player Meadow campaign retained; larger classroom parties are not implemented.",
+    "Offline preview is a schematic/art composite, not UIKit capture."
+  ]
+}

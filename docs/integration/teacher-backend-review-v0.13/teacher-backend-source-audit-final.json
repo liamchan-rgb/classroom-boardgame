@@ -1,0 +1,14 @@
+{
+  "kind": "source-routing-audit",
+  "commit": "b20e3a95cf5c52d4724f66e5f88d219bdff48f58",
+  "publicOnlyHasPlayerFacingPanels": true,
+  "oneTeacherOwnedSessionAndRenderer": true,
+  "mapAndBattleUseOriginalProductionComponents": true,
+  "publicModeDoesNotStartAnotherAIOrDecisionTimer": true,
+  "privateSheetsRoutedToTeacherWindow": true,
+  "legacySinglePlayerTrainingUnderlayRemoved": true,
+  "publicGameInputsDisabled": true,
+  "publicGameCallbacksExplicitlyReadOnly": true,
+  "battleCompletionReturnsToExploration": true,
+  "nativeWindowRoutingVerified": false
+}

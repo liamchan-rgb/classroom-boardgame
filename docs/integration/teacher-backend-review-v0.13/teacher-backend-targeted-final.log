@@ -1,0 +1,72 @@
+[0/1] Planning build
+Building for debugging...
+[0/7] Write sources
+[2/7] Write swift-version--3C8F63DB8035BADF.txt
+[4/8] Emitting module ClassroomGameCore
+[6/16] Emitting module MeadowWorldSupport
+[7/17] Emitting module ClassroomGameCoreTests
+[10/19] Emitting module MeadowMapExport
+[12/18] Emitting module MeadowBattleSupport
+[14/24] Emitting module MeadowClassroomSupport
+[15/24] Compiling MeadowClassroomSupport ClassroomBackend.swift
+[17/26] Emitting module MeadowBattleSupportTests
+[19/29] Emitting module MeadowCampaignAuditSupport
+[21/32] Compiling MeadowClassroomSupportTests ClassroomBackendTests.swift
+[22/32] Emitting module MeadowClassroomSupportTests
+[24/34] Emitting module MeadowCampaignReview
+[26/33] Emitting module MeadowWorldSupportTests
+[27/34] /workspace/classroom-boardgame/native/Packages/GameCore/.build/x86_64-unknown-linux-gnu/debug/ClassroomGameCorePackageDiscoveredTests.derived/all-discovered-tests.swift
+[28/34] Write sources
+[30/34] Emitting module MeadowSupportReviewExport
+/workspace/classroom-boardgame/native/Packages/GameCore/Tools/ReviewExporter.swift:496:25: warning: initialization of immutable value 'cues' was never used; consider replacing with assignment to '_' or removing it
+494 |                 if let value=receipt {
+495 |                     dice=BattleDice.channels(action,actor:actorUnit,target:targetUnit,catalog:model.engine.catalog,receipt:value)
+496 |                     let cues=SpellbladeEffects.recipients(intent,catalog:model.engine.catalog)
+    |                         `- warning: initialization of immutable value 'cues' was never used; consider replacing with assignment to '_' or removing it
+497 |                     for id in ["p1","p2","m1","m2"] {
+498 |                         let before=value.before.units[id]!,after=value.after.units[id]!,foot=PartyVisual.feet[id]!,point=PartyVisual.hitPoint(target:id)
+[32/38] Compiling ClassroomGameCorePackageDiscoveredTests MeadowClassroomSupportTests.swift
+[33/38] Compiling ClassroomGameCorePackageDiscoveredTests MeadowWorldSupportTests.swift
+[34/39] Compiling ClassroomGameCorePackageDiscoveredTests all-discovered-tests.swift
+[35/39] Emitting module ClassroomGameCorePackageDiscoveredTests
+[36/39] Compiling ClassroomGameCorePackageDiscoveredTests ClassroomGameCoreTests.swift
+[37/39] Compiling ClassroomGameCorePackageDiscoveredTests MeadowBattleSupportTests.swift
+[38/40] Wrapping AST for ClassroomGameCorePackageDiscoveredTests for debugging
+[39/46] /workspace/classroom-boardgame/native/Packages/GameCore/.build/x86_64-unknown-linux-gnu/debug/ClassroomGameCorePackageTests.derived/runner.swift
+[40/46] Write sources
+[41/46] Wrapping AST for MeadowClassroomSupportTests for debugging
+[42/46] Wrapping AST for MeadowClassroomSupport for debugging
+[44/48] Emitting module ClassroomGameCorePackageTests
+[45/48] Compiling ClassroomGameCorePackageTests runner.swift
+[46/48] Write Objects.LinkFileList
+[47/48] Linking ClassroomGameCorePackageTests.xctest
+Build complete! (14.83s)
+Test Suite 'Selected tests' started at 2026-11-07 05:13:19.239
+Test Suite 'ClassroomBackendTests' started at 2026-11-07 05:13:19.243
+Test Case 'ClassroomBackendTests.testAdminEditsDoNotOpenAPublicEditorOrChangeRandom' started at 2026-11-07 05:13:19.243
+Test Case 'ClassroomBackendTests.testAdminEditsDoNotOpenAPublicEditorOrChangeRandom' passed (0.034 seconds)
+Test Case 'ClassroomBackendTests.testBattleBindingUsesOneExistingEngineAndDoesNotRoll' started at 2026-11-07 05:13:19.277
+Test Case 'ClassroomBackendTests.testBattleBindingUsesOneExistingEngineAndDoesNotRoll' passed (0.137 seconds)
+Test Case 'ClassroomBackendTests.testDisplayCannotAdvanceTravelOrClockThroughBackend' started at 2026-11-07 05:13:19.414
+Test Case 'ClassroomBackendTests.testDisplayCannotAdvanceTravelOrClockThroughBackend' passed (0.023 seconds)
+Test Case 'ClassroomBackendTests.testDisplayCannotEditRefillRewardMoveOrSelect' started at 2026-11-07 05:13:19.437
+Test Case 'ClassroomBackendTests.testDisplayCannotEditRefillRewardMoveOrSelect' passed (0.023 seconds)
+Test Case 'ClassroomBackendTests.testDisplayCannotGenerateMapsOrInstallGame' started at 2026-11-07 05:13:19.460
+Test Case 'ClassroomBackendTests.testDisplayCannotGenerateMapsOrInstallGame' passed (0.023 seconds)
+Test Case 'ClassroomBackendTests.testOnlyExplicitPlayerPanelsCanBeProjected' started at 2026-11-07 05:13:19.483
+Test Case 'ClassroomBackendTests.testOnlyExplicitPlayerPanelsCanBeProjected' passed (0.032 seconds)
+Test Case 'ClassroomBackendTests.testRestoringDoesNotKeepAnInvisibleBookPause' started at 2026-11-07 05:13:19.515
+Test Case 'ClassroomBackendTests.testRestoringDoesNotKeepAnInvisibleBookPause' passed (0.023 seconds)
+Test Case 'ClassroomBackendTests.testTeacherActionsValidateTurnAPTargetAndDoNotConsumeRandom' started at 2026-11-07 05:13:19.538
+Test Case 'ClassroomBackendTests.testTeacherActionsValidateTurnAPTargetAndDoNotConsumeRandom' passed (0.029 seconds)
+Test Case 'ClassroomBackendTests.testTeacherBackendAndRendererUseTheSameEngine' started at 2026-11-07 05:13:19.566
+Test Case 'ClassroomBackendTests.testTeacherBackendAndRendererUseTheSameEngine' passed (0.024 seconds)
+Test Case 'ClassroomBackendTests.testTeacherCanGenerateExactConfiguredNodeCounts' started at 2026-11-07 05:13:19.590
+Test Case 'ClassroomBackendTests.testTeacherCanGenerateExactConfiguredNodeCounts' passed (0.231 seconds)
+Test Suite 'ClassroomBackendTests' passed at 2026-11-07 05:13:19.821
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.578 (0.578) seconds
+Test Suite 'Selected tests' passed at 2026-11-07 05:13:19.821
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.578 (0.578) seconds
+◇ Test run started.
+↳ Testing Library Version: 6.0.3 (18c42c19cac3faf)
+✔ Test run with 0 tests passed after 0.001 seconds.
