@@ -1,0 +1,39 @@
+name: Publish verified build23 once
+# Temporary recovery route while the local CLI credential is expired.
+# Delete after verified publication; only this exact file push triggers it.
+on:
+  push:
+    branches: [feat/teacher-backend-meadow-v0.13]
+    paths: [.github/workflows/publish-verified-build23.yml]
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: classroom-build23-archive-once
+  cancel-in-progress: false
+jobs:
+  archive_verified_bridge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Fetch complete source history without binary backup branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --unshallow --filter=blob:none origin main "${GITHUB_REF_NAME}"
+      - name: Archive restore-check publish and verify public bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/publish_meadow_milestone.py
+      - name: Retain publication receipt
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: meadow-bridge-archive-receipt
+          path: ${{ runner.temp }}/meadow-milestone/archive_publish_receipt.json
+          retention-days: 14
+          if-no-files-found: warn

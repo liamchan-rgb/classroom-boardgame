@@ -1,6 +1,6 @@
 {
   "kind": "source-routing-audit",
-  "commit": null,
+  "commit": "7b27d32e01582a96f4611538d9db5561663388f9",
   "publicOnlyHasPlayerFacingPanels": true,
   "oneTeacherOwnedSessionAndRenderer": true,
   "mapAndBattleUseOriginalProductionComponents": true,

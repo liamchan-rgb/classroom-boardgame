@@ -8,7 +8,7 @@ from pathlib import Path
 import hashlib,json,os,shutil,subprocess,tempfile,urllib.request,zipfile
 
 R=Path(__file__).resolve().parents[1];os.chdir(R)
-milestone='archive-archive-browser-meadow-v0.18.0-20261107'
+milestone='archive-browser-meadow-v0.18.0-20261107'
 record_path='docs/integration/archive-browser-v0.18.0-build.json'
 record=json.loads((R/record_path).read_text());repo='liamchan-rgb/classroom-boardgame'
 T=Path(os.environ['RUNNER_TEMP'])/'meadow-milestone';T.mkdir(exist_ok=False)
