@@ -1,0 +1,20 @@
+{
+  "kind": "offline import/export workflow schematic",
+  "notAppCapture": true,
+  "notTouchReplay": true,
+  "notPerformanceMeasurement": true,
+  "sourceSamples": 100,
+  "sampleMS": 80,
+  "totalMS": 8000,
+  "decodedFrames": 100,
+  "phases": [
+    "勾选已保存的人物和行程槽",
+    "生成JSON → 系统文件保存窗口",
+    "选择备份 → 校验与目标槽预览",
+    "明确确认 → 先备份原槽再导入"
+  ],
+  "transferFormat": "JSON v1",
+  "profileSlots": 12,
+  "campaignSlots": 8,
+  "liveCampaignNotChangedOnImport": true
+}
