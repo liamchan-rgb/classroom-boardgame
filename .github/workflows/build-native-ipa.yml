@@ -61,7 +61,7 @@ jobs:
           set -euo pipefail
           app_path='native/build/ClassroomProbe.xcarchive/Products/Applications/ClassroomProbe.app'
           lipo -archs "$app_path/ClassroomProbe" | tee artifacts/architectures.txt
-          xcrun assetutil --info "$app_path/Assets.car" > artifacts/assets-info.json
+          /usr/bin/assetutil --info "$app_path/Assets.car" > artifacts/assets-info.json
           test "$(lipo -archs "$app_path/ClassroomProbe")" = arm64
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app_path/Info.plist")" = "0.13"
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$app_path/Info.plist")" = "14"

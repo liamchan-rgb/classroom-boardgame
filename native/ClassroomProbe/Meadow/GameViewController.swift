@@ -19,6 +19,9 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     var classroomReady:Bool {ready}
     var classroomBusy:Bool {battlePreviewView?.classroomBusy ?? false}
     var classroomActions:[PartyAction] {battlePreviewView?.classroomActions ?? []}
+    func classroomFinishBattleIfReady(){
+        if classroomMode,battlePreviewActive,!classroomBusy,campaign?.engine.state.battle==nil {setBattlePreviewActive(false)}
+    }
     private let campaign:MeadowCampaignSession?
     private let campaignRefill=MeadowPreviewPalette.button("补充移动")
     private let campaignItems=MeadowPreviewPalette.button("行囊与装备")
@@ -542,8 +545,8 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     private func showLoadingFailure(_ error: Error) {
         guard !loadingFailed else { return }
         let diagnostic = MeadowGPUDiagnostics.shared.failed(error)
-        if classroomMode {classroomStatus?(diagnostic)}
-        let first=classroomMode ? "林地载入暂停，请教师在后台重试。":diagnostic
+        if classroomMode {classroomStatus?(diagnostic.localizedDescription)}
+        let first=classroomMode ? NSError(domain:"ClassroomRenderer",code:diagnostic.code,userInfo:[NSLocalizedDescriptionKey:"林地载入暂停，请教师在后台重试。"]):diagnostic
         loadingFailed = true; firstFrameWaitSeconds = nil
         loadingTimer?.invalidate(); loadingTimer = nil
         setRenderingPaused(true)
@@ -1209,7 +1212,7 @@ private func refreshCampaignStatus(allowBattleOpen:Bool=true) {
             guard let campaign,!campaign.isMoving,campaign.engine.state.battle==nil,!campaign.isCompleted else{throw GameError("请先停止移动并结束战斗。")}
             editNodeContents(id)
         case .pauseOrResume:togglePlayback()
-        case .save:try saveCampaign()
+        case .save:try campaign?.checkpoint(camera:scene.campaignCamera)
         case .zoom(let direction):scene.setZoom(scene.zoom+CGFloat(direction)*0.2)
         case .pan(let amount):scene.panBy(amount)
         }

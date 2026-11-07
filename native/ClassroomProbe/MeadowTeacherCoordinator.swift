@@ -24,6 +24,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
     private var aiKey:String?
     private func tick(){
         let now=ProcessInfo.processInfo.systemUptime,delta=min(0.5,max(0,now-lastTick));lastTick=now;revision += 1
+        renderer?.classroomFinishBattleIfReady()
         guard UIApplication.shared.applicationState == .active,ready,let c=campaign,c.engine.state.battle != nil,surface != .book,c.engine.state.pauseReasons.isEmpty else{enemyWork?.cancel();enemyWork=nil;aiKey=nil;return}
         guard !busy else{return}
         do{
