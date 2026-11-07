@@ -1,0 +1,49 @@
+{
+  "formatVersion": 1,
+  "logicalZIP": "archive-teacher-backend-meadow-v0.13-20261107.zip",
+  "bytes": 375581345,
+  "sha256": "19e069210810c47094d7225246402a7c57cefef9cd81c5710841029115f83844",
+  "parts": [
+    {
+      "file": "archive-teacher-backend-meadow-v0.13-20261107.zip.part000",
+      "bytes": 50331648,
+      "sha256": "305b88c2a612a25559c6c7a164bc0f50d5f7290199c5f3879d02b7a3c1a8507b"
+    },
+    {
+      "file": "archive-teacher-backend-meadow-v0.13-20261107.zip.part001",
+      "bytes": 50331648,
+      "sha256": "97b19617f5645faa3a7e2cf399dae9d38bd54869bc1c4f2162ede8890b7d8404"
+    },
+    {
+      "file": "archive-teacher-backend-meadow-v0.13-20261107.zip.part002",
+      "bytes": 50331648,
+      "sha256": "55e12f17fd844df5cfa9e7af881c3ab22942bbf351f52bbf6b2ee09b46232bd1"
+    },
+    {
+      "file": "archive-teacher-backend-meadow-v0.13-20261107.zip.part003",
+      "bytes": 50331648,
+      "sha256": "6fbe78096ec3191a6f2a09f4bb5bc820d4909e88a6ebdac19dd5b447e077cb76"
+    },
+    {
+      "file": "archive-teacher-backend-meadow-v0.13-20261107.zip.part004",
+      "bytes": 50331648,
+      "sha256": "a805f922111e770d1224faba3607cd1b30d527f5a3f338b65f4e44e752346d0d"
+    },
+    {
+      "file": "archive-teacher-backend-meadow-v0.13-20261107.zip.part005",
+      "bytes": 50331648,
+      "sha256": "6ecb490ffefa8e401148cca3aadbd0fb9f472560490abba2dabec8a502bebb5d"
+    },
+    {
+      "file": "archive-teacher-backend-meadow-v0.13-20261107.zip.part006",
+      "bytes": 50331648,
+      "sha256": "19780e35e0c877d4d3e63423466dc012b9fe561d85a317c5c756cc430b106a08"
+    },
+    {
+      "file": "archive-teacher-backend-meadow-v0.13-20261107.zip.part007",
+      "bytes": 23259809,
+      "sha256": "dd9f63a60dbcecbd0a5cc0230c78fd321223849ec26df4dc82983dc1cbb766b4"
+    }
+  ],
+  "reason": "Lossless split; GitHub normal Git rejects files over 100MB"
+}
