@@ -1,0 +1,35 @@
+{
+  "appVersion": "0.12/build12",
+  "testedCommit": "db3349219c00a9e3ac3850253693eccdbdc625be",
+  "sourceCommit": "db3349219c00a9e3ac3850253693eccdbdc625be",
+  "runID": 42318043447,
+  "runAttempt": 1,
+  "artifactID": 13552250765,
+  "artifactArchiveSha256": "ace79aaba61e3d12cb9c1ed2a70922bd226ac4525cd46ce5896183e3ec54dca0",
+  "artifactArchiveBytes": 34123663,
+  "ipaSha256": "f0ed60f418908707d503361f4ef9eb1f23fee4808d5768a9782cfa03a7c25fb4",
+  "ipaBytes": 36150180,
+  "coreTests": {
+    "ClassroomGameCore": 79,
+    "ClassroomProbeCore": 6,
+    "failures": 0
+  },
+  "deviceReleaseArchive": true,
+  "arm64": true,
+  "executableMode": "0o755",
+  "classicZIP2": true,
+  "CRC": true,
+  "artSource": "175c7dfc4a68e62cb9693da8d837b77081619a6b",
+  "artFilesVerified": 114,
+  "minimumOS": "27.0",
+  "sdk": "iphoneos27.2",
+  "customMetalLibraryExpected": false,
+  "newPVEDeviceVerified": false,
+  "appLaunched": false,
+  "simulatorLaunched": false,
+  "externalDisplayVerified": false,
+  "limitations": [
+    "External display, teacher/private notes and PPT behavior need user device verification.",
+    "Generic melee rig bound for adventurer/spellblade; other classes retain original art."
+  ]
+}
