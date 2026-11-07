@@ -162,6 +162,10 @@ struct MeadowPublicView:View {
                 Ellipse().fill(RadialGradient(colors:[effectColor(cue).opacity(0.7*(1-(age-0.46)/0.64)),.clear],center:.center,startRadius:0,endRadius:size*0.8))
                     .frame(width:size*2,height:size).offset(y:size*0.3).blendMode(.plusLighter)
             }
+            if let cue,age>=0,!(cue.effects.contains("impact") || cue.effects.contains("natural20")) {
+                // Recovery light sits behind the body, preserving its silhouette.
+                effects(cue,skillID:skillID,age:age,size:size)
+            }
             if unit.player && ["adventurer","spellblade"].contains(unit.templateID) {
                 MeadowBridgeHero(clip:clip,progress:progress).frame(width:size*1.65,height:size*1.65)
                     .offset(x:lunge,y:-size*0.16)
@@ -181,7 +185,9 @@ struct MeadowPublicView:View {
                     .opacity(cue?.effects.contains("shield") == true && unit.shield == cue?.shieldChange ? min(1,max(0,(age-0.72)/0.25)):1)
             }
             if let cue,age>=0 {
-                effects(cue,skillID:skillID,age:age,size:size).offset(x:lunge)
+                if cue.effects.contains("impact") || cue.effects.contains("natural20") {
+                    effects(cue,skillID:skillID,age:age,size:size).offset(x:lunge)
+                }
                 if cue.healthChange != 0 && age >= (cue.healthChange>0 ? 0.72:0.46) {
                     Text((cue.healthChange>0 ? "+":"")+String(cue.healthChange)).font(.system(size:40,weight:.heavy,design:.serif))
                         .foregroundStyle(cue.healthChange>0 ? Color.green:Color.white).shadow(color:.black,radius:2)
@@ -231,9 +237,11 @@ struct MeadowPublicView:View {
         let impact=cue.effects.contains("impact") || cue.effects.contains("natural20")
         let recovery=cue.effects.contains("heal") || cue.effects.contains("revive") || cue.effects.contains("shield")
         guard impact || recovery else { return nil }
-        let start=impact ? 0.46:0.0
+        let mainCast=["runeWard","dragonSoulWard","dragonScaleWard","rally"].contains(skillID ?? "")
+        let start=impact ? (skillID == "runeSlash" ? 0.22:0.46):mainCast ? 0.0:0.72
         guard age>=start else { return nil }
-        let index=min(19,Int(max(0,age-start)/(1.3-start)*20))
+        let progress = impact && skillID == "runeSlash" ? (age<0.46 ? (age-0.22)/0.24*0.5:0.5+(age-0.46)/0.84*0.5):max(0,age-start)/(1.3-start)
+        let index=min(19,Int(progress*20))
         if impact && skillID == "runeSlash" { return MeadowBridgeAssets.image(String(format:"MeadowRuneSlashAttack%02d",index+1)) }
         if impact && skillID == "dragonFlame" { return MeadowBridgeAssets.image(String(format:"MeadowDragonFlame%02d",index+1)) }
         if cue.effects.contains("shield") && skillID == "runeWard" { return MeadowBridgeAssets.image(String(format:"MeadowRuneWardCast%02d",index+1)) }

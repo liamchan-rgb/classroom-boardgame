@@ -41,7 +41,7 @@ struct PVEPlayView:View {
     }
     private var header:some View {
         HStack(spacing:14) {
-            Text("晴空学园 · v0.12").font(.title2.bold())
+            Text("晴空学园 · v0.12.1").font(.title2.bold())
             if let state = model.state {
                 Text(state.phase.displayName).font(.headline)
                 if let battle = state.battle {

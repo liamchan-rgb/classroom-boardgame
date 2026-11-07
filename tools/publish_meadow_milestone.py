@@ -8,8 +8,8 @@ from pathlib import Path
 import hashlib,json,os,shutil,subprocess,tempfile,urllib.request,zipfile
 
 R=Path(__file__).resolve().parents[1];os.chdir(R)
-milestone='archive-meadow-public-bridge-v0.12-20261107'
-record_path='docs/integration/meadow-v0.12-build.json'
+milestone='archive-meadow-public-bridge-v0.12.1-20261107'
+record_path='docs/integration/meadow-v0.12.1-build.json'
 record=json.loads((R/record_path).read_text());repo='liamchan-rgb/classroom-boardgame'
 T=Path(os.environ['RUNNER_TEMP'])/'meadow-milestone';T.mkdir(exist_ok=False)
 D=T/'deliveries';D.mkdir()
@@ -28,13 +28,13 @@ action=gh(f'repos/{repo}/actions/runs/{record["runID"]}')
 assert action['conclusion']=='success' and action['head_sha']==record['testedCommit']
 artifact=gh(f'repos/{repo}/actions/artifacts/{record["artifactID"]}')
 assert artifact['workflow_run']['head_sha']==record['testedCommit'] and not artifact['expired']
-archive=D/'ClassroomStage2-v0.12-build.zip'
+archive=D/'ClassroomStage2-v0.12.1-build.zip'
 subprocess.run(['curl','-fLsS','--retry','3','-H','Authorization: Bearer '+os.environ['GH_TOKEN'],
     f'https://api.github.com/repos/{repo}/actions/artifacts/{record["artifactID"]}/zip','-o',str(archive)],check=True)
 assert sha(archive)==record['artifactArchiveSha256'] and artifact['digest']=='sha256:'+sha(archive)
 with zipfile.ZipFile(archive) as z:
     assert z.testzip() is None
-    ipa='ClassroomStage2-v0.12-unsigned.ipa';(D/ipa).write_bytes(z.read(ipa))
+    ipa='ClassroomStage2-v0.12.1-unsigned.ipa';(D/ipa).write_bytes(z.read(ipa))
 assert sha(D/ipa)==record['ipaSha256']
 for name in ['meadow-public-normal.gif','meadow-public-contact-sheet.png','meadow-fixtures.json']:
     shutil.copy2(R/'docs/integration/meadow-review-v0.12'/name,D/name)
@@ -70,7 +70,7 @@ for suffix in ['.manifest.json','.zip.sha256','.恢复说明.md']:
     source=output.with_suffix(suffix) if suffix!='.zip.sha256' else output.with_suffix('.zip.sha256')
     shutil.copy2(source,transport/source.name)
 for p in D.iterdir():shutil.copy2(p,transport/p.name)
-(transport/'README.md').write_text(f'''# Meadow public bridge v0.12
+(transport/'README.md').write_text(f'''# Meadow public bridge v0.12.1
 
 Source snapshot/tag: `{current}` / `{milestone}`.
 Actual device Release compiled commit: `{record['testedCommit']}`.
@@ -95,7 +95,7 @@ for file in sorted(transport.iterdir()):
     run('git','update-index','--add','--cacheinfo','100644',blob,milestone+'/'+file.name,env=env)
     rows.append(dict(file=file.name,bytes=file.stat().st_size,sha256=sha(file)))
 tree=run('git','write-tree',env=env)
-commit=run('git','commit-tree',tree,'-p',parent,'-m','Archive verified Meadow classroom bridge v0.12')
+commit=run('git','commit-tree',tree,'-p',parent,'-m','Archive verified Meadow classroom bridge v0.12.1')
 run('git','push','origin',commit+':refs/heads/archive-assets')
 run('git','push','origin','refs/tags/'+milestone)
 # Verify all public bytes with a full, unauthenticated GET, including every part.
