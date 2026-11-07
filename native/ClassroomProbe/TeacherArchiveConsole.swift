@@ -6,6 +6,7 @@ import MeadowWorldSupport
 struct TeacherArchiveConsole:View {
     @ObservedObject var game:MeadowTeacherCoordinator
     var onClose:()->Void
+    @State private var transfer:TeacherSaveTransferRequest?
     @State private var tab=0
     @State private var player="p1"
     @State private var name=""
@@ -40,7 +41,14 @@ struct TeacherArchiveConsole:View {
                     else{teacherForm}
                 }
             }.navigationTitle("教师 · 档案与行程")
-                .toolbar{ToolbarItem(placement:.cancellationAction){Button("关闭"){onClose()}}}
+                .toolbar{
+                    ToolbarItem(placement:.cancellationAction){Button("关闭"){onClose()}}
+                    ToolbarItem(placement:.confirmationAction){Menu("导入导出"){
+                        Button("批量导出槽位备份"){transfer=TeacherSaveTransferRequest()}
+                        Button("从文件导入备份"){transfer=TeacherSaveTransferRequest(importing:true)}
+                    }}
+                }
+                .sheet(item:$transfer,onDismiss:{reload()}){request in TeacherSaveTransferConsole(directory:store.directory,request:request,onClose:{transfer=nil})}
                 .onAppear{player=game.campaign?.selectedPlayerID ?? "p1";readPlayer();reload();teacherTeam=game.campaign?.engine.state.teams.first?.id ?? "party"}
                 .onChange(of:player){_,_ in readPlayer()}
                 .onChange(of:bodyStyle){_,_ in updateThumbnail()}
@@ -54,7 +62,7 @@ struct TeacherArchiveConsole:View {
                 if !players.isEmpty{Picker("当前角色",selection:$player){ForEach(players){Text($0.name).tag($0.id)}}}
                 TextField("人物名（最多40字）",text:$name)
                 Picker("外观款式",selection:$bodyStyle){Text("林间绿衣").tag("forester");Text("行旅蓝衣").tag("wayfarer")}
-                Picker("衣装装扮",selection:$outfit){Text("跟随实际护甲").tag("follow");Text("蓝衣").tag("blue");Text("皮甲").tag("leatherArmor");Text("符文甲").tag("runeArmor")}
+                Picker("衣装装扮",selection:$outfit){Text("跟随实际护甲").tag("follow");Text("基础衣装").tag("blue");Text("皮甲").tag("leatherArmor");Text("符文甲").tag("runeArmor")}
                 if let thumbnail{Image(uiImage:thumbnail).interpolation(.none).resizable().scaledToFit().frame(height:130).frame(maxWidth:.infinity).background(Color(red:0.08,green:0.17,blue:0.12))}
                 Text("仅使用已有美术。装扮不提供装备属性；武器仍跟随实际装备。战斗沿用现有挂载骨架，尚缺独立体型美术。").font(.caption)
                 Button("应用到当前角色"){let p=profile;ask("将姓名和装扮应用到当前角色，保留职业、数值、装备和行程？"){try game.applyProfile(p,to:player);notice=game.message}}.disabled(game.busy || game.campaign==nil || game.campaign?.isCompleted==true)
@@ -68,6 +76,7 @@ struct TeacherArchiveConsole:View {
                         if let error=errors["p\(slot)"]{Text("原文件保留："+error).font(.caption).foregroundStyle(.red)}
                         HStack {
                             Button("保存档案"){let p=profile;savePrompt(occupied:profiles[slot] != nil || errors["p\(slot)"] != nil,message:"覆盖人物槽\(slot)？"){try store.saveProfile(p,slot:slot,title:p.name);notice="人物档案已保存。"}}
+                            Button("导出"){transfer=TeacherSaveTransferRequest(selection:[.init(.profile,slot)])}.disabled(profiles[slot]==nil)
                             Button("读取到编辑区"){if let p=profiles[slot]?.value{name=p.name;bodyStyle=p.appearance.body;outfit=p.appearance.outfit ?? "follow";updateThumbnail();notice="档案已读取到编辑区；尚未改变行程中的角色。"}}.disabled(profiles[slot]==nil)
                         }.buttonStyle(.bordered)
                     }
@@ -89,6 +98,7 @@ struct TeacherArchiveConsole:View {
                         if let error=errors["j\(slot)"]{Text("原文件保留："+error).font(.caption).foregroundStyle(.red)}
                         HStack {
                             Button("保存到此槽"){saveJourney(slot)}.disabled(game.campaign==nil || game.busy)
+                            Button("导出"){transfer=TeacherSaveTransferRequest(selection:[.init(.campaign,slot)])}.disabled(journeys[slot]==nil || game.busy)
                             Button("读取"){if let entry=journeys[slot]{ask("读取“\(entry.title)”？当前行程将先自动备份。"){try load(entry.value)}}}.disabled(journeys[slot]==nil || game.busy)
                         }.buttonStyle(.bordered)
                     }

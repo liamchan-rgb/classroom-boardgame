@@ -58,11 +58,13 @@ public final class MeadowSlotStore {
         return directory.appendingPathComponent("\(kind)-\(slot).json")
     }
     private func read<T:Codable&Equatable>(_ kind:String,_ slot:Int,_ type:T.Type)throws->MeadowSaveSlot<T>? {
+        try recoverPendingImport()
         let path=try url(kind,slot);guard FileManager.default.fileExists(atPath:path.path) else{return nil}
         let result=try JSONDecoder().decode(MeadowSaveSlot<T>.self,from:Data(contentsOf:path))
         guard result.version==1,result.savedAt.timeIntervalSince1970.isFinite,!result.title.isEmpty,result.title.count<=80 else{throw GameError("存档信息无效。")};return result
     }
     private func write<T:Codable&Equatable>(_ kind:String,_ slot:Int,_ value:MeadowSaveSlot<T>)throws {
+        try recoverPendingImport()
         let path=try url(kind,slot);guard !value.title.isEmpty,value.title.count<=80 else{throw GameError("请输入1至80字存档标题。")}
         let bytes=try JSONEncoder().encode(value)
         try FileManager.default.createDirectory(at:directory,withIntermediateDirectories:true)
