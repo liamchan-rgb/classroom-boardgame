@@ -1,0 +1,2846 @@
+{
+  "repository": "liamchan-rgb/experiment",
+  "commit": "175c7dfc4a68e62cb9693da8d837b77081619a6b",
+  "assets": [
+    {
+      "file": "Assets.xcassets/AppIcon.appiconset/Contents.json",
+      "sha256": "04976842c5d02f82d5aea8514a6e538991a3729ece3da97a23fcf5f2f6ef6575",
+      "bytes": 200
+    },
+    {
+      "file": "Assets.xcassets/AppIcon.appiconset/icon.png",
+      "sha256": "d04ee164f6c6eb4c5d14ab8a37672cdfb3558c70f9b954932b375ad82757525f",
+      "bytes": 1550287
+    },
+    {
+      "file": "Assets.xcassets/Banner.imageset/Banner.png",
+      "sha256": "8db999fbd2105a55fe7840fe7ce959d161be4340ee0f9c50fe8d8a8eba31686a",
+      "bytes": 102801
+    },
+    {
+      "file": "Assets.xcassets/Banner.imageset/Contents.json",
+      "sha256": "4e9da63642036ec6eb932d9ab505112c939330f214c3fcc7fc1b6b9af1905ea6",
+      "bytes": 150
+    },
+    {
+      "file": "Assets.xcassets/BattleHeroContactCandidate.imageset/BattleHeroContactCandidate.png",
+      "sha256": "92621973da4d352c625f20660bae5303aae25e68c4f557632535030330dd2e4a",
+      "bytes": 433006
+    },
+    {
+      "file": "Assets.xcassets/BattleHeroContactCandidate.imageset/Contents.json",
+      "sha256": "96e12d32454f977ce524b37222e77d25c5440be3e4e8a41891d6a44cd88afea3",
+      "bytes": 176
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXBarrier.imageset/BattleVFXBarrier.png",
+      "sha256": "f53a63c4b9aea9eafa8d73c9a55b2b71411f18f2a7cc9636675e20d32a9ffdcb",
+      "bytes": 169291
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXBarrier.imageset/Contents.json",
+      "sha256": "3e476062abe8d0d03e9bec48753aaa2086da7afc1c4c72450f8695693b8b64a3",
+      "bytes": 160
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXBurst.imageset/BattleVFXBurst.png",
+      "sha256": "49e110cce4d4ad1ba50115e13f31cb8533d8f95d6de218b963f1941b2728e579",
+      "bytes": 241422
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXBurst.imageset/Contents.json",
+      "sha256": "5a6a35970bf9efb57ff3a62423d6e362e2537c96679154293ca12c6d59070b8a",
+      "bytes": 158
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXConfig.dataset/Contents.json",
+      "sha256": "9ac7b30df0dae6be6ff045ba2ed803e7dfe95c2e63583b994a53a7e1eb04ecde",
+      "bytes": 149
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXConfig.dataset/config.json",
+      "sha256": "ff6eae4f007e22769922d1e26038fe8477a1e0cc3784cd52e84ef4c80ce32d05",
+      "bytes": 437
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXCyanShard.imageset/BattleVFXCyanShard.png",
+      "sha256": "131eb9510b4ba476919109f6089d20e61c1168b793926e587e1061d6d465e31a",
+      "bytes": 127591
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXCyanShard.imageset/Contents.json",
+      "sha256": "c48734b5aa2237a2b3425b366c531c6d10d956cae91fd27d551153842cb8ff33",
+      "bytes": 162
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXDeathBody.imageset/BattleVFXDeathBody.png",
+      "sha256": "bae27bc1a45df1f10cbb1970317daa86668939c79218e410cb4d438ab78e65e6",
+      "bytes": 205696
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXDeathBody.imageset/Contents.json",
+      "sha256": "b3df054bdd445e203ff240b30316dd7ab92144c571f75f1b33beb0fd2940b7d2",
+      "bytes": 162
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXDeathBody60.imageset/BattleVFXDeathBody60.png",
+      "sha256": "77e9584676ad3f8d5b1a476e3a1676d4e9fea4f24150c64630bc32106adac9a7",
+      "bytes": 377824
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXDeathBody60.imageset/Contents.json",
+      "sha256": "d28300d9d4c6ff01d4bd1518f275cb05dbe481cc62f4e733bf4e66939ace723e",
+      "bytes": 164
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXDeathWind.imageset/BattleVFXDeathWind.png",
+      "sha256": "471cb145ed11d46e6836ed1d7c23f40ce2ffed3fb17451e6d498e4ae6da4a92f",
+      "bytes": 889800
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXDeathWind.imageset/Contents.json",
+      "sha256": "2347098a3ded3fecccd16c51c1ac25dfe52cc328064cd8f7713dad05f2967de9",
+      "bytes": 162
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXDeathWind60.imageset/BattleVFXDeathWind60.png",
+      "sha256": "6a359cc8c0379834d6ff2d2a621d2b373e0327da8553302f57156f6e88c9bf16",
+      "bytes": 1880091
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXDeathWind60.imageset/Contents.json",
+      "sha256": "c3ee36ebbdfb601012ab130edd125bf2ad6e12dd18cd374b5e74958315bd05de",
+      "bytes": 164
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXDeathWindHeavy.imageset/BattleVFXDeathWindHeavy.png",
+      "sha256": "8ec7ca5c59570cca9e5de6c8f018e9e86a6d8b23a14feb65160c1d9ae0fae2c0",
+      "bytes": 884689
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXDeathWindHeavy.imageset/Contents.json",
+      "sha256": "42eee2b3dd8ef9506b18ca040096c9a2f8647dc0934618c0351b428aa9f50a2e",
+      "bytes": 167
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXGoldEmber.imageset/BattleVFXGoldEmber.png",
+      "sha256": "f7cd6824d26da3e7aba8a1393565da1e5d16b6d75ae7970b1cd4d22638fcc438",
+      "bytes": 123349
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXGoldEmber.imageset/Contents.json",
+      "sha256": "7cb1528bef5b7af3528e0f6b7e927578f841af8e3874e0302b54c29d7c71d6e1",
+      "bytes": 162
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXGroundSpark.imageset/BattleVFXGroundSpark.png",
+      "sha256": "4917a4d3eae3c83a841b94dc47b5dd7c14d3c39d26cf414c4d3f571e1dd689cd",
+      "bytes": 123782
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXGroundSpark.imageset/Contents.json",
+      "sha256": "3fe0d7bb18157a202ff9fbc528540a14177a69b19c1a44a751ae8c33926978e1",
+      "bytes": 164
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXHealShaft.imageset/BattleVFXHealShaft.png",
+      "sha256": "aa73fcbe95d765419119d19191761f84cb739e5fdc93a060f8cf269eb925545c",
+      "bytes": 160499
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXHealShaft.imageset/Contents.json",
+      "sha256": "90538667ae723e4e9a977716e2cd694b4fba6281ceb52739d74d75a4b0c669ed",
+      "bytes": 162
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXHealStar.imageset/BattleVFXHealStar.png",
+      "sha256": "5b77229c116010ff4ba69e78729354bf77fdf4700921190a87baa36565e95c2e",
+      "bytes": 66370
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXHealStar.imageset/Contents.json",
+      "sha256": "b499f9a0a582cdcbab979257e96db68f3bff3d53a69519afc6cb155d1e0989e2",
+      "bytes": 161
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXHealWave.imageset/BattleVFXHealWave.png",
+      "sha256": "105fd25c5e89b02e41bc7c485a516f5e6827bfe7d6bbc2445173731b07ffd214",
+      "bytes": 152396
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXHealWave.imageset/Contents.json",
+      "sha256": "c88cbcba5aa9f2fda98b1897fff6fee7f91a69c17c457e2728c80b33cb965904",
+      "bytes": 161
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXHealWisp.imageset/BattleVFXHealWisp.png",
+      "sha256": "5a646584217b283d90c805209a1aa69979da6d89ca71ba23204810130b379fcc",
+      "bytes": 147084
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXHealWisp.imageset/Contents.json",
+      "sha256": "455825dae7d64014ef82173f891616b2f0cea800a98db8f793d42252957310d0",
+      "bytes": 161
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXHealingMicroSheet.imageset/BattleVFXHealingMicroSheet.png",
+      "sha256": "4cdc69977c64ea81657a8b822ef34143dd62e4b59bed4f864d69aec07f0016f0",
+      "bytes": 190665
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXHealingMicroSheet.imageset/Contents.json",
+      "sha256": "9ab294d0cd1a5c5832c2c8703be11f040f2498c378250d157dc5b28109154101",
+      "bytes": 170
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXHealingStandardSheet.imageset/BattleVFXHealingStandardSheet.png",
+      "sha256": "3c8413a80fa083e716738820a35dca6859c3f4713dc3d923e0a318274326cd11",
+      "bytes": 350499
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXHealingStandardSheet.imageset/Contents.json",
+      "sha256": "bb269270ca13ab5c48b13462ab68ffab94a9e929bd6f2cba83948c6f5285e604",
+      "bytes": 173
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXHealingStrongSheet.imageset/BattleVFXHealingStrongSheet.png",
+      "sha256": "04603c7392de3d1d378b075afe1e3a332f779aeac186a3ff221037344dee2b6d",
+      "bytes": 208044
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXHealingStrongSheet.imageset/Contents.json",
+      "sha256": "a8a15bc1b99dac55418d5522aaafa190d8a126eeb1e77de6b4a039846ab5a284",
+      "bytes": 171
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXHeavyArc.imageset/BattleVFXHeavyArc.png",
+      "sha256": "f0c67cc659de76be670679ded5f69d4b7156d5cea31db4b3337e3947fb25ff07",
+      "bytes": 246994
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXHeavyArc.imageset/Contents.json",
+      "sha256": "bebb19eabf03851ffcddd198ab1b185a12354624f22a07803b94c2e352e22ac3",
+      "bytes": 161
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXHeavyHitMask.imageset/BattleVFXHeavyHitMask.png",
+      "sha256": "9070ccf9736529e1f5dcdf8997493ce0aa9aec1f4c5ac40198df9302f7cd924d",
+      "bytes": 8903
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXHeavyHitMask.imageset/Contents.json",
+      "sha256": "05464ee27d2ac755c3c64022d3adb4675ba9e18f099ba897d1ed97faa64ac101",
+      "bytes": 165
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXHeavySpray.imageset/BattleVFXHeavySpray.png",
+      "sha256": "85d9b1fddb5788cebd0b316688465939f7aeb504552750d9fac325927d926266",
+      "bytes": 332313
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXHeavySpray.imageset/Contents.json",
+      "sha256": "2fbfbe75db826cf41b07fb9a2715e12c779e4f641559ea66e9494804c42290b0",
+      "bytes": 163
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXHitMask.imageset/BattleVFXHitMask.png",
+      "sha256": "9d016a5c59632fcdc853441ed901246dcec9dad20cd64ad73129ad09dc001820",
+      "bytes": 7511
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXHitMask.imageset/Contents.json",
+      "sha256": "f171691aa509ddeebef7fc8607e82811a26a7d7cbd89f5c4ef2ebfc2df5b71dc",
+      "bytes": 160
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXMote.imageset/BattleVFXMote.png",
+      "sha256": "8f1be9af15f8785e7e9c51f5ab3ed7d925e418058ab3c5ad20a017e5a0d4cfc4",
+      "bytes": 24655
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXMote.imageset/Contents.json",
+      "sha256": "8d3ed3477d6803b17fe21f8fe3f9d02d4224d792a3b3ca3245c32cb7390a7bcf",
+      "bytes": 157
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXRing.imageset/BattleVFXRing.png",
+      "sha256": "e9d0d5507219cdb6dd6e2c2c9e2f6f6c15ee1c81b722090d535d67a4edeef927",
+      "bytes": 128014
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXRing.imageset/Contents.json",
+      "sha256": "04f071887a8f5f5e0fed77c631819483f4b5fd69dce0b5bd7b14ce3fb901186c",
+      "bytes": 157
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXRoundBarrier.imageset/BattleVFXRoundBarrier.png",
+      "sha256": "c0a2d67cddd503c9b246f27babe9dbb227d3b403ac3d20e17d2dc3e0bcef3948",
+      "bytes": 350968
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXRoundBarrier.imageset/Contents.json",
+      "sha256": "a1349ae6add61c1dee7fd476785bf1957be84f46cbd5604f78e1f7342e806604",
+      "bytes": 165
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXSlash.imageset/BattleVFXSlash.png",
+      "sha256": "87e154bc5ea620b2a6331d7e0329b0a5f833b5ecaebfccfbd8c2731140a9959b",
+      "bytes": 242552
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXSlash.imageset/Contents.json",
+      "sha256": "cf751c64ebc158b46ef8048654f1634d6b41793dbbc8619c3588b16961a75b7b",
+      "bytes": 158
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXWardHit.imageset/BattleVFXWardHit.png",
+      "sha256": "2baf5f83b72f2d0695992fb482efd4911fbfd9b4178eda59666df48ca62c4c66",
+      "bytes": 353901
+    },
+    {
+      "file": "Assets.xcassets/BattleVFXWardHit.imageset/Contents.json",
+      "sha256": "c697d5c9f44eb3c8ac0069741e83a23d7f86baae68e9f3d045354f481ad3b6f2",
+      "bytes": 160
+    },
+    {
+      "file": "Assets.xcassets/CampTent.imageset/CampTent.png",
+      "sha256": "edd9719278442b084404aadbf6ef3c6c428e379a2f14ebb66d27df3214a30ad5",
+      "bytes": 349307
+    },
+    {
+      "file": "Assets.xcassets/CampTent.imageset/Contents.json",
+      "sha256": "bc4f1337c092aa40670fd9f0721c61efdebb33f0fdac81553c6eae5a8ccc9b1a",
+      "bytes": 152
+    },
+    {
+      "file": "Assets.xcassets/Contents.json",
+      "sha256": "f5fb0e1f3a8142892ed092efb5955c1c2cc537003a89ad7bbdb9dade7fe8985f",
+      "bytes": 60
+    },
+    {
+      "file": "Assets.xcassets/Fence.imageset/Contents.json",
+      "sha256": "f06a4e4907452ab39b15faef011ae1ace7fe53ae84534e33fcc7810da567312e",
+      "bytes": 149
+    },
+    {
+      "file": "Assets.xcassets/Fence.imageset/Fence.png",
+      "sha256": "52ae8ed31d5af87701e40ba74331d0039a2cd2c6608aab6c51fbb17e6b6cd1d8",
+      "bytes": 154993
+    },
+    {
+      "file": "Assets.xcassets/Flowers.imageset/Contents.json",
+      "sha256": "e55fd62a25d9f10b15d8c4b26cf293fc9828c9e0970db27e841a006e0ff2b3c0",
+      "bytes": 151
+    },
+    {
+      "file": "Assets.xcassets/Flowers.imageset/Flowers.png",
+      "sha256": "632fed0f5bf6c514f12969507a23bf086082eaf9d0f7e572c891cbd1393c38f4",
+      "bytes": 349956
+    },
+    {
+      "file": "Assets.xcassets/Hero1Diagonals.imageset/Contents.json",
+      "sha256": "2243a1692d5562afc9ef35ca552454c99ff27a4be0fa083bc104d7badcc9a1da",
+      "bytes": 158
+    },
+    {
+      "file": "Assets.xcassets/Hero1Diagonals.imageset/Hero1Diagonals.png",
+      "sha256": "c5853ac0bfe8ed7fc9d8b7d0a6891638d0e2656d893d2243ecc5c39705ba19dd",
+      "bytes": 216398
+    },
+    {
+      "file": "Assets.xcassets/Hero1Directions.imageset/Contents.json",
+      "sha256": "78f1633b78fdaf4728c44925f3cd8b33c89598245ae5e8dc5537aad2d0acc683",
+      "bytes": 159
+    },
+    {
+      "file": "Assets.xcassets/Hero1Directions.imageset/Hero1Directions.png",
+      "sha256": "6f4c3dc116974b24799243d87f70ed483dc398aefc0d5ee81e214a9255a3b702",
+      "bytes": 321036
+    },
+    {
+      "file": "Assets.xcassets/Hero2Diagonals.imageset/Contents.json",
+      "sha256": "bad284da2b89ed55004ff35d54773f51cf2a5cccc8e25113790df7037dddca26",
+      "bytes": 158
+    },
+    {
+      "file": "Assets.xcassets/Hero2Diagonals.imageset/Hero2Diagonals.png",
+      "sha256": "bdc3539ded52c1c2ed5c9f493b986a210828ab63baaa5389182f8962755782b2",
+      "bytes": 694709
+    },
+    {
+      "file": "Assets.xcassets/Hero2Directions.imageset/Contents.json",
+      "sha256": "75f75a00d4a1385f16a88a738f0c351b56cfb5a51408bd5239c4be8d79217684",
+      "bytes": 159
+    },
+    {
+      "file": "Assets.xcassets/Hero2Directions.imageset/Hero2Directions.png",
+      "sha256": "b8e4978f719ecadcc52958360629e709eba07830abd9a7f0d5b6adc4dbdef4c3",
+      "bytes": 623974
+    },
+    {
+      "file": "Assets.xcassets/Hero3Diagonals.imageset/Contents.json",
+      "sha256": "f35e197cff42eec8be66fabc06e422dcd8adc61ce5cc6d85feb6c647e3aba44b",
+      "bytes": 158
+    },
+    {
+      "file": "Assets.xcassets/Hero3Diagonals.imageset/Hero3Diagonals.png",
+      "sha256": "837ce103ab176e8708ec8c383ba545f22abc3820ef28974d9ca91d33ba7fc91e",
+      "bytes": 642530
+    },
+    {
+      "file": "Assets.xcassets/Hero3Directions.imageset/Contents.json",
+      "sha256": "221d0ebe067621f51378291862ee3b1b1c194255e944e6f3dca75f22c5859a34",
+      "bytes": 159
+    },
+    {
+      "file": "Assets.xcassets/Hero3Directions.imageset/Hero3Directions.png",
+      "sha256": "af52432dd53f9b07027716531dee5202f3cf45a58fd910d123f2a031fadbe9c9",
+      "bytes": 587474
+    },
+    {
+      "file": "Assets.xcassets/LaunchColor.colorset/Contents.json",
+      "sha256": "8342d1212a65d5ebab7aaf5d1c7bc3170c096581fee69ccaa76842a95c850226",
+      "bytes": 317
+    },
+    {
+      "file": "Assets.xcassets/LayeredP1BlueVariant.imageset/Contents.json",
+      "sha256": "d5471ab7f4d963dea2440f10edc2055fc6d93ae7a20f81b5d27d475b0f83c207",
+      "bytes": 164
+    },
+    {
+      "file": "Assets.xcassets/LayeredP1BlueVariant.imageset/LayeredP1BlueVariant.png",
+      "sha256": "851a3ef0c8f3215330ca97dfccae4b97f1a778687ac7b5c3fc3ea938f3ab86ce",
+      "bytes": 157494
+    },
+    {
+      "file": "Assets.xcassets/MeadowActionRing.imageset/Contents.json",
+      "sha256": "6334789b8ec78f53b3185186f37b7208b32a69bfe52e8cf5402bd54d4dffb87a",
+      "bytes": 107
+    },
+    {
+      "file": "Assets.xcassets/MeadowActionRing.imageset/MeadowActionRing.png",
+      "sha256": "092378d8b93850065d65812f225ec15fd347e3aaf1790d5912223eb464df70da",
+      "bytes": 217324
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleBowBodyCore.imageset/Contents.json",
+      "sha256": "95475bc192994e2433de79702296450f7fae7bab501b682213f7c8789bc50825",
+      "bytes": 167
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleBowBodyCore.imageset/MeadowBattleBowBodyCore.png",
+      "sha256": "bf80404ea2dc3a4bbc2f860b6597a9ba4580e7dee69059e20ba027aaf2231085",
+      "bytes": 12942
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleBowDrawingHand.imageset/Contents.json",
+      "sha256": "8e0c8bd8a9670ecd8873eef8b731417b83d87b9dedfe898548dff83559938d97",
+      "bytes": 170
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleBowDrawingHand.imageset/MeadowBattleBowDrawingHand.png",
+      "sha256": "9478d8ef649185ea4ec336c610d5f908dd9490a0a8d7597d339564c2808ec1df",
+      "bytes": 575
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleBowGripHand.imageset/Contents.json",
+      "sha256": "22669a11b723f90ca79f928d86d14b9cd657d5f2bd9d1ab087ae7de5e717cfdc",
+      "bytes": 167
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleBowGripHand.imageset/MeadowBattleBowGripHand.png",
+      "sha256": "449d87204646f9a323549550a366350eb69b640cd9ef096291ae693a36cb5f76",
+      "bytes": 520
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleBowLegFarThighWardrobe.imageset/Contents.json",
+      "sha256": "bc76191d98722e2eb4d6dc4cc8a0694037e0e7b33181a3cd66eca52d9ef81463",
+      "bytes": 178
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleBowLegFarThighWardrobe.imageset/MeadowBattleBowLegFarThighWardrobe.png",
+      "sha256": "50598ec8f96632e607600efc6575caa0bb158749c4a56d0164f4d85d2af0abff",
+      "bytes": 9272
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleBowReviewedBodyCore.imageset/Contents.json",
+      "sha256": "7e292094da8eb71e7e45760dddf76434f2ec78b012b2eaecb8d9b7bf5b6830a3",
+      "bytes": 122
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleBowReviewedBodyCore.imageset/MeadowBattleBowReviewedBodyCore.png",
+      "sha256": "002d79d44bdb5b42eaae95003a3b7de983291b5cda3f4d1eb92bcb5d723b964b",
+      "bytes": 12912
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleBowReviewedDrawingHandHeld.imageset/Contents.json",
+      "sha256": "e243f6b1fdbff14a494a90f446ab9fa4ed6ab48628d87498130f1fb3d8680a9e",
+      "bytes": 129
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleBowReviewedDrawingHandHeld.imageset/MeadowBattleBowReviewedDrawingHandHeld.png",
+      "sha256": "09aa5667922626f1005ec2bd4d0504510e06baaed2e8cc35c423e6559994cf77",
+      "bytes": 272
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleBowReviewedDrawingHandOpen.imageset/Contents.json",
+      "sha256": "252f81d1ce9ac1e0f7519299f7aae071233c44ff8daa2b89ffec148101e2f1ac",
+      "bytes": 129
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleBowReviewedDrawingHandOpen.imageset/MeadowBattleBowReviewedDrawingHandOpen.png",
+      "sha256": "6a784a0809801f6b04e39ad5ff60dd3ca510e3394f2cb739767ec98bafb16fcb",
+      "bytes": 266
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleBowReviewedDrawingHandRelaxed.imageset/Contents.json",
+      "sha256": "dd7df87fd25dbfcf581bfea2c4c8d399eb58cd1b40bb7c0883ee16e797cc76da",
+      "bytes": 132
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleBowReviewedDrawingHandRelaxed.imageset/MeadowBattleBowReviewedDrawingHandRelaxed.png",
+      "sha256": "a5da5b2dbe4f38ef743b6ed07b5e062ee36e4052fe95ed45c19f3d51d3c9a535",
+      "bytes": 280
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleBowReviewedGripHand.imageset/Contents.json",
+      "sha256": "cab5b210e8452514cd6cdb3912f18367a5ee14ec80bc5102d636af19c76f0cbc",
+      "bytes": 122
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleBowReviewedGripHand.imageset/MeadowBattleBowReviewedGripHand.png",
+      "sha256": "2abe5f87495eb10da9613a9147d6c4ccb1ded9dd782bf38718760a654cd68297",
+      "bytes": 280
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleBowReviewedLegFarThighWardrobe.imageset/Contents.json",
+      "sha256": "d6d8e58726e0b7b1e29e21f19374f8f845791b9bdde1cc44cd908f3f4839ba5b",
+      "bytes": 133
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleBowReviewedLegFarThighWardrobe.imageset/MeadowBattleBowReviewedLegFarThighWardrobe.png",
+      "sha256": "f2ab10d0f0710811897148ceed316f1a94141b9383297266249e01ed6d3a1cd6",
+      "bytes": 8112
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleBowReviewedLegNearThighWardrobe.imageset/Contents.json",
+      "sha256": "28821cab3ec8dddef3d9623437fce86333b999043e0a5696409ef25eb2d62158",
+      "bytes": 134
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleBowReviewedLegNearThighWardrobe.imageset/MeadowBattleBowReviewedLegNearThighWardrobe.png",
+      "sha256": "aa96a663a628b55994372d1e20d2ccff0186eb2f380d485454eaf9ca90b5f118",
+      "bytes": 8624
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleBowReviewedSleeves.imageset/Contents.json",
+      "sha256": "8df97663ef6931bd056b15fd394f7342bb2098874c652953c35b05bc8845bfdb",
+      "bytes": 121
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleBowReviewedSleeves.imageset/MeadowBattleBowReviewedSleeves.png",
+      "sha256": "b1ff288653cef8cb0c2cfc3706b869a07655c2ae32a3fe914868ebb32a8f93ef",
+      "bytes": 722470
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleBowReviewedTorso.imageset/Contents.json",
+      "sha256": "1eecb6ab3b4c88450b508451f45b992bc1f1bf2528c1edce7feef1ded59ccbb8",
+      "bytes": 119
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleBowReviewedTorso.imageset/MeadowBattleBowReviewedTorso.png",
+      "sha256": "c81c7e6e2468055683d8d3f69ea630b47c18bd452c29c7737179e0399ac55ff0",
+      "bytes": 2513
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleBowWardrobeCore.imageset/Contents.json",
+      "sha256": "d87e6bbee2bb4142c431d7a51966ccd9f429d206af67af74ec2b0c1aa15cb50f",
+      "bytes": 171
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleBowWardrobeCore.imageset/MeadowBattleBowWardrobeCore.png",
+      "sha256": "bb35bbb91fd62aa7f57ca87958052a02c20bbe6630581a275adbe7b5df62a6ec",
+      "bytes": 9208
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleForestWarden.imageset/Contents.json",
+      "sha256": "75f3d0b56f405e09a13e825cf99a23eefbd473622513e176519dbb08407fae38",
+      "bytes": 168
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleForestWarden.imageset/MeadowBattleForestWarden.png",
+      "sha256": "d56174e08d3f117db212a71419477e0d3f4173b8017bc123d7ad35390bd067a1",
+      "bytes": 92984
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleGreatSword.imageset/Contents.json",
+      "sha256": "653243ffb460073c832f1f310a7f4f59d147d7d86ba4804d9f8d2d85c71cde5b",
+      "bytes": 113
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleGreatSword.imageset/MeadowBattleGreatSword.png",
+      "sha256": "6f3d9f61f55876e6a89312f80b04ad44e27492372023f7e0085a0255bcc84d07",
+      "bytes": 6442
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroAnimationV2.dataset/Contents.json",
+      "sha256": "897ccc3b3068f0a285810398cc80028cfffb09c764ff0403cd4efe852ba9245d",
+      "bytes": 152
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroAnimationV2.dataset/animation.json",
+      "sha256": "0a0c8383dfe6c2c26a7821c2f6a1342b174eb01015a8855fa1e062fbdfd1375c",
+      "bytes": 11078
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroArmNearForearmBody.imageset/Contents.json",
+      "sha256": "52ebf52260d6e89f580066d9ea894eb129f98b0d21965aad6bf016f992240b89",
+      "bytes": 178
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroArmNearForearmBody.imageset/MeadowBattleHeroArmNearForearmBody.png",
+      "sha256": "e37bd6e21a55d7c8688756b41feee4a77c1126cbbceac93e653958b7102f64d7",
+      "bytes": 13363
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroArmNearForearmWardrobe.imageset/Contents.json",
+      "sha256": "f28e467af3dcbd046bddfd9acb72b2fde2f531901515118b78bc71d9a80ff520",
+      "bytes": 182
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroArmNearForearmWardrobe.imageset/MeadowBattleHeroArmNearForearmWardrobe.png",
+      "sha256": "4d5016f7899a08874c2c5d46fd0dd16f304ced2b5297e8cdb2b8374d9252ab0e",
+      "bytes": 9690
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroArmNearUpperBody.imageset/Contents.json",
+      "sha256": "074ed03827c8fdd9e32bf03166d9d8137b2a982510cde3055b37505805799d80",
+      "bytes": 176
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroArmNearUpperBody.imageset/MeadowBattleHeroArmNearUpperBody.png",
+      "sha256": "1ba79fe1a919311c386f79f182ab77bee88fa3949dc318be3109cbeb664f22e0",
+      "bytes": 13321
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroArmNearUpperWardrobe.imageset/Contents.json",
+      "sha256": "3e651765abc3067be1b99510df7219f469b8a855626f18da2c4b2ea81a08c03c",
+      "bytes": 180
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroArmNearUpperWardrobe.imageset/MeadowBattleHeroArmNearUpperWardrobe.png",
+      "sha256": "eafcd179b21732f52582d1469f981d65e0a4ca6024cbe49d9de5473b7cb875ca",
+      "bytes": 9726
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroBody.imageset/Contents.json",
+      "sha256": "164cc96c466c855ca6a122100d561c4cfa147a803a457f869a99bd86aad3b42f",
+      "bytes": 164
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroBody.imageset/MeadowBattleHeroBody.png",
+      "sha256": "6fdb0f71ac32e530e7242f02750bb1ccfb50f4e50a19efd0ae3dce3664a4418c",
+      "bytes": 14437
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroBodyCore.imageset/Contents.json",
+      "sha256": "ccdd88a581f26cb2df0d18073cca4ca512adbc8cb1615a17276f4ff6443112a9",
+      "bytes": 168
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroBodyCore.imageset/MeadowBattleHeroBodyCore.png",
+      "sha256": "40acbcd999ce879a445300755ef1ec25c0c2c38080325c6c5f14776fa94ddde1",
+      "bytes": 13753
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroConfiguration.dataset/Contents.json",
+      "sha256": "69c15a19909cf7aca002911b036ea6b324ef3b4fb1978dcbf33ca5bd211505f7",
+      "bytes": 156
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroConfiguration.dataset/configuration.json",
+      "sha256": "aa1108b4570775c66c133fcf1ca51fce41df74993ebff6dc4c1d03a59dcd6826",
+      "bytes": 593
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroConfigurationV2.dataset/Contents.json",
+      "sha256": "69c15a19909cf7aca002911b036ea6b324ef3b4fb1978dcbf33ca5bd211505f7",
+      "bytes": 156
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroConfigurationV2.dataset/configuration.json",
+      "sha256": "54891fe5a3bcc9fba09bf0727d288286c3d939274d93bb8e4e0257f69885d865",
+      "bytes": 1246
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroFace.imageset/Contents.json",
+      "sha256": "08c2e6e8cb1735c1b9da3bd4b5794e8f6197124a23701dc315d605abc440e471",
+      "bytes": 164
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroFace.imageset/MeadowBattleHeroFace.png",
+      "sha256": "11d54df5f734d6140919bd8f3bc1448795e55e35e3ad0981c05c7248eda28b64",
+      "bytes": 931
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroFarHand.imageset/Contents.json",
+      "sha256": "ef238c853d4d2d99456c9089b1af93fccb53eba9876abac8cf7947115a89361f",
+      "bytes": 167
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroFarHand.imageset/MeadowBattleHeroFarHand.png",
+      "sha256": "c37cbd0984a8b68ffc6f1721997ba33455a2d2bc5d697c2c77f318ec72ca7661",
+      "bytes": 783
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroHair.imageset/Contents.json",
+      "sha256": "69199c71eeeffae6af627802963fd219c3a264cb186b81739f3b36ae3d51708f",
+      "bytes": 164
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroHair.imageset/MeadowBattleHeroHair.png",
+      "sha256": "144d8fa28d23319afe6a1e9560ccc14b8450da25d225361772b0f2cdad65a209",
+      "bytes": 1710
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroJointUnderlay.imageset/Contents.json",
+      "sha256": "f19f020791181e6b491ba9f15bb6e482ab2f366a94c22a67a1f237f75feabf1c",
+      "bytes": 173
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroJointUnderlay.imageset/MeadowBattleHeroJointUnderlay.png",
+      "sha256": "9ea53c1fe83f78f1270a19f163af29fef647b0db4e1684a975e6306a3897a2e7",
+      "bytes": 9962
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroLegFarShinBody.imageset/Contents.json",
+      "sha256": "125f9e2aeab0b057ed5393b3f221cc93e1e01f09ad368681e43a00e79dbc9672",
+      "bytes": 174
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroLegFarShinBody.imageset/MeadowBattleHeroLegFarShinBody.png",
+      "sha256": "69d05e9a44dffddfa0d7cc5f6af0afed02cfc589512812fb4268bf95a08a4016",
+      "bytes": 13341
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroLegFarShinWardrobe.imageset/Contents.json",
+      "sha256": "333cd665296c6f0fe97f3be91e05c451e0e4fcbaf39dbd51c763d7c2b5f643e3",
+      "bytes": 178
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroLegFarShinWardrobe.imageset/MeadowBattleHeroLegFarShinWardrobe.png",
+      "sha256": "e2990029bf7fe14cd4af8215d8ed86b1623af288330049f197d28ba738027a2f",
+      "bytes": 9757
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroLegFarThighBody.imageset/Contents.json",
+      "sha256": "d68d0236a272bb8336fe219d898cf10238fdbf3622f8f42cc33537bbeca8cbb5",
+      "bytes": 175
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroLegFarThighBody.imageset/MeadowBattleHeroLegFarThighBody.png",
+      "sha256": "50ec5f98c5933ab2936b38b081c977785592907e4302c6b69aa5b9019802c384",
+      "bytes": 13409
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroLegFarThighWardrobe.imageset/Contents.json",
+      "sha256": "6acf65f3375669ddd3407f35316f7cd67a9a2db2b10a7e9bcf1bc9e391fb6532",
+      "bytes": 179
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroLegFarThighWardrobe.imageset/MeadowBattleHeroLegFarThighWardrobe.png",
+      "sha256": "b5b31b719b9dc5b85012da0f54d47616dadec763e6c5fdd881ea844698910af5",
+      "bytes": 9790
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroLegNearShinBody.imageset/Contents.json",
+      "sha256": "c03735817732f08169efdd309cddde46aca7b0a76d76454d063136f14bb9529e",
+      "bytes": 175
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroLegNearShinBody.imageset/MeadowBattleHeroLegNearShinBody.png",
+      "sha256": "34218b1f89cf3c64ec807521cfebf8f3c3d1eb238a945e73f89c33e21ee20203",
+      "bytes": 13325
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroLegNearShinWardrobe.imageset/Contents.json",
+      "sha256": "96a10c91186a158c8efe65952bb5ba3dbc9e4c9d383dc760f466a43361fbd6b2",
+      "bytes": 179
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroLegNearShinWardrobe.imageset/MeadowBattleHeroLegNearShinWardrobe.png",
+      "sha256": "7ec76ed5aa128a3b98008aa5ec5d03aedb7567211d23afb1fb55aae4f6fb37a5",
+      "bytes": 9774
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroLegNearThighBody.imageset/Contents.json",
+      "sha256": "5cbae1797aef78878564d8ace89a0e9fcefc14137f2d94ce1bed10fa16149655",
+      "bytes": 176
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroLegNearThighBody.imageset/MeadowBattleHeroLegNearThighBody.png",
+      "sha256": "22f31602ce77c49aa71989fb63be514863f42ead41003d3b19acd570cfd34de0",
+      "bytes": 13381
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroLegNearThighWardrobe.imageset/Contents.json",
+      "sha256": "367ba5f7800234627f6701c81ec948c9715cd26bc107dd9cad642c95a54456d4",
+      "bytes": 180
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroLegNearThighWardrobe.imageset/MeadowBattleHeroLegNearThighWardrobe.png",
+      "sha256": "e1c91b3d4c836da3a72d0d311f043f63c48c684c8088e55097b6bace213aaf7e",
+      "bytes": 9784
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroNearHand.imageset/Contents.json",
+      "sha256": "930ee44db480127be76195db919260e17ad4315c5f041dfd41a077048136e6ac",
+      "bytes": 168
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroNearHand.imageset/MeadowBattleHeroNearHand.png",
+      "sha256": "2d69ea1ef28c8209ca81556546e25bfc57bd9f471973c22e4474e0b9a00e3399",
+      "bytes": 1228
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroWardrobe.imageset/Contents.json",
+      "sha256": "2df7b66fa6d57be49a32bf2966ed39f496fd53c2ea2a0587767e9164d57fa458",
+      "bytes": 168
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroWardrobe.imageset/MeadowBattleHeroWardrobe.png",
+      "sha256": "74abfbe6d6da043bc1fe7d936be1fba1915cfadc5c72803b1cd0259aa164717c",
+      "bytes": 10005
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroWardrobeCore.imageset/Contents.json",
+      "sha256": "fe5996e6ab6a6ac08d4ab16456da89d8c1849319f4145ec3c3a2752857bfb23f",
+      "bytes": 172
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroWardrobeCore.imageset/MeadowBattleHeroWardrobeCore.png",
+      "sha256": "1a946e0db6559c92e8eebcba70f62fccb2325c55afce85f42538625c66efb600",
+      "bytes": 9760
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroWeapon.imageset/Contents.json",
+      "sha256": "c80c39773cba1709ba2da729ef5217674491223b7b448681ca76d9b2cd3953c2",
+      "bytes": 166
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHeroWeapon.imageset/MeadowBattleHeroWeapon.png",
+      "sha256": "a4a0122c73fba3120e9c4537fd55089195a61469a1c72e098b9f430d10ceaa5c",
+      "bytes": 3093
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHuntingBow.imageset/Contents.json",
+      "sha256": "706a2e0162182e32bb68eed233d31efc1c189f8b2191b1b190f83150d0be0e2f",
+      "bytes": 166
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleHuntingBow.imageset/MeadowBattleHuntingBow.png",
+      "sha256": "5492fc5082c2969af78215714aab653d9416834a8cdd7869580359181cb1002f",
+      "bytes": 900
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleLegendaryStaff.imageset/Contents.json",
+      "sha256": "04ff7824ee89eb509954149e3fc907a73180473e2ca2cd3bb5eee335414efa3d",
+      "bytes": 117
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleLegendaryStaff.imageset/MeadowBattleLegendaryStaff.png",
+      "sha256": "44bd232b23a8301bc21fa8e1f58747ce8afc019fa867dbe1763df68a522440df",
+      "bytes": 5353
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleVFXDragonScaleWard.imageset/Contents.json",
+      "sha256": "8688c2830e44ae72ee169e23b829878070be7beedfdc01047c4846338a3682c9",
+      "bytes": 174
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleVFXDragonScaleWard.imageset/MeadowBattleVFXDragonScaleWard.png",
+      "sha256": "1e138eb4579c5fefeb6973bcfcb134b7074f5907c6599845b0fbc77f77990875",
+      "bytes": 1620470
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleVFXDragonSoulWard.imageset/Contents.json",
+      "sha256": "ac706b0e987bdb587ec4a01a38deef56affa16d4815fad870e24f696a765dc07",
+      "bytes": 173
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleVFXDragonSoulWard.imageset/MeadowBattleVFXDragonSoulWard.png",
+      "sha256": "ea35846f285765c16215b4fe1534aa00bfc63116c0cdfd2d523809aa74a68052",
+      "bytes": 408501
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleVFXRally.imageset/Contents.json",
+      "sha256": "0a8da513b6e1d5b2ec4e40c5c5cc04656cf0675f485844e3f591548d6c09396e",
+      "bytes": 164
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleVFXRally.imageset/MeadowBattleVFXRally.png",
+      "sha256": "fa1f1bd05843d38d405b25cdd6ca1388a228214df25a79eb99a0604bf764caf8",
+      "bytes": 1038369
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleVFXStarlightPulse.imageset/Contents.json",
+      "sha256": "8a75ce60f25ac716d0f1895f3e7a372ea0c1ec5f9d1c573ce910ccd3e72c3640",
+      "bytes": 173
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleVFXStarlightPulse.imageset/MeadowBattleVFXStarlightPulse.png",
+      "sha256": "63c7820b3f02d52a4aabb0bcab3626fe45c16f6344184beb65883ef052d905ad",
+      "bytes": 2451578
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleVFXSweep.imageset/Contents.json",
+      "sha256": "a32f541605b87fec58ad13a52a7a0fccc159d52b2b26a9e02873da17685c423b",
+      "bytes": 164
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleVFXSweep.imageset/MeadowBattleVFXSweep.png",
+      "sha256": "818bdd0e00fce53322c586f44aeb279a9befe79c2ea410e63338aa6fe7201f8f",
+      "bytes": 1818050
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleWardenAttackSheet.imageset/Contents.json",
+      "sha256": "f18db510a5c013379b0a10e1eff325dbeb18bc2622869b59798ec0ccda690840",
+      "bytes": 173
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleWardenAttackSheet.imageset/MeadowBattleWardenAttackSheet.png",
+      "sha256": "a23f614584b0e25e867ed789c64fa85d1d7ac9d56bfd6b1f26311d4392fc245a",
+      "bytes": 626997
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleWardenMotion.dataset/Contents.json",
+      "sha256": "7cbc3e2d3fbf7975d7538223a79d25e702bd9aef9282458cb7113dc626e0855b",
+      "bytes": 149
+    },
+    {
+      "file": "Assets.xcassets/MeadowBattleWardenMotion.dataset/motion.json",
+      "sha256": "434b5f49700817fceef97a5adaaa5708d8480ad95e6dbf651aaa413d1d7c290c",
+      "bytes": 5481
+    },
+    {
+      "file": "Assets.xcassets/MeadowCampFarForest.imageset/01-far-forest.png",
+      "sha256": "291fd390cdc894004b8c93370a486069d10527f3cca6bd523367dc5784c11e52",
+      "bytes": 3245781
+    },
+    {
+      "file": "Assets.xcassets/MeadowCampFarForest.imageset/Contents.json",
+      "sha256": "bf4391dd559b680d8959109f6d511777f5e69a008a427c7cfdb23b160df635cb",
+      "bytes": 157
+    },
+    {
+      "file": "Assets.xcassets/MeadowCampForeground.imageset/04-foreground.png",
+      "sha256": "0def1d45ba05d6b316ef901071656d0ceb4310c35027d5c9ed1a68ffcd0b6050",
+      "bytes": 836971
+    },
+    {
+      "file": "Assets.xcassets/MeadowCampForeground.imageset/Contents.json",
+      "sha256": "e04bbf32d5e3cac024d785b0a48ecb0782ca4aa8cb6c443276e61c9fea2d0dbc",
+      "bytes": 157
+    },
+    {
+      "file": "Assets.xcassets/MeadowCampGround.imageset/02-ground.png",
+      "sha256": "f76f1ad3f83f5d6b8b8234f5708a2dc2c90bd42dd0b86de0847ac3176c4b3879",
+      "bytes": 2006004
+    },
+    {
+      "file": "Assets.xcassets/MeadowCampGround.imageset/Contents.json",
+      "sha256": "26ec5e3c8561b019ac039cac297a406c3519c802fe88f6146cce11e83415d2d8",
+      "bytes": 153
+    },
+    {
+      "file": "Assets.xcassets/MeadowCampMidground.imageset/03-midground.png",
+      "sha256": "7c46ac01aeb05956ed3ea9390c0fc07ed2951c551ce019c0523bb455b9f93d34",
+      "bytes": 843779
+    },
+    {
+      "file": "Assets.xcassets/MeadowCampMidground.imageset/Contents.json",
+      "sha256": "adbaa8eb86f94c56ee90fdd0cbf6a9a85d2f494dc7744dd8cbbd64798e41a382",
+      "bytes": 156
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame01.imageset/Contents.json",
+      "sha256": "b4fdeb0e4cede2834d4b29ca8d6a8fbc1252806c5f9825f719a450d2341b98ad",
+      "bytes": 163
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame01.imageset/MeadowDragonFlame01.png",
+      "sha256": "9878c7e5b5805a849f59466341b2e389f39513d9976ade6438769314757edc9d",
+      "bytes": 8701
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame02.imageset/Contents.json",
+      "sha256": "009601dfd9e7e83b4bdb33c20725a4ca06ced469a771273b3a323aeb263e69e8",
+      "bytes": 163
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame02.imageset/MeadowDragonFlame02.png",
+      "sha256": "f590e8f4c99f8208dd6af26b2b8a4df51e6fb9c7b2d9d0dd3862541827f8afed",
+      "bytes": 25937
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame03.imageset/Contents.json",
+      "sha256": "ad3d3f5141d15cb736432faa4409e07c097d1316cce99910ae0a17bf0f8f2310",
+      "bytes": 163
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame03.imageset/MeadowDragonFlame03.png",
+      "sha256": "e87ce5fc32f41d20ec02806bac9fe174c7e80b2ac9d86dbf73513c205f958856",
+      "bytes": 40423
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame04.imageset/Contents.json",
+      "sha256": "0b2db82b7f24e11d1c534510500eb58bcd51db9da42a70342774f91e2eb93c51",
+      "bytes": 163
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame04.imageset/MeadowDragonFlame04.png",
+      "sha256": "949056be46815a7bf7dedf1bb287cc51b24e4c928ff0966be6d5839a6e3506c6",
+      "bytes": 64599
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame05.imageset/Contents.json",
+      "sha256": "eaf7632d174409858903cd865efd0bef4eb867fde57b0207b345e76ca9023a12",
+      "bytes": 163
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame05.imageset/MeadowDragonFlame05.png",
+      "sha256": "3b2601536254126e4322ccd37481f2f09b623c11ee13d94df9bed60f9a196a3a",
+      "bytes": 72010
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame06.imageset/Contents.json",
+      "sha256": "71e7b08aa3f7e2d8a390e6a282f508647dfe90a0b1812b0b0ae12afa34f8a6dc",
+      "bytes": 163
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame06.imageset/MeadowDragonFlame06.png",
+      "sha256": "4268541a356fad2b56ead83c479eed39553bd08623743e8278afb4cdee511f38",
+      "bytes": 77484
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame07.imageset/Contents.json",
+      "sha256": "87b987a4fdc9538c46152497ecad4afe38323cc1af11c0b6ae64471976ba6a23",
+      "bytes": 163
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame07.imageset/MeadowDragonFlame07.png",
+      "sha256": "c59d42740998e63d3b9e80508b2d1bd28a48a0a04cf21f9383df8df5de6202f3",
+      "bytes": 79805
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame08.imageset/Contents.json",
+      "sha256": "b80166ff88597080ab3da0b7cb5c09bff35d9bf9333677213942b899a52fe4af",
+      "bytes": 163
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame08.imageset/MeadowDragonFlame08.png",
+      "sha256": "c1cc3994747a179b419b8e4326d43920b48e365de5b09123eac712b6829a7946",
+      "bytes": 97229
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame09.imageset/Contents.json",
+      "sha256": "c799856c530e45660f21dc89ee312cfb32a0fb6c456333b5763dc4b96a08ded1",
+      "bytes": 163
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame09.imageset/MeadowDragonFlame09.png",
+      "sha256": "02dd5a8390ace12c996a272e4fc0d301d78d0978766ff1d50122184bc86dff4f",
+      "bytes": 108652
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame10.imageset/Contents.json",
+      "sha256": "7c081ef71ef2d0d846c7e21ec3109a4556bde0e87d5bd4888020c9c3ab46e9f5",
+      "bytes": 163
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame10.imageset/MeadowDragonFlame10.png",
+      "sha256": "03f43d81c5d1b94f92316d4f2c6f6ed6563dadf2e224c284e5dde2f9725043ea",
+      "bytes": 109621
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame11.imageset/Contents.json",
+      "sha256": "4e754389d659bf97ba76abb45cb4563897d30bcb91be4480078d735c10e4b860",
+      "bytes": 163
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame11.imageset/MeadowDragonFlame11.png",
+      "sha256": "d5e24743933fad35fd2b7fc099970066733e687298e6749c3ced7dfe12fce52b",
+      "bytes": 118688
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame12.imageset/Contents.json",
+      "sha256": "55cff6a5fc324d00e98bbcae47234b2058ae6bd3f080d4688c52a78f21965da2",
+      "bytes": 163
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame12.imageset/MeadowDragonFlame12.png",
+      "sha256": "fe5d1c5ba9d0d0cba2a74faac380862c2e359cf2b438a0969e91b13950e7b70a",
+      "bytes": 123401
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame13.imageset/Contents.json",
+      "sha256": "6afa82d7c63e49fd726dd0c3876bc311a6d618a9b0dc1260bfa6150c76041bc3",
+      "bytes": 163
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame13.imageset/MeadowDragonFlame13.png",
+      "sha256": "633b5e8dd143b167f1ed2ab290806523969d86461254fed729a8978b58505bce",
+      "bytes": 116684
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame14.imageset/Contents.json",
+      "sha256": "6cda93218d4daa6c2c7341aa556bca894b9a151e455501bfd159e6b5466c7204",
+      "bytes": 163
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame14.imageset/MeadowDragonFlame14.png",
+      "sha256": "0cd4fc1ec41451e130d0356f4a37e2ac95c2122fe5530e178fa2aff6ff3d55c1",
+      "bytes": 95684
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame15.imageset/Contents.json",
+      "sha256": "4ec16b4535fdc9eb30d9063edfe180c90c092b9bdf9b956bb6aa18d131ef800e",
+      "bytes": 163
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame15.imageset/MeadowDragonFlame15.png",
+      "sha256": "961e13d52a7550a9cd2957848b924e64a0d7a5a54c61c16133e6c36cade04927",
+      "bytes": 61234
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame16.imageset/Contents.json",
+      "sha256": "44a900fb829103bb4ab43a4c26927ca305bb89816481d12755a8cb5007b182b6",
+      "bytes": 163
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame16.imageset/MeadowDragonFlame16.png",
+      "sha256": "2ed819b3995f62985e231c971039b2d659839d82c50b9a12a092016daba6a7f2",
+      "bytes": 40244
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame17.imageset/Contents.json",
+      "sha256": "4f7fa10cfcb1642ed7c0c101f553127bf9bba4dd03900452d08b083b3c8d02c7",
+      "bytes": 163
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame17.imageset/MeadowDragonFlame17.png",
+      "sha256": "660f4d89760c2cb3af3a2957c07ffd1eb34af029dd563284b4491f3c52cd721f",
+      "bytes": 36553
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame18.imageset/Contents.json",
+      "sha256": "6838fd66260aee7637fe4180fd29b1a3c9dd321f011f0b5112ab5c39a8ffe432",
+      "bytes": 163
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame18.imageset/MeadowDragonFlame18.png",
+      "sha256": "2ada36a83737861a5aa91a523085253412636e6aa614e05d3349f79178906c3b",
+      "bytes": 19800
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame19.imageset/Contents.json",
+      "sha256": "319567cd0f3ce6d22d0f84b9edd016c1feb5fd65007e5aed3a1591cda1024e3d",
+      "bytes": 163
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame19.imageset/MeadowDragonFlame19.png",
+      "sha256": "bdb8d18c79e68c0ca4c944975a5d1c6e7565534242bfe8d6834173f2bb05bdee",
+      "bytes": 8473
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame20.imageset/Contents.json",
+      "sha256": "1d08d473730d01c04fb488e3710831aa852065277da519bbe4fad21593b732b6",
+      "bytes": 163
+    },
+    {
+      "file": "Assets.xcassets/MeadowDragonFlame20.imageset/MeadowDragonFlame20.png",
+      "sha256": "b32aeee2fc20b805853ca9200ca075147023c5eb240c34a46e27966f9c45d323",
+      "bytes": 2052
+    },
+    {
+      "file": "Assets.xcassets/MeadowGround.imageset/Contents.json",
+      "sha256": "ff5c34622fbd430a7001e3b4d35a9a6e034457731ad342ba000ccde1bcf9c8cf",
+      "bytes": 156
+    },
+    {
+      "file": "Assets.xcassets/MeadowGround.imageset/MeadowGround.png",
+      "sha256": "14b2cfa2e4a51eb3dab3a12f3065e04d7a73b2a1364ed05d40de668835cf6fa4",
+      "bytes": 3466424
+    },
+    {
+      "file": "Assets.xcassets/MeadowLeatherArmorArmNearForearmBody.imageset/Contents.json",
+      "sha256": "d2744454c2ffc47264a0676aee8e97e08b4254b21e33bdf1f7b4a75e7912b181",
+      "bytes": 127
+    },
+    {
+      "file": "Assets.xcassets/MeadowLeatherArmorArmNearForearmBody.imageset/MeadowLeatherArmorArmNearForearmBody.png",
+      "sha256": "55444b86e37ed12e68fe4513adf3922052b46d36fb7419b913f733179a0e411e",
+      "bytes": 567
+    },
+    {
+      "file": "Assets.xcassets/MeadowLeatherArmorArmNearForearmWardrobe.imageset/Contents.json",
+      "sha256": "3a3ecc8210751429c8068ea6f6635cfee4fba6a93296f454618a8eb7a648543c",
+      "bytes": 131
+    },
+    {
+      "file": "Assets.xcassets/MeadowLeatherArmorArmNearForearmWardrobe.imageset/MeadowLeatherArmorArmNearForearmWardrobe.png",
+      "sha256": "3c6c50f94ab35e9f96c772731fe6b7950048179bc81b8ab0396cc1edbde89163",
+      "bytes": 334
+    },
+    {
+      "file": "Assets.xcassets/MeadowLeatherArmorArmNearUpperBody.imageset/Contents.json",
+      "sha256": "ecb220370a38ac0fa287f833ae1fcfa5acaa4804d250add7f8fc904b9f372f66",
+      "bytes": 125
+    },
+    {
+      "file": "Assets.xcassets/MeadowLeatherArmorArmNearUpperBody.imageset/MeadowLeatherArmorArmNearUpperBody.png",
+      "sha256": "81032c972162ab5a5204c9a8e8d75e11947e5378b90677eba504a6f458a7797e",
+      "bytes": 625
+    },
+    {
+      "file": "Assets.xcassets/MeadowLeatherArmorArmNearUpperWardrobe.imageset/Contents.json",
+      "sha256": "ae5e0aaa4cad836946bab6ea12c7603cee364aac5769411a9dcdc7c41a3ad915",
+      "bytes": 129
+    },
+    {
+      "file": "Assets.xcassets/MeadowLeatherArmorArmNearUpperWardrobe.imageset/MeadowLeatherArmorArmNearUpperWardrobe.png",
+      "sha256": "56d8c06ee47347fc36342eb54b16cebe8d29177c788eacfa272d7c70057b0d81",
+      "bytes": 1099
+    },
+    {
+      "file": "Assets.xcassets/MeadowLeatherArmorBowLayers.imageset/Contents.json",
+      "sha256": "593a54dace4b033867a9a3e7f0745e8d6b3debf7a45ce88ff161cdb08d72e706",
+      "bytes": 118
+    },
+    {
+      "file": "Assets.xcassets/MeadowLeatherArmorBowLayers.imageset/MeadowLeatherArmorBowLayers.png",
+      "sha256": "579d43d4448823c1b3450e487cc29c69187fa10baa3e68c3c2581a650416b6b7",
+      "bytes": 781915
+    },
+    {
+      "file": "Assets.xcassets/MeadowLeatherArmorBowTorso.imageset/Contents.json",
+      "sha256": "5709a79ed6a43306dca859b5cd943cee19aae06295db2db463ae4598e17fbf8d",
+      "bytes": 117
+    },
+    {
+      "file": "Assets.xcassets/MeadowLeatherArmorBowTorso.imageset/MeadowLeatherArmorBowTorso.png",
+      "sha256": "90f9451558e043280b370dca98fe5ba7c58664368f14734084d5671cefca056f",
+      "bytes": 3709
+    },
+    {
+      "file": "Assets.xcassets/MeadowLeatherArmorHemFarWardrobe.imageset/Contents.json",
+      "sha256": "1a97e9f2668a85c1050c4bd89c6a87601189bf0481e3b5916b32dd3231755e0f",
+      "bytes": 123
+    },
+    {
+      "file": "Assets.xcassets/MeadowLeatherArmorHemFarWardrobe.imageset/MeadowLeatherArmorHemFarWardrobe.png",
+      "sha256": "5a623390cd7971ad690e45b9512653020632009a1e8f2b4369f29ab3b012d365",
+      "bytes": 1874
+    },
+    {
+      "file": "Assets.xcassets/MeadowLeatherArmorHemNearWardrobe.imageset/Contents.json",
+      "sha256": "25c8eb051a1ef067a9325bc4d40346e96fa07ce2ef5f3b70434ee0827829ebe5",
+      "bytes": 124
+    },
+    {
+      "file": "Assets.xcassets/MeadowLeatherArmorHemNearWardrobe.imageset/MeadowLeatherArmorHemNearWardrobe.png",
+      "sha256": "13c3613caee21a84b0b9de405e75c8b7645b8707812526058ee8c72bc9fcc174",
+      "bytes": 1549
+    },
+    {
+      "file": "Assets.xcassets/MeadowLeatherArmorIcon.imageset/Contents.json",
+      "sha256": "1a384ef26d6015f2fa1a9fa7206e5c08fc77e565be153ea034f4afc8be13bf31",
+      "bytes": 113
+    },
+    {
+      "file": "Assets.xcassets/MeadowLeatherArmorIcon.imageset/MeadowLeatherArmorIcon.png",
+      "sha256": "89445707f18331b3ee0bb31141edab47dc61ca949b0723e47b8fcac39d0f92ba",
+      "bytes": 214070
+    },
+    {
+      "file": "Assets.xcassets/MeadowLeatherArmorLegFarThighWardrobe.imageset/Contents.json",
+      "sha256": "9858ae47dff60d8e137e9cc9f2a96cd09384b2a40c397e5d8661373e60ea0e10",
+      "bytes": 128
+    },
+    {
+      "file": "Assets.xcassets/MeadowLeatherArmorLegFarThighWardrobe.imageset/MeadowLeatherArmorLegFarThighWardrobe.png",
+      "sha256": "69ef6bc80a0c1b7f6ad79088a4f3c209f8664f7d3c64ecc20a84f4a34c2f66f1",
+      "bytes": 2589
+    },
+    {
+      "file": "Assets.xcassets/MeadowLeatherArmorLegNearThighWardrobe.imageset/Contents.json",
+      "sha256": "fce5703e7e696128f62fc308cebac71ca0c567dceb1aa80758d6cc35e4b5dde9",
+      "bytes": 129
+    },
+    {
+      "file": "Assets.xcassets/MeadowLeatherArmorLegNearThighWardrobe.imageset/MeadowLeatherArmorLegNearThighWardrobe.png",
+      "sha256": "b89606e82055c292b688a27ba873fccf695d3b35da9c78774caf4b5461cc9361",
+      "bytes": 2203
+    },
+    {
+      "file": "Assets.xcassets/MeadowLeatherArmorPauldronNearWardrobe.imageset/Contents.json",
+      "sha256": "400277ceb8b317934d7e1978d2affe027c6cf88183f1c1bf715829239eb4f93b",
+      "bytes": 129
+    },
+    {
+      "file": "Assets.xcassets/MeadowLeatherArmorPauldronNearWardrobe.imageset/MeadowLeatherArmorPauldronNearWardrobe.png",
+      "sha256": "1a375ccd1b8c676bc63899f6c704556a0aa1bf8ff5da773516c2cfe06ef89383",
+      "bytes": 1494
+    },
+    {
+      "file": "Assets.xcassets/MeadowLeatherArmorWardrobeCore.imageset/Contents.json",
+      "sha256": "383735819e83403151e25ea06d6c31417a333d18c647ad3e1301353e27c8b642",
+      "bytes": 121
+    },
+    {
+      "file": "Assets.xcassets/MeadowLeatherArmorWardrobeCore.imageset/MeadowLeatherArmorWardrobeCore.png",
+      "sha256": "f0b92abd22a31c9eebc48c55e97f60b7609e9ac237b03af300d1f9d909e810de",
+      "bytes": 5710
+    },
+    {
+      "file": "Assets.xcassets/MeadowMonsterCaveTrollDeath.imageset/Contents.json",
+      "sha256": "e8e860ca2945ac169ced1213690cdbc14def6bc29328ff74e9c56b9c0de6a1af",
+      "bytes": 127
+    },
+    {
+      "file": "Assets.xcassets/MeadowMonsterCaveTrollDeath.imageset/MeadowMonsterCaveTrollDeath.png",
+      "sha256": "5028c37ec88f9a85050909b86cbf1dc7f4cea13c2d0e7a8e8947b66ed1a9e0b2",
+      "bytes": 398528
+    },
+    {
+      "file": "Assets.xcassets/MeadowMonsterCaveTrollMotion.imageset/Contents.json",
+      "sha256": "5be73f76001aebc313db21e3e3d8d026d3eb67df89c5d85feb8b4c5814d009da",
+      "bytes": 128
+    },
+    {
+      "file": "Assets.xcassets/MeadowMonsterCaveTrollMotion.imageset/MeadowMonsterCaveTrollMotion.png",
+      "sha256": "15a43234ddd5b234b894aaa51e1578805b034e95c9c6f6aa77f4aa9decec3b44",
+      "bytes": 279431
+    },
+    {
+      "file": "Assets.xcassets/MeadowMonsterGoblinArcherDeath.imageset/Contents.json",
+      "sha256": "85e4f9c907451d3c37a3a60b059063a608258b078b8480a69aa77a20726a6400",
+      "bytes": 130
+    },
+    {
+      "file": "Assets.xcassets/MeadowMonsterGoblinArcherDeath.imageset/MeadowMonsterGoblinArcherDeath.png",
+      "sha256": "8bf9585ba67598cc3222b1e38da09c574ec6375bba4e17ba4fd8617c0896ff21",
+      "bytes": 237947
+    },
+    {
+      "file": "Assets.xcassets/MeadowMonsterGoblinArcherMotion.imageset/Contents.json",
+      "sha256": "1cb519f270b81724ae81f6e3c99316837d833ab40f79146aa73fe1603b4dfd6b",
+      "bytes": 131
+    },
+    {
+      "file": "Assets.xcassets/MeadowMonsterGoblinArcherMotion.imageset/MeadowMonsterGoblinArcherMotion.png",
+      "sha256": "91a1a4a5842ed788d347df7834780fadf99fa4e2654694e2b0f6be9525cdb4f7",
+      "bytes": 159082
+    },
+    {
+      "file": "Assets.xcassets/MeadowMonsterRuinDragonDeath.imageset/Contents.json",
+      "sha256": "632b48ab842e9fe0d64ceac1d0a8b091501c7ed28e19fc075093d4565f65611b",
+      "bytes": 128
+    },
+    {
+      "file": "Assets.xcassets/MeadowMonsterRuinDragonDeath.imageset/MeadowMonsterRuinDragonDeath.png",
+      "sha256": "30191f8fdd08e9fc8ffddbeab73de1898f668d5535f9bd24342ff2a8b67dde20",
+      "bytes": 520860
+    },
+    {
+      "file": "Assets.xcassets/MeadowMonsterRuinDragonMotion.imageset/Contents.json",
+      "sha256": "7fe9df2be98554045faaa07c01eab93fa4da3818d0ab6120ba6789d12ec5943a",
+      "bytes": 129
+    },
+    {
+      "file": "Assets.xcassets/MeadowMonsterRuinDragonMotion.imageset/MeadowMonsterRuinDragonMotion.png",
+      "sha256": "6029cac4e84e3bbfcb559b241083b07fb031f86666fbe659ef8b67a20adea3b2",
+      "bytes": 390981
+    },
+    {
+      "file": "Assets.xcassets/MeadowMonsterSlimeDeath.imageset/Contents.json",
+      "sha256": "79757b0c4ff73826c306f188d2e87bec824ff5994bf4bbc8bb8cf4383f95ec94",
+      "bytes": 123
+    },
+    {
+      "file": "Assets.xcassets/MeadowMonsterSlimeDeath.imageset/MeadowMonsterSlimeDeath.png",
+      "sha256": "609e371bf1e6d425273b131e3b7358a6dfd7f64458d54c40b302009aea4979ed",
+      "bytes": 437502
+    },
+    {
+      "file": "Assets.xcassets/MeadowMonsterSlimeMotion.imageset/Contents.json",
+      "sha256": "0babadabf59d88dd38d59d6aae740d94c459d736822f78f03970ca00a21478de",
+      "bytes": 124
+    },
+    {
+      "file": "Assets.xcassets/MeadowMonsterSlimeMotion.imageset/MeadowMonsterSlimeMotion.png",
+      "sha256": "fb422e2359f5785e6e70d4fd0c39f1b80ca314d95287983fea0afd9d2efc758e",
+      "bytes": 316605
+    },
+    {
+      "file": "Assets.xcassets/MeadowMonsterStoneGuardianDeath.imageset/Contents.json",
+      "sha256": "0b992a8f8a2ddcf3726bfcdb827aeae4894c1e6e5313f6df9be2c88486e8796f",
+      "bytes": 131
+    },
+    {
+      "file": "Assets.xcassets/MeadowMonsterStoneGuardianDeath.imageset/MeadowMonsterStoneGuardianDeath.png",
+      "sha256": "c7c0805f79c2fd8824178fcd53a6e7c574620e08ba8d9b94520e801137ceb248",
+      "bytes": 365083
+    },
+    {
+      "file": "Assets.xcassets/MeadowMonsterStoneGuardianMotion.imageset/Contents.json",
+      "sha256": "c9ae7350f3e74dacb076993f44e1a400a015b1a31b8d298782b078fb00600d4b",
+      "bytes": 132
+    },
+    {
+      "file": "Assets.xcassets/MeadowMonsterStoneGuardianMotion.imageset/MeadowMonsterStoneGuardianMotion.png",
+      "sha256": "7cd07d0e52e864ef05345573831871f554978ccf5df4a0f219f4d44c53b64530",
+      "bytes": 268657
+    },
+    {
+      "file": "Assets.xcassets/MeadowMonsterVisuals.dataset/Contents.json",
+      "sha256": "a16f911055643a70d5894d035b268585c219c1fc8c37aa146edcb3b3ed9a26e6",
+      "bytes": 105
+    },
+    {
+      "file": "Assets.xcassets/MeadowMonsterVisuals.dataset/motion.json",
+      "sha256": "5ff6b30ab04c6f90025d5ada01fef91a8185955c9791a994604e8e8a6293d1b8",
+      "bytes": 5940
+    },
+    {
+      "file": "Assets.xcassets/MeadowMonsterWolfDeath.imageset/Contents.json",
+      "sha256": "59de3f4238b0eba49884f22dc84959e0bca4037dfe6115afb27da718d41afb5c",
+      "bytes": 122
+    },
+    {
+      "file": "Assets.xcassets/MeadowMonsterWolfDeath.imageset/MeadowMonsterWolfDeath.png",
+      "sha256": "f52ecb672ec7438c44611a14e7d5c619ddf93879e56e6707119423c8c7adb115",
+      "bytes": 395729
+    },
+    {
+      "file": "Assets.xcassets/MeadowMonsterWolfMotion.imageset/Contents.json",
+      "sha256": "0ba7e12f35ca6a36c913a89b4c1a7a4423dfb1e46291770b24443d9246ab2eaf",
+      "bytes": 123
+    },
+    {
+      "file": "Assets.xcassets/MeadowMonsterWolfMotion.imageset/MeadowMonsterWolfMotion.png",
+      "sha256": "93b6d0167dc5ae07705326757ec5049703e94094d9afe57d7ed1511ed4b73353",
+      "bytes": 277084
+    },
+    {
+      "file": "Assets.xcassets/MeadowPartyGreatSword.imageset/Contents.json",
+      "sha256": "e70f360e6c2667853987e56aab291dd059a015a6e7f1cd824c54956e01f0d212",
+      "bytes": 112
+    },
+    {
+      "file": "Assets.xcassets/MeadowPartyGreatSword.imageset/MeadowPartyGreatSword.png",
+      "sha256": "7812fe8a0824b632c332995e61ab1e89e320b55fd7700a30ae98f8343638b2c1",
+      "bytes": 97207
+    },
+    {
+      "file": "Assets.xcassets/MeadowPartyHuntingBow.imageset/Contents.json",
+      "sha256": "cb521dac509498d5c0dabd9e38a184db453d6175d8bd3046baaa0b4c657f696d",
+      "bytes": 165
+    },
+    {
+      "file": "Assets.xcassets/MeadowPartyHuntingBow.imageset/MeadowPartyHuntingBow.png",
+      "sha256": "2d58ba019e297699a662c3555047ccc9463418b09c76688dd0b2b6fbf7022cb9",
+      "bytes": 61368
+    },
+    {
+      "file": "Assets.xcassets/MeadowPartyLargePotion.imageset/Contents.json",
+      "sha256": "86eb9e4954cef274cf56895a3e08b1f1e9b3febd0a5daa85a93a885b376dec08",
+      "bytes": 166
+    },
+    {
+      "file": "Assets.xcassets/MeadowPartyLargePotion.imageset/MeadowPartyLargePotion.png",
+      "sha256": "9641bb5def250456414108822f279cc9e90a7775e27e756947f8b103cc2e8c72",
+      "bytes": 168000
+    },
+    {
+      "file": "Assets.xcassets/MeadowPartyLegendaryStaff.imageset/Contents.json",
+      "sha256": "7445118ec556e160ba9db6c914f3fd5e2104bd2fff99de460b2eeb17198422a3",
+      "bytes": 116
+    },
+    {
+      "file": "Assets.xcassets/MeadowPartyLegendaryStaff.imageset/MeadowPartyLegendaryStaff.png",
+      "sha256": "19bf67cc642cbf6923071746c9b5f4851832fd88b15e5ab6a150f572e828bca1",
+      "bytes": 82114
+    },
+    {
+      "file": "Assets.xcassets/MeadowPartyRevivalStone.imageset/Contents.json",
+      "sha256": "220bd48802ed0de48f49f70c2be28af3798058594635c396aa5882f83b00693f",
+      "bytes": 167
+    },
+    {
+      "file": "Assets.xcassets/MeadowPartyRevivalStone.imageset/MeadowPartyRevivalStone.png",
+      "sha256": "1d3d594fb9fdb46781eaa6434b3d409cd3195b4ffa0fd03ed3cb22eef29c5803",
+      "bytes": 113877
+    },
+    {
+      "file": "Assets.xcassets/MeadowPartyShieldPotion.imageset/Contents.json",
+      "sha256": "b01357d7b2033920cfb4af89f487f1d60f325ed97f134b46ae34e40001ff213b",
+      "bytes": 167
+    },
+    {
+      "file": "Assets.xcassets/MeadowPartyShieldPotion.imageset/MeadowPartyShieldPotion.png",
+      "sha256": "c57f86636af263cf8d22931d0e13630ca959dde5806865c6296df3f3f035ca22",
+      "bytes": 145186
+    },
+    {
+      "file": "Assets.xcassets/MeadowPartySmallPotion.imageset/Contents.json",
+      "sha256": "46aa336c3f861f8131c48a3763e39c8b114bf0e3edf789f3f946fe19ec10e86e",
+      "bytes": 166
+    },
+    {
+      "file": "Assets.xcassets/MeadowPartySmallPotion.imageset/MeadowPartySmallPotion.png",
+      "sha256": "cbca94a567e6175d1dfee79b20f66029c48458287fbe5b50b2907ba822d5934e",
+      "bytes": 128451
+    },
+    {
+      "file": "Assets.xcassets/MeadowPartyTrainingSword.imageset/Contents.json",
+      "sha256": "85949e63637308dd04c8f5315476c093caf67734556d71a3effe6904c9932dfd",
+      "bytes": 168
+    },
+    {
+      "file": "Assets.xcassets/MeadowPartyTrainingSword.imageset/MeadowPartyTrainingSword.png",
+      "sha256": "0a9adb9c988f637e8cfe0ccf398ba569b007703d4c904f6bfe1aad0b1c01d75a",
+      "bytes": 98462
+    },
+    {
+      "file": "Assets.xcassets/MeadowPowerBadge.imageset/Contents.json",
+      "sha256": "fa97875e2296c2e87662a37e0657cd0f2545de9c69980294aef3d37b10751f8e",
+      "bytes": 107
+    },
+    {
+      "file": "Assets.xcassets/MeadowPowerBadge.imageset/MeadowPowerBadge.png",
+      "sha256": "f34fffcdee2946e9d8810e6267c83748eece205f733027fbdd2a0d40fd29fed2",
+      "bytes": 174156
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneArmorArmNearForearmBody.imageset/Contents.json",
+      "sha256": "ecf9dc482ae99ae62669e44fb9047adb27e3bd65b3404b5aac3e243f44d7a7dd",
+      "bytes": 124
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneArmorArmNearForearmBody.imageset/MeadowRuneArmorArmNearForearmBody.png",
+      "sha256": "55444b86e37ed12e68fe4513adf3922052b46d36fb7419b913f733179a0e411e",
+      "bytes": 567
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneArmorArmNearForearmWardrobe.imageset/Contents.json",
+      "sha256": "2cbd81b7678022a365bd617b80089c14a1226d4a22260f00131e4081ba532f5b",
+      "bytes": 128
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneArmorArmNearForearmWardrobe.imageset/MeadowRuneArmorArmNearForearmWardrobe.png",
+      "sha256": "58d43620f4c99187b8cdd467f209f9b491dbcc944068b45440746a2fc5ce8510",
+      "bytes": 698
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneArmorArmNearUpperBody.imageset/Contents.json",
+      "sha256": "2e9d9ed402e6fa5c539e29b8459e3d810da78336fc50a211c6f1fae140cc3e2a",
+      "bytes": 122
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneArmorArmNearUpperBody.imageset/MeadowRuneArmorArmNearUpperBody.png",
+      "sha256": "81032c972162ab5a5204c9a8e8d75e11947e5378b90677eba504a6f458a7797e",
+      "bytes": 625
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneArmorArmNearUpperWardrobe.imageset/Contents.json",
+      "sha256": "877198b3a40acab88f576b783840e015b89fbc150061dfaf243861f23b0f656d",
+      "bytes": 126
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneArmorArmNearUpperWardrobe.imageset/MeadowRuneArmorArmNearUpperWardrobe.png",
+      "sha256": "467ffe0b2c5a7f0e1c30f52eda8acf464493078e273b4ad6cd482e0f2b2ec4f8",
+      "bytes": 1272
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneArmorBowLayers.imageset/Contents.json",
+      "sha256": "9fffbf33d19a94ce65fce7cd3a546993fa5d540a13f9f0cd9226c02c5f1ad5e1",
+      "bytes": 115
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneArmorBowLayers.imageset/MeadowRuneArmorBowLayers.png",
+      "sha256": "9e34cdc32613bb6780d085685ccd3d4af6bdfed4b2a7c4cdbc1c7e1f4431bc1c",
+      "bytes": 812670
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneArmorBowTorso.imageset/Contents.json",
+      "sha256": "79ab7677b26948d38043ece42d67f51022f02187a75230ef429249f1959b8f4c",
+      "bytes": 114
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneArmorBowTorso.imageset/MeadowRuneArmorBowTorso.png",
+      "sha256": "049394c95f88110c1375691642ad6464845f2d417aee352a9f82b604fa5eb4bc",
+      "bytes": 3822
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneArmorHemFarWardrobe.imageset/Contents.json",
+      "sha256": "96d83b4db674c56d2dd896f9d3fa2a934751a7f9acc98e00b13fa1bab1927953",
+      "bytes": 120
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneArmorHemFarWardrobe.imageset/MeadowRuneArmorHemFarWardrobe.png",
+      "sha256": "bf8cd430b1937275e4f146e5dc58b1d044c62794af3ca9c9d41bb71ef5838c77",
+      "bytes": 1897
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneArmorHemNearWardrobe.imageset/Contents.json",
+      "sha256": "3d63f21691a31de6f80a3bc9d0628892702efecaf843eb7648dce6000601c0df",
+      "bytes": 121
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneArmorHemNearWardrobe.imageset/MeadowRuneArmorHemNearWardrobe.png",
+      "sha256": "1adaff8981cb413b5745c594764361d5dd9ae1d1363120156ead38c0e32c2e70",
+      "bytes": 1624
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneArmorIcon.imageset/Contents.json",
+      "sha256": "f1c5170300a8d230779694b15f3e0aacee4f1a6f1b5c2cab2548b846727faff8",
+      "bytes": 110
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneArmorIcon.imageset/MeadowRuneArmorIcon.png",
+      "sha256": "4ee68957d7fa6031c90266801290b45fa362945491b22428e20c4efbc5659ba0",
+      "bytes": 251232
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneArmorLegFarThighWardrobe.imageset/Contents.json",
+      "sha256": "00972060e041aa5ddefb95d00395e5ed03d145247ce6534f76db315fcaefb3b5",
+      "bytes": 125
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneArmorLegFarThighWardrobe.imageset/MeadowRuneArmorLegFarThighWardrobe.png",
+      "sha256": "69ef6bc80a0c1b7f6ad79088a4f3c209f8664f7d3c64ecc20a84f4a34c2f66f1",
+      "bytes": 2589
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneArmorLegNearThighWardrobe.imageset/Contents.json",
+      "sha256": "b5f8de809eea17ab55765c11529940632f6863db5756e7287dae5234f3a8041f",
+      "bytes": 126
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneArmorLegNearThighWardrobe.imageset/MeadowRuneArmorLegNearThighWardrobe.png",
+      "sha256": "b89606e82055c292b688a27ba873fccf695d3b35da9c78774caf4b5461cc9361",
+      "bytes": 2203
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneArmorPauldronNearWardrobe.imageset/Contents.json",
+      "sha256": "e621835d3087d8deca198207126c4e76aa7116392345a7206737d00b79b70e25",
+      "bytes": 126
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneArmorPauldronNearWardrobe.imageset/MeadowRuneArmorPauldronNearWardrobe.png",
+      "sha256": "a5e954995231685480481cc53d9dd83b35af4c8a3828bc5723eb28989599ce0d",
+      "bytes": 1585
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneArmorWardrobeCore.imageset/Contents.json",
+      "sha256": "447558bd07904c6b68cfd24f823c9820f21e504632a4b424573627a5e9eb9a03",
+      "bytes": 118
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneArmorWardrobeCore.imageset/MeadowRuneArmorWardrobeCore.png",
+      "sha256": "7f057174dc245300524b3eeff1ac6dc65fbe82de79627a4be79b1a32180c6286",
+      "bytes": 6452
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlash01.imageset/Contents.json",
+      "sha256": "cacbbeff4b7d701ab18d89800a7889ab75de6532caf73c58271c383069b9774f",
+      "bytes": 161
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlash01.imageset/MeadowRuneSlash01.png",
+      "sha256": "95f24ad6342984746ee1febf0f22302831f131429bd57d60e5433ccf14490ae0",
+      "bytes": 60575
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlash02.imageset/Contents.json",
+      "sha256": "cb37038c5a3aca48423cedcc51d9904a54f25c318bb5db7d9f71f9e60665aedd",
+      "bytes": 161
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlash02.imageset/MeadowRuneSlash02.png",
+      "sha256": "d191077187be121f5c03c29f781edf3302ec4842b180fc17441381c83dbff8cd",
+      "bytes": 57507
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlash03.imageset/Contents.json",
+      "sha256": "0b067dd2e2f04a65d7078edd7cad0fb1375a494a6a05ecb6342f0ae8fbaab2d7",
+      "bytes": 161
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlash03.imageset/MeadowRuneSlash03.png",
+      "sha256": "261f60d853029b909abb0867418dbadc08636ad13a5753c7194a1a049a90d8c4",
+      "bytes": 81089
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlash04.imageset/Contents.json",
+      "sha256": "2d2169adc251f63fb4f1373b1b3624e5035e5d52496c4f44f5a44daa88867a7f",
+      "bytes": 161
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlash04.imageset/MeadowRuneSlash04.png",
+      "sha256": "ab0f4ce832fc2d9e9318392c9d36364a5fdb5efb42843dce55f07537350373a3",
+      "bytes": 90352
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlash05.imageset/Contents.json",
+      "sha256": "85827fa478e558b2f562866f70bc5b3bbef222df0b29fc9847d1b1e84d2dff7d",
+      "bytes": 161
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlash05.imageset/MeadowRuneSlash05.png",
+      "sha256": "7ddf20b8f5764cb2fc098c98cd3e7af82d102b69b45eae5cc713872ec08b38cd",
+      "bytes": 68808
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlash06.imageset/Contents.json",
+      "sha256": "312820d3dcecbf63281957b2cb2d435ad0663ac18f2df9eeb0e5c8f7754f04d3",
+      "bytes": 161
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlash06.imageset/MeadowRuneSlash06.png",
+      "sha256": "483e4ef72844911044c0d663e53c327d73d4da7b8229d6a29194bed58319f9a9",
+      "bytes": 65032
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlash07.imageset/Contents.json",
+      "sha256": "b79f7d7492653443343b7bc380688d5e502ab46c88fc47ebae192c714b82ed32",
+      "bytes": 161
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlash07.imageset/MeadowRuneSlash07.png",
+      "sha256": "19d49faaa654995324abbc8229d3f29f25f5ca6dae2a6ab9495c252ab8cf0ed0",
+      "bytes": 59412
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlash08.imageset/Contents.json",
+      "sha256": "a3b22fa6001d8c6ca528dcfe0b92348c5404d878a294224452a9026a9fbdf9be",
+      "bytes": 161
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlash08.imageset/MeadowRuneSlash08.png",
+      "sha256": "20feac9dc9d0843ed7a86b816d217a4e990aa3f3e56aaf046e131d80c180cb6b",
+      "bytes": 35455
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack01.imageset/Contents.json",
+      "sha256": "79caa03693577c56db1b8129be8eb84ce4ca77dd3ef72ca1dea4dbf5ab90f33e",
+      "bytes": 167
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack01.imageset/MeadowRuneSlashAttack01.png",
+      "sha256": "72c1391c2492321c2a4ce5352cd6afe191b1aee8d00c6ca665654dd6804428d1",
+      "bytes": 9447
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack02.imageset/Contents.json",
+      "sha256": "7befadf905b6671514ce0fcfcacb6a376358fe3a30900b34cbe5ce4ec3ad81a8",
+      "bytes": 167
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack02.imageset/MeadowRuneSlashAttack02.png",
+      "sha256": "7746f775f9d95d35f79f42ecd66c31f59e851965e1570bcfa89b2319627bbd4b",
+      "bytes": 18272
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack03.imageset/Contents.json",
+      "sha256": "b80a13111cb934499b96f8650c7ba1ca02e8d3588ee0a5f082d4c1ceb7bb5e68",
+      "bytes": 167
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack03.imageset/MeadowRuneSlashAttack03.png",
+      "sha256": "263125e906e8bb9ded0d5e0f6a6f7a5ccd72599cfe97977bd758501e97db3442",
+      "bytes": 22057
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack04.imageset/Contents.json",
+      "sha256": "02015ca29b2a0a95da9b233946107d476416a9fda46080a302475eb63b97e45f",
+      "bytes": 167
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack04.imageset/MeadowRuneSlashAttack04.png",
+      "sha256": "beba8efabdafc1430325e8644e35258d455c66f4dda91ce2b7ccc16b55c22419",
+      "bytes": 54400
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack05.imageset/Contents.json",
+      "sha256": "b0f37fee94f905789a99dc8690378fbc847765bcc4a8123f9747281848d134e2",
+      "bytes": 167
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack05.imageset/MeadowRuneSlashAttack05.png",
+      "sha256": "996bedc5edaad3e4eb2722eb59a7282715dfaf9c1883a7caa3684fe19d978873",
+      "bytes": 62316
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack06.imageset/Contents.json",
+      "sha256": "360dce145fa6c16ede4794a5fad10ab1fe1f6ccd665270139a485c6d81eb2d16",
+      "bytes": 167
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack06.imageset/MeadowRuneSlashAttack06.png",
+      "sha256": "823786a024762a8dca63072fe74b9fd057b1db110409239b8e4a99998cb01375",
+      "bytes": 64457
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack07.imageset/Contents.json",
+      "sha256": "91161dbab60415ebfeb5b482693148f4d4c3aa2fa987c37390e30446b456f55c",
+      "bytes": 167
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack07.imageset/MeadowRuneSlashAttack07.png",
+      "sha256": "ca0fd07af6e7081e115c73ebc9cc480a12b8cd3987cac18fc9e9dad215319412",
+      "bytes": 69665
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack08.imageset/Contents.json",
+      "sha256": "548dc39cade188b0929bc6ea08d41e48c257a3cc5885a6ac5763063d9159e488",
+      "bytes": 167
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack08.imageset/MeadowRuneSlashAttack08.png",
+      "sha256": "a0e9909338b84ad7c963e48506df3a0db03c19831fe7294681b6a1a0cf429653",
+      "bytes": 81875
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack09.imageset/Contents.json",
+      "sha256": "efad656cdc4d4a156876b7361d2331b84b03ce454cac0ce5c7ee99429dad5d7b",
+      "bytes": 167
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack09.imageset/MeadowRuneSlashAttack09.png",
+      "sha256": "4bffc33340929be72a779a59f69e1f4fdef90cbf2ab0d7685273b66b2f65a75f",
+      "bytes": 81642
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack10.imageset/Contents.json",
+      "sha256": "7522b702521f9feacd5d88918c10ef9ec0492ba3456b926c033e768e6e8d97e9",
+      "bytes": 167
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack10.imageset/MeadowRuneSlashAttack10.png",
+      "sha256": "18c439ece74bb50496a6187ce118e6793e6ef5bd24cefe1fe77db89ee5b24097",
+      "bytes": 92414
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack11.imageset/Contents.json",
+      "sha256": "12ae0652c05873d4354dba0292fca392f1aa451aa8c0de008f3e2145b69ff83a",
+      "bytes": 167
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack11.imageset/MeadowRuneSlashAttack11.png",
+      "sha256": "19bdbccf3337399be4ee8f3fa91638f2f08803e29c1b2cf9adc06c503b5a9b78",
+      "bytes": 86540
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack12.imageset/Contents.json",
+      "sha256": "64e974608b48ed041c1798c7a5ede2a9f00e3d48b11613b190fc54ea079ca930",
+      "bytes": 167
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack12.imageset/MeadowRuneSlashAttack12.png",
+      "sha256": "c6a35c3d59a095cc034864dd8cd3e7ed150113fe3a0cc85d086e71892eb4f1a8",
+      "bytes": 75462
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack13.imageset/Contents.json",
+      "sha256": "c7ccb18c922c070d016fbd73a28bf553b8fca51a738e6e2a3f7175154b475722",
+      "bytes": 167
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack13.imageset/MeadowRuneSlashAttack13.png",
+      "sha256": "36dcb6f4e70d1b001d5ece01ceae5404a6ed279c693526e58c8548ebdb77c7b8",
+      "bytes": 66105
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack14.imageset/Contents.json",
+      "sha256": "bc2f3193d1c5d47afbc9fa19d39a686d824dd5c1c68d8f6727c26369ac42e418",
+      "bytes": 167
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack14.imageset/MeadowRuneSlashAttack14.png",
+      "sha256": "81ea92bf262d7be25784c20b31aafe1f5fd918a1fcddf366a703117b9a774112",
+      "bytes": 52088
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack15.imageset/Contents.json",
+      "sha256": "54f8092a5556e645c7667aedfad528017a737c4f745543e2c6bcf4578b01b44c",
+      "bytes": 167
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack15.imageset/MeadowRuneSlashAttack15.png",
+      "sha256": "27ca5c5315a55a46bac2d978e3ff5f0709144573b7a799f9b3530ced5ff3487a",
+      "bytes": 48674
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack16.imageset/Contents.json",
+      "sha256": "6294297a365a8a3754e43178ec2580e48e9356b9f13d17e94144612532785495",
+      "bytes": 167
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack16.imageset/MeadowRuneSlashAttack16.png",
+      "sha256": "752dc0ce55c13b93b5453a5f7aad33d026a7806e19d54a4f62e36658d9359eca",
+      "bytes": 43312
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack17.imageset/Contents.json",
+      "sha256": "a5dd60ef549231c34b8194a8ed66817d9ffd8aca949a4ee191386988e43a5b11",
+      "bytes": 167
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack17.imageset/MeadowRuneSlashAttack17.png",
+      "sha256": "f4df81482b2c40caa8b0bef65ea79088ee3c574c5d48f0542b183939a0725742",
+      "bytes": 31744
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack18.imageset/Contents.json",
+      "sha256": "2e5154d30e0ca402f72b2ae9d2594624911270bb8a14972048c02f9016fac081",
+      "bytes": 167
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack18.imageset/MeadowRuneSlashAttack18.png",
+      "sha256": "c59a1a42ab9e26311eda427474c9bedb51b806da408f6e14036178608e8dfa49",
+      "bytes": 17381
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack19.imageset/Contents.json",
+      "sha256": "1564aa96e6adde3c257f1407760cf01a0eab089854ef7b9f1d3a30268658b11b",
+      "bytes": 167
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack19.imageset/MeadowRuneSlashAttack19.png",
+      "sha256": "488f4ed4a302a84c0d6b5ab6dd5aea7f31a03398880dff4d2181de22ed23464f",
+      "bytes": 4701
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack20.imageset/Contents.json",
+      "sha256": "c4db5d2a39d88036b45dafb6e0b969175db3ebace6bc611904ddcd8f62b70010",
+      "bytes": 167
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneSlashAttack20.imageset/MeadowRuneSlashAttack20.png",
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "bytes": 334
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast01.imageset/Contents.json",
+      "sha256": "ca1e7ac9f23bd4bc53e47a92159dc6edd01ff4022efccb46ec0baa97d4762a78",
+      "bytes": 164
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast01.imageset/MeadowRuneWardCast01.png",
+      "sha256": "adbcc37cf9ad2130b08a49058ecf19e346cb8913752bc8c3d949a59f1853df5b",
+      "bytes": 8782
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast02.imageset/Contents.json",
+      "sha256": "fef1de43e99ee091e6b247338d0fc86805f666ca409055a27fafe273f96567fb",
+      "bytes": 164
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast02.imageset/MeadowRuneWardCast02.png",
+      "sha256": "ef6899bbecf0f82b3a467a7829cb9b0b8005a3e5f054bd39f2afe1293b7d9828",
+      "bytes": 32451
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast03.imageset/Contents.json",
+      "sha256": "593959b0d60929bc37fb13ae01a7161c18f7c8df254ffea396ee27fb25cd17e4",
+      "bytes": 164
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast03.imageset/MeadowRuneWardCast03.png",
+      "sha256": "061320336020d18b2de1e3298e3b7d9cbfc5cfdda9c049fcdfa86e2ae40d409d",
+      "bytes": 40482
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast04.imageset/Contents.json",
+      "sha256": "4f46ff79687f27ab2fbed83738bb61a2c13d068215ff1ca90407a7e495659370",
+      "bytes": 164
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast04.imageset/MeadowRuneWardCast04.png",
+      "sha256": "d1e676ea46b34a2a170bf347bc900b9f36f3bd17d80ab025cfe788f6b8e8547a",
+      "bytes": 53365
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast05.imageset/Contents.json",
+      "sha256": "8b48fe1c37065998247f5e871e3356e31aad6152afa736036aef7dc31c046974",
+      "bytes": 164
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast05.imageset/MeadowRuneWardCast05.png",
+      "sha256": "01fd746f9ca6b1985bbb15a9dec8a38e63f6d4fdf39e2fbad1e48166b7fdde4d",
+      "bytes": 65585
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast06.imageset/Contents.json",
+      "sha256": "cc4839c395b4e6580f74a73fd472d28cced3ad131aa3af031d3909f435ed4bc2",
+      "bytes": 164
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast06.imageset/MeadowRuneWardCast06.png",
+      "sha256": "6e1e69cbf60e752d396f68260df148f2d7d77d87c72acdc5779ab4c8733ee057",
+      "bytes": 62658
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast07.imageset/Contents.json",
+      "sha256": "2ea46272ddb93c0c2bd7c07bad8d4188816da23b0791a4ceee91fa5a29a5d476",
+      "bytes": 164
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast07.imageset/MeadowRuneWardCast07.png",
+      "sha256": "85caa5c3989a2d5af7c2c7b183a4c2542c5cbed72ff01663742b7b025938fbd9",
+      "bytes": 68313
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast08.imageset/Contents.json",
+      "sha256": "f79a26f597c8a2214c9f2e08a39a77741b5ea71b19d2b737d96aa6a022c2d129",
+      "bytes": 164
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast08.imageset/MeadowRuneWardCast08.png",
+      "sha256": "ba6f2400bf8569a5dd46402a18b74145185d72b40d63581d0e3e812b7422469d",
+      "bytes": 72737
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast09.imageset/Contents.json",
+      "sha256": "45da6da343a268bad26f63f68e09a303f80b69072540dc6396b559d40c369d4d",
+      "bytes": 164
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast09.imageset/MeadowRuneWardCast09.png",
+      "sha256": "473ce0987fcaae06a22a768b46188aa51107d088048a6f9b1d6ad3e2731696e4",
+      "bytes": 79195
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast10.imageset/Contents.json",
+      "sha256": "bc9870e817632212087f90dcfe0be141ebc242c2e7f8053906a80333943efb61",
+      "bytes": 164
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast10.imageset/MeadowRuneWardCast10.png",
+      "sha256": "1c82da3eea13a4a47323b1d666651dfef09ee4cd0384f50efacf28a62b0a405d",
+      "bytes": 93893
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast11.imageset/Contents.json",
+      "sha256": "c82657a8054bd2606f7c8325a206227396c39636d9f91c01f13f246bf6c12eb0",
+      "bytes": 164
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast11.imageset/MeadowRuneWardCast11.png",
+      "sha256": "cea78bb7e9cce5d66bbe70f12e909c9458c29685140b4ab09f1eecf8e343f332",
+      "bytes": 94251
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast12.imageset/Contents.json",
+      "sha256": "7655c1e0b3e5ffbb9c3245db19360f6ea4f732c3ae591cbe3327feec7ad3a48a",
+      "bytes": 164
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast12.imageset/MeadowRuneWardCast12.png",
+      "sha256": "ac9c266434ddb19a319915279f4375fadc26f34eeeb9d0bec61128e43041bc20",
+      "bytes": 95210
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast13.imageset/Contents.json",
+      "sha256": "28ab6958e91fc0c69add4a1e42f43925cda425e9937da7d203ea12f58a58a397",
+      "bytes": 164
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast13.imageset/MeadowRuneWardCast13.png",
+      "sha256": "a6ed081527fcede5ac1a2db634912dccc96d4fb98a43db8587512ac94f822c8f",
+      "bytes": 98116
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast14.imageset/Contents.json",
+      "sha256": "a9b52c6d99815b4c3ae188302cee176f8fe17d723af763d245a1505f3fd1818a",
+      "bytes": 164
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast14.imageset/MeadowRuneWardCast14.png",
+      "sha256": "184d3a82b411c933a863f0524288dfb0dc9a0d946de5cd4107540748bfe2660d",
+      "bytes": 89323
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast15.imageset/Contents.json",
+      "sha256": "a8163ebedeba371ce7c8f29f8801a79d8eb9979c8ade020e1fa5b07fc64972b1",
+      "bytes": 164
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast15.imageset/MeadowRuneWardCast15.png",
+      "sha256": "7508000063bc90f3f2c18f3692d48ebb2e5a986022d6b3415f3e9433b4093add",
+      "bytes": 80914
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast16.imageset/Contents.json",
+      "sha256": "f5113474ad4d69cd2b0259ed72bf0f1ebae9143605d3ed6f6cf7955604c95ceb",
+      "bytes": 164
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast16.imageset/MeadowRuneWardCast16.png",
+      "sha256": "350047b9c73727c9ab9cde665096461ca8524cfa527fc523126f89be3fde059f",
+      "bytes": 70474
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast17.imageset/Contents.json",
+      "sha256": "46c17164b13681dfc3ca0b234fb12ff11d833c8e579032059aa4d714ae39edfe",
+      "bytes": 164
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast17.imageset/MeadowRuneWardCast17.png",
+      "sha256": "7735c0161695a50e52ac454babbfd796e025199233bf0e4864a964b1b3b92130",
+      "bytes": 59555
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast18.imageset/Contents.json",
+      "sha256": "cbd282d5b5775bbd7efc7eac815209228d1e9cb1cc3cc3a573a55705d85243ea",
+      "bytes": 164
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast18.imageset/MeadowRuneWardCast18.png",
+      "sha256": "3c21a9e5e2bcd141f31c772550043e3613e4e03c6292954507ad981447fbb211",
+      "bytes": 42166
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast19.imageset/Contents.json",
+      "sha256": "d49825017ce3dfc2c12e58882303c3007d61e4d3758a436ce3528bf57f1e3387",
+      "bytes": 164
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast19.imageset/MeadowRuneWardCast19.png",
+      "sha256": "d1ff40215fb32b8ff260922c3fa771e0a98d0c5385f2a4928866f82c7f9d9e24",
+      "bytes": 32127
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast20.imageset/Contents.json",
+      "sha256": "d559bfd3e620fa1d2e0523530591e410bd6c0c9a12de930107c245b1274f0274",
+      "bytes": 164
+    },
+    {
+      "file": "Assets.xcassets/MeadowRuneWardCast20.imageset/MeadowRuneWardCast20.png",
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "bytes": 334
+    },
+    {
+      "file": "Assets.xcassets/NodeBossSanctum.imageset/Contents.json",
+      "sha256": "e7ff9c1acb96838b196fde168dac4c46422f97cee69d22031cade5222305040b",
+      "bytes": 159
+    },
+    {
+      "file": "Assets.xcassets/NodeBossSanctum.imageset/NodeBossSanctum.png",
+      "sha256": "34e236b6c358e217aeb31d0539d6ddd76c97eb0896c63d4d394f08a475b7d346",
+      "bytes": 368317
+    },
+    {
+      "file": "Assets.xcassets/NodeCombatOutpost.imageset/Contents.json",
+      "sha256": "25484b5f1876f31cc753b28bbe032cf9c7b9668e2cec9191dcf5dd3cebc83b75",
+      "bytes": 161
+    },
+    {
+      "file": "Assets.xcassets/NodeCombatOutpost.imageset/NodeCombatOutpost.png",
+      "sha256": "02aefae21fe853343b6ab3809f31d37ef818c34de00a1baacf17146f03e4bc41",
+      "bytes": 297930
+    },
+    {
+      "file": "Assets.xcassets/NodeRewardCache.imageset/Contents.json",
+      "sha256": "33a5d3526dec37e97db3c2456416f9fc069981b833a30947d51f424ff0f37889",
+      "bytes": 159
+    },
+    {
+      "file": "Assets.xcassets/NodeRewardCache.imageset/NodeRewardCache.png",
+      "sha256": "befa34a89d9932b1f964d4b55fcc8e233f5f4442d9c968340ffa44315a1077a0",
+      "bytes": 261899
+    },
+    {
+      "file": "Assets.xcassets/NodeWaystone.imageset/Contents.json",
+      "sha256": "083a0d747836c0a17c18ea42e5a0e7fe5ec809e76ce684d7e475eabe345b8b04",
+      "bytes": 156
+    },
+    {
+      "file": "Assets.xcassets/NodeWaystone.imageset/NodeWaystone.png",
+      "sha256": "ca7d4d11881d91136c34eb6385c92aa9ddc9ee32e128295a34a6b3223ce07ebb",
+      "bytes": 242423
+    },
+    {
+      "file": "Assets.xcassets/OakA.imageset/Contents.json",
+      "sha256": "f8535cc90cb3f9e27e76a30b7c28027a142b1027aac7f8bc7d9a86b0e2a94a89",
+      "bytes": 148
+    },
+    {
+      "file": "Assets.xcassets/OakA.imageset/OakA.png",
+      "sha256": "cead2c7d1847a7ab160b36cfb5343be1fcd1d72a779399532982a9e4eec5b1b6",
+      "bytes": 511329
+    },
+    {
+      "file": "Assets.xcassets/OakB.imageset/Contents.json",
+      "sha256": "8083ec33c0ee9120771a192674a68e2a6f3f378fae3a1612d93b0e7f4f62be26",
+      "bytes": 148
+    },
+    {
+      "file": "Assets.xcassets/OakB.imageset/OakB.png",
+      "sha256": "2c91817c971ea414141889c853dec6d397d19bce22cffa4bee4ca91a239c6694",
+      "bytes": 418558
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterBowDiagonals.imageset/Contents.json",
+      "sha256": "37e79b69ae3fdf44882bf019b49ea3e01c0f6ba5f75f1d3c63193aaef6e22c39",
+      "bytes": 166
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterBowDiagonals.imageset/P1ForesterBowDiagonals.png",
+      "sha256": "bc5adaba660be9c95468d370cccb25aa5320f42fa381fb5e8e04f77cd7bab5ec",
+      "bytes": 216324
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterBowDirections.imageset/Contents.json",
+      "sha256": "ba9263201efb36b685dca2a06063b963fd3498d8de8950cdfe876ee1168c102e",
+      "bytes": 167
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterBowDirections.imageset/P1ForesterBowDirections.png",
+      "sha256": "f83aa84664e7c1a27610b92dea261af1e733912fd7467efac903dd09c772a931",
+      "bytes": 312409
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterGreatSwordDiagonals.imageset/Contents.json",
+      "sha256": "937090f209f77f3dfa88c48465234d3a1cc1e5677c58b4907f4b35fa5d099641",
+      "bytes": 120
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterGreatSwordDiagonals.imageset/P1ForesterGreatSwordDiagonals.png",
+      "sha256": "b615ed21be448036fd88663a2b061fe61796dbec1b92b533154cd02e685f00fb",
+      "bytes": 302595
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterGreatSwordDirections.imageset/Contents.json",
+      "sha256": "d2b80c2e8b496679fcb60b17be79f548c5e4c5bf90bce3ee4c4b4130fb89413d",
+      "bytes": 121
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterGreatSwordDirections.imageset/P1ForesterGreatSwordDirections.png",
+      "sha256": "0539f23657866ccd60e6b2d5473bff11baab4d4bc4dd32c2f20aaab6471fa5ef",
+      "bytes": 362943
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterLeatherarmorGreatswordDiagonals.imageset/Contents.json",
+      "sha256": "67d3f8374a6e4d6b0934ccd25c4f7870de41576dc9c30ea6a0ddd40515597741",
+      "bytes": 132
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterLeatherarmorGreatswordDiagonals.imageset/P1ForesterLeatherarmorGreatswordDiagonals.png",
+      "sha256": "40ce748f873abc337b5b3f677abb8a1052c0b25583c305c9f6d61f002471d5be",
+      "bytes": 327611
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterLeatherarmorGreatswordDirections.imageset/Contents.json",
+      "sha256": "e37545edea88f8158c74ae029b2282e81b176f0a04bef80dd12afaea3672835b",
+      "bytes": 133
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterLeatherarmorGreatswordDirections.imageset/P1ForesterLeatherarmorGreatswordDirections.png",
+      "sha256": "37080265e1ba589239b2024dda1979c6c4df07e000a94a91c1ae9afd699039ef",
+      "bytes": 369889
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterLeatherarmorHuntingbowDiagonals.imageset/Contents.json",
+      "sha256": "70f2bd0e4f74c9ec5ff5a08aeaa766de1bd884e5a679398723bc1c8012649a74",
+      "bytes": 132
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterLeatherarmorHuntingbowDiagonals.imageset/P1ForesterLeatherarmorHuntingbowDiagonals.png",
+      "sha256": "3d5c6e4dcc0fc2c6b641d08c176372a68ef79a2a3181c5066927f9d4ee547386",
+      "bytes": 245943
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterLeatherarmorHuntingbowDirections.imageset/Contents.json",
+      "sha256": "62cad88e363b0bf5084aa9ca9160118eb2c8f5891599f7f29cdce9f3074ba8ac",
+      "bytes": 133
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterLeatherarmorHuntingbowDirections.imageset/P1ForesterLeatherarmorHuntingbowDirections.png",
+      "sha256": "cfe5097e435aa672b7a22376eea61289b1bf7550d3ce98116a4ae45a5f563157",
+      "bytes": 320476
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterLeatherarmorLegendarystaffDiagonals.imageset/Contents.json",
+      "sha256": "02ec79cf7eac7ea10c9c400755df62ed70224f73c11a26f49d31362ffb6350ca",
+      "bytes": 136
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterLeatherarmorLegendarystaffDiagonals.imageset/P1ForesterLeatherarmorLegendarystaffDiagonals.png",
+      "sha256": "b7c1d4290574c1c617019efb0010a9f13848c0fbc0111325a69b0283c8efeee6",
+      "bytes": 347186
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterLeatherarmorLegendarystaffDirections.imageset/Contents.json",
+      "sha256": "989e194e4b08722ef5e53bcc12a4b8b8d5b3d933e885724a1d1208b0164cfea9",
+      "bytes": 137
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterLeatherarmorLegendarystaffDirections.imageset/P1ForesterLeatherarmorLegendarystaffDirections.png",
+      "sha256": "be9469ade14200747b17b045c754c869cf27dd8e8a9eac4ddb6c9679e8385c7e",
+      "bytes": 382276
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterLeatherarmorNoneDiagonals.imageset/Contents.json",
+      "sha256": "e7f1793d2df97cb3c27f7e36bdd044f2706c242cd53872b96b23deebe3f38208",
+      "bytes": 126
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterLeatherarmorNoneDiagonals.imageset/P1ForesterLeatherarmorNoneDiagonals.png",
+      "sha256": "30f9accce08034e4198dc34069a1dc2311df57dcf4354b41cdc9491b8e79f7e2",
+      "bytes": 237982
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterLeatherarmorNoneDirections.imageset/Contents.json",
+      "sha256": "a5b7695b68bc854948fe54c28fe4901950f0c55574e4cf32c6cebecd1ddb4cc2",
+      "bytes": 127
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterLeatherarmorNoneDirections.imageset/P1ForesterLeatherarmorNoneDirections.png",
+      "sha256": "f009b3d3930a45eccec6ddd700dcfae1a37cfc15307879c616d7e0f75c2077fd",
+      "bytes": 317637
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterLeatherarmorTrainingswordDiagonals.imageset/Contents.json",
+      "sha256": "017386c9b332ea8975c5ab0e74d28dc21bd0294db55647e38f8743671fde77ad",
+      "bytes": 135
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterLeatherarmorTrainingswordDiagonals.imageset/P1ForesterLeatherarmorTrainingswordDiagonals.png",
+      "sha256": "4a54239d691a29da9c607edd45861876d0266eb5b758d64c366746e92c76c321",
+      "bytes": 242815
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterLeatherarmorTrainingswordDirections.imageset/Contents.json",
+      "sha256": "0449bbf8a63817795b10bc53f4b45387cfff31c823e3d257b9bf88c3658d4b40",
+      "bytes": 136
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterLeatherarmorTrainingswordDirections.imageset/P1ForesterLeatherarmorTrainingswordDirections.png",
+      "sha256": "f5eb2d1e150e41cff7d33aaa24eee990abccf1d7503f565254d9dd41439c76e0",
+      "bytes": 326421
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterLegendaryStaffDiagonals.imageset/Contents.json",
+      "sha256": "40544eccfc324f1c3382b9170a684e9f9bde6532becf575177ba0b7cdaf5b5cb",
+      "bytes": 124
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterLegendaryStaffDiagonals.imageset/P1ForesterLegendaryStaffDiagonals.png",
+      "sha256": "ee773731c082dfb6705a664df54e951ea95eb2efb678377e114286b7c2276bf9",
+      "bytes": 322135
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterLegendaryStaffDirections.imageset/Contents.json",
+      "sha256": "d37347095e47eb287ed7c6e66516a7872d9f9dbc4e194478ebff61c733a7eb64",
+      "bytes": 125
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterLegendaryStaffDirections.imageset/P1ForesterLegendaryStaffDirections.png",
+      "sha256": "412d325a11af529abceb36da932626bfeedf6dca82adcd81fc9f2bf0291691d6",
+      "bytes": 373721
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterRunearmorGreatswordDiagonals.imageset/Contents.json",
+      "sha256": "24f5db852384ec19fca25499883b88c42052be80f12496cd4f576f8b8e46366e",
+      "bytes": 129
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterRunearmorGreatswordDiagonals.imageset/P1ForesterRunearmorGreatswordDiagonals.png",
+      "sha256": "41c502f01503e3f83bdcc7d18937b23d29853d54c83e188660b2fe8ed257f6c9",
+      "bytes": 337193
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterRunearmorGreatswordDirections.imageset/Contents.json",
+      "sha256": "6b050bb6d4e35f91c5834e4f15a877bb304aaecafb17ae827f7b15ed0dcda831",
+      "bytes": 130
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterRunearmorGreatswordDirections.imageset/P1ForesterRunearmorGreatswordDirections.png",
+      "sha256": "39cf9519d0a350b861972f489a9ca9c575849337ce58a46b6bc8b099a96e07a6",
+      "bytes": 370786
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterRunearmorHuntingbowDiagonals.imageset/Contents.json",
+      "sha256": "c0048abcaa936e785555d7ab0110f2ad68bb3a5dd075f8be97b592fc33e16294",
+      "bytes": 129
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterRunearmorHuntingbowDiagonals.imageset/P1ForesterRunearmorHuntingbowDiagonals.png",
+      "sha256": "edc12c7dde745ba761158a964c778515ccf137a6871b4f23692a7f0600c99853",
+      "bytes": 260604
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterRunearmorHuntingbowDirections.imageset/Contents.json",
+      "sha256": "5a774fce351c78f2f4de0096785b6e8783319380f3a2176f74bfcf9ec2f9ed36",
+      "bytes": 130
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterRunearmorHuntingbowDirections.imageset/P1ForesterRunearmorHuntingbowDirections.png",
+      "sha256": "5ca01c3dd610ad778e5fb197a37b4d21ce7818237b6cefded322cf7c23576043",
+      "bytes": 322510
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterRunearmorLegendarystaffDiagonals.imageset/Contents.json",
+      "sha256": "5ddce6737421ac61080ed2fd42636898df77cd1257b6a88e63435dd508b3291b",
+      "bytes": 133
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterRunearmorLegendarystaffDiagonals.imageset/P1ForesterRunearmorLegendarystaffDiagonals.png",
+      "sha256": "4635126a17dd7096935d87baa359735802070a527266c63fc68aa151ec45d12c",
+      "bytes": 360530
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterRunearmorLegendarystaffDirections.imageset/Contents.json",
+      "sha256": "31303a7e4a6289f05c28f1eaad9e5ccc7bb1bf9ef70ce77350920c89e3faed32",
+      "bytes": 134
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterRunearmorLegendarystaffDirections.imageset/P1ForesterRunearmorLegendarystaffDirections.png",
+      "sha256": "e15c39f46e39fe18ef39966f840306252b965661c89f60fe98332a22076aa6de",
+      "bytes": 385150
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterRunearmorNoneDiagonals.imageset/Contents.json",
+      "sha256": "72d0e647aefda85d547dcbb4d38ce0b4c605dd5f766206b6448149ba6c7c9fe4",
+      "bytes": 123
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterRunearmorNoneDiagonals.imageset/P1ForesterRunearmorNoneDiagonals.png",
+      "sha256": "9ab3268047b8385ed4877e584101caf1d59bf75de9fb5277698563cb35a02b18",
+      "bytes": 253463
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterRunearmorNoneDirections.imageset/Contents.json",
+      "sha256": "1e5092e0d0e2dfbbf054721f52e580ed13f5c0c5479bc9512d44db50a69cfbf3",
+      "bytes": 124
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterRunearmorNoneDirections.imageset/P1ForesterRunearmorNoneDirections.png",
+      "sha256": "6e6e499baa768deec3d02e3f2e83d4fc50b1295f03d351de0c12326a7e904c8d",
+      "bytes": 319889
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterRunearmorTrainingswordDiagonals.imageset/Contents.json",
+      "sha256": "686b126250c375dd1daee214830e0ce38ca35f29aa3e4ab57bc111756ee55362",
+      "bytes": 132
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterRunearmorTrainingswordDiagonals.imageset/P1ForesterRunearmorTrainingswordDiagonals.png",
+      "sha256": "c979d906477e21528b135ab88d5a21a73c81f2ba607d60b47c943cde92cd36a2",
+      "bytes": 256561
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterRunearmorTrainingswordDirections.imageset/Contents.json",
+      "sha256": "b72789d822d8cd918246e8289c2e67f6c162eb59c6603de7f8f182b96b6dbe9b",
+      "bytes": 133
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterRunearmorTrainingswordDirections.imageset/P1ForesterRunearmorTrainingswordDirections.png",
+      "sha256": "7a64eb67b07b6537df81d6856813ead283f94c4c0cad2ff82d80cf235edb903c",
+      "bytes": 328719
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterUnarmedDiagonals.imageset/Contents.json",
+      "sha256": "38bd10a630b3f1dbb919e5fe0625642090c15d8e73f62c734ecb1689b9cec7d4",
+      "bytes": 170
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterUnarmedDiagonals.imageset/P1ForesterUnarmedDiagonals.png",
+      "sha256": "bc06355a8d2733f4d4d9911dfeb9dc49826cf7e2569ddf07dca2b99f63229e3a",
+      "bytes": 207915
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterUnarmedDirections.imageset/Contents.json",
+      "sha256": "a096664e81ba33975fd60a0bc0c5341c2cf0d48827fe87bded20278b3ff5020c",
+      "bytes": 171
+    },
+    {
+      "file": "Assets.xcassets/P1ForesterUnarmedDirections.imageset/P1ForesterUnarmedDirections.png",
+      "sha256": "a97d7c2ef7f8bd1fe55f51b310152c676b583b59dc49203c632c41f9403c2c53",
+      "bytes": 309742
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerBowDiagonals.imageset/Contents.json",
+      "sha256": "2944f5eb9854c42c8c79d1d9a35b07a71ef14ae1814b3f91143dd9e11c94c03d",
+      "bytes": 166
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerBowDiagonals.imageset/P1WayfarerBowDiagonals.png",
+      "sha256": "fa085d94beb84ac58c6548ae988e9788697d71c748c32a8921a46b6262069bf9",
+      "bytes": 307030
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerBowDirections.imageset/Contents.json",
+      "sha256": "7ac1081560c6db67d70820aa6fe0f14125087c7c1fb0ae0ef0b348eb7e097df6",
+      "bytes": 167
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerBowDirections.imageset/P1WayfarerBowDirections.png",
+      "sha256": "628359248d35dad3de8e6921bfa0c652eca768e5f73a9cc551865873faadcde0",
+      "bytes": 365958
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerDiagonals.imageset/Contents.json",
+      "sha256": "744df27e82bdf95558524a9389083d4b5f6b3d3584289e07902b93fed77232b9",
+      "bytes": 163
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerDiagonals.imageset/P1WayfarerDiagonals.png",
+      "sha256": "aba51ecb542cdf5317be32fcb3894ace607ea6198e435665e983cc4a06c7803a",
+      "bytes": 309700
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerDirections.imageset/Contents.json",
+      "sha256": "611ccd6901a47b7880c2f54157c3024a722bc2b3f917fbd6f87e837a5e633cdc",
+      "bytes": 164
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerDirections.imageset/P1WayfarerDirections.png",
+      "sha256": "d54ff95577a8d8399b323f4e53206f1dff93a660ac98cd7259978bfa7c499711",
+      "bytes": 371216
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerGreatSwordDiagonals.imageset/Contents.json",
+      "sha256": "da1c092fc559d0c249e870c46b99ac62d45633b56527a2634ce496f4b054aae4",
+      "bytes": 120
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerGreatSwordDiagonals.imageset/P1WayfarerGreatSwordDiagonals.png",
+      "sha256": "34d64acbfec9292cce8d58bbf8ed548a0e40b674dba7cc1020c7b42c72b5f4b3",
+      "bytes": 379633
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerGreatSwordDirections.imageset/Contents.json",
+      "sha256": "57c5eea30c62a1e79e9835cdc521668b03cc478c4c3e82e6344c2e318ed1902d",
+      "bytes": 121
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerGreatSwordDirections.imageset/P1WayfarerGreatSwordDirections.png",
+      "sha256": "ab990be48dbe657930b41c28d63ae385bd30b54e09d04ed6153b3204b5aebdbe",
+      "bytes": 410090
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerLeatherarmorGreatswordDiagonals.imageset/Contents.json",
+      "sha256": "31e66734ada67e3cdb40d0585505e330f3b6cd34e815a519ea52712d6d5088a3",
+      "bytes": 132
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerLeatherarmorGreatswordDiagonals.imageset/P1WayfarerLeatherarmorGreatswordDiagonals.png",
+      "sha256": "676ee11c3ab5fe74cded3aa3d6eaf42caa40f5a9225c8169c3b3d5fe157b326f",
+      "bytes": 329612
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerLeatherarmorGreatswordDirections.imageset/Contents.json",
+      "sha256": "1180db53db016dbe82941beb57499d583b874890308f6488dc3b18c189ee31a0",
+      "bytes": 133
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerLeatherarmorGreatswordDirections.imageset/P1WayfarerLeatherarmorGreatswordDirections.png",
+      "sha256": "106de7f9fa570756e9ef83ec147f57bd5cfb31568a45026a5f7a13d9d6f5a342",
+      "bytes": 369615
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerLeatherarmorHuntingbowDiagonals.imageset/Contents.json",
+      "sha256": "1ef60391135575da01ffcbf8256915efd4ef0826483b5bdfed10b56e02a58f6e",
+      "bytes": 132
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerLeatherarmorHuntingbowDiagonals.imageset/P1WayfarerLeatherarmorHuntingbowDiagonals.png",
+      "sha256": "1431c5d126b099b2a4a7087d08c2c25471a7ecfc33f60a690cd2751da764c38f",
+      "bytes": 247217
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerLeatherarmorHuntingbowDirections.imageset/Contents.json",
+      "sha256": "3e622c6ef52897fa9dbaa93f41344a339391338c0c0896cfa18a155ea02896af",
+      "bytes": 133
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerLeatherarmorHuntingbowDirections.imageset/P1WayfarerLeatherarmorHuntingbowDirections.png",
+      "sha256": "bcb827f084cea6f364081be868b685eecfaa434e4df87d0382c1d4a4eb867e67",
+      "bytes": 320321
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerLeatherarmorLegendarystaffDiagonals.imageset/Contents.json",
+      "sha256": "bd847836f90f78eb0cc188326d0957eed05947310df9aa9847cd35a9b0ed6b51",
+      "bytes": 136
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerLeatherarmorLegendarystaffDiagonals.imageset/P1WayfarerLeatherarmorLegendarystaffDiagonals.png",
+      "sha256": "25caa36d0136a0d871ba46a048ed8a61c75d01112f622e4b73df182b47e660bd",
+      "bytes": 349120
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerLeatherarmorLegendarystaffDirections.imageset/Contents.json",
+      "sha256": "5ead8b90863952b181f2243287f0e8b7c3ee32efe5530cdeffd5828ea67aa125",
+      "bytes": 137
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerLeatherarmorLegendarystaffDirections.imageset/P1WayfarerLeatherarmorLegendarystaffDirections.png",
+      "sha256": "76d8cb7c8a329b41f4ca8db6161301db543b966e01b085207bc7e7fc84d606e5",
+      "bytes": 381694
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerLeatherarmorNoneDiagonals.imageset/Contents.json",
+      "sha256": "b6ef0c2abfe82ba17cacbe1e4933cb4bd774e6377a0c97d47db8ff5357abd23b",
+      "bytes": 126
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerLeatherarmorNoneDiagonals.imageset/P1WayfarerLeatherarmorNoneDiagonals.png",
+      "sha256": "2316dd62f2d4ace53e0927cec679b08c59e27b358fb6aeb0e498b10db528e0bb",
+      "bytes": 240048
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerLeatherarmorNoneDirections.imageset/Contents.json",
+      "sha256": "202bc785f04ddd6346510af6585e04efe1435b33422baf826bb855277e0a45e0",
+      "bytes": 127
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerLeatherarmorNoneDirections.imageset/P1WayfarerLeatherarmorNoneDirections.png",
+      "sha256": "8ab5cf138868ee8c57ef1ac60c11f1664ed76d0bc77351e15f0d5b488e0ecd8a",
+      "bytes": 317266
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerLeatherarmorTrainingswordDiagonals.imageset/Contents.json",
+      "sha256": "5e9d3024d959c84878eda588331d798fb7225ceb1c39136119d48f1f48827c3f",
+      "bytes": 135
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerLeatherarmorTrainingswordDiagonals.imageset/P1WayfarerLeatherarmorTrainingswordDiagonals.png",
+      "sha256": "fe8641b1e4d976c91176547af8fb2132079d92ad6032e4e8e937016ff5f05f16",
+      "bytes": 245280
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerLeatherarmorTrainingswordDirections.imageset/Contents.json",
+      "sha256": "e1bb4159a79a2d77307947c53430df1cf765c0b879aff9361837781b62a88aac",
+      "bytes": 136
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerLeatherarmorTrainingswordDirections.imageset/P1WayfarerLeatherarmorTrainingswordDirections.png",
+      "sha256": "85d8992abd80da3762031271236ddfa6f380590cdaf6702acb64a5c3b07fddaf",
+      "bytes": 325649
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerLegendaryStaffDiagonals.imageset/Contents.json",
+      "sha256": "738d23d3c6db13a99b0c2d34211d92ea246392dc54c27b6457b10e387f56b2e2",
+      "bytes": 124
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerLegendaryStaffDiagonals.imageset/P1WayfarerLegendaryStaffDiagonals.png",
+      "sha256": "00be929cbf739a61173b17c949177ea37f9b9b4b58a30f6b92af5c4219e65b4e",
+      "bytes": 407075
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerLegendaryStaffDirections.imageset/Contents.json",
+      "sha256": "8d8f9590eca63a03e325c98038f1c315b86a09da6ce30639e14a58909e9608f4",
+      "bytes": 125
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerLegendaryStaffDirections.imageset/P1WayfarerLegendaryStaffDirections.png",
+      "sha256": "c9ccecd31ffa45a87653f023b9dac57c70c9c0cfb6bfa3746c50cff34cc4b9bd",
+      "bytes": 421974
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerRunearmorGreatswordDiagonals.imageset/Contents.json",
+      "sha256": "34ade6c5eaa4ef18aca3c0888818ee733e864e7ae0306279c79c23708100e1e0",
+      "bytes": 129
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerRunearmorGreatswordDiagonals.imageset/P1WayfarerRunearmorGreatswordDiagonals.png",
+      "sha256": "cfa857147363add51d48675c65ddd964342eb92991001bcc39c2efdf48d3e1d9",
+      "bytes": 339207
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerRunearmorGreatswordDirections.imageset/Contents.json",
+      "sha256": "cca19f51dc3944e880cefac7162e8162f9755c0ba13e4f877c3eac532847ae85",
+      "bytes": 130
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerRunearmorGreatswordDirections.imageset/P1WayfarerRunearmorGreatswordDirections.png",
+      "sha256": "848ee2684e5212622c9c0472787a79d90ec389010a6ce8e6b45b81f724ee3007",
+      "bytes": 370491
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerRunearmorHuntingbowDiagonals.imageset/Contents.json",
+      "sha256": "9d90a7463e9d1a503bae0c273672fd8218e4a3e53bf7c29f9e128bc7311a4939",
+      "bytes": 129
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerRunearmorHuntingbowDiagonals.imageset/P1WayfarerRunearmorHuntingbowDiagonals.png",
+      "sha256": "06350c004a938eb81d07f502728dcc8a08e56fc68a8b2c8c4b193b54af4ea155",
+      "bytes": 262062
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerRunearmorHuntingbowDirections.imageset/Contents.json",
+      "sha256": "54a2ec71924ec6a37d526083984e12079377a9d00bb583453429f00643cff545",
+      "bytes": 130
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerRunearmorHuntingbowDirections.imageset/P1WayfarerRunearmorHuntingbowDirections.png",
+      "sha256": "3698c4ea40155c95df8a4829ecf23f61ee4164e13a813c7c066ca8388fb1197b",
+      "bytes": 322300
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerRunearmorLegendarystaffDiagonals.imageset/Contents.json",
+      "sha256": "6f1f6b37ab5f872c27560c9436176292c63bdbdd4fba6c8185f14f4840b1a242",
+      "bytes": 133
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerRunearmorLegendarystaffDiagonals.imageset/P1WayfarerRunearmorLegendarystaffDiagonals.png",
+      "sha256": "5b150ae9d26498938cda71fcb543207f07444a047baa379404ae45bae31bd386",
+      "bytes": 362440
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerRunearmorLegendarystaffDirections.imageset/Contents.json",
+      "sha256": "1b9e7824fc7ac2fdc4973437dc9ad8919e7416e25665fabda5b6b39395c58085",
+      "bytes": 134
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerRunearmorLegendarystaffDirections.imageset/P1WayfarerRunearmorLegendarystaffDirections.png",
+      "sha256": "5c15b995d7014170664935a30e64f993179edb41f8a5a577539c9cb33e34e04a",
+      "bytes": 384934
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerRunearmorNoneDiagonals.imageset/Contents.json",
+      "sha256": "645f5c1bdb4db853fa42ddb1ef6e83fbcc76a508f99d1c452f5017029d973b43",
+      "bytes": 123
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerRunearmorNoneDiagonals.imageset/P1WayfarerRunearmorNoneDiagonals.png",
+      "sha256": "d0f51a435ebd86fd05197624921c0e8786388836754888ac9b96e24aa6c51e57",
+      "bytes": 255497
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerRunearmorNoneDirections.imageset/Contents.json",
+      "sha256": "cf0d47a6e85a1322c4e64b024190a3113190f9d24d55a8cf394666168f4b6b87",
+      "bytes": 124
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerRunearmorNoneDirections.imageset/P1WayfarerRunearmorNoneDirections.png",
+      "sha256": "97cade7131cf280831c0dd11676f1f3421067897c2f50ff99c7bd35795a65064",
+      "bytes": 319474
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerRunearmorTrainingswordDiagonals.imageset/Contents.json",
+      "sha256": "9d5b4fcf1179c1899fa3c5bb32a636ec4433927b2aa3ea416f11a6343971f3e0",
+      "bytes": 132
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerRunearmorTrainingswordDiagonals.imageset/P1WayfarerRunearmorTrainingswordDiagonals.png",
+      "sha256": "d6808530550c21c4ee1316527af99ae532891b47f775f3cad11d22c5b75e25d1",
+      "bytes": 259150
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerRunearmorTrainingswordDirections.imageset/Contents.json",
+      "sha256": "c622452956df6fa0879f04ba69d9c3561f1b6387380608ae8603e20cad8d1f31",
+      "bytes": 133
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerRunearmorTrainingswordDirections.imageset/P1WayfarerRunearmorTrainingswordDirections.png",
+      "sha256": "87c047ec9e0c595e55eeb3fb8f304e7740f5f17f7e7f7876e1c1fc9c52f19024",
+      "bytes": 328483
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerUnarmedDiagonals.imageset/Contents.json",
+      "sha256": "aca336deb5a5fdc66d55c9219eea70a2bfe5bd88191ae7586ca056c135a3af22",
+      "bytes": 170
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerUnarmedDiagonals.imageset/P1WayfarerUnarmedDiagonals.png",
+      "sha256": "72194c4c31f0c188e4afc6edaba64d7f905197014547245ecd04920689eab1d3",
+      "bytes": 305124
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerUnarmedDirections.imageset/Contents.json",
+      "sha256": "5442eee9d31f5fbe4870e7ae825a5283aa4fcdc81e950cfedf5d769b222f9ba0",
+      "bytes": 171
+    },
+    {
+      "file": "Assets.xcassets/P1WayfarerUnarmedDirections.imageset/P1WayfarerUnarmedDirections.png",
+      "sha256": "d4bdbdbde2eed60f8971bc892162933fcd3d75b93ac9be9a65296b171af12bcf",
+      "bytes": 364822
+    },
+    {
+      "file": "Assets.xcassets/Pines.imageset/Contents.json",
+      "sha256": "f6bacf4f5abc2a179663e38d51248157c3abbd423fc39f96be5bcbf627e1138b",
+      "bytes": 149
+    },
+    {
+      "file": "Assets.xcassets/Pines.imageset/Pines.png",
+      "sha256": "22f4729e32e1a1f0323d7a9e01583b011118b6ed1faae6b1c8c0dc77e6f17583",
+      "bytes": 361948
+    },
+    {
+      "file": "Assets.xcassets/RockHigh.imageset/Contents.json",
+      "sha256": "5c658719e112622b5781a8895ff26075edbfa8259fbbfcd83eb7780bf537f348",
+      "bytes": 152
+    },
+    {
+      "file": "Assets.xcassets/RockHigh.imageset/RockHigh.png",
+      "sha256": "9321b37abaac60be339106ad02e601a45c27dcc6e9d50f100b6e72be5ded6632",
+      "bytes": 356166
+    },
+    {
+      "file": "Assets.xcassets/RockLow.imageset/Contents.json",
+      "sha256": "fd8d03c07108a2639b27f2d2a20ff0333ce54990783a4dcf8292b49adf1a559b",
+      "bytes": 151
+    },
+    {
+      "file": "Assets.xcassets/RockLow.imageset/RockLow.png",
+      "sha256": "d2806a67c24079effa2e3535dc09e8397078f314fba7cacc23612887c3ae8010",
+      "bytes": 291999
+    },
+    {
+      "file": "Assets.xcassets/RockSmall.imageset/Contents.json",
+      "sha256": "afff6e33ca6af5cbbd5867ac0805bc77611f7784461a9a92fc66cc4475f66fc2",
+      "bytes": 153
+    },
+    {
+      "file": "Assets.xcassets/RockSmall.imageset/RockSmall.png",
+      "sha256": "efcb2b7038f249bc1c6dd71358445eb6600f9041f998b0b04d49db88ef1026c7",
+      "bytes": 208466
+    },
+    {
+      "file": "Assets.xcassets/Shrub.imageset/Contents.json",
+      "sha256": "694829705403fc1c1df941cd840701c49634da2d6c570cbdd849b201c292d267",
+      "bytes": 149
+    },
+    {
+      "file": "Assets.xcassets/Shrub.imageset/Shrub.png",
+      "sha256": "077e0a4c75ac713ec9869566b9461d259d0ea971145accbe1e59567136cf4189",
+      "bytes": 317723
+    },
+    {
+      "file": "Assets.xcassets/WatchTower.imageset/Contents.json",
+      "sha256": "9e87d4f99c263ff7b6cd41b43908a5c06ac71fbbcff23438512f3dc0edf35183",
+      "bytes": 154
+    },
+    {
+      "file": "Assets.xcassets/WatchTower.imageset/WatchTower.png",
+      "sha256": "51a5daa83808069adc0baa1e3dfd40f3ab598e9fbde7f4f6ad67dd7263bda771",
+      "bytes": 276234
+    },
+    {
+      "file": "SceneMap.json",
+      "sha256": "b5d8e7c74e6038a4d6b3e266cf1c6f7184eee56cfb2c2f462b7e048ab6cd0ea5",
+      "bytes": 18140
+    },
+    {
+      "file": "hero-gait.json",
+      "sha256": "44ad26e97cfd0836074eefc70ee081f2bbb5b2003961ed1e779acbfebdaaa527",
+      "bytes": 59096
+    }
+  ]
+}

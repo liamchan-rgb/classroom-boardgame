@@ -11,13 +11,9 @@ struct ClassroomProbeApp: App {
                 .ignoresSafeArea()
                 .onChange(of: scenePhase) { _, phase in
                     if phase != .active {
-                        TeacherSession.shared.display.ruleExample = nil
-                        TeacherSession.shared.pause(.background, enabled: true)
+                        TeacherSession.shared.pause(.background,enabled:true)
                         TeacherSession.shared.concealNotes()
-                        if TeacherSession.shared.playOpen { TeacherSession.shared.pve.pause(.background, enabled: true) }
-                    } else if TeacherSession.shared.playOpen {
-                        TeacherSession.shared.pve.pause(.background, enabled: false)
-                    }
+                    } else {TeacherSession.shared.pause(.background,enabled:false)}
                 }
         }
     }
@@ -36,6 +32,7 @@ final class TeacherHostController: UIViewController {
     override var canBecomeFirstResponder: Bool { true }
     override func viewDidLoad() {
         super.viewDidLoad()
+        TeacherSession.shared.game.privatePresenter=self
         let host = UIHostingController(rootView: TeacherConsole(session: .shared))
         addChild(host)
         host.view.translatesAutoresizingMaskIntoConstraints = false
@@ -56,46 +53,31 @@ final class TeacherHostController: UIViewController {
     }
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated); becomeFirstResponder()
-        #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("--visual-check"), let window = view.window {
-            Task { @MainActor in
-                do { try await NativeVisualValidation.run(in:window) }
-                catch { print("VISUAL_VALIDATION_FAILED: \(error)") }
-            }
-        }
-        #endif
+
     }
     deinit { NotificationCenter.default.removeObserver(self) }
     @objc private func clearPressedKeys() { heldKeys.removeAll() }
     override func resignFirstResponder() -> Bool { heldKeys.removeAll(); return super.resignFirstResponder() }
     override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
         let session = TeacherSession.shared
-        guard !session.isEditingNotes, !session.rulesOpen, !(session.playOpen && session.pve.modalOpen) else { heldKeys.removeAll(); super.pressesBegan(presses, with: event); return }
-        var handled = false
+        guard !session.isEditingNotes,!session.game.modalOpen else{heldKeys.removeAll();super.pressesBegan(presses,with:event);return}
+        var handled=false
         for press in presses {
-            guard let key = press.key,
-                  key.modifierFlags.intersection([.command, .control, .alternate]).isEmpty else { continue }
-            let code: String
-            if session.playOpen && session.pve.bookOpen && key.keyCode == .keyboardLeftArrow { code = "book-left" }
-            else if session.playOpen && session.pve.bookOpen && key.keyCode == .keyboardRightArrow { code = "book-right" }
-            else if (UIKeyboardHIDUsage.keyboard1.rawValue...UIKeyboardHIDUsage.keyboard7.rawValue).contains(key.keyCode.rawValue) {
-                code = String(key.keyCode.rawValue - UIKeyboardHIDUsage.keyboard1.rawValue + 1)
-            } else { code = key.charactersIgnoringModifiers.lowercased() }
-            let playKeys = session.playOpen ? ["g", "a", "s", "e", " ", "book-left", "book-right"] : ["g", " "]
-            guard playKeys.contains(code) || (Int(code).map { (1...7).contains($0) } ?? false) else { continue }
-            handled = true
-            guard heldKeys.insert(code).inserted else { continue }
-            if session.playOpen {
-                if code == "book-left" { session.turnPage(-1) }
-                else if code == "book-right" { session.turnPage(1) }
-                else { _ = session.pve.handleKey(code, shift: key.modifierFlags.contains(.shift)) }
-            }
-            else if code == "g" { session.award() }
-            else if code == " " { session.togglePause() }
-            else if let number = Int(code) { session.select(number) }
+            guard let key=press.key,key.modifierFlags.intersection([.command,.control,.alternate]).isEmpty else{continue}
+            let code=key.charactersIgnoringModifiers.lowercased()
+            guard ["1","2","g","a","e"," "].contains(code) || key.keyCode == .keyboardLeftArrow || key.keyCode == .keyboardRightArrow else{continue}
+            handled=true;guard heldKeys.insert(code).inserted else{continue}
+            if key.keyCode == .keyboardLeftArrow {session.turnPage(-1)}
+            else if key.keyCode == .keyboardRightArrow {session.turnPage(1)}
+            else if code=="1" || code=="2" {session.game.select("p"+code)}
+            else if code=="g" {session.game.award()}
+            else if code=="a" {session.game.battle(.attack)}
+            else if code=="e" {session.game.battle(.endTurn)}
+            else if code==" " {session.game.operation(.pauseOrResume)}
         }
-        if !handled { super.pressesBegan(presses, with: event) }
+        if !handled {super.pressesBegan(presses,with:event)}
     }
+
     override func pressesEnded(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
         for press in presses {
             if let key = press.key {
@@ -121,7 +103,7 @@ final class PublicSceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options: UIScene.ConnectionOptions) {
         guard let windowScene = scene as? UIWindowScene else { return }
         let created = UIWindow(windowScene: windowScene)
-        created.rootViewController = UIHostingController(rootView: PublicSurface(model: TeacherSession.shared.display))
+        created.rootViewController = UIHostingController(rootView: PublicSurface(model: TeacherSession.shared.display,game:TeacherSession.shared.game))
         created.isHidden = false
         window = created
         TeacherSession.shared.setConnection(id: session.persistentIdentifier, connected: true)

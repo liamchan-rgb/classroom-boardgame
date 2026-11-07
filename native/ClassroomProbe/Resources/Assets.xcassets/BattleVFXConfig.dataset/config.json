@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "deathFrames": 48,
+  "deathColumns": 8,
+  "deathFrameSeconds": 0.04,
+  "bodyCell": [
+    384,
+    256
+  ],
+  "windCell": [
+    640,
+    320
+  ],
+  "windOffset": [
+    0,
+    -32
+  ],
+  "deathInitialSampleSeconds": 0.032,
+  "v3Source": "Art/Scenes/MeadowBattle/effects-v3/effect.json",
+  "skillPower": {
+    "strike": 0.9,
+    "heal": 0.28,
+    "guard": 0.28
+  },
+  "previewDarken": 0.34,
+  "castDarken": 0.56
+}

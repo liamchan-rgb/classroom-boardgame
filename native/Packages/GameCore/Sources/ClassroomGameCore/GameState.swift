@@ -73,6 +73,8 @@ public struct MapNode: Codable, Equatable, Identifiable {
     public var x: Double
     public var y: Double
     public var reward: NodeReward?
+    public var siteConfiguration:CampaignSiteConfiguration? = nil
+    public var siteResolved: Bool? = nil
     public var rewardCompleted: Bool
     public init(id: Int, name: String, kind: NodeKind = .empty, x: Double = 0, y: Double = 0, reward: NodeReward? = nil) {
         self.id = id; self.name = name; self.kind = kind; self.x = x; self.y = y
@@ -114,6 +116,12 @@ public struct GameMap: Codable, Equatable {
         let ids = Set(nodes.map(\.id))
         guard !nodes.isEmpty, ids.count == nodes.count, revealed.isSubset(of: ids),
               nodes.allSatisfy({ $0.x.isFinite && $0.y.isFinite }) else { throw GameError("地图节点或揭示状态无效。") }
+        for node in nodes {
+            if let c=node.siteConfiguration {try c.validate();guard node.kind == .empty || (node.kind == .start && c.kind == .shop) else{throw GameError("地点配置类型无效。")}}
+        }
+        for node in nodes where node.siteResolved != nil {
+            guard node.kind == .empty,CampaignSiteRules.kind(node:node,seed:seed) != .shop else{throw GameError("事件状态与地点不匹配。") }
+        }
         var edgeKeys: Set<String> = []
         for road in roads {
             guard ids.contains(road.a), ids.contains(road.b), road.a != road.b,

@@ -30,7 +30,7 @@ def check(native):
         if not (native / "ClassroomProbe" / name).exists():
             raise ValueError(f"Missing source/resource: {name}")
     declared_swift = {name for name in paths if name.endswith(".swift")}
-    actual_swift = {p.name for p in (native / "ClassroomProbe").glob("*.swift")}
+    actual_swift = {str(p.relative_to(native / "ClassroomProbe")) for p in (native / "ClassroomProbe").rglob("*.swift")}
     if declared_swift != actual_swift:
         raise ValueError(f"App Swift source list differs: {declared_swift ^ actual_swift}")
     for package in re.findall(r'"relativePath"\s*=\s*"([^"]+)"', content):

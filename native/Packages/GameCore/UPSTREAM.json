@@ -1,0 +1,23 @@
+{
+  "repository": "liamchan-rgb/classroom-boardgame",
+  "commit": "1e9100c4c18364ea64b3ec974fe957ba4ef42f6f",
+  "originalPackagePath": "native/Packages/GameCore",
+  "sourceAndCatalogUnmodified": true,
+  "sourceSHA256": {
+    "Sources/ClassroomGameCore/Catalog.swift": "e814e9a50e493988e5250a85bb7c7b0a936ae05d890c751350bb154fb9e0e354",
+    "Sources/ClassroomGameCore/Rules.swift": "f87e42dcf0947f04be3a3fe649f8753c7b7073819c4fa6d53fad23d19bcb06d8",
+    "Sources/ClassroomGameCore/GameState.swift": "0b0afe748f20a7ea0018b910a23bbfee8bdf79a7b7237bfa073dd7f2547073a6",
+    "Sources/ClassroomGameCore/MapPresentation.swift": "c85bab177e9da7c5f2b59562add8dca40b48cb12f90f71d58e0d742a33cf1894",
+    "Sources/ClassroomGameCore/Presentation.swift": "dc61fc1cd3ad7d5baea0c50cf064bb37dbb686b4c58251a90f3f2b52426e7fc1",
+    "Sources/ClassroomGameCore/PVEPlaySession.swift": "773a3c551953f9391856cb6ed7b8b4028183d2fafdb9f5ba74e19dc1f7043f4a",
+    "Sources/ClassroomGameCore/PlayProjection.swift": "5eb34e456f666de21118dd87ff55105a03e5b69f7a7335e8d1eea0a6e3f78454",
+    "Sources/ClassroomGameCore/MonsterAI.swift": "cdfa3df6182046f7f1c1f266c6a9bcd016fcccd67a188d792f1f96e184a53ffc",
+    "Sources/ClassroomGameCore/ActionPlanning.swift": "104976daefc47062997d4d190eab304eea4774c65605732d288c1ddf226957d7",
+    "Sources/ClassroomGameCore/GameEngine.swift": "fd7af9210e625efcf508fe5cf3c1465b4af46479d523f6ab73887c8029f22c49",
+    "Sources/ClassroomGameCore/RuleExamples.swift": "b4cb5f728efa72ceafeb8aff0206ce38c47bc72e4ebc2ddf217fdc3363d5d1e1",
+    "Sources/ClassroomGameCore/PublicProjection.swift": "96431486e4da5739333973eb395b52a6865166aaa408d8cafdcc0b883b3709e8",
+    "Sources/ClassroomGameCore/Resources/initial-content.json": "aaab980fd5f3154ac813a02dc907a835ee0e0181c4149f2b7803d9594795f34a"
+  },
+  "manifestAdaptation": "iOS17 minimum to iOS15 for pure Foundation engine; added isolated MeadowBattleSupport library/exporter/tests. No upstream source changed.",
+  "demoCatalogExtension": "local meadowTrainingWarden test template only;19 source skills/18 source items remain exact"
+}

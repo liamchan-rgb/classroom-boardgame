@@ -1,0 +1,365 @@
+{
+  "version": 1,
+  "attackSeconds": 0.96,
+  "deathSeconds": 0.8,
+  "records": [
+    {
+      "id": "slime",
+      "name": "捣蛋史莱姆",
+      "asset": "MeadowMonsterSlime",
+      "canvas": [
+        384,
+        256
+      ],
+      "anchor": [
+        178.5,
+        240
+      ],
+      "deathCanvas": [
+        512,
+        320
+      ],
+      "deathAnchor": [
+        178.5,
+        272
+      ],
+      "scale": 0.88,
+      "contacts": [
+        [
+          106.0,
+          240
+        ],
+        [
+          231.5,
+          240
+        ]
+      ],
+      "clips": {
+        "idle": {
+          "offset": 0,
+          "count": 12
+        },
+        "attack": {
+          "offset": 12,
+          "count": 24
+        },
+        "cast": {
+          "offset": 36,
+          "count": 12
+        },
+        "hurt": {
+          "offset": 48,
+          "count": 8
+        }
+      },
+      "deathCount": 40,
+      "sourceCropSize": [
+        1142,
+        663
+      ],
+      "hitAnchor": [
+        110,
+        158
+      ]
+    },
+    {
+      "id": "wolf",
+      "name": "森林狼",
+      "asset": "MeadowMonsterWolf",
+      "canvas": [
+        384,
+        256
+      ],
+      "anchor": [
+        178.5,
+        240
+      ],
+      "deathCanvas": [
+        512,
+        320
+      ],
+      "deathAnchor": [
+        178.5,
+        272
+      ],
+      "scale": 0.88,
+      "contacts": [
+        [
+          107.5,
+          240
+        ],
+        [
+          273.0,
+          240
+        ]
+      ],
+      "clips": {
+        "idle": {
+          "offset": 0,
+          "count": 12
+        },
+        "attack": {
+          "offset": 12,
+          "count": 24
+        },
+        "cast": {
+          "offset": 36,
+          "count": 12
+        },
+        "hurt": {
+          "offset": 48,
+          "count": 8
+        }
+      },
+      "deathCount": 40,
+      "sourceCropSize": [
+        516,
+        292
+      ],
+      "hitAnchor": [
+        110,
+        158
+      ]
+    },
+    {
+      "id": "goblinArcher",
+      "name": "哥布林弓手",
+      "asset": "MeadowMonsterGoblinArcher",
+      "canvas": [
+        384,
+        256
+      ],
+      "anchor": [
+        178.5,
+        240
+      ],
+      "deathCanvas": [
+        512,
+        320
+      ],
+      "deathAnchor": [
+        178.5,
+        272
+      ],
+      "scale": 0.88,
+      "contacts": [
+        [
+          135.5,
+          240
+        ]
+      ],
+      "clips": {
+        "idle": {
+          "offset": 0,
+          "count": 12
+        },
+        "attack": {
+          "offset": 12,
+          "count": 24
+        },
+        "cast": {
+          "offset": 36,
+          "count": 12
+        },
+        "hurt": {
+          "offset": 48,
+          "count": 8
+        }
+      },
+      "deathCount": 40,
+      "sourceCropSize": [
+        357,
+        430
+      ],
+      "hitAnchor": [
+        198,
+        158
+      ]
+    },
+    {
+      "id": "stoneGuardian",
+      "name": "石像守卫",
+      "asset": "MeadowMonsterStoneGuardian",
+      "canvas": [
+        384,
+        256
+      ],
+      "anchor": [
+        178.5,
+        240
+      ],
+      "deathCanvas": [
+        512,
+        320
+      ],
+      "deathAnchor": [
+        178.5,
+        272
+      ],
+      "scale": 0.88,
+      "contacts": [
+        [
+          130.5,
+          240
+        ],
+        [
+          217.0,
+          240
+        ]
+      ],
+      "clips": {
+        "idle": {
+          "offset": 0,
+          "count": 12
+        },
+        "attack": {
+          "offset": 12,
+          "count": 24
+        },
+        "cast": {
+          "offset": 36,
+          "count": 12
+        },
+        "hurt": {
+          "offset": 48,
+          "count": 8
+        }
+      },
+      "deathCount": 40,
+      "sourceCropSize": [
+        426,
+        504
+      ],
+      "hitAnchor": [
+        183,
+        158
+      ]
+    },
+    {
+      "id": "caveTroll",
+      "name": "洞穴巨魔",
+      "asset": "MeadowMonsterCaveTroll",
+      "canvas": [
+        384,
+        256
+      ],
+      "anchor": [
+        178.5,
+        240
+      ],
+      "deathCanvas": [
+        512,
+        320
+      ],
+      "deathAnchor": [
+        178.5,
+        272
+      ],
+      "scale": 1.04,
+      "contacts": [
+        [
+          156.0,
+          240
+        ],
+        [
+          271.0,
+          240
+        ]
+      ],
+      "clips": {
+        "idle": {
+          "offset": 0,
+          "count": 12
+        },
+        "attack": {
+          "offset": 12,
+          "count": 24
+        },
+        "cast": {
+          "offset": 36,
+          "count": 12
+        },
+        "hurt": {
+          "offset": 48,
+          "count": 8
+        }
+      },
+      "deathCount": 40,
+      "sourceCropSize": [
+        509,
+        474
+      ],
+      "hitAnchor": [
+        190,
+        171
+      ]
+    },
+    {
+      "id": "ruinDragon",
+      "name": "遗迹魔龙",
+      "asset": "MeadowMonsterRuinDragon",
+      "canvas": [
+        384,
+        256
+      ],
+      "anchor": [
+        178.5,
+        240
+      ],
+      "deathCanvas": [
+        512,
+        320
+      ],
+      "deathAnchor": [
+        178.5,
+        272
+      ],
+      "scale": 1.04,
+      "contacts": [
+        [
+          42.0,
+          240
+        ],
+        [
+          53.0,
+          240
+        ],
+        [
+          103.0,
+          240
+        ]
+      ],
+      "clips": {
+        "idle": {
+          "offset": 0,
+          "count": 12
+        },
+        "attack": {
+          "offset": 12,
+          "count": 24
+        },
+        "cast": {
+          "offset": 36,
+          "count": 12
+        },
+        "hurt": {
+          "offset": 48,
+          "count": 8
+        }
+      },
+      "deathCount": 40,
+      "sourceCropSize": [
+        608,
+        457
+      ],
+      "hitAnchor": [
+        152,
+        171
+      ]
+    }
+  ],
+  "animationMethod": "registered continuous full-surface deformation; not separately redrawn limbs",
+  "sourceApproval": null,
+  "appRun": false,
+  "displayTargetFPS": 60
+}

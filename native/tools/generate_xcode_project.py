@@ -30,8 +30,8 @@ def encode(value, level=0):
 
 sources = []
 files = []
-for name in ("App.swift", "DeckRenderer.swift", "TeacherSession.swift", "Views.swift", "RulesLabView.swift", "PVEAppSession.swift", "PVEStyle.swift", "PVEMapView.swift", "PVEPublicView.swift", "PVEPlayView.swift", "PVESheets.swift", "PVEKeyboard.swift", "PVEArt.swift", "NativeVisualValidation.swift", "MeadowBridgeActor.swift", "MeadowPublicView.swift", "MeadowPresentationControls.swift"):
-    ref = add("file:" + name, "PBXFileReference", lastKnownFileType="sourcecode.swift", path=name, sourceTree="<group>")
+for name in ['App.swift', 'ClassroomTheme.swift', 'DeckRenderer.swift', 'Meadow/Game/EnvironmentShaders.swift', 'Meadow/Game/GaitReviewScene.swift', 'Meadow/Game/GaitTest.swift', 'Meadow/Game/GameScene.swift', 'Meadow/Game/HeroFrames.swift', 'Meadow/Game/JourneySimulation.swift', 'Meadow/Game/LivingWorld.swift', 'Meadow/Game/MeadowBattleActorView.swift', 'Meadow/Game/MeadowBattleDiceView.swift', 'Meadow/Game/MeadowBattleEncounter.swift', 'Meadow/Game/MeadowBattleLandscapeView.swift', 'Meadow/Game/MeadowBattleLayout.swift', 'Meadow/Game/MeadowBattlePlateProcessor.swift', 'Meadow/Game/MeadowBattlePreviewView.swift', 'Meadow/Game/MeadowBattleScenePresentation.swift', 'Meadow/Game/MeadowGPUDiagnostics.swift', 'Meadow/Game/MeadowLoader.swift', 'Meadow/Game/MeadowLoadingView.swift', 'Meadow/Game/MeadowPartyBattleView.swift', 'Meadow/Game/MeadowPartyStageView.swift', 'Meadow/Game/MeadowRoadMask.swift', 'Meadow/Game/MeadowShadowRenderer.swift', 'Meadow/Game/MeadowViewport.swift', 'Meadow/Game/ProjectedShadow.swift', 'Meadow/Game/SceneDefinition.swift', 'Meadow/Game/Trail.swift', 'Meadow/Game/TrailNetwork.swift', 'Meadow/Game/WalkCycle.swift', 'Meadow/GameViewController.swift', 'Meadow/ShadowLab/ShadowLabGeometry.swift', 'Meadow/ShadowLab/ShadowLabRenderer.swift', 'Meadow/ShadowLab/ShadowLabShaders.metal', 'Meadow/ShadowLab/ShadowLabViewController.swift', 'Meadow/UI/MeadowEncounterPreviewView.swift', 'Meadow/UI/MeadowInventoryViewController.swift', 'Meadow/UI/MeadowMapSettingsViewController.swift', 'Meadow/UI/ParchmentButton.swift', 'MeadowPublicOutput.swift', 'MeadowTeacherCoordinator.swift', 'MeadowTeacherDashboard.swift', 'TeacherSession.swift', 'Views.swift']:
+    ref = add("file:" + name, "PBXFileReference", lastKnownFileType="sourcecode.metal" if name.endswith(".metal") else "sourcecode.swift", path=name, sourceTree="<group>")
     files.append(ref)
     sources.append(add("build:" + name, "PBXBuildFile", fileRef=ref))
 plist = add("info", "PBXFileReference", lastKnownFileType="text.plist.xml", path="Info.plist", sourceTree="<group>")
@@ -41,12 +41,9 @@ for name in ("sample.pptx", "ThirdPartyNotices.txt", "design-tokens.json"):
     ref = add("resource:" + name, "PBXFileReference", lastKnownFileType="file", path="Resources/" + name, sourceTree="<group>")
     files.append(ref)
     resource_builds.append(add("build:" + name, "PBXBuildFile", fileRef=ref))
-ref = add("resource:Art", "PBXFileReference", lastKnownFileType="folder", path="Resources/Art", sourceTree="<group>")
-files.append(ref)
-resource_builds.append(add("build:Art", "PBXBuildFile", fileRef=ref))
-ref = add("resource:MeadowArt", "PBXFileReference", lastKnownFileType="folder", path="Resources/MeadowArt", sourceTree="<group>")
-files.append(ref)
-resource_builds.append(add("build:MeadowArt", "PBXBuildFile", fileRef=ref))
+for name,kind in [("Assets.xcassets","folder.assetcatalog"),("SceneMap.json","text.json"),("hero-gait.json","text.json"),("meadow-port-provenance.json","text.json")]:
+    ref = add("resource:"+name,"PBXFileReference",lastKnownFileType=kind,path="Resources/"+name,sourceTree="<group>")
+    files.append(ref);resource_builds.append(add("build:"+name,"PBXBuildFile",fileRef=ref))
 product = add("product", "PBXFileReference", explicitFileType="wrapper.application", includeInIndex="0", path="ClassroomProbe.app", sourceTree="BUILT_PRODUCTS_DIR")
 app_group = add("app-group", "PBXGroup", children=files, path="ClassroomProbe", sourceTree="<group>")
 products_group = add("products-group", "PBXGroup", children=[product], name="Products", sourceTree="<group>")
@@ -57,9 +54,13 @@ framework_build = add("build:core", "PBXBuildFile", productRef=package_product)
 game_package = add("game-package", "XCLocalSwiftPackageReference", relativePath="Packages/GameCore")
 game_product = add("game-product", "XCSwiftPackageProductDependency", package=game_package, productName="ClassroomGameCore")
 game_framework = add("build:game", "PBXBuildFile", productRef=game_product)
+extra_products=[];extra_frameworks=[]
+for name in ["MeadowBattleSupport","MeadowWorldSupport","MeadowClassroomSupport"]:
+    prod=add("product:"+name,"XCSwiftPackageProductDependency",package=game_package,productName=name)
+    extra_products.append(prod);extra_frameworks.append(add("framework:"+name,"PBXBuildFile",productRef=prod))
 source_phase = add("sources", "PBXSourcesBuildPhase", buildActionMask="2147483647", files=sources, runOnlyForDeploymentPostprocessing="0")
 resource_phase = add("resources", "PBXResourcesBuildPhase", buildActionMask="2147483647", files=resource_builds, runOnlyForDeploymentPostprocessing="0")
-framework_phase = add("frameworks", "PBXFrameworksBuildPhase", buildActionMask="2147483647", files=[framework_build, game_framework], runOnlyForDeploymentPostprocessing="0")
+framework_phase = add("frameworks", "PBXFrameworksBuildPhase", buildActionMask="2147483647", files=[framework_build, game_framework]+extra_frameworks, runOnlyForDeploymentPostprocessing="0")
 project_configs = []
 target_configs = []
 for name in ("Debug", "Release"):
@@ -78,7 +79,7 @@ for name in ("Debug", "Release"):
                            SUPPORTS_MACCATALYST="NO", SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD="NO",
                            SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD="NO", SWIFT_EMIT_LOC_STRINGS="NO",
                            LD_RUNPATH_SEARCH_PATHS=["$(inherited)", "@executable_path/Frameworks"],
-                           CURRENT_PROJECT_VERSION="13", MARKETING_VERSION="0.12.1")
+                           CURRENT_PROJECT_VERSION="14", MARKETING_VERSION="0.13", ASSETCATALOG_COMPILER_APPICON_NAME="AppIcon")
     target_configs.append(add("target:" + name, "XCBuildConfiguration", name=name, buildSettings=target_settings))
 project_config_list = add("project-config-list", "XCConfigurationList", buildConfigurations=project_configs,
                           defaultConfigurationIsVisible="0", defaultConfigurationName="Release")
@@ -87,7 +88,7 @@ target_config_list = add("target-config-list", "XCConfigurationList", buildConfi
 target = add("target", "PBXNativeTarget", name="ClassroomProbe", productName="ClassroomProbe", productReference=product,
              productType="com.apple.product-type.application", buildConfigurationList=target_config_list,
              buildPhases=[source_phase, framework_phase, resource_phase], buildRules=[], dependencies=[],
-             packageProductDependencies=[package_product, game_product])
+             packageProductDependencies=[package_product, game_product]+extra_products)
 project = add("project", "PBXProject", attributes=dict(LastUpgradeCheck="2700", BuildIndependentTargetsInParallel="YES"),
               buildConfigurationList=project_config_list, compatibilityVersion="Xcode 14.0", developmentRegion="zh-Hans",
               hasScannedForEncodings="0", knownRegions=["zh-Hans", "en", "Base"], mainGroup=main_group,

@@ -1,16 +1,12 @@
 import UIKit
 import Combine
 import ClassroomProbeCore
-import ClassroomGameCore
 
 @MainActor
 final class PublicDisplayModel: ObservableObject {
     @Published var snapshot = ProbeState().publicSnapshot
     @Published var image: UIImage?
-    @Published var ruleExample: PublicGameSnapshot?
-    @Published var playFrame: PublicPlayFrame?
-    @Published var playBook = false
-    @Published var meadowPresentation = true
+
 }
 
 @MainActor
@@ -24,9 +20,7 @@ final class TeacherSession: ObservableObject {
     @Published private(set) var importReport = "尚未导入PPTX。"
     @Published var showNotes = false
     private(set) var isEditingNotes = false
-    private(set) var rulesOpen = false
-    private(set) var playOpen = false
-    lazy var pve = PVEAppSession(display: display)
+    lazy var game = MeadowTeacherCoordinator()
     private var connectedIDs: Set<String> = []
     private var deck: ParsedDeck?
     private var pptxData: Data?
@@ -67,34 +61,12 @@ final class TeacherSession: ObservableObject {
         isEditingNotes = false
         pause(.notes, enabled: false)
     }
-    func beginRules() {
-        concealNotes()
-        rulesOpen = true
-        pause(.rules, enabled: true)
-    }
-    func beginPlay() {
-        concealNotes()
-        display.ruleExample = nil
-        pause(.manual, enabled: true)
-        playOpen = true
-        pve.activate()
-    }
-    func endPlay() {
-        pve.deactivate()
-        playOpen = false
-        concealNotes()
-    }
-    func endRules() {
-        display.ruleExample = nil
-        rulesOpen = false
-        pause(.rules, enabled: false)
-    }
     func setConnection(id: String, connected: Bool) {
         if connected { connectedIDs.insert(id) } else { connectedIDs.remove(id) }
         connectionCount = connectedIDs.count
+        game.setConnection(id,connected:connected)
         if connectedIDs.isEmpty {
-            display.ruleExample = nil; concealNotes(); pause(.manual, enabled: true)
-            if playOpen { pve.pause(.manual, enabled: true) }
+            concealNotes(); pause(.manual, enabled: true)
         }
     }
     func setRegistrationStatus(_ text: String) { registrationStatus = text }

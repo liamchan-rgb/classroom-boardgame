@@ -26,6 +26,16 @@ public enum OperationSummary {
         for event in receipt.events {
             let actor = name(event.actor), target = name(event.target)
             switch event.kind {
+            case "campaignTrade": if let actor {
+                let parts=event.detail.split(separator:":",maxSplits:1).map(String.init)
+                let item=parts.count==2 ? ((try? catalog.item(parts[1]).name) ?? "物品"):"物品"
+                result.append("\(actor)\(event.amount<0 ? "买入":"卖出")\(item)1件，金币\(event.amount)")
+            }
+            case "campaignSiteEvent": if let actor {
+                let parts=event.detail.split(separator:":").map(String.init)
+                let ending=parts.last=="leave" ? "选择离开":parts.contains("spring") ? "恢复\(event.amount)生命":"拾得\(event.amount)金币"
+                result.append("\(actor)完成地点事件："+ending)
+            }
             case "naturalTwenty": if let target { result.append("自然20！\(target)生命归零") }
             case "damage": if let target { result.append("\(target)生命减少\(event.amount)，\(event.detail)") }
             case "heal": if let target, event.amount > 0 { result.append("\(target)恢复\(event.amount)生命") }

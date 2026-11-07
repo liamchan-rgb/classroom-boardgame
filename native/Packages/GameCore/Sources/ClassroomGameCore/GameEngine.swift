@@ -122,6 +122,39 @@ struct Evaluation {
 
     mutating func execute(_ command: GameCommand) throws {
         switch command {
+        case .configureCampaignSite(let node,let config):try configureCampaignSite(node:node,configuration:config)
+        case .tradeCampaignSite(let actor,let item,let buy):try tradeCampaignSite(actor:actor,item:item,buy:buy)
+        case .resolveCampaignSite(let actor,let accept):try resolveCampaignSite(actor:actor,accept:accept)
+        case .campaignMove(let actors,let node):
+            let travelers=try campaignTravelers(actors)
+            guard travelers.allSatisfy({(state.map.neighbors($0.nodeID).contains(node) || $0.nodeID==node)}) else{throw GameError("道路不连续。")}
+            for id in actors {state.units[id]?.nodeID=node}
+            state.map.revealed.insert(node)
+            events.append(GameEvent("campaignArrival",actor:actors.first,detail:String(node)))
+        case .interactCampaignNode(let actors):
+            let travelers=try campaignTravelers(actors),nodeID=travelers[0].nodeID
+            guard let index=state.map.nodes.firstIndex(where:{$0.id==nodeID}) else{throw GameError("地点不存在。")}
+            let node=state.map.nodes[index]
+            if node.kind == .reward,let reward=node.reward,!node.rewardCompleted {
+                try rewardActors(actors,reward:ResourceReward(coins:reward.coins,score:reward.score,items:reward.items),source:"nodeReward")
+                state.map.nodes[index].rewardCompleted=true
+            }else if node.kind == .combat || node.kind == .boss {
+                let enemies=state.units.values.filter{$0.kind == .monster && $0.isAlive && $0.nodeID==nodeID}.map(\.id).sorted()
+                guard !enemies.isEmpty else{throw GameError("此地点的敌人已清理。")}
+                for id in state.players.filter(\.isAlive).map(\.id) {
+                    var player=try unit(id);player.ap=try GameRules.attributes(player,catalog:catalog).baseAP;state.units[id]=player
+                }
+                try start(kind:.pve,monsters:enemies)
+            }else{throw GameError(node.kind == .reward ? "此处补给已领取。":"此地点没有待处理事件。")}
+            events.append(GameEvent("campaignInteraction",actor:actors.first,detail:String(nodeID)))
+        case .refillCampaignMovement(let actors,let coins,let manual):
+            guard state.phase == .exploration,state.battle==nil,!actors.isEmpty,Set(actors).count==actors.count,coins>=0,!manual || coins==0 else{throw GameError("无法补充移动条。")}
+            var total=0
+            for id in actors {let actor=try unit(id);guard actor.kind == .player else{throw GameError("请选择队伍成员。")};total=try checkedAdd(total,actor.coins)}
+            guard total>=coins else{throw GameError("全队金币不足。")}
+            var unpaid=coins
+            for id in actors.sorted(){let payment=min(unpaid,state.units[id]!.coins);state.units[id]!.coins-=payment;unpaid-=payment}
+            events.append(GameEvent("campaignMovementRefilled",amount:coins,detail:manual ? "manual":"coins"))
         case .monsterStep: try monsterStep()
         case .editResources(let id, let patch):
             if let health = patch.health { try setHealth(id, value: health, killer: nil) }
@@ -164,6 +197,9 @@ struct Evaluation {
         case .refillExploration:
             guard state.phase == .exploration else { throw GameError("只在探索时手动补足行动点。") }
             for id in state.players.map(\.id) { var actor = try unit(id); try GameRules.refill(&actor, catalog: catalog); state.units[id] = actor }
+        case .configureNodeEncounter(let id, let templates): try configureNodeEncounter(id, templates: templates)
+        case .configureNodeReward(let id, let reward): try configureNodeReward(id, reward: reward)
+        case .resetNodeReward(let id): try resetNodeReward(id)
         }
         try checkOutcome()
         if let current = state.battle?.current, let actor = state.units[current], !actor.isAlive || actor.ap == 0 {
@@ -171,6 +207,46 @@ struct Evaluation {
         }
         if state.battle != nil && state.battle?.current == nil &&
             !state.pauseReasons.contains(.allPlayersDown) && !state.pauseReasons.contains(.noSurvivors) { try nextActor() }
+    }
+
+    func campaignTravelers(_ actors:[String])throws->[GameUnit] {
+        guard state.phase == .exploration,state.battle==nil,!actors.isEmpty,Set(actors).count==actors.count else{throw GameError("请先结束当前战斗。")}
+        let travelers=try actors.map{try unit($0)}
+        guard travelers.allSatisfy({$0.kind == .player && $0.isAlive && $0.nodeID==travelers[0].nodeID}) else{throw GameError("同行成员必须存活且位于同一地点。")}
+        return travelers
+    }
+    mutating func configureNodeEncounter(_ id:Int,templates:[String])throws {
+        guard state.phase == .exploration,state.battle == nil,
+              let index=state.map.nodes.firstIndex(where:{$0.id==id}),
+              (state.map.nodes[index].kind == .combat || state.map.nodes[index].kind == .boss) else {throw GameError("只能在行程暂停时编辑战斗或首领地点。")}
+        guard !templates.isEmpty,templates.count<=3,(state.map.nodes[index].kind != .boss || templates.count==1) else {throw GameError("普通战斗需配置1—3只怪物；首领地点固定1只。")}
+        for template in templates {_ = try catalog.monster(template)}
+        let old=state.units.values.filter{$0.kind == .monster && $0.nodeID==id}.map(\.id)
+        for monster in old {state.units.removeValue(forKey:monster)}
+        for (offset,template) in templates.enumerated() {
+            let monster=try GameFactory.monster(id:"m-\(id)-\(offset+1)",templateID:template,nodeID:id,catalog:catalog)
+            state.units[monster.id]=monster
+        }
+        events.append(GameEvent("nodeEncounterConfigured",amount:templates.count,detail:"node=\(id);templates=\(templates.joined(separator:","))"))
+    }
+
+    mutating func configureNodeReward(_ id:Int,reward:NodeReward)throws {
+        guard state.phase == .exploration,state.battle == nil,
+              let index=state.map.nodes.firstIndex(where:{$0.id==id}),state.map.nodes[index].kind == .reward else {
+            throw GameError("只能在行程暂停时编辑补给地点。")
+        }
+        guard reward.coins>=0,reward.score>=0,reward.coins<=100_000,reward.score<=100_000,reward.items.count<=16,
+              reward.items.values.allSatisfy({$0>0 && $0<=1_000}) else {throw GameError("奖励数量无效，请输入非负整数。")}
+        for item in reward.items.keys {_ = try catalog.item(item)}
+        state.map.nodes[index].reward=reward
+        events.append(GameEvent("nodeRewardConfigured",amount:reward.coins,detail:"node=\(id);score=\(reward.score);claimed=\(state.map.nodes[index].rewardCompleted)"))
+    }
+    mutating func resetNodeReward(_ id:Int)throws {
+        guard state.phase == .exploration,state.battle == nil,
+              let index=state.map.nodes.firstIndex(where:{$0.id==id}),state.map.nodes[index].kind == .reward,
+              state.map.nodes[index].rewardCompleted else {throw GameError("只能在探索暂停时重置已领取的补给地点。")}
+        state.map.nodes[index].rewardCompleted=false
+        events.append(GameEvent("nodeRewardReset",detail:"node=\(id);explicit=true"))
     }
 
     mutating func start(kind: BattleKind, monsters: [String]) throws {
