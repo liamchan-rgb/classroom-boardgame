@@ -146,4 +146,17 @@ final class ClassroomGMTests:XCTestCase {
         XCTAssertThrowsError(try b.undoTeacherAction(role:.teacher))
     }
 
+    func testTeacherUndoPreservesCurrentBookPauseAcrossSurfaceChanges()throws {
+        let b=try fixture(),c=b.campaign!
+        try c.engine.setPause(.book,enabled:true);try b.project(.book,role:.teacher)
+        try b.grantPlayers(["p1"],ap:1,coins:10,role:.teacher)
+        try c.engine.setPause(.book,enabled:false);try b.project(.exploration,role:.teacher)
+        try b.undoTeacherAction(role:.teacher)
+        XCTAssertFalse(c.engine.state.pauseReasons.contains(.book));XCTAssertEqual(b.surface,.exploration)
+        try b.grantPlayers(["p1"],ap:1,coins:10,role:.teacher)
+        try c.engine.setPause(.book,enabled:true);try b.project(.book,role:.teacher)
+        try b.undoTeacherAction(role:.teacher)
+        XCTAssertTrue(c.engine.state.pauseReasons.contains(.book));XCTAssertEqual(b.surface,.book)
+    }
+
 }

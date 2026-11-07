@@ -33,7 +33,7 @@ public extension ClassroomGameBackend {
     func undoTeacherAction(role:ClassroomRole)throws {
         try Self.requireTeacher(role)
         guard let c=campaign,!c.isCompleted,canUndoTeacherAction else{throw GameError("最近操作不是GM修改或绘本发放，不能从此入口撤销。")}
-        _=try c.engine.undo()
+        _=try c.engine.undoPreservingPresentationPause()
     }
     func editPlayer(_ id:String,value:TeacherPlayerEdit,role:ClassroomRole)throws {
         try Self.requireTeacher(role)

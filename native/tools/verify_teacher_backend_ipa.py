@@ -20,8 +20,8 @@ F=D/'artifact';ipa=F/'ClassroomStage2-v0.15.0-unsigned.ipa'
 assert (F/'source-commit.txt').read_text().strip()==run['head_sha']
 test_log=(F/'game-core-tests.log').read_text()
 suite_totals={name:int(count) for name,count in re.findall(r"Test Suite '(\w+Tests)\.xctest' passed[^\n]*\n[^\n]*Executed (\d+) tests, with 0 failures",test_log)}
-assert suite_totals=={'MeadowWorldSupportTests':116,'MeadowClassroomSupportTests':47,'MeadowBattleSupportTests':108,'ClassroomGameCoreTests':72},suite_totals
-assert sum(suite_totals.values())==343 and len(re.findall(r"Test Case '[^\n]+' passed",test_log))==343
+assert suite_totals=={'MeadowWorldSupportTests':116,'MeadowClassroomSupportTests':48,'MeadowBattleSupportTests':108,'ClassroomGameCoreTests':72},suite_totals
+assert sum(suite_totals.values())==344 and len(re.findall(r"Test Case '[^\n]+' passed",test_log))==344
 assert 'Executed 6 tests, with 0 failures' in (F/'core-tests.log').read_text()
 log=(F/'xcode-build.log').read_text();assert '** ARCHIVE SUCCEEDED **' in log
 for name in ['MeadowTeacherCoordinator.swift','MeadowTeacherDashboard.swift','MeadowPublicOutput.swift','MeadowClassroomFrameMirror.swift','GameViewController.swift']:assert name in log
@@ -56,7 +56,7 @@ with zipfile.ZipFile(ipa) as z,ipa.open('rb') as raw:
     assert not any('embedded.mobileprovision' in n or '_CodeSignature' in n for n in z.namelist())
 record=dict(appVersion='0.15.0/build20',testedCommit=run['head_sha'],sourceCommit=run['head_sha'],runID=run['id'],runAttempt=run['run_attempt'],artifactID=artifact['id'],
     artifactArchiveSha256=sha(outer.read_bytes()),artifactArchiveBytes=outer.stat().st_size,ipaSha256=sha(ipa.read_bytes()),ipaBytes=ipa.stat().st_size,
-    coreTests={'CurrentDemoAndClassroomBackend':343,'ClassroomProbeCore':6,'failures':0,'nativeSuites':suite_totals},deviceReleaseArchive=True,arm64=True,executableMode=oct(stat.S_IMODE(mode)),
+    coreTests={'CurrentDemoAndClassroomBackend':344,'ClassroomProbeCore':6,'failures':0,'nativeSuites':suite_totals},deviceReleaseArchive=True,arm64=True,executableMode=oct(stat.S_IMODE(mode)),
     executableSHA256=sha(exe),classicZIP2=True,CRC=True,artSource=manifest['commit'],sourceResourceHashesVerified=len(manifest['assets']),compiledAssetNamesVerified=len(expected),rigResourceHashesVerified=3,
     metalLibraries={},minimumOS=info['MinimumOSVersion'],sdk=info['DTSDKName'],legacyGameUIRemoved=True,fixedLogicalCanvas=[1280,720],fixedMetalScale=1,teacherUsesGameOnlyMirror=True,teacherMirrorMaximumFPS=30,teacherMirrorPixelSize=[960,540],layeredPreview=True,dragAndPinchInput=True,bookStatusMaximumAreaFraction=0.09,bookGrantsUseSameEngine=True,privatePlayerGM=True,maximumStudents=6,reservedHostSeats=1,teamManagement=True,sharedWarehouses=True,singlePageTeacherWindow=True,skillsUseOriginalCards=True,teacherOnlyToolbar=True,mirrorReadbackOffMain=True,theoreticalRawPixelBudgetBytesPerSecond=62208000,publicRenderTargetFPS=60,
     newPVEDeviceVerified=False,appLaunched=False,simulatorLaunched=False,externalDisplayVerified=False,

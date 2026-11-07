@@ -37,12 +37,21 @@ public final class GameEngine {
         return entry
     }
     @discardableResult
-    public func undo() throws -> OperationReceipt {
-        guard let entry = history.last else { throw GameError("没有可撤销的游戏操作。") }
-        let shortened = Array(history.dropLast())
-        try persist?(GameArchive(catalog: catalog, state: entry.before, history: shortened))
-        state = entry.before; history = shortened
-        return entry
+    public func undo() throws -> OperationReceipt {try restoreLastOperation(preservingPresentation:false)}
+    /// Teacher resource undo must not restore an obsolete book/editor pause
+    /// after the user has changed presentation surfaces.
+    @discardableResult
+    public func undoPreservingPresentationPause()throws->OperationReceipt {try restoreLastOperation(preservingPresentation:true)}
+    private func restoreLastOperation(preservingPresentation:Bool)throws->OperationReceipt {
+        guard let entry=history.last else{throw GameError("没有可撤销的游戏操作。")}
+        let shortened=Array(history.dropLast());var restored=entry.before
+        if preservingPresentation {
+            let metadata:Set<GamePause>=[.manual,.book,.editor,.history,.background]
+            restored.pauseReasons.subtract(metadata);restored.pauseReasons.formUnion(state.pauseReasons.intersection(metadata))
+            if state.battle?.current==restored.battle?.current && state.battle?.round==restored.battle?.round {restored.remainingSeconds=state.remainingSeconds}
+        }
+        try persist?(GameArchive(catalog:catalog,state:restored,history:shortened))
+        state=restored;history=shortened;return entry
     }
     public func rollback(after id: String) throws {
         guard let index = history.firstIndex(where: { $0.id == id }) else { throw GameError("历史操作不存在。") }
