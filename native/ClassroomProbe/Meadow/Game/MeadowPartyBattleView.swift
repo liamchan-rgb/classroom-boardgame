@@ -61,7 +61,7 @@ final class MeadowPartyBattleView:UIView {
         end.addAction(UIAction { [weak self] _ in self?.perform(.endTurn) },for:.touchUpInside)
         for _ in 0..<6 { let card=MeadowPreviewCard(title:"",text:"");skills.append(card);skillScroll.addSubview(card) }
         skillScroll.addSubview(items);items.showsMenuAsPrimaryAction=true
-        stage.onChoose={ [weak self] id in self?.choose(id) }
+        stage.onChoose={ [weak self] id in guard let self,!self.classroomMode else{return};self.choose(id) }
         stage.onPresentationChanged={ [weak self] in self?.refresh() }
         accessibilityIdentifier="meadowPartySupportEncounter"
     }
@@ -175,9 +175,9 @@ final class MeadowPartyBattleView:UIView {
             b.previewStrength=0;b.previewColor = .clear
             b.button.removeTarget(nil,action:nil,for:.touchUpInside)
             b.button.removeAction(identifiedBy:UIAction.Identifier("party-skill"),for:.touchUpInside)
-            b.button.addAction(UIAction(identifier:UIAction.Identifier("party-skill"),handler:{ [weak self] _ in self?.perform(a) }),for:.touchUpInside)
+            b.button.addAction(UIAction(identifier:UIAction.Identifier("party-skill"),handler:{ [weak self] _ in guard let self,!self.classroomMode else{return};self.perform(a) }),for:.touchUpInside)
             b.onFocus={ [weak self] focused in
-                guard let self else { return }
+                guard let self,!self.classroomMode else { return }
                 if focused { self.focusedAction=a;self.stage.preview(a,target:self.target(a));self.hint.text=model.actionReadout(a,ally:self.friend,enemy:self.foe).text.replacingOccurrences(of:"\n",with:" · ") }
                 else if self.focusedAction==a { self.focusedAction=nil;self.stage.preview(nil,target:self.target(a)) }
             }
@@ -189,7 +189,7 @@ final class MeadowPartyBattleView:UIView {
             let count=current.flatMap { state.units[$0]?.inventory[a.rawValue] } ?? 0
             let readout=model.actionReadout(a,ally:friend,enemy:foe)
             let allowed=readout.allowed
-            menu.append(UIAction(title:"\(a.title) ×\(count) · \(a == .revivalStone ? 2:1) AP"+(allowed ? "":" · "+readout.availability),image:UIImage(named:"MeadowParty"+a.rawValue.prefix(1).uppercased()+a.rawValue.dropFirst()),attributes:allowed && !busy ? []:.disabled,handler:{ [weak self] _ in self?.perform(a) }))
+            menu.append(UIAction(title:"\(a.title) ×\(count) · \(a == .revivalStone ? 2:1) AP"+(allowed ? "":" · "+readout.availability),image:UIImage(named:"MeadowParty"+a.rawValue.prefix(1).uppercased()+a.rawValue.dropFirst()),attributes:allowed && !busy ? []:.disabled,handler:{ [weak self] _ in guard let self,!self.classroomMode else{return};self.perform(a) }))
         }
         let inventoryInfo=UIAction(title:"查看双方个人资源",image:UIImage(systemName:"list.bullet.rectangle")){[weak self] _ in
             guard let self else{return};self.showResourceSummary(model)
