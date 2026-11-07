@@ -1,0 +1,58 @@
+{
+  "version": "0.16.0/build21",
+  "sourceBranch": "feat/teacher-backend-meadow-v0.13",
+  "sourceSnapshotCommit": "93a899956222d958d4d257c37990010899590559",
+  "compiledCommit": "a14364ba89c44a76bffebe0e6004a019f860c8cd",
+  "tag": "archive-player-slots-meadow-v0.16.0-20261107",
+  "buildRun": 42390402952,
+  "archiveRun": 42391019080,
+  "archiveCommit": "b6625c3fbbb9b00ae4d0e03f599fa1ec0db5c3bf",
+  "archiveBytes": 437879083,
+  "archiveSHA256": "55fc3d7c402c596887c82a02adb51d7bfaf5cf2c4ddbd5bd1eeb98b4697baa8c",
+  "coreTests": {
+    "CurrentDemoAndClassroomBackend": 368,
+    "ClassroomProbeCore": 6,
+    "failures": 0,
+    "nativeSuites": {
+      "MeadowWorldSupportTests": 134,
+      "MeadowClassroomSupportTests": 54,
+      "MeadowBattleSupportTests": 108,
+      "ClassroomGameCoreTests": 72
+    }
+  },
+  "additionalLocalPythonTests": 4,
+  "ipaBytes": 62573595,
+  "ipaSha256": "699c2d5b6e90580e6240768d16e6091a9355afc3f3a7b719fb79edbf6b415308",
+  "minimumOS": "27.0",
+  "publicGETChecks": [
+    {
+      "url": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/b6625c3fbbb9b00ae4d0e03f599fa1ec0db5c3bf/archive-player-slots-meadow-v0.16.0-20261107/ClassroomStage2-v0.16.0-unsigned.ipa",
+      "bytes": 62573595,
+      "sha256": "699c2d5b6e90580e6240768d16e6091a9355afc3f3a7b719fb79edbf6b415308",
+      "status": 200
+    },
+    {
+      "url": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/b6625c3fbbb9b00ae4d0e03f599fa1ec0db5c3bf/archive-player-slots-meadow-v0.16.0-20261107/player-slots-normal.gif",
+      "bytes": 157114,
+      "sha256": "bd3ad6a74ac1fa334197fe7df04dd510e435af26d06129a47d3d478b0d7a6fe1",
+      "status": 200
+    }
+  ],
+  "bundleRestoreVerified": true,
+  "allArchivePublicBytesVerified": true,
+  "ipaURL": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/b6625c3fbbb9b00ae4d0e03f599fa1ec0db5c3bf/archive-player-slots-meadow-v0.16.0-20261107/ClassroomStage2-v0.16.0-unsigned.ipa",
+  "gifURL": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/b6625c3fbbb9b00ae4d0e03f599fa1ec0db5c3bf/archive-player-slots-meadow-v0.16.0-20261107/player-slots-normal.gif",
+  "archiveURL": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/b6625c3fbbb9b00ae4d0e03f599fa1ec0db5c3bf/archive-player-slots-meadow-v0.16.0-20261107/README.md",
+  "scope": "12 independent player name/appearance profile slots; 8 complete campaign slots; recovery copies before load/rollback/new journey; teacher-only operation history and rollback including movement checkpoints; teacher P7 joining UI and same-engine seven-player flow.",
+  "nextSteps": [
+    "Manual export/import of player profiles and campaign saves.",
+    "Filtering campaign saves and classifying operation history for long classroom sessions."
+  ],
+  "limitations": [
+    "No device CPU/GPU timing or touch responsiveness measurement was performed.",
+    "User-reported TV/disconnect misalignment is addressed in code; real AirPlay/TV/disconnect validation needs user screenshots.",
+    "P3-P7 reuse existing approved character resources; distinct character art remains missing. Teacher host has a private joining UI. Independent body variants in battle remain missing; approved rigs are reused.",
+    "Offline review demonstrates fixed-canvas geometry; it is not UIKit capture or proof of device repair.",
+    "No App, simulator, device or external-display runtime validation."
+  ]
+}
