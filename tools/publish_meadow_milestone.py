@@ -8,8 +8,8 @@ from pathlib import Path
 import hashlib,json,os,shutil,subprocess,tempfile,urllib.request,zipfile
 
 R=Path(__file__).resolve().parents[1];os.chdir(R)
-milestone='archive-team-module-meadow-v0.14.0-20261107'
-record_path='docs/integration/team-module-v0.14.0-build.json'
+milestone='archive-book-gm-meadow-v0.15.0-20261107'
+record_path='docs/integration/book-gm-v0.15.0-build.json'
 record=json.loads((R/record_path).read_text());repo='liamchan-rgb/classroom-boardgame'
 T=Path(os.environ['RUNNER_TEMP'])/'meadow-milestone';T.mkdir(exist_ok=False)
 D=T/'deliveries';D.mkdir()
@@ -28,16 +28,16 @@ action=gh(f'repos/{repo}/actions/runs/{record["runID"]}')
 assert action['conclusion']=='success' and action['head_sha']==record['testedCommit']
 artifact=gh(f'repos/{repo}/actions/artifacts/{record["artifactID"]}')
 assert artifact['workflow_run']['head_sha']==record['testedCommit'] and not artifact['expired']
-archive=D/'ClassroomStage2-v0.14.0-build.zip'
+archive=D/'ClassroomStage2-v0.15.0-build.zip'
 subprocess.run(['curl','-fLsS','--retry','3','-H','Authorization: Bearer '+os.environ['GH_TOKEN'],
     f'https://api.github.com/repos/{repo}/actions/artifacts/{record["artifactID"]}/zip','-o',str(archive)],check=True)
 assert sha(archive)==record['artifactArchiveSha256'] and artifact['digest']=='sha256:'+sha(archive)
 with zipfile.ZipFile(archive) as z:
     assert z.testzip() is None
-    ipa='ClassroomStage2-v0.14.0-unsigned.ipa';(D/ipa).write_bytes(z.read(ipa))
+    ipa='ClassroomStage2-v0.15.0-unsigned.ipa';(D/ipa).write_bytes(z.read(ipa))
 assert sha(D/ipa)==record['ipaSha256']
-for name in ['team-module-normal.gif','team-module-contact-sheet.png','team-module-review-input.json']:
-    shutil.copy2(R/'docs/integration/team-module-review-v0.14.0'/name,D/name)
+for name in ['book-gm-normal.gif','book-gm-contact-sheet.png','book-gm-review-input.json']:
+    shutil.copy2(R/'docs/integration/book-gm-review-v0.15.0'/name,D/name)
 (D/'verification.json').write_text(json.dumps(record,indent=2)+'\n')
 selected=[p.name for p in D.iterdir()];selection=T/'selected.json';selection.write_text(json.dumps(selected))
 run('git','config','user.name','github-actions[bot]');run('git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com')
@@ -70,13 +70,13 @@ for suffix in ['.manifest.json','.zip.sha256','.恢复说明.md']:
     source=output.with_suffix(suffix) if suffix!='.zip.sha256' else output.with_suffix('.zip.sha256')
     shutil.copy2(source,transport/source.name)
 for p in D.iterdir():shutil.copy2(p,transport/p.name)
-(transport/'README.md').write_text(f'''# Meadow six-student teams and reserved host seat v0.14.0
+(transport/'README.md').write_text(f'''# Meadow public book status, teacher grants and private player GM v0.15.0
 
 Source snapshot/tag: `{current}` / `{milestone}`.
 Actual device Release compiled commit: `{record['testedCommit']}`.
 Build run: https://github.com/{repo}/actions/runs/{record['runID']}
 IPA: `{ipa}`, SHA256 `{record['ipaSha256']}`, {record['ipaBytes']} bytes.
-329 GameCore/backend + 6 ProbeCore tests passed. No app, simulator or device was launched.
+343 GameCore/backend + 6 ProbeCore tests passed. No app, simulator or device was launched.
 GIF is an offline fixed-canvas layout demonstration, not a runtime screenshot or confirmation of device repair.
 Teacher owns the current demo rules, map generation and private controls. Public output uses the full existing Meadow map/battle renderer and read-only player panels; no old game fallback.
 Download all .part files, transport.json and restore_zip.py to restore the archive ZIP; follow its recovery guide.
@@ -95,7 +95,7 @@ for file in sorted(transport.iterdir()):
     run('git','update-index','--add','--cacheinfo','100644',blob,milestone+'/'+file.name,env=env)
     rows.append(dict(file=file.name,bytes=file.stat().st_size,sha256=sha(file)))
 tree=run('git','write-tree',env=env)
-commit=run('git','commit-tree',tree,'-p',parent,'-m','Archive verified six-student teams and reserved host seat v0.14.0')
+commit=run('git','commit-tree',tree,'-p',parent,'-m','Archive verified public book status, teacher grants and private player GM v0.15.0')
 run('git','push','origin',commit+':refs/heads/archive-assets')
 run('git','push','origin','refs/tags/'+milestone)
 # Verify all public bytes with a full, unauthenticated GET, including every part.
@@ -107,6 +107,6 @@ for row in rows:
     target.unlink()
 receipt=dict(milestone=milestone,sourceSnapshotCommit=current,compiledCommit=record['testedCommit'],archiveCommit=commit,
     archiveSHA256=sha(output),archiveBytes=output.stat().st_size,bundleRestoreVerified=True,allPublicGETVerified=True,
-    ipaURL=base+ipa,gifURL=base+'team-module-normal.gif',archiveURL=base+'README.md',files=rows)
+    ipaURL=base+ipa,gifURL=base+'book-gm-normal.gif',archiveURL=base+'README.md',files=rows)
 (T/'archive_publish_receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
 print(json.dumps(receipt,indent=2),flush=True)

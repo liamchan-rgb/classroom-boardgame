@@ -23,6 +23,7 @@ public struct DamageBuff: Codable, Equatable {
     public var amount: Int
     public var roundsLeft: Int
     public var appliedRound: Int
+    public init(amount:Int,roundsLeft:Int,appliedRound:Int){self.amount=amount;self.roundsLeft=roundsLeft;self.appliedRound=appliedRound}
 }
 
 public struct GameUnit: Codable, Equatable, Identifiable {

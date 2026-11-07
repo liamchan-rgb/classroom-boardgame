@@ -12,7 +12,7 @@ struct PublicSurface:View {
     var teacherPreview=false
     var body:some View {
         Group {
-            if game.surface == .book {PublicBookPage(model:model)}
+            if game.surface == .book {PublicBookPage(model:model,players:game.backend.bookPlayers)}
             else {
                 GeometryReader { geometry in
                     let rect=ClassroomCanvas.fitted(in:geometry.size)
@@ -37,14 +37,47 @@ struct PublicSurface:View {
     }
 }
 
-private struct PublicBookPage:View {
+/// Same read-only page on TV and in the teacher's book preview.
+struct PublicBookPage:View {
     @ObservedObject var model:PublicDisplayModel
+    let players:[ClassroomBookPlayerStatus]
     var body:some View {
-        VStack(spacing:12){
-            HStack{Text("课堂绘本").bold();Spacer();Text("\(model.snapshot.pageCount==0 ? 0:model.snapshot.pageIndex+1) / \(model.snapshot.pageCount)")}.font(.title2).padding()
-            if let image=model.image {Image(uiImage:image).resizable().scaledToFit().frame(maxWidth:.infinity,maxHeight:.infinity)}
-            else{Text("教师正在准备绘本").font(.largeTitle).frame(maxWidth:.infinity,maxHeight:.infinity)}
-        }.foregroundStyle(.white).background(Color(red:0.06,green:0.11,blue:0.08))
+        GeometryReader { geometry in
+            let height=ClassroomBookStatusLayout.height(in:geometry.size,players:players.count)
+            VStack(spacing:0){
+                ZStack(alignment:.topTrailing){
+                    Group {
+                        if let image=model.image {Image(uiImage:image).resizable().scaledToFit()}
+                        else{Text("教师正在准备绘本").font(.title)}
+                    }.frame(maxWidth:.infinity,maxHeight:.infinity)
+                    Text("\(model.snapshot.pageCount==0 ? 0:model.snapshot.pageIndex+1) / \(model.snapshot.pageCount)")
+                        .font(.caption.bold()).padding(6).background(.black.opacity(0.45),in:RoundedRectangle(cornerRadius:6)).padding(6)
+                }.frame(height:max(0,geometry.size.height-height))
+                if height>0 {
+                    HStack(spacing:4){
+                        ForEach(players){unit in BookPlayerBadge(unit:unit,height:height).frame(maxWidth:.infinity)}
+                    }.padding(.horizontal,6).frame(height:height).background(Color(red:0.06,green:0.11,blue:0.08)).clipped()
+                }
+            }
+        }.foregroundStyle(.white).background(.black).allowsHitTesting(false)
+    }
+}
+private struct BookPlayerBadge:View {
+    let unit:ClassroomBookPlayerStatus
+    let height:CGFloat
+    private func number(_ value:Int)->String {value.formatted(.number.notation(.compactName).locale(Locale(identifier:"zh_CN")))}
+    var body:some View {
+        VStack(alignment:.leading,spacing:1){
+            Text(unit.name).font(.system(size:min(16,max(8,height*0.24)),weight:.bold)).foregroundStyle(unit.health>0 ? Color.white:.gray)
+            HStack(spacing:3){
+                Text("HP \(number(unit.health))/\(number(unit.maximumHealth))")
+                ProgressView(value:Double(unit.health),total:Double(max(1,unit.maximumHealth))).tint(.green).frame(maxWidth:.infinity)
+            }.font(.system(size:min(14,max(8,height*0.21)),weight:.medium))
+            HStack(spacing:3){Text("◆ \(number(unit.ap))/\(number(unit.maximumAP))");Spacer(minLength:0);Text("金币 \(number(unit.coins))")}
+                .font(.system(size:min(14,max(8,height*0.21)),weight:.semibold)).foregroundStyle(Color(red:0.94,green:0.81,blue:0.46))
+        }.lineLimit(1).minimumScaleFactor(0.45).padding(.horizontal,3)
+            .accessibilityElement(children:.ignore)
+            .accessibilityLabel("\(unit.name)，生命\(unit.health)/\(unit.maximumHealth)，行动点\(unit.ap)/\(unit.maximumAP)，金币\(unit.coins)")
     }
 }
 

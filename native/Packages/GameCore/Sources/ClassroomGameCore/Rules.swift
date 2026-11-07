@@ -155,6 +155,8 @@ public enum GameCommand: Codable, Equatable {
     case interactCampaignNode(actors:[String])
     case refillCampaignMovement(actors:[String],coins:Int,manual:Bool)
     case monsterStep
+    case editPlayer(unit:String,value:TeacherPlayerEdit)
+    case grantPlayerResources(actors:[String],ap:Int,coins:Int)
     case editResources(unit: String, value: ResourcePatch)
     case startBattle(kind: BattleKind, monsters: [String])
     case move(actors: [String], path: [Int])

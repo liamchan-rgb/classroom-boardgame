@@ -19,16 +19,16 @@ struct MeadowTeacherDashboard:View {
     private func workspace(fullScreen:Bool)->some View {
         VStack(spacing:0){
             HStack(spacing:10){
-                Text("教师游戏 · v0.14.0").font(.headline)
+                Text("教师游戏 · v0.15.0").font(.headline)
                 Text(game.externalConnected ? "电视已连接":"本机预览").font(.caption).foregroundStyle(.secondary)
                 Spacer(minLength:0)
+                Button("GM"){game.openGM()}.disabled(!game.ready || game.busy || game.campaign==nil)
                 Button(fullScreen ? "退出全屏":"全屏"){fullPreview = !fullScreen}
                 Menu {
                     Button("随机地图与新行程"){game.settings()}.disabled(game.busy || inBattle)
                     Button("继续已保存行程"){game.restore()}.disabled(game.busy || inBattle)
                     Button("保存行程"){game.operation(.save)}.disabled(!game.ready || game.busy)
                     Divider()
-                    Button("调整生命与资源"){game.editResources()}.disabled(game.busy || game.campaign==nil)
                     Button("奖励10金币"){game.award()}.disabled(game.busy || game.campaign==nil)
                     Button("队伍与仓库"){game.openTeamConsole()}.disabled(!game.ready || game.busy)
                     Button("路线与结算"){game.operation(.route)}.disabled(!game.ready || game.busy)

@@ -230,15 +230,27 @@ final class MeadowTeacherCoordinator:ObservableObject {
             revision += 1
         }catch{message=error.localizedDescription}
     }
-    func editResources(){
-        guard !busy,let c=campaign,let unit=c.engine.state.units[c.selectedPlayerID],let presenter=presentationHost else{return}
-        let sheet=UIAlertController(title:"教师调整 · "+unit.name,message:"仅后台可修改，投放端只显示保存后的状态。\n生命 / 护盾 / 当前行动点 / 金币 / 积分",preferredStyle:.alert)
-        for (label,value) in [("生命",unit.health),("护盾",unit.shield),("当前行动点",unit.ap),("金币",unit.coins),("积分",unit.score)] {sheet.addTextField{$0.placeholder=label;$0.accessibilityLabel=label;$0.text=String(value);$0.keyboardType = .numberPad}}
-        sheet.addAction(UIAlertAction(title:"取消",style:.cancel))
-        sheet.addAction(UIAlertAction(title:"保存",style:.default){[weak self,weak sheet] _ in
-            guard let self,let values=sheet?.textFields?.compactMap({Int($0.text ?? "")}),values.count==5 else{return}
-            do{try self.backend.apply(.editResources(unit:unit.id,value:ResourcePatch(health:values[0],shield:values[1],ap:values[2],coins:values[3],score:values[4])),role:.teacher);self.renderer?.classroomRefresh();self.revision += 1}catch{self.message=error.localizedDescription}
-        });presenter.present(sheet,animated:true)
+    func editResources(){openGM()}
+    func openGM(){
+        guard ready,!busy,!modalOpen,campaign != nil,let presenter=presentationHost else{return}
+        let screen=UIHostingController(rootView:TeacherGMConsole(game:self,onClose:{[weak self] in self?.presentationHost?.dismiss(animated:true)}))
+        screen.modalPresentationStyle = .formSheet;screen.preferredContentSize=CGSize(width:980,height:780)
+        presenter.present(screen,animated:true)
+    }
+    @discardableResult func undoTeacherAction()->Bool {
+        guard !busy else{message="请等待当前动作结束。";return false}
+        do{try backend.undoTeacherAction(role:.teacher);renderer?.classroomRefresh();message="已撤销最近一次玩家修改或发放。";revision += 1;return true}
+        catch{message=error.localizedDescription;return false}
+    }
+    @discardableResult func saveGM(_ id:String,value:TeacherPlayerEdit)->Bool {
+        guard !busy else{message="请等待当前动作结束。";return false}
+        do{try backend.editPlayer(id,value:value,role:.teacher);renderer?.classroomRefresh();message="玩家数值与背包已保存。";revision += 1;return true}
+        catch{message=error.localizedDescription;return false}
+    }
+    @discardableResult func grantBookPlayers(_ ids:[String],ap:Int,coins:Int)->Bool {
+        guard !busy else{message="请等待当前动作结束。";return false}
+        do{try backend.grantPlayers(ids,ap:ap,coins:coins,role:.teacher);renderer?.classroomRefresh();message="已向\(ids.count)名玩家发放行动点\(ap)、金币\(coins)。";revision += 1;return true}
+        catch{message=error.localizedDescription;return false}
     }
     func setConnection(_ id:String,connected:Bool){if connected{externalIDs.insert(id)}else{externalIDs.remove(id)};updateMirrorDemand();if !externalConnected{frameMirror.frame=nil};revision += 1}
 }

@@ -69,8 +69,19 @@ assert '(0..<7).map' in game
 assert not any('@State' in line and ',quantity=' in line for line in team.splitlines())
 assert 'teacherTransferTeamResource' in team
 assert 'transferTeamResource' in team and 'configureTeams' in team and 'mergeTeams' in team
+book=public[public.index('struct PublicBookPage'):public.index('private struct PublicInventoryPanel')]
+gm=read('TeacherGMConsole.swift');grant=read('TeacherBookGrantBar.swift');views=read('Views.swift')
+assert 'ClassroomBookStatusLayout.height(in:geometry.size,players:players.count)' in book
+assert '.frame(height:height)' in book and '.clipped()' in book
+assert 'TeacherGMConsole' not in public and 'TextField' not in book and 'game.openGM()' in views
+assert 'TeacherBookGrantBar(game:game' in views and 'PublicBookPage(model:session.display,players:game.backend.bookPlayers)' in views
+assert 'grantPlayers(ids,ap:ap,coins:coins,role:.teacher)' in host
+assert 'backend.editPlayer(id,value:value,role:.teacher)' in host
+assert 'UIHostingController(rootView:TeacherGMConsole' in host
+assert 'if game.saveGM(selected,value:value){reload()' in gm
+assert 'backend.canUndoTeacherAction' in gm and 'undoTeacherAction()' in grant
 result=dict(kind='source-routing-audit',commit=a.commit,publicOnlyHasPlayerFacingPanels=True,oneTeacherOwnedSessionAndRenderer=True,
     mapAndBattleUseOriginalProductionComponents=True,publicModeDoesNotStartAnotherAIOrDecisionTimer=True,
     privateSheetsRoutedToTeacherWindow=True,legacySinglePlayerTrainingUnderlayRemoved=True,
-    publicGameInputsDisabled=True,publicGameCallbacksExplicitlyReadOnly=True,battleCompletionReturnsToExploration=True,fixedCanvasAndDrawablePolicy=True,teacherUsesActualGameOnlyMirror=True,teacherSimplifiedMapRemoved=True,actualProjectionUsedForInput=True,highResolution30FPSPolicy=True,layeredPreviewAvoidsMapRasterization=True,dragPanAndPinch=True,readbackOffMainQueue=True,hiddenPreviewStopsCopying=True,fullScreenTeacherInputWired=True,sixStudentsAndReservedHostSeat=True,dynamicMapAndBattlePlayers=True,privateTeamAndWarehouseControls=True,singlePageTeacherWindow=True,originalSkillCardsUseTeacherHitRouting=True,allClassroomSkillCardsFitWithoutScroll=True,encounterAllowsMapInput=True,nativeWindowRoutingVerified=False)
+    publicGameInputsDisabled=True,publicGameCallbacksExplicitlyReadOnly=True,battleCompletionReturnsToExploration=True,fixedCanvasAndDrawablePolicy=True,teacherUsesActualGameOnlyMirror=True,teacherSimplifiedMapRemoved=True,actualProjectionUsedForInput=True,highResolution30FPSPolicy=True,layeredPreviewAvoidsMapRasterization=True,dragPanAndPinch=True,readbackOffMainQueue=True,hiddenPreviewStopsCopying=True,fullScreenTeacherInputWired=True,sixStudentsAndReservedHostSeat=True,dynamicMapAndBattlePlayers=True,privateTeamAndWarehouseControls=True,publicBookStatusAreaBound=True,privateBookGrantAndGMControls=True,sharedEngineForBookAndGM=True,singlePageTeacherWindow=True,originalSkillCardsUseTeacherHitRouting=True,allClassroomSkillCardsFitWithoutScroll=True,encounterAllowsMapInput=True,nativeWindowRoutingVerified=False)
 a.output.parent.mkdir(parents=True,exist_ok=True);a.output.write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2))

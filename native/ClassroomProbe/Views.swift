@@ -21,31 +21,13 @@ private struct TeacherBookConsole:View {
     @State private var exportingURL:URL?
     @FocusState private var notesFocused:Bool
     var body:some View {
-        ScrollView {
-            VStack(alignment:.leading,spacing:16){
-                Text("教师绘本后台").font(.title.bold())
-                Text(session.registrationStatus).foregroundStyle(.secondary)
-                Text(session.message)
-                HStack {
-                    Button("投放绘本"){notesFocused=false;game.project(.book)}.disabled(game.busy)
-                    Button("返回游戏画面"){notesFocused=false;session.concealNotes();game.project(.exploration)}
-                    Button("上一页"){session.turnPage(-1)}
-                    Button("下一页"){session.turnPage(1)}
-                    Text("\(session.state.pageCount==0 ? 0:session.state.pageIndex+1) / \(session.state.pageCount)")
-                }.buttonStyle(ClassroomButtonStyle(primary:true))
-                HStack(alignment:.top,spacing:20){
-                    Group {
-                        if let image=session.display.image{Image(uiImage:image).resizable().scaledToFit()}
-                        else{ContentUnavailableView("导入课堂绘本",systemImage:"book",description:Text("页面将公开展示，备注只保留在这里。"))}
-                    }.frame(maxWidth:.infinity,minHeight:360)
-                    VStack(alignment:.leading,spacing:10){
-                        Toggle("显示教师备注",isOn:$session.showNotes)
-                        if session.showNotes {
-                            TextEditor(text:Binding(get:{session.currentNote},set:{session.editNote($0)})).focused($notesFocused).frame(minHeight:320)
-                        }else{Text("备注不会投放到游戏窗口。").foregroundStyle(.secondary)}
-                    }.frame(width:300)
-                }
-                HStack {
+        VStack(alignment:.leading,spacing:10){
+            HStack {
+                Text("教师绘本后台").font(.title2.bold())
+                Text(session.registrationStatus).font(.caption).lineLimit(1)
+                Spacer()
+                Button("GM窗口"){notesFocused=false;game.openGM()}.disabled(game.busy || game.campaign==nil)
+                Menu("绘本文件") {
                     Button("加载内置测试PPTX"){session.loadSample()}
                     Button("导入PPTX"){importingBackup=false;openImporter()}
                     Button("导入报告"){report=true}
@@ -53,9 +35,27 @@ private struct TeacherBookConsole:View {
                     Button("恢复绘本"){session.restoreLocal()}
                     Button("导出绘本备份"){exportingURL=session.exportedURL()}
                     Button("导入绘本备份"){importingBackup=true;openImporter()}
-                }.buttonStyle(ClassroomButtonStyle())
-            }.padding(24)
-        }.background(GameTheme.background).foregroundStyle(GameTheme.ink)
+                }
+            }
+            HStack {
+                Button("投放绘本"){notesFocused=false;game.project(.book)}.disabled(game.busy)
+                Button("返回游戏画面"){notesFocused=false;session.concealNotes();game.project(.exploration)}
+                Button("上一页"){session.turnPage(-1)}
+                Button("下一页"){session.turnPage(1)}
+                Text("\(session.state.pageCount==0 ? 0:session.state.pageIndex+1) / \(session.state.pageCount)")
+            }.buttonStyle(ClassroomButtonStyle(primary:true))
+            TeacherBookGrantBar(game:game,prepare:{notesFocused=false})
+            HStack(alignment:.top,spacing:16){
+                PublicBookPage(model:session.display,players:game.backend.bookPlayers).frame(maxWidth:.infinity,maxHeight:.infinity)
+                VStack(alignment:.leading,spacing:8){
+                    Toggle("显示教师备注",isOn:$session.showNotes)
+                    if session.showNotes {
+                        TextEditor(text:Binding(get:{session.currentNote},set:{session.editNote($0)})).focused($notesFocused)
+                    }else{Text("备注不会投放到游戏窗口。").foregroundStyle(.secondary);Spacer()}
+                }.frame(width:280)
+            }.frame(maxHeight:.infinity)
+            Text(game.message+" · "+session.message).font(.caption).lineLimit(1).foregroundStyle(.secondary)
+        }.padding(16).background(GameTheme.background).foregroundStyle(GameTheme.ink)
         .onChange(of:notesFocused){_,active in session.notesFocus(active)}
         .onChange(of:session.showNotes){_,value in if !value{notesFocused=false}}
         .fileImporter(isPresented:$importer,allowedContentTypes:importingBackup ? [.json]:[UTType(filenameExtension:"pptx") ?? .data]){result in

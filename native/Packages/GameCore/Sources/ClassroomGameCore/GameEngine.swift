@@ -156,6 +156,8 @@ struct Evaluation {
             for id in actors.sorted(){let payment=min(unpaid,state.units[id]!.coins);state.units[id]!.coins-=payment;unpaid-=payment}
             events.append(GameEvent("campaignMovementRefilled",amount:coins,detail:manual ? "manual":"coins"))
         case .monsterStep: try monsterStep()
+        case .editPlayer(let id,let value):try editPlayer(id,value:value)
+        case .grantPlayerResources(let ids,let ap,let coins):try grantPlayerResources(ids,ap:ap,coins:coins)
         case .editResources(let id, let patch):
             if let health = patch.health { try setHealth(id, value: health, killer: nil) }
             var edited = try unit(id)

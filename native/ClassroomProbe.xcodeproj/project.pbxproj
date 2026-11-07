@@ -466,6 +466,26 @@
 			"isa" = "PBXBuildFile";
 			"fileRef" = "A3239AF0CB1C912385F2A090";
 		};
+		"58DBEFF1784DBDB692FD93C1" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "TeacherGMConsole.swift";
+			"sourceTree" = "<group>";
+		};
+		"5E770B8D200FF0118B8C7D4C" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "58DBEFF1784DBDB692FD93C1";
+		};
+		"88898945DDBE4E9C4F72BD72" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "TeacherBookGrantBar.swift";
+			"sourceTree" = "<group>";
+		};
+		"04F6271CE9DA276B39728CAE" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "88898945DDBE4E9C4F72BD72";
+		};
 		"B1A3FE4A8FE761A756D23B4A" = {
 			"isa" = "PBXFileReference";
 			"lastKnownFileType" = "sourcecode.swift";
@@ -618,6 +638,8 @@
 				"6FFF1241B9BBE3C79F8D45D3",
 				"3335E1BC1A403DE66CF560E8",
 				"A3239AF0CB1C912385F2A090",
+				"58DBEFF1784DBDB692FD93C1",
+				"88898945DDBE4E9C4F72BD72",
 				"B1A3FE4A8FE761A756D23B4A",
 				"68721AB0B096F524A9B42608",
 				"06271BAF49532C879AA3C58B",
@@ -751,6 +773,8 @@
 				"F2EC677A728E08A335530B01",
 				"BEAEA776BC78901A630715D4",
 				"FEF475B50088EB9445C7BB5D",
+				"5E770B8D200FF0118B8C7D4C",
+				"04F6271CE9DA276B39728CAE",
 				"3D37AAC1141D10B6E3121AE3",
 				"0D99D4DB6ACD79E97AF4824E",
 			);
@@ -819,8 +843,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				"CURRENT_PROJECT_VERSION" = "19";
-				"MARKETING_VERSION" = "0.14.0";
+				"CURRENT_PROJECT_VERSION" = "20";
+				"MARKETING_VERSION" = "0.15.0";
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 			};
 		};
@@ -860,8 +884,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				"CURRENT_PROJECT_VERSION" = "19";
-				"MARKETING_VERSION" = "0.14.0";
+				"CURRENT_PROJECT_VERSION" = "20";
+				"MARKETING_VERSION" = "0.15.0";
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 			};
 		};
