@@ -1,0 +1,19 @@
+{
+  "kind": "offline workflow schematic with existing approved atlas",
+  "notAppCapture": true,
+  "notTouchReplay": true,
+  "notPerformanceMeasurement": true,
+  "sourceSamples": 120,
+  "sampleMS": 50,
+  "totalMS": 6000,
+  "decodedFrames": 4,
+  "profileSlots": 12,
+  "campaignSlots": 8,
+  "teacherHostEnableUI": true,
+  "phases": [
+    "保存人物档案 · 姓名和装扮独立于整局状态",
+    "选择完整行程槽 · 读取前自动备份",
+    "操作历史 · 保留选中条目并撤回后续操作",
+    "老师加入独立P7席位 · 六名学生保持"
+  ]
+}
