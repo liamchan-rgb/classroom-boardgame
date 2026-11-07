@@ -1195,7 +1195,7 @@ private func refreshCampaignStatus(allowBattleOpen:Bool=true) {
         screen.onClose={ [weak self] in self?.classroomInventoryChanged?(nil);self?.refreshCampaignStatus() }
         present(screen,animated:true)
     }
-    enum TeacherOperation {case inventory,interact,refill,team,route,editNode(Int),pauseOrResume,save}
+    enum TeacherOperation {case inventory,interact,refill,team,route,editNode(Int),pauseOrResume,save,zoom(Int),pan(CGPoint)}
     func classroomPerform(_ operation:TeacherOperation,role:ClassroomRole)throws {
         try ClassroomGameBackend.requireTeacher(role)
         guard classroomMode,ready,!classroomBusy else{throw GameError("画面准备中或动作尚未结束。")}
@@ -1210,6 +1210,8 @@ private func refreshCampaignStatus(allowBattleOpen:Bool=true) {
             editNodeContents(id)
         case .pauseOrResume:togglePlayback()
         case .save:try saveCampaign()
+        case .zoom(let direction):scene.setZoom(scene.zoom+CGFloat(direction)*0.2)
+        case .pan(let amount):scene.panBy(amount)
         }
     }
     func classroomRefresh(){scene.refreshCampaign();refreshCampaignStatus();battlePreviewView?.classroomRefresh()}

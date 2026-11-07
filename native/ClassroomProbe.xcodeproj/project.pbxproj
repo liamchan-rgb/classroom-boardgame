@@ -16,6 +16,16 @@
 			"isa" = "PBXBuildFile";
 			"fileRef" = "B103E9354A9F3DDB1F1F5FFF";
 		};
+		"FEE4240556D460778CACF252" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "ClassroomTheme.swift";
+			"sourceTree" = "<group>";
+		};
+		"EBFCD21BF96244EFBA4F75E5" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "FEE4240556D460778CACF252";
+		};
 		"94C083F25F57C56CA95198B7" = {
 			"isa" = "PBXFileReference";
 			"lastKnownFileType" = "sourcecode.swift";
@@ -25,6 +35,406 @@
 		"6499838B36F4B47F3BBDE495" = {
 			"isa" = "PBXBuildFile";
 			"fileRef" = "94C083F25F57C56CA95198B7";
+		};
+		"694592A08B2026452F45432F" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/EnvironmentShaders.swift";
+			"sourceTree" = "<group>";
+		};
+		"6A55E5E5094B2CA6F96F69BA" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "694592A08B2026452F45432F";
+		};
+		"B29F434DEE9BC7F91FF39110" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/GaitReviewScene.swift";
+			"sourceTree" = "<group>";
+		};
+		"CA8079983BDEBA21852A4B49" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "B29F434DEE9BC7F91FF39110";
+		};
+		"32987798B566F39A5809DC2F" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/GaitTest.swift";
+			"sourceTree" = "<group>";
+		};
+		"F004A2D69A015D89BDDF27F9" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "32987798B566F39A5809DC2F";
+		};
+		"1E4701014E71A420F9DC824F" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/GameScene.swift";
+			"sourceTree" = "<group>";
+		};
+		"1B58B57628CAFF640B69D445" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "1E4701014E71A420F9DC824F";
+		};
+		"E7019ADE69332CB6527D2DA8" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/HeroFrames.swift";
+			"sourceTree" = "<group>";
+		};
+		"7533238B3F2116328B180CC0" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "E7019ADE69332CB6527D2DA8";
+		};
+		"C3BBC8C29A646AA3EB737250" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/JourneySimulation.swift";
+			"sourceTree" = "<group>";
+		};
+		"1F6B39D2B34EE266B5671C2F" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "C3BBC8C29A646AA3EB737250";
+		};
+		"B12B9570D0368854668FAB74" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/LivingWorld.swift";
+			"sourceTree" = "<group>";
+		};
+		"0BC7BBF42478B949F5D8A7EE" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "B12B9570D0368854668FAB74";
+		};
+		"6CA2AFFD1718255DBA433798" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/MeadowBattleActorView.swift";
+			"sourceTree" = "<group>";
+		};
+		"C6090E769859A189C918C0D1" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "6CA2AFFD1718255DBA433798";
+		};
+		"320118EFA2B2DF8601E154C7" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/MeadowBattleDiceView.swift";
+			"sourceTree" = "<group>";
+		};
+		"6FE8D41A56A0BA10F0C9E500" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "320118EFA2B2DF8601E154C7";
+		};
+		"EDA800C66912658663553E14" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/MeadowBattleEncounter.swift";
+			"sourceTree" = "<group>";
+		};
+		"13B3AD8498AB754BD0834A6A" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "EDA800C66912658663553E14";
+		};
+		"48C935F532AC3C56150B3473" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/MeadowBattleLandscapeView.swift";
+			"sourceTree" = "<group>";
+		};
+		"98ECC5FCA65FB0EEAEA09DCF" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "48C935F532AC3C56150B3473";
+		};
+		"4E137BFA3BD0705F9C26DD25" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/MeadowBattleLayout.swift";
+			"sourceTree" = "<group>";
+		};
+		"F26BD5E3EF308D045D759676" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "4E137BFA3BD0705F9C26DD25";
+		};
+		"582DC0484C88B934F1472063" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/MeadowBattlePlateProcessor.swift";
+			"sourceTree" = "<group>";
+		};
+		"DFB4D31F9ABB59BD9D0C2019" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "582DC0484C88B934F1472063";
+		};
+		"A348F08C6CB91EA34607E53D" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/MeadowBattlePreviewView.swift";
+			"sourceTree" = "<group>";
+		};
+		"3F78BD9FE4ACBA5D497B91A7" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "A348F08C6CB91EA34607E53D";
+		};
+		"0F36CEDB38096F7F879787D0" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/MeadowBattleScenePresentation.swift";
+			"sourceTree" = "<group>";
+		};
+		"86B1AAABC058CCB542C7D7B4" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "0F36CEDB38096F7F879787D0";
+		};
+		"116914813E8333E64579A0A6" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/MeadowGPUDiagnostics.swift";
+			"sourceTree" = "<group>";
+		};
+		"55075A7FF4817BE6A0990270" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "116914813E8333E64579A0A6";
+		};
+		"C03ACCC154E00C1BEA2AD79C" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/MeadowLoader.swift";
+			"sourceTree" = "<group>";
+		};
+		"2581324DA89B504519558DE7" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "C03ACCC154E00C1BEA2AD79C";
+		};
+		"853584D55D2AE6F37C9BAB3F" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/MeadowLoadingView.swift";
+			"sourceTree" = "<group>";
+		};
+		"7C0B256B29E0BACFB3148A6D" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "853584D55D2AE6F37C9BAB3F";
+		};
+		"3EDB6ADD0741DFF1334F259C" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/MeadowPartyBattleView.swift";
+			"sourceTree" = "<group>";
+		};
+		"070E1399B06A6232B3CE8F33" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "3EDB6ADD0741DFF1334F259C";
+		};
+		"1D64A1929BD27BA6C2BFFE22" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/MeadowPartyStageView.swift";
+			"sourceTree" = "<group>";
+		};
+		"0FC398E922109C52CA59E441" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "1D64A1929BD27BA6C2BFFE22";
+		};
+		"89BBC237E234B2E588A04FB2" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/MeadowRoadMask.swift";
+			"sourceTree" = "<group>";
+		};
+		"E59A6802EDD2C75A5A5B0A82" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "89BBC237E234B2E588A04FB2";
+		};
+		"3CF4E50BE2C7616497670302" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/MeadowShadowRenderer.swift";
+			"sourceTree" = "<group>";
+		};
+		"C8B3948CBCF3E00252BBCE0F" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "3CF4E50BE2C7616497670302";
+		};
+		"0E9D9FC937EC98A10AFA3484" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/MeadowViewport.swift";
+			"sourceTree" = "<group>";
+		};
+		"17A60CB0423DC0A5CA70C0BF" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "0E9D9FC937EC98A10AFA3484";
+		};
+		"E2F606F49AC4411F288B3D13" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/ProjectedShadow.swift";
+			"sourceTree" = "<group>";
+		};
+		"FCEF6B198C5FFDDF00E456FC" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "E2F606F49AC4411F288B3D13";
+		};
+		"0F4229325198A9431FCD4D77" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/SceneDefinition.swift";
+			"sourceTree" = "<group>";
+		};
+		"C272E5F6DB42415C327A93C3" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "0F4229325198A9431FCD4D77";
+		};
+		"474EF41C1BA8AE2BD90D651E" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/Trail.swift";
+			"sourceTree" = "<group>";
+		};
+		"DDAB9ACB110D528D78953B1E" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "474EF41C1BA8AE2BD90D651E";
+		};
+		"BCBCB940DA61109EA5A70C72" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/TrailNetwork.swift";
+			"sourceTree" = "<group>";
+		};
+		"8C4A8761E32F6CF464AE4D5B" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "BCBCB940DA61109EA5A70C72";
+		};
+		"D112CEFBA74CD3AAB3DE7097" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/WalkCycle.swift";
+			"sourceTree" = "<group>";
+		};
+		"105574F3EF457039AB39FF59" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "D112CEFBA74CD3AAB3DE7097";
+		};
+		"FF4A74A623ED2EC07DF5FE29" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/GameViewController.swift";
+			"sourceTree" = "<group>";
+		};
+		"C4488C800C89818133AFBC1E" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "FF4A74A623ED2EC07DF5FE29";
+		};
+		"4D93898F62355242AC30108A" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/ShadowLab/ShadowLabGeometry.swift";
+			"sourceTree" = "<group>";
+		};
+		"4DC7D4113A690CED1F8B9C36" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "4D93898F62355242AC30108A";
+		};
+		"38AF43C7BA8D56AF5A65316C" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/ShadowLab/ShadowLabRenderer.swift";
+			"sourceTree" = "<group>";
+		};
+		"87BFFF099516CBBC949FCC52" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "38AF43C7BA8D56AF5A65316C";
+		};
+		"55E4FE7DF530AF2F5B77CFBB" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.metal";
+			"path" = "Meadow/ShadowLab/ShadowLabShaders.metal";
+			"sourceTree" = "<group>";
+		};
+		"A829420B9863410BAA863CCA" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "55E4FE7DF530AF2F5B77CFBB";
+		};
+		"9F0C9AB9171EBAA71B510D3A" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/ShadowLab/ShadowLabViewController.swift";
+			"sourceTree" = "<group>";
+		};
+		"F1AFAF08D42A47C90E95C5BB" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "9F0C9AB9171EBAA71B510D3A";
+		};
+		"1C38127D18B2447C8A11C7EA" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/UI/MeadowEncounterPreviewView.swift";
+			"sourceTree" = "<group>";
+		};
+		"A84D803EACCA67CAEB944461" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "1C38127D18B2447C8A11C7EA";
+		};
+		"22A7DA21858652980315FFFC" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/UI/MeadowInventoryViewController.swift";
+			"sourceTree" = "<group>";
+		};
+		"0CF7D6A30BDA8400551CA07A" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "22A7DA21858652980315FFFC";
+		};
+		"F4173D49A6505D5A66B0E96E" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/UI/MeadowMapSettingsViewController.swift";
+			"sourceTree" = "<group>";
+		};
+		"5E3BB57FCE8B269E4E601DE5" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "F4173D49A6505D5A66B0E96E";
+		};
+		"76CAAF7A8D6BE464314EBDB3" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/UI/ParchmentButton.swift";
+			"sourceTree" = "<group>";
+		};
+		"575EF86DB0E9F00B79D19887" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "76CAAF7A8D6BE464314EBDB3";
+		};
+		"F0A6E9C81ACF5122E3017408" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "MeadowPublicOutput.swift";
+			"sourceTree" = "<group>";
+		};
+		"2B85ED0D255B72549E378180" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "F0A6E9C81ACF5122E3017408";
+		};
+		"3BD91D65CDA40795EA3E9F5F" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "MeadowTeacherCoordinator.swift";
+			"sourceTree" = "<group>";
+		};
+		"E138F57492F4276CBDE3F637" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "3BD91D65CDA40795EA3E9F5F";
+		};
+		"6FFF1241B9BBE3C79F8D45D3" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "MeadowTeacherDashboard.swift";
+			"sourceTree" = "<group>";
+		};
+		"F2EC677A728E08A335530B01" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "6FFF1241B9BBE3C79F8D45D3";
 		};
 		"B1A3FE4A8FE761A756D23B4A" = {
 			"isa" = "PBXFileReference";
@@ -45,136 +455,6 @@
 		"0D99D4DB6ACD79E97AF4824E" = {
 			"isa" = "PBXBuildFile";
 			"fileRef" = "68721AB0B096F524A9B42608";
-		};
-		"1B718BC2F6E50CD44FCF14A5" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "RulesLabView.swift";
-			"sourceTree" = "<group>";
-		};
-		"AC83F6BF172A14E66F5B4B70" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "1B718BC2F6E50CD44FCF14A5";
-		};
-		"C7B104AF595657B7FC620B62" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "PVEAppSession.swift";
-			"sourceTree" = "<group>";
-		};
-		"EF72657BBA2F83C34549BE3F" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "C7B104AF595657B7FC620B62";
-		};
-		"753E9B1832356A767E10F071" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "PVEStyle.swift";
-			"sourceTree" = "<group>";
-		};
-		"2070907CBE17BF0E408705B2" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "753E9B1832356A767E10F071";
-		};
-		"6E4F7F11D4407EC2135AE5E5" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "PVEMapView.swift";
-			"sourceTree" = "<group>";
-		};
-		"D4F0C8015D109FA2315E94A8" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "6E4F7F11D4407EC2135AE5E5";
-		};
-		"AF15B03012E392E5AFF61706" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "PVEPublicView.swift";
-			"sourceTree" = "<group>";
-		};
-		"C5314677CF5925C8E34B0528" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "AF15B03012E392E5AFF61706";
-		};
-		"6D05EA9CF3115E304EB5E6A4" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "PVEPlayView.swift";
-			"sourceTree" = "<group>";
-		};
-		"6F9981CF519EF3267506AD2A" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "6D05EA9CF3115E304EB5E6A4";
-		};
-		"8FCBDC717CA54A4D73F56A98" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "PVESheets.swift";
-			"sourceTree" = "<group>";
-		};
-		"18BEA6D452A0D5BF25AE1168" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "8FCBDC717CA54A4D73F56A98";
-		};
-		"B5421907CB9D8A66E9193821" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "PVEKeyboard.swift";
-			"sourceTree" = "<group>";
-		};
-		"47F8E596E5EE7C98D64D5460" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "B5421907CB9D8A66E9193821";
-		};
-		"874498D15E2C4ECD714CAC49" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "PVEArt.swift";
-			"sourceTree" = "<group>";
-		};
-		"0F511239DFFC2841F9517BE1" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "874498D15E2C4ECD714CAC49";
-		};
-		"D72241D2E71AF360D92ED3F4" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "NativeVisualValidation.swift";
-			"sourceTree" = "<group>";
-		};
-		"C69FA66D78140FC3F5EC9086" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "D72241D2E71AF360D92ED3F4";
-		};
-		"14E687683930A4A8586F2D28" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "MeadowBridgeActor.swift";
-			"sourceTree" = "<group>";
-		};
-		"AF06BB0A30C64F9F3D8A1C6B" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "14E687683930A4A8586F2D28";
-		};
-		"C14E0CE5BB256CBA7467B2F8" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "MeadowPublicView.swift";
-			"sourceTree" = "<group>";
-		};
-		"7941812D1853D2B85EFF6615" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "C14E0CE5BB256CBA7467B2F8";
-		};
-		"726B233C9A2A426A16E71C45" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "MeadowPresentationControls.swift";
-			"sourceTree" = "<group>";
-		};
-		"9F4859D727B7C57B3E2D5A27" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "726B233C9A2A426A16E71C45";
 		};
 		"06271BAF49532C879AA3C58B" = {
 			"isa" = "PBXFileReference";
@@ -212,25 +492,45 @@
 			"isa" = "PBXBuildFile";
 			"fileRef" = "54AE073B4791810725C73209";
 		};
-		"20BEAC8F8173541DA9BDC303" = {
+		"0F8E7C3D1939CD723044E991" = {
 			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "folder";
-			"path" = "Resources/Art";
+			"lastKnownFileType" = "folder.assetcatalog";
+			"path" = "Resources/Assets.xcassets";
 			"sourceTree" = "<group>";
 		};
-		"7356E94E3A52E57C04B36D33" = {
+		"D0ADC22F3C046CC76298F620" = {
 			"isa" = "PBXBuildFile";
-			"fileRef" = "20BEAC8F8173541DA9BDC303";
+			"fileRef" = "0F8E7C3D1939CD723044E991";
 		};
-		"1E40454A5FA0D7361B95950A" = {
+		"E2CEF7F5A34037217D26E7E5" = {
 			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "folder";
-			"path" = "Resources/MeadowArt";
+			"lastKnownFileType" = "text.json";
+			"path" = "Resources/SceneMap.json";
 			"sourceTree" = "<group>";
 		};
-		"7AF212852F99AFA6CA70647C" = {
+		"6F49FE599DAAE8E3FBDA29D2" = {
 			"isa" = "PBXBuildFile";
-			"fileRef" = "1E40454A5FA0D7361B95950A";
+			"fileRef" = "E2CEF7F5A34037217D26E7E5";
+		};
+		"38CE2342CBED6F5FFC3EDE78" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "text.json";
+			"path" = "Resources/hero-gait.json";
+			"sourceTree" = "<group>";
+		};
+		"E78356E3A2C5B9015FD0080B" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "38CE2342CBED6F5FFC3EDE78";
+		};
+		"2C8922DAD5AD5F24E658760C" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "text.json";
+			"path" = "Resources/meadow-port-provenance.json";
+			"sourceTree" = "<group>";
+		};
+		"3A9772C84904171226FAEA67" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "2C8922DAD5AD5F24E658760C";
 		};
 		"A8792157CB4F27FB949C035F" = {
 			"isa" = "PBXFileReference";
@@ -243,28 +543,58 @@
 			"isa" = "PBXGroup";
 			"children" = (
 				"B103E9354A9F3DDB1F1F5FFF",
+				"FEE4240556D460778CACF252",
 				"94C083F25F57C56CA95198B7",
+				"694592A08B2026452F45432F",
+				"B29F434DEE9BC7F91FF39110",
+				"32987798B566F39A5809DC2F",
+				"1E4701014E71A420F9DC824F",
+				"E7019ADE69332CB6527D2DA8",
+				"C3BBC8C29A646AA3EB737250",
+				"B12B9570D0368854668FAB74",
+				"6CA2AFFD1718255DBA433798",
+				"320118EFA2B2DF8601E154C7",
+				"EDA800C66912658663553E14",
+				"48C935F532AC3C56150B3473",
+				"4E137BFA3BD0705F9C26DD25",
+				"582DC0484C88B934F1472063",
+				"A348F08C6CB91EA34607E53D",
+				"0F36CEDB38096F7F879787D0",
+				"116914813E8333E64579A0A6",
+				"C03ACCC154E00C1BEA2AD79C",
+				"853584D55D2AE6F37C9BAB3F",
+				"3EDB6ADD0741DFF1334F259C",
+				"1D64A1929BD27BA6C2BFFE22",
+				"89BBC237E234B2E588A04FB2",
+				"3CF4E50BE2C7616497670302",
+				"0E9D9FC937EC98A10AFA3484",
+				"E2F606F49AC4411F288B3D13",
+				"0F4229325198A9431FCD4D77",
+				"474EF41C1BA8AE2BD90D651E",
+				"BCBCB940DA61109EA5A70C72",
+				"D112CEFBA74CD3AAB3DE7097",
+				"FF4A74A623ED2EC07DF5FE29",
+				"4D93898F62355242AC30108A",
+				"38AF43C7BA8D56AF5A65316C",
+				"55E4FE7DF530AF2F5B77CFBB",
+				"9F0C9AB9171EBAA71B510D3A",
+				"1C38127D18B2447C8A11C7EA",
+				"22A7DA21858652980315FFFC",
+				"F4173D49A6505D5A66B0E96E",
+				"76CAAF7A8D6BE464314EBDB3",
+				"F0A6E9C81ACF5122E3017408",
+				"3BD91D65CDA40795EA3E9F5F",
+				"6FFF1241B9BBE3C79F8D45D3",
 				"B1A3FE4A8FE761A756D23B4A",
 				"68721AB0B096F524A9B42608",
-				"1B718BC2F6E50CD44FCF14A5",
-				"C7B104AF595657B7FC620B62",
-				"753E9B1832356A767E10F071",
-				"6E4F7F11D4407EC2135AE5E5",
-				"AF15B03012E392E5AFF61706",
-				"6D05EA9CF3115E304EB5E6A4",
-				"8FCBDC717CA54A4D73F56A98",
-				"B5421907CB9D8A66E9193821",
-				"874498D15E2C4ECD714CAC49",
-				"D72241D2E71AF360D92ED3F4",
-				"14E687683930A4A8586F2D28",
-				"C14E0CE5BB256CBA7467B2F8",
-				"726B233C9A2A426A16E71C45",
 				"06271BAF49532C879AA3C58B",
 				"6BFC76380CC79F82566884C6",
 				"2BF35B3FB72A3D4E876979D6",
 				"54AE073B4791810725C73209",
-				"20BEAC8F8173541DA9BDC303",
-				"1E40454A5FA0D7361B95950A",
+				"0F8E7C3D1939CD723044E991",
+				"E2CEF7F5A34037217D26E7E5",
+				"38CE2342CBED6F5FFC3EDE78",
+				"2C8922DAD5AD5F24E658760C",
 			);
 			"path" = "ClassroomProbe";
 			"sourceTree" = "<group>";
@@ -311,27 +641,82 @@
 			"isa" = "PBXBuildFile";
 			"productRef" = "BF5F72769ADDCE9E80395CC4";
 		};
+		"1A68F0B6E3D22B61A2F6041C" = {
+			"isa" = "XCSwiftPackageProductDependency";
+			"package" = "A6D8EA4DA16437C2DFCCA7CD";
+			"productName" = "MeadowBattleSupport";
+		};
+		"D1DB555D7A124EFE6F070246" = {
+			"isa" = "PBXBuildFile";
+			"productRef" = "1A68F0B6E3D22B61A2F6041C";
+		};
+		"7C86CCB7BF2BD361887FE501" = {
+			"isa" = "XCSwiftPackageProductDependency";
+			"package" = "A6D8EA4DA16437C2DFCCA7CD";
+			"productName" = "MeadowWorldSupport";
+		};
+		"36D22FFBD4102B677F1B3B0A" = {
+			"isa" = "PBXBuildFile";
+			"productRef" = "7C86CCB7BF2BD361887FE501";
+		};
+		"EE996B010E47258E08C9166D" = {
+			"isa" = "XCSwiftPackageProductDependency";
+			"package" = "A6D8EA4DA16437C2DFCCA7CD";
+			"productName" = "MeadowClassroomSupport";
+		};
+		"C8CB49644DAEA4AB9206F355" = {
+			"isa" = "PBXBuildFile";
+			"productRef" = "EE996B010E47258E08C9166D";
+		};
 		"878A52FC5FF6A57D50B7B870" = {
 			"isa" = "PBXSourcesBuildPhase";
 			"buildActionMask" = "2147483647";
 			"files" = (
 				"48CD02DF754AD4A38EF8C21B",
+				"EBFCD21BF96244EFBA4F75E5",
 				"6499838B36F4B47F3BBDE495",
+				"6A55E5E5094B2CA6F96F69BA",
+				"CA8079983BDEBA21852A4B49",
+				"F004A2D69A015D89BDDF27F9",
+				"1B58B57628CAFF640B69D445",
+				"7533238B3F2116328B180CC0",
+				"1F6B39D2B34EE266B5671C2F",
+				"0BC7BBF42478B949F5D8A7EE",
+				"C6090E769859A189C918C0D1",
+				"6FE8D41A56A0BA10F0C9E500",
+				"13B3AD8498AB754BD0834A6A",
+				"98ECC5FCA65FB0EEAEA09DCF",
+				"F26BD5E3EF308D045D759676",
+				"DFB4D31F9ABB59BD9D0C2019",
+				"3F78BD9FE4ACBA5D497B91A7",
+				"86B1AAABC058CCB542C7D7B4",
+				"55075A7FF4817BE6A0990270",
+				"2581324DA89B504519558DE7",
+				"7C0B256B29E0BACFB3148A6D",
+				"070E1399B06A6232B3CE8F33",
+				"0FC398E922109C52CA59E441",
+				"E59A6802EDD2C75A5A5B0A82",
+				"C8B3948CBCF3E00252BBCE0F",
+				"17A60CB0423DC0A5CA70C0BF",
+				"FCEF6B198C5FFDDF00E456FC",
+				"C272E5F6DB42415C327A93C3",
+				"DDAB9ACB110D528D78953B1E",
+				"8C4A8761E32F6CF464AE4D5B",
+				"105574F3EF457039AB39FF59",
+				"C4488C800C89818133AFBC1E",
+				"4DC7D4113A690CED1F8B9C36",
+				"87BFFF099516CBBC949FCC52",
+				"A829420B9863410BAA863CCA",
+				"F1AFAF08D42A47C90E95C5BB",
+				"A84D803EACCA67CAEB944461",
+				"0CF7D6A30BDA8400551CA07A",
+				"5E3BB57FCE8B269E4E601DE5",
+				"575EF86DB0E9F00B79D19887",
+				"2B85ED0D255B72549E378180",
+				"E138F57492F4276CBDE3F637",
+				"F2EC677A728E08A335530B01",
 				"3D37AAC1141D10B6E3121AE3",
 				"0D99D4DB6ACD79E97AF4824E",
-				"AC83F6BF172A14E66F5B4B70",
-				"EF72657BBA2F83C34549BE3F",
-				"2070907CBE17BF0E408705B2",
-				"D4F0C8015D109FA2315E94A8",
-				"C5314677CF5925C8E34B0528",
-				"6F9981CF519EF3267506AD2A",
-				"18BEA6D452A0D5BF25AE1168",
-				"47F8E596E5EE7C98D64D5460",
-				"0F511239DFFC2841F9517BE1",
-				"C69FA66D78140FC3F5EC9086",
-				"AF06BB0A30C64F9F3D8A1C6B",
-				"7941812D1853D2B85EFF6615",
-				"9F4859D727B7C57B3E2D5A27",
 			);
 			"runOnlyForDeploymentPostprocessing" = "0";
 		};
@@ -342,8 +727,10 @@
 				"4D846A8C621CBB1D64264EF4",
 				"A782B7B15BD1CF048DF4D43E",
 				"BB38697EEA1B34302C3C92D1",
-				"7356E94E3A52E57C04B36D33",
-				"7AF212852F99AFA6CA70647C",
+				"D0ADC22F3C046CC76298F620",
+				"6F49FE599DAAE8E3FBDA29D2",
+				"E78356E3A2C5B9015FD0080B",
+				"3A9772C84904171226FAEA67",
 			);
 			"runOnlyForDeploymentPostprocessing" = "0";
 		};
@@ -353,6 +740,9 @@
 			"files" = (
 				"49EEC38F2A087F264732B049",
 				"7408A016A24A3C12AA158D05",
+				"D1DB555D7A124EFE6F070246",
+				"36D22FFBD4102B677F1B3B0A",
+				"C8CB49644DAEA4AB9206F355",
 			);
 			"runOnlyForDeploymentPostprocessing" = "0";
 		};
@@ -393,8 +783,9 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				"CURRENT_PROJECT_VERSION" = "13";
-				"MARKETING_VERSION" = "0.12.1";
+				"CURRENT_PROJECT_VERSION" = "14";
+				"MARKETING_VERSION" = "0.13";
+				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 			};
 		};
 		"07CA1E69F6068DEA30A4DA6B" = {
@@ -433,8 +824,9 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				"CURRENT_PROJECT_VERSION" = "13";
-				"MARKETING_VERSION" = "0.12.1";
+				"CURRENT_PROJECT_VERSION" = "14";
+				"MARKETING_VERSION" = "0.13";
+				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 			};
 		};
 		"7ED5184A5487DF185E3420D0" = {
@@ -474,6 +866,9 @@
 			"packageProductDependencies" = (
 				"F5AE27228AC34400DE4A3768",
 				"BF5F72769ADDCE9E80395CC4",
+				"1A68F0B6E3D22B61A2F6041C",
+				"7C86CCB7BF2BD361887FE501",
+				"EE996B010E47258E08C9166D",
 			);
 		};
 		"244210E48437B6556980A702" = {

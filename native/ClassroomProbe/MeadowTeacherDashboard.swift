@@ -36,6 +36,15 @@ struct MeadowTeacherDashboard:View {
                         Spacer();Text("移动 \(Int(ceil(campaign.movementRemaining)))/\(Int(ceil(campaign.movementCapacity)))")
                     }.buttonStyle(.borderedProminent)
                     Toggle("选取地点进行后台编辑",isOn:$selectingNode)
+                    HStack {
+                        Text("投放镜头")
+                        Button("缩小"){game.operation(.zoom(-1))}
+                        Button("放大"){game.operation(.zoom(1))}
+                        Button("←"){game.operation(.pan(CGPoint(x:60,y:0)))}
+                        Button("→"){game.operation(.pan(CGPoint(x:-60,y:0)))}
+                        Button("↑"){game.operation(.pan(CGPoint(x:0,y:60)))}
+                        Button("↓"){game.operation(.pan(CGPoint(x:0,y:-60)))}
+                    }.buttonStyle(.bordered).disabled(!game.ready || game.busy)
                     TeacherControlMap(game:game,selectingNode:selectingNode).frame(height:310)
                     HStack {
                         Button("投放探索地图"){game.project(.exploration)}
