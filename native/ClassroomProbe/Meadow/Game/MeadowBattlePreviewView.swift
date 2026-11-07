@@ -39,6 +39,7 @@ enum MeadowPreviewPalette {
 final class MeadowBattlePreviewView: UIView {
     var classroomModelFactory:(()throws->PartyEncounter)? {didSet{party.classroomModelFactory=classroomModelFactory}}
     func classroomEnemyStep(){party.classroomEnemyStep()}
+    func classroomHit(at point:CGPoint)->MeadowPartyBattleView.ClassroomHit? {party.classroomHit(at:convert(point,to:party))}
     var classroomMode=false {didSet {
         party.classroomMode=classroomMode
         if classroomMode {

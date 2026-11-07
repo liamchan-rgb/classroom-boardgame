@@ -70,7 +70,15 @@ final class MeadowTeacherCoordinator:ObservableObject {
         return renderer?.classroomActions ?? []
     }
     var externalConnected:Bool {!externalIDs.isEmpty}
-    var modalOpen:Bool {privatePresenter?.presentedViewController != nil && !localOutputPreview}
+    var modalOpen:Bool {
+        guard let first=privatePresenter?.presentedViewController else{return false}
+        return !localOutputPreview || first.presentedViewController != nil
+    }
+    private var presentationHost:UIViewController? {
+        var top=privatePresenter
+        while let next=top?.presentedViewController {top=next}
+        return top
+    }
     init(){
         mirrorTimer=Timer.scheduledTimer(withTimeInterval:1/ClassroomPreviewPolicy.framesPerSecond,repeats:true){[weak self] _ in
             Task{@MainActor in
@@ -108,7 +116,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
         catch{message="存档读取失败，原文件保留："+error.localizedDescription}
     }
     func settings(){
-        guard !busy,campaign?.engine.state.battle==nil,let presenter=privatePresenter else{message="请先结束战斗，再调整随机地图。";return}
+        guard !busy,campaign?.engine.state.battle==nil,let presenter=presentationHost else{message="请先结束战斗，再调整随机地图。";return}
         do{try renderer?.classroomSuspend()}catch{message=error.localizedDescription;return}
         let screen=MeadowMapSettingsViewController()
         screen.classroomGenerated={ [backend] config in try backend.generate(config,role:.teacher) }
@@ -130,9 +138,33 @@ final class MeadowTeacherCoordinator:ObservableObject {
         }catch{message=error.localizedDescription}
     }
     func select(_ id:String){do{try backend.selectPlayer(id,role:.teacher);selectedTarget=id;renderer?.classroomRefresh();revision += 1}catch{message=error.localizedDescription}}
+    func canTapCanvas(_ point:CGPoint)->Bool {
+        guard ready,!busy,!modalOpen,surface != .book else{return false}
+        if campaign?.engine.state.battle != nil {return (try? renderer?.classroomBattleHit(at:point,role:.teacher)) != nil}
+        return canBeginMapGesture(point)
+    }
+    func chooseBattleTarget(_ id:String){
+        guard !busy,!modalOpen else{return}
+        selectedTarget=id;hoveredCanvasAction=nil
+        try? renderer?.classroomFocus(nil,target:id,role:.teacher)
+        revision += 1
+    }
+    private var hoveredCanvasAction:PartyAction?
+    func canvasHover(_ point:CGPoint?){
+        var action:PartyAction?
+        if let point,ready,!busy,!modalOpen,case .action(let value)?=try? renderer?.classroomBattleHit(at:point,role:.teacher),canUse(value){action=value}
+        guard action != hoveredCanvasAction else{return}
+        hoveredCanvasAction=action;focus(action)
+    }
     func canvasTap(_ point:CGPoint,selectingNode:Bool){
         guard ready else{message="画面还在准备，请稍候。";return}
         guard !busy,!modalOpen else{message="请等待当前动作结束或关闭后台对话框。";return}
+        if campaign?.engine.state.battle != nil {
+            if let hit=try? renderer?.classroomBattleHit(at:point,role:.teacher) {
+                switch hit {case .action(let action):battle(action);case .target(let id):chooseBattleTarget(id)}
+            }
+            return
+        }
         guard surface.acceptsMapInput,let c=campaign,c.engine.state.battle==nil,!c.isCompleted else{message="请先收起当前面板或返回探索地图。";return}
         do {
             guard let world=try renderer?.classroomWorldPoint(at:point,role:.teacher) else{message="请点击预览面板外的道路，或收起预览。";return}
@@ -189,7 +221,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
         }catch{message=error.localizedDescription}
     }
     func editResources(){
-        guard !busy,let c=campaign,let unit=c.engine.state.units[c.selectedPlayerID],let presenter=privatePresenter else{return}
+        guard !busy,let c=campaign,let unit=c.engine.state.units[c.selectedPlayerID],let presenter=presentationHost else{return}
         let sheet=UIAlertController(title:"教师调整 · "+unit.name,message:"仅后台可修改，投放端只显示保存后的状态。\n生命 / 护盾 / 当前行动点 / 金币 / 积分",preferredStyle:.alert)
         for (label,value) in [("生命",unit.health),("护盾",unit.shield),("当前行动点",unit.ap),("金币",unit.coins),("积分",unit.score)] {sheet.addTextField{$0.placeholder=label;$0.accessibilityLabel=label;$0.text=String(value);$0.keyboardType = .numberPad}}
         sheet.addAction(UIAlertAction(title:"取消",style:.cancel))

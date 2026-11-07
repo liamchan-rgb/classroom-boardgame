@@ -33,12 +33,18 @@ assert 'waitUntilCompleted' not in metal[metal.index('private struct MirrorCopy'
 assert 'for subview in view.subviews where subview !== groundView' in game and 'classroomCaptureFrame' in host
 assert 'teacherPreview && game.externalConnected' in public and 'MeadowTeacherMirror(mirror:game.frameMirror)' in public
 assert 'UIWindow' not in mirror and 'privatePresenter' not in mirror
-cover=dashboard[dashboard.index('.fullScreenCover'):dashboard.index('    private func battleControls')]
-assert 'TeacherGamePreview(game:game,selectingNode:selectingNode)' in cover
+assert 'workspace(fullScreen:true)' in dashboard and 'workspace(fullScreen:false)' in dashboard
 assert 'surface.acceptsMapInput' in host and 'surface == .exploration,let c=campaign' not in host
 assert 'game.previewVisibility(previewID,visible:true)' in dashboard and 'game.previewVisibility(previewID,visible:false)' in dashboard
-assert '.onScrollVisibilityChange(threshold:0.05)' in dashboard
-assert 'tracksScroll:true' in dashboard
+assert 'ScrollView' not in dashboard and 'battleControls' not in dashboard
+assert 'ForEach(game.actions' not in dashboard and 'game.battle(action)' in dashboard  # item menu only
+assert 'MeadowTeacherMapInput(canBegin:game.canBeginMapGesture,canTap:game.canTapCanvas' in dashboard
+assert 'classroomBattleHit(at:point,role:.teacher)' in host
+assert 'case .action(let action):battle(action)' in host
+assert 'classroomHit(at:convert(point,to:party))' in preview
+assert 'ClassroomGameBackend.requireTeacher(role)' in game[game.index('func classroomBattleHit'):game.index('func classroomFinishBattleIfReady')]
+assert 'card.frame.contains(p)' in party and 'stage.classroomTarget' in party
+assert 'if classroomMode {skillScroll.isScrollEnabled=false' in party
 assert 'ClassroomPreviewPolicy.enabled' in host and 'defer{publishChanges();updateMirrorDemand()}' in host
 assert 'if next != lastUIState' in host
 assert 'format.scale=ClassroomPreviewPolicy.pixelScale' in game
@@ -58,5 +64,5 @@ assert 'frame.mapRect' in mirror and 'frame.overlay' in mirror
 result=dict(kind='source-routing-audit',commit=a.commit,publicOnlyHasPlayerFacingPanels=True,oneTeacherOwnedSessionAndRenderer=True,
     mapAndBattleUseOriginalProductionComponents=True,publicModeDoesNotStartAnotherAIOrDecisionTimer=True,
     privateSheetsRoutedToTeacherWindow=True,legacySinglePlayerTrainingUnderlayRemoved=True,
-    publicGameInputsDisabled=True,publicGameCallbacksExplicitlyReadOnly=True,battleCompletionReturnsToExploration=True,fixedCanvasAndDrawablePolicy=True,teacherUsesActualGameOnlyMirror=True,teacherSimplifiedMapRemoved=True,actualProjectionUsedForInput=True,highResolution30FPSPolicy=True,layeredPreviewAvoidsMapRasterization=True,dragPanAndPinch=True,readbackOffMainQueue=True,hiddenPreviewStopsCopying=True,fullScreenTeacherInputWired=True,encounterAllowsMapInput=True,nativeWindowRoutingVerified=False)
+    publicGameInputsDisabled=True,publicGameCallbacksExplicitlyReadOnly=True,battleCompletionReturnsToExploration=True,fixedCanvasAndDrawablePolicy=True,teacherUsesActualGameOnlyMirror=True,teacherSimplifiedMapRemoved=True,actualProjectionUsedForInput=True,highResolution30FPSPolicy=True,layeredPreviewAvoidsMapRasterization=True,dragPanAndPinch=True,readbackOffMainQueue=True,hiddenPreviewStopsCopying=True,fullScreenTeacherInputWired=True,singlePageTeacherWindow=True,originalSkillCardsUseTeacherHitRouting=True,allClassroomSkillCardsFitWithoutScroll=True,encounterAllowsMapInput=True,nativeWindowRoutingVerified=False)
 a.output.parent.mkdir(parents=True,exist_ok=True);a.output.write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2))

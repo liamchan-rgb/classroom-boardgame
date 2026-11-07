@@ -12,11 +12,11 @@ assert any(j['name']=='build' and j['conclusion']=='success' for j in jobs)
 for name in ['Test offline core','Build unsigned iPad app','Package for free personal signing']:
     assert any(s['name']==name and s['conclusion']=='success' for j in jobs for s in j['steps'])
 artifact=next(x for x in json.loads((D/'artifacts.json').read_text())['artifacts'] if x['id']==source['artifactID'])
-assert artifact['name']=='ClassroomStage2-v0.13.3-build' and artifact['workflow_run']['head_sha']==run['head_sha'] and not artifact['expired']
+assert artifact['name']=='ClassroomStage2-v0.13.4-build' and artifact['workflow_run']['head_sha']==run['head_sha'] and not artifact['expired']
 sha=lambda data:hashlib.sha256(data).hexdigest()
 outer=D/'artifact.zip';assert artifact['digest']=='sha256:'+sha(outer.read_bytes())
 with zipfile.ZipFile(outer) as z:assert z.testzip() is None;z.extractall(D/'artifact')
-F=D/'artifact';ipa=F/'ClassroomStage2-v0.13.3-unsigned.ipa'
+F=D/'artifact';ipa=F/'ClassroomStage2-v0.13.4-unsigned.ipa'
 assert (F/'source-commit.txt').read_text().strip()==run['head_sha']
 test_log=(F/'game-core-tests.log').read_text()
 suite_totals={name:int(count) for name,count in re.findall(r"Test Suite '(\w+Tests)\.xctest' passed[^\n]*\n[^\n]*Executed (\d+) tests, with 0 failures",test_log)}
@@ -40,7 +40,7 @@ with zipfile.ZipFile(ipa) as z,ipa.open('rb') as raw:
         raw.seek(e.header_offset);h=struct.unpack('<IHHHHHIIIHH',raw.read(30));assert h[0]==0x04034b50 and h[1]<=20 and h[3]==0 and h[-1]==0
     prefix='Payload/ClassroomProbe.app/'
     info=plistlib.loads(z.read(prefix+'Info.plist'))
-    assert (info['CFBundleShortVersionString'],info['CFBundleVersion'])==('0.13.3','17')
+    assert (info['CFBundleShortVersionString'],info['CFBundleVersion'])==('0.13.4','18')
     assert info['CFBundleIdentifier']=='org.personal.classroom.stage0' and info['CFBundleSupportedPlatforms']==['iPhoneOS'] and info['MinimumOSVersion']=='27.0'
     exe=z.read(prefix+info['CFBundleExecutable']);assert struct.unpack('<II',exe[:8])==(0xfeedfacf,0x100000c)
     mode=z.getinfo(prefix+info['CFBundleExecutable']).external_attr>>16;assert stat.S_IMODE(mode)==0o755
@@ -54,11 +54,11 @@ with zipfile.ZipFile(ipa) as z,ipa.open('rb') as raw:
     assert z.getinfo(prefix+'Assets.car').file_size>0
     assert not any('/Art/' in n or '/MeadowArt/' in n for n in z.namelist())
     assert not any('embedded.mobileprovision' in n or '_CodeSignature' in n for n in z.namelist())
-record=dict(appVersion='0.13.3/build17',testedCommit=run['head_sha'],sourceCommit=run['head_sha'],runID=run['id'],runAttempt=run['run_attempt'],artifactID=artifact['id'],
+record=dict(appVersion='0.13.4/build18',testedCommit=run['head_sha'],sourceCommit=run['head_sha'],runID=run['id'],runAttempt=run['run_attempt'],artifactID=artifact['id'],
     artifactArchiveSha256=sha(outer.read_bytes()),artifactArchiveBytes=outer.stat().st_size,ipaSha256=sha(ipa.read_bytes()),ipaBytes=ipa.stat().st_size,
     coreTests={'CurrentDemoAndClassroomBackend':317,'ClassroomProbeCore':6,'failures':0,'nativeSuites':suite_totals},deviceReleaseArchive=True,arm64=True,executableMode=oct(stat.S_IMODE(mode)),
     executableSHA256=sha(exe),classicZIP2=True,CRC=True,artSource=manifest['commit'],sourceResourceHashesVerified=len(manifest['assets']),compiledAssetNamesVerified=len(expected),rigResourceHashesVerified=3,
-    metalLibraries={},minimumOS=info['MinimumOSVersion'],sdk=info['DTSDKName'],legacyGameUIRemoved=True,fixedLogicalCanvas=[1280,720],fixedMetalScale=1,teacherUsesGameOnlyMirror=True,teacherMirrorMaximumFPS=30,teacherMirrorPixelSize=[960,540],layeredPreview=True,dragAndPinchInput=True,mirrorReadbackOffMain=True,theoreticalRawPixelBudgetBytesPerSecond=62208000,publicRenderTargetFPS=60,
+    metalLibraries={},minimumOS=info['MinimumOSVersion'],sdk=info['DTSDKName'],legacyGameUIRemoved=True,fixedLogicalCanvas=[1280,720],fixedMetalScale=1,teacherUsesGameOnlyMirror=True,teacherMirrorMaximumFPS=30,teacherMirrorPixelSize=[960,540],layeredPreview=True,dragAndPinchInput=True,singlePageTeacherWindow=True,skillsUseOriginalCards=True,teacherOnlyToolbar=True,mirrorReadbackOffMain=True,theoreticalRawPixelBudgetBytesPerSecond=62208000,publicRenderTargetFPS=60,
     newPVEDeviceVerified=False,appLaunched=False,simulatorLaunched=False,externalDisplayVerified=False,
     limitations=['No device CPU/GPU timing or touch responsiveness measurement was performed.','User-reported TV/disconnect misalignment is addressed in code; real AirPlay/TV/disconnect validation needs user screenshots.','Existing two-player Meadow campaign retained; larger classroom parties are not implemented.','Offline review demonstrates fixed-canvas geometry; it is not UIKit capture or proof of device repair.'])
 with zipfile.ZipFile(ipa) as z:record['metalLibraries']={n:sha(z.read(n)) for n in metal}

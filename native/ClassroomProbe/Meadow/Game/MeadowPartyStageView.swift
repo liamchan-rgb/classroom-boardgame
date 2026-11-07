@@ -91,6 +91,17 @@ final class MeadowPartyStageView:UIView {
     }
     required init?(coder:NSCoder) { fatalError("init(coder:) has not been implemented") }
     @objc private func tapped(_ r:UITapGestureRecognizer) { if !isPlaying,let id=r.view?.accessibilityIdentifier { onChoose?(id) } }
+    /// Uses the displayed actors/vitals, including the world's current fit transform.
+    func classroomTarget(at point:CGPoint)->String? {
+        guard !isPlaying,bounds.contains(point) else{return nil}
+        let p=convert(point,to:world)
+        for id in renderIDs.reversed() {
+            if let label=labels[id],!label.isHidden,label.alpha>0,label.frame.contains(p){return id}
+            let unit:UIView?=actors[id].map{$0 as UIView} ?? monsters[id].map{$0 as UIView}
+            if let unit,!unit.isHidden,unit.alpha>0,unit.frame.contains(p){return id}
+        }
+        return nil
+    }
     func start() { MeadowBattleVFXAssets.prewarm();victoryAt=nil;sceneTime=0;recovery=[:];recoveryTier=[:];formation=[:];birth=[:];contact=[:];broken=[:];deaths=[:];hurt=[:];messages=[];emissions=[];skillVFX=[];pendingStatusCues=[];statusSnapshots=[:];poseKeys=[:];fallen=[:];diceAction=nil;diceConfirmedAt=nil;diceView.confirmationAge=nil;diceView.dice=[];diceSettledAt=nil;diceExitAt=nil;dimFrom=0;dimTarget=0;clock.start() }
     func classroomPause(_ value:Bool){if value{clock.stop()}else{clock.start()}}
     func stop() { MeadowMonsterFrames.retain([]);clock.stop();intent=nil;impact=nil;completion=nil;focus=nil;skillVFX=[];pendingStatusCues=[];statusSnapshots=[:] }

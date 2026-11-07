@@ -75,6 +75,11 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     var classroomReady:Bool {ready}
     var classroomBusy:Bool {battlePreviewView?.classroomBusy ?? false}
     var classroomActions:[PartyAction] {battlePreviewView?.classroomActions ?? []}
+    func classroomBattleHit(at point:CGPoint,role:ClassroomRole)throws->MeadowPartyBattleView.ClassroomHit? {
+        try ClassroomGameBackend.requireTeacher(role)
+        guard classroomMode,ready,battlePreviewActive,!classroomBusy,let battle=battlePreviewView else{return nil}
+        return battle.classroomHit(at:view.convert(point,to:battle))
+    }
     func classroomFinishBattleIfReady(){
         if classroomMode,battlePreviewActive,!classroomBusy,campaign?.engine.state.battle==nil {setBattlePreviewActive(false)}
     }

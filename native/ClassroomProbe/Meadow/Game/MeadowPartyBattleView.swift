@@ -14,6 +14,17 @@ final class MeadowPartyBattleView:UIView {
     var classroomActions:[PartyAction] {model?.playerActions() ?? []}
     func classroomAction(_ action:PartyAction,target:String){choose(target);perform(action)}
     func classroomFocus(_ action:PartyAction?,target:String){choose(target);focusedAction=action;stage.preview(action,target:action.map{self.target($0)} ?? target)}
+    enum ClassroomHit {case action(PartyAction),target(String)}
+    func classroomHit(at point:CGPoint)->ClassroomHit? {
+        guard classroomMode,active,!classroomBusy,let model else{return nil}
+        layoutIfNeeded()
+        let actions=model.playerActions()
+        for (index,card) in skills.enumerated() where index<actions.count && !card.isHidden {
+            let p=convert(point,to:skillScroll)
+            if skillScroll.bounds.contains(p),card.frame.contains(p){return .action(actions[index])}
+        }
+        return stage.classroomTarget(at:convert(point,to:stage)).map{.target($0)}
+    }
     var onClose:(()->Void)?
     var campaignEngine:GameEngine?
     var onCommit:((OperationReceipt)->Void)?
@@ -254,10 +265,11 @@ final class MeadowPartyBattleView:UIView {
         buff.frame=CGRect(x:pw-100,y:8,width:38,height:38);shieldBuff.frame=CGRect(x:pw-55,y:8,width:38,height:38)
         skillScroll.frame=CGRect(x:14,y:62,width:max(1,pw-28),height:max(1,panel.bounds.height-72))
         let visible=skills.filter { !$0.isHidden };let n=CGFloat(visible.count)
-        let cw=max(190,(skillScroll.bounds.width-110-n*10)/max(1,n))
+        let cw=classroomMode ? max(1,(skillScroll.bounds.width-max(0,n-1)*10)/max(1,n)):max(190,(skillScroll.bounds.width-110-n*10)/max(1,n))
         for (i,card) in visible.enumerated() { card.frame=CGRect(x:CGFloat(i)*(cw+10),y:0,width:cw,height:skillScroll.bounds.height) }
         items.frame=CGRect(x:n*(cw+10),y:0,width:100,height:skillScroll.bounds.height)
-        skillScroll.contentSize=CGSize(width:items.frame.maxX,height:skillScroll.bounds.height)
+        skillScroll.contentSize=CGSize(width:classroomMode ? skillScroll.bounds.width:items.frame.maxX,height:skillScroll.bounds.height)
+        if classroomMode {skillScroll.isScrollEnabled=false;skillScroll.contentOffset = .zero}
     }
 }
 
