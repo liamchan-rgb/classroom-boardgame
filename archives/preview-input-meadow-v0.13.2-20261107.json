@@ -1,0 +1,58 @@
+{
+  "version": "0.13.2/build16",
+  "sourceBranch": "feat/teacher-backend-meadow-v0.13",
+  "sourceSnapshotCommit": "2c9f395448421218f7a90f3576b1e6a22ebde451",
+  "compiledCommit": "81406b3bf1c08e11b9d70defdac90a0297a4cc7a",
+  "tag": "archive-preview-input-meadow-v0.13.2-20261107",
+  "buildRun": 42350765946,
+  "archiveRun": 42351319022,
+  "archiveCommit": "0b1981b3b78d07ee0ba8d4cd45f6a077c9a4bd59",
+  "archiveBytes": 380254367,
+  "archiveSHA256": "83de3e246d1f93f99a547bd3cd90481405547e43afe438a9001da931aa08e887",
+  "coreTests": {
+    "CurrentDemoAndClassroomBackend": 313,
+    "ClassroomProbeCore": 6,
+    "failures": 0,
+    "nativeSuites": {
+      "MeadowWorldSupportTests": 116,
+      "MeadowClassroomSupportTests": 17,
+      "MeadowBattleSupportTests": 108,
+      "ClassroomGameCoreTests": 72
+    }
+  },
+  "additionalPythonCITests": 4,
+  "ipaBytes": 62087899,
+  "ipaSha256": "d335bc7fe9320357dcca960fbc556a134a97ded8b7ccc2e379a8c7efd30f355a",
+  "minimumOS": "27.0",
+  "publicGETChecks": [
+    {
+      "url": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/0b1981b3b78d07ee0ba8d4cd45f6a077c9a4bd59/archive-preview-input-meadow-v0.13.2-20261107/ClassroomStage2-v0.13.2-unsigned.ipa",
+      "bytes": 62087899,
+      "sha256": "d335bc7fe9320357dcca960fbc556a134a97ded8b7ccc2e379a8c7efd30f355a",
+      "status": 200
+    },
+    {
+      "url": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/0b1981b3b78d07ee0ba8d4cd45f6a077c9a4bd59/archive-preview-input-meadow-v0.13.2-20261107/preview-input-normal.gif",
+      "bytes": 696287,
+      "sha256": "fea0153a838322c57137fcd03ab9d6075acef84ed1eb99b2ac34d38c4309f810",
+      "status": 200
+    }
+  ],
+  "bundleRestoreVerified": true,
+  "allArchivePublicBytesVerified": true,
+  "ipaURL": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/0b1981b3b78d07ee0ba8d4cd45f6a077c9a4bd59/archive-preview-input-meadow-v0.13.2-20261107/ClassroomStage2-v0.13.2-unsigned.ipa",
+  "gifURL": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/0b1981b3b78d07ee0ba8d4cd45f6a077c9a4bd59/archive-preview-input-meadow-v0.13.2-20261107/preview-input-normal.gif",
+  "archiveURL": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/0b1981b3b78d07ee0ba8d4cd45f6a077c9a4bd59/archive-preview-input-meadow-v0.13.2-20261107/README.md",
+  "scope": "Bound teacher relay to visible 640x360/15Hz preview with GPU downscale and off-main CGImage readback; publish UI only on state changes; restore full-screen map input and navigation outside encounter preview.",
+  "deferred": [
+    "Book player health/AP/coins total <=10% of public area.",
+    "Teacher AP/coin grants while on book page."
+  ],
+  "limitations": [
+    "No device CPU/GPU timing or touch responsiveness measurement was performed.",
+    "User-reported TV/disconnect misalignment is addressed in code; real AirPlay/TV/disconnect validation needs user screenshots.",
+    "Existing two-player Meadow campaign retained; larger classroom parties are not implemented.",
+    "Offline review demonstrates fixed-canvas geometry; it is not UIKit capture or proof of device repair.",
+    "No App, simulator, device or external-display runtime validation."
+  ]
+}
