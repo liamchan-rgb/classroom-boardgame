@@ -1,0 +1,85 @@
+{
+  "appVersion": "0.16.0/build21",
+  "testedCommit": "a14364ba89c44a76bffebe0e6004a019f860c8cd",
+  "sourceCommit": "a14364ba89c44a76bffebe0e6004a019f860c8cd",
+  "runID": 42390402952,
+  "runAttempt": 1,
+  "artifactID": 13581960299,
+  "artifactArchiveSha256": "23575f358fa55e74e5473b71a70a734e5e3e21d7387f50b622e2dfe9c88095ab",
+  "artifactArchiveBytes": 58154712,
+  "ipaSha256": "699c2d5b6e90580e6240768d16e6091a9355afc3f3a7b719fb79edbf6b415308",
+  "ipaBytes": 62573595,
+  "coreTests": {
+    "CurrentDemoAndClassroomBackend": 368,
+    "ClassroomProbeCore": 6,
+    "failures": 0,
+    "nativeSuites": {
+      "MeadowWorldSupportTests": 134,
+      "MeadowClassroomSupportTests": 54,
+      "MeadowBattleSupportTests": 108,
+      "ClassroomGameCoreTests": 72
+    }
+  },
+  "deviceReleaseArchive": true,
+  "arm64": true,
+  "executableMode": "0o755",
+  "executableSHA256": "0e39a37d4e9f18705f16c82123867257fb3fa04e64d36458f699114681ee78b4",
+  "classicZIP2": true,
+  "CRC": true,
+  "artSource": "175c7dfc4a68e62cb9693da8d837b77081619a6b",
+  "sourceResourceHashesVerified": 568,
+  "compiledAssetNamesVerified": 281,
+  "rigResourceHashesVerified": 3,
+  "metalLibraries": {
+    "Payload/ClassroomProbe.app/default.metallib": "af74556814a875eb225eca5ed22720122ed9dc2a88daa8117b180298956b921f"
+  },
+  "minimumOS": "27.0",
+  "sdk": "iphoneos27.2",
+  "legacyGameUIRemoved": true,
+  "fixedLogicalCanvas": [
+    1280,
+    720
+  ],
+  "fixedMetalScale": 1,
+  "teacherUsesGameOnlyMirror": true,
+  "teacherMirrorMaximumFPS": 30,
+  "teacherMirrorPixelSize": [
+    960,
+    540
+  ],
+  "layeredPreview": true,
+  "dragAndPinchInput": true,
+  "bookStatusMaximumAreaFraction": 0.09,
+  "bookGrantsUseSameEngine": true,
+  "privatePlayerGM": true,
+  "playerProfileSlots": 12,
+  "campaignSlots": 8,
+  "privateHistoryRollback": true,
+  "teacherJoinUI": true,
+  "maximumStudents": 6,
+  "reservedHostSeats": 1,
+  "teamManagement": true,
+  "sharedWarehouses": true,
+  "singlePageTeacherWindow": true,
+  "skillsUseOriginalCards": true,
+  "teacherOnlyToolbar": true,
+  "mirrorReadbackOffMain": true,
+  "theoreticalRawPixelBudgetBytesPerSecond": 62208000,
+  "publicRenderTargetFPS": 60,
+  "newPVEDeviceVerified": false,
+  "appLaunched": false,
+  "simulatorLaunched": false,
+  "externalDisplayVerified": false,
+  "limitations": [
+    "No device CPU/GPU timing or touch responsiveness measurement was performed.",
+    "User-reported TV/disconnect misalignment is addressed in code; real AirPlay/TV/disconnect validation needs user screenshots.",
+    "P3-P7 reuse existing approved character resources; distinct character art remains missing. Teacher host has a private joining UI. Independent body variants in battle remain missing; approved rigs are reused.",
+    "Offline review demonstrates fixed-canvas geometry; it is not UIKit capture or proof of device repair."
+  ],
+  "newSourceFilesInDeviceCompile": [
+    "TeacherArchiveConsole.swift",
+    "PlayerAppearance.swift",
+    "CampaignSlots.swift"
+  ],
+  "executableDiffersFromBuild20": true
+}
