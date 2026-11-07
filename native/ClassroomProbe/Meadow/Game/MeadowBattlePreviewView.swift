@@ -39,7 +39,14 @@ enum MeadowPreviewPalette {
 final class MeadowBattlePreviewView: UIView {
     var classroomModelFactory:(()throws->PartyEncounter)? {didSet{party.classroomModelFactory=classroomModelFactory}}
     func classroomEnemyStep(){party.classroomEnemyStep()}
-    var classroomMode=false {didSet {party.classroomMode=classroomMode}}
+    var classroomMode=false {didSet {
+        party.classroomMode=classroomMode
+        if classroomMode {
+            // The formal party preview is the sole public battle UI. Remove
+            // the parent single-player training UI rather than overlaying it.
+            [header,landscape,track,details,mapBorder,mapTitle,partyButton,stageTitle].forEach{$0.removeFromSuperview()}
+        }
+    }}
     func classroomPause(_ value:Bool){party.classroomSetPaused(value)}
     func classroomRefresh(){party.classroomRefresh()}
     func classroomResume(){if !isActive{setActive(true)};party.classroomSetPaused(false)}
