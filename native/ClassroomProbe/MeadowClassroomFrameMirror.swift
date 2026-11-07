@@ -1,18 +1,29 @@
 import SwiftUI
 import UIKit
 
-/// Only the game controller supplies pixels. No teacher root, permission sheet,
-/// notes or controls can be included. No second campaign/renderer is created.
+/// Both layers originate in the one clean game controller, never the teacher root.
+struct MeadowTeacherPreviewFrame {
+    let map:CGImage?
+    let mapRect:CGRect
+    let overlay:UIImage?
+    let background:UIColor
+}
 @MainActor final class MeadowFrameMirror:ObservableObject {
-    @Published var image:UIImage?
+    @Published var frame:MeadowTeacherPreviewFrame?
 }
 struct MeadowTeacherMirror:View {
     @ObservedObject var mirror:MeadowFrameMirror
     var body:some View {
-        ZStack {
-            Color.black
-            if let image=mirror.image {Image(uiImage:image).resizable().interpolation(.none).scaledToFit()}
-            else{Text("正在同步游戏画面…").foregroundStyle(.white)}
+        ZStack(alignment:.topLeading) {
+            if let frame=mirror.frame {
+                Color(uiColor:frame.background)
+                if let map=frame.map {
+                    Image(decorative:map,scale:1).resizable().interpolation(.none)
+                        .frame(width:frame.mapRect.width,height:frame.mapRect.height)
+                        .position(x:frame.mapRect.midX,y:frame.mapRect.midY)
+                }
+                if let overlay=frame.overlay {Image(uiImage:overlay).resizable().interpolation(.none)}
+            }else{Color.black;Text("正在同步游戏画面…").foregroundStyle(.white)}
         }
     }
 }

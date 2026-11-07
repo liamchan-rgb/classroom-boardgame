@@ -18,6 +18,12 @@ public enum ClassroomCanvas {
         guard rect.width>0,rect.height>0,rect.contains(point) else{return nil}
         return CGPoint(x:(point.x-rect.minX)*size.width/rect.width,y:(point.y-rect.minY)*size.height/rect.height)
     }
+    /// Pan translations are vectors: remove letterbox scaling, not its origin.
+    public static func translation(_ delta:CGPoint,in host:CGSize)->CGPoint? {
+        let rect=fitted(in:host)
+        guard rect.width>0,rect.height>0,delta.x.isFinite,delta.y.isFinite else{return nil}
+        return CGPoint(x:delta.x*size.width/rect.width,y:delta.y*size.height/rect.height)
+    }
     /// Invert the actual renderer projection, including camera pan and zoom.
     public static func unproject(_ point:CGPoint,origin:CGPoint,xAxis:CGPoint,yAxis:CGPoint)->CGPoint? {
         let determinant=xAxis.x*yAxis.y-xAxis.y*yAxis.x

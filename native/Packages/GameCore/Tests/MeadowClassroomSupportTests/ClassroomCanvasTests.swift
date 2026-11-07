@@ -30,6 +30,20 @@ final class ClassroomCanvasTests:XCTestCase {
         XCTAssertNil(ClassroomCanvas.point(CGPoint(x:10,y:10),in:CGSize(width:1024,height:768)))
         XCTAssertNil(ClassroomCanvas.point(.zero,in:.zero))
     }
+    func testDragVectorsHaveTheSameCanonicalDistanceAcrossHosts(){
+        let delta=CGPoint(x:120,y:-48)
+        for host in hosts {
+            let rect=ClassroomCanvas.fitted(in:host),scale=rect.width/1280
+            let actual=ClassroomCanvas.translation(CGPoint(x:delta.x*scale,y:delta.y*scale),in:host)!
+            XCTAssertEqual(actual.x,delta.x,accuracy:0.000001);XCTAssertEqual(actual.y,delta.y,accuracy:0.000001)
+            let back=ClassroomCanvas.translation(CGPoint(x:-delta.x*scale,y:-delta.y*scale),in:host)!
+            XCTAssertEqual(actual.x+back.x,0,accuracy:0.000001);XCTAssertEqual(actual.y+back.y,0,accuracy:0.000001)
+        }
+    }
+    func testInvalidDragVectorsAreRejected(){
+        XCTAssertNil(ClassroomCanvas.translation(CGPoint(x:1,y:1),in:.zero))
+        XCTAssertNil(ClassroomCanvas.translation(CGPoint(x:Double.nan,y:1),in:CGSize(width:1280,height:720)))
+    }
     func testActualProjectionInverseIncludesZoomPanAndNonUniformAxes(){
         for zoom in [0.7,1.0,1.6,2.2] {
             let origin=CGPoint(x:-145,y:81),xAxis=CGPoint(x:zoom,y:0.1*zoom),yAxis=CGPoint(x:0.03*zoom,y:zoom)

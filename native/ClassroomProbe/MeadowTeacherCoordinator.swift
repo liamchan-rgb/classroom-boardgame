@@ -74,11 +74,14 @@ final class MeadowTeacherCoordinator:ObservableObject {
     init(){
         mirrorTimer=Timer.scheduledTimer(withTimeInterval:1/ClassroomPreviewPolicy.framesPerSecond,repeats:true){[weak self] _ in
             Task{@MainActor in
-                guard let self,self.renderer?.classroomMirrorEnabled==true,let image=self.renderer?.classroomCaptureFrame() else{return}
-                self.frameMirror.image=image
+                self?.publishMirrorFrame()
             }
         }
         timer=Timer.scheduledTimer(withTimeInterval:0.15,repeats:true){[weak self] _ in Task{@MainActor in self?.tick()}}
+    }
+    private func publishMirrorFrame(){
+        guard renderer?.classroomMirrorEnabled==true,let frame=renderer?.classroomCaptureFrame() else{return}
+        frameMirror.frame=frame
     }
     func install(_ session:MeadowCampaignSession){
         do{
@@ -88,7 +91,8 @@ final class MeadowTeacherCoordinator:ObservableObject {
             let controller=GameViewController(campaign:session,classroomMode:true)
             controller.classroomPrivatePresenter=privatePresenter
             controller.classroomMirrorEnabled=false
-            frameMirror.image=nil
+            controller.classroomFrameAvailable={ [weak self] in self?.publishMirrorFrame() }
+            frameMirror.frame=nil
             controller.classroomAdvanceTravel={ [backend] distance in try backend.advanceTravel(distance:distance,role:.teacher) }
             controller.classroomBattleModel={ [backend] in try backend.battleModel(role:.teacher) }
             controller.classroomStatus={ [weak self] text in guard let self,self.message != text else{return};self.message=text;self.revision += 1 }
@@ -144,6 +148,19 @@ final class MeadowTeacherCoordinator:ObservableObject {
             revision += 1
         }catch{message=error.localizedDescription}
     }
+    var canManipulateMap:Bool {ready && !busy && !modalOpen && surface.acceptsMapInput && campaign?.engine.state.battle==nil && campaign?.isCompleted==false}
+    func canBeginMapGesture(_ point:CGPoint)->Bool {
+        guard canManipulateMap else{return false}
+        return (try? renderer?.classroomWorldPoint(at:point,role:.teacher)) != nil
+    }
+    func canvasPan(_ delta:CGPoint){
+        guard canManipulateMap else{return}
+        do{try renderer?.classroomPerform(.pan(delta),role:.teacher)}catch{message=error.localizedDescription}
+    }
+    func canvasZoom(_ scale:CGFloat,anchor:CGPoint){
+        guard canManipulateMap else{return}
+        do{try renderer?.classroomZoom(by:scale,anchor:anchor,role:.teacher)}catch{message=error.localizedDescription}
+    }
     func canUse(_ action:PartyAction)->Bool {
         guard ready,!busy,!modalOpen else{return false}
         return (try? backend.battleTarget(for:action,selected:selectedTarget,role:.teacher)) != nil
@@ -181,7 +198,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
             do{try self.backend.apply(.editResources(unit:unit.id,value:ResourcePatch(health:values[0],shield:values[1],ap:values[2],coins:values[3],score:values[4])),role:.teacher);self.renderer?.classroomRefresh();self.revision += 1}catch{self.message=error.localizedDescription}
         });presenter.present(sheet,animated:true)
     }
-    func setConnection(_ id:String,connected:Bool){if connected{externalIDs.insert(id)}else{externalIDs.remove(id)};updateMirrorDemand();if !externalConnected{frameMirror.image=nil};revision += 1}
+    func setConnection(_ id:String,connected:Bool){if connected{externalIDs.insert(id)}else{externalIDs.remove(id)};updateMirrorDemand();if !externalConnected{frameMirror.frame=nil};revision += 1}
 }
 
 /// Only the clean game renderer moves between native hosts. Every host uses

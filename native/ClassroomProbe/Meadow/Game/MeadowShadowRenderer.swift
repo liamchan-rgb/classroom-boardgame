@@ -54,7 +54,7 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
     var classroomMirrorEnabled=false
     var onClassroomMapFrame:((CGImage)->Void)?
     private var mirrorBusy=false
-    private var lastMirrorTime:TimeInterval = -.infinity
+    private var mirrorClock=ClassroomPreviewClock()
     private var mirrorBuffer:MTLBuffer?
     private var mirrorTarget:MTLTexture?
     private let mirrorReadback=DispatchQueue(label:"classroom.preview.readback",qos:.utility)
@@ -364,7 +364,7 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
     private struct MirrorCopy {let buffer:MTLBuffer;let width:Int,height:Int,row:Int}
     private func encodeClassroomMirror(command:MTLCommandBuffer,texture:MTLTexture)->MirrorCopy? {
         let now=CACurrentMediaTime()
-        guard classroomMirrorEnabled,onClassroomMapFrame != nil,!mirrorBusy,now-lastMirrorTime>=1/ClassroomPreviewPolicy.framesPerSecond else{return nil}
+        guard classroomMirrorEnabled,onClassroomMapFrame != nil,!mirrorBusy,mirrorClock.take(at:now) else{return nil}
         let size=ClassroomPreviewPolicy.size(for:CGSize(width:texture.width,height:texture.height)),width=Int(size.width),height=Int(size.height)
         if mirrorTarget?.width != width || mirrorTarget?.height != height {
             let descriptor=MTLTextureDescriptor.texture2DDescriptor(pixelFormat:.bgra8Unorm,width:width,height:height,mipmapped:false)
@@ -381,7 +381,7 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
         encoder.drawPrimitives(type:.triangle,vertexStart:0,vertexCount:3);encoder.endEncoding()
         guard let blit=command.makeBlitCommandEncoder() else{return nil}
         blit.copy(from:target,sourceSlice:0,sourceLevel:0,sourceOrigin:MTLOrigin(x:0,y:0,z:0),sourceSize:MTLSize(width:width,height:height,depth:1),to:buffer,destinationOffset:0,destinationBytesPerRow:row,destinationBytesPerImage:length)
-        blit.endEncoding();mirrorBusy=true;lastMirrorTime=now
+        blit.endEncoding();mirrorBusy=true
         return MirrorCopy(buffer:buffer,width:width,height:height,row:row)
     }
     /// Worker queue only: copy pixels/construct CGImage before returning to UI.

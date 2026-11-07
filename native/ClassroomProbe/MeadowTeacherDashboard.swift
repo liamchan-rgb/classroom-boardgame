@@ -12,7 +12,7 @@ struct MeadowTeacherDashboard:View {
         ScrollView {
             VStack(alignment:.leading,spacing:16){
                 HStack {
-                    Text("教师游戏后台 · v0.13.2").font(.title.bold())
+                    Text("教师游戏后台 · v0.13.3").font(.title.bold())
                     Spacer();Text(game.externalConnected ? "公开屏幕已连接":"当前可在本机预览")
                 }
                 Text(game.message).foregroundStyle(.secondary)
@@ -43,7 +43,7 @@ struct MeadowTeacherDashboard:View {
                         TeacherGamePreview(game:game,selectingNode:selectingNode,tracksScroll:true).aspectRatio(16/9,contentMode:.fit).clipShape(RoundedRectangle(cornerRadius:14))
                         Button("全屏查看公开游戏界面"){fullPreview=true}.buttonStyle(ClassroomButtonStyle(primary:true))
                     }
-                    Text(selectingNode ? "点击上方游戏画面选择地点，修改表单只在教师端出现。":"点击上方实际游戏画面的道路即可移动。").font(.callout)
+                    Text(selectingNode ? "点击上方游戏画面选择地点，修改表单只在教师端出现。":"拖动地图平移视野，双指缩放；点击道路移动人物。").font(.callout)
                     if let id=game.selectedNode {Text("后台选中：\(id) · \(campaign.engine.state.map.nodes.first{$0.id==id}?.name ?? "地点")").font(.callout.bold())}
                     HStack {
                         Button("投放探索地图"){game.project(.exploration)}
@@ -111,12 +111,9 @@ private struct TeacherGamePreview:View {
     var body:some View {
         PublicSurface(model:TeacherSession.shared.display,game:game,teacherPreview:true)
             .overlay {
-                GeometryReader { geometry in
-                    Color.clear.contentShape(Rectangle()).gesture(SpatialTapGesture().onEnded{ value in
-                        guard let point=ClassroomCanvas.point(value.location,in:geometry.size) else{return}
-                        game.canvasTap(point,selectingNode:selectingNode)
-                    })
-                }
+                MeadowTeacherMapInput(canBegin:game.canBeginMapGesture,
+                    tap:{game.canvasTap($0,selectingNode:selectingNode)},
+                    pan:game.canvasPan,zoom:{game.canvasZoom($0,anchor:$1)})
             }
             .onScrollVisibilityChange(threshold:0.05){visible in if tracksScroll{game.previewVisibility(previewID,visible:visible)}}
             .onAppear{game.previewVisibility(previewID,visible:true)}

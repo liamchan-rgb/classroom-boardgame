@@ -9,21 +9,50 @@ import MeadowClassroomSupport
 final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     private let classroomMode:Bool
     private var classroomSuspended=false
-    var classroomMirrorEnabled=false {didSet{groundRenderer?.classroomMirrorEnabled=classroomMirrorEnabled}}
+    var classroomMirrorEnabled=false {didSet{
+        groundRenderer?.classroomMirrorEnabled=classroomMirrorEnabled
+        if classroomMirrorEnabled && !oldValue {classroomOverlayDirty=true;classroomDeliveredMap = -1;classroomDeliveryClock=ClassroomPreviewClock()}
+    }}
     private var classroomMapFrame:CGImage?
-    /// A clean game-only image; permission dialogs belong to another root.
-    func classroomCaptureFrame()->UIImage? {
+    private var classroomMapSerial=0, classroomOverlaySerial=0
+    private var classroomDeliveredMap = -1, classroomDeliveredOverlay = -1
+    private var classroomOverlay:UIImage?
+    private var classroomOverlayDirty=true
+    private var classroomOverlayAt:TimeInterval = -.infinity
+    private var classroomDeliveryClock=ClassroomPreviewClock()
+    var classroomFrameAvailable:(()->Void)?
+    /// Map pixels are never rerasterized on the main thread. UIKit captures
+    /// only the transparent game overlay, cached between actual HUD changes.
+    func classroomCaptureFrame()->MeadowTeacherPreviewFrame? {
         guard classroomMode,classroomMirrorEnabled,isViewLoaded,view.window != nil else{return nil}
-        let format=UIGraphicsImageRendererFormat();format.scale=ClassroomPreviewPolicy.pixelScale;format.opaque=true
-        return UIGraphicsImageRenderer(size:ClassroomCanvas.size,format:format).image{ context in
-            view.backgroundColor?.setFill();context.cgContext.fill(CGRect(origin:.zero,size:ClassroomCanvas.size))
-            if let image=classroomMapFrame,let ground=groundView,image.width==Int(ClassroomPreviewPolicy.size(for:ground.drawableSize).width),image.height==Int(ClassroomPreviewPolicy.size(for:ground.drawableSize).height){UIImage(cgImage:image).draw(in:ground.frame)}
-            for subview in view.subviews where subview !== groundView && !subview.isHidden && subview.alpha>0 {
-                context.cgContext.saveGState();context.cgContext.translateBy(x:subview.frame.minX,y:subview.frame.minY)
-                (subview.layer.presentation() ?? subview.layer).render(in:context.cgContext)
-                context.cgContext.restoreGState()
+        let now=ProcessInfo.processInfo.systemUptime
+        let needsOverlay=ClassroomPreviewPolicy.refreshOverlay(now:now,last:classroomOverlayAt,dirty:classroomOverlayDirty || !ready,battle:battlePreviewActive)
+        guard classroomDeliveredMap != classroomMapSerial || needsOverlay else{return nil}
+        guard classroomDeliveryClock.take(at:now) else{return nil}
+        if needsOverlay {
+            let format=UIGraphicsImageRendererFormat();format.scale=ClassroomPreviewPolicy.pixelScale;format.opaque=false;format.preferredRange = .standard
+            classroomOverlay=UIGraphicsImageRenderer(size:ClassroomCanvas.size,format:format).image{context in
+                for subview in view.subviews where subview !== groundView && !subview.isHidden && subview.alpha>0 {
+                    context.cgContext.saveGState();context.cgContext.translateBy(x:subview.frame.minX,y:subview.frame.minY)
+                    (subview.layer.presentation() ?? subview.layer).render(in:context.cgContext)
+                    context.cgContext.restoreGState()
+                }
             }
+            classroomOverlayAt=now;classroomOverlayDirty=false;classroomOverlaySerial += 1
         }
+        guard classroomDeliveredMap != classroomMapSerial || classroomDeliveredOverlay != classroomOverlaySerial else{return nil}
+        classroomDeliveredMap=classroomMapSerial;classroomDeliveredOverlay=classroomOverlaySerial
+        var map:CGImage?
+        if let ground=groundView,let image=classroomMapFrame {
+            let wanted=ClassroomPreviewPolicy.size(for:ground.drawableSize)
+            if image.width==Int(wanted.width) && image.height==Int(wanted.height){map=image}
+        }
+        return MeadowTeacherPreviewFrame(map:map,mapRect:groundView?.frame ?? .zero,overlay:classroomOverlay,background:view.backgroundColor ?? .black)
+    }
+    func classroomZoom(by scale:CGFloat,anchor:CGPoint,role:ClassroomRole)throws {
+        try ClassroomGameBackend.requireTeacher(role)
+        guard ready,!classroomBusy,!battlePreviewActive,scale.isFinite,scale>0,gameView.frame.contains(anchor) else{return}
+        scene.setZoom(scene.zoom*scale,anchorInView:CGPoint(x:anchor.x-gameView.frame.minX,y:anchor.y-gameView.frame.minY))
     }
     func classroomWorldPoint(at point:CGPoint,role:ClassroomRole)throws->CGPoint? {
         try ClassroomGameBackend.requireTeacher(role)
@@ -328,6 +357,7 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
+        classroomOverlayDirty=true
         let mapFrame: CGRect
         if battlePreviewActive, let preview = battlePreviewView {
             preview.frame = view.bounds
@@ -450,7 +480,7 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
                 self.groundRenderer = prepared.renderer
                 if self.classroomMode {
                     self.groundRenderer?.classroomMirrorEnabled=self.classroomMirrorEnabled
-                    self.groundRenderer?.onClassroomMapFrame={ [weak self] image in self?.classroomMapFrame=image }
+                    self.groundRenderer?.onClassroomMapFrame={ [weak self] image in self?.classroomMapFrame=image;self?.classroomMapSerial += 1;self?.classroomFrameAvailable?() }
                 }
                 self.scene.shadowMapSize = prepared.renderer?.shadowSize ?? 0
                 self.groundRenderer?.alignmentReview = ProcessInfo.processInfo.arguments.contains("-alignmentReview")
@@ -527,6 +557,7 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     private func finishLoading() {
         guard !ready, !loadingFailed, foregroundBecameReady, groundRenderer == nil || groundBecameReady else { return }
         ready = true
+        classroomOverlayDirty=true
         firstFrameWaitSeconds = nil
         let now = ProcessInfo.processInfo.systemUptime
         loadingTimer?.invalidate(); loadingTimer = nil
@@ -590,6 +621,7 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         setRenderingPaused(true)
         setMapEnabled(false)
         loadingView.isHidden = false
+        classroomOverlayDirty=true
         loadingView.failed(first, restartRequired: MeadowGPUDiagnostics.shared.requiresColdLaunch)
         if reviewMode, let data = try? JSONSerialization.data(withJSONObject: [
             "loadingError": error.localizedDescription, "loadingProgress": loadingProgress,
@@ -772,6 +804,7 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     }
 
     private func setBattlePreviewActive(_ active: Bool) {
+        classroomOverlayDirty=true
         guard active != battlePreviewActive else { return }
         guard scene.gaitTest == nil else { return }
         p1AppearanceButton.isHidden = active || HeroFrames.appearanceTitles.isEmpty
@@ -1110,6 +1143,7 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     }
 
     private func selectEncounterPreview(_ id:Int?) {
+        classroomOverlayDirty=true
         previewEncounterNode=id;refreshEncounterPreview();view.setNeedsLayout()
     }
     private func refreshEncounterPreview(){
@@ -1123,6 +1157,7 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         encounterPreview.show(value,completed:campaign.isCompleted);encounterPreview.classroomReadOnly=classroomMode;encounterPreview.isHidden=false
     }
 private func refreshCampaignStatus(allowBattleOpen:Bool=true) {
+        classroomOverlayDirty=true
         guard let campaign else{return}
         for control in [shadowLabButton,gaitTestButton,battlePreviewButton,p1AppearanceButton] {control.isHidden=true}
         let state=campaign.engine.state,players=state.players
@@ -1266,6 +1301,7 @@ private func refreshCampaignStatus(allowBattleOpen:Bool=true) {
         try ClassroomGameBackend.requireTeacher(role);battlePreviewView?.classroomFocus(action,target:target)
     }
     func classroomSuspend()throws {
+        classroomOverlayDirty=true
         guard !classroomBusy else{throw GameError("请等动作播放结束后切换绘本。")}
         if let campaign {try campaign.suspendAndCheckpoint(camera:scene.campaignCamera)}
         classroomSuspended=true
@@ -1273,6 +1309,7 @@ private func refreshCampaignStatus(allowBattleOpen:Bool=true) {
         setRenderingPaused(true)
     }
     func classroomResumeRenderer(){
+        classroomOverlayDirty=true
         classroomSuspended=false
         if battlePreviewActive {battlePreviewView?.classroomResume()}
         setRenderingPaused(!mapPresented || loadingFailed)

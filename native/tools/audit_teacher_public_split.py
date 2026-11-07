@@ -22,7 +22,7 @@ assert 'view.isUserInteractionEnabled = !classroomMode' in game
 assert 'classroomFinishBattleIfReady()' in host
 dashboard=read('MeadowTeacherDashboard.swift');mirror=read('MeadowClassroomFrameMirror.swift');metal=read('Meadow/Game/MeadowShadowRenderer.swift')
 assert 'TeacherControlMap' not in dashboard and 'Canvas{' not in dashboard
-assert 'TeacherGamePreview' in dashboard and 'game.canvasTap(point,selectingNode:selectingNode)' in dashboard
+assert 'TeacherGamePreview' in dashboard and 'game.canvasTap($0,selectingNode:selectingNode)' in dashboard
 assert 'classroomNode(atWorldPoint:world,role:.teacher)' in host
 assert 'selectedNode=hit?.id' in host
 assert 'ClassroomCanvas.size' in host and 'controller.view.frame=view.bounds' not in host
@@ -32,7 +32,7 @@ assert 'encodeClassroomMirror(command:command,texture:drawable.texture)' in meta
 assert 'waitUntilCompleted' not in metal[metal.index('private struct MirrorCopy'):metal.index('/// The offscreen repeated probe')]
 assert 'for subview in view.subviews where subview !== groundView' in game and 'classroomCaptureFrame' in host
 assert 'teacherPreview && game.externalConnected' in public and 'MeadowTeacherMirror(mirror:game.frameMirror)' in public
-assert 'UIWindow' not in mirror and 'campaign' not in mirror.replace('campaign/renderer','')
+assert 'UIWindow' not in mirror and 'privatePresenter' not in mirror
 cover=dashboard[dashboard.index('.fullScreenCover'):dashboard.index('    private func battleControls')]
 assert 'TeacherGamePreview(game:game,selectingNode:selectingNode)' in cover
 assert 'surface.acceptsMapInput' in host and 'surface == .exploration,let c=campaign' not in host
@@ -44,8 +44,19 @@ assert 'if next != lastUIState' in host
 assert 'format.scale=ClassroomPreviewPolicy.pixelScale' in game
 assert 'self.mirrorReadback.async' in metal and 'Self.makeClassroomMirror(mirror)' in metal
 assert 'sourceSize:MTLSize(width:width,height:height,depth:1)' in metal and 'setFragmentTexture(texture,index:0)' in metal
+input=read('MeadowTeacherMapInput.swift')
+assert 'pan.minimumNumberOfTouches=1;pan.maximumNumberOfTouches=2' in input
+assert 'tap.require(toFail:pan);tap.require(toFail:pinch)' in input
+assert 'shouldBeRequiredToFailBy' in input and 'otherGestureRecognizer.view is UIScrollView' in input
+assert 'ClassroomCanvas.translation(pan.translation(in:self),in:bounds.size)' in input
+assert 'game.canvasPan' in dashboard and 'game.canvasZoom' in dashboard
+assert 'scene.setZoom(scene.zoom*scale,anchorInView:' in game
+assert 'classroomFrameAvailable' in host and 'self?.publishMirrorFrame()' in host
+assert 'MeadowTeacherPreviewFrame(map:map' in game and 'UIImage(cgImage:image).draw' not in game
+assert 'format.opaque=false' in game and 'ClassroomPreviewPolicy.refreshOverlay' in game
+assert 'frame.mapRect' in mirror and 'frame.overlay' in mirror
 result=dict(kind='source-routing-audit',commit=a.commit,publicOnlyHasPlayerFacingPanels=True,oneTeacherOwnedSessionAndRenderer=True,
     mapAndBattleUseOriginalProductionComponents=True,publicModeDoesNotStartAnotherAIOrDecisionTimer=True,
     privateSheetsRoutedToTeacherWindow=True,legacySinglePlayerTrainingUnderlayRemoved=True,
-    publicGameInputsDisabled=True,publicGameCallbacksExplicitlyReadOnly=True,battleCompletionReturnsToExploration=True,fixedCanvasAndDrawablePolicy=True,teacherUsesActualGameOnlyMirror=True,teacherSimplifiedMapRemoved=True,actualProjectionUsedForInput=True,halfResolutionPreviewBudget=True,readbackOffMainQueue=True,hiddenPreviewStopsCopying=True,fullScreenTeacherInputWired=True,encounterAllowsMapInput=True,nativeWindowRoutingVerified=False)
+    publicGameInputsDisabled=True,publicGameCallbacksExplicitlyReadOnly=True,battleCompletionReturnsToExploration=True,fixedCanvasAndDrawablePolicy=True,teacherUsesActualGameOnlyMirror=True,teacherSimplifiedMapRemoved=True,actualProjectionUsedForInput=True,highResolution30FPSPolicy=True,layeredPreviewAvoidsMapRasterization=True,dragPanAndPinch=True,readbackOffMainQueue=True,hiddenPreviewStopsCopying=True,fullScreenTeacherInputWired=True,encounterAllowsMapInput=True,nativeWindowRoutingVerified=False)
 a.output.parent.mkdir(parents=True,exist_ok=True);a.output.write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2))
