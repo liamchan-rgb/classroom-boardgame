@@ -1,0 +1,57 @@
+{
+  "version": "0.13.1/build15",
+  "sourceBranch": "feat/teacher-backend-meadow-v0.13",
+  "sourceSnapshotCommit": "5664dd2f2ae4920ccc765585857074f872be1506",
+  "compiledCommit": "7ffc6b13ab3f58c39ea21f63669e2c46440d6e2f",
+  "tag": "archive-display-mirror-meadow-v0.13.1-20261107",
+  "buildRun": 42346131666,
+  "archiveRun": 42346849708,
+  "archiveCommit": "01604bc3a93627a60881da807bf923b4fc02fc07",
+  "archiveBytes": 377681214,
+  "archiveSHA256": "01126f7d8c29e45dab98837b91e190c5e21d602e0c0135b9ebaa0dd43b95d8d7",
+  "coreTests": {
+    "CurrentDemoAndClassroomBackend": 310,
+    "ClassroomProbeCore": 6,
+    "failures": 0,
+    "nativeSuites": {
+      "MeadowWorldSupportTests": 116,
+      "MeadowClassroomSupportTests": 14,
+      "MeadowBattleSupportTests": 108,
+      "ClassroomGameCoreTests": 72
+    }
+  },
+  "additionalPythonCITests": 4,
+  "ipaBytes": 62053723,
+  "ipaSha256": "88b62f485759e72d606159497dcb1d3f74235b4f5987d675b59e950a1ef2f244",
+  "minimumOS": "27.0",
+  "publicGETChecks": [
+    {
+      "url": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/01604bc3a93627a60881da807bf923b4fc02fc07/archive-display-mirror-meadow-v0.13.1-20261107/ClassroomStage2-v0.13.1-unsigned.ipa",
+      "bytes": 62053723,
+      "sha256": "88b62f485759e72d606159497dcb1d3f74235b4f5987d675b59e950a1ef2f244",
+      "status": 200
+    },
+    {
+      "url": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/01604bc3a93627a60881da807bf923b4fc02fc07/archive-display-mirror-meadow-v0.13.1-20261107/display-mirror-normal.gif",
+      "bytes": 696287,
+      "sha256": "fea0153a838322c57137fcd03ab9d6075acef84ed1eb99b2ac34d38c4309f810",
+      "status": 200
+    }
+  ],
+  "bundleRestoreVerified": true,
+  "allArchivePublicBytesVerified": true,
+  "ipaURL": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/01604bc3a93627a60881da807bf923b4fc02fc07/archive-display-mirror-meadow-v0.13.1-20261107/ClassroomStage2-v0.13.1-unsigned.ipa",
+  "gifURL": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/01604bc3a93627a60881da807bf923b4fc02fc07/archive-display-mirror-meadow-v0.13.1-20261107/display-mirror-normal.gif",
+  "archiveURL": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/01604bc3a93627a60881da807bf923b4fc02fc07/archive-display-mirror-meadow-v0.13.1-20261107/README.md",
+  "scope": "Fixed 1280x720 game canvas and explicit Metal drawable geometry across window attachment; teacher schematic removed in favor of actual game-only frame relay; private controls remain outside public content.",
+  "deferred": [
+    "Book player health/AP/coins total <=10% of public area.",
+    "Teacher AP/coin grants while on book page."
+  ],
+  "limitations": [
+    "User-reported TV/disconnect misalignment is addressed in code; real AirPlay/TV/disconnect validation needs user screenshots.",
+    "Existing two-player Meadow campaign retained; larger classroom parties are not implemented.",
+    "Offline review demonstrates fixed-canvas geometry; it is not UIKit capture or proof of device repair.",
+    "No App, simulator, device or external-display runtime validation."
+  ]
+}
