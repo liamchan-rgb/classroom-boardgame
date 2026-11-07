@@ -8,6 +8,18 @@ struct TeacherArchiveConsole:View {
     var onClose:()->Void
     @State private var transfer:TeacherSaveTransferRequest?
     @State private var tab=0
+    @State private var journeyQuery=MeadowJourneyQuery()
+    @State private var journeyRows:[MeadowJourneyIndex]=[]
+    @State private var historyQuery=MeadowHistoryQuery()
+    @State private var historyRows:[MeadowHistoryIndex]=[]
+    @State private var historyPeople:[String:String]=[:]
+    @State private var historyLimit=50
+    @State private var historyIndexToken=UUID()
+    @State private var indexingHistory=false
+    private var matchingJourneys:[MeadowJourneyIndex]{journeyQuery.apply(journeyRows)}
+    private var matchingHistory:[MeadowHistoryIndex]{historyQuery.apply(historyRows)}
+    private var emptyJourneySlots:[Int]{(1...MeadowSlotStore.campaignCount).filter{journeys[$0]==nil && errors["j\($0)"]==nil}}
+    private var damagedJourneySlots:[Int]{(1...MeadowSlotStore.campaignCount).filter{errors["j\($0)"] != nil}}
     @State private var player="p1"
     @State private var name=""
     @State private var bodyStyle="forester"
@@ -49,7 +61,10 @@ struct TeacherArchiveConsole:View {
                     }}
                 }
                 .sheet(item:$transfer,onDismiss:{reload()}){request in TeacherSaveTransferConsole(directory:store.directory,request:request,onClose:{transfer=nil})}
-                .onAppear{player=game.campaign?.selectedPlayerID ?? "p1";readPlayer();reload();teacherTeam=game.campaign?.engine.state.teams.first?.id ?? "party"}
+                .onAppear{player=game.campaign?.selectedPlayerID ?? "p1";readPlayer();reload();rebuildHistory();teacherTeam=game.campaign?.engine.state.teams.first?.id ?? "party"}
+                .onChange(of:game.campaign?.engine.history.last?.id){_,_ in rebuildHistory()}
+                .onChange(of:game.campaign?.engine.state.gameID){_,_ in rebuildHistory()}
+                .onChange(of:historyQuery){_,_ in historyLimit=50}
                 .onChange(of:player){_,_ in readPlayer()}
                 .onChange(of:bodyStyle){_,_ in updateThumbnail()}
                 .onChange(of:outfit){_,_ in updateThumbnail()}
@@ -90,19 +105,38 @@ struct TeacherArchiveConsole:View {
                 TextField("存档标题",text:$title)
                 Text("保存地图、队伍、背包、战斗队列/骰子状态、各队移动条和镜头。原自动存档继续生效；读取前另存当前进度。读取战斗槽会保持暂停，等待教师继续。").font(.caption)
             }
-            Section("行程槽") {
-                ForEach(1...MeadowSlotStore.campaignCount,id:\.self){slot in
+            Section("查找已保存行程") {
+                HStack{Text("搜索");TextField("标题 / 成员 / 队伍 / 种子",text:$journeyQuery.text)}
+                Picker("状态",selection:$journeyQuery.state){ForEach(MeadowJourneyState.allCases,id:\.rawValue){Text($0.title).tag($0)}}
+                Picker("人数",selection:$journeyQuery.players){Text("全部人数").tag(0);ForEach(1...7,id:\.self){Text("\($0)人").tag($0)}}
+                Picker("排序",selection:$journeyQuery.order){ForEach(MeadowArchiveOrder.allCases,id:\.rawValue){Text($0.title).tag($0)}}
+                HStack{Text("匹配 \(matchingJourneys.count) / 已保存 \(journeyRows.count)");Spacer();Button("清除筛选"){journeyQuery=MeadowJourneyQuery()}.disabled(journeyQuery==MeadowJourneyQuery())}.font(.caption)
+            }
+            Section("已保存行程 · 原槽号保持") {
+                ForEach(matchingJourneys){row in
                     VStack(alignment:.leading,spacing:6) {
-                        Text("行程槽 \(slot) · "+(journeys[slot]?.title ?? "空槽")).font(.headline)
-                        if let e=journeys[slot]{Text("\(e.value.archive.state.players.count)人 · \(e.value.layout.map.nodes.count)节点 · "+e.savedAt.formatted(date:.abbreviated,time:.shortened)).font(.caption)}
-                        if let error=errors["j\(slot)"]{Text("原文件保留："+error).font(.caption).foregroundStyle(.red)}
+                        Text("行程槽 \(row.slot) · "+row.title).font(.headline)
+                        Text("\(row.state.title) · \(row.players)人 · "+row.savedAt.formatted(date:.abbreviated,time:.shortened)).font(.caption)
                         HStack {
-                            Button("保存到此槽"){saveJourney(slot)}.disabled(game.campaign==nil || game.busy)
-                            Button("导出"){transfer=TeacherSaveTransferRequest(selection:[.init(.campaign,slot)])}.disabled(journeys[slot]==nil || game.busy)
-                            Button("读取"){if let entry=journeys[slot]{ask("读取“\(entry.title)”？当前行程将先自动备份。"){try load(entry.value)}}}.disabled(journeys[slot]==nil || game.busy)
+                            Button("覆盖保存"){saveJourney(row.slot)}.disabled(game.campaign==nil || game.busy)
+                            Button("导出"){transfer=TeacherSaveTransferRequest(selection:[.init(.campaign,row.slot)])}.disabled(game.busy)
+                            Button("读取"){if let entry=journeys[row.slot]{ask("读取“\(entry.title)”？当前行程将先自动备份。"){try load(entry.value)}}}.disabled(game.busy)
                         }.buttonStyle(.bordered)
                     }
                 }
+                if matchingJourneys.isEmpty{Text(journeyRows.isEmpty ? "暂无已保存行程。":"没有匹配的行程，可清除筛选。")}
+            }
+            if !damagedJourneySlots.isEmpty {
+                Section("无法读取 · 不受筛选隐藏") {
+                    ForEach(damagedJourneySlots,id:\.self){slot in
+                        Text("行程槽\(slot) · 原文件保留："+(errors["j\(slot)"] ?? "未知错误")).font(.caption).foregroundStyle(.red)
+                        Button("覆盖保存到行程槽\(slot)"){saveJourney(slot)}.disabled(game.campaign==nil || game.busy)
+                    }
+                }
+            }
+            Section("空槽 · 新建保存") {
+                ForEach(emptyJourneySlots,id:\.self){slot in Button("保存到行程槽\(slot)"){saveJourney(slot)}.disabled(game.campaign==nil || game.busy)}
+                if emptyJourneySlots.isEmpty{Text("没有空槽，可在已保存行程中选择覆盖。")}
             }
             Section("读取前自动备份") {
                 if recoveries.isEmpty{Text("暂无备份。")}
@@ -114,19 +148,54 @@ struct TeacherArchiveConsole:View {
         }
     }
     private var historyForm:some View {
-        Section("回退到所选操作之后") {
-            Text("保留选中这一条，撤回后续操作；骰子状态与战斗队列一并恢复。回退后暂停，当前行程自动备份。旧记录若没有道路快照，会停止移动游标。").font(.caption)
-            ForEach(Array((game.campaign?.engine.history ?? []).reversed())){entry in
-                DisclosureGroup("#\(entry.sequence) · "+historyTitle(entry)) {
-                    Text(String(describing:entry.command)).font(.caption).textSelection(.enabled)
-                    ForEach(Array(entry.dice.enumerated()),id:\.offset){_,d in Text("骰子：\(d.values.map(String.init).joined(separator:"、")) → \(d.total)").font(.caption)}
-                    ForEach(entry.after.players){unit in
-                        if let before=entry.before.units[unit.id],before != unit{Text("\(unit.name) · HP \(before.health)→\(unit.health) · AP \(before.ap)→\(unit.ap) · 金币 \(before.coins)→\(unit.coins)").font(.caption)}
-                    }
-                    Button("回退到此条之后"){let count=(game.campaign?.engine.history.count ?? 0)-entry.sequence;ask("保留第\(entry.sequence)条，撤回其后\(count)条操作？"){try game.rollback(to:entry.id);notice=game.message}}.disabled(game.busy)
+        Group {
+            Section("查找操作") {
+                HStack{Text("搜索");TextField("操作 / 成员姓名 / ID / 序号",text:$historyQuery.text)}
+                Picker("类别",selection:$historyQuery.category){ForEach(MeadowHistoryCategory.allCases,id:\.rawValue){Text($0.title).tag($0)}}
+                Picker("涉及人物 / 怪物",selection:Binding(get:{historyQuery.participant ?? ""},set:{historyQuery.participant=$0.isEmpty ? nil:$0})){
+                    Text("全部对象").tag("")
+                    ForEach(historyPeople.keys.sorted(),id:\.self){id in Text((historyPeople[id] ?? id)+" · "+id).tag(id)}
                 }
+                Toggle("最新操作在前",isOn:$historyQuery.newestFirst)
+                HStack{Text("匹配 \(matchingHistory.count) / 全部 \(historyRows.count)");Spacer();Button("清除筛选"){historyQuery=MeadowHistoryQuery()}.disabled(historyQuery==MeadowHistoryQuery())}.font(.caption)
             }
-            if game.campaign?.engine.history.isEmpty != false{Text("暂无操作记录。")}
+            Section("回退到所选操作之后") {
+                Text("筛选只影响列表。回退会保留所选记录，撤回其后所有操作，包括被筛选隐藏的操作；先备份当前行程，再恢复骰子、队列和移动检查点并暂停。").font(.caption)
+                if indexingHistory{ProgressView("正在整理历史索引…")}
+                ForEach(Array(matchingHistory.prefix(historyLimit))){row in
+                    if let history=game.campaign?.engine.history,history.indices.contains(row.sequence-1),history[row.sequence-1].id==row.id {
+                        historyRecord(history[row.sequence-1],row:row)
+                    }
+                }
+                if !indexingHistory && matchingHistory.isEmpty{Text(historyRows.isEmpty ? "暂无操作记录。":"没有匹配的记录，可清除筛选。")}
+                if matchingHistory.count>historyLimit{Button("再显示50条（已显示\(min(historyLimit,matchingHistory.count)) / \(matchingHistory.count)）"){historyLimit += 50}}
+            }
+        }
+    }
+    private func historyRecord(_ entry:OperationReceipt,row:MeadowHistoryIndex)->some View {
+        DisclosureGroup("#\(entry.sequence) · "+row.category.title+" · "+row.title) {
+            Text(String(describing:entry.command)).font(.caption).textSelection(.enabled)
+            ForEach(Array(entry.dice.enumerated()),id:\.offset){_,d in Text("骰子：\(d.values.map(String.init).joined(separator:"、")) → \(d.total)").font(.caption)}
+            ForEach(entry.after.players){unit in
+                if let before=entry.before.units[unit.id],before != unit{Text("\(unit.name) · HP \(before.health)→\(unit.health) · AP \(before.ap)→\(unit.ap) · 金币 \(before.coins)→\(unit.coins)").font(.caption)}
+            }
+            Button("回退到此条之后"){let count=(game.campaign?.engine.history.count ?? 0)-entry.sequence;ask("保留原第\(entry.sequence)条，撤回其后全部\(count)条（包括当前未显示的记录）？"){try game.rollback(to:entry.id);notice=game.message}}.disabled(game.busy || indexingHistory)
+        }
+    }
+    private func rebuildHistory(){
+        let token=UUID();historyIndexToken=token;historyLimit=50;historyRows=[];historyPeople=[:]
+        guard let archive=game.campaign?.engine.archive else{indexingHistory=false;return}
+        indexingHistory=true
+        Task {
+            let result=await Task.detached(priority:.userInitiated){()->([MeadowHistoryIndex],[String:String]) in
+                let rows=archive.history.map{MeadowHistoryIndex(entry:$0,catalog:archive.catalog)}
+                var names=[String:String]()
+                for entry in archive.history {for id in Set(entry.before.units.keys).union(entry.after.units.keys){names[id]=entry.after.units[id]?.name ?? entry.before.units[id]?.name}}
+                let used=Set(rows.flatMap(\.participants));return (rows,names.filter{used.contains($0.key)})
+            }.value
+            guard historyIndexToken==token else{return}
+            historyRows=result.0;historyPeople=result.1;indexingHistory=false
+            if let id=historyQuery.participant,historyPeople[id]==nil{historyQuery.participant=nil}
         }
     }
     private var teacherForm:some View {
@@ -141,28 +210,6 @@ struct TeacherArchiveConsole:View {
             }
         }
     }
-    private func historyTitle(_ entry:OperationReceipt)->String {
-        switch entry.command {
-        case .applyPlayerProfile:return "更新人物档案"
-        case .addHost:return "老师加入"
-        case .grantPlayerResources:return "发放行动点 / 金币"
-        case .editPlayer,.editResources:return "GM修改玩家"
-        case .configureTeams,.mergeTeams,.changeTeam:return "调整队伍"
-        case .transferTeamResource,.teacherTransferTeamResource:return "转移队伍资源"
-        case .campaignMove,.move:return "抵达地图节点"
-        case .refillCampaignMovement:return "补充地图移动条"
-        case .startBattle:return "开始战斗"
-        case .attack:return "普通攻击"
-        case .cast(_,let skill,_):return (try? game.campaign?.engine.catalog.skill(skill).name) ?? "释放技能"
-        case .monsterStep:return "怪物行动"
-        case .useItem:return "使用物品"
-        case .equip:return "更换装备"
-        case .endTurn:return "结束行动"
-        case .reward:return "发放奖励"
-        case .finishBattle:return "结束战斗"
-        default:return "游戏操作"
-        }
-    }
     private func updateThumbnail(){let index=HeroFrames.appearanceIDs.firstIndex(of:bodyStyle) ?? 0;thumbnail=HeroFrames.inventoryImages(appearanceIndex:index,weaponID:nil,armorID:appearance.armor(worn:game.campaign?.engine.state.units[player]?.equipment.armor)).first}
     private func readPlayer(){guard let u=game.campaign?.engine.state.units[player] else{updateThumbnail();return};name=u.name;let a=u.appearance ?? .init(body:game.campaign?.snapshot.appearanceID ?? "forester");bodyStyle=a.body;outfit=a.outfit ?? "follow";updateThumbnail()}
     private func ask(_ message:String,action:@escaping ()throws->Void){confirmation=message;pending=action;confirm=true}
@@ -171,5 +218,5 @@ struct TeacherArchiveConsole:View {
     private func saveJourney(_ slot:Int){guard let c=game.campaign else{return};do{try c.checkpoint();let save=c.snapshot,label=title;savePrompt(occupied:journeys[slot] != nil || errors["j\(slot)"] != nil,message:"覆盖行程槽\(slot)？"){try store.saveCampaign(save,slot:slot,title:label);notice="完整行程已保存。"}}catch{notice=error.localizedDescription}}
     private func load(_ save:MeadowCampaignSave)throws{var value=save;if value.archive.state.battle != nil{value.archive.state.pauseReasons.insert(.manual)};try game.loadJourney(value);notice=game.message;player=game.campaign?.selectedPlayerID ?? "p1";readPlayer()}
     private func recoveryTitle(_ url:URL)->String{let date=(try? url.resourceValues(forKeys:[.contentModificationDateKey]).contentModificationDate) ?? .distantPast;return date.formatted(date:.abbreviated,time:.shortened)}
-    private func reload(){profiles=[:];journeys=[:];errors=[:];for s in 1...MeadowSlotStore.profileCount{do{profiles[s]=try store.profile(s)}catch{errors["p\(s)"]=error.localizedDescription}};for s in 1...MeadowSlotStore.campaignCount{do{journeys[s]=try store.campaign(s)}catch{errors["j\(s)"]=error.localizedDescription}};do{recoveries=try store.recoveries()}catch{notice="自动备份目录读取失败："+error.localizedDescription}}
+    private func reload(){defer{journeyRows=journeys.map{MeadowJourneyIndex(slot:$0.key,entry:$0.value)}};profiles=[:];journeys=[:];errors=[:];for s in 1...MeadowSlotStore.profileCount{do{profiles[s]=try store.profile(s)}catch{errors["p\(s)"]=error.localizedDescription}};for s in 1...MeadowSlotStore.campaignCount{do{journeys[s]=try store.campaign(s)}catch{errors["j\(s)"]=error.localizedDescription}};do{recoveries=try store.recoveries()}catch{notice="自动备份目录读取失败："+error.localizedDescription}}
 }

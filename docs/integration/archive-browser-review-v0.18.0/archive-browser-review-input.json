@@ -1,0 +1,17 @@
+{
+  "kind": "offline archive browser and art contract schematic",
+  "notAppCapture": true,
+  "notTouchReplay": true,
+  "notPerformanceMeasurement": true,
+  "totalMS": 8000,
+  "decodedFrames": 100,
+  "sourceSamples": 100,
+  "sampleMS": 80,
+  "phases": [
+    "行程查找 · 原槽号保持",
+    "历史分类 · 显示原始序号",
+    "回退确认 · 包括筛选隐藏的后续操作",
+    "美术对接文档 · 固定来源提交与配套依赖"
+  ],
+  "artResourcesUpdated": false
+}

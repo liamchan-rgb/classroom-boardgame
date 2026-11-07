@@ -1,0 +1,82 @@
+Fetching https://github.com/weichsel/ZIPFoundation.git from cache
+Fetched https://github.com/weichsel/ZIPFoundation.git from cache (0.93s)
+Computing version for https://github.com/weichsel/ZIPFoundation.git
+Computed https://github.com/weichsel/ZIPFoundation.git at 0.9.20 (0.61s)
+Creating working copy for https://github.com/weichsel/ZIPFoundation.git
+Working copy of https://github.com/weichsel/ZIPFoundation.git resolved at 0.9.20
+warning: 'zipfoundation': found 1 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+    /workspace/classroom-boardgame/native/Packages/ProbeCore/.build/checkouts/ZIPFoundation/Sources/ZIPFoundation/Resources/PrivacyInfo.xcprivacy
+Building for debugging...
+[0/16] Write sources
+[1/16] Copying Fixtures
+[2/16] Write sources
+[4/16] Write swift-version--3C8F63DB8035BADF.txt
+[6/28] Emitting module ZIPFoundation
+[7/38] Compiling ZIPFoundation Archive+BackingConfiguration.swift
+[8/38] Compiling ZIPFoundation Archive+Deprecated.swift
+[9/38] Compiling ZIPFoundation Archive+Helpers.swift
+[10/38] Compiling ZIPFoundation Archive+MemoryFile.swift
+[11/38] Compiling ZIPFoundation Archive+Progress.swift
+[12/38] Compiling ZIPFoundation Archive+Reading.swift
+[13/38] Compiling ZIPFoundation Archive+ReadingDeprecated.swift
+[14/38] Compiling ZIPFoundation Archive+Writing.swift
+[15/38] Compiling ZIPFoundation Archive+WritingDeprecated.swift
+[16/38] Compiling ZIPFoundation Archive+ZIP64.swift
+[17/38] Compiling ZIPFoundation Archive.swift
+[18/38] Compiling ZIPFoundation Data+Compression.swift
+[19/38] Compiling ZIPFoundation Data+CompressionDeprecated.swift
+[20/38] Compiling ZIPFoundation Data+Serialization.swift
+[21/38] Compiling ZIPFoundation Date+ZIP.swift
+[22/38] Compiling ZIPFoundation Entry+Serialization.swift
+[23/38] Compiling ZIPFoundation Entry+ZIP64.swift
+[24/38] Compiling ZIPFoundation Entry.swift
+[25/38] Compiling ZIPFoundation FileManager+ZIP.swift
+[26/38] Compiling ZIPFoundation FileManager+ZIPDeprecated.swift
+[27/38] Compiling ZIPFoundation URL+ZIP.swift
+[28/39] Wrapping AST for ZIPFoundation for debugging
+[30/41] Compiling ClassroomProbeCore PPTXReader.swift
+[31/41] Emitting module ClassroomProbeCore
+[32/42] Compiling ClassroomProbeCore ProbeState.swift
+[33/43] Wrapping AST for ClassroomProbeCore for debugging
+[35/45] Emitting module ClassroomProbeCoreTests
+[36/45] Compiling ClassroomProbeCoreTests ProbeCoreTests.swift
+[37/46] Compiling ClassroomProbeCoreTests resource_bundle_accessor.swift
+[38/47] /workspace/classroom-boardgame/native/Packages/ProbeCore/.build/x86_64-unknown-linux-gnu/debug/ClassroomProbeCorePackageDiscoveredTests.derived/all-discovered-tests.swift
+[39/47] Write sources
+[40/47] Wrapping AST for ClassroomProbeCoreTests for debugging
+[42/49] Emitting module ClassroomProbeCorePackageDiscoveredTests
+[43/49] Compiling ClassroomProbeCorePackageDiscoveredTests ClassroomProbeCoreTests.swift
+[44/50] Compiling ClassroomProbeCorePackageDiscoveredTests all-discovered-tests.swift
+[45/51] /workspace/classroom-boardgame/native/Packages/ProbeCore/.build/x86_64-unknown-linux-gnu/debug/ClassroomProbeCorePackageTests.derived/runner.swift
+[46/51] Write sources
+[47/51] Wrapping AST for ClassroomProbeCorePackageDiscoveredTests for debugging
+[49/53] Compiling ClassroomProbeCorePackageTests runner.swift
+[50/53] Emitting module ClassroomProbeCorePackageTests
+[51/54] Wrapping AST for ClassroomProbeCorePackageTests for debugging
+[52/54] Write Objects.LinkFileList
+[53/54] Linking ClassroomProbeCorePackageTests.xctest
+Build complete! (20.33s)
+Test Suite 'All tests' started at 2026-11-07 17:30:28.047
+Test Suite 'debug.xctest' started at 2026-11-07 17:30:28.051
+Test Suite 'ProbeCoreTests' started at 2026-11-07 17:30:28.051
+Test Case 'ProbeCoreTests.testActualPPTXOrderImagesEmptyAndLongNotes' started at 2026-11-07 17:30:28.051
+Test Case 'ProbeCoreTests.testActualPPTXOrderImagesEmptyAndLongNotes' passed (0.019 seconds)
+Test Case 'ProbeCoreTests.testBackupRoundTripIncludesAssetsButRestoresPaused' started at 2026-11-07 17:30:28.070
+Test Case 'ProbeCoreTests.testBackupRoundTripIncludesAssetsButRestoresPaused' passed (0.103 seconds)
+Test Case 'ProbeCoreTests.testInvalidBackupIsRejectedBeforeUse' started at 2026-11-07 17:30:28.173
+Test Case 'ProbeCoreTests.testInvalidBackupIsRejectedBeforeUse' passed (0.001 seconds)
+Test Case 'ProbeCoreTests.testNotesExcludeSlideNumberAndFooter' started at 2026-11-07 17:30:28.174
+Test Case 'ProbeCoreTests.testNotesExcludeSlideNumberAndFooter' passed (0.0 seconds)
+Test Case 'ProbeCoreTests.testPauseReasonsRemainIndependentAndTimeFreezes' started at 2026-11-07 17:30:28.174
+Test Case 'ProbeCoreTests.testPauseReasonsRemainIndependentAndTimeFreezes' passed (0.001 seconds)
+Test Case 'ProbeCoreTests.testUnsafePathBadZipAndDTDRejected' started at 2026-11-07 17:30:28.175
+Test Case 'ProbeCoreTests.testUnsafePathBadZipAndDTDRejected' passed (0.012 seconds)
+Test Suite 'ProbeCoreTests' passed at 2026-11-07 17:30:28.187
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.136 (0.136) seconds
+Test Suite 'debug.xctest' passed at 2026-11-07 17:30:28.187
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.136 (0.136) seconds
+Test Suite 'All tests' passed at 2026-11-07 17:30:28.187
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.136 (0.136) seconds
+◇ Test run started.
+↳ Testing Library Version: 6.0.3 (18c42c19cac3faf)
+✔ Test run with 0 tests passed after 0.001 seconds.

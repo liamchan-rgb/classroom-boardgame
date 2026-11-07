@@ -1,3 +1,7 @@
+## 当前v0.18.0/build23 · 行程/历史筛选与美术对接（2026-11-07）
+
+用户继续下一步，并要求说明experiment后续人物骨骼/配饰/技能特效/UI等如何接入课堂端。本轮行程搜索/状态/人数/排序，历史分类/涉及对象/关键字/升降序与50条分页；原槽号/记录ID不变，坏档提示与空槽独立，回退会撤回所选记录后全部原操作（包含隐藏项），查询不写档/RNG。14新增Swift与4盘点工具专项，实际Release/包检仍需回执。美术制作/同步agent先读[对接协议](docs/integration/experiment-art-sync.md)，按[变更模板](docs/integration/experiment-art-update-template.json)成套交付与固定SHA接入；只读工具tools/plan_experiment_art_update.py不做apply，禁止整仓/旧Vendor覆盖课堂权限/7人/存档。两仓库镜像协议已建立。本轮只同步流程，没有导入新美术/推进175c7dfc资源基线，experiment仍Build95。正常GIF、直接IPA、可恢复归档和两仓库日志必须完成；不运行App/模拟器/实机，缺图只登记。详见docs/integration/archive-browser-v0.18.0.md。后两步：教师课堂配置预设；有实际源交付后接入首批美术更新。
+
 ## v0.17.0/build22交付核验（2026-11-07）
 
 实际设备Release编译`46ae062fbb17663f4b015b9ab847dbd4f67c8289`、run42392999420 attempt1成功，389规则/后台+6绘本核心零失败，21新增专项在内，4工具检查通过。IPA CRC/经典ZIP2.0/arm64/755/版本/Metal/568源资源/281编译名称/3挂载JSON通过，二进制不同build21。人物与行程的单个/批量JSON导出、预览/目标槽/确认导入、原文件备份与中断恢复完成。未运行App/模拟器/实机，真实触摸/键盘/电视/性能由用户复核。源码/IPA/GIF可恢复归档与下载索引：archives/save-transfer-meadow-v0.17.0-20261107.json（回执收尾不递归归档）。

@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "status": "draft",
+  "sourceRepository": "liamchan-rgb/experiment",
+  "sourceCommit": null,
+  "previousComponentCommit": "175c7dfc4a68e62cb9693da8d837b77081619a6b",
+  "components": [
+    {
+      "kind": "character-rig / accessory / skill-vfx / monster / lighting / public-ui",
+      "sourcePaths": [],
+      "destinationPaths": [],
+      "pairedMetadataAndCode": [],
+      "coordinateAndTimingChanges": "填写画布/根节点/脚底/握点/帧数/节奏/命中与生成时刻的变化",
+      "persistentIDCompatibility": "说明旧人物/装备/技能ID是否保留，若重命名列出别名或迁移",
+      "classroomAdaptationsToRetain": ["6 students + teacher P7", "teacher-only controls and file windows", "fixed canvas and shared renderer", "same campaign/rules/RNG", "existing save slots and transfers"],
+      "sourceReviewGIF": null,
+      "userAcceptedScope": null,
+      "missingArt": [],
+      "files": []
+    }
+  ],
+  "checks": {
+    "offlineAssemblyReviewed": false,
+    "normalSpeedGIF": null,
+    "pureTestReceipt": null,
+    "privacyRoutingAudit": null,
+    "classroomCompiledCommit": null,
+    "deviceArchiveRun": null,
+    "artifactID": null,
+    "ipaURL": null,
+    "ipaSHA256": null,
+    "publicFullGETVerified": false,
+    "recoverableArchiveIndex": null,
+    "appOrSimulatorLaunched": false
+  }
+}

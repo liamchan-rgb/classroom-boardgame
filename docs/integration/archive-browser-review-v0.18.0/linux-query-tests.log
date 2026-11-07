@@ -1,0 +1,59 @@
+[0/1] Planning build
+Building for debugging...
+[0/6] Write sources
+[1/6] Write swift-version--3C8F63DB8035BADF.txt
+[3/8] Emitting module MeadowWorldSupport
+[4/8] Compiling MeadowWorldSupport ArchiveQueries.swift
+[5/10] Write Objects.LinkFileList
+[7/12] Linking MeadowMapExport
+[9/12] Emitting module MeadowWorldSupportTests
+[10/12] Compiling MeadowWorldSupportTests ArchiveQueryTests.swift
+[11/18] /workspace/classroom-boardgame/native/Packages/GameCore/.build/x86_64-unknown-linux-gnu/debug/ClassroomGameCorePackageDiscoveredTests.derived/all-discovered-tests.swift
+[12/19] Write sources
+[13/19] Linking MeadowCampaignReview
+[15/23] Emitting module ClassroomGameCorePackageDiscoveredTests
+[16/23] Compiling ClassroomGameCorePackageDiscoveredTests ClassroomGameCoreTests.swift
+[17/23] Compiling ClassroomGameCorePackageDiscoveredTests MeadowBattleSupportTests.swift
+[18/23] Compiling ClassroomGameCorePackageDiscoveredTests MeadowClassroomSupportTests.swift
+[19/25] Compiling ClassroomGameCorePackageDiscoveredTests MeadowWorldSupportTests.swift
+[20/25] Compiling ClassroomGameCorePackageDiscoveredTests all-discovered-tests.swift
+[21/23] Write Objects.LinkFileList
+[22/23] Linking ClassroomGameCorePackageTests.xctest
+Build complete! (6.74s)
+Test Suite 'Selected tests' started at 2026-11-07 17:33:42.377
+Test Suite 'ArchiveQueryTests' started at 2026-11-07 17:33:42.379
+Test Case 'ArchiveQueryTests.testCastAndEndTurnUseCommandActorsWithoutEvents' started at 2026-11-07 17:33:42.379
+Test Case 'ArchiveQueryTests.testCastAndEndTurnUseCommandActorsWithoutEvents' passed (0.02 seconds)
+Test Case 'ArchiveQueryTests.testCompletedJourneyIsClassifiedSeparately' started at 2026-11-07 17:33:42.398
+Test Case 'ArchiveQueryTests.testCompletedJourneyIsClassifiedSeparately' passed (0.063 seconds)
+Test Case 'ArchiveQueryTests.testFilteredRollbackUsesOriginalIDAndRemovesHiddenOperations' started at 2026-11-07 17:33:42.461
+Test Case 'ArchiveQueryTests.testFilteredRollbackUsesOriginalIDAndRemovesHiddenOperations' passed (0.017 seconds)
+Test Case 'ArchiveQueryTests.testHistoryCategoriesCoverCombatTravelResourceTeamAppearanceConfiguration' started at 2026-11-07 17:33:42.479
+Test Case 'ArchiveQueryTests.testHistoryCategoriesCoverCombatTravelResourceTeamAppearanceConfiguration' passed (0.0 seconds)
+Test Case 'ArchiveQueryTests.testHistoryFiltersAndOrderingDoNotRenumberRecords' started at 2026-11-07 17:33:42.479
+Test Case 'ArchiveQueryTests.testHistoryFiltersAndOrderingDoNotRenumberRecords' passed (0.01 seconds)
+Test Case 'ArchiveQueryTests.testHistorySearchRetainsOldAndNewNames' started at 2026-11-07 17:33:42.489
+Test Case 'ArchiveQueryTests.testHistorySearchRetainsOldAndNewNames' passed (0.015 seconds)
+Test Case 'ArchiveQueryTests.testIndexAndQueriesNeverMutateCampaignOrRNG' started at 2026-11-07 17:33:42.504
+Test Case 'ArchiveQueryTests.testIndexAndQueriesNeverMutateCampaignOrRNG' passed (0.043 seconds)
+Test Case 'ArchiveQueryTests.testJourneyCombinesTokensAndTreatsWhitespaceAsEmpty' started at 2026-11-07 17:33:42.547
+Test Case 'ArchiveQueryTests.testJourneyCombinesTokensAndTreatsWhitespaceAsEmpty' passed (0.035 seconds)
+Test Case 'ArchiveQueryTests.testJourneyOrdersAreStableAndKeepOriginalSlots' started at 2026-11-07 17:33:42.583
+Test Case 'ArchiveQueryTests.testJourneyOrdersAreStableAndKeepOriginalSlots' passed (0.083 seconds)
+Test Case 'ArchiveQueryTests.testJourneySearchFindsTitleNamesTeamAndSeed' started at 2026-11-07 17:33:42.665
+Test Case 'ArchiveQueryTests.testJourneySearchFindsTitleNamesTeamAndSeed' passed (0.041 seconds)
+Test Case 'ArchiveQueryTests.testJourneyStatusAndPlayerCountCompose' started at 2026-11-07 17:33:42.707
+Test Case 'ArchiveQueryTests.testJourneyStatusAndPlayerCountCompose' passed (0.058 seconds)
+Test Case 'ArchiveQueryTests.testNoMatchAndResetRestoreFullList' started at 2026-11-07 17:33:42.765
+Test Case 'ArchiveQueryTests.testNoMatchAndResetRestoreFullList' passed (0.014 seconds)
+Test Case 'ArchiveQueryTests.testTeamRenameIncludesUnchangedMembers' started at 2026-11-07 17:33:42.779
+Test Case 'ArchiveQueryTests.testTeamRenameIncludesUnchangedMembers' passed (0.011 seconds)
+Test Case 'ArchiveQueryTests.testUnchangedAttackParticipantsStillMatch' started at 2026-11-07 17:33:42.791
+Test Case 'ArchiveQueryTests.testUnchangedAttackParticipantsStillMatch' passed (0.011 seconds)
+Test Suite 'ArchiveQueryTests' passed at 2026-11-07 17:33:42.802
+	 Executed 14 tests, with 0 failures (0 unexpected) in 0.422 (0.422) seconds
+Test Suite 'Selected tests' passed at 2026-11-07 17:33:42.802
+	 Executed 14 tests, with 0 failures (0 unexpected) in 0.422 (0.422) seconds
+◇ Test run started.
+↳ Testing Library Version: 6.0.3 (18c42c19cac3faf)
+✔ Test run with 0 tests passed after 0.001 seconds.
