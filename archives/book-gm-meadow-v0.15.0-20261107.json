@@ -1,0 +1,62 @@
+{
+  "version": "0.15.0/build20",
+  "sourceBranch": "feat/teacher-backend-meadow-v0.13",
+  "sourceSnapshotCommit": "eb1a922ced394361543f3faf0fc9bd85c74dbf2d",
+  "compiledCommit": "92ad2d39e09bd8b289727b3be29544953a4193fa",
+  "tag": "archive-book-gm-meadow-v0.15.0-20261107",
+  "buildRun": 42380512294,
+  "archiveRun": 42381086078,
+  "archiveCommit": "1a95393811f8dd62086d3922d84455ace597d823",
+  "archiveBytes": 436140695,
+  "archiveSHA256": "6cb4c038b89ed8d8b4728d0bd9a055b175e6ed770917c189ccd3f2bfd31daf08",
+  "coreTests": {
+    "CurrentDemoAndClassroomBackend": 344,
+    "ClassroomProbeCore": 6,
+    "failures": 0,
+    "nativeSuites": {
+      "MeadowWorldSupportTests": 116,
+      "MeadowClassroomSupportTests": 48,
+      "MeadowBattleSupportTests": 108,
+      "ClassroomGameCoreTests": 72
+    }
+  },
+  "additionalPythonCITests": 4,
+  "ipaBytes": 62351059,
+  "ipaSha256": "ed92c030c08017c28b798a427d2ac78eecdd0d5101d61b92075f32c5d75d84cc",
+  "minimumOS": "27.0",
+  "publicGETChecks": [
+    {
+      "url": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/1a95393811f8dd62086d3922d84455ace597d823/archive-book-gm-meadow-v0.15.0-20261107/ClassroomStage2-v0.15.0-unsigned.ipa",
+      "bytes": 62351059,
+      "sha256": "ed92c030c08017c28b798a427d2ac78eecdd0d5101d61b92075f32c5d75d84cc",
+      "status": 200
+    },
+    {
+      "url": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/1a95393811f8dd62086d3922d84455ace597d823/archive-book-gm-meadow-v0.15.0-20261107/book-gm-normal.gif",
+      "bytes": 113793,
+      "sha256": "3cb67fd22415149b7d735cde028ca081ced213a485d131de26f9e1daf27d97a7",
+      "status": 200
+    }
+  ],
+  "bundleRestoreVerified": true,
+  "allArchivePublicBytesVerified": true,
+  "ipaURL": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/1a95393811f8dd62086d3922d84455ace597d823/archive-book-gm-meadow-v0.15.0-20261107/ClassroomStage2-v0.15.0-unsigned.ipa",
+  "gifURL": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/1a95393811f8dd62086d3922d84455ace597d823/archive-book-gm-meadow-v0.15.0-20261107/book-gm-normal.gif",
+  "archiveURL": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/1a95393811f8dd62086d3922d84455ace597d823/archive-book-gm-meadow-v0.15.0-20261107/README.md",
+  "scope": "Public book status limited to 9 percent for up to seven players; private on-book multi-player AP/coin grants and any-player GM resources, base attributes, buffs, skill uses and backpack quantities; atomic save, restricted teacher undo and current presentation pause preserved.",
+  "completedBookRequests": [
+    "Public player health/AP/coins within 9% status area.",
+    "Teacher grants on book page using one campaign."
+  ],
+  "nextSteps": [
+    "Teacher operation history list and rollback to selected records.",
+    "Teacher participant enable UI and full seven-player flow."
+  ],
+  "limitations": [
+    "No device CPU/GPU timing or touch responsiveness measurement was performed.",
+    "User-reported TV/disconnect misalignment is addressed in code; real AirPlay/TV/disconnect validation needs user screenshots.",
+    "P3-P7 reuse existing approved character resources; distinct character art remains missing. Host joining is a teacher-only backend API; no host enable UI in this version.",
+    "Offline review demonstrates fixed-canvas geometry; it is not UIKit capture or proof of device repair.",
+    "No App, simulator, device or external-display runtime validation."
+  ]
+}
