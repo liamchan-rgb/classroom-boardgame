@@ -18,3 +18,7 @@
 本轮不实施绘本≤10%人物生命/AP/金币状态或绘本发放入口，待办继续见docs/planning/classroom-book-status-backlog.md。无新美术，沿用已存资源；完整测试/归档/包检/公开GET结果以preview-input-v0.13.2-build.json为准。
 
 后两步仍为绘本小型状态区、绘本教师发放；先依据用户设备反馈确认本轮交互与电视对齐。
+
+## 最终归档核验
+
+实际设备Release编译 `81406b3bf1c08e11b9d70defdac90a0297a4cc7a`，run42350765946 attempt1；313规则/后台+6绘本核心测试零失败，45原生Swift绑定/归档通过。IPA 62087899字节，SHA256 `d335bc7fe9320357dcca960fbc556a134a97ded8b7ccc2e379a8c7efd30f355a`；arm64/755/ZIP2.0/CRC/Metal/568源资源/281编译名称/3挂载JSON通过，二进制不同于build15。无设备响应或耗时实测。详见preview-input-v0.13.2-build.json。

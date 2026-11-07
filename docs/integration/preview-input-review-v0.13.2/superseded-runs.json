@@ -1,0 +1,7 @@
+{
+  "runs": [
+    42350196166,
+    42350410685
+  ],
+  "reason": "Superseded by scroll-visibility gating and paused-preview cache handling. No interim IPA delivered."
+}

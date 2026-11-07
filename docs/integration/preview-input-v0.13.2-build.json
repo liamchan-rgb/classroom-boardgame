@@ -1,0 +1,63 @@
+{
+  "appVersion": "0.13.2/build16",
+  "testedCommit": "81406b3bf1c08e11b9d70defdac90a0297a4cc7a",
+  "sourceCommit": "81406b3bf1c08e11b9d70defdac90a0297a4cc7a",
+  "runID": 42350765946,
+  "runAttempt": 1,
+  "artifactID": 13565822246,
+  "artifactArchiveSha256": "f972413a990edef41dedd4acb4ad127dd5d2e532c2dd0239dc74eef6946cba31",
+  "artifactArchiveBytes": 57932748,
+  "ipaSha256": "d335bc7fe9320357dcca960fbc556a134a97ded8b7ccc2e379a8c7efd30f355a",
+  "ipaBytes": 62087899,
+  "coreTests": {
+    "CurrentDemoAndClassroomBackend": 313,
+    "ClassroomProbeCore": 6,
+    "failures": 0,
+    "nativeSuites": {
+      "MeadowWorldSupportTests": 116,
+      "MeadowClassroomSupportTests": 17,
+      "MeadowBattleSupportTests": 108,
+      "ClassroomGameCoreTests": 72
+    }
+  },
+  "deviceReleaseArchive": true,
+  "arm64": true,
+  "executableMode": "0o755",
+  "executableSHA256": "f98ea5154b6e22622bc7eb6ec23a19265dc3bc3076e1264f5cada9253b03119e",
+  "classicZIP2": true,
+  "CRC": true,
+  "artSource": "175c7dfc4a68e62cb9693da8d837b77081619a6b",
+  "sourceResourceHashesVerified": 568,
+  "compiledAssetNamesVerified": 281,
+  "rigResourceHashesVerified": 3,
+  "metalLibraries": {
+    "Payload/ClassroomProbe.app/default.metallib": "af74556814a875eb225eca5ed22720122ed9dc2a88daa8117b180298956b921f"
+  },
+  "minimumOS": "27.0",
+  "sdk": "iphoneos27.2",
+  "legacyGameUIRemoved": true,
+  "fixedLogicalCanvas": [
+    1280,
+    720
+  ],
+  "fixedMetalScale": 1,
+  "teacherUsesGameOnlyMirror": true,
+  "teacherMirrorMaximumFPS": 15,
+  "teacherMirrorPixelSize": [
+    640,
+    360
+  ],
+  "mirrorReadbackOffMain": true,
+  "theoreticalRawPixelBudgetBytesPerSecond": 13824000,
+  "publicRenderTargetFPS": 60,
+  "newPVEDeviceVerified": false,
+  "appLaunched": false,
+  "simulatorLaunched": false,
+  "externalDisplayVerified": false,
+  "limitations": [
+    "No device CPU/GPU timing or touch responsiveness measurement was performed.",
+    "User-reported TV/disconnect misalignment is addressed in code; real AirPlay/TV/disconnect validation needs user screenshots.",
+    "Existing two-player Meadow campaign retained; larger classroom parties are not implemented.",
+    "Offline review demonstrates fixed-canvas geometry; it is not UIKit capture or proof of device repair."
+  ]
+}

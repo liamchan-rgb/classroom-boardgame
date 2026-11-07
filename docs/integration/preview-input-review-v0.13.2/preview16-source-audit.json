@@ -1,0 +1,23 @@
+{
+  "kind": "source-routing-audit",
+  "commit": "81406b3bf1c08e11b9d70defdac90a0297a4cc7a",
+  "publicOnlyHasPlayerFacingPanels": true,
+  "oneTeacherOwnedSessionAndRenderer": true,
+  "mapAndBattleUseOriginalProductionComponents": true,
+  "publicModeDoesNotStartAnotherAIOrDecisionTimer": true,
+  "privateSheetsRoutedToTeacherWindow": true,
+  "legacySinglePlayerTrainingUnderlayRemoved": true,
+  "publicGameInputsDisabled": true,
+  "publicGameCallbacksExplicitlyReadOnly": true,
+  "battleCompletionReturnsToExploration": true,
+  "fixedCanvasAndDrawablePolicy": true,
+  "teacherUsesActualGameOnlyMirror": true,
+  "teacherSimplifiedMapRemoved": true,
+  "actualProjectionUsedForInput": true,
+  "halfResolutionPreviewBudget": true,
+  "readbackOffMainQueue": true,
+  "hiddenPreviewStopsCopying": true,
+  "fullScreenTeacherInputWired": true,
+  "encounterAllowsMapInput": true,
+  "nativeWindowRoutingVerified": false
+}

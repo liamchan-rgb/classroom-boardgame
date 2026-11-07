@@ -1,0 +1,78 @@
+[0/1] Planning build
+Building for debugging...
+[0/19] Write sources
+[2/19] Write swift-version--3C8F63DB8035BADF.txt
+[4/11] Compiling MeadowClassroomSupport ClassroomPreviewPolicy.swift
+[5/11] Emitting module MeadowClassroomSupport
+[6/12] Compiling MeadowClassroomSupport ClassroomBackend.swift
+[7/13] Wrapping AST for MeadowClassroomSupport for debugging
+[9/16] Compiling MeadowClassroomSupportTests ClassroomBackendTests.swift
+[10/16] Emitting module MeadowClassroomSupportTests
+[11/16] Compiling MeadowClassroomSupportTests ClassroomCanvasTests.swift
+[12/17] Compiling MeadowClassroomSupportTests ClassroomPreviewTests.swift
+[13/22] /workspace/classroom-boardgame/native/Packages/GameCore/.build/x86_64-unknown-linux-gnu/debug/ClassroomGameCorePackageDiscoveredTests.derived/all-discovered-tests.swift
+[14/22] Write sources
+[15/22] Wrapping AST for MeadowClassroomSupportTests for debugging
+[17/27] Emitting module ClassroomGameCorePackageDiscoveredTests
+[18/27] Compiling ClassroomGameCorePackageDiscoveredTests ClassroomGameCoreTests.swift
+[19/27] Compiling ClassroomGameCorePackageDiscoveredTests MeadowBattleSupportTests.swift
+[20/27] Compiling ClassroomGameCorePackageDiscoveredTests MeadowClassroomSupportTests.swift
+[21/27] Compiling ClassroomGameCorePackageDiscoveredTests MeadowWorldSupportTests.swift
+[22/28] Compiling ClassroomGameCorePackageDiscoveredTests all-discovered-tests.swift
+[23/29] /workspace/classroom-boardgame/native/Packages/GameCore/.build/x86_64-unknown-linux-gnu/debug/ClassroomGameCorePackageTests.derived/runner.swift
+[24/29] Write sources
+[25/29] Wrapping AST for ClassroomGameCorePackageDiscoveredTests for debugging
+[27/31] Emitting module ClassroomGameCorePackageTests
+[28/31] Compiling ClassroomGameCorePackageTests runner.swift
+[29/31] Write Objects.LinkFileList
+[30/31] Linking ClassroomGameCorePackageTests.xctest
+Build complete! (5.30s)
+Test Suite 'Selected tests' started at 2026-11-07 07:08:38.862
+Test Suite 'ClassroomBackendTests' started at 2026-11-07 07:08:38.867
+Test Case 'ClassroomBackendTests.testAdminEditsDoNotOpenAPublicEditorOrChangeRandom' started at 2026-11-07 07:08:38.867
+Test Case 'ClassroomBackendTests.testAdminEditsDoNotOpenAPublicEditorOrChangeRandom' passed (0.029 seconds)
+Test Case 'ClassroomBackendTests.testBattleBindingUsesOneExistingEngineAndDoesNotRoll' started at 2026-11-07 07:08:38.895
+Test Case 'ClassroomBackendTests.testBattleBindingUsesOneExistingEngineAndDoesNotRoll' passed (0.128 seconds)
+Test Case 'ClassroomBackendTests.testDisplayCannotAdvanceTravelOrClockThroughBackend' started at 2026-11-07 07:08:39.023
+Test Case 'ClassroomBackendTests.testDisplayCannotAdvanceTravelOrClockThroughBackend' passed (0.022 seconds)
+Test Case 'ClassroomBackendTests.testDisplayCannotEditRefillRewardMoveOrSelect' started at 2026-11-07 07:08:39.045
+Test Case 'ClassroomBackendTests.testDisplayCannotEditRefillRewardMoveOrSelect' passed (0.024 seconds)
+Test Case 'ClassroomBackendTests.testDisplayCannotGenerateMapsOrInstallGame' started at 2026-11-07 07:08:39.070
+Test Case 'ClassroomBackendTests.testDisplayCannotGenerateMapsOrInstallGame' passed (0.024 seconds)
+Test Case 'ClassroomBackendTests.testOnlyExplicitPlayerPanelsCanBeProjected' started at 2026-11-07 07:08:39.093
+Test Case 'ClassroomBackendTests.testOnlyExplicitPlayerPanelsCanBeProjected' passed (0.022 seconds)
+Test Case 'ClassroomBackendTests.testRestoringDoesNotKeepAnInvisibleBookPause' started at 2026-11-07 07:08:39.116
+Test Case 'ClassroomBackendTests.testRestoringDoesNotKeepAnInvisibleBookPause' passed (0.023 seconds)
+Test Case 'ClassroomBackendTests.testTeacherActionsValidateTurnAPTargetAndDoNotConsumeRandom' started at 2026-11-07 07:08:39.139
+Test Case 'ClassroomBackendTests.testTeacherActionsValidateTurnAPTargetAndDoNotConsumeRandom' passed (0.029 seconds)
+Test Case 'ClassroomBackendTests.testTeacherBackendAndRendererUseTheSameEngine' started at 2026-11-07 07:08:39.168
+Test Case 'ClassroomBackendTests.testTeacherBackendAndRendererUseTheSameEngine' passed (0.024 seconds)
+Test Case 'ClassroomBackendTests.testTeacherCanGenerateExactConfiguredNodeCounts' started at 2026-11-07 07:08:39.192
+Test Case 'ClassroomBackendTests.testTeacherCanGenerateExactConfiguredNodeCounts' passed (0.211 seconds)
+Test Suite 'ClassroomBackendTests' passed at 2026-11-07 07:08:39.402
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.536 (0.536) seconds
+Test Suite 'ClassroomCanvasTests' started at 2026-11-07 07:08:39.402
+Test Case 'ClassroomCanvasTests.testActualProjectionInverseIncludesZoomPanAndNonUniformAxes' started at 2026-11-07 07:08:39.402
+Test Case 'ClassroomCanvasTests.testActualProjectionInverseIncludesZoomPanAndNonUniformAxes' passed (0.0 seconds)
+Test Case 'ClassroomCanvasTests.testAllHostsUseOneCanvasAndFitWithoutCroppingOrStretching' started at 2026-11-07 07:08:39.403
+Test Case 'ClassroomCanvasTests.testAllHostsUseOneCanvasAndFitWithoutCroppingOrStretching' passed (0.0 seconds)
+Test Case 'ClassroomCanvasTests.testInputRoundTripAndLetterboxReject' started at 2026-11-07 07:08:39.403
+Test Case 'ClassroomCanvasTests.testInputRoundTripAndLetterboxReject' passed (0.0 seconds)
+Test Case 'ClassroomCanvasTests.testRepeatedIPadTVDisconnectFitsDoNotChangeCampaignCameraMapOrRandom' started at 2026-11-07 07:08:39.403
+Test Case 'ClassroomCanvasTests.testRepeatedIPadTVDisconnectFitsDoNotChangeCampaignCameraMapOrRandom' passed (0.024 seconds)
+Test Suite 'ClassroomCanvasTests' passed at 2026-11-07 07:08:39.428
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.025 (0.025) seconds
+Test Suite 'ClassroomPreviewTests' started at 2026-11-07 07:08:39.428
+Test Case 'ClassroomPreviewTests.testOpeningMonsterPreviewStillAllowsTeacherRoadNavigation' started at 2026-11-07 07:08:39.428
+Test Case 'ClassroomPreviewTests.testOpeningMonsterPreviewStillAllowsTeacherRoadNavigation' passed (0.022 seconds)
+Test Case 'ClassroomPreviewTests.testPreviewIsOffWhenHiddenLocalBookBackgroundOrPrivateModal' started at 2026-11-07 07:08:39.450
+Test Case 'ClassroomPreviewTests.testPreviewIsOffWhenHiddenLocalBookBackgroundOrPrivateModal' passed (0.0 seconds)
+Test Case 'ClassroomPreviewTests.testPreviewPayloadStaysWithinBudgetWithoutChangingGameCanvas' started at 2026-11-07 07:08:39.450
+Test Case 'ClassroomPreviewTests.testPreviewPayloadStaysWithinBudgetWithoutChangingGameCanvas' passed (0.0 seconds)
+Test Suite 'ClassroomPreviewTests' passed at 2026-11-07 07:08:39.450
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.023 (0.023) seconds
+Test Suite 'Selected tests' passed at 2026-11-07 07:08:39.451
+	 Executed 17 tests, with 0 failures (0 unexpected) in 0.583 (0.583) seconds
+◇ Test run started.
+↳ Testing Library Version: 6.0.3 (18c42c19cac3faf)
+✔ Test run with 0 tests passed after 0.001 seconds.
