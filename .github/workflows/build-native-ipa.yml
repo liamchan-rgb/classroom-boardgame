@@ -3,6 +3,11 @@ name: Build personal iPad app
 # Manual runs only. No Apple credentials, provisioning profiles or paid runners.
 on:
   workflow_dispatch:
+    inputs:
+      archive_only:
+        description: "Archive and publish the already verified Meadow bridge build only"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -13,6 +18,7 @@ concurrency:
 
 jobs:
   build:
+    if: ${{ !inputs.archive_only }}
     runs-on: xcode-27
     timeout-minutes: 45
     steps:
@@ -69,5 +75,35 @@ jobs:
         with:
           name: ClassroomStage2-v0.12-build
           path: artifacts/
+          retention-days: 14
+          if-no-files-found: warn
+
+  archive_verified_bridge:
+    if: ${{ inputs.archive_only }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Fetch complete source history without binary backup branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --unshallow --filter=blob:none origin main "${GITHUB_REF_NAME}"
+      - name: Archive, restore-check, publish and verify public bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/publish_meadow_milestone.py
+      - name: Retain publication receipt
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: meadow-bridge-archive-receipt
+          path: ${{ runner.temp }}/meadow-milestone/archive_publish_receipt.json
           retention-days: 14
           if-no-files-found: warn
