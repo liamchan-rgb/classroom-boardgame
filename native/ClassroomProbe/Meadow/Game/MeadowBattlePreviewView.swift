@@ -44,7 +44,8 @@ final class MeadowBattlePreviewView: UIView {
         if classroomMode {
             // The formal party preview is the sole public battle UI. Remove
             // the parent single-player training UI rather than overlaying it.
-            [header,landscape,track,details,mapBorder,mapTitle,partyButton,stageTitle].forEach{$0.removeFromSuperview()}
+            let obsolete:[UIView]=[header,landscape,track,details,mapBorder,mapTitle,partyButton,stageTitle]
+            obsolete.forEach{$0.removeFromSuperview()}
         }
     }}
     func classroomPause(_ value:Bool){party.classroomSetPaused(value)}
