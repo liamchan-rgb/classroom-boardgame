@@ -28,6 +28,7 @@ final class MeadowMapSettingsViewController: UIViewController {
     private let studentCountLabel=UILabel()
     private var classRows:[UIStackView]=[]
     private var studentNames:[UITextField]=[]
+    private var profileLooks:[String:PlayerAppearance]=[:]
     private var classControls:[UISegmentedControl] {[campaignClass,companionClass]+extraClasses}
     private var result: GeneratedMeadowMap?
     private var revision = 0
@@ -96,7 +97,15 @@ final class MeadowMapSettingsViewController: UIViewController {
             selector.addTarget(self,action:#selector(refreshPartySummary),for:.valueChanged)
             let summary=classSummaries[i];summary.numberOfLines=0;summary.textColor = .white;summary.font = .systemFont(ofSize:16,weight:.semibold)
             let name=UITextField();name.placeholder="学生姓名（可选）";name.borderStyle = .roundedRect;name.textColor = .white;name.backgroundColor=UIColor(white:1,alpha:0.08);studentNames.append(name)
-            let row=UIStackView(arrangedSubviews:[label,name,selector,summary]);row.axis = .vertical;row.spacing=6
+            let profiles=UIButton(type:.system);profiles.setTitle("读取人物档案",for:.normal);profiles.showsMenuAsPrimaryAction=true
+            profiles.menu=UIMenu(children:(1...MeadowSlotStore.profileCount).map{slot in
+                let entry=try? MeadowTeacherCoordinator.slotStore.profile(slot)
+                return UIAction(title:"人物槽\(slot) · \(entry?.value.name ?? "空/无法读取")",attributes:entry==nil ? .disabled:[]){[weak self] _ in
+                    guard let self,let entry else{return};name.text=entry.value.name;self.profileLooks["p\(i+1)"]=entry.value.appearance
+                    profiles.setTitle("已选："+entry.value.name,for:.normal)
+                }
+            })
+            let row=UIStackView(arrangedSubviews:[label,name,profiles,selector,summary]);row.axis = .vertical;row.spacing=6
             classRows.append(row);right.addArrangedSubview(row)
         }
         let partyNote=UILabel();partyNote.text="支持相同职业。以上为职业基础值，装备另计；职业与衣装、武器独立。继续存档沿用原队伍。";partyNote.numberOfLines=0;partyNote.font = .systemFont(ofSize:16);partyNote.textColor=gold
@@ -230,6 +239,7 @@ final class MeadowMapSettingsViewController: UIViewController {
             guard let self else{return}
             do {
                 let store=Self.campaignStore(),base=FileManager.default.urls(for:.applicationSupportDirectory,in:.userDomainMask)[0]
+                if let old=try store.read(){try MeadowTeacherCoordinator.slotStore.backup(old)}
                 let campStore=CampSaveStore(url:base.appendingPathComponent("MeadowCamp/camp-v1.json"))
                 var units:[String:ClassroomGameCore.GameUnit]?,appearance="forester"
                 if let bytes=try campStore.read() {
@@ -238,12 +248,12 @@ final class MeadowMapSettingsViewController: UIViewController {
                     units=save.archive.state.units;appearance=save.appearanceID
                 }
                 try store.preserveCompletedCampaign()
-                let session=try MeadowCampaignSession.new(layout:result,appearanceID:appearance,playerClassID:config.playerClassID,companionClassID:config.companionClassID,studentClasses:Array(self.classControls.prefix(Int(self.studentCount.value))).map{MeadowPartyConfiguration.classIDs[max(0,$0.selectedSegmentIndex)]},studentNames:self.studentNames.prefix(Int(self.studentCount.value)).map{$0.text ?? ""},loadouts:units,persist:store.write)
+                let session=try MeadowCampaignSession.new(layout:result,appearanceID:appearance,playerClassID:config.playerClassID,companionClassID:config.companionClassID,studentClasses:Array(self.classControls.prefix(Int(self.studentCount.value))).map{MeadowPartyConfiguration.classIDs[max(0,$0.selectedSegmentIndex)]},studentNames:self.studentNames.prefix(Int(self.studentCount.value)).map{$0.text ?? ""},playerAppearances:self.profileLooks,loadouts:units,persist:store.write)
                 self.presentCampaign(session)
             } catch {self.status.text="未开始新行程："+error.localizedDescription}
         }
         if FileManager.default.fileExists(atPath:Self.campaignStore().url.path) {
-            let alert=UIAlertController(title:"开始新行程？",message:"这会替换当前探索存档。营地衣装与装备存档会保留。\n"+[classSummaries[0].text,classSummaries[1].text].compactMap{$0}.joined(separator:"\n\n"),preferredStyle:.alert)
+            let alert=UIAlertController(title:"开始新行程？",message:"当前行程会先自动备份，手动行程槽保留。营地衣装与装备存档会保留。\n"+[classSummaries[0].text,classSummaries[1].text].compactMap{$0}.joined(separator:"\n\n"),preferredStyle:.alert)
             alert.addAction(UIAlertAction(title:"取消",style:.cancel))
             alert.addAction(UIAlertAction(title:"开始新行程",style:.destructive,handler:{_ in create()}));present(alert,animated:true)
         } else {create()}

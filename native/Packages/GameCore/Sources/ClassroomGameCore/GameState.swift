@@ -46,6 +46,7 @@ public struct GameUnit: Codable, Equatable, Identifiable {
     public var damageBuff: DamageBuff?
     public var canActFromRound: Int
     public var active: Bool
+    public var appearance: PlayerAppearance? = nil
     public var defeatRewarded: Bool
     public var isAlive: Bool { health > 0 }
 }

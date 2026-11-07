@@ -23,6 +23,7 @@ final class GameScene: SKScene {
     }
     func refreshCampaign() {
         guard let campaign,world != nil else{return}
+        refreshProfileFrames()
         simulation.selected=campaign.playerIDs.firstIndex(of:campaign.selectedPlayerID) ?? 0
         for (index,d) in world.definition.discoveries.enumerated() {
             guard let id=d.nodeID,let node=campaign.engine.state.map.nodes.first(where:{$0.id==id}) else{continue}
@@ -39,6 +40,23 @@ final class GameScene: SKScene {
     private var actorRoots: [SKNode] = []
     private var actorLabels: [SKNode] = []
     private var frames: [[[SKTexture]]] = []
+    private var profileFrames:[String:[[SKTexture]]]=[:]
+    private var profileLocomotion=Array(repeating:AuthoredLocomotion(plan:HeroFrames.locomotionPlan),count:7)
+    private func profileUnit(_ index:Int)->GameUnit? {
+        guard let campaign,campaign.playerIDs.indices.contains(index),let unit=campaign.engine.state.units[campaign.playerIDs[index]],unit.appearance != nil else{return nil};return unit
+    }
+    func refreshProfileFrames(){
+        guard let campaign,world != nil else{return}
+        var active=Set<String>()
+        for (index,id) in campaign.playerIDs.enumerated() {
+            guard let unit=campaign.engine.state.units[id],let look=unit.appearance,frames.indices.contains(index) else{continue}
+            let ai=HeroFrames.appearanceIDs.firstIndex(of:look.body) ?? 0,armor=look.armor(worn:unit.equipment.armor)
+            let key="\(ai)-\(unit.equipment.weapon ?? "none")-\(armor ?? "none")";active.insert(key)
+            if profileFrames[key]==nil{profileFrames[key]=HeroFrames.load(1,appearanceIndex:ai,weaponID:unit.equipment.weapon,armorID:armor)}
+            frames[index]=profileFrames[key]!
+        }
+        profileFrames=profileFrames.filter{active.contains($0.key)}
+    }
     private var layeredP1Frames: [SKTexture]?
     private(set) var layeredPreview = false
     private var walks = [WalkCycle(), WalkCycle(), WalkCycle()]
@@ -513,8 +531,9 @@ final class GameScene: SKScene {
         let heroIndices = campaign != nil ? Array(0..<campaign!.playerIDs.count):(layeredPreview ? [0, 1] : Array(actors.indices))
         let heroes = heroIndices.map { index -> MeadowHeroCaster in
             let pose = actorPose(index)
-            return MeadowHeroCaster(index: layeredPreview ? 0 : index%3, foot: actorPoint(index), facing: pose.facing,
-                                    frame: pose.frame, phase: pose.phase, appearanceIndex: index == 0 ? p1AppearanceIndex : 0,weaponID:index == 0 ? p1WeaponID:"trainingSword",armorID:index == 0 ? p1ArmorID:nil)
+            let u=profileUnit(index),look=u?.appearance
+            return MeadowHeroCaster(index: layeredPreview || look != nil ? 0 : index%3, foot: actorPoint(index), facing: pose.facing,
+                                    frame: pose.frame, phase: pose.phase, appearanceIndex: look.flatMap{HeroFrames.appearanceIDs.firstIndex(of:$0.body)} ?? (index == 0 ? p1AppearanceIndex : 0),weaponID:u != nil ? u!.equipment.weapon:(index == 0 ? p1WeaponID:"trainingSword"),armorID:look != nil ? look!.armor(worn:u?.equipment.armor):(index == 0 ? p1ArmorID:nil))
         }
         return MeadowFrameState(world: world, camera: MeadowViewport(world: world, scene: self, viewSize: viewSize), time: environmentTime, heroes: heroes, includeEnvironment: gaitTest == nil)
     }
@@ -524,8 +543,12 @@ final class GameScene: SKScene {
         return gaitTest?.point(for:index) ?? simulation.point(for:index)
     }
     private func actorPose(_ index: Int) -> HeroPose {
+        if index != 0,profileUnit(index) != nil {
+            let p=profileLocomotion[index]
+            return HeroPose(heroIndex:0,facing:p.facing,frame:p.frame,phase:p.phase)
+        }
         let modular = index == 0 && HeroFrames.locomotionPlan != nil
-        return HeroPose(heroIndex: layeredPreview && index < 2 ? 0 : index%3,
+        return HeroPose(heroIndex: (layeredPreview && index < 2) || profileUnit(index) != nil ? 0 : index%3,
                         facing: gaitTest?.facing ?? (modular ? p1Locomotion.facing : walks[index].facing),
                         frame: gaitTest?.frame ?? (modular ? p1Locomotion.frame : walks[index].frame),
                         phase: gaitTest?.phase ?? (modular ? p1Locomotion.phase : walks[index].phase))
@@ -536,6 +559,9 @@ final class GameScene: SKScene {
             let point = actorPoint(index)
             if gaitTest == nil, let before {
                 walks[index].advance(from: before[index], to: point)
+                if index != 0,profileUnit(index) != nil {
+                    profileLocomotion[index].advance(from:before[index],to:point,seconds:seconds,requested:campaign.map{$0.isMoving && $0.travel?.actors.contains($0.playerIDs[index])==true} ?? false,headingHint:campaign.map{CGPoint(x:$0.heading.x,y:$0.heading.y)} ?? .zero)
+                }
                 if index == 0 {
                     p1Locomotion.advance(from: before[index], to: point, seconds: seconds,
                         requested: campaign.map{$0.isMoving && $0.travel?.actors.contains("p1")==true} ?? (simulation.isPlaying && !simulation.travelers[0].isWaiting),

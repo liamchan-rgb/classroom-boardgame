@@ -286,7 +286,8 @@ final class MeadowCampaignInventoryViewController:UIViewController {
         let a=try? GameRules.attributes(unit,catalog:catalog)
         health.show("生命",value:unit.health,maximum:a?.maximumHealth ?? 1,color:.systemGreen);ap.show(value:unit.ap,maximum:a?.maximumAP ?? 8)
         stats.text="\(unit.name)\n金币 \(unit.coins) · 积分 \(unit.score)\n额外伤害 ＋\(a?.damage ?? 0)"+(actor=="p2" ? "\nP2装备规则可用，地图形象暂沿用原资源。":"")
-        hero.image=actor=="p1" ? HeroFrames.inventoryImages(appearanceIndex:HeroFrames.appearanceIDs.firstIndex(of:session.snapshot.appearanceID) ?? 0,weaponID:unit.equipment.weapon,armorID:unit.equipment.armor).first:nil
+        let look=unit.appearance ?? PlayerAppearance(body:session.snapshot.appearanceID)
+        hero.image=(actor=="p1" || unit.appearance != nil) ? HeroFrames.inventoryImages(appearanceIndex:HeroFrames.appearanceIDs.firstIndex(of:look.body) ?? 0,weaponID:unit.equipment.weapon,armorID:look.armor(worn:unit.equipment.armor)).first:nil
         for (i,slot) in ItemSlot.allCases.enumerated(){
             let name=unit.equipment[slot].flatMap{try? catalog.item($0).name} ?? "未装备"
             slots[i].configuration?.title=CampInventoryProjection.slotTitle(slot)+" · "+name

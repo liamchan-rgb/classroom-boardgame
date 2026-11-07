@@ -110,9 +110,48 @@ final class MeadowTeacherCoordinator:ObservableObject {
             message="地图已由后台准备，投放端只显示游戏。";updateMirrorDemand();revision += 1
         }catch{message=error.localizedDescription}
     }
+    static var slotStore:MeadowSlotStore {MeadowSlotStore(directory:MeadowMapSettingsViewController.campaignStore().url.deletingLastPathComponent().appendingPathComponent("Slots",isDirectory:true))}
+    func openArchives(){
+        guard !busy,!modalOpen,let presenter=presentationHost else{return}
+        let screen=UIHostingController(rootView:TeacherArchiveConsole(game:self,onClose:{[weak self] in self?.presentationHost?.dismiss(animated:true)}))
+        screen.modalPresentationStyle = .formSheet;screen.preferredContentSize=CGSize(width:900,height:720)
+        presenter.present(screen,animated:true)
+    }
+    func loadJourney(_ save:MeadowCampaignSave)throws {
+        guard !busy else{throw GameError("请等待动作结束。")}
+        try save.validate()
+        let wasBook=surface == .book,store=MeadowMapSettingsViewController.campaignStore()
+        // Construct and validate without writing, then back up the live working copy.
+        _=try MeadowCampaignSession(save:save)
+        if let campaign{try Self.slotStore.backup(campaign.snapshot)}
+        try store.write(save.encoded())
+        install(try MeadowCampaignSession(save:save,persist:store.write))
+        if wasBook{project(.book)}
+        message="行程已读取；原进度已留在自动备份。";revision += 1
+    }
+    func rollback(to id:String)throws {
+        guard let campaign else{throw GameError("尚未开始行程。")}
+        try loadJourney(campaign.snapshot.rollingBack(after:id,book:surface == .book))
+        message="已回退到所选操作之后，当前已暂停。";revision += 1
+    }
+    func applyProfile(_ profile:MeadowPlayerProfile,to id:String)throws {
+        guard !busy,let campaign,!campaign.isCompleted else{throw GameError("请等待动作结束，或开始未结算行程。")}
+        try profile.validate()
+        let wasBook=surface == .book
+        try backend.apply(.applyPlayerProfile(unit:id,name:profile.name,appearance:profile.appearance),role:.teacher)
+        install(campaign);if wasBook{project(.book)}
+        message="已更新姓名和外观，数值与装备保持。";revision += 1
+    }
+    func joinTeacher(name:String,classID:String,team:String,appearance:PlayerAppearance?)throws {
+        guard !busy,let campaign else{throw GameError("请先开始行程。")}
+        let wasBook=surface == .book
+        try backend.joinTeacher(name:name,classID:classID,team:team,appearance:appearance,role:.teacher)
+        install(campaign);if wasBook{project(.book)}
+        message="老师已加入独立P7席位。";revision += 1
+    }
     func restore(){
         guard !busy,campaign?.engine.state.battle==nil else{message="请先结束当前战斗。";return}
-        do{let store=MeadowMapSettingsViewController.campaignStore();guard let save=try store.read() else{message="还没有已保存的行程。";return};install(try MeadowCampaignSession(save:save,persist:store.write))}
+        do{let store=MeadowMapSettingsViewController.campaignStore();guard let save=try store.read() else{message="还没有已保存的行程。";return};try loadJourney(save)}
         catch{message="存档读取失败，原文件保留："+error.localizedDescription}
     }
     func settings(){

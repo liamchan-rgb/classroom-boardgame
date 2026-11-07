@@ -215,6 +215,9 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
         for name in Array(textures.keys) where !retainingCurrent && HeroFrames.armorAtlasNames.contains(name) && !names.contains(name) { textures.removeValue(forKey:name) }
         for (name,texture) in prepared { textures[name]=texture }
     }
+    func retainCampaignArmorAtlases(_ names:Set<String>){
+        for name in Array(textures.keys) where HeroFrames.armorAtlasNames.contains(name) && !names.contains(name){textures.removeValue(forKey:name)}
+    }
     private func heroTexture(_ hero: MeadowHeroCaster) throws -> MTLTexture {
         let name = HeroFrames.atlasName(heroIndex: hero.index, diagonal: hero.facing >= 4,
                                        appearanceIndex: hero.appearanceIndex,weaponID:hero.weaponID,armorID:hero.armorID)

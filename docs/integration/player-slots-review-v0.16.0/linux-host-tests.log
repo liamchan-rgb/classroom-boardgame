@@ -1,0 +1,30 @@
+[0/1] Planning build
+Building for debugging...
+[0/7] Write sources
+[1/7] Write swift-version--3C8F63DB8035BADF.txt
+[3/5] Compiling MeadowClassroomSupport ClassroomBackend.swift
+[4/5] Emitting module MeadowClassroomSupport
+[5/7] Write Objects.LinkFileList
+[6/7] Linking ClassroomGameCorePackageTests.xctest
+Build complete! (2.49s)
+Test Suite 'Selected tests' started at 2026-11-07 16:15:18.399
+Test Suite 'ClassroomArchiveTests' started at 2026-11-07 16:15:18.401
+Test Case 'ClassroomArchiveTests.testBadTeacherAppearanceDoesNotPartiallyJoin' started at 2026-11-07 16:15:18.401
+Test Case 'ClassroomArchiveTests.testBadTeacherAppearanceDoesNotPartiallyJoin' passed (0.024 seconds)
+Test Case 'ClassroomArchiveTests.testOldHostCommandDecodesWithoutAppearance' started at 2026-11-07 16:15:18.425
+Test Case 'ClassroomArchiveTests.testOldHostCommandDecodesWithoutAppearance' passed (0.002 seconds)
+Test Case 'ClassroomArchiveTests.testPublicDisplayCannotChangeProfile' started at 2026-11-07 16:15:18.427
+Test Case 'ClassroomArchiveTests.testPublicDisplayCannotChangeProfile' passed (0.116 seconds)
+Test Case 'ClassroomArchiveTests.testSevenPlayerBattleUsesIndividualAPAndQueue' started at 2026-11-07 16:15:18.544
+Test Case 'ClassroomArchiveTests.testSevenPlayerBattleUsesIndividualAPAndQueue' passed (0.023 seconds)
+Test Case 'ClassroomArchiveTests.testTeacherCanUndoJoinUsingSelectedHistory' started at 2026-11-07 16:15:18.566
+Test Case 'ClassroomArchiveTests.testTeacherCanUndoJoinUsingSelectedHistory' passed (0.019 seconds)
+Test Case 'ClassroomArchiveTests.testTeacherProfileAndSevenPlayerSaveUseSameEngine' started at 2026-11-07 16:15:18.585
+Test Case 'ClassroomArchiveTests.testTeacherProfileAndSevenPlayerSaveUseSameEngine' passed (0.14 seconds)
+Test Suite 'ClassroomArchiveTests' passed at 2026-11-07 16:15:18.725
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.324 (0.324) seconds
+Test Suite 'Selected tests' passed at 2026-11-07 16:15:18.725
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.324 (0.324) seconds
+◇ Test run started.
+↳ Testing Library Version: 6.0.3 (18c42c19cac3faf)
+✔ Test run with 0 tests passed after 0.001 seconds.

@@ -544,6 +544,7 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
                     self.scene.selectP1Loadout(appearance:index,weapon:unit.equipment.weapon,armor:unit.equipment.armor)
                 }
             } catch { self.showLoadingFailure(error);return }
+            do{try self.prepareProfileVisuals()}catch{self.showLoadingFailure(error);return}
             self.scene.activateForMetalRenderer()
             self.mapPresented = true
             renderer.start(in: surface, scene: self.scene)
@@ -732,6 +733,22 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         p1AppearanceButton.configuration?.title="行囊装备"
         p1AppearanceButton.accessibilityLabel="打开P1行囊与装备"
         p1AppearanceButton.accessibilityValue=unit.equipment.itemIDs.compactMap { try? catalog.item($0).name }.joined(separator:"、")
+    }
+    private var profileVisualSignature=""
+    private func prepareProfileVisuals()throws {
+        guard let campaign else{return}
+        let units=campaign.engine.state.players.filter{$0.id=="p1" || $0.appearance != nil}
+        let signature=units.map{u in "\(u.id)-\((u.appearance?.body ?? campaign.snapshot.appearanceID))-\(u.appearance?.outfit ?? "follow")-\(u.equipment.weapon ?? "none")-\(u.equipment.armor ?? "none")"}.joined(separator:"|")
+        guard signature != profileVisualSignature else{return}
+        var names=Set<String>()
+        for u in units {
+            let a=u.appearance ?? PlayerAppearance(body:campaign.snapshot.appearanceID),index=HeroFrames.appearanceIDs.firstIndex(of:a.body) ?? 0,armor=a.armor(worn:u.equipment.armor)
+            try groundRenderer?.prepareP1Equipment(appearance:index,weapon:u.equipment.weapon,armor:armor,retainingCurrent:true)
+            for diagonal in [false,true]{names.insert(HeroFrames.atlasName(heroIndex:0,diagonal:diagonal,appearanceIndex:index,weaponID:u.equipment.weapon,armorID:armor))}
+            if u.id=="p1"{scene.selectP1Loadout(appearance:index,weapon:u.equipment.weapon,armor:armor)}
+        }
+        groundRenderer?.retainCampaignArmorAtlases(names)
+        scene.refreshProfileFrames();profileVisualSignature=signature
     }
     private func prepareCampVisuals(_ unit:GameUnit,appearance:String,retaining:Bool) throws {
         guard let index=HeroFrames.appearanceIDs.firstIndex(of:appearance) else { throw GameError("衣装不受支持。") }
@@ -1164,6 +1181,7 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
 private func refreshCampaignStatus(allowBattleOpen:Bool=true) {
         classroomOverlayDirty=true
         guard let campaign else{return}
+        do{try prepareProfileVisuals()}catch{showCampaignMessage(error.localizedDescription)}
         for control in [shadowLabButton,gaitTestButton,battlePreviewButton,p1AppearanceButton] {control.isHidden=true}
         let state=campaign.engine.state,players=state.players
         randomMapSummary.text="已探索 \(state.map.revealed.count)/\(state.map.nodes.count) · 金币 \(players.reduce(0){$0+$1.coins}) · 积分 \(players.reduce(0){$0+$1.score})"+(campaign.cleared ? " · 敌人已清理":"")
@@ -1260,17 +1278,14 @@ private func refreshCampaignStatus(allowBattleOpen:Bool=true) {
         screen.performEquip={ [weak self] actor,slot,item in
             guard let self else{return}
             let candidate=try campaign.candidateEquipment(actor:actor,slot:slot,item:item)
-            let appearance=campaign.snapshot.appearanceID
-            let known:Set<String>=["trainingSword","huntingBow","greatSword","legendaryStaff","leatherArmor","runeArmor","powerBadge","actionRing"]
-            if actor != "p1" || !candidate.equipment.itemIDs.allSatisfy(known.contains) {
-                try campaign.equipInventory(actor:actor,slot:slot,item:item)
-                return
+            if actor=="p1" || candidate.appearance != nil {
+                let look=candidate.appearance ?? PlayerAppearance(body:campaign.snapshot.appearanceID)
+                let index=HeroFrames.appearanceIDs.firstIndex(of:look.body) ?? 0
+                try self.groundRenderer?.prepareP1Equipment(appearance:index,weapon:candidate.equipment.weapon,armor:look.armor(worn:candidate.equipment.armor),retainingCurrent:true)
             }
-            try self.prepareCampVisuals(candidate,appearance:appearance,retaining:true)
-            do{try campaign.equipInventory(actor:actor,slot:slot,item:item)}
-            catch{if let old=campaign.engine.state.units[actor]{try? self.prepareCampVisuals(old,appearance:appearance,retaining:false)};throw error}
-            if let index=HeroFrames.appearanceIDs.firstIndex(of:appearance) {self.scene.selectP1Loadout(appearance:index,weapon:candidate.equipment.weapon,armor:candidate.equipment.armor)}
-            try? self.prepareCampVisuals(candidate,appearance:appearance,retaining:false)
+            try campaign.equipInventory(actor:actor,slot:slot,item:item)
+            self.profileVisualSignature=""
+            try self.prepareProfileVisuals()
         }
         screen.onChange={ [weak self] in self?.scene.refreshCampaign();self?.refreshCampaignStatus(allowBattleOpen:false) }
         screen.onClose={ [weak self] in self?.classroomInventoryChanged?(nil);self?.refreshCampaignStatus() }

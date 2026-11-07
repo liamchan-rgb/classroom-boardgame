@@ -1,0 +1,9 @@
+test_device_sdk_cannot_hide_incompatible_simulator_sdk (test_ci_tools.XcodeSelectionTests.test_device_sdk_cannot_hide_incompatible_simulator_sdk) ... ok
+test_inconsistent_debug_release_minimum_is_reported (test_ci_tools.XcodeSelectionTests.test_inconsistent_debug_release_minimum_is_reported) ... ok
+test_missing_required_sdk_fails_without_lowering_project_target (test_ci_tools.XcodeSelectionTests.test_missing_required_sdk_fails_without_lowering_project_target) ... ok
+test_old_default_is_rejected_in_favor_of_compatible_installation (test_ci_tools.XcodeSelectionTests.test_old_default_is_rejected_in_favor_of_compatible_installation) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.010s
+
+OK

@@ -79,6 +79,7 @@ extension GameState {
               random.cursor >= 0, random.cursor <= random.scripted.count else { throw GameError("本局状态或计时、随机状态无效。") }
         if let value = random.damageD20Override, !(1...20).contains(value) { throw GameError("验证骰值无效。") }
         for (key, unit) in units {
+            try unit.appearance?.validate()
             let stats = try GameRules.attributes(unit, catalog: catalog)
             guard key == unit.id, !unit.id.isEmpty, !unit.name.isEmpty, nodeIDs.contains(unit.nodeID),
                   (0...stats.maximumHealth).contains(unit.health), unit.shield >= 0,
@@ -174,7 +175,8 @@ public enum GameCommand: Codable, Equatable {
     case mergeTeams(source:String,destination:String)
     case transferTeamResource(from:TeamResourceOwner,to:TeamResourceOwner,coins:Int,item:String?,count:Int)
     case teacherTransferTeamResource(from:TeamResourceOwner,to:TeamResourceOwner,coins:Int,item:String?,count:Int)
-    case addHost(id:String,name:String,classID:String,team:String,node:Int)
+    case addHost(id:String,name:String,classID:String,team:String,node:Int,appearance:PlayerAppearance?=nil)
+    case applyPlayerProfile(unit:String,name:String,appearance:PlayerAppearance)
     case changeTeam(unit: String, team: String)
     case reorderQueue([String])
     case finishBattle(winner: String?, byScore: Bool)

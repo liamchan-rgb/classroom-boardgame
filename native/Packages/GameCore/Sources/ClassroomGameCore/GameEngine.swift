@@ -196,9 +196,15 @@ struct Evaluation {
         case .mergeTeams(let source,let destination):try mergeTeams(source:source,destination:destination)
         case .transferTeamResource(let from,let to,let coins,let item,let count):try transferTeamResource(from:from,to:to,coins:coins,item:item,count:count)
         case .teacherTransferTeamResource(let from,let to,let coins,let item,let count):try transferTeamResource(from:from,to:to,coins:coins,item:item,count:count,teacher:true)
-        case .addHost(let id,let name,let classID,let team,let node):
+        case .applyPlayerProfile(let id,let name,let appearance):
+            let clean=name.trimmingCharacters(in:.whitespacesAndNewlines)
+            guard state.units[id]?.kind == .player,!clean.isEmpty,clean.count<=40 else{throw GameError("人物姓名需为1至40个字符。")}
+            try appearance.validate();state.units[id]?.name=clean;state.units[id]?.appearance=appearance
+            events.append(GameEvent("playerProfile",target:id,detail:clean))
+        case .addHost(let id,let name,let classID,let team,let node,let appearance):
             guard state.phase == .exploration,state.battle==nil,!state.players.contains(where:{$0.host}),state.players.filter({!$0.host}).count<=6,state.units[id]==nil,state.teams.contains(where:{$0.id==team}),state.map.nodes.contains(where:{$0.id==node}) else{throw GameError("主持人只能在探索时加入，且最多一名。")}
             state.units[id]=try GameFactory.player(id:id,name:name,classID:classID,teamID:team,nodeID:node,host:true,catalog:catalog)
+            try appearance?.validate();state.units[id]?.appearance=appearance
             events.append(GameEvent("hostJoined",actor:id))
         case .changeTeam(let id, let team):
             guard try unit(id).kind == .player, state.teams.contains(where: { $0.id == team }) else { throw GameError("换队对象或队伍无效。") }

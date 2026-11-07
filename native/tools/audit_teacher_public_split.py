@@ -80,8 +80,13 @@ assert 'backend.editPlayer(id,value:value,role:.teacher)' in host
 assert 'UIHostingController(rootView:TeacherGMConsole' in host
 assert 'if game.saveGM(selected,value:value){reload()' in gm
 assert 'backend.canUndoTeacherAction' in gm and 'undoTeacherAction()' in grant
+archives=read('TeacherArchiveConsole.swift')
+assert 'TeacherArchiveConsole' not in public and 'UIHostingController(rootView:TeacherArchiveConsole' in host
+assert 'game.openArchives()' in views and 'game.openArchives()' in dashboard
+assert 'Self.slotStore.backup(campaign.snapshot)' in host and 'rollingBack(after:id' in host
+assert 'game.joinTeacher' in archives and 'game.applyProfile' in archives and 'store.saveCampaign' in archives
 result=dict(kind='source-routing-audit',commit=a.commit,publicOnlyHasPlayerFacingPanels=True,oneTeacherOwnedSessionAndRenderer=True,
     mapAndBattleUseOriginalProductionComponents=True,publicModeDoesNotStartAnotherAIOrDecisionTimer=True,
     privateSheetsRoutedToTeacherWindow=True,legacySinglePlayerTrainingUnderlayRemoved=True,
-    publicGameInputsDisabled=True,publicGameCallbacksExplicitlyReadOnly=True,battleCompletionReturnsToExploration=True,fixedCanvasAndDrawablePolicy=True,teacherUsesActualGameOnlyMirror=True,teacherSimplifiedMapRemoved=True,actualProjectionUsedForInput=True,highResolution30FPSPolicy=True,layeredPreviewAvoidsMapRasterization=True,dragPanAndPinch=True,readbackOffMainQueue=True,hiddenPreviewStopsCopying=True,fullScreenTeacherInputWired=True,sixStudentsAndReservedHostSeat=True,dynamicMapAndBattlePlayers=True,privateTeamAndWarehouseControls=True,publicBookStatusAreaBound=True,privateBookGrantAndGMControls=True,sharedEngineForBookAndGM=True,singlePageTeacherWindow=True,originalSkillCardsUseTeacherHitRouting=True,allClassroomSkillCardsFitWithoutScroll=True,encounterAllowsMapInput=True,nativeWindowRoutingVerified=False)
+    publicGameInputsDisabled=True,publicGameCallbacksExplicitlyReadOnly=True,battleCompletionReturnsToExploration=True,fixedCanvasAndDrawablePolicy=True,teacherUsesActualGameOnlyMirror=True,teacherSimplifiedMapRemoved=True,actualProjectionUsedForInput=True,highResolution30FPSPolicy=True,layeredPreviewAvoidsMapRasterization=True,dragPanAndPinch=True,readbackOffMainQueue=True,hiddenPreviewStopsCopying=True,fullScreenTeacherInputWired=True,sixStudentsAndReservedHostSeat=True,dynamicMapAndBattlePlayers=True,privateTeamAndWarehouseControls=True,publicBookStatusAreaBound=True,privateBookGrantAndGMControls=True,privateProfileAndCampaignSlots=True,privateHistoryAndTeacherJoining=True,sharedEngineForBookAndGM=True,singlePageTeacherWindow=True,originalSkillCardsUseTeacherHitRouting=True,allClassroomSkillCardsFitWithoutScroll=True,encounterAllowsMapInput=True,nativeWindowRoutingVerified=False)
 a.output.parent.mkdir(parents=True,exist_ok=True);a.output.write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2))

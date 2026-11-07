@@ -40,6 +40,7 @@ public struct MeadowCampaignCompletion:Codable,Equatable {
     public let distance:Double,movementCoins:Int,historyCount:Int
 }
 public struct MeadowCampaignSave:Codable,Equatable {
+    public var checkpoints:[MeadowCampaignCheckpoint]?=nil
     public var movementBalances:[String:Double]?=nil
     public var movementTeam:String {archive.state.units[selectedPlayerID ?? "p1"]?.teamID ?? "party"}
     public var movementLimit:Double {MeadowMovementRules.capacity(archive,team:movementTeam)}
@@ -60,6 +61,10 @@ public struct MeadowCampaignSave:Codable,Equatable {
               (1...6).contains(archive.state.players.filter{!$0.host}.count),archive.state.players.filter({$0.host}).count<=1,
               archive.state.players.allSatisfy({$0.host ? $0.id=="p7":(1...6).map{"p\($0)"}.contains($0.id)}),archive.catalog == (try MeadowCampaignSession.catalog()),
               archive.state.map.nodes.map(\.id)==layout.map.nodes.map(\.id),archive.state.map.roads==layout.map.roads else {throw GameError("探索存档与当前地图或规则不匹配。")}
+        if let checkpoints {
+            let operations=Set(archive.history.map(\.id))
+            guard Set(checkpoints.map(\.operationID)).count==checkpoints.count,checkpoints.allSatisfy({operations.contains($0.operationID)}) else{throw GameError("历史移动快照无效。")}
+        }
         let ids=Set(layout.map.nodes.map(\.id))
         let assets=Set(["CampTent","NodeCombatOutpost","NodeBossSanctum","NodeRewardCache","NodeWaystone","OakA","OakB","Pines","RockLow","RockHigh","RockSmall","Shrub","Flowers"])
         guard layout.props.allSatisfy({assets.contains($0.asset)}),archive.state.units.values.filter({$0.kind == .monster}).allSatisfy({u in
@@ -162,6 +167,11 @@ private final class CampaignWriter {
         }
         if next.movementBalances != nil,let amount=next.movement?.remaining {next.movementBalances?[key]=min(amount,limit)}
         if let amount=next.movement?.remaining {next.movement?.remaining=min(amount,limit)}
+        let ids=Set(next.archive.history.map(\.id))
+        next.checkpoints=(next.checkpoints ?? []).filter{ids.contains($0.operationID)}
+        if let last=next.archive.history.last,!next.checkpoints!.contains(where:{$0.operationID==last.id}) {
+            next.checkpoints!.append(MeadowCampaignCheckpoint(save:next,operationID:last.id))
+        }
         if let persist {try persist(next.encoded())};snapshot=next
     }
 }
@@ -227,7 +237,7 @@ public final class MeadowCampaignSession {
         var elder=try c.monster("caveTroll");elder.id="meadowElderStag";elder.name="古树鹿王"
         c.monsters += [stag,elder];try c.validate();return c
     }
-    public static func new(layout:GeneratedMeadowMap,appearanceID:String="forester",playerClassID:String="spellblade",companionClassID:String="ranger",studentClasses:[String]?=nil,studentNames:[String]?=nil,loadouts:[String:GameUnit]?=nil,persist:((Data)throws->Void)?=nil)throws->MeadowCampaignSession {
+    public static func new(layout:GeneratedMeadowMap,appearanceID:String="forester",playerClassID:String="spellblade",companionClassID:String="ranger",studentClasses:[String]?=nil,studentNames:[String]?=nil,playerAppearances:[String:PlayerAppearance]?=nil,loadouts:[String:GameUnit]?=nil,persist:((Data)throws->Void)?=nil)throws->MeadowCampaignSession {
         let catalog=try self.catalog(),start=layout.map.nodes.first{$0.kind == .start}!.id
         try MeadowPartyConfiguration(playerClassID:playerClassID,companionClassID:companionClassID).validate(catalog:catalog)
         let classes=studentClasses ?? [playerClassID,companionClassID]
@@ -237,6 +247,7 @@ public final class MeadowCampaignSession {
             let id="p\(index+1)"
             var u=try GameFactory.player(id:id,name:id.uppercased()+" · "+catalog.playerClass(classID).name,classID:classID,teamID:"party",nodeID:start,catalog:catalog)
             if let names=studentNames,names.indices.contains(index),!names[index].trimmingCharacters(in:.whitespacesAndNewlines).isEmpty{u.name=names[index].trimmingCharacters(in:.whitespacesAndNewlines)}
+            u.appearance=playerAppearances?[id];try u.appearance?.validate()
             u.inventory=["smallPotion":2,"largePotion":1,"shieldPotion":1,"revivalStone":1]
             if let source=loadouts?[id] {u.equipment=source.equipment;u.inventory=source.inventory}
             u.health=try GameRules.attributes(u,catalog:catalog).maximumHealth;try GameRules.refill(&u,catalog:catalog);units[id]=u
