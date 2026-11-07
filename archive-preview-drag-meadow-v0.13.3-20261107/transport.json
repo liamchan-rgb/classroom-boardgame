@@ -1,0 +1,54 @@
+{
+  "formatVersion": 1,
+  "logicalZIP": "archive-preview-drag-meadow-v0.13.3-20261107.zip",
+  "bytes": 425511932,
+  "sha256": "cdd0f1982e0f9f02131d1b574680f2bb2c8713775dcd224f43ac5f99c28cb0b4",
+  "parts": [
+    {
+      "file": "archive-preview-drag-meadow-v0.13.3-20261107.zip.part000",
+      "bytes": 50331648,
+      "sha256": "44a6ee141977a80d9296aa9d0c595d01d99c81ff234b3892a4c59892a4aa37b0"
+    },
+    {
+      "file": "archive-preview-drag-meadow-v0.13.3-20261107.zip.part001",
+      "bytes": 50331648,
+      "sha256": "46c514983990924e5f273b47813def27288a8bd4d4174408e51984da8da0e987"
+    },
+    {
+      "file": "archive-preview-drag-meadow-v0.13.3-20261107.zip.part002",
+      "bytes": 50331648,
+      "sha256": "274097d68f1c1994e46b97b5a5b4934d0ae393b8076dd06b014d40b37337fb47"
+    },
+    {
+      "file": "archive-preview-drag-meadow-v0.13.3-20261107.zip.part003",
+      "bytes": 50331648,
+      "sha256": "10c2100e7634a3f3e08e0ec4e0162342d54f9b5885c63d6383bfdf7a7c23db5d"
+    },
+    {
+      "file": "archive-preview-drag-meadow-v0.13.3-20261107.zip.part004",
+      "bytes": 50331648,
+      "sha256": "0fca69b9226d2cc3b525d6af75468e9f410f02f5893337f2a650d7afa461adff"
+    },
+    {
+      "file": "archive-preview-drag-meadow-v0.13.3-20261107.zip.part005",
+      "bytes": 50331648,
+      "sha256": "f4881ad732d3d91820778d212de96e4fa147d4e4072f104a74dcf5e1e00caae0"
+    },
+    {
+      "file": "archive-preview-drag-meadow-v0.13.3-20261107.zip.part006",
+      "bytes": 50331648,
+      "sha256": "d7435ccdfecea0234fda3dd4b17135aa528667f2be19fc0687f63e7388883184"
+    },
+    {
+      "file": "archive-preview-drag-meadow-v0.13.3-20261107.zip.part007",
+      "bytes": 50331648,
+      "sha256": "e237e8f18e4b04b2b1e62c16aafb776ee260f36d9e7207af7ab506558a05c55c"
+    },
+    {
+      "file": "archive-preview-drag-meadow-v0.13.3-20261107.zip.part008",
+      "bytes": 22858748,
+      "sha256": "eda7abc11ffa87d57be430bd48b515123dcfeff381e2f381383edbcc7bd140d9"
+    }
+  ],
+  "reason": "Lossless split; GitHub normal Git rejects files over 100MB"
+}
