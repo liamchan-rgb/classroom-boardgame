@@ -25,6 +25,7 @@ struct TeacherSaveTransferConsole:View {
     let directory:URL
     let request:TeacherSaveTransferRequest
     let onClose:()->Void
+    @State private var initialized=false
     @State private var importing=false
     @State private var picker=false
     @State private var exporter=false
@@ -53,7 +54,7 @@ struct TeacherSaveTransferConsole:View {
             }.disabled(working).navigationTitle("人物与行程 · 导入导出")
                 .toolbar{ToolbarItem(placement:.cancellationAction){Button("关闭"){onClose()}.disabled(working)}}
                 .interactiveDismissDisabled(working)
-                .onAppear{importing=request.importing;refresh(selectDefaults:true)}
+                .onAppear{if !initialized{initialized=true;importing=request.importing;refresh(selectDefaults:true)}}
                 .onChange(of:importing){_,value in selection=value ? Set(package?.addresses ?? []):Set(rows.filter{$0.error==nil}.map(\.address))}
                 .fileImporter(isPresented:$picker,allowedContentTypes:[.json]){result in switch result{case .success(let url):readFile(url);case .failure(let error):notice=isCancellation(error) ? "已取消选取，槽位未改变。":"文件选取失败："+error.localizedDescription}}
                 .fileExporter(isPresented:$exporter,document:document,contentType:.json,defaultFilename:filename){result in
