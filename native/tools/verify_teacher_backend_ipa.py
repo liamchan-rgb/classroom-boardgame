@@ -24,7 +24,7 @@ assert suite_totals=={'MeadowWorldSupportTests':116,'MeadowClassroomSupportTests
 assert sum(suite_totals.values())==310 and len(re.findall(r"Test Case '[^\n]+' passed",test_log))==310
 assert 'Executed 6 tests, with 0 failures' in (F/'core-tests.log').read_text()
 log=(F/'xcode-build.log').read_text();assert '** ARCHIVE SUCCEEDED **' in log
-for name in ['MeadowTeacherCoordinator.swift','MeadowTeacherDashboard.swift','MeadowPublicOutput.swift','GameViewController.swift']:assert name in log
+for name in ['MeadowTeacherCoordinator.swift','MeadowTeacherDashboard.swift','MeadowPublicOutput.swift','MeadowClassroomFrameMirror.swift','GameViewController.swift']:assert name in log
 for name in ['PVEPlayView.swift','PVEPublicView.swift','RulesLabView.swift','MeadowPublicView.swift']:assert name not in log
 def source_file(path):return subprocess.check_output(['git','show',run['head_sha']+':'+path],cwd=R)
 manifest=json.loads(source_file('native/ClassroomProbe/Resources/meadow-port-provenance.json'))

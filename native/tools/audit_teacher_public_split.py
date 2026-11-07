@@ -23,6 +23,8 @@ assert 'classroomFinishBattleIfReady()' in host
 dashboard=read('MeadowTeacherDashboard.swift');mirror=read('MeadowClassroomFrameMirror.swift');metal=read('Meadow/Game/MeadowShadowRenderer.swift')
 assert 'TeacherControlMap' not in dashboard and 'Canvas{' not in dashboard
 assert 'TeacherGamePreview' in dashboard and 'game.canvasTap(point,selectingNode:selectingNode)' in dashboard
+assert 'classroomNode(atWorldPoint:world,role:.teacher)' in host
+assert 'selectedNode=hit?.id' in host
 assert 'ClassroomCanvas.size' in host and 'controller.view.frame=view.bounds' not in host
 assert 'ground.autoResizeDrawable = !classroomMode' in game and 'classroomMode ? .aspectFit:.resizeFill' in game
 assert 'ground.drawableSize=pixels' in game

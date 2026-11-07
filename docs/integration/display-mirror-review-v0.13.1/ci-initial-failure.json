@@ -1,0 +1,8 @@
+{
+  "runID": 42345436987,
+  "source": "c9c583950d765b69cb28dee425ff0b1f20158f80",
+  "stage": "Test offline core compile",
+  "reason": "Apple Foundation geometry overlay needs explicit CoreGraphics import; Linux Foundation already exposes it.",
+  "fix": "5a2bafe590bd1642ca182e21954289a299adead4",
+  "ipaProduced": false
+}

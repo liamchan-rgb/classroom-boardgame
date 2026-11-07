@@ -113,10 +113,13 @@ final class MeadowTeacherCoordinator:ObservableObject {
             guard let world=try renderer?.classroomWorldPoint(at:point,role:.teacher) else{return}
             let wx=Double(world.x),wy=Double(world.y)
             let closest=c.engine.state.map.nodes.min{hypot($0.x*1280-wx,$0.y*c.snapshot.layout.coordinateHeight-wy)<hypot($1.x*1280-wx,$1.y*c.snapshot.layout.coordinateHeight-wy)}
-            if selectingNode {selectedNode=closest?.id;message="已在实际画面中选中地点，编辑表单仅在后台打开。";revision += 1;return}
-            try backend.travel(to:.init(wx,wy),role:.teacher)
+            let hitID=try renderer?.classroomNode(atWorldPoint:world,role:.teacher)
+            let hit=hitID.flatMap{id in c.engine.state.map.nodes.first{$0.id==id}}
+            if selectingNode {selectedNode=hit?.id;message=hit == nil ? "请点击画面中的建筑或节点标记。":"已在实际画面中选中地点，编辑表单仅在后台打开。";revision += 1;return}
+            let destination=hit.map{c.point(at:$0.id)} ?? .init(wx,wy)
+            try backend.travel(to:destination,role:.teacher)
             renderer?.classroomPreviewEncounter(nil);renderer?.classroomRefresh();message="已指定道路目标，移动条按实际距离扣除。"
-            if let node=closest,hypot(node.x*1280-wx,node.y*c.snapshot.layout.coordinateHeight-wy)<80,(node.kind == .combat || node.kind == .boss){selectedNode=node.id;project(.encounter(node.id))}
+            if let node=hit ?? closest,(hit != nil || hypot(node.x*1280-wx,node.y*c.snapshot.layout.coordinateHeight-wy)<80),(node.kind == .combat || node.kind == .boss){selectedNode=node.id;project(.encounter(node.id))}
             revision += 1
         }catch{message=error.localizedDescription}
     }

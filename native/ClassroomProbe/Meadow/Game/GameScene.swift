@@ -638,6 +638,21 @@ final class GameScene: SKScene {
             xAxis:CGPoint(x:projection.xAxis.dx,y:projection.xAxis.dy),yAxis:CGPoint(x:projection.yAxis.dx,y:projection.yAxis.dy))
     }
 
+    func classroomNode(atWorldPoint point:CGPoint)->Int? {
+        guard let world else{return nil}
+        let location=LivingWorld.position(point)
+        // Badges and sprite frames use their real world positions, anchors and
+        // dimensions. A roof is not approximated by the nearest node center.
+        for (index,marker) in discoveryNodes.enumerated() where marker.calculateAccumulatedFrame().insetBy(dx:-6,dy:-6).contains(location) {
+            if let id=world.definition.discoveries[index].nodeID{return id}
+        }
+        for node in world.children.sorted(by:{$0.zPosition>$1.zPosition}) {
+            guard let name=node.name,name.hasPrefix("landmark-"),let id=Int(name.dropFirst(9)) else{continue}
+            if node.frame.insetBy(dx:-6,dy:-6).contains(location){return id}
+        }
+        return nil
+    }
+
     private func handleWorldTap(_ location: CGPoint) {
         if let index = actorRoots.indices.filter({campaign == nil || $0<campaign!.playerIDs.count}).min(by: {
             hypot(actorRoots[$0].position.x - location.x, actorRoots[$0].position.y + 17 - location.y) <

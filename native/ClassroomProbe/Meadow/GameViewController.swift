@@ -30,6 +30,11 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         guard ready,!battlePreviewActive,gameView.frame.contains(point) else{return nil}
         return scene.classroomWorldPoint(CGPoint(x:point.x-gameView.frame.minX,y:point.y-gameView.frame.minY))
     }
+    func classroomNode(atWorldPoint point:CGPoint,role:ClassroomRole)throws->Int? {
+        try ClassroomGameBackend.requireTeacher(role)
+        guard ready,!battlePreviewActive else{return nil}
+        return scene.classroomNode(atWorldPoint:point)
+    }
     weak var classroomPrivatePresenter:UIViewController?
     var classroomAdvanceTravel:((Double)throws->[OperationReceipt])?
     var classroomBattleModel:(()throws->PartyEncounter)?
