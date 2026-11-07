@@ -1,0 +1,24 @@
+{
+  "kind": "offline book and GM structure schematic",
+  "notAppCapture": true,
+  "notTouchReplay": true,
+  "notPerformanceMeasurement": true,
+  "sourceSamples": 120,
+  "sampleMS": 50,
+  "totalMS": 6000,
+  "decodedFrames": 4,
+  "publicCanvas": [
+    1280,
+    720
+  ],
+  "statusAreaFraction": 0.09,
+  "maximumCapacityExample": 7,
+  "teacherHostEnableUI": false,
+  "privateDraftDoesNotChangePublicUntilSaved": true,
+  "phases": [
+    "绘本页选择奖励对象 · 无须切回游戏",
+    "发放AP与金币 · 公开状态更新",
+    "GM编辑P6草稿 · 公开仍保持旧值",
+    "保存GM · 仅公开玩家结果，不显示编辑表单"
+  ]
+}

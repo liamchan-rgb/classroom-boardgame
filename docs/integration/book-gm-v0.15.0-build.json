@@ -1,0 +1,75 @@
+{
+  "appVersion": "0.15.0/build20",
+  "testedCommit": "92ad2d39e09bd8b289727b3be29544953a4193fa",
+  "sourceCommit": "92ad2d39e09bd8b289727b3be29544953a4193fa",
+  "runID": 42380512294,
+  "runAttempt": 1,
+  "artifactID": 13577069867,
+  "artifactArchiveSha256": "6bd8a3bde69d7124a7bbc4b52c61bbb665547671fbeb90e2aa5d6c4e6d52f3a8",
+  "artifactArchiveBytes": 58050403,
+  "ipaSha256": "ed92c030c08017c28b798a427d2ac78eecdd0d5101d61b92075f32c5d75d84cc",
+  "ipaBytes": 62351059,
+  "coreTests": {
+    "CurrentDemoAndClassroomBackend": 344,
+    "ClassroomProbeCore": 6,
+    "failures": 0,
+    "nativeSuites": {
+      "MeadowWorldSupportTests": 116,
+      "MeadowClassroomSupportTests": 48,
+      "MeadowBattleSupportTests": 108,
+      "ClassroomGameCoreTests": 72
+    }
+  },
+  "deviceReleaseArchive": true,
+  "arm64": true,
+  "executableMode": "0o755",
+  "executableSHA256": "8a708aaca197eeaccc8d9f657086acb95dd2facf47cfd02564484fe48b9c4be1",
+  "classicZIP2": true,
+  "CRC": true,
+  "artSource": "175c7dfc4a68e62cb9693da8d837b77081619a6b",
+  "sourceResourceHashesVerified": 568,
+  "compiledAssetNamesVerified": 281,
+  "rigResourceHashesVerified": 3,
+  "metalLibraries": {
+    "Payload/ClassroomProbe.app/default.metallib": "af74556814a875eb225eca5ed22720122ed9dc2a88daa8117b180298956b921f"
+  },
+  "minimumOS": "27.0",
+  "sdk": "iphoneos27.2",
+  "legacyGameUIRemoved": true,
+  "fixedLogicalCanvas": [
+    1280,
+    720
+  ],
+  "fixedMetalScale": 1,
+  "teacherUsesGameOnlyMirror": true,
+  "teacherMirrorMaximumFPS": 30,
+  "teacherMirrorPixelSize": [
+    960,
+    540
+  ],
+  "layeredPreview": true,
+  "dragAndPinchInput": true,
+  "bookStatusMaximumAreaFraction": 0.09,
+  "bookGrantsUseSameEngine": true,
+  "privatePlayerGM": true,
+  "maximumStudents": 6,
+  "reservedHostSeats": 1,
+  "teamManagement": true,
+  "sharedWarehouses": true,
+  "singlePageTeacherWindow": true,
+  "skillsUseOriginalCards": true,
+  "teacherOnlyToolbar": true,
+  "mirrorReadbackOffMain": true,
+  "theoreticalRawPixelBudgetBytesPerSecond": 62208000,
+  "publicRenderTargetFPS": 60,
+  "newPVEDeviceVerified": false,
+  "appLaunched": false,
+  "simulatorLaunched": false,
+  "externalDisplayVerified": false,
+  "limitations": [
+    "No device CPU/GPU timing or touch responsiveness measurement was performed.",
+    "User-reported TV/disconnect misalignment is addressed in code; real AirPlay/TV/disconnect validation needs user screenshots.",
+    "P3-P7 reuse existing approved character resources; distinct character art remains missing. Host joining is a teacher-only backend API; no host enable UI in this version.",
+    "Offline review demonstrates fixed-canvas geometry; it is not UIKit capture or proof of device repair."
+  ]
+}

@@ -1,0 +1,228 @@
+[0/1] Planning build
+Building for debugging...
+[0/8] Write sources
+[3/8] Write swift-version--3C8F63DB8035BADF.txt
+[5/10] Compiling ClassroomGameCore GameEngine.swift
+[6/10] Emitting module ClassroomGameCore
+[7/14] Compiling ClassroomGameCore PlayProjection.swift
+[8/14] Compiling ClassroomGameCore RuleExamples.swift
+[9/14] Compiling ClassroomGameCore ActionPlanning.swift
+[10/14] Compiling ClassroomGameCore PVEPlaySession.swift
+[12/43] Compiling MeadowWorldSupport EquipmentReadout.swift
+[13/43] Compiling MeadowWorldSupport JourneyClosing.swift
+[14/45] Compiling MeadowWorldSupport Campaign.swift
+[15/45] Compiling MeadowWorldSupport CampaignSiteAccess.swift
+[16/45] Compiling MeadowWorldSupport EncounterPreview.swift
+[19/48] Compiling MeadowWorldSupport PartyConfiguration.swift
+[20/48] Emitting module ClassroomGameCoreTests
+[21/48] Emitting module MeadowWorldSupport
+[27/49] Compiling ClassroomGameCoreTests PVEFlowTests.swift
+[28/49] Emitting module MeadowBattleSupport
+[29/49] Compiling MeadowBattleSupport TrainingLoadout.swift
+[31/50] Compiling ClassroomGameCoreTests PresentationTests.swift
+[32/50] Compiling ClassroomGameCoreTests StateAndScoringTests.swift
+[34/50] Wrapping AST for ClassroomGameCore for debugging
+[36/70] Compiling MeadowBattleSupportTests AccessoryEquipmentTests.swift
+[37/70] Compiling MeadowBattleSupportTests AmbushTests.swift
+[38/70] Compiling MeadowBattleSupportTests ArmorEquipmentTests.swift
+[40/72] Compiling MeadowClassroomSupport ClassroomBackend.swift
+[41/72] Compiling MeadowClassroomSupport ClassroomBookStatus.swift
+[42/72] Emitting module MeadowClassroomSupport
+[44/72] Compiling MeadowBattleSupportTests DragonFlameTests.swift
+[45/72] Compiling MeadowBattleSupportTests EquipmentTests.swift
+[46/72] Compiling MeadowBattleSupportTests GreatSwordTests.swift
+[47/72] Compiling MeadowBattleSupportTests LegendaryStaffTests.swift
+[48/76] Emitting module MeadowBattleSupportTests
+[52/76] Compiling MeadowBattleSupportTests BowTests.swift
+[53/76] Compiling MeadowBattleSupportTests CampInventoryTests.swift
+[54/79] Compiling MeadowSupportReviewExport ReviewExporter.swift
+/workspace/classroom-boardgame/native/Packages/GameCore/Tools/ReviewExporter.swift:496:25: warning: initialization of immutable value 'cues' was never used; consider replacing with assignment to '_' or removing it
+494 |                 if let value=receipt {
+495 |                     dice=BattleDice.channels(action,actor:actorUnit,target:targetUnit,catalog:model.engine.catalog,receipt:value)
+496 |                     let cues=SpellbladeEffects.recipients(intent,catalog:model.engine.catalog)
+    |                         `- warning: initialization of immutable value 'cues' was never used; consider replacing with assignment to '_' or removing it
+497 |                     for id in ["p1","p2","m1","m2"] {
+498 |                         let before=value.before.units[id]!,after=value.after.units[id]!,foot=PartyVisual.feet[id]!,point=PartyVisual.hitPoint(target:id)
+[55/79] Emitting module MeadowSupportReviewExport
+/workspace/classroom-boardgame/native/Packages/GameCore/Tools/ReviewExporter.swift:496:25: warning: initialization of immutable value 'cues' was never used; consider replacing with assignment to '_' or removing it
+494 |                 if let value=receipt {
+495 |                     dice=BattleDice.channels(action,actor:actorUnit,target:targetUnit,catalog:model.engine.catalog,receipt:value)
+496 |                     let cues=SpellbladeEffects.recipients(intent,catalog:model.engine.catalog)
+    |                         `- warning: initialization of immutable value 'cues' was never used; consider replacing with assignment to '_' or removing it
+497 |                     for id in ["p1","p2","m1","m2"] {
+498 |                         let before=value.before.units[id]!,after=value.after.units[id]!,foot=PartyVisual.feet[id]!,point=PartyVisual.hitPoint(target:id)
+[57/84] Emitting module MeadowClassroomSupportTests
+[58/85] Compiling MeadowCampaignAuditSupport LoadoutAudit.swift
+[59/85] Compiling MeadowBattleSupportTests LockedDiceTests.swift
+[60/85] Compiling MeadowBattleSupportTests PartyTests.swift
+[61/85] Compiling MeadowBattleSupportTests PolyDiceTests.swift
+[62/85] Compiling MeadowBattleSupportTests SpellbladeTests.swift
+[64/86] Compiling MeadowClassroomSupportTests ClassroomTeamTests.swift
+[64/86] Write Objects.LinkFileList
+[67/85] Compiling MeadowClassroomSupportTests ClassroomBackendTests.swift
+[68/85] Compiling MeadowClassroomSupportTests ClassroomCanvasTests.swift
+[69/85] Compiling MeadowClassroomSupportTests ClassroomGMTests.swift
+[70/85] Compiling MeadowClassroomSupportTests ClassroomPreviewTests.swift
+[72/86] Emitting module MeadowCampaignAuditSupport
+[73/86] Compiling MeadowCampaignAuditSupport JourneyAudit.swift
+[74/85] Wrapping AST for MeadowClassroomSupportTests for debugging
+[75/85] Linking MeadowSupportReviewExport
+[76/85] Write Objects.LinkFileList
+[77/94] Linking MeadowMapExport
+[78/94] Linking MeadowCampaignReview
+[80/94] Compiling MeadowWorldSupportTests JourneyAuditTests.swift
+/workspace/classroom-boardgame/native/Packages/GameCore/Tests/MeadowWorldSupportTests/PartyConfigurationTests.swift:98:15: warning: result of call to 'commit' is unused
+ 96 |         let restored=try MeadowCampaignSession(save:.decoded(s.snapshot.encoded())),replay=try PartyEncounter(engine:restored.engine)
+ 97 |         let again=try XCTUnwrap(replay.prepare(.support,target:"p2"))
+ 98 |         try b.commit(intent.id);try replay.commit(again.id)
+    |               `- warning: result of call to 'commit' is unused
+ 99 |         XCTAssertEqual(s.engine.state,restored.engine.state)
+100 |         XCTAssertEqual(s.engine.state.units["p1"]!.skillUses["support"],1)
+
+/workspace/classroom-boardgame/native/Packages/GameCore/Tests/MeadowWorldSupportTests/PartyConfigurationTests.swift:98:44: warning: result of call to 'commit' is unused
+ 96 |         let restored=try MeadowCampaignSession(save:.decoded(s.snapshot.encoded())),replay=try PartyEncounter(engine:restored.engine)
+ 97 |         let again=try XCTUnwrap(replay.prepare(.support,target:"p2"))
+ 98 |         try b.commit(intent.id);try replay.commit(again.id)
+    |                                            `- warning: result of call to 'commit' is unused
+ 99 |         XCTAssertEqual(s.engine.state,restored.engine.state)
+100 |         XCTAssertEqual(s.engine.state.units["p1"]!.skillUses["support"],1)
+[81/94] Compiling MeadowWorldSupportTests JourneyReadoutTests.swift
+/workspace/classroom-boardgame/native/Packages/GameCore/Tests/MeadowWorldSupportTests/PartyConfigurationTests.swift:98:15: warning: result of call to 'commit' is unused
+ 96 |         let restored=try MeadowCampaignSession(save:.decoded(s.snapshot.encoded())),replay=try PartyEncounter(engine:restored.engine)
+ 97 |         let again=try XCTUnwrap(replay.prepare(.support,target:"p2"))
+ 98 |         try b.commit(intent.id);try replay.commit(again.id)
+    |               `- warning: result of call to 'commit' is unused
+ 99 |         XCTAssertEqual(s.engine.state,restored.engine.state)
+100 |         XCTAssertEqual(s.engine.state.units["p1"]!.skillUses["support"],1)
+
+/workspace/classroom-boardgame/native/Packages/GameCore/Tests/MeadowWorldSupportTests/PartyConfigurationTests.swift:98:44: warning: result of call to 'commit' is unused
+ 96 |         let restored=try MeadowCampaignSession(save:.decoded(s.snapshot.encoded())),replay=try PartyEncounter(engine:restored.engine)
+ 97 |         let again=try XCTUnwrap(replay.prepare(.support,target:"p2"))
+ 98 |         try b.commit(intent.id);try replay.commit(again.id)
+    |                                            `- warning: result of call to 'commit' is unused
+ 99 |         XCTAssertEqual(s.engine.state,restored.engine.state)
+100 |         XCTAssertEqual(s.engine.state.units["p1"]!.skillUses["support"],1)
+[82/94] Compiling MeadowWorldSupportTests PartyConfigurationTests.swift
+/workspace/classroom-boardgame/native/Packages/GameCore/Tests/MeadowWorldSupportTests/PartyConfigurationTests.swift:98:15: warning: result of call to 'commit' is unused
+ 96 |         let restored=try MeadowCampaignSession(save:.decoded(s.snapshot.encoded())),replay=try PartyEncounter(engine:restored.engine)
+ 97 |         let again=try XCTUnwrap(replay.prepare(.support,target:"p2"))
+ 98 |         try b.commit(intent.id);try replay.commit(again.id)
+    |               `- warning: result of call to 'commit' is unused
+ 99 |         XCTAssertEqual(s.engine.state,restored.engine.state)
+100 |         XCTAssertEqual(s.engine.state.units["p1"]!.skillUses["support"],1)
+
+/workspace/classroom-boardgame/native/Packages/GameCore/Tests/MeadowWorldSupportTests/PartyConfigurationTests.swift:98:44: warning: result of call to 'commit' is unused
+ 96 |         let restored=try MeadowCampaignSession(save:.decoded(s.snapshot.encoded())),replay=try PartyEncounter(engine:restored.engine)
+ 97 |         let again=try XCTUnwrap(replay.prepare(.support,target:"p2"))
+ 98 |         try b.commit(intent.id);try replay.commit(again.id)
+    |                                            `- warning: result of call to 'commit' is unused
+ 99 |         XCTAssertEqual(s.engine.state,restored.engine.state)
+100 |         XCTAssertEqual(s.engine.state.units["p1"]!.skillUses["support"],1)
+[83/94] Compiling MeadowWorldSupportTests ProvisionsPreviewTests.swift
+/workspace/classroom-boardgame/native/Packages/GameCore/Tests/MeadowWorldSupportTests/PartyConfigurationTests.swift:98:15: warning: result of call to 'commit' is unused
+ 96 |         let restored=try MeadowCampaignSession(save:.decoded(s.snapshot.encoded())),replay=try PartyEncounter(engine:restored.engine)
+ 97 |         let again=try XCTUnwrap(replay.prepare(.support,target:"p2"))
+ 98 |         try b.commit(intent.id);try replay.commit(again.id)
+    |               `- warning: result of call to 'commit' is unused
+ 99 |         XCTAssertEqual(s.engine.state,restored.engine.state)
+100 |         XCTAssertEqual(s.engine.state.units["p1"]!.skillUses["support"],1)
+
+/workspace/classroom-boardgame/native/Packages/GameCore/Tests/MeadowWorldSupportTests/PartyConfigurationTests.swift:98:44: warning: result of call to 'commit' is unused
+ 96 |         let restored=try MeadowCampaignSession(save:.decoded(s.snapshot.encoded())),replay=try PartyEncounter(engine:restored.engine)
+ 97 |         let again=try XCTUnwrap(replay.prepare(.support,target:"p2"))
+ 98 |         try b.commit(intent.id);try replay.commit(again.id)
+    |                                            `- warning: result of call to 'commit' is unused
+ 99 |         XCTAssertEqual(s.engine.state,restored.engine.state)
+100 |         XCTAssertEqual(s.engine.state.units["p1"]!.skillUses["support"],1)
+[84/94] Emitting module MeadowWorldSupportTests
+[85/94] Compiling MeadowWorldSupportTests CampaignSiteTests.swift
+[86/94] Compiling MeadowWorldSupportTests CampaignTests.swift
+[87/94] Compiling MeadowWorldSupportTests EncounterPlannerTests.swift
+[88/94] Compiling MeadowWorldSupportTests EquipmentJourneyTests.swift
+[89/98] Compiling MeadowWorldSupportTests RouteGuidanceTests.swift
+/workspace/classroom-boardgame/native/Packages/GameCore/Tests/MeadowWorldSupportTests/SaveEditingTests.swift:112:76: warning: result of call to 'commit' is unused
+110 |         try move(s,to:target);try s.interactCurrentNode();let model=try PartyEncounter(engine:s.engine)
+111 |         for _ in 0..<6 where model.current.map({s.engine.state.units[$0]?.kind == .monster})==true {
+112 |             let intent=try XCTUnwrap(model.prepareMonsterStep());try model.commit(intent.id)
+    |                                                                            `- warning: result of call to 'commit' is unused
+113 |         }
+114 |         let monster=try XCTUnwrap(model.monsterIDs.first),before=s.engine.archive
+[90/98] Compiling MeadowWorldSupportTests SaveEditingTests.swift
+/workspace/classroom-boardgame/native/Packages/GameCore/Tests/MeadowWorldSupportTests/SaveEditingTests.swift:112:76: warning: result of call to 'commit' is unused
+110 |         try move(s,to:target);try s.interactCurrentNode();let model=try PartyEncounter(engine:s.engine)
+111 |         for _ in 0..<6 where model.current.map({s.engine.state.units[$0]?.kind == .monster})==true {
+112 |             let intent=try XCTUnwrap(model.prepareMonsterStep());try model.commit(intent.id)
+    |                                                                            `- warning: result of call to 'commit' is unused
+113 |         }
+114 |         let monster=try XCTUnwrap(model.monsterIDs.first),before=s.engine.archive
+[91/98] Compiling MeadowWorldSupportTests SiteConfigurationTests.swift
+/workspace/classroom-boardgame/native/Packages/GameCore/Tests/MeadowWorldSupportTests/SaveEditingTests.swift:112:76: warning: result of call to 'commit' is unused
+110 |         try move(s,to:target);try s.interactCurrentNode();let model=try PartyEncounter(engine:s.engine)
+111 |         for _ in 0..<6 where model.current.map({s.engine.state.units[$0]?.kind == .monster})==true {
+112 |             let intent=try XCTUnwrap(model.prepareMonsterStep());try model.commit(intent.id)
+    |                                                                            `- warning: result of call to 'commit' is unused
+113 |         }
+114 |         let monster=try XCTUnwrap(model.monsterIDs.first),before=s.engine.archive
+[92/98] Compiling MeadowWorldSupportTests TempoTests.swift
+/workspace/classroom-boardgame/native/Packages/GameCore/Tests/MeadowWorldSupportTests/SaveEditingTests.swift:112:76: warning: result of call to 'commit' is unused
+110 |         try move(s,to:target);try s.interactCurrentNode();let model=try PartyEncounter(engine:s.engine)
+111 |         for _ in 0..<6 where model.current.map({s.engine.state.units[$0]?.kind == .monster})==true {
+112 |             let intent=try XCTUnwrap(model.prepareMonsterStep());try model.commit(intent.id)
+    |                                                                            `- warning: result of call to 'commit' is unused
+113 |         }
+114 |         let monster=try XCTUnwrap(model.monsterIDs.first),before=s.engine.archive
+[93/100] /workspace/classroom-boardgame/native/Packages/GameCore/.build/x86_64-unknown-linux-gnu/debug/ClassroomGameCorePackageDiscoveredTests.derived/all-discovered-tests.swift
+[94/101] Write sources
+[96/106] Emitting module ClassroomGameCorePackageDiscoveredTests
+[97/106] Compiling ClassroomGameCorePackageDiscoveredTests ClassroomGameCoreTests.swift
+[98/106] Compiling ClassroomGameCorePackageDiscoveredTests MeadowBattleSupportTests.swift
+[99/106] Compiling ClassroomGameCorePackageDiscoveredTests MeadowClassroomSupportTests.swift
+[100/106] Compiling ClassroomGameCorePackageDiscoveredTests MeadowWorldSupportTests.swift
+[101/107] Compiling ClassroomGameCorePackageDiscoveredTests all-discovered-tests.swift
+[102/108] /workspace/classroom-boardgame/native/Packages/GameCore/.build/x86_64-unknown-linux-gnu/debug/ClassroomGameCorePackageTests.derived/runner.swift
+[103/108] Write sources
+[104/108] Wrapping AST for ClassroomGameCorePackageDiscoveredTests for debugging
+[106/110] Compiling ClassroomGameCorePackageTests runner.swift
+[107/110] Emitting module ClassroomGameCorePackageTests
+[108/110] Write Objects.LinkFileList
+[109/110] Linking ClassroomGameCorePackageTests.xctest
+Build complete! (38.05s)
+Test Suite 'Selected tests' started at 2026-11-07 14:11:44.812
+Test Suite 'ClassroomGMTests' started at 2026-11-07 14:11:44.814
+Test Case 'ClassroomGMTests.testBookGrantUpdatesSelectedPlayersWithIndividualCapsAndNoMovementDebit' started at 2026-11-07 14:11:44.814
+Test Case 'ClassroomGMTests.testBookGrantUpdatesSelectedPlayersWithIndividualCapsAndNoMovementDebit' passed (0.031 seconds)
+Test Case 'ClassroomGMTests.testBookProjectionIncludesSevenPlayersAndOnlyPublicFields' started at 2026-11-07 14:11:44.845
+Test Case 'ClassroomGMTests.testBookProjectionIncludesSevenPlayersAndOnlyPublicFields' passed (0.024 seconds)
+Test Case 'ClassroomGMTests.testBookStripUsesLessThanTenPercentForAllSupportedPlayerCounts' started at 2026-11-07 14:11:44.869
+Test Case 'ClassroomGMTests.testBookStripUsesLessThanTenPercentForAllSupportedPlayerCounts' passed (0.0 seconds)
+Test Case 'ClassroomGMTests.testDisplayCannotGrantOrEditAnyPlayer' started at 2026-11-07 14:11:44.869
+Test Case 'ClassroomGMTests.testDisplayCannotGrantOrEditAnyPlayer' passed (0.026 seconds)
+Test Case 'ClassroomGMTests.testGMBuffsAndExplicitSkillResetPersistWithoutResettingAP' started at 2026-11-07 14:11:44.896
+Test Case 'ClassroomGMTests.testGMBuffsAndExplicitSkillResetPersistWithoutResettingAP' passed (0.025 seconds)
+Test Case 'ClassroomGMTests.testGMCanEditAnyPlayerResourcesAttributesAndBagWithoutChangingIdentityOrOthers' started at 2026-11-07 14:11:44.920
+Test Case 'ClassroomGMTests.testGMCanEditAnyPlayerResourcesAttributesAndBagWithoutChangingIdentityOrOthers' passed (0.023 seconds)
+Test Case 'ClassroomGMTests.testGMDeathAndReviveKeepNormalNextRoundEligibility' started at 2026-11-07 14:11:44.943
+Test Case 'ClassroomGMTests.testGMDeathAndReviveKeepNormalNextRoundEligibility' passed (0.023 seconds)
+Test Case 'ClassroomGMTests.testGMFailedDiskSaveKeepsStateProjectionAndRandomUnchanged' started at 2026-11-07 14:11:44.966
+Test Case 'ClassroomGMTests.testGMFailedDiskSaveKeepsStateProjectionAndRandomUnchanged' passed (0.05 seconds)
+Test Case 'ClassroomGMTests.testGMRejectsDefeatingActiveRoadTravelerWithoutCorruptingCursor' started at 2026-11-07 14:11:45.016
+Test Case 'ClassroomGMTests.testGMRejectsDefeatingActiveRoadTravelerWithoutCorruptingCursor' passed (0.025 seconds)
+Test Case 'ClassroomGMTests.testGMRejectsIllegalCapsInventoryAndSkillUsesAtomically' started at 2026-11-07 14:11:45.042
+Test Case 'ClassroomGMTests.testGMRejectsIllegalCapsInventoryAndSkillUsesAtomically' passed (0.024 seconds)
+Test Case 'ClassroomGMTests.testGMSaveAndUndoRestoreCompletePlayerAndBookProjection' started at 2026-11-07 14:11:45.065
+Test Case 'ClassroomGMTests.testGMSaveAndUndoRestoreCompletePlayerAndBookProjection' passed (0.047 seconds)
+Test Case 'ClassroomGMTests.testGMZeroQuantityRemovesOnlyBackpackCopy' started at 2026-11-07 14:11:45.113
+Test Case 'ClassroomGMTests.testGMZeroQuantityRemovesOnlyBackpackCopy' passed (0.023 seconds)
+Test Case 'ClassroomGMTests.testGrantInvalidRecipientsAmountsAndOverflowRollBackEveryone' started at 2026-11-07 14:11:45.135
+Test Case 'ClassroomGMTests.testGrantInvalidRecipientsAmountsAndOverflowRollBackEveryone' passed (0.026 seconds)
+Test Case 'ClassroomGMTests.testTeacherUndoIsPrivateAndCannotUndoUnrelatedLaterActions' started at 2026-11-07 14:11:45.162
+Test Case 'ClassroomGMTests.testTeacherUndoIsPrivateAndCannotUndoUnrelatedLaterActions' passed (0.023 seconds)
+Test Case 'ClassroomGMTests.testTeacherUndoPreservesCurrentBookPauseAcrossSurfaceChanges' started at 2026-11-07 14:11:45.184
+Test Case 'ClassroomGMTests.testTeacherUndoPreservesCurrentBookPauseAcrossSurfaceChanges' passed (0.025 seconds)
+Test Suite 'ClassroomGMTests' passed at 2026-11-07 14:11:45.209
+	 Executed 15 tests, with 0 failures (0 unexpected) in 0.396 (0.396) seconds
+Test Suite 'Selected tests' passed at 2026-11-07 14:11:45.209
+	 Executed 15 tests, with 0 failures (0 unexpected) in 0.396 (0.396) seconds
+◇ Test run started.
+↳ Testing Library Version: 6.0.3 (18c42c19cac3faf)
+✔ Test run with 0 tests passed after 0.001 seconds.
