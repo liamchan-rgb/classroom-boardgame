@@ -1,0 +1,54 @@
+{
+  "formatVersion": 1,
+  "logicalZIP": "archive-book-gm-meadow-v0.15.0-20261107.zip",
+  "bytes": 436140695,
+  "sha256": "6cb4c038b89ed8d8b4728d0bd9a055b175e6ed770917c189ccd3f2bfd31daf08",
+  "parts": [
+    {
+      "file": "archive-book-gm-meadow-v0.15.0-20261107.zip.part000",
+      "bytes": 50331648,
+      "sha256": "3ecf3fab5f312b51ba91d09b01b317daab1ad2a6d725387a0e5d55810bb46f3d"
+    },
+    {
+      "file": "archive-book-gm-meadow-v0.15.0-20261107.zip.part001",
+      "bytes": 50331648,
+      "sha256": "c4404fb62f2fab52ccfcfba92cff2da3cade8a3e754d2399a0c8450e6e803264"
+    },
+    {
+      "file": "archive-book-gm-meadow-v0.15.0-20261107.zip.part002",
+      "bytes": 50331648,
+      "sha256": "d862a4adf1c49397463ab5a357f96521b7811170efbf586eff2195d25bc5b2a9"
+    },
+    {
+      "file": "archive-book-gm-meadow-v0.15.0-20261107.zip.part003",
+      "bytes": 50331648,
+      "sha256": "742cc5341fcb042eb98a37683ea1bae78e5ab4e7935723a679dab974fba6a53d"
+    },
+    {
+      "file": "archive-book-gm-meadow-v0.15.0-20261107.zip.part004",
+      "bytes": 50331648,
+      "sha256": "61a497edd9b45f56dc77225401585ab46f8a6df64de4b09e1683373be39a7f60"
+    },
+    {
+      "file": "archive-book-gm-meadow-v0.15.0-20261107.zip.part005",
+      "bytes": 50331648,
+      "sha256": "585ee79218e0b14611e471244f98c248c3f404d201b828eca8c2933daa6e0613"
+    },
+    {
+      "file": "archive-book-gm-meadow-v0.15.0-20261107.zip.part006",
+      "bytes": 50331648,
+      "sha256": "47dc1a2c2293fea79462268332ee8c39f5a44f4c19ab8a1e4b7c080e880ab268"
+    },
+    {
+      "file": "archive-book-gm-meadow-v0.15.0-20261107.zip.part007",
+      "bytes": 50331648,
+      "sha256": "ef38c741bbe0f5bbf90136364a8523444f34b0562e226ef0cc3c2c17ef1f3257"
+    },
+    {
+      "file": "archive-book-gm-meadow-v0.15.0-20261107.zip.part008",
+      "bytes": 33487511,
+      "sha256": "a3219880a876a3387df94ed49a3de860d63e1a1aa4affcd890ed1ba36e57893d"
+    }
+  ],
+  "reason": "Lossless split; GitHub normal Git rejects files over 100MB"
+}
