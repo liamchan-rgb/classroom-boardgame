@@ -272,12 +272,13 @@ final class MeadowPartyStageView:UIView {
                 actor.setWeaponAsset(HeroFrames.weaponVisual(unit.equipment.weapon)?.battleAsset)
                 let displayedArmor=unit.appearance != nil ? unit.appearance!.armor(worn:unit.equipment.armor):unit.equipment.armor
                 actor.setArmor(displayedArmor)
+                actor.setHead(hair:unit.appearance.map{$0.hair ?? ($0.body=="wayfarer" ? "hair-silver":"hair-chestnut")},face:unit.appearance.map{$0.face ?? ($0.body=="wayfarer" ? "face-amber":"face-blue")})
                 let clip=pose.clip,progress=pose.progress
                 actor.setPose(clip:clip,progress:CGFloat(progress))
                 let s=CGFloat(PartyVisual.heroScale),root=actor.poseRootOffset
                 actor.frame=CGRect(x:foot.x-123*s+root.x*s,y:foot.y-214*s+root.y*s,width:256*s,height:256*s)
                 actor.layer.zPosition=CGFloat(f.y)
-                let key="\(clip)-\(Int((progress*24).rounded()))-\(unit.equipment.weapon ?? "none")-\(displayedArmor ?? "none")"
+                let key="\(clip)-\(Int((progress*24).rounded()))-\(unit.equipment.weapon ?? "none")-\(displayedArmor ?? "none")-\(unit.appearance?.visualKey ?? "original")"
                 if key != poseKeys[id] { shadows[id]?.update(image:actor.poseSilhouette,soleY:actor.poseFootAnchorPx.y,contacts:actor.poseContacts.map { .init(point:$0,radius:12) });poseKeys[id]=key }
                 attached[id]?.frame=actor.bounds
                 attached[id]?.update(shield:shownVitals.shield,preview:0,time:sceneTime,formation:shownVitals.shield==0 ? formation[id].flatMap { sceneTime-$0<1.0 ? sceneTime-$0:nil }:nil,formationBase:0,birth:birth[id].map { sceneTime-$0 },contact:contact[id].map { sceneTime-$0 },broken:broken[id].map { sceneTime-$0 },recovery:unit.isAlive ? recovery[id].map { sceneTime-$0 }:nil,recoveryTier:recoveryTier[id])

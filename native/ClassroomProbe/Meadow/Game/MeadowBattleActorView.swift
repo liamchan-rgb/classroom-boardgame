@@ -222,6 +222,25 @@ final class MeadowBattleActorView: UIView {
     private var isGreatSword:Bool { weaponAsset=="MeadowBattleGreatSword" }
     private var isBow:Bool { weaponAsset=="MeadowBattleHuntingBow" }
     private var weaponAsset:String?="MeadowBattleHeroWeapon"
+    private var hairID:String?
+    private var faceID:String?
+    private func customHead(_ name:String)->String? {
+        if name=="MeadowBattleHeroHair" {return CustomAppearanceAssets.battleHair(hairID)}
+        if name=="MeadowBattleHeroFace" {return CustomAppearanceAssets.battleFace(faceID)}
+        return nil
+    }
+    func setHead(hair:String?,face:String?) {
+        guard hair != hairID || face != faceID else{return}
+        hairID=hair;faceID=face;silhouetteCache.removeAllObjects();applyPose(currentPose)
+    }
+    private func headPose(_ name:String,pose:MeadowBattlePoseSample,rig:BowRigSample?)->MeadowBattleLayerPose? {
+        if customHead(name) != nil,let torso=rig?.parts["torso"] {
+            // New heads are registered rest layers, even for canvas-baked bow
+            // states. Apply the original torso transform exactly once.
+            return .init(offset:CGPoint(x:torso.offset.x,y:torso.offset.y),pivot:CGPoint(x:torso.pivot.x,y:torso.pivot.y),rotation:CGFloat(torso.rotation))
+        }
+        return pose.layers[name]
+    }
     private var armorID:String?
     private var armor:HeroFrames.ArmorVisualBinding? { HeroFrames.armorVisual(armorID) }
     private static let pauldron="MeadowBattleHeroPauldronNearWardrobe"
@@ -357,6 +376,7 @@ final class MeadowBattleActorView: UIView {
         return value
     }
     private func sourceAsset(_ name:String)->String? {
+        if let head=customHead(name) {return head}
         if name=="MeadowBattleHeroWeapon" { return weaponAsset }
         if isBow && name=="MeadowBattleHeroBodyCore" { return "MeadowBattleBowReviewedBodyCore" }
         if isBow && ["MeadowBattleHeroWardrobeCore","MeadowBattleHeroNearHand","MeadowBattleHeroJointUnderlay","MeadowBattleHeroArmNearUpperBody","MeadowBattleHeroArmNearForearmBody","MeadowBattleHeroArmNearUpperWardrobe","MeadowBattleHeroArmNearForearmWardrobe"].contains(name) { return nil }
@@ -372,7 +392,7 @@ final class MeadowBattleActorView: UIView {
         let pose=resolvedPose(rawPose)
         let rig=isBow ? bowSample(rawPose):nil
         let surfaceDepth=Dictionary(uniqueKeysWithValues:orderedLayerNames(for:pose.clip).enumerated().map { ($0.element,CGFloat($0.offset)) })
-        for (group,view) in bowSurfaces { view.isHidden = !isBow;view.layer.zPosition=surfaceDepth[group] ?? 0;view.update(rig,atlas:armor?.bowAtlas,torso:armor?.bowTorso) }
+        for (group,view) in bowSurfaces { view.isHidden = !isBow || customHead(group) != nil;view.layer.zPosition=surfaceDepth[group] ?? 0;view.update(rig,atlas:armor?.bowAtlas,torso:armor?.bowTorso) }
 
         bowGeometry.isHidden = !isBow;bowGeometry.sample=rig;bowGeometry.layer.zPosition=CGFloat(orderedLayerNames(for:pose.clip).firstIndex(of:"MeadowBattleHeroWeapon") ?? 28)+0.5
         guard !images.isEmpty else { return }
@@ -381,10 +401,10 @@ final class MeadowBattleActorView: UIView {
         UIView.performWithoutAnimation {
             let orderedImages=images.enumerated().map { (layerNames[$0.offset],$0.element) }
             for (name,image) in orderedImages {
-                image.image=(isBow && name=="MeadowBattleHeroBodyCore") ? Self.bowBodyCore:sourceAsset(name).flatMap { UIImage(named:$0) };image.isHidden=sourceAsset(name)==nil || rig?.nativeTiles?[name] != nil
+                image.image=(isBow && name=="MeadowBattleHeroBodyCore") ? Self.bowBodyCore:sourceAsset(name).flatMap { UIImage(named:$0) };image.isHidden=sourceAsset(name)==nil || (customHead(name)==nil && rig?.nativeTiles?[name] != nil)
                 image.layer.zPosition = depth[name] ?? 0
                 image.alpha = (name == "MeadowBattleHeroJointUnderlay" && pose.clip == "idle" && !isStaff) ? 0 : name.hasPrefix("BowFar") ? 0.86:1
-                guard let part = pose.layers[name] else { image.transform = .identity; continue }
+                guard let part = headPose(name,pose:pose,rig:rig) else { image.transform = .identity; continue }
                 let sx = bounds.width / (configuration?.canvasSize.width ?? 256)
                 let sy = bounds.height / (configuration?.canvasSize.height ?? 256)
                 let px = part.pivot.x * sx, py = part.pivot.y * sy
@@ -450,12 +470,12 @@ final class MeadowBattleActorView: UIView {
         let rendered = UIGraphicsImageRenderer(size: size, format: format).image { renderer in
             for name in orderedLayerNames(for: pose.clip) {
                 if isBow && name == "farHand" { MeadowBowGeometryView.paint(renderer.cgContext,sample:bowSample(poseForBowSilhouette)) }
-                if isBow && bowNativeGroups.contains(name) && (bowSample(poseForBowSilhouette).nativeTiles?[name] != nil || ["torso","head","farArm","farHand","nearUpperArm","nearSleeveConnected","nearHand"].contains(name)) {
+                if isBow && customHead(name)==nil && bowNativeGroups.contains(name) && (bowSample(poseForBowSilhouette).nativeTiles?[name] != nil || ["torso","head","farArm","farHand","nearUpperArm","nearSleeveConnected","nearHand"].contains(name)) {
                     MeadowBowSurfaceView.render(sample:bowSample(poseForBowSilhouette),group:name,atlas:armor?.bowAtlas,torso:armor?.bowTorso).draw(at:.zero);continue
                 }
                 if name == "MeadowBattleHeroJointUnderlay" && pose.clip == "idle" && !isStaff { continue }
                 guard let asset=sourceAsset(name),let image = (isBow && name=="MeadowBattleHeroBodyCore") ? Self.bowBodyCore:UIImage(named: asset) else { continue }
-                let part = renderPose.layers[name] ?? MeadowBattleLayerPose()
+                let part = headPose(name,pose:renderPose,rig:isBow ? bowSample(poseForBowSilhouette):nil) ?? MeadowBattleLayerPose()
                 let sx = size.width / 256, sy = size.height / 256
                 let px = part.pivot.x * sx, py = part.pivot.y * sy
                 let ox = part.offset.x * sx, oy = part.offset.y * sy

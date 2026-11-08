@@ -51,8 +51,8 @@ final class GameScene: SKScene {
         for (index,id) in campaign.playerIDs.enumerated() {
             guard let unit=campaign.engine.state.units[id],let look=unit.appearance,frames.indices.contains(index) else{continue}
             let ai=HeroFrames.appearanceIDs.firstIndex(of:look.body) ?? 0,armor=look.armor(worn:unit.equipment.armor)
-            let key="\(ai)-\(unit.equipment.weapon ?? "none")-\(armor ?? "none")";active.insert(key)
-            if profileFrames[key]==nil{profileFrames[key]=HeroFrames.load(1,appearanceIndex:ai,weaponID:unit.equipment.weapon,armorID:armor)}
+            let key="\(look.visualKey)-\(unit.equipment.weapon ?? "none")-\(armor ?? "none")";active.insert(key)
+            if profileFrames[key]==nil{profileFrames[key]=HeroFrames.load(1,appearanceIndex:ai,weaponID:unit.equipment.weapon,armorID:armor,hair:look.hair,face:look.face)}
             frames[index]=profileFrames[key]!
         }
         profileFrames=profileFrames.filter{active.contains($0.key)}
@@ -533,7 +533,7 @@ final class GameScene: SKScene {
             let pose = actorPose(index)
             let u=profileUnit(index),look=u?.appearance
             return MeadowHeroCaster(index: layeredPreview || look != nil ? 0 : index%3, foot: actorPoint(index), facing: pose.facing,
-                                    frame: pose.frame, phase: pose.phase, appearanceIndex: look.flatMap{HeroFrames.appearanceIDs.firstIndex(of:$0.body)} ?? (index == 0 ? p1AppearanceIndex : 0),weaponID:u != nil ? u!.equipment.weapon:(index == 0 ? p1WeaponID:"trainingSword"),armorID:look != nil ? look!.armor(worn:u?.equipment.armor):(index == 0 ? p1ArmorID:nil))
+                                    frame: pose.frame, phase: pose.phase, hairID:look?.hair,faceID:look?.face,appearanceIndex: look.flatMap{HeroFrames.appearanceIDs.firstIndex(of:$0.body)} ?? (index == 0 ? p1AppearanceIndex : 0),weaponID:u != nil ? u!.equipment.weapon:(index == 0 ? p1WeaponID:"trainingSword"),armorID:look != nil ? look!.armor(worn:u?.equipment.armor):(index == 0 ? p1ArmorID:nil))
         }
         return MeadowFrameState(world: world, camera: MeadowViewport(world: world, scene: self, viewSize: viewSize), time: environmentTime, heroes: heroes, includeEnvironment: gaitTest == nil)
     }

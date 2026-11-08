@@ -1,0 +1,30 @@
+{
+  "scope": "Actual exported GIFs in independent Chromium; not App execution, performance measurement or user art approval",
+  "appSimulatorOrDeviceRun": false,
+  "records": [
+    {
+      "path": "docs/integration/custom-appearance-review-v0.19.0/custom-appearance-normal.gif",
+      "dimensions": {
+        "complete": true,
+        "width": 1536,
+        "height": 560
+      },
+      "intervalMs": 130,
+      "sampleHashes": [
+        "4ccb978efc3686eb6e2749e0629b99178982e7da1c614067d0de8cd64c17d0af",
+        "27fb87b09f23f3ddc0bb83086cee5c62c4849c3d4d3fbf0458124df3bb58e1ac",
+        "9353aec0d3cce75cfbe9760c0b6f562392bf68e680401a504d1a5e055bb3d330",
+        "21df59f524e230741565c28c230b097943d16e4b07e308fdf80526854d0763f9",
+        "79e99b7ab9105eeac727f2cd5e6b7ed62cd3c82bc3586f6ef82bfad797df8bbf",
+        "1c7d0fdf2c767eff359fe673edc1168f9b195370d516d8d0e60c03d51b0dfc69",
+        "b699eb3e5919e8682fabde7c35b7e1c61dc6a49b11cc313dfce296b24d211f11",
+        "e8410843393d560379430306026c6b0c4c6b63afee7e2e43f50881501b1cbe9c",
+        "7830020c34ee7cf4010aec3c8e705e65978cd2258186e03052f17975356a4ff5",
+        "4ccb978efc3686eb6e2749e0629b99178982e7da1c614067d0de8cd64c17d0af",
+        "fba7ec5de09bd963d942640d772b451cc453079682876c063c2eeb29b98782db",
+        "8ffeffade1fabc235dd9f626fda323726ac4468bf5206180ddca8ceff1e8affe"
+      ],
+      "distinctScreenshotHashes": 11
+    }
+  ]
+}

@@ -24,6 +24,8 @@ struct TeacherArchiveConsole:View {
     @State private var name=""
     @State private var bodyStyle="forester"
     @State private var outfit="follow"
+    @State private var hair="original"
+    @State private var face="original"
     @State private var title="课堂行程"
     @State private var notice="人物档案只含姓名和装扮；行程槽保存整局进度。"
     @State private var profiles:[Int:MeadowSaveSlot<MeadowPlayerProfile>]=[:]
@@ -39,7 +41,7 @@ struct TeacherArchiveConsole:View {
     @State private var pending:(()throws->Void)?
     private var store:MeadowSlotStore {MeadowTeacherCoordinator.slotStore}
     private var players:[GameUnit] {game.campaign?.engine.state.players ?? []}
-    private var appearance:PlayerAppearance {.init(body:bodyStyle,outfit:outfit=="follow" ? nil:outfit)}
+    private var appearance:PlayerAppearance {.init(body:bodyStyle,outfit:outfit=="follow" ? nil:outfit,hair:hair=="original" ? nil:hair,face:face=="original" ? nil:face)}
     private var profile:MeadowPlayerProfile {.init(name:name,appearance:appearance)}
     var body:some View {
         NavigationStack {
@@ -68,6 +70,8 @@ struct TeacherArchiveConsole:View {
                 .onChange(of:player){_,_ in readPlayer()}
                 .onChange(of:bodyStyle){_,_ in updateThumbnail()}
                 .onChange(of:outfit){_,_ in updateThumbnail()}
+                .onChange(of:hair){_,_ in updateThumbnail()}
+                .onChange(of:face){_,_ in updateThumbnail()}
                 .alert("确认操作",isPresented:$confirm){Button("取消",role:.cancel){pending=nil};Button("确认",role:.destructive){executePending()}}message:{Text(confirmation)}
         }
     }
@@ -77,9 +81,11 @@ struct TeacherArchiveConsole:View {
                 if !players.isEmpty{Picker("当前角色",selection:$player){ForEach(players){Text($0.name).tag($0.id)}}}
                 TextField("人物名（最多40字）",text:$name)
                 Picker("外观款式",selection:$bodyStyle){Text("林间绿衣").tag("forester");Text("行旅蓝衣").tag("wayfarer")}
-                Picker("衣装装扮",selection:$outfit){Text("跟随实际护甲").tag("follow");Text("基础衣装").tag("blue");Text("皮甲").tag("leatherArmor");Text("符文甲").tag("runeArmor")}
+                Picker("衣装装扮",selection:$outfit){Text("跟随实际护甲").tag("follow");Text("基础衣装").tag("blue");Text("皮甲").tag("leatherArmor");Text("符文甲").tag("runeArmor");Text("星辉甲 · 天仪礼甲").tag("starlightArmor");Text("龙纹甲 · 龙翼巡游甲").tag("dragonArmor")}
+                Picker("发型（可自由搭配）",selection:$hair){Text("原有发型").tag("original");ForEach(Array(PlayerAppearance.hairOptions.enumerated()),id:\.element){i,id in Text(["男式 · 短碎发","男式 · 偏分发","男式 · 小束发","女式 · 紫色盖耳长发","女式 · 侧马尾","女式 · 盘发"][i]).tag(id)}}
+                Picker("五官（可自由搭配）",selection:$face){Text("原有五官").tag("original");ForEach(Array(PlayerAppearance.faceOptions.enumerated()),id:\.element){i,id in Text(["明朗 · 蓝瞳","沉静 · 琥珀瞳","柔和 · 绿瞳","清晰 · 紫瞳"][i]).tag(id)}}
                 if let thumbnail{Image(uiImage:thumbnail).interpolation(.none).resizable().scaledToFit().frame(height:130).frame(maxWidth:.infinity).background(Color(red:0.08,green:0.17,blue:0.12))}
-                Text("仅使用已有美术。装扮不提供装备属性；武器仍跟随实际装备。战斗沿用现有挂载骨架，尚缺独立体型美术。").font(.caption)
+                Text("发型与五官自由组合，同步到探索、背包和战斗。保存人物槽后可在新行程复用。衣装不提供装备属性，武器跟随实际装备；沿用原人物体型与动作。").font(.caption)
                 Button("应用到当前角色"){let p=profile;ask("将姓名和装扮应用到当前角色，保留职业、数值、装备和行程？"){try game.applyProfile(p,to:player);notice=game.message}}.disabled(game.busy || game.campaign==nil || game.campaign?.isCompleted==true)
                 Button("从当前角色重新读取"){readPlayer()}.disabled(players.isEmpty)
             }
@@ -92,7 +98,7 @@ struct TeacherArchiveConsole:View {
                         HStack {
                             Button("保存档案"){let p=profile;savePrompt(occupied:profiles[slot] != nil || errors["p\(slot)"] != nil,message:"覆盖人物槽\(slot)？"){try store.saveProfile(p,slot:slot,title:p.name);notice="人物档案已保存。"}}
                             Button("导出"){transfer=TeacherSaveTransferRequest(selection:[.init(.profile,slot)])}.disabled(profiles[slot]==nil)
-                            Button("读取到编辑区"){if let p=profiles[slot]?.value{name=p.name;bodyStyle=p.appearance.body;outfit=p.appearance.outfit ?? "follow";updateThumbnail();notice="档案已读取到编辑区；尚未改变行程中的角色。"}}.disabled(profiles[slot]==nil)
+                            Button("读取到编辑区"){if let p=profiles[slot]?.value{name=p.name;bodyStyle=p.appearance.body;outfit=p.appearance.outfit ?? "follow";hair=p.appearance.hair ?? "original";face=p.appearance.face ?? "original";updateThumbnail();notice="档案已读取到编辑区；尚未改变行程中的角色。"}}.disabled(profiles[slot]==nil)
                         }.buttonStyle(.bordered)
                     }
                 }
@@ -210,8 +216,8 @@ struct TeacherArchiveConsole:View {
             }
         }
     }
-    private func updateThumbnail(){let index=HeroFrames.appearanceIDs.firstIndex(of:bodyStyle) ?? 0;thumbnail=HeroFrames.inventoryImages(appearanceIndex:index,weaponID:nil,armorID:appearance.armor(worn:game.campaign?.engine.state.units[player]?.equipment.armor)).first}
-    private func readPlayer(){guard let u=game.campaign?.engine.state.units[player] else{updateThumbnail();return};name=u.name;let a=u.appearance ?? .init(body:game.campaign?.snapshot.appearanceID ?? "forester");bodyStyle=a.body;outfit=a.outfit ?? "follow";updateThumbnail()}
+    private func updateThumbnail(){let index=HeroFrames.appearanceIDs.firstIndex(of:bodyStyle) ?? 0;thumbnail=HeroFrames.inventoryImages(appearanceIndex:index,weaponID:nil,armorID:appearance.armor(worn:game.campaign?.engine.state.units[player]?.equipment.armor),hair:appearance.hair,face:appearance.face).first}
+    private func readPlayer(){guard let u=game.campaign?.engine.state.units[player] else{updateThumbnail();return};name=u.name;let a=u.appearance ?? .init(body:game.campaign?.snapshot.appearanceID ?? "forester");bodyStyle=a.body;outfit=a.outfit ?? "follow";hair=a.hair ?? "original";face=a.face ?? "original";updateThumbnail()}
     private func ask(_ message:String,action:@escaping ()throws->Void){confirmation=message;pending=action;confirm=true}
     private func executePending(){defer{pending=nil;reload()};do{try pending?()}catch{notice="未完成，原文件保留："+error.localizedDescription}}
     private func savePrompt(occupied:Bool,message:String,action:@escaping ()throws->Void){if occupied{ask(message,action:action)}else{do{try action();reload()}catch{notice=error.localizedDescription}}}

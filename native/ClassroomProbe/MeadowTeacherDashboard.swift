@@ -19,7 +19,7 @@ struct MeadowTeacherDashboard:View {
     private func workspace(fullScreen:Bool)->some View {
         VStack(spacing:0){
             HStack(spacing:10){
-                Text("教师游戏 · v0.18.0").font(.headline)
+                Text("教师游戏 · v0.19.0").font(.headline)
                 Text(game.externalConnected ? "电视已连接":"本机预览").font(.caption).foregroundStyle(.secondary)
                 Spacer(minLength:0)
                 Button("GM"){game.openGM()}.disabled(!game.ready || game.busy || game.campaign==nil)

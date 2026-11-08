@@ -1,5 +1,6 @@
 import SpriteKit
 import MeadowBattleSupport
+import ClassroomGameCore
 
 enum HeroFrames {
     // Shared distance-clock resolution; artwork can contain fewer whole poses.
@@ -51,6 +52,8 @@ enum HeroFrames {
         let bowAtlas:String,bowTorso:String
     }
     static func armorVisual(_ id:String?)->ArmorVisualBinding? { id.flatMap { layout.armorVisuals?[$0] } }
+    static func image(named name:String)->UIImage? { CustomAppearanceAssets.isCustom(name) ? CustomAppearanceAssets.image(name):UIImage(named:name) }
+    static func isEquipmentAtlas(_ name:String)->Bool { armorAtlasNames.contains(name) || CustomAppearanceAssets.isCustom(name) }
     static var armorAtlasNames:Set<String> { Set(layout.modularP1?.loadouts.flatMap { $0.armorAtlasNames?.values.flatMap { $0.values.flatMap { $0 } } ?? [] } ?? []) }
     static func weaponVisual(_ id:String?)->EquipmentVisualBinding? { id.flatMap { layout.equipmentVisuals?[$0] } }
 
@@ -60,7 +63,8 @@ enum HeroFrames {
 
     static var appearanceTitles: [String] { layout.modularP1?.loadouts.map(\.title) ?? [] }
 
-    static func atlasName(heroIndex: Int, diagonal: Bool, appearanceIndex: Int = 0,weaponID:String?="trainingSword",armorID:String?=nil) -> String {
+    static func atlasName(heroIndex: Int, diagonal: Bool, appearanceIndex: Int = 0,weaponID:String?="trainingSword",armorID:String?=nil,hair:String?=nil,face:String?=nil) -> String {
+        if heroIndex==0, hair != nil || face != nil || ["starlightArmor","dragonArmor"].contains(armorID ?? "") { return CustomAppearanceAssets.name(body:appearanceIDs[appearanceIndex],armor:armorID,weapon:weaponID,hair:hair,face:face,half:diagonal ? 1:0) }
         if heroIndex == 0, let presets = layout.modularP1?.loadouts {
             precondition(presets.indices.contains(appearanceIndex))
             let preset=presets[appearanceIndex]
@@ -76,9 +80,9 @@ enum HeroFrames {
     }
 
     /// Exact idle + eight authored front-walk cells, without re-synthesizing art.
-    static func inventoryImages(appearanceIndex:Int,weaponID:String?,armorID:String?) -> [UIImage] {
-        let name=atlasName(heroIndex:0,diagonal:false,appearanceIndex:appearanceIndex,weaponID:weaponID,armorID:armorID)
-        guard let image=UIImage(named:name)?.cgImage else { return [] }
+    static func inventoryImages(appearanceIndex:Int,weaponID:String?,armorID:String?,hair:String?=nil,face:String?=nil) -> [UIImage] {
+        let name=atlasName(heroIndex:0,diagonal:false,appearanceIndex:appearanceIndex,weaponID:weaponID,armorID:armorID,hair:hair,face:face)
+        guard let image=image(named:name)?.cgImage else { return [] }
         let cell=image.height/atlasRows
         return (0...8).compactMap { index in
             image.cropping(to:CGRect(x:index*cell,y:0,width:cell,height:cell)).map { UIImage(cgImage:$0) }
@@ -104,10 +108,10 @@ enum HeroFrames {
         return frame == 0 ? 0 : 1 + (frame - 1) * authoredFrameCount(heroIndex: heroIndex) / walkFrameCount
     }
 
-    static func load(_ hero: Int, appearanceIndex: Int = 0,weaponID:String?="trainingSword",armorID:String?=nil) -> [[SKTexture]] {
+    static func load(_ hero: Int, appearanceIndex: Int = 0,weaponID:String?="trainingSword",armorID:String?=nil,hair:String?=nil,face:String?=nil) -> [[SKTexture]] {
         [false, true].flatMap { diagonal -> [[SKTexture]] in
-            let name = atlasName(heroIndex: hero - 1, diagonal: diagonal, appearanceIndex: appearanceIndex,weaponID:weaponID,armorID:armorID)
-            guard let atlas = UIImage(named: name)?.cgImage else {
+            let name = atlasName(heroIndex: hero - 1, diagonal: diagonal, appearanceIndex: appearanceIndex,weaponID:weaponID,armorID:armorID,hair:hair,face:face)
+            guard let atlas = image(named:name)?.cgImage else {
                 fatalError("Missing hero atlas: \(name)")
             }
             let cell = atlas.height / atlasRows
@@ -256,5 +260,40 @@ struct HeroPose {
         let t = max(0, min(1, (point.y - 0.22) / 0.20))
         let blend = t * t * (3 - 2 * t)
         return ground * (1 - blend) + 0.125 * blend
+    }
+}
+
+/// Selected components are composited at loadout change only. Both SpriteKit
+/// and Metal upload the same resulting pixels; shadows never use the old head.
+enum CustomAppearanceAssets {
+    private struct Manifest:Decodable {
+        let bodyAtlases:[String:[String]],foregroundAtlases:[String:[String]],hairAtlases:[String:[String]],faceAtlases:[String:[String]]
+        let battleHair:[String:String],battleFaces:[String:String]
+    }
+    private static let manifest:Manifest = {
+        guard let u=Bundle.main.url(forResource:"custom-appearance",withExtension:"json"),let d=try? Data(contentsOf:u),let m=try? JSONDecoder().decode(Manifest.self,from:d) else{fatalError("Missing registered appearance components")};return m
+    }()
+    private static let cache:NSCache<NSString,UIImage> = {let c=NSCache<NSString,UIImage>();c.totalCostLimit=120*1024*1024;return c}()
+    static func isCustom(_ name:String)->Bool {name.hasPrefix("Custom|")}
+    static func name(body:String,armor:String?,weapon:String?,hair:String?,face:String?,half:Int)->String {
+        ["Custom",body,armor ?? "base",weapon ?? "none",hair ?? "original",face ?? "original",String(half)].joined(separator:"|")
+    }
+    static func battleHair(_ id:String?)->String? {id.flatMap{manifest.battleHair[$0]}}
+    static func battleFace(_ id:String?)->String? {id.flatMap{manifest.battleFaces[$0]}}
+    static func image(_ name:String)->UIImage? {
+        if let image=cache.object(forKey:name as NSString){return image}
+        let p=name.components(separatedBy:"|");guard p.count==7,let half=Int(p[6]),(0...1).contains(half) else{return nil}
+        let outfit=p[2]=="base" ? p[1]:p[2]
+        let hair=p[4]=="original" ? (p[1]=="wayfarer" ? "hair-silver":"hair-chestnut"):p[4]
+        let face=p[5]=="original" ? (p[1]=="wayfarer" ? "face-amber":"face-blue"):p[5]
+        guard let bs=manifest.bodyAtlases[outfit+"|"+p[3]],let front=manifest.foregroundAtlases[outfit],let hs=manifest.hairAtlases[hair],let fs=manifest.faceAtlases[face],bs.count==2,hs.count==2,fs.count==2,
+              let bodyImage=UIImage(named:bs[half]),let faceImage=UIImage(named:fs[half]),let hairImage=UIImage(named:hs[half]),let foreground=UIImage(named:front[half]) else{return nil}
+        let format=UIGraphicsImageRendererFormat();format.scale=1;format.preferredRange = .standard
+        let image=UIGraphicsImageRenderer(size:CGSize(width:3328,height:1024),format:format).image{r in
+            r.cgContext.interpolationQuality = .none;r.cgContext.setAllowsAntialiasing(false)
+            let box=CGRect(x:0,y:0,width:3328,height:1024)
+            bodyImage.draw(in:box);faceImage.draw(in:box);hairImage.draw(in:box);foreground.draw(in:box)
+        }
+        cache.setObject(image,forKey:name as NSString,cost:3328*1024*4);return image
     }
 }

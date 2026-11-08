@@ -41,7 +41,7 @@ for name in ("sample.pptx", "ThirdPartyNotices.txt", "design-tokens.json"):
     ref = add("resource:" + name, "PBXFileReference", lastKnownFileType="file", path="Resources/" + name, sourceTree="<group>")
     files.append(ref)
     resource_builds.append(add("build:" + name, "PBXBuildFile", fileRef=ref))
-for name,kind in [("Assets.xcassets","folder.assetcatalog"),("SceneMap.json","text.json"),("hero-gait.json","text.json"),("meadow-port-provenance.json","text.json")]:
+for name,kind in [("Assets.xcassets","folder.assetcatalog"),("SceneMap.json","text.json"),("hero-gait.json","text.json"),("custom-appearance.json","text.json"),("meadow-port-provenance.json","text.json")]:
     ref = add("resource:"+name,"PBXFileReference",lastKnownFileType=kind,path="Resources/"+name,sourceTree="<group>")
     files.append(ref);resource_builds.append(add("build:"+name,"PBXBuildFile",fileRef=ref))
 product = add("product", "PBXFileReference", explicitFileType="wrapper.application", includeInIndex="0", path="ClassroomProbe.app", sourceTree="BUILT_PRODUCTS_DIR")
@@ -79,7 +79,7 @@ for name in ("Debug", "Release"):
                            SUPPORTS_MACCATALYST="NO", SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD="NO",
                            SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD="NO", SWIFT_EMIT_LOC_STRINGS="NO",
                            LD_RUNPATH_SEARCH_PATHS=["$(inherited)", "@executable_path/Frameworks"],
-                           CURRENT_PROJECT_VERSION="23", MARKETING_VERSION="0.18.0", ASSETCATALOG_COMPILER_APPICON_NAME="AppIcon")
+                           CURRENT_PROJECT_VERSION="24", MARKETING_VERSION="0.19.0", ASSETCATALOG_COMPILER_APPICON_NAME="AppIcon")
     target_configs.append(add("target:" + name, "XCBuildConfiguration", name=name, buildSettings=target_settings))
 project_config_list = add("project-config-list", "XCConfigurationList", buildConfigurations=project_configs,
                           defaultConfigurationIsVisible="0", defaultConfigurationName="Release")
