@@ -1,0 +1,64 @@
+{
+  "formatVersion": 1,
+  "logicalZIP": "custom-appearance-meadow-v0.19.0-20261108.zip",
+  "bytes": 506940769,
+  "sha256": "c193aa63523600ad7a4f072a6ec398a372f21c13e3a6424475917cd3f23c4171",
+  "parts": [
+    {
+      "file": "custom-appearance-meadow-v0.19.0-20261108.zip.part000",
+      "bytes": 50331648,
+      "sha256": "7acd759b9b125060880d27c91a6667caebfea07c761f5744a6857923b2352dda"
+    },
+    {
+      "file": "custom-appearance-meadow-v0.19.0-20261108.zip.part001",
+      "bytes": 50331648,
+      "sha256": "9573dd5eb4950dbece76e69f29e6bf3ffef1de5edc7f0b7e2204b3234339dc96"
+    },
+    {
+      "file": "custom-appearance-meadow-v0.19.0-20261108.zip.part002",
+      "bytes": 50331648,
+      "sha256": "eb5aea4e85164fcb3ecc43f2f431de8b3058112c0590877c7fd427a4ff218412"
+    },
+    {
+      "file": "custom-appearance-meadow-v0.19.0-20261108.zip.part003",
+      "bytes": 50331648,
+      "sha256": "d5fbfd778d1385d5beb25098f2491162243bc850d3e38d14c18979d29cae81f1"
+    },
+    {
+      "file": "custom-appearance-meadow-v0.19.0-20261108.zip.part004",
+      "bytes": 50331648,
+      "sha256": "e9710f908657bc4631fcac7629d4881edd8e84e72f6f319788ca7b6afe4ae916"
+    },
+    {
+      "file": "custom-appearance-meadow-v0.19.0-20261108.zip.part005",
+      "bytes": 50331648,
+      "sha256": "c4fd00d70535b76e653cf84138eb5fbb7f9a0dc505386d2b31fa2b69b784b1ed"
+    },
+    {
+      "file": "custom-appearance-meadow-v0.19.0-20261108.zip.part006",
+      "bytes": 50331648,
+      "sha256": "5a6414c41f8759df05bdde1a40c1adbb39bbdd76366972f2856c6d30b4027c5c"
+    },
+    {
+      "file": "custom-appearance-meadow-v0.19.0-20261108.zip.part007",
+      "bytes": 50331648,
+      "sha256": "615d86209f0f7aea6b1495202d43895d44656ed5833052c498a907c14b5e06b3"
+    },
+    {
+      "file": "custom-appearance-meadow-v0.19.0-20261108.zip.part008",
+      "bytes": 50331648,
+      "sha256": "451e4f23f0c76450f9e5797f14b1abfa698ab341d93b4d9981fbe89864251522"
+    },
+    {
+      "file": "custom-appearance-meadow-v0.19.0-20261108.zip.part009",
+      "bytes": 50331648,
+      "sha256": "c6870958410939b326878eebcf9e639da97a4e62aba3ff791a87df445495099b"
+    },
+    {
+      "file": "custom-appearance-meadow-v0.19.0-20261108.zip.part010",
+      "bytes": 3624289,
+      "sha256": "9241c76050aadb1698ed32641f3d12477b696731033dff06de347456fe72d3c0"
+    }
+  ],
+  "reason": "Lossless split; GitHub normal Git rejects files over 100MB"
+}

@@ -1,0 +1,15 @@
+{
+  "artSource": "13cbe2e250a74a1a8e5c4a0dd026c866fd2cdfa8",
+  "packagedComponentCompositesChecked": 4992,
+  "maximumRGBACompositingRounding": 0,
+  "newAssetFiles": 260,
+  "battlePNGsMatchReviewedSource": true,
+  "samePlayerRecordAllScenes": true,
+  "GIF": {
+    "frames": 80,
+    "durationMs": 2700,
+    "sha256": "287b741bc80d95567c237b0bdac5fbd73adbe545dcff6e5ad93479031b11e007"
+  },
+  "noAppSimulatorOrDeviceRun": true,
+  "GIFScope": "Offline actual walk component composites and existing battle sampler; not UIKit capture or device performance proof"
+}
