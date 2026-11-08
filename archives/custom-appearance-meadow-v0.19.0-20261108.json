@@ -1,0 +1,63 @@
+{
+  "version": "0.19.0/build24",
+  "sourceBranch": "feat/teacher-backend-meadow-v0.13",
+  "sourceSnapshotCommit": "01c222385be32310334b45ae38c0dcfab65d1db1",
+  "compiledCommit": "40335ca5f8c6ba876d59c279f2b05c8a20dec30a",
+  "tag": "custom-appearance-meadow-v0.19.0-20261108",
+  "buildRun": 42480618163,
+  "archiveRun": 42481372759,
+  "archiveCommit": "1bd467d43e70d7dcb8f00decece403a104a4144c",
+  "archiveBytes": 506940769,
+  "archiveSHA256": "c193aa63523600ad7a4f072a6ec398a372f21c13e3a6424475917cd3f23c4171",
+  "coreTests": {
+    "CurrentDemoAndClassroomBackend": 413,
+    "ClassroomProbeCore": 6,
+    "failures": 0,
+    "nativeSuites": {
+      "MeadowWorldSupportTests": 179,
+      "MeadowClassroomSupportTests": 54,
+      "MeadowBattleSupportTests": 108,
+      "ClassroomGameCoreTests": 72
+    }
+  },
+  "additionalLocalPythonTests": 8,
+  "ipaBytes": 78656566,
+  "ipaSha256": "94aae4eb1b3449ebf4768b665bd251e65a99c8cbc96d1b2a3db302bcf2a881de",
+  "minimumOS": "27.0",
+  "publicGETChecks": [
+    {
+      "url": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/1bd467d43e70d7dcb8f00decece403a104a4144c/custom-appearance-meadow-v0.19.0-20261108/ClassroomStage2-v0.19.0-unsigned.ipa",
+      "bytes": 78656566,
+      "sha256": "94aae4eb1b3449ebf4768b665bd251e65a99c8cbc96d1b2a3db302bcf2a881de",
+      "status": 200
+    },
+    {
+      "url": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/1bd467d43e70d7dcb8f00decece403a104a4144c/custom-appearance-meadow-v0.19.0-20261108/custom-appearance-normal.gif",
+      "bytes": 680839,
+      "sha256": "287b741bc80d95567c237b0bdac5fbd73adbe545dcff6e5ad93479031b11e007",
+      "status": 200
+    }
+  ],
+  "bundleRestoreVerified": true,
+  "allArchivePublicBytesVerified": true,
+  "ipaURL": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/1bd467d43e70d7dcb8f00decece403a104a4144c/custom-appearance-meadow-v0.19.0-20261108/ClassroomStage2-v0.19.0-unsigned.ipa",
+  "gifURL": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/1bd467d43e70d7dcb8f00decece403a104a4144c/custom-appearance-meadow-v0.19.0-20261108/custom-appearance-normal.gif",
+  "archiveURL": "https://raw.githubusercontent.com/liamchan-rgb/classroom-boardgame/1bd467d43e70d7dcb8f00decece403a104a4144c/custom-appearance-meadow-v0.19.0-20261108/README.md",
+  "artSourceCommit": "13cbe2e250a74a1a8e5c4a0dd026c866fd2cdfa8",
+  "unchangedWholeResourceBaseline": "175c7dfc4a68e62cb9693da8d837b77081619a6b",
+  "runtimeArtChanged": true,
+  "sourceResourcesVerified": 829,
+  "compiledNamesVerified": 411,
+  "scope": "Teacher character customization: six independent hair styles, four face sets, two B cosmetic outfits; shared persistent player selection in exploration/inventory/battle/shadows; profile/campaign slots, new journeys, imports/exports and P7; old saves compatible, no equipment statistics granted.",
+  "nextSteps": [
+    "Check installed selection, persistence and cross-scene appearance using user screenshots.",
+    "Teacher classroom configuration presets."
+  ],
+  "limitations": [
+    "No device CPU/GPU timing or touch responsiveness measurement was performed.",
+    "User-reported TV/disconnect misalignment is addressed in code; real AirPlay/TV/disconnect validation needs user screenshots.",
+    "P3-P7 reuse existing approved character resources; distinct character art remains missing. Teacher host has a private joining UI. Independent body variants remain missing; existing rigs support the new shared hair, face and cosmetic outfits.",
+    "Offline review demonstrates fixed-canvas geometry; it is not UIKit capture or proof of device repair.",
+    "No App, simulator, device or external-display execution."
+  ]
+}
