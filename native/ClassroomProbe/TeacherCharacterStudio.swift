@@ -75,9 +75,9 @@ struct TeacherCharacterStudio:View {
                 let column=1+tick%8
                 ZStack(alignment:.bottom){
                     LinearGradient(colors:[Color(red:0.36,green:0.55,blue:0.38),Color(red:0.20,green:0.36,blue:0.22)],startPoint:.top,endPoint:.bottom)
-                    Ellipse().fill(.black.opacity(0.25)).frame(width:110,height:24).offset(y:-44)
+                    Ellipse().fill(.black.opacity(0.25)).frame(width:120,height:26).offset(y:-30)
                     if let image=cell(facing:facing,column:column,look:appearance){
-                        Image(uiImage:image).interpolation(.none).resizable().scaledToFit().frame(width:310,height:310).offset(y:6)
+                        Image(uiImage:image).interpolation(.none).resizable().scaledToFit().frame(width:300,height:330).padding(.bottom,14)
                     }else{Text("预览素材缺失").foregroundStyle(.white)}
                     Text(Self.turnNames[Self.turn.firstIndex(of:facing) ?? 0]).font(.caption.bold()).foregroundStyle(.white.opacity(0.85)).padding(6)
                         .background(.black.opacity(0.3),in:Capsule()).padding(.bottom,10)
@@ -177,15 +177,17 @@ struct TeacherCharacterStudio:View {
         if let face{a.face=face=="original" ? nil:face}
         return a
     }
-    private func cell(facing:Int,column:Int,look:PlayerAppearance)->UIImage? {
-        CustomAppearanceAssets.cell(body:look.body,armor:look.armor(worn:worn),weapon:weapon,hair:look.hair,face:look.face,facing:facing,column:column)
+    /// The figure stands about x 88-157, y 79-213 in its 256 px cell: crops keep it large in the frame.
+    private static let bodyCrop=CGRect(x:52,y:56,width:152,height:168),headCrop=CGRect(x:94,y:72,width:66,height:66)
+    private func cell(facing:Int,column:Int,look:PlayerAppearance,crop:CGRect=Self.bodyCrop)->UIImage? {
+        guard let full=CustomAppearanceAssets.cell(body:look.body,armor:look.armor(worn:worn),weapon:weapon,hair:look.hair,face:look.face,facing:facing,column:column) else{return nil}
+        return full.cgImage?.cropping(to:crop).map{UIImage(cgImage:$0)} ?? full
     }
     private func tile(key:String,look:PlayerAppearance,zoom:Bool)->UIImage? {
         let full=key+"|"+look.visualKey
         if let image=tiles[full]{return image}
-        guard let image=cell(facing:0,column:0,look:look) else{return nil}
-        // Faces: the head only (upper middle of the 256 px cell).
-        let result=zoom ? (image.cgImage?.cropping(to:CGRect(x:78,y:28,width:100,height:100)).map{UIImage(cgImage:$0)} ?? image):image
+        // Faces: the head only.
+        guard let result=cell(facing:0,column:0,look:look,crop:zoom ? Self.headCrop:Self.bodyCrop) else{return nil}
         DispatchQueue.main.async{tiles[full]=result}
         return result
     }

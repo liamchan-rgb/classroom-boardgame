@@ -546,6 +546,26 @@
 			"isa" = "PBXBuildFile";
 			"fileRef" = "396DA8529BFE27E9FAB0A8A6";
 		};
+		"5D81AFD1A677819D20E21CBA" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/UI/MeadowItemIcon.swift";
+			"sourceTree" = "<group>";
+		};
+		"84129D168353308255E0DDA5" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "5D81AFD1A677819D20E21CBA";
+		};
+		"76E35111C17956DF8AEB3B3C" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/UI/MeadowShopViewController.swift";
+			"sourceTree" = "<group>";
+		};
+		"BDBE10460BB68495C34C758B" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "76E35111C17956DF8AEB3B3C";
+		};
 		"E7404666D43A7B9ECAC76699" = {
 			"isa" = "PBXFileReference";
 			"lastKnownFileType" = "sourcecode.swift";
@@ -826,6 +846,8 @@
 				"450C5C3C12F37DCD94A4786A",
 				"BA1214086742441D7CAE6C08",
 				"396DA8529BFE27E9FAB0A8A6",
+				"5D81AFD1A677819D20E21CBA",
+				"76E35111C17956DF8AEB3B3C",
 				"E7404666D43A7B9ECAC76699",
 				"F0A6E9C81ACF5122E3017408",
 				"3BD91D65CDA40795EA3E9F5F",
@@ -979,6 +1001,8 @@
 				"7DF97A8DEA187288208532BF",
 				"A4398D5D6CE0D037E439045C",
 				"705163158F9AA2FE42B2C567",
+				"84129D168353308255E0DDA5",
+				"BDBE10460BB68495C34C758B",
 				"545976A2418B9F6DC9B7EDEF",
 				"2B85ED0D255B72549E378180",
 				"E138F57492F4276CBDE3F637",

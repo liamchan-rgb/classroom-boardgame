@@ -1004,20 +1004,11 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     private func showCampaignSite(actor:String,node:MapNode) {
         guard let campaign,let kind=campaign.siteKind(node:node.id),let unit=campaign.engine.state.units[actor] else{return}
         if kind == .shop {
-            let menu=UIAlertController(title:"行商 · #\(node.id)",message:"\(unit.name) · 个人金币 \(unit.coins)\n买卖均为1件；物品进入购买者行囊，不自动装备。当前价格按此地保存的比例计算。",preferredStyle:.actionSheet)
-            for player in campaign.engine.state.players where player.isAlive && player.nodeID==node.id && player.id != actor {
-                menu.addAction(UIAlertAction(title:"改由 "+player.name+" 交易",style:.default){[weak self] _ in self?.showCampaignSite(actor:player.id,node:node)})
-            }
-            for item in campaign.engine.catalog.items where item.purchasePrice != nil && item.setID==nil {
-                let price=(try? CampaignSiteRules.price(item:item,buy:true,node:node,seed:campaign.engine.state.map.seed)) ?? item.purchasePrice!
-                let action=UIAlertAction(title:"买 · \(item.name) · \(price) 金币",style:.default){[weak self] _ in self?.confirmSiteTrade(actor:actor,item:item,buy:true)}
-                action.isEnabled=unit.coins>=price;menu.addAction(action)
-            }
-            for item in campaign.engine.catalog.items where (unit.inventory[item.id] ?? 0)>0 && item.sellPrice>0 {
-                let selling=(try? CampaignSiteRules.price(item:item,buy:false,node:node,seed:campaign.engine.state.map.seed)) ?? item.sellPrice
-                menu.addAction(UIAlertAction(title:"卖 · \(item.name) ×\(unit.inventory[item.id]!) · \(selling) 金币",style:.default){[weak self] _ in self?.confirmSiteTrade(actor:actor,item:item,buy:false)})
-            }
-            menu.addAction(UIAlertAction(title:"离开商店",style:.cancel));menu.popoverPresentationController?.sourceView=campaignBattle;menu.popoverPresentationController?.sourceRect=campaignBattle.bounds;presentSiteScreen(menu)
+            // The shop screen: item cards with pictures and prices, buyer switch, buy / sell one at a time.
+            let shop=MeadowShopViewController(session:campaign,node:node.id,actor:actor)
+            shop.onTrade={[weak self] _ in self?.scene.refreshCampaign();self?.refreshCampaignStatus()}
+            if let old=presentedViewController as? UIAlertController {old.dismiss(animated:true){[weak self] in self?.present(shop,animated:true)}}
+            else {present(shop,animated:true)}
         }else {
             let title=kind == .satchel ? "路边失物":"林间清泉"
             let config=CampaignSiteRules.configuration(node:node,seed:campaign.engine.state.map.seed)!

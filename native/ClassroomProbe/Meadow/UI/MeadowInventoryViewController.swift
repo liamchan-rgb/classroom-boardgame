@@ -199,10 +199,7 @@ final class MeadowInventoryViewController:UIViewController,UIDocumentPickerDeleg
         } catch { attempt { throw error } }
     }
     private func rect(_ r:InventoryRect)->CGRect { CGRect(x:r.x,y:r.y,width:r.width,height:r.height) }
-    private func inventoryIcon(_ id:String)->UIImage? {
-        let asset=HeroFrames.weaponVisual(id)?.iconAsset ?? HeroFrames.armorVisual(id)?.iconAsset ?? HeroFrames.accessoryVisual(id)?.iconAsset ?? ["smallPotion":"MeadowPartySmallPotion","largePotion":"MeadowPartyLargePotion","shieldPotion":"MeadowPartyShieldPotion","revivalStone":"MeadowPartyRevivalStone"][id]
-        return asset.flatMap { UIImage(named:$0) }
-    }
+    private func inventoryIcon(_ id:String)->UIImage? { MeadowItemIcon.image(id) }
 }
 
 /// Uses the expedition's live engine; never stages a separate camp inventory.
@@ -273,6 +270,9 @@ final class MeadowCampaignInventoryViewController:UIViewController {
         for e in entries {
             let row=MeadowPreviewPalette.button(e.name+"\n背包 ×\(e.quantity)"+(e.equipped ? " · 已装备":""))
             row.configuration?.title=e.name;row.configuration?.subtitle="背包 ×\(e.quantity)"+(e.equipped ? " · 已装备":"")
+            // The item's picture at the front of its row.
+            row.configuration?.image=MeadowItemIcon.image(e.id,item:try? catalog.item(e.id),side:54);row.configuration?.imagePlacement = .leading;row.configuration?.imagePadding=14
+            row.contentHorizontalAlignment = .leading
             row.configuration?.baseBackgroundColor=e.id==selected ? MeadowPreviewPalette.gold:MeadowPreviewPalette.panel
             row.configuration?.baseForegroundColor=e.id==selected ? MeadowPreviewPalette.panel:MeadowPreviewPalette.ink
             row.configuration?.subtitleTextAttributesTransformer=UIConfigurationTextAttributesTransformer { value in var v=value;v.font=MeadowPreviewPalette.font(15,.medium);return v }
@@ -323,6 +323,8 @@ final class MeadowCampaignInventoryViewController:UIViewController {
         func text(_ value:String,_ size:CGFloat=17){let label=MeadowPreviewPalette.label(value,size:size);label.numberOfLines=0;let h=max(24,label.sizeThatFits(CGSize(width:max(1,width-24),height:10000)).height);label.frame=CGRect(x:12,y:y,width:width-24,height:h);detailContent.addSubview(label);y+=h+12}
         primary.isHidden=true
         guard let id=selected,let item=try? session.engine.catalog.item(id),let unit=session.engine.state.units[actor] else{text("选择物品查看详情");return}
+        let picture=UIImageView(image:MeadowItemIcon.image(id,item:item));picture.contentMode = .scaleAspectFit;picture.layer.magnificationFilter = .nearest
+        picture.frame=CGRect(x:(width-96)/2,y:y,width:96,height:96);detailContent.addSubview(picture);y+=106
         text(item.name,22);text(CampInventoryProjection.summary(item));text("背包 ×\(unit.inventory[id] ?? 0)")
         primary.isHidden=false;primary.isEnabled=false
         if let slot=item.slot {

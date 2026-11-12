@@ -67,7 +67,7 @@ final class MeadowGainPopup: UIView {
             if gain.score > 0 { flow.add(chip(icon: UIImage(systemName: "star.circle.fill"), tint: UIColor(red: 0.55, green: 0.85, blue: 1, alpha: 1), text: "积分 +\(gain.score)")) }
             for item in gain.items {
                 let itemName = (try? catalog?.item(item.id).name) ?? item.id
-                flow.add(chip(icon: Self.icon(item.id), tint: nil, text: "\(itemName) ×\(item.count)"))
+                flow.add(chip(icon: MeadowItemIcon.image(item.id, item: try? catalog?.item(item.id)), tint: nil, text: "\(itemName) ×\(item.count)"))
             }
             chips += flow.chips
             stack.addArrangedSubview(flow)
