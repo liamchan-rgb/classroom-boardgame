@@ -19,4 +19,4 @@ for item in ['starlightArmor','dragonArmor']:
  a=g['armorVisuals'][item];assert set(a['battleLayers'].values())<={x.name.split('.')[0] for x in (r/'Assets.xcassets').iterdir()};assert a['bowAtlas'] in names and a['bowTorso'] in names
 assert p['appearanceSourceCommit']==m['sourceCommit'] and p['commit']=='175c7dfc4a68e62cb9693da8d837b77081619a6b'
 for row in p['assets']:assert hashlib.sha256((r/row['file']).read_bytes()).hexdigest()==row['sha256'],row['file']
-print('PASS: 829 pinned resources; 130 new image names; component dependencies, PNG CRC and original mixed-source provenance.')
+print(f'PASS: {len(p["assets"])} pinned resources; 130 new image names; component dependencies, PNG CRC and original mixed-source provenance.')

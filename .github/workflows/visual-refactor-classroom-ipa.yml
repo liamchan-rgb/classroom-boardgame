@@ -1,0 +1,75 @@
+name: Classroom visual refactor IPA
+# Builds the classroom app from the visual-refactor branch when the pushed commit message contains "[ipa]":
+# offline core tests, unsigned device Release archive, then a pre-release with a direct .ipa link for SideStore.
+# Never runs a simulator or a device.
+on:
+  push:
+    branches: [claude/meadowjourney-visual-refactor-kh0zpr]
+permissions:
+  contents: write
+concurrency:
+  group: classroom-visual-ipa-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  ipa:
+    if: ${{ contains(github.event.head_commit.message, '[ipa]') }}
+    runs-on: xcode-27
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Select compatible Xcode
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          python3 native/tools/select_ci_xcode.py --github-env "$GITHUB_ENV" 2>&1 | tee artifacts/xcode-selection.log
+      - name: Test offline core
+        shell: bash
+        run: |
+          set -euo pipefail
+          swift test --package-path native/Packages/ProbeCore 2>&1 | tee artifacts/core-tests.log | tail -5
+          swift test --package-path native/Packages/GameCore 2>&1 | tee artifacts/game-core-tests.log | tail -5
+      - name: Build unsigned iPad app
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 native/tools/validate_xcode_project.py
+          python3 native/tools/check_custom_appearance.py
+          xcodebuild -resolvePackageDependencies -project native/ClassroomProbe.xcodeproj -scheme ClassroomProbe 2>&1 | tee artifacts/dependencies.log | tail -3
+          xcodebuild -project native/ClassroomProbe.xcodeproj -scheme ClassroomProbe \
+            -configuration Release -destination 'generic/platform=iOS' \
+            -derivedDataPath native/build -archivePath native/build/ClassroomProbe.xcarchive \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO archive 2>&1 | tee artifacts/xcode-build.log | grep -E "error:|warning: unre|ARCHIVE" | head -60
+          test -d native/build/ClassroomProbe.xcarchive/Products/Applications/ClassroomProbe.app
+      - name: Package
+        shell: bash
+        run: |
+          set -euo pipefail
+          app='native/build/ClassroomProbe.xcarchive/Products/Applications/ClassroomProbe.app'
+          test "$(lipo -archs "$app/ClassroomProbe")" = arm64
+          version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app/Info.plist")"
+          build="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$app/Info.plist")"
+          echo "version=$version build=$build" | tee artifacts/version.txt
+          python3 native/tools/package_ipa.py "$app" "artifacts/ClassroomStage2-v$version-${GITHUB_SHA::8}-unsigned.ipa"
+          shasum -a 256 artifacts/*.ipa | tee artifacts/ipa.sha256
+      - name: Publish pre-release with a direct IPA link
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          short="${GITHUB_SHA::8}"; tag="classroom-visual-$short"; ipa="$(ls artifacts/*.ipa)"
+          notes="课堂端视觉重构测试包（未签名，供 SideStore 侧载）。提交 ${GITHUB_SHA}；核心离线测试与设备 Release 编译，未运行模拟器或实机。$(cat artifacts/version.txt) SHA256: $(cut -d' ' -f1 artifacts/ipa.sha256)"
+          gh release delete "$tag" --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag 2>/dev/null || true
+          gh release create "$tag" "$ipa" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --prerelease --title "课堂端测试包 $short" --notes "$notes"
+          echo "IPA: https://github.com/$GITHUB_REPOSITORY/releases/download/$tag/$(basename "$ipa")"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: classroom-visual-ipa-logs-${{ github.run_id }}
+          path: |
+            artifacts/*.log
+            artifacts/version.txt
+            artifacts/ipa.sha256
+          if-no-files-found: warn
+          retention-days: 14

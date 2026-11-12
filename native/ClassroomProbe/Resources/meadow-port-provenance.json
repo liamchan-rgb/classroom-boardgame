@@ -184,8 +184,10 @@
     },
     {
       "file": "Assets.xcassets/BattleVFXHealingMicroSheet.imageset/BattleVFXHealingMicroSheet.png",
-      "sha256": "4cdc69977c64ea81657a8b822ef34143dd62e4b59bed4f864d69aec07f0016f0",
-      "bytes": 190665
+      "sha256": "cc4c76cb6205ce8051c6109e56b0e685c382d301d40c3b2bf958915e145776d2",
+      "bytes": 22284,
+      "sourceCommit": "89dcbdf1e1a32c3c45f600c85b49e9a1275e1935",
+      "sourcePath": "Sources/Resources/Assets.xcassets/BattleVFXHealingMicroSheet.imageset/BattleVFXHealingMicroSheet.png"
     },
     {
       "file": "Assets.xcassets/BattleVFXHealingMicroSheet.imageset/Contents.json",
@@ -194,8 +196,10 @@
     },
     {
       "file": "Assets.xcassets/BattleVFXHealingStandardSheet.imageset/BattleVFXHealingStandardSheet.png",
-      "sha256": "3c8413a80fa083e716738820a35dca6859c3f4713dc3d923e0a318274326cd11",
-      "bytes": 350499
+      "sha256": "bef48c0685ff6e347ece53639c8db2a3dba10b9a678c0765a6cf9265af44ef63",
+      "bytes": 92079,
+      "sourceCommit": "89dcbdf1e1a32c3c45f600c85b49e9a1275e1935",
+      "sourcePath": "Sources/Resources/Assets.xcassets/BattleVFXHealingStandardSheet.imageset/BattleVFXHealingStandardSheet.png"
     },
     {
       "file": "Assets.xcassets/BattleVFXHealingStandardSheet.imageset/Contents.json",
@@ -204,8 +208,10 @@
     },
     {
       "file": "Assets.xcassets/BattleVFXHealingStrongSheet.imageset/BattleVFXHealingStrongSheet.png",
-      "sha256": "04603c7392de3d1d378b075afe1e3a332f779aeac186a3ff221037344dee2b6d",
-      "bytes": 208044
+      "sha256": "315f99bb5d9ee3c89a80f2794d27570b0722252b2341fc1786d305057bbf84cf",
+      "bytes": 91994,
+      "sourceCommit": "89dcbdf1e1a32c3c45f600c85b49e9a1275e1935",
+      "sourcePath": "Sources/Resources/Assets.xcassets/BattleVFXHealingStrongSheet.imageset/BattleVFXHealingStrongSheet.png"
     },
     {
       "file": "Assets.xcassets/BattleVFXHealingStrongSheet.imageset/Contents.json",
@@ -2679,8 +2685,10 @@
     },
     {
       "file": "Assets.xcassets/MeadowBattleVFXDragonScaleWard.imageset/MeadowBattleVFXDragonScaleWard.png",
-      "sha256": "1e138eb4579c5fefeb6973bcfcb134b7074f5907c6599845b0fbc77f77990875",
-      "bytes": 1620470
+      "sha256": "412aa6acba811bd3bd946a225f1185aeed1fcaa74fbe62bc727f98397d0a35b3",
+      "bytes": 82696,
+      "sourceCommit": "89dcbdf1e1a32c3c45f600c85b49e9a1275e1935",
+      "sourcePath": "Sources/Resources/Assets.xcassets/MeadowBattleVFXDragonScaleWard.imageset/MeadowBattleVFXDragonScaleWard.png"
     },
     {
       "file": "Assets.xcassets/MeadowBattleVFXDragonSoulWard.imageset/Contents.json",
@@ -2689,8 +2697,10 @@
     },
     {
       "file": "Assets.xcassets/MeadowBattleVFXDragonSoulWard.imageset/MeadowBattleVFXDragonSoulWard.png",
-      "sha256": "ea35846f285765c16215b4fe1534aa00bfc63116c0cdfd2d523809aa74a68052",
-      "bytes": 408501
+      "sha256": "bae5bd8788402a5cd5512e1c163e3ee1ef969e9498a9587d19efb747b6278585",
+      "bytes": 63315,
+      "sourceCommit": "89dcbdf1e1a32c3c45f600c85b49e9a1275e1935",
+      "sourcePath": "Sources/Resources/Assets.xcassets/MeadowBattleVFXDragonSoulWard.imageset/MeadowBattleVFXDragonSoulWard.png"
     },
     {
       "file": "Assets.xcassets/MeadowBattleVFXRally.imageset/Contents.json",
@@ -2699,8 +2709,10 @@
     },
     {
       "file": "Assets.xcassets/MeadowBattleVFXRally.imageset/MeadowBattleVFXRally.png",
-      "sha256": "fa1f1bd05843d38d405b25cdd6ca1388a228214df25a79eb99a0604bf764caf8",
-      "bytes": 1038369
+      "sha256": "e0564a1bd8d3cd41d4be38c41721c9c22c90ba2f5830c5b9d5fa304264657815",
+      "bytes": 62178,
+      "sourceCommit": "89dcbdf1e1a32c3c45f600c85b49e9a1275e1935",
+      "sourcePath": "Sources/Resources/Assets.xcassets/MeadowBattleVFXRally.imageset/MeadowBattleVFXRally.png"
     },
     {
       "file": "Assets.xcassets/MeadowBattleVFXStarlightPulse.imageset/Contents.json",
@@ -2709,8 +2721,10 @@
     },
     {
       "file": "Assets.xcassets/MeadowBattleVFXStarlightPulse.imageset/MeadowBattleVFXStarlightPulse.png",
-      "sha256": "63c7820b3f02d52a4aabb0bcab3626fe45c16f6344184beb65883ef052d905ad",
-      "bytes": 2451578
+      "sha256": "17d77772da1f2322fef8cf22fa52ef2ea8984a72eb918b69727dc97a3addaf77",
+      "bytes": 99382,
+      "sourceCommit": "89dcbdf1e1a32c3c45f600c85b49e9a1275e1935",
+      "sourcePath": "Sources/Resources/Assets.xcassets/MeadowBattleVFXStarlightPulse.imageset/MeadowBattleVFXStarlightPulse.png"
     },
     {
       "file": "Assets.xcassets/MeadowBattleVFXSweep.imageset/Contents.json",
@@ -2719,8 +2733,10 @@
     },
     {
       "file": "Assets.xcassets/MeadowBattleVFXSweep.imageset/MeadowBattleVFXSweep.png",
-      "sha256": "818bdd0e00fce53322c586f44aeb279a9befe79c2ea410e63338aa6fe7201f8f",
-      "bytes": 1818050
+      "sha256": "b3219c6ecbbb96e5a2ee58c734c517c652e4fec8d2cc41c68fb4ae596a0959d8",
+      "bytes": 33215,
+      "sourceCommit": "89dcbdf1e1a32c3c45f600c85b49e9a1275e1935",
+      "sourcePath": "Sources/Resources/Assets.xcassets/MeadowBattleVFXSweep.imageset/MeadowBattleVFXSweep.png"
     },
     {
       "file": "Assets.xcassets/MeadowBattleWardenAttackSheet.imageset/Contents.json",
@@ -2781,6 +2797,62 @@
       "file": "Assets.xcassets/MeadowCampMidground.imageset/Contents.json",
       "sha256": "adbaa8eb86f94c56ee90fdd0cbf6a9a85d2f494dc7744dd8cbbd64798e41a382",
       "bytes": 156
+    },
+    {
+      "file": "Assets.xcassets/MeadowCampWideFarForest.imageset/01-far-forest.png",
+      "sha256": "6d947b450eaf86beee3e9f927726cbd01f5b47e7c2382b4cb3ed136ddaba0dfe",
+      "bytes": 5596103,
+      "sourceCommit": "89dcbdf1e1a32c3c45f600c85b49e9a1275e1935",
+      "sourcePath": "Sources/Resources/Assets.xcassets/MeadowCampWideFarForest.imageset/01-far-forest.png"
+    },
+    {
+      "file": "Assets.xcassets/MeadowCampWideFarForest.imageset/Contents.json",
+      "sha256": "7c20e91c0314fe4e64ffc7aa9a96319fa6027405fa6122caff5ced5446d3d694",
+      "bytes": 163,
+      "sourceCommit": "89dcbdf1e1a32c3c45f600c85b49e9a1275e1935",
+      "sourcePath": "Sources/Resources/Assets.xcassets/MeadowCampWideFarForest.imageset/Contents.json"
+    },
+    {
+      "file": "Assets.xcassets/MeadowCampWideForeground.imageset/04-foreground.png",
+      "sha256": "2bc7ff4274f35a3b50406331be0d9bc5988f75a9f912cb1352c9abad4b8bcdb1",
+      "bytes": 1063454,
+      "sourceCommit": "89dcbdf1e1a32c3c45f600c85b49e9a1275e1935",
+      "sourcePath": "Sources/Resources/Assets.xcassets/MeadowCampWideForeground.imageset/04-foreground.png"
+    },
+    {
+      "file": "Assets.xcassets/MeadowCampWideForeground.imageset/Contents.json",
+      "sha256": "cd0642b37676c7b62f0a25d599eb42e81cfbc17ea79055d0a749fa1d967bee57",
+      "bytes": 163,
+      "sourceCommit": "89dcbdf1e1a32c3c45f600c85b49e9a1275e1935",
+      "sourcePath": "Sources/Resources/Assets.xcassets/MeadowCampWideForeground.imageset/Contents.json"
+    },
+    {
+      "file": "Assets.xcassets/MeadowCampWideGround.imageset/02-ground.png",
+      "sha256": "23bb47917c608c2ca4b9437b90262f6d1a5c8f328eea5dcc6eb334a8c3e8402e",
+      "bytes": 3871567,
+      "sourceCommit": "89dcbdf1e1a32c3c45f600c85b49e9a1275e1935",
+      "sourcePath": "Sources/Resources/Assets.xcassets/MeadowCampWideGround.imageset/02-ground.png"
+    },
+    {
+      "file": "Assets.xcassets/MeadowCampWideGround.imageset/Contents.json",
+      "sha256": "e20bd0408b5e3e9908b533dfa662a2637209a2da741d478b43887144dfbb5bcf",
+      "bytes": 159,
+      "sourceCommit": "89dcbdf1e1a32c3c45f600c85b49e9a1275e1935",
+      "sourcePath": "Sources/Resources/Assets.xcassets/MeadowCampWideGround.imageset/Contents.json"
+    },
+    {
+      "file": "Assets.xcassets/MeadowCampWideMidground.imageset/03-midground.png",
+      "sha256": "b280381a44afaeda842df9e02780c9c5085679c887b1f30db393f414f1af9acf",
+      "bytes": 2480531,
+      "sourceCommit": "89dcbdf1e1a32c3c45f600c85b49e9a1275e1935",
+      "sourcePath": "Sources/Resources/Assets.xcassets/MeadowCampWideMidground.imageset/03-midground.png"
+    },
+    {
+      "file": "Assets.xcassets/MeadowCampWideMidground.imageset/Contents.json",
+      "sha256": "dba49985e161dd3187a2a4442292167ccfa1e077eff4928c587c5a7947f2e391",
+      "bytes": 162,
+      "sourceCommit": "89dcbdf1e1a32c3c45f600c85b49e9a1275e1935",
+      "sourcePath": "Sources/Resources/Assets.xcassets/MeadowCampWideMidground.imageset/Contents.json"
     },
     {
       "file": "Assets.xcassets/MeadowDragonFlame01.imageset/Contents.json",
@@ -4674,5 +4746,7 @@
   ],
   "mixedSources": true,
   "appearanceSourceCommit": "13cbe2e250a74a1a8e5c4a0dd026c866fd2cdfa8",
-  "appearanceNote": "Original baseline is retained for unchanged resources; sourceCommit on each new/updated file identifies the pinned component source. No automatic whole-source baseline advance."
+  "appearanceNote": "Original baseline is retained for unchanged resources; sourceCommit on each new/updated file identifies the pinned component source. No automatic whole-source baseline advance.",
+  "visualRefactorSourceCommit": "89dcbdf1e1a32c3c45f600c85b49e9a1275e1935",
+  "visualRefactorNote": "Battle/world visual refactor (procedural skill effects, hit feel, camera, formation, turn order, target marks, wide scene, gain cards) from experiment branch claude/meadowjourney-visual-refactor-kh0zpr; only the listed files carry this sourceCommit. P1 atlases/head parts of that branch were not imported (the classroom keeps its custom-appearance components)."
 }

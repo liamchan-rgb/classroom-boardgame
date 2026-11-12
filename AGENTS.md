@@ -1,3 +1,7 @@
+## v0.20.0/build25候选 · 视觉重构接入、50存档槽、人物自定义界面、商店界面（2026-11-12）
+
+用户要求把experiment视觉重构分支（claude/meadowjourney-visual-refactor-kh0zpr）的美术接入课堂端，并改进：存档槽加到50、人物自定义与保存界面做成可见、商店做界面且商店与背包物品有图标。工作分支claude/meadowjourney-visual-refactor-kh0zpr（基于feat/teacher-backend-meadow-v0.13）。按docs/integration/experiment-art-sync.md逐文件三方合并，源固定89dcbdf1，基线13cbe2e2；保留教师路由/6学生+P7/自定义外观/镜像回读，未导入特效审核台与该分支P1图集。接入记录docs/integration/experiment-art-sync/2026-11-12-visual-refactor.json。新增workflow visual-refactor-classroom-ipa.yml：提交信息含[ipa]时跑核心测试、设备Release归档并发布预发布直链IPA。只做CI编译，不运行App/模拟器/实机；用户实机验收待反馈，新美术认可null。
+
 ## v0.19.0/build24永久交付已核验（2026-11-08）
 
 人物自定义已接入：六发型/四五官/双B衣装，旧档兼容、跨探索/背包/战斗/阴影共用记录。真实编译40335ca5f8c6ba876d59c279f2b05c8a20dec30a、run42480618163，413+6测试零失败，8工具检查；829资源/411编译名/3骨架及CRC/ZIP2.0/arm64/755/Metal通过。源码快照01c222385be32310334b45ae38c0dcfab65d1db1、归档run42481372759，Git bundle独立恢复与全部公开GET通过。直接IPA 78656566字节，SHA256 94aae4eb1b3449ebf4768b665bd251e65a99c8cbc96d1b2a3db302bcf2a881de；正常GIF2700ms/80帧。索引archives/custom-appearance-meadow-v0.19.0-20261108.json。已存archive-assets，回执收尾不递归归档；没有App/模拟器/实机运行，用户设备复核仍待反馈。两只临时发布/触发分支均已清除，无重复构建任务。

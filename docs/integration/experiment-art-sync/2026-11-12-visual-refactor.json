@@ -1,0 +1,42 @@
+{
+  "sourceRepository": "liamchan-rgb/experiment",
+  "sourceBranch": "claude/meadowjourney-visual-refactor-kh0zpr",
+  "sourceCommit": "89dcbdf1e1a32c3c45f600c85b49e9a1275e1935",
+  "previousComponentCommit": "13cbe2e250a74a1a8e5c4a0dd026c866fd2cdfa8",
+  "plan": "tools/plan_experiment_art_update.py --from-commit 13cbe2e2... --to-commit 89dcbdf1... (928 rows; 618 offline Art/ references not imported)",
+  "components": [
+    {
+      "kind": "skill-vfx / hit-feel / camera / numbers",
+      "note": "Procedural skill, blow, projectile, shield, death and buff effects drawn on the GPU (Metal) with a CoreGraphics fallback; hit feel, trauma camera shake and director shots; floating numbers; skill-name captions."
+    },
+    {
+      "kind": "battle formation",
+      "note": "MeadowBattleFormation grows the battle world (zoom 1 / 1.25 / 1.45) for up to 7 heroes vs 3 monsters; units keep their size. PartyVisual.feet became settable; classroom defaults (p1-p7) kept as classicFeet."
+    },
+    {
+      "kind": "public battle UI",
+      "note": "Turn-order rail, health headers with damage ghost and blue shield bar, ground target marks, fixed dice plate, map drawer with a 2x wide scene (MeadowCampWide*) built from existing scenery art, gain cards for items entering a pack."
+    },
+    {
+      "kind": "world",
+      "note": "HD-2D post-process pass (bloom/grade before on-map UI), idle breathing, responsive P1 walk controller."
+    }
+  ],
+  "codeMerge": "Three-way merge per file (base experiment 13cbe2e2 = the classroom copies' common ancestor; ours experiment 89dcbdf1; theirs classroom). Kept: teacher routing (classroomHit/classroomTarget/classroomPause/classroomMode guards), 6 students + P7 dynamic players (now laid out by configureUnits/formation), custom appearance heads/outfits in the stage key, classroom mirror readback after the post-processed composite. Not imported: effects review lab and its home button, home-screen entry cleanup, P1 atlases/head-split/compositor (the classroom's custom-appearance components stay authoritative). Fixes for the classroom: breathing list grows with up to 7 heroes; map drawer and turn-rail clicks routed through the teacher hit interface (.toggleMap / .target); gain cards dismiss themselves on the public screen.",
+  "resources": "16 resource files carry sourceCommit 89dcbdf1 in meadow-port-provenance.json (8 updated battle VFX sheets, 8 new MeadowCampWide* files); global baseline 175c7dfc retained.",
+  "classroomFeatures": [
+    "50 character slots and 50 journey slots (were 12 / 8); lists show used slots plus a few empty ones",
+    "Character studio (teacher window, visible button on the dashboard, welcome screen and book page): live 8-direction walking preview, picture tiles for 6 hair styles, 4 faces, 2 bodies and outfits, apply to a member, save/load among 50 slots",
+    "Shop screen replacing the action sheet: item cards with pictures and prices, buyer switch, buy/sell one at a time with before/after preview",
+    "Item pictures in the journey backpack rows and detail, and in gain cards (drawn badges for set pieces without art)"
+  ],
+  "version": "0.20.0/build25",
+  "checks": {
+    "classroomResourceCheck": "check_custom_appearance.py PASS (837 pinned resources)",
+    "toolTests": "8 OK",
+    "xcodeProject": "validate_xcode_project.py PASS (67 Swift sources)",
+    "swiftCompileAndTests": "pending CI (no Swift toolchain in this session)",
+    "appOrSimulatorLaunched": false
+  },
+  "userAcceptedScope": null
+}
