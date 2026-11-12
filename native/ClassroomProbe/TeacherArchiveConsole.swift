@@ -39,6 +39,15 @@ struct TeacherArchiveConsole:View {
     @State private var confirm=false
     @State private var confirmation=""
     @State private var pending:(()throws->Void)?
+    /// 50 slots each: by default only used slots and a few empty ones are listed.
+    @State private var showAllProfiles=false
+    @State private var showAllEmptyJourneys=false
+    private var listedProfileSlots:[Int] {
+        let all=Array(1...MeadowSlotStore.profileCount)
+        if showAllProfiles{return all}
+        let used=all.filter{profiles[$0] != nil || errors["p\($0)"] != nil}
+        return (used+all.filter{!used.contains($0)}.prefix(3)).sorted()
+    }
     private var store:MeadowSlotStore {MeadowTeacherCoordinator.slotStore}
     private var players:[GameUnit] {game.campaign?.engine.state.players ?? []}
     private var appearance:PlayerAppearance {.init(body:bodyStyle,outfit:outfit=="follow" ? nil:outfit,hair:hair=="original" ? nil:hair,face:face=="original" ? nil:face)}
@@ -89,8 +98,8 @@ struct TeacherArchiveConsole:View {
                 Button("应用到当前角色"){let p=profile;ask("将姓名和装扮应用到当前角色，保留职业、数值、装备和行程？"){try game.applyProfile(p,to:player);notice=game.message}}.disabled(game.busy || game.campaign==nil || game.campaign?.isCompleted==true)
                 Button("从当前角色重新读取"){readPlayer()}.disabled(players.isEmpty)
             }
-            Section("人物槽 · 可供新行程复用") {
-                ForEach(1...MeadowSlotStore.profileCount,id:\.self){slot in
+            Section("人物槽 · 共\(MeadowSlotStore.profileCount)个，可供新行程复用") {
+                ForEach(listedProfileSlots,id:\.self){slot in
                     VStack(alignment:.leading,spacing:6) {
                         Text("人物槽 \(slot) · "+(profiles[slot]?.value.name ?? "空槽")).font(.headline)
                         if let entry=profiles[slot]{Text(entry.savedAt.formatted(date:.abbreviated,time:.shortened)).font(.caption)}
@@ -102,6 +111,7 @@ struct TeacherArchiveConsole:View {
                         }.buttonStyle(.bordered)
                     }
                 }
+                Button(showAllProfiles ? "只显示已用槽位和3个空槽":"显示全部\(MeadowSlotStore.profileCount)个人物槽"){showAllProfiles.toggle()}
             }
         }
     }
@@ -141,7 +151,8 @@ struct TeacherArchiveConsole:View {
                 }
             }
             Section("空槽 · 新建保存") {
-                ForEach(emptyJourneySlots,id:\.self){slot in Button("保存到行程槽\(slot)"){saveJourney(slot)}.disabled(game.campaign==nil || game.busy)}
+                ForEach(showAllEmptyJourneys ? emptyJourneySlots:Array(emptyJourneySlots.prefix(4)),id:\.self){slot in Button("保存到行程槽\(slot)"){saveJourney(slot)}.disabled(game.campaign==nil || game.busy)}
+                if emptyJourneySlots.count>4{Button(showAllEmptyJourneys ? "收起空槽":"显示全部\(emptyJourneySlots.count)个空槽"){showAllEmptyJourneys.toggle()}}
                 if emptyJourneySlots.isEmpty{Text("没有空槽，可在已保存行程中选择覆盖。")}
             }
             Section("读取前自动备份") {

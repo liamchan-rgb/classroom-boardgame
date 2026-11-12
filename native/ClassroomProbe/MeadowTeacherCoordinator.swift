@@ -200,7 +200,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
         guard !busy,!modalOpen else{message="请等待当前动作结束或关闭后台对话框。";return}
         if campaign?.engine.state.battle != nil {
             if let hit=try? renderer?.classroomBattleHit(at:point,role:.teacher) {
-                switch hit {case .action(let action):battle(action);case .target(let id):chooseBattleTarget(id)}
+                switch hit {case .action(let action):battle(action);case .target(let id):chooseBattleTarget(id);case .toggleMap:try? renderer?.classroomToggleBattleMap(role:.teacher)}
             }
             return
         }

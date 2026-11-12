@@ -60,7 +60,8 @@ final class GameScene: SKScene {
     private var layeredP1Frames: [SKTexture]?
     private(set) var layeredPreview = false
     private var walks = [WalkCycle(), WalkCycle(), WalkCycle()]
-    private var p1Locomotion = AuthoredLocomotion(plan: HeroFrames.locomotionPlan)
+    private var p1Locomotion = AuthoredLocomotion(plan: HeroFrames.locomotionPlan, timing: HeroFrames.p1GaitTiming)
+    private var breathing = [HeroBreathing](repeating: HeroBreathing(), count: 3)
     private(set) var p1AppearanceIndex = 0
     private var p1AppearanceFrames: [String: [[SKTexture]]] = [:]
     private(set) var p1WeaponID:String?="trainingSword"
@@ -533,7 +534,8 @@ final class GameScene: SKScene {
             let pose = actorPose(index)
             let u=profileUnit(index),look=u?.appearance
             return MeadowHeroCaster(index: layeredPreview || look != nil ? 0 : index%3, foot: actorPoint(index), facing: pose.facing,
-                                    frame: pose.frame, phase: pose.phase, hairID:look?.hair,faceID:look?.face,appearanceIndex: look.flatMap{HeroFrames.appearanceIDs.firstIndex(of:$0.body)} ?? (index == 0 ? p1AppearanceIndex : 0),weaponID:u != nil ? u!.equipment.weapon:(index == 0 ? p1WeaponID:"trainingSword"),armorID:look != nil ? look!.armor(worn:u?.equipment.armor):(index == 0 ? p1ArmorID:nil))
+                                    frame: pose.frame, phase: pose.phase, hairID:look?.hair,faceID:look?.face,appearanceIndex: look.flatMap{HeroFrames.appearanceIDs.firstIndex(of:$0.body)} ?? (index == 0 ? p1AppearanceIndex : 0),weaponID:u != nil ? u!.equipment.weapon:(index == 0 ? p1WeaponID:"trainingSword"),armorID:look != nil ? look!.armor(worn:u?.equipment.armor):(index == 0 ? p1ArmorID:nil),
+                                    breath: index < actors.count ? actors[index].yScale : 1)
         }
         return MeadowFrameState(world: world, camera: MeadowViewport(world: world, scene: self, viewSize: viewSize), time: environmentTime, heroes: heroes, includeEnvironment: gaitTest == nil)
     }
@@ -582,6 +584,11 @@ final class GameScene: SKScene {
             }
             actors[index].texture = texture
             actors[index].xScale = HeroFrames.isMirrored(pose.facing) ? -1 : 1
+            let alive = campaign.map { index < $0.playerIDs.count && $0.engine.state.units[$0.playerIDs[index]]?.isAlive == true } ?? true
+            // The classroom draws up to 7 heroes: grow the breathing list with the cast.
+            while breathing.count <= index { breathing.append(HeroBreathing()) }
+            breathing[index].advance(idle: HeroBreathing.enabled && pose.frame == 0 && alive, seconds: seconds)
+            actors[index].yScale = breathing[index].yScale(time: environmentTime, index: index)
             actors[index].warpGeometry = nil
             actors[index].position = pose.bodyOffset(size: actors[index].size)
             actorRoots[index].position = LivingWorld.position(point)

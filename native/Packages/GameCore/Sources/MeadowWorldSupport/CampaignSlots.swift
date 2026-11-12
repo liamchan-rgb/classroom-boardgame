@@ -50,7 +50,7 @@ public struct MeadowSaveSlot<Value:Codable&Equatable>:Codable,Equatable {
 }
 /// Separate namespaces; damaged entries never hide healthy slots or get erased.
 public final class MeadowSlotStore {
-    public static let profileCount=12,campaignCount=8
+    public static let profileCount=50,campaignCount=50
     public let directory:URL
     public init(directory:URL){self.directory=directory}
     private func url(_ kind:String,_ slot:Int)throws->URL {

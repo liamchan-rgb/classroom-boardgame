@@ -51,6 +51,10 @@ final class MeadowBattleLandscapeView: UIView {
     private var castLightAt: Double?
     private var lastImpactAt: Double?
     private var lastImpactCue: MeadowBattleAnimationCue?
+    /// Presentation-only hit feel of the last blow; set when the impact fires.
+    private var hitTier = MeadowBattleHitTier.medium
+    private var hitDirection = 1.0
+    private var hitKicks = true
     private var deathStartedAt: Double?
     private var lastDeathFrame = -1
     private var savedImpact = CGPoint.zero
@@ -334,6 +338,7 @@ final class MeadowBattleLandscapeView: UIView {
             diceAtEnemy=value == .enemyStrike;diceSettledAt=nil;diceExitAt=nil;diceCastAt=sceneTime;diceCastFrom=initial
             diceView.dice=[BattleDie(value == .heal ? "green":value == .guardPose ? "blue":"red",value:value == .strike ? 5:4,label:"固定值")]
         } else { diceExitAt=sceneTime }
+        if value == .strike || value == .enemyStrike { MeadowBattleHaptics.prepare() }
         self.completion = nil; cue = value; cueElapsed = 0
         self.completion = completion; impactHandler = onImpact; terminalClip = nil
         shieldFormationBase = 0
@@ -392,6 +397,9 @@ final class MeadowBattleLandscapeView: UIView {
         }
         switch result.cue {
         case .strike:
+            let killed = enemyHP == 0
+            hitTier = .classify(damage: result.damage, killed: killed); hitDirection = 1; hitKicks = true
+            MeadowBattleHaptics.hit(hitTier, killed: killed)
             effects.message = "−\(result.damage)"; effects.messageColor = .white
             let floor=baseEnemyFrame.minY+240/256*baseEnemyFrame.height
             emit(.strike,attackContactPoint,floor)
@@ -399,6 +407,8 @@ final class MeadowBattleLandscapeView: UIView {
             if enemyHP == 0, deathStartedAt == nil { deathStartedAt = sceneTime; lastDeathFrame = -1; selected = false }
         case .enemyStrike:
             hitWasBlocked = result.damage == 0
+            hitTier = .classify(damage: result.damage); hitDirection = -1; hitKicks = !hitWasBlocked
+            if hitWasBlocked { MeadowBattleHaptics.blocked() } else { MeadowBattleHaptics.hit(hitTier) }
             if result.shieldAbsorbed > 0 {
                 shieldContactAt=sceneTime
                 emit(.shieldContact,CGPoint(x:hero.frame.minX+CGFloat(MeadowBattleShieldGeometry.contactX)*unit,y:hero.frame.minY+CGFloat(MeadowBattleShieldGeometry.contactY)*unit),foot.y)
@@ -482,9 +492,9 @@ final class MeadowBattleLandscapeView: UIView {
                     let to=PartyPoint(Double(baseEnemyFrame.minX+94*baseEnemyFrame.width/384),Double(baseEnemyFrame.minY+152*baseEnemyFrame.height/256))
                     let travel=GreatSwordRig.travel(age:cueElapsed,from:from,to:to,scale:s);heroTravel=CGFloat(travel.x);heroLift=CGFloat(travel.y)
                 }
-                let age=cueElapsed-MeadowBattleImpactClock.strikeContact
-                let recoil=age <= 0.14 ? smooth((age+0.02)/0.16) : 1-smooth((age-0.14)/0.38)
-                enemyRecoil = canvas.bounds.width * 0.025 * recoil
+                if lastImpactCue == .strike, let at = lastImpactAt, sceneTime - at < 0.9 {
+                    enemyRecoil = CGFloat(MeadowBattleHitFeel.knockback(age: sceneTime - at, tier: hitTier, canvasWidth: Double(canvas.bounds.width)))
+                }
             case .enemyStrike:
                 monsterProgress = p
                 let enemyFront = baseEnemyFrame.minX + 42 / 384 * baseEnemyFrame.width
@@ -537,11 +547,19 @@ final class MeadowBattleLandscapeView: UIView {
         hero.transform = .identity
         hero.frame = baseHeroFrame.offsetBy(dx: heroTravel + offset.x * unit, dy: heroLift + offset.y * unit)
         enemy.transform = .identity
-        let monster=PartyVisual.monster(time:sceneTime,attackAge:cue == .enemyStrike ? cueElapsed:nil,hurtAge:lastImpactCue == .strike ? lastImpactAt.map { sceneTime-$0 }:nil)
+        // The struck monster's squash, knockback and flash come from MeadowBattleHitFeel, so the shared monster
+        // motion is asked for its idle/attack state only (no hurt reaction of its own).
+        let monster=PartyVisual.monster(time:sceneTime,attackAge:cue == .enemyStrike ? cueElapsed:nil,hurtAge:nil)
+        var squashX: CGFloat = 1, squashY: CGFloat = 1
+        if deathStartedAt == nil, lastImpactCue == .strike, let at = lastImpactAt, sceneTime - at < 0.9 {
+            let squash = MeadowBattleHitFeel.squash(age: sceneTime - at, tier: hitTier)
+            squashX = CGFloat(squash.x); squashY = CGFloat(squash.y)
+        }
         enemy.frame = baseEnemyFrame.offsetBy(dx: enemyTravel + enemyRecoil, dy: 0)
         if deathStartedAt == nil {
-            let old=enemy.frame;let h=old.height*monster.scaleY
-            enemy.frame=CGRect(x:old.minX,y:old.minY+(old.height-h)*240/256,width:old.width,height:h)
+            let old=enemy.frame;let h=old.height*monster.scaleY*squashY,w=old.width*squashX
+            let footX=old.minX+old.width*178.5/384
+            enemy.frame=CGRect(x:footX-w*178.5/384,y:old.minY+(old.height-h)*240/256,width:w,height:h)
         }
         let enemyPose = min(7, max(0, Int(monsterProgress * 8)))
         if deathStartedAt == nil, enemyPose != lastEnemyPose {
@@ -570,9 +588,7 @@ final class MeadowBattleLandscapeView: UIView {
         enemyFlash.alpha = 0
         if deathStartedAt == nil, lastImpactCue == .strike, let at = lastImpactAt {
             let age=sceneTime-at
-            if age < 0.22 {
-                enemyFlash.alpha = 0.85 * (age < 0.04 ? smooth((age+0.04)/0.08) : 1-smooth((age-0.04)/0.18))
-            }
+            if age < 0.22 { enemyFlash.alpha = 0.95 * CGFloat(MeadowBattleHitFeel.flash(age: age)) }
         }
         if let at = deathStartedAt {
             let index = MeadowBattleVisualMotion.windFrame(sceneTime-at)
@@ -612,6 +628,7 @@ final class MeadowBattleLandscapeView: UIView {
         let ring: CGFloat = cue == .strike ? 0.65*(1-smooth((cueElapsed-0.24)/0.16)) : cue == nil && focusedAction != .protection ? power*0.7*focusEnvelope : 0
         let particles=lightEmissions.flatMap { e in MeadowBattleLightField.sample(e.kind,age:sceneTime-e.startedAt,originX:e.x,originY:e.y,groundY:e.groundY) }
         for renderer in [effects,groundEffects] {
+            renderer.hitTier=hitTier;renderer.hitDirection=hitDirection;renderer.hitFeel=lastImpactCue == .strike
             renderer.rangedImpact=usesBow || usesStaff
             renderer.heroFoot=heroFoot; renderer.enemyFoot=enemyFoot; renderer.impact=savedImpact
             renderer.cue=cue; renderer.progress=p; renderer.selected=selected; renderer.shield=shownShieldValue
@@ -632,13 +649,18 @@ final class MeadowBattleLandscapeView: UIView {
         // Move only the world; HUD, health labels and skill cards remain stable.
         let hitAge=lastImpactAt.map { sceneTime-$0 } ?? 10
         let wardAge=shieldContactAt.map { sceneTime-$0 } ?? 10
-        var shake: CGFloat = 0, zoom: CGFloat = 0
-        if lastImpactCue == .strike, hitAge<0.5 {
-            shake=4*(1-smooth(hitAge/0.28)); zoom=0.045*(1-smooth(hitAge/0.5))
-        } else if wardAge<0.22 { shake=1.5*(1-smooth(wardAge/0.22)) }
-        if UIAccessibility.isReduceMotionEnabled { shake=0; zoom=0 }
-        world.transform=CGAffineTransform(translationX:sin(CGFloat(hitAge)*83)*shake*canvas.bounds.width/760,
-            y:cos(CGFloat(hitAge)*64)*shake*0.55*canvas.bounds.width/760).scaledBy(x:1+zoom,y:1+zoom)
+        let canvasUnit = canvas.bounds.width / 760
+        var kick = MeadowBattleHitFeel.Camera.zero
+        if hitKicks, lastImpactCue == .strike || lastImpactCue == .enemyStrike, hitAge < 0.9 {
+            kick = MeadowBattleHitFeel.camera(age: hitAge, tier: hitTier, direction: hitDirection)
+        }
+        var shake: CGFloat = 0
+        if kick == .zero, wardAge < 0.22 { shake = 1.5 * (1 - smooth(wardAge / 0.22)) }
+        if UIAccessibility.isReduceMotionEnabled { kick = .zero; shake = 0 }
+        var worldTransform = CGAffineTransform(translationX: CGFloat(kick.dx) * canvasUnit + sin(CGFloat(hitAge) * 83) * shake * canvasUnit,
+                                               y: CGFloat(kick.dy) * canvasUnit + cos(CGFloat(hitAge) * 64) * shake * 0.55 * canvasUnit)
+        worldTransform = worldTransform.rotated(by: CGFloat(kick.rotation)).scaledBy(x: 1 + CGFloat(kick.zoom), y: 1 + CGFloat(kick.zoom))
+        world.transform = worldTransform
         let labelWidth = max(108, canvas.bounds.width * 0.20)
         heroStatus.frame = CGRect(x: heroFoot.x - labelWidth / 2,
             y: max(48, heroFoot.y - canvas.bounds.height * MeadowBattleCanvasGeometry.heroVisibleHeight - 49),

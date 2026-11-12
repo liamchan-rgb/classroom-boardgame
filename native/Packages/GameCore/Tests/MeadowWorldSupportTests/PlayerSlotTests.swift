@@ -30,7 +30,7 @@ final class PlayerSlotTests:XCTestCase {
         XCTAssertNoThrow(try PlayerAppearance(outfit:"runeArmor").validate())
     }
     func testSlotBoundsAndNamespaces()throws {
-        let store=try temporary();XCTAssertThrowsError(try store.profile(0));XCTAssertThrowsError(try store.profile(13));XCTAssertThrowsError(try store.campaign(9))
+        let store=try temporary();XCTAssertThrowsError(try store.profile(0));XCTAssertThrowsError(try store.profile(51));XCTAssertThrowsError(try store.campaign(51));XCTAssertEqual(MeadowSlotStore.profileCount,50);XCTAssertEqual(MeadowSlotStore.campaignCount,50)
         try store.saveProfile(.init(name:"甲",appearance:.init()),slot:1,title:"人物")
         XCTAssertNil(try store.campaign(1));XCTAssertNil(try store.profile(2))
     }

@@ -44,16 +44,22 @@ public enum PartyVisual {
         if id.hasPrefix("m-") {return id.hasSuffix("-3") ? "m3":id.hasSuffix("-2") ? "m2":"m1"};return id
     }
     public static func foot(_ id:String)->PartyPoint? {feet[slot(id)]}
-    public static let feet:[String:PartyPoint]=["p1":PartyPoint(165,420),"p2":PartyPoint(315,505),"p3":PartyPoint(80,300),"p4":PartyPoint(280,315),"p5":PartyPoint(75,555),"p6":PartyPoint(440,555),"p7":PartyPoint(460,290),"m1":PartyPoint(650,395),"m2":PartyPoint(835,510),"m3":PartyPoint(600,585)]
+    /// The classroom default stand (6 students + teacher P7, 3 monsters, as before). The app's formation (up to 7 players, or two mirrored PvP teams) replaces `feet` and `mirrored` per battle.
+    public static let classicFeet:[String:PartyPoint]=["p1":PartyPoint(165,420),"p2":PartyPoint(315,505),"p3":PartyPoint(80,300),"p4":PartyPoint(280,315),"p5":PartyPoint(75,555),"p6":PartyPoint(440,555),"p7":PartyPoint(460,290),"m1":PartyPoint(650,395),"m2":PartyPoint(835,510),"m3":PartyPoint(600,585)]
+    public static var feet:[String:PartyPoint]=classicFeet
+    /// Slots drawn facing left (the right-hand team in PvP): every sideways offset of theirs is mirrored.
+    public static var mirrored:Set<String>=[]
+    /// +1 for a unit that faces right (the usual heroes), -1 for a mirrored one.
+    public static func facing(_ id:String)->Double { mirrored.contains(slot(id)) ? -1:1 }
     public static func smooth(_ x:Double)->Double { let t=min(1,max(0,x));return t*t*(3-2*t) }
     public static func pulse(_ age:Double,_ start:Double,_ peak:Double,_ end:Double)->Double { age<peak ? smooth((age-start)/(peak-start)):1-smooth((age-peak)/(end-peak)) }
-    public static func chest(_ id:String)->PartyPoint { let p=foot(id)!;return PartyPoint(p.x+5*heroScale,p.y-70*heroScale) }
+    public static func chest(_ id:String)->PartyPoint { let p=foot(id)!;return PartyPoint(p.x+5*heroScale*facing(id),p.y-70*heroScale) }
     public static func skillEffectCenter(targets:[String],actor:String,templates:[String:String]=[:])->PartyPoint {
         let points=targets.compactMap { id -> PartyPoint? in
             guard let foot=foot(id) else { return nil }
             let monster=id.hasPrefix("m")
             if monster,let spec=MonsterVisualSpec.find(templates[id]){return spec.hitPoint(at:foot)}
-            return PartyPoint(foot.x+(monster ? 13.5*enemyScale:5*heroScale),foot.y-(monster ? 112*enemyScale:86*heroScale))
+            return PartyPoint(foot.x+(monster ? 13.5*enemyScale:5*heroScale*facing(id)),foot.y-(monster ? 112*enemyScale:86*heroScale))
         }
         guard !points.isEmpty else { return foot(actor).map { PartyPoint($0.x,$0.y-70*heroScale) } ?? PartyPoint(width/2,height/2) }
         return PartyPoint(points.reduce(0){$0+$1.x}/Double(points.count),points.reduce(0){$0+$1.y}/Double(points.count))
@@ -62,7 +68,7 @@ public enum PartyVisual {
         let foot=foot(target)!
         if target.hasPrefix("m"),let spec=MonsterVisualSpec.find(templateID){return spec.hitPoint(at:foot)}
         if ["greatSword","legendaryStaff"].contains(weaponID ?? ""),target.hasPrefix("m") { return PartyPoint(foot.x+(94-178.5)*enemyScale,foot.y+(152-240)*enemyScale) }
-        return PartyPoint(foot.x+(target.hasPrefix("m") ? -80:shielded ? (5+240*0.41)*heroScale:10),foot.y-(target.hasPrefix("m") ? 72:65))
+        return PartyPoint(foot.x+(target.hasPrefix("m") ? -80:(shielded ? (5+240*0.41)*heroScale:10)*facing(target)),foot.y-(target.hasPrefix("m") ? 72:65))
     }
     public static func damageLabelOrigin(at:PartyPoint,width:Double,height:Double,age:Double)->PartyPoint {
         PartyPoint(at.x-width/2,at.y-height/2-max(0,age)*26)
@@ -118,10 +124,18 @@ public enum PartyVisual {
         }
     }
     public static func travel(_ intent:PartyIntent?,age:Double,shielded:Bool=false)->PartyPoint {
-        guard let intent,intent.action.isOffensive,let from=foot(intent.actor),let to=foot(intent.target) else { return PartyPoint(0,0) }
+        guard let intent,intent.action.isOffensive,let realFrom=foot(intent.actor),let realTo=foot(intent.target) else { return PartyPoint(0,0) }
         if intent.action == .dragonFlame { return PartyPoint(0,0) }
-        let legacy=hitPoint(target:intent.target,shielded:shielded,weaponID:intent.weaponID)
-        let registered=hitPoint(target:intent.target,shielded:shielded,weaponID:intent.weaponID,templateID:intent.targetTemplateID)
+        // A mirrored (left-facing) attacker moves exactly like a right-facing one in a mirrored world: flip x, plan, flip the answer back.
+        let f=facing(intent.actor)
+        func m(_ p:PartyPoint)->PartyPoint { PartyPoint(p.x*f,p.y) }
+        let from=m(realFrom),to=m(realTo)
+        let legacy=m(hitPoint(target:intent.target,shielded:shielded,weaponID:intent.weaponID))
+        let registered=m(hitPoint(target:intent.target,shielded:shielded,weaponID:intent.weaponID,templateID:intent.targetTemplateID))
+        let r=plannedTravel(intent,age:age,shielded:shielded,from:from,to:to,legacy:legacy,registered:registered)
+        return PartyPoint(r.x*f,r.y)
+    }
+    private static func plannedTravel(_ intent:PartyIntent,age:Double,shielded:Bool,from:PartyPoint,to:PartyPoint,legacy:PartyPoint,registered:PartyPoint)->PartyPoint {
         let correction=PartyPoint(registered.x-legacy.x,registered.y-legacy.y)
         if intent.action == .runeSlash {
             let approach=smooth(age/0.82),retreat=1-smooth((age-1.25)/0.52),p=min(approach,retreat)

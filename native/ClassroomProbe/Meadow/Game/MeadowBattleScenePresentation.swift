@@ -104,9 +104,9 @@ enum MeadowBattleVFXAssets {
     static let mote = UIImage(named: "BattleVFXMote")!
     static let body = frames("BattleVFXDeathBody60", width: 384, height: 256,count:48)
     static let wind = frames("BattleVFXDeathWind60", width: 448, height: 320,count:116)
-    static let healingMicro = frames("BattleVFXHealingMicroSheet", width: 280, height: 280, columns: 5, count: 20)
-    static let healingStandard = frames("BattleVFXHealingStandardSheet", width: 614, height: 512, columns: 5, count: 20)
-    static let healingStrong = frames("BattleVFXHealingStrongSheet", width: 512, height: 512, columns: 5, count: 20)
+    static let healingMicro = frames("BattleVFXHealingMicroSheet", width: 320, height: 320, columns: 5, count: 20)
+    static let healingStandard = frames("BattleVFXHealingStandardSheet", width: 320, height: 268, columns: 5, count: 20)
+    static let healingStrong = frames("BattleVFXHealingStrongSheet", width: 320, height: 320, columns: 5, count: 20)
     static let runeSlashAttack = namedFrames("MeadowRuneSlashAttack", count: 20)
     static let runeWardCast = namedFrames("MeadowRuneWardCast", count: 20)
     static let starlightPulse = frames("MeadowBattleVFXStarlightPulse",width:344,height:344,columns:5,count:20)
@@ -155,7 +155,6 @@ enum MeadowBattleVFXAssets {
     static func prewarm() {
         DispatchQueue.global(qos:.userInitiated).async {
             _ = body; _ = wind
-            _ = healingMicro; _ = healingStandard; _ = healingStrong
             _ = runeSlashAttack; _ = runeWardCast
             _ = starlightPulse; _ = rally; _ = sweep; _ = dragonSoulWard; _ = dragonScaleWard
         }
@@ -172,18 +171,13 @@ private final class MeadowBattleHealingArtworkView: UIView {
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     func update(tier: HealingEffectTier?, age: Double) {
         self.tier = tier; self.age = age
-        isHidden = tier == nil || tier?.frameBlend(at: age) == nil
+        isHidden = tier == nil || !MeadowSkillProceduralDrawing.active(tier!, age: age)
         setNeedsDisplay()
     }
     override func draw(_ rect: CGRect) {
-        guard let tier, let blend = tier.frameBlend(at: age) else { return }
-        let frames = MeadowBattleVFXAssets.healingFrames(for: tier)
-        guard frames.count == HealingEffectTier.frameCount else { return }
-        let upperWeight = CGFloat(blend.upperWeight),opacity=CGFloat(tier.artOpacity)
-        frames[blend.lower].draw(in: rect, blendMode: .plusLighter, alpha: opacity*(1-upperWeight))
-        if blend.upper != blend.lower, upperWeight > 0 {
-            frames[blend.upper].draw(in: rect, blendMode: .plusLighter, alpha: opacity*upperWeight)
-        }
+        guard let tier, MeadowSkillProceduralDrawing.active(tier, age: age), let ctx = UIGraphicsGetCurrentContext() else { return }
+        let foot = PartyPoint(Double(rect.midX), Double(rect.minY + rect.height * CGFloat(tier.canvasGroundAnchorY))), scale = Double(rect.height) / 260
+        MeadowSkillProceduralDrawing.drawHeal(tier, age: age, foot: foot, chest: PartyPoint(foot.x, foot.y - 80 * scale), in: ctx, bounds: rect)
     }
 }
 
@@ -214,6 +208,10 @@ final class MeadowBattleEffectsView: UIView {
     var shieldBreakAge: Double?
     var deathAge: Double?
     var particles: [MeadowBattleLightParticle] = []
+    /// Presentation-only hit feel of the last blow (see `MeadowBattleHitFeel`).
+    var hitTier = MeadowBattleHitTier.medium
+    var hitDirection = 1.0
+    var hitFeel = false
     override init(frame: CGRect) { super.init(frame: frame); isOpaque = false; isUserInteractionEnabled = false }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     override func draw(_ rect: CGRect) {
@@ -260,30 +258,16 @@ final class MeadowBattleEffectsView: UIView {
                 light(CGPoint(x:impact.x+CGFloat(age)*90*unit,y:impact.y),115,95,0.18*(1-smooth(CGFloat(age/1.4))))
             }
 
-            light(CGPoint(x: impact.x+20*unit, y: enemyFoot.y), 235, 55, burst*0.76)
-            light(impact, 195, 190, burst*0.48)
+            // The sharp contact flare and sparks replace the old large bloom; only a small warm floor and hit glow remain.
+            light(CGPoint(x: impact.x+20*unit, y: enemyFoot.y), 220, 48, burst*0.30)
+            light(impact, 120, 120, CGFloat(impactAge.map { MeadowBattleHitFeel.flash(age: $0) } ?? 0)*0.55)
             light(heroFoot,95,32,(wardSpawn*0.28+wardContact*0.38),.cyan)
-            if let age=impactAge, age<0.5 {
-                let spread=1+CGFloat(max(0,age))*2
-                sprite(MeadowBattleVFXAssets.spray,CGPoint(x:impact.x+45*unit,y:enemyFoot.y-3*unit),260*spread,22+CGFloat(max(0,age))*70,burst*0.55)
-            }
             light(heroFoot, 90, 26, previewPower*previewEnvelope*0.16)
             return
         }
-        if let tier=recoveryTier,let age=recoveryAge,let blend=tier.frameBlend(at:age) {
-            let size:CGSize
-            switch tier {
-            case .micro: size=CGSize(width:208,height:208)
-            case .standard: size=CGSize(width:248,height:207)
-            case .strong: size=CGSize(width:258,height:258)
-            }
-            let frame=CGRect(x:heroFoot.x-size.width*unit/2,y:heroFoot.y-size.height*unit*CGFloat(tier.canvasGroundAnchorY),width:size.width*unit,height:size.height*unit)
-            let frames=MeadowBattleVFXAssets.healingFrames(for:tier),mix=CGFloat(blend.upperWeight)
-            if frames.count==HealingEffectTier.frameCount {
-                let opacity=CGFloat(tier.artOpacity)
-                frames[blend.lower].draw(in:frame,blendMode:.plusLighter,alpha:opacity*(1-mix))
-                if blend.upper != blend.lower,mix>0 { frames[blend.upper].draw(in:frame,blendMode:.plusLighter,alpha:opacity*mix) }
-            }
+        if let tier=recoveryTier,let age=recoveryAge,MeadowSkillProceduralDrawing.active(tier,age:age),let ctx=UIGraphicsGetCurrentContext() {
+            let foot=PartyPoint(Double(heroFoot.x),Double(heroFoot.y))
+            MeadowSkillProceduralDrawing.drawHeal(tier,age:age,foot:foot,chest:PartyPoint(foot.x,foot.y-80*Double(unit)),in:ctx,bounds:bounds)
         }
         if selected, cue == nil {
             UIColor(red: 1, green: 0.84, blue: 0.35, alpha: 0.65).setStroke()
@@ -299,19 +283,13 @@ final class MeadowBattleEffectsView: UIView {
         if let age=impactAge, age<0.70 {
             let slash=pulse(age,-0.06,0,0.25)
             let spread=CGFloat(max(0,age))
-            if !rangedImpact { sprite(MeadowBattleVFXAssets.slash,impact,225,225,slash) }
+            if !rangedImpact { sprite(MeadowBattleVFXAssets.slash,impact,190,190,slash*0.8) }
             ctx.saveGState();ctx.translateBy(x:impact.x,y:impact.y);ctx.rotate(by:-0.65+spread*3.8)
-            let arc=(225+spread*300)*unit
-            MeadowBattleVFXAssets.heavyArc.draw(in:CGRect(x:-arc/2,y:-arc/2,width:arc,height:arc),blendMode:.plusLighter,alpha:rangedImpact ? 0:burst*0.9)
+            let arc=(170+spread*220)*unit
+            MeadowBattleVFXAssets.heavyArc.draw(in:CGRect(x:-arc/2,y:-arc/2,width:arc,height:arc),blendMode:.plusLighter,alpha:rangedImpact ? 0:burst*0.55)
             ctx.restoreGState()
-            let echo=pulse(age,0.10,0.19,0.65)
-            sprite(MeadowBattleVFXAssets.heavyArc,CGPoint(x:impact.x+spread*22*unit,y:impact.y),285+spread*160,225+spread*170,rangedImpact ? 0:echo*0.38)
-            sprite(MeadowBattleVFXAssets.burst,impact,205+spread*145,205+spread*145,burst)
-            sprite(MeadowBattleVFXAssets.spray,CGPoint(x:impact.x+(95+spread*75)*unit,y:impact.y-15*unit),250+spread*180,160,burst*0.9)
-            for i in 0..<26 {
-                let angle=CGFloat(i)*2.399
-                let distance=spread*CGFloat(150+(i%5)*38)*unit
-                sprite(MeadowBattleVFXAssets.mote,CGPoint(x:impact.x+cos(angle)*distance,y:impact.y+sin(angle)*distance),CGFloat(i%4==0 ? 22 : 10),CGFloat(i%4==0 ? 7 : 10),burst*0.9)
+            if hitFeel {
+                MeadowBattleHitFeelPainter.draw(in:ctx,age:age,tier:hitTier,direction:hitDirection,impact:impact,floorY:enemyFoot.y,footX:enemyFoot.x,unit:unit)
             }
         }
         if let age=shieldContactAge, age<0.4 {
@@ -326,7 +304,9 @@ final class MeadowBattleEffectsView: UIView {
             (p.cyan ? MeadowBattleVFXAssets.shard : MeadowBattleVFXAssets.ember).draw(in:CGRect(x:-size/2,y:-size/3,width:size,height:size*0.67),blendMode:.plusLighter,alpha:CGFloat(p.alpha))
             ctx.restoreGState()
         }
-        if let age=messageAge, age < 0.7, !message.isEmpty {
+        if hitFeel, !messageAtHero, !message.isEmpty, let age=messageAge {
+            MeadowBattleHitFeelPainter.drawNumber(in:ctx,text:message,age:age,tier:hitTier,impact:impact,unit:unit)
+        } else if let age=messageAge, age < 0.7, !message.isEmpty {
             let center=messageAtHero ? heroFoot : impact
             let attrs:[NSAttributedString.Key:Any]=[.font:UIFont.boldSystemFont(ofSize:max(16,23*unit)),.foregroundColor:messageColor,.strokeColor:UIColor(red:0.15,green:0.1,blue:0.04,alpha:1),.strokeWidth:-3]
             let label=NSAttributedString(string:message,attributes:attrs)
@@ -508,29 +488,89 @@ final class MeadowBattleActionPointsView:UIView {
     }
 }
 
+/// The health header above a unit on the battle stage: no boxed panel - the name and the numbers are outlined text over the scene, and
+/// under them one chunky bar. The bar is green / amber / red by how much is left; a pale "ghost" shows what the last blow took and
+/// drains a moment later; the shield is a cyan cap along the bar's top edge (with its value by the numbers); at low health the bar pulses.
 final class MeadowBattleVitalsView: UIView {
-    private let title=UILabel()
-    private let track=UIView(),fill=UIView(),shieldTrack=UIView(),shieldFill=UIView()
-    private var hp:CGFloat=1,ward:CGFloat=0
+    private let title=UILabel(),numbers=UILabel()
+    private let track=UIView(),ghost=UIView(),fill=UIView(),shieldFill=UIView(),gloss=UIView(),plate=UIView(),shieldTrack=UIView()
+    private var hp:CGFloat=1,ward:CGFloat=0,ghostRatio:CGFloat=1,ghostTimer:Timer?
     override init(frame:CGRect) {
-        super.init(frame:frame);isUserInteractionEnabled=false;isAccessibilityElement=true
-        backgroundColor=MeadowPreviewPalette.panel;layer.cornerRadius=5
-        title.font=MeadowPreviewPalette.font(17);title.textColor=MeadowPreviewPalette.ink
-        title.textAlignment = .center
-        for bar in [track,shieldTrack] { bar.backgroundColor=UIColor.black.withAlphaComponent(0.7);addSubview(bar) }
-        fill.backgroundColor = .systemGreen;shieldFill.backgroundColor = .systemCyan
-        track.addSubview(fill);shieldTrack.addSubview(shieldFill);addSubview(title)
+        super.init(frame:frame);isUserInteractionEnabled=false;isAccessibilityElement=true;backgroundColor = .clear
+        // A dark plate behind the words, so they read over any scenery.
+        plate.backgroundColor=UIColor(red:0.04,green:0.07,blue:0.05,alpha:0.82);plate.layer.cornerRadius=6;addSubview(plate)
+        for label in [title,numbers] {
+            label.adjustsFontSizeToFitWidth=true;label.minimumScaleFactor=0.6;addSubview(label)
+        }
+        numbers.textAlignment = .right
+        track.backgroundColor=UIColor(red:0.05,green:0.06,blue:0.05,alpha:0.88);track.layer.cornerRadius=5;track.layer.borderWidth=1.5
+        track.layer.borderColor=UIColor(red:0.98,green:0.93,blue:0.77,alpha:0.9).cgColor;track.clipsToBounds=true
+        ghost.backgroundColor=UIColor(red:1,green:0.93,blue:0.75,alpha:0.95)
+        shieldFill.backgroundColor=UIColor(red:0.35,green:0.9,blue:1,alpha:1)
+        gloss.backgroundColor=UIColor.white.withAlphaComponent(0.22)
+        addSubview(track);[ghost,fill,gloss].forEach(track.addSubview)
+        // The shield keeps its own blue bar, under the health bar.
+        shieldTrack.backgroundColor=UIColor(red:0.05,green:0.06,blue:0.05,alpha:0.88);shieldTrack.layer.cornerRadius=3;shieldTrack.clipsToBounds=true
+        shieldTrack.layer.borderWidth=1;shieldTrack.layer.borderColor=UIColor(red:0.6,green:0.95,blue:1,alpha:0.9).cgColor
+        addSubview(shieldTrack);shieldTrack.addSubview(shieldFill)
     }
     required init?(coder:NSCoder) { fatalError("init(coder:) has not been implemented") }
-    func show(name:String,hp:Int,maximum:Int,shield:Int,maximumShield:Int=8) {
-        title.text="\(name)  \(hp)/\(maximum)";self.hp=CGFloat(hp)/CGFloat(maximum);ward=CGFloat(min(maximumShield,shield))/CGFloat(max(1,maximumShield))
-        shieldTrack.isHidden=shield==0
-        accessibilityLabel=name;accessibilityValue="生命\(hp)/\(maximum)，护盾\(shield)";setNeedsLayout()
+    func show(name:String,hp value:Int,maximum:Int,shield:Int,maximumShield:Int=8) {
+        let ratio=CGFloat(max(0,min(maximum,value)))/CGFloat(max(1,maximum))
+        // Flat sans-serif, like the damage numbers; the dark plate behind does the separating, so no outline is needed.
+        title.attributedText=NSAttributedString(string:name.replacingOccurrences(of:"▶ ",with:""),attributes:[.font:UIFont.systemFont(ofSize:15,weight:.heavy),.foregroundColor:UIColor.white])
+        let text=NSMutableAttributedString(string:"\(max(0,value))",attributes:[.font:UIFont.systemFont(ofSize:17,weight:.heavy),.foregroundColor:UIColor.white])
+        text.append(NSAttributedString(string:"/\(maximum)",attributes:[.font:UIFont.systemFont(ofSize:13,weight:.bold),.foregroundColor:UIColor(white:0.82,alpha:1)]))
+        if shield>0 { text.append(NSAttributedString(string:"  ◆\(shield)",attributes:[.font:UIFont.systemFont(ofSize:14,weight:.heavy),.foregroundColor:UIColor(red:0.45,green:0.92,blue:1,alpha:1)])) }
+        numbers.attributedText=text
+        fill.backgroundColor=ratio>0.5 ? UIColor(red:0.30,green:0.85,blue:0.36,alpha:1):ratio>0.25 ? UIColor(red:0.98,green:0.70,blue:0.20,alpha:1):UIColor(red:0.95,green:0.26,blue:0.22,alpha:1)
+        ward=CGFloat(min(maximumShield,shield))/CGFloat(max(1,maximumShield))
+        if ratio<hp-0.001,window != nil {
+            // A blow: the bar drops at once, the pale ghost of the lost part lingers and then drains.
+            ghostRatio=max(ghostRatio,hp);hp=ratio;layoutBars()
+            ghostTimer?.invalidate()
+            ghostTimer=Timer.scheduledTimer(withTimeInterval:0.45,repeats:false) { [weak self] _ in
+                guard let self else { return }
+                self.ghostRatio=self.hp;UIView.animate(withDuration:0.5,delay:0,options:[.curveEaseIn,.beginFromCurrentState]) { self.layoutBars() }
+            }
+        } else if abs(ratio-hp)>0.001,window != nil {
+            hp=ratio;ghostRatio=ratio;UIView.animate(withDuration:0.4,delay:0,options:[.curveEaseOut,.beginFromCurrentState]) { self.layoutBars() }
+        } else { hp=ratio;if ghostTimer?.isValid != true { ghostRatio=ratio } }
+        // Low on health: the bar pulses.
+        let low=ratio>0 && ratio<=0.25
+        if low,track.layer.animation(forKey:"low")==nil {
+            let pulse=CABasicAnimation(keyPath:"opacity");pulse.fromValue=1;pulse.toValue=0.45;pulse.duration=0.45;pulse.autoreverses=true;pulse.repeatCount = .infinity
+            track.layer.add(pulse,forKey:"low")
+        } else if !low { track.layer.removeAnimation(forKey:"low") }
+        accessibilityLabel=name;accessibilityValue="生命\(value)/\(maximum)，护盾\(shield)";setNeedsLayout()
+    }
+    /// A slim bar without name and numbers (for crowded battles); the owner sizes the view.
+    var compact=false { didSet { if compact != oldValue { title.isHidden=compact;numbers.isHidden=compact;plate.isHidden=compact;setNeedsLayout() } } }
+    private func layoutBars() {
+        let w=track.bounds.width,h=track.bounds.height
+        ghost.frame=CGRect(x:0,y:0,width:w*ghostRatio,height:h)
+        fill.frame=CGRect(x:0,y:0,width:w*hp,height:h)
+        gloss.frame=CGRect(x:0,y:0,width:w*hp,height:h*0.38)
+        shieldFill.frame=CGRect(x:0,y:0,width:shieldTrack.bounds.width*ward,height:shieldTrack.bounds.height);shieldTrack.isHidden=ward<=0
     }
     override func layoutSubviews() {
-        super.layoutSubviews();title.frame=CGRect(x:3,y:1,width:bounds.width-6,height:23)
-        track.frame=CGRect(x:6,y:27,width:bounds.width-12,height:7);fill.frame=CGRect(x:0,y:0,width:track.bounds.width*hp,height:7)
-        shieldTrack.frame=CGRect(x:6,y:36,width:bounds.width-12,height:4);shieldFill.frame=CGRect(x:0,y:0,width:shieldTrack.bounds.width*ward,height:4)
+        super.layoutSubviews()
+        let w=bounds.width,h=bounds.height
+        if compact {
+            track.layer.cornerRadius=3;track.layer.borderWidth=1
+            track.frame=CGRect(x:0,y:max(0,h-12),width:w,height:min(8,h))
+            shieldTrack.frame=CGRect(x:0,y:h-4,width:w,height:4)
+        } else {
+            // Words on the plate (name left, numbers right), the health bar under it, the blue shield bar under that.
+            track.layer.cornerRadius=5;track.layer.borderWidth=1.5
+            let nw=min(w*0.55,numbers.intrinsicContentSize.width+2)
+            plate.frame=CGRect(x:0,y:h-44,width:w,height:24)
+            numbers.frame=CGRect(x:w-nw-5,y:h-44,width:nw,height:24)
+            title.frame=CGRect(x:6,y:h-44,width:max(1,w-nw-14),height:24)
+            track.frame=CGRect(x:0,y:h-19,width:w,height:12)
+            shieldTrack.frame=CGRect(x:0,y:h-6,width:w,height:6)
+        }
+        layoutBars()
     }
 }
 

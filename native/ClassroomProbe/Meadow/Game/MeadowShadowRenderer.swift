@@ -15,6 +15,7 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
         let appearanceIndex: Int
         let weaponID:String?
         let armorID:String?
+        let breath: CGFloat
 
         init(_ hero: MeadowHeroCaster) {
             index = hero.index
@@ -24,6 +25,7 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
             phase = hero.phase
             appearanceIndex = hero.appearanceIndex
             weaponID=hero.weaponID;armorID=hero.armorID
+            breath = hero.breath
         }
     }
 
@@ -58,6 +60,9 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
     private var mirrorBuffer:MTLBuffer?
     private var mirrorTarget:MTLTexture?
     private let mirrorReadback=DispatchQueue(label:"classroom.preview.readback",qos:.utility)
+    /// HD-2D world grade between the composed world and on-map UI. Nil only if
+    /// its pipelines failed to build; the original single-pass path remains.
+    let postProcess: MeadowPostProcess?
     private weak var gameScene: GameScene?
     var alignmentReview = false
     var onFirstFrameCompleted: (() -> Void)?
@@ -111,6 +116,8 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
         presentation.fragmentFunction = library.makeFunction(name: "meadowBackdropFragment")
         presentation.colorAttachments[0].pixelFormat = .bgra8Unorm
         presentationPipeline = try device.makeRenderPipelineState(descriptor: presentation)
+        postProcess = try? MeadowPostProcess(device: device, library: library,
+                                             enabled: !ProcessInfo.processInfo.arguments.contains("-noPostProcess"))
         progress?(0.27, "准备地面深度状态")
         let state = MTLDepthStencilDescriptor(); state.depthCompareFunction = .lessEqual; state.isDepthWriteEnabled = true
         guard let depthState = device.makeDepthStencilState(descriptor: state) else { throw ShadowLabError.setup("地图深度状态失败") }
@@ -243,7 +250,8 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
             let pose = HeroPose(heroIndex: hero.index, facing: hero.facing, frame: hero.frame, phase: hero.phase)
             let offset = pose.bodyOffset()
             let foot = CGPoint(x: hero.foot.x + offset.x, y: hero.foot.y - offset.y)
-            let instance = ShadowLabInstance(asset: .hero, root: Self.root(foot), width: 64 / Self.units, aspect: 1, anchor: SIMD2(0.5, 0.125))
+            // Idle breathing scales height about the same ground anchor as the sprite.
+            let instance = ShadowLabInstance(asset: .hero, root: Self.root(foot), width: 64 / Self.units, aspect: Float(hero.breath), anchor: SIMD2(0.5, 0.125))
             mesh.imageCaster(instance, mirrored: HeroFrames.isMirrored(hero.facing), pose: pose)
             var item = try draw(mesh, texture: texture, kind: 2)
             item.uvRect = HeroFrames.atlasRect(facing: hero.facing, frame: hero.frame, heroIndex: hero.index)
@@ -425,15 +433,44 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
             lastRenderTime = frame.time; lastCamera = frame.camera
             lastHeroes = heroes; lastIncludesEnvironment = frame.includeEnvironment
         }
+        guard let output = target.colorAttachments[0].texture else { throw ShadowLabError.setup("组合背景呈现编码失败") }
+        let viewport = CGRect(x: 0, y: 0, width: output.width, height: output.height)
+        // Gait review and pixel-alignment captures stay ungraded on purpose.
+        if let post = postProcess, post.isEnabled, frame.includeEnvironment, !alignmentReview,
+           let scene = foreground.scene {
+            // 1. Backdrop + SpriteKit world (minus on-map UI) into the offscreen world target.
+            let world = try post.worldTarget(width: output.width, height: output.height)
+            let worldPass = MTLRenderPassDescriptor(); worldPass.colorAttachments[0].texture = world
+            try encodeBackdrop(command: command, target: worldPass)
+            let overlays = MeadowPostProcess.overlayNodes(in: frame.world)
+            let restoreOverlays = MeadowPostProcess.hide(overlays)
+            foreground.render(withViewport: viewport, commandBuffer: command, renderPassDescriptor: worldPass)
+            restoreOverlays()
+            // 2. Grade into the real target. 3. On-map UI on top, unblurred and ungraded.
+            try post.encode(command: command, target: target, camera: frame.camera, time: frame.time)
+            if !overlays.isEmpty {
+                let restoreWorld = MeadowPostProcess.isolate(overlays, world: frame.world, scene: scene)
+                target.colorAttachments[0].loadAction = .load
+                foreground.render(withViewport: viewport, commandBuffer: command, renderPassDescriptor: target)
+                restoreWorld()
+            }
+            return
+        }
+        if postProcess?.isEnabled == false { postProcess?.releaseTargets() }
+        try encodeBackdrop(command: command, target: target)
+        foreground.render(withViewport: viewport, commandBuffer: command, renderPassDescriptor: target)
+    }
+
+    /// Clear `target`, draw the cached point-resolution backdrop, leave it loadable.
+    private func encodeBackdrop(command: MTLCommandBuffer, target: MTLRenderPassDescriptor) throws {
         target.colorAttachments[0].loadAction = .clear; target.colorAttachments[0].storeAction = .store
-        guard let present = command.makeRenderCommandEncoder(descriptor: target), let output = target.colorAttachments[0].texture else { throw ShadowLabError.setup("组合背景呈现编码失败") }
+        guard let present = command.makeRenderCommandEncoder(descriptor: target) else { throw ShadowLabError.setup("组合背景呈现编码失败") }
         present.label = "Point-resolution backdrop to Retina target"
         present.setRenderPipelineState(presentationPipeline)
         present.setFragmentTexture(backgroundTarget, index: 0)
         present.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)
         present.endEncoding()
         target.colorAttachments[0].loadAction = .load
-        foreground.render(withViewport: CGRect(x: 0, y: 0, width: output.width, height: output.height), commandBuffer: command, renderPassDescriptor: target)
     }
 
     /// Run only on the loader's worker queue, before any SpriteKit texture
@@ -507,6 +544,8 @@ struct MeadowHeroCaster {
     var appearanceIndex: Int = 0
     var weaponID:String?="trainingSword"
     var armorID:String?
+    /// Idle-breathing vertical scale, mirrored from the foreground sprite.
+    var breath: CGFloat = 1
 }
 
 struct MeadowFrameState {

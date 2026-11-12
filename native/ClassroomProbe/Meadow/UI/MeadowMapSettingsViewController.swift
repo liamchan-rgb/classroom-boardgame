@@ -98,10 +98,12 @@ final class MeadowMapSettingsViewController: UIViewController {
             let summary=classSummaries[i];summary.numberOfLines=0;summary.textColor = .white;summary.font = .systemFont(ofSize:16,weight:.semibold)
             let name=UITextField();name.placeholder="学生姓名（可选）";name.borderStyle = .roundedRect;name.textColor = .white;name.backgroundColor=UIColor(white:1,alpha:0.08);studentNames.append(name)
             let profiles=UIButton(type:.system);profiles.setTitle("读取人物档案",for:.normal);profiles.showsMenuAsPrimaryAction=true
-            profiles.menu=UIMenu(children:(1...MeadowSlotStore.profileCount).map{slot in
-                let entry=try? MeadowTeacherCoordinator.slotStore.profile(slot)
-                return UIAction(title:"人物槽\(slot) · \(entry?.value.name ?? "空/无法读取")",attributes:entry==nil ? .disabled:[]){[weak self] _ in
-                    guard let self,let entry else{return};name.text=entry.value.name;self.profileLooks["p\(i+1)"]=entry.value.appearance
+            // Only the used slots (of 50) are offered.
+            profiles.menu=UIMenu(children:(1...MeadowSlotStore.profileCount).compactMap{slot in
+                guard let found=try? MeadowTeacherCoordinator.slotStore.profile(slot) else{return nil}
+                let entry:MeadowSaveSlot<MeadowPlayerProfile>=found
+                return UIAction(title:"人物槽\(slot) · \(entry.value.name)"){[weak self] _ in
+                    guard let self else{return};name.text=entry.value.name;self.profileLooks["p\(i+1)"]=entry.value.appearance
                     profiles.setTitle("已选："+entry.value.name,for:.normal)
                 }
             })

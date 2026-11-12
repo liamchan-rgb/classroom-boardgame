@@ -406,6 +406,146 @@
 			"isa" = "PBXBuildFile";
 			"fileRef" = "76CAAF7A8D6BE464314EBDB3";
 		};
+		"6A2030E6B9AED102C52700BF" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/HeroBreathing.swift";
+			"sourceTree" = "<group>";
+		};
+		"F71AEFE1CB35BB4E928E180B" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "6A2030E6B9AED102C52700BF";
+		};
+		"667BB793920CEC4258CF3854" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/MeadowBattleFormation.swift";
+			"sourceTree" = "<group>";
+		};
+		"F4894B5252E350BAFAFC3B9B" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "667BB793920CEC4258CF3854";
+		};
+		"6D6AB0945FF665FF878568C5" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/MeadowBattleHitFeel.swift";
+			"sourceTree" = "<group>";
+		};
+		"9DDA71885930251A3FF96BD7" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "6D6AB0945FF665FF878568C5";
+		};
+		"2536EB22129DBE8BBA3240E7" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/MeadowBattleHitFeelPainter.swift";
+			"sourceTree" = "<group>";
+		};
+		"F0A8E6A7AB99B19A3A014442" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "2536EB22129DBE8BBA3240E7";
+		};
+		"08C505E8CD7CA7D199A3D508" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/MeadowBattleNumber.swift";
+			"sourceTree" = "<group>";
+		};
+		"6821477473C51F551AB7F51E" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "08C505E8CD7CA7D199A3D508";
+		};
+		"AD3C0D520BDA312183056023" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.metal";
+			"path" = "Meadow/Game/MeadowPostProcess.metal";
+			"sourceTree" = "<group>";
+		};
+		"B3ACD2C586768865F6757D23" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "AD3C0D520BDA312183056023";
+		};
+		"AE8A62FCE2E2BAB1095A8994" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/MeadowPostProcess.swift";
+			"sourceTree" = "<group>";
+		};
+		"ABC593BCBF50A9B922F044AE" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "AE8A62FCE2E2BAB1095A8994";
+		};
+		"127EB9205530DF5B318206EF" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/MeadowSkillAmbientLight.swift";
+			"sourceTree" = "<group>";
+		};
+		"6E939B6378FF4135E6649F80" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "127EB9205530DF5B318206EF";
+		};
+		"42B94F5838576E3D97D8F469" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/MeadowSkillGPU.swift";
+			"sourceTree" = "<group>";
+		};
+		"8BB84DFD02666E35E4196FD6" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "42B94F5838576E3D97D8F469";
+		};
+		"8A4602517402DF03FC174FC6" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/MeadowSkillProcedural.swift";
+			"sourceTree" = "<group>";
+		};
+		"4A1B7BA497E5B1A14132764A" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "8A4602517402DF03FC174FC6";
+		};
+		"ACB577A387ED60F48B65A999" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/MeadowSkillProceduralPainter.swift";
+			"sourceTree" = "<group>";
+		};
+		"A3C16163E090E00EF1B48ED8" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "ACB577A387ED60F48B65A999";
+		};
+		"450C5C3C12F37DCD94A4786A" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/MeadowTargetMarkerView.swift";
+			"sourceTree" = "<group>";
+		};
+		"7DF97A8DEA187288208532BF" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "450C5C3C12F37DCD94A4786A";
+		};
+		"BA1214086742441D7CAE6C08" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/MeadowTurnOrderView.swift";
+			"sourceTree" = "<group>";
+		};
+		"A4398D5D6CE0D037E439045C" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "BA1214086742441D7CAE6C08";
+		};
+		"396DA8529BFE27E9FAB0A8A6" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/UI/MeadowGainPopup.swift";
+			"sourceTree" = "<group>";
+		};
+		"705163158F9AA2FE42B2C567" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "396DA8529BFE27E9FAB0A8A6";
+		};
 		"E7404666D43A7B9ECAC76699" = {
 			"isa" = "PBXFileReference";
 			"lastKnownFileType" = "sourcecode.swift";
@@ -662,6 +802,20 @@
 				"22A7DA21858652980315FFFC",
 				"F4173D49A6505D5A66B0E96E",
 				"76CAAF7A8D6BE464314EBDB3",
+				"6A2030E6B9AED102C52700BF",
+				"667BB793920CEC4258CF3854",
+				"6D6AB0945FF665FF878568C5",
+				"2536EB22129DBE8BBA3240E7",
+				"08C505E8CD7CA7D199A3D508",
+				"AD3C0D520BDA312183056023",
+				"AE8A62FCE2E2BAB1095A8994",
+				"127EB9205530DF5B318206EF",
+				"42B94F5838576E3D97D8F469",
+				"8A4602517402DF03FC174FC6",
+				"ACB577A387ED60F48B65A999",
+				"450C5C3C12F37DCD94A4786A",
+				"BA1214086742441D7CAE6C08",
+				"396DA8529BFE27E9FAB0A8A6",
 				"E7404666D43A7B9ECAC76699",
 				"F0A6E9C81ACF5122E3017408",
 				"3BD91D65CDA40795EA3E9F5F",
@@ -800,6 +954,20 @@
 				"0CF7D6A30BDA8400551CA07A",
 				"5E3BB57FCE8B269E4E601DE5",
 				"575EF86DB0E9F00B79D19887",
+				"F71AEFE1CB35BB4E928E180B",
+				"F4894B5252E350BAFAFC3B9B",
+				"9DDA71885930251A3FF96BD7",
+				"F0A8E6A7AB99B19A3A014442",
+				"6821477473C51F551AB7F51E",
+				"B3ACD2C586768865F6757D23",
+				"ABC593BCBF50A9B922F044AE",
+				"6E939B6378FF4135E6649F80",
+				"8BB84DFD02666E35E4196FD6",
+				"4A1B7BA497E5B1A14132764A",
+				"A3C16163E090E00EF1B48ED8",
+				"7DF97A8DEA187288208532BF",
+				"A4398D5D6CE0D037E439045C",
+				"705163158F9AA2FE42B2C567",
 				"545976A2418B9F6DC9B7EDEF",
 				"2B85ED0D255B72549E378180",
 				"E138F57492F4276CBDE3F637",

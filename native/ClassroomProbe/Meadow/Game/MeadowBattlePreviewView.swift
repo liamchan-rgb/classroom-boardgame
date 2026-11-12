@@ -39,6 +39,7 @@ enum MeadowPreviewPalette {
 final class MeadowBattlePreviewView: UIView {
     var classroomModelFactory:(()throws->PartyEncounter)? {didSet{party.classroomModelFactory=classroomModelFactory}}
     func classroomEnemyStep(){party.classroomEnemyStep()}
+    func classroomToggleMap(){party.classroomToggleMap()}
     func classroomHit(at point:CGPoint)->MeadowPartyBattleView.ClassroomHit? {party.classroomHit(at:convert(point,to:party))}
     var classroomMode=false {didSet {
         party.classroomMode=classroomMode
@@ -342,6 +343,8 @@ final class MeadowBattlePreviewView: UIView {
         subtitle.frame = CGRect(x: 16, y: 43, width: textWidth, height: 23)
     }
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        // The party battle's pull tab sits on the map's edge, and with the map drawer closed the battlefield covers the map: those touches stay here.
+        if partyMode,let hit=super.hitTest(point,with:event),party.mapHidden || hit.accessibilityIdentifier=="battleMapDrawer" { return hit }
         if mapFrame.contains(point),(partyMode || !partyButton.frame.contains(point)) { return nil }
         return super.hitTest(point, with: event)
     }

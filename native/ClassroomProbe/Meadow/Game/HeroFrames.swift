@@ -45,6 +45,16 @@ enum HeroFrames {
         return decoded
     }()
 
+    /// Foot-locked pose timing for the modular P1 (uniform where the art's
+    /// stride is too short for timing to help, or if the data is missing).
+    static let p1GaitTiming: GaitTiming = {
+        guard let plan = locomotionPlan, plan.timing != "uniform",
+              let url = Bundle.main.url(forResource: "hero-gait", withExtension: "json"),
+              let data = try? Data(contentsOf: url),
+              let soles = GaitTiming.p1Soles(rigJSON: data) else { return .uniform }
+        return .footLocked(soles: soles)
+    }()
+
     struct ArmorVisualBinding:Decodable {
         let itemID:String,iconAsset:String
         let battleLayers:[String:String]
