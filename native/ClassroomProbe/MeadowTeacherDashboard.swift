@@ -22,6 +22,7 @@ struct MeadowTeacherDashboard:View {
                 Text("教师游戏 · v0.19.0").font(.headline)
                 Text(game.externalConnected ? "电视已连接":"本机预览").font(.caption).foregroundStyle(.secondary)
                 Spacer(minLength:0)
+                Button{game.openCharacterStudio()}label:{Label("人物自定义",systemImage:"person.crop.circle.badge.plus")}.disabled(game.busy)
                 Button("GM"){game.openGM()}.disabled(!game.ready || game.busy || game.campaign==nil)
                 Button(fullScreen ? "退出全屏":"全屏"){fullPreview = !fullScreen}
                 Menu {
@@ -80,6 +81,7 @@ struct MeadowTeacherDashboard:View {
                         Text("准备林间旅程").font(.title.bold())
                         Button("随机地图与新行程"){game.settings()}
                         Button("继续已保存行程"){game.restore()}
+                        Button("人物自定义"){game.openCharacterStudio()}
                     }.buttonStyle(.borderedProminent).foregroundStyle(.white)
                 }else{Color.black}
                 if !inBattle,game.surface != .exploration {

@@ -288,6 +288,24 @@ enum CustomAppearanceAssets {
     static func name(body:String,armor:String?,weapon:String?,hair:String?,face:String?,half:Int)->String {
         ["Custom",body,armor ?? "base",weapon ?? "none",hair ?? "original",face ?? "original",String(half)].joined(separator:"|")
     }
+    /// One 256 px cell of the composed atlas (facing 0-7, column 0 idle, 1-8 walk), drawn from the registered components without
+    /// composing the whole atlas: the character studio previews every option this way.
+    static func cell(body:String,armor:String?,weapon:String?,hair:String?,face:String?,facing:Int,column:Int)->UIImage? {
+        let key="cell|"+name(body:body,armor:armor,weapon:weapon,hair:hair,face:face,half:facing>=4 ? 1:0)+"|\(facing%4)|\(column)"
+        if let image=cache.object(forKey:key as NSString){return image}
+        let half=facing>=4 ? 1:0,outfit=armor ?? body
+        let hairID=hair ?? (body=="wayfarer" ? "hair-silver":"hair-chestnut"),faceID=face ?? (body=="wayfarer" ? "face-amber":"face-blue")
+        guard let bs=manifest.bodyAtlases[outfit+"|"+(weapon ?? "none")] ?? manifest.bodyAtlases[outfit+"|none"],let front=manifest.foregroundAtlases[outfit],let hs=manifest.hairAtlases[hairID],let fs=manifest.faceAtlases[faceID],bs.count==2,hs.count==2,fs.count==2 else{return nil}
+        let rect=CGRect(x:column*256,y:(facing%4)*256,width:256,height:256)
+        let layers=[bs[half],fs[half],hs[half],front[half]].compactMap{UIImage(named:$0)?.cgImage?.cropping(to:rect)}
+        guard layers.count==4 else{return nil}
+        let format=UIGraphicsImageRendererFormat();format.scale=1
+        let image=UIGraphicsImageRenderer(size:CGSize(width:256,height:256),format:format).image{r in
+            let c=r.cgContext;c.interpolationQuality = .none;c.translateBy(x:0,y:256);c.scaleBy(x:1,y:-1)
+            for l in layers{c.draw(l,in:CGRect(x:0,y:0,width:256,height:256))}
+        }
+        cache.setObject(image,forKey:key as NSString,cost:256*256*4);return image
+    }
     static func battleHair(_ id:String?)->String? {id.flatMap{manifest.battleHair[$0]}}
     static func battleFace(_ id:String?)->String? {id.flatMap{manifest.battleFaces[$0]}}
     static func image(_ name:String)->UIImage? {

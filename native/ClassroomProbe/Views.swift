@@ -28,6 +28,7 @@ private struct TeacherBookConsole:View {
                 Spacer()
                 Button("GM窗口"){notesFocused=false;game.openGM()}.disabled(game.busy || game.campaign==nil)
                 Button("存档与历史"){notesFocused=false;game.openArchives()}.disabled(game.busy)
+                Button("人物自定义"){notesFocused=false;game.openCharacterStudio()}.disabled(game.busy)
                 Menu("绘本文件") {
                     Button("加载内置测试PPTX"){session.loadSample()}
                     Button("导入PPTX"){importingBackup=false;openImporter()}

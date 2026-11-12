@@ -117,6 +117,13 @@ final class MeadowTeacherCoordinator:ObservableObject {
         screen.modalPresentationStyle = .formSheet;screen.preferredContentSize=CGSize(width:900,height:720)
         presenter.present(screen,animated:true)
     }
+    /// The character studio (teacher window): looks, live preview, apply to a member, 50 character slots.
+    func openCharacterStudio(){
+        guard !busy,!modalOpen,let presenter=presentationHost else{return}
+        let screen=UIHostingController(rootView:TeacherCharacterStudio(game:self,onClose:{[weak self] in self?.presentationHost?.dismiss(animated:true)}))
+        screen.modalPresentationStyle = .formSheet;screen.preferredContentSize=CGSize(width:1000,height:760)
+        presenter.present(screen,animated:true)
+    }
     func loadJourney(_ save:MeadowCampaignSave)throws {
         guard !busy else{throw GameError("请等待动作结束。")}
         try save.validate()
