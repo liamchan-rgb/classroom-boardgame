@@ -29,7 +29,7 @@ final class SaveTransferTests:XCTestCase {
         let s=try store(),t=try transfer();_=try s.importTransfer(t,destinations:[.init(.profile,3):1]);XCTAssertEqual(try s.profile(1),t.profiles[0].entry)
     }
     func testMissingDestinationRejectedBeforeWriting()throws {let s=try store();XCTAssertThrowsError(try s.importTransfer(transfer(),destinations:[:]));XCTAssertNil(try s.profile(3))}
-    func testOutOfRangeDestinationRejected()throws {let s=try store();XCTAssertThrowsError(try s.importTransfer(transfer(),destinations:[.init(.profile,3):13]));XCTAssertNil(try s.profile(3))}
+    func testOutOfRangeDestinationRejected()throws {let s=try store();XCTAssertThrowsError(try s.importTransfer(transfer(),destinations:[.init(.profile,3):51]));XCTAssertNil(try s.profile(3))}
     func testDuplicateTargetRejectedBeforeOverwriting()throws {
         let s=try store();try s.saveProfile(profile("原"),slot:1,title:"原");var t=try transfer();t.profiles.append(.init(slot:4,entry:.init(title:"另一个",value:profile("新"))))
         XCTAssertThrowsError(try s.importTransfer(t,destinations:[.init(.profile,3):1,.init(.profile,4):1]));XCTAssertEqual(try s.profile(1)?.value.name,"原")
