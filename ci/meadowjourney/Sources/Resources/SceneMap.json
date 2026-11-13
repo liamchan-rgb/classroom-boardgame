@@ -1,0 +1,1276 @@
+{
+  "seed": 31827,
+  "props": [
+    {
+      "asset": "RockLow",
+      "x": 262,
+      "y": 126,
+      "width": 96,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "OakA",
+      "x": 286.12,
+      "y": 71.17,
+      "width": 53.46,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "OakB",
+      "x": 218.31,
+      "y": 98.79,
+      "width": 66.28,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "Pines",
+      "x": 222.91,
+      "y": 70.85,
+      "width": 73.52,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "RockHigh",
+      "x": 181,
+      "y": 227,
+      "width": 104,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "OakB",
+      "x": 220.8,
+      "y": 177.01,
+      "width": 70.92,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "Pines",
+      "x": 235.62,
+      "y": 196.55,
+      "width": 64.32,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "RockSmall",
+      "x": 300,
+      "y": 311,
+      "width": 95,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "Pines",
+      "x": 349.57,
+      "y": 256.45,
+      "width": 70.18,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "OakA",
+      "x": 263.96,
+      "y": 271.89,
+      "width": 61.19,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "RockLow",
+      "x": 473,
+      "y": 196,
+      "width": 99,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "OakA",
+      "x": 484.65,
+      "y": 165.59,
+      "width": 73.54,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "OakB",
+      "x": 448.27,
+      "y": 163.77,
+      "width": 72.8,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "Pines",
+      "x": 511.09,
+      "y": 142.0,
+      "width": 70.81,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "RockHigh",
+      "x": 607,
+      "y": 120,
+      "width": 93,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "OakB",
+      "x": 644.78,
+      "y": 90.27,
+      "width": 48.69,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "Pines",
+      "x": 574.66,
+      "y": 88.12,
+      "width": 72.82,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "RockSmall",
+      "x": 835,
+      "y": 80,
+      "width": 107,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "Pines",
+      "x": 884.26,
+      "y": 54.88,
+      "width": 60.65,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "OakA",
+      "x": 796.67,
+      "y": 30.86,
+      "width": 57.99,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "RockLow",
+      "x": 929,
+      "y": 219,
+      "width": 105,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "OakA",
+      "x": 967.89,
+      "y": 195.04,
+      "width": 66.03,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "OakB",
+      "x": 922.37,
+      "y": 193.54,
+      "width": 58.16,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "Pines",
+      "x": 915.31,
+      "y": 179.28,
+      "width": 50.45,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "RockHigh",
+      "x": 1139,
+      "y": 335,
+      "width": 110,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "OakB",
+      "x": 1118.38,
+      "y": 302.34,
+      "width": 61.43,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "Pines",
+      "x": 1090.27,
+      "y": 301.32,
+      "width": 69.34,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "RockSmall",
+      "x": 807,
+      "y": 427,
+      "width": 108,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "Pines",
+      "x": 835.97,
+      "y": 372.73,
+      "width": 68.94,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "OakA",
+      "x": 846.2,
+      "y": 371.1,
+      "width": 52.93,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "RockLow",
+      "x": 139,
+      "y": 533,
+      "width": 117,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "OakA",
+      "x": 171.72,
+      "y": 500.49,
+      "width": 64.17,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "OakB",
+      "x": 172.52,
+      "y": 496.0,
+      "width": 73.78,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "Pines",
+      "x": 124.28,
+      "y": 511.07,
+      "width": 70.97,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "RockHigh",
+      "x": 446,
+      "y": 581,
+      "width": 111,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "OakB",
+      "x": 423.6,
+      "y": 534.19,
+      "width": 57.74,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "Pines",
+      "x": 457.39,
+      "y": 542.32,
+      "width": 60.84,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "RockSmall",
+      "x": 278,
+      "y": 687,
+      "width": 110,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "Pines",
+      "x": 249.44,
+      "y": 646.16,
+      "width": 66.8,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "OakA",
+      "x": 249.99,
+      "y": 652.92,
+      "width": 58.53,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "RockLow",
+      "x": 839,
+      "y": 605,
+      "width": 115,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "OakA",
+      "x": 794.67,
+      "y": 562.44,
+      "width": 61.13,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "OakB",
+      "x": 789.03,
+      "y": 570.35,
+      "width": 53.49,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "Pines",
+      "x": 871.11,
+      "y": 575.49,
+      "width": 60.53,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "RockHigh",
+      "x": 1088,
+      "y": 656,
+      "width": 120,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "OakB",
+      "x": 1120.53,
+      "y": 605.49,
+      "width": 73.51,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "Pines",
+      "x": 1080.76,
+      "y": 615.2,
+      "width": 53.8,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "RockSmall",
+      "x": 1141,
+      "y": 110,
+      "width": 109,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "Pines",
+      "x": 1087.03,
+      "y": 68.72,
+      "width": 64.27,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "OakA",
+      "x": 1185.8,
+      "y": 89.98,
+      "width": 58.96,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "RockLow",
+      "x": -62,
+      "y": 350,
+      "width": 110,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "OakA",
+      "x": -97.57,
+      "y": 309.89,
+      "width": 57.4,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "OakB",
+      "x": -96.42,
+      "y": 326.45,
+      "width": 48.66,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "Pines",
+      "x": -82.98,
+      "y": 295.69,
+      "width": 73.19,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "RockHigh",
+      "x": 1303,
+      "y": 480,
+      "width": 120,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "OakB",
+      "x": 1323.66,
+      "y": 454.99,
+      "width": 71.65,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "Pines",
+      "x": 1275.27,
+      "y": 449.18,
+      "width": 54.5,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "RockSmall",
+      "x": 472,
+      "y": 830,
+      "width": 112,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "Pines",
+      "x": 429.79,
+      "y": 806.71,
+      "width": 59.3,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "OakA",
+      "x": 488.09,
+      "y": 783.67,
+      "width": 59.05,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "RockLow",
+      "x": 968,
+      "y": 838,
+      "width": 125,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "OakA",
+      "x": 1008.76,
+      "y": 791.78,
+      "width": 58.82,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "OakB",
+      "x": 939.18,
+      "y": 799.29,
+      "width": 70.83,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "Pines",
+      "x": 1022.31,
+      "y": 810.23,
+      "width": 60.96,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "RockHigh",
+      "x": 165,
+      "y": -90,
+      "width": 110,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "OakB",
+      "x": 199.98,
+      "y": -114.28,
+      "width": 56.67,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "Pines",
+      "x": 135.8,
+      "y": -121.82,
+      "width": 53.53,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "RockSmall",
+      "x": 540,
+      "y": -90,
+      "width": 120,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "Pines",
+      "x": 502.84,
+      "y": -122.55,
+      "width": 52.74,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "OakA",
+      "x": 556.17,
+      "y": -140.01,
+      "width": 70.63,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "RockLow",
+      "x": 980,
+      "y": -76,
+      "width": 125,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "OakA",
+      "x": 924.06,
+      "y": -106.58,
+      "width": 52.54,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "OakB",
+      "x": 962.71,
+      "y": -124.87,
+      "width": 49.97,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "Pines",
+      "x": 934.09,
+      "y": -124.94,
+      "width": 53.81,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "Pines",
+      "x": 37.59,
+      "y": 66.36,
+      "width": 82.16,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "Pines",
+      "x": 58.83,
+      "y": 81.29,
+      "width": 64.45,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "Pines",
+      "x": 112.59,
+      "y": 153.74,
+      "width": 77.62,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "OakB",
+      "x": 128.82,
+      "y": 155.94,
+      "width": 57.85,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "OakA",
+      "x": 371.41,
+      "y": 72.93,
+      "width": 62.27,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "OakA",
+      "x": 393.96,
+      "y": 66.34,
+      "width": 56.71,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "OakB",
+      "x": 675.15,
+      "y": 58.64,
+      "width": 73.35,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "Pines",
+      "x": 666.16,
+      "y": 57.64,
+      "width": 75.73,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "OakA",
+      "x": 1039.89,
+      "y": 66.72,
+      "width": 54.39,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "Pines",
+      "x": 1037.57,
+      "y": 62.11,
+      "width": 62.23,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "Pines",
+      "x": 1243.95,
+      "y": 186.67,
+      "width": 51.95,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "OakB",
+      "x": 1219.83,
+      "y": 194.75,
+      "width": 61.66,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "Pines",
+      "x": 79.42,
+      "y": 440.34,
+      "width": 78.03,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "OakA",
+      "x": 42.28,
+      "y": 437.28,
+      "width": 64.18,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "OakB",
+      "x": 213.03,
+      "y": 425.28,
+      "width": 69.21,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "OakA",
+      "x": 200.72,
+      "y": 452.44,
+      "width": 50.15,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "OakB",
+      "x": 382.62,
+      "y": 301.38,
+      "width": 69.32,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "OakA",
+      "x": 409.99,
+      "y": 302.45,
+      "width": 68.1,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "Pines",
+      "x": 677.09,
+      "y": 410.16,
+      "width": 60.36,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "Pines",
+      "x": 646.37,
+      "y": 415.83,
+      "width": 71.2,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "OakA",
+      "x": 878.44,
+      "y": 319.49,
+      "width": 77.02,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "OakB",
+      "x": 866.45,
+      "y": 307.45,
+      "width": 62.68,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "OakA",
+      "x": 1014.69,
+      "y": 368.86,
+      "width": 70.82,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "OakB",
+      "x": 1011.29,
+      "y": 383.14,
+      "width": 50.65,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "OakA",
+      "x": 1241.97,
+      "y": 581.48,
+      "width": 54.9,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "OakA",
+      "x": 1242.38,
+      "y": 569.21,
+      "width": 81.64,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "OakA",
+      "x": 963.7,
+      "y": 529.8,
+      "width": 59.28,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "Pines",
+      "x": 939.8,
+      "y": 532.56,
+      "width": 72.98,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "Pines",
+      "x": 641.45,
+      "y": 645.92,
+      "width": 71.55,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "OakA",
+      "x": 658.14,
+      "y": 632.78,
+      "width": 75.66,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "OakA",
+      "x": 133.13,
+      "y": 711.8,
+      "width": 54.62,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "Pines",
+      "x": 149.61,
+      "y": 712.71,
+      "width": 76.42,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "OakB",
+      "x": 498.06,
+      "y": 751.46,
+      "width": 74.84,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "OakA",
+      "x": 475.89,
+      "y": 740.69,
+      "width": 63.85,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "OakB",
+      "x": 712.06,
+      "y": 789.33,
+      "width": 60.56,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "Pines",
+      "x": 690.29,
+      "y": 769.91,
+      "width": 82.79,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "OakB",
+      "x": 48.07,
+      "y": 778.65,
+      "width": 70.36,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "OakA",
+      "x": 23.7,
+      "y": 780.53,
+      "width": 60.82,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "Pines",
+      "x": 1265.57,
+      "y": 806.99,
+      "width": 80.55,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "OakB",
+      "x": 1276.14,
+      "y": 800.91,
+      "width": 57.69,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "Pines",
+      "x": 1276.71,
+      "y": -2.27,
+      "width": 63.44,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "OakA",
+      "x": 1288.41,
+      "y": -14.8,
+      "width": 81.06,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "Pines",
+      "x": 1379.21,
+      "y": 259.85,
+      "width": 68.63,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "OakB",
+      "x": 1345.64,
+      "y": 265.63,
+      "width": 54.51,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "OakA",
+      "x": -67.95,
+      "y": 28.95,
+      "width": 57.03,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "OakA",
+      "x": -79.04,
+      "y": 22.69,
+      "width": 56.04,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "OakB",
+      "x": 194.01,
+      "y": 803.55,
+      "width": 54.82,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "Pines",
+      "x": 183.55,
+      "y": 824.15,
+      "width": 80.66,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "OakB",
+      "x": 1191.97,
+      "y": -100.76,
+      "width": 72.98,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "OakB",
+      "x": 1206.55,
+      "y": -112.94,
+      "width": 53.3,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "OakA",
+      "x": 742.75,
+      "y": -164.52,
+      "width": 54.55,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "OakB",
+      "x": 703.93,
+      "y": -157.0,
+      "width": 53.62,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "OakA",
+      "x": 66.92,
+      "y": -146.03,
+      "width": 80.52,
+      "wind": 1,
+      "mirror": false
+    },
+    {
+      "asset": "Pines",
+      "x": 107.21,
+      "y": -157.11,
+      "width": 77.65,
+      "wind": 1,
+      "mirror": true
+    },
+    {
+      "asset": "CampTent",
+      "x": 321,
+      "y": 399,
+      "width": 163,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "WatchTower",
+      "x": 482,
+      "y": 399,
+      "width": 74,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "WatchTower",
+      "x": 744,
+      "y": 201,
+      "width": 70,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "Fence",
+      "x": 236,
+      "y": 401,
+      "width": 46,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "Fence",
+      "x": 528,
+      "y": 397,
+      "width": 42,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "Fence",
+      "x": 705,
+      "y": 179,
+      "width": 45,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "Fence",
+      "x": 779,
+      "y": 177,
+      "width": 36,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "Fence",
+      "x": 206,
+      "y": 502,
+      "width": 65,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "Fence",
+      "x": 1046,
+      "y": 449,
+      "width": 67,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "Fence",
+      "x": 939,
+      "y": 605,
+      "width": 56,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "Fence",
+      "x": 583,
+      "y": 645,
+      "width": 62,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "Fence",
+      "x": 333,
+      "y": 93,
+      "width": 48,
+      "wind": 0,
+      "mirror": false
+    },
+    {
+      "asset": "Fence",
+      "x": 1210,
+      "y": 241,
+      "width": 53,
+      "wind": 0,
+      "mirror": false
+    }
+  ],
+  "roads": [
+    {
+      "to": 1,
+      "width": 23,
+      "points": [
+        {
+          "x": 285,
+          "y": 442
+        },
+        {
+          "x": 330,
+          "y": 447
+        },
+        {
+          "x": 383,
+          "y": 448
+        },
+        {
+          "x": 440,
+          "y": 444
+        },
+        {
+          "x": 503,
+          "y": 445
+        },
+        {
+          "x": 555,
+          "y": 441
+        }
+      ],
+      "from": 0
+    },
+    {
+      "to": 2,
+      "width": 22,
+      "points": [
+        {
+          "x": 555,
+          "y": 441
+        },
+        {
+          "x": 578,
+          "y": 412
+        },
+        {
+          "x": 601,
+          "y": 378
+        },
+        {
+          "x": 629,
+          "y": 346
+        },
+        {
+          "x": 655,
+          "y": 313
+        },
+        {
+          "x": 684,
+          "y": 282
+        },
+        {
+          "x": 713,
+          "y": 252
+        },
+        {
+          "x": 735,
+          "y": 223
+        },
+        {
+          "x": 744,
+          "y": 209
+        }
+      ],
+      "from": 1
+    },
+    {
+      "to": 3,
+      "width": 15,
+      "points": [
+        {
+          "x": 555,
+          "y": 441
+        },
+        {
+          "x": 658,
+          "y": 466
+        },
+        {
+          "x": 779,
+          "y": 468
+        },
+        {
+          "x": 876,
+          "y": 441
+        },
+        {
+          "x": 982,
+          "y": 430
+        }
+      ],
+      "from": 1
+    },
+    {
+      "to": 4,
+      "width": 15,
+      "points": [
+        {
+          "x": 555,
+          "y": 441
+        },
+        {
+          "x": 577,
+          "y": 488
+        },
+        {
+          "x": 623,
+          "y": 530
+        },
+        {
+          "x": 682,
+          "y": 570
+        },
+        {
+          "x": 735,
+          "y": 578
+        }
+      ],
+      "from": 1
+    }
+  ],
+  "discoveries": [
+    {
+      "x": 982,
+      "y": 430,
+      "title": "草坡驿站"
+    },
+    {
+      "x": 735,
+      "y": 578,
+      "title": "风铃石径"
+    }
+  ],
+  "textureBudgetMiB": 42.36
+}

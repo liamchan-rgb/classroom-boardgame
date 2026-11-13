@@ -19,3 +19,6 @@ artifacts/
 *.mobiledevicepairing
 .env
 .env.*
+
+# MeadowJourney check snapshot build output
+ci/meadowjourney/build/

@@ -1,0 +1,107 @@
+name: MeadowJourney character sprite check
+
+# 在本仓库已验证的 macOS/Xcode 运行器上编译 experiment 仓库的 MeadowJourney 快照（ci/meadowjourney），
+# 跑单元测试，检查 Swift 版人物烘焙器能编译、与网页工具出图一致。不触碰桌游 App，不签名，不出 IPA。
+on:
+  push:
+    branches:
+      - claude/hd2d-pixel-character-walk-s2pdwi
+    paths:
+      - 'ci/meadowjourney/**'
+      - '.github/workflows/meadowjourney-character-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: meadowjourney-character-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Compile and test MeadowJourney
+    runs-on: xcode-27
+    timeout-minutes: 40
+    defaults:
+      run:
+        shell: bash
+        working-directory: ci/meadowjourney
+    env:
+      PROJECT: MeadowJourney.xcodeproj
+      SCHEME: MeadowJourney
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Toolchain and project validation
+        run: |
+          set -euo pipefail
+          mkdir -p build/logs
+          cat SOURCE_COMMIT | tee build/logs/source-commit.txt
+          xcode-select -p 2>&1 | tee build/logs/xcode-path.log
+          xcodebuild -version 2>&1 | tee build/logs/xcode-version.log
+          python3 scripts/validate-project.py 2>&1 | tee build/logs/validate.log
+
+      - name: Compile for iOS Simulator
+        run: |
+          set -euo pipefail
+          xcodebuild build \
+            -project "$PROJECT" -scheme "$SCHEME" -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            2>&1 | tee build/logs/simulator-build.log
+
+      - name: Choose a simulator
+        id: simulator
+        run: |
+          set -euo pipefail
+          if python3 scripts/select-simulator.py iPad > build/udid.txt; then
+            :
+          else
+            status=$?
+            if [ "$status" -ne 2 ]; then exit "$status"; fi
+            xcodebuild -downloadPlatform iOS 2>&1 | tee build/logs/runtime-download.log
+            python3 scripts/select-simulator.py iPad > build/udid.txt
+          fi
+          udid="$(cat build/udid.txt)"
+          echo "udid=$udid" >> "$GITHUB_OUTPUT"
+          xcrun simctl bootstatus "$udid" -b 2>&1 | tee build/logs/simulator-boot.log
+
+      - name: Unit tests (including Swift / web parity)
+        run: |
+          set -euo pipefail
+          xcodebuild test \
+            -project "$PROJECT" -scheme "$SCHEME" -configuration Debug \
+            -destination 'platform=iOS Simulator,id=${{ steps.simulator.outputs.udid }}' \
+            -only-testing:MeadowJourneyTests \
+            -derivedDataPath build/DerivedData \
+            -resultBundlePath build/UnitTests.xcresult \
+            -parallel-testing-enabled NO \
+            CODE_SIGNING_ALLOWED=NO \
+            2>&1 | tee build/logs/unit-tests.log
+          grep '\[character-parity\]' build/logs/unit-tests.log || true
+
+      - name: Screenshot the running scene
+        if: ${{ !cancelled() && steps.simulator.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          udid='${{ steps.simulator.outputs.udid }}'
+          app="$(find build/DerivedData/Build/Products -maxdepth 2 -name 'MeadowJourney.app' -path '*iphonesimulator*' | head -1)"
+          xcrun simctl install "$udid" "$app"
+          xcrun simctl launch "$udid" com.liamchan.experiment.meadow -visualReview
+          sleep 8
+          mkdir -p build/screens
+          xcrun simctl io "$udid" screenshot build/screens/scene.png
+
+      - name: Upload logs, results and screenshot
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: meadowjourney-character-check-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ci/meadowjourney/build/logs
+            ci/meadowjourney/build/UnitTests.xcresult
+            ci/meadowjourney/build/screens
+          retention-days: 14
+          if-no-files-found: ignore
