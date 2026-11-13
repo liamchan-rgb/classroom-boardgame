@@ -56,7 +56,7 @@ struct GlassField:View {
             ClassroomTextField(placeholder:placeholder,text:$text,limit:limit,keyboard:keyboard).frame(height:40)
         }
         .padding(.horizontal,12)
-        .background(.ultraThinMaterial,in:RoundedRectangle(cornerRadius:12,style:.continuous))
+        .background(GlassFill.field,in:RoundedRectangle(cornerRadius:12,style:.continuous))
         .overlay(RoundedRectangle(cornerRadius:12,style:.continuous).stroke(.white.opacity(0.55),lineWidth:1))
     }
 }
@@ -66,8 +66,9 @@ struct GlassBackdrop:View {
     var body:some View {
         ZStack{
             LinearGradient(colors:[Color(red:0.80,green:0.90,blue:0.86),Color(red:0.70,green:0.82,blue:0.90),Color(red:0.86,green:0.84,blue:0.74)],startPoint:.topLeading,endPoint:.bottomTrailing)
-            Circle().fill(Color(red:0.55,green:0.78,blue:0.62).opacity(0.45)).frame(width:520).blur(radius:90).offset(x:-260,y:-220)
-            Circle().fill(Color(red:0.98,green:0.80,blue:0.55).opacity(0.35)).frame(width:460).blur(radius:100).offset(x:300,y:260)
+            // Soft colour pools drawn as radial gradients: same look as blurred blobs, no per-frame blur pass.
+            RadialGradient(colors:[Color(red:0.55,green:0.78,blue:0.62).opacity(0.55),.clear],center:UnitPoint(x:0.15,y:0.12),startRadius:0,endRadius:520)
+            RadialGradient(colors:[Color(red:0.98,green:0.80,blue:0.55).opacity(0.45),.clear],center:UnitPoint(x:0.88,y:0.9),startRadius:0,endRadius:520)
         }.ignoresSafeArea()
     }
 }
@@ -76,9 +77,8 @@ extension View {
     /// Frosted glass panel: material fill, hairline highlight and a soft lift.
     func glassPanel(radius:CGFloat=18,padding:CGFloat=14)->some View {
         self.padding(padding)
-            .background(.ultraThinMaterial,in:RoundedRectangle(cornerRadius:radius,style:.continuous))
+            .background(GlassFill.panel,in:RoundedRectangle(cornerRadius:radius,style:.continuous))
             .overlay(RoundedRectangle(cornerRadius:radius,style:.continuous).stroke(LinearGradient(colors:[.white.opacity(0.7),.white.opacity(0.15)],startPoint:.top,endPoint:.bottom),lineWidth:1))
-            .shadow(color:.black.opacity(0.08),radius:12,y:6)
     }
     /// A sheet whose content sits on glass over the meadow wash.
     func glassSheet()->some View {
@@ -98,10 +98,9 @@ struct GlassIconButtonStyle:ButtonStyle {
             .foregroundStyle(prominent ? Color.white:tint)
             .background {
                 if prominent {RoundedRectangle(cornerRadius:14,style:.continuous).fill(tint.opacity(enabled ? 0.9:0.4))}
-                else {RoundedRectangle(cornerRadius:14,style:.continuous).fill(.ultraThinMaterial)}
+                else {RoundedRectangle(cornerRadius:14,style:.continuous).fill(GlassFill.button)}
             }
             .overlay(RoundedRectangle(cornerRadius:14,style:.continuous).stroke(.white.opacity(prominent ? 0.35:0.6),lineWidth:1))
-            .shadow(color:.black.opacity(configuration.isPressed ? 0:0.07),radius:6,y:3)
             .scaleEffect(configuration.isPressed ? 0.95:1)
             .opacity(enabled ? 1:0.45)
             .animation(.spring(response:0.25,dampingFraction:0.7),value:configuration.isPressed)
@@ -127,7 +126,7 @@ struct GlassChip:View {
             Text(text).font(.system(size:14,weight:.semibold,design:.rounded)).monospacedDigit().foregroundStyle(GameTheme.ink)
         }
         .padding(.horizontal,10).padding(.vertical,6)
-        .background(.ultraThinMaterial,in:Capsule())
+        .background(GlassFill.field,in:Capsule())
         .overlay(Capsule().stroke(.white.opacity(0.6),lineWidth:1))
     }
 }
@@ -142,5 +141,13 @@ struct GlassHeader:View {
 
 extension View {
     /// Frosted rows for teacher forms (use with `glassSheet()`).
-    func glassRow()->some View {listRowBackground(Rectangle().fill(.ultraThinMaterial))}
+    func glassRow()->some View {listRowBackground(Rectangle().fill(GlassFill.panel))}
+}
+/// Static "frosted" fills. Live material blur (backdrop filters) re-renders every frame while the game
+/// preview animates in the same window and made the teacher iPad stutter, so glass is faked with
+/// translucent white gradients over the soft, static backdrop.
+enum GlassFill {
+    static let panel=LinearGradient(colors:[.white.opacity(0.72),.white.opacity(0.52)],startPoint:.top,endPoint:.bottom)
+    static let button=LinearGradient(colors:[.white.opacity(0.82),.white.opacity(0.62)],startPoint:.top,endPoint:.bottom)
+    static let field=Color.white.opacity(0.66)
 }

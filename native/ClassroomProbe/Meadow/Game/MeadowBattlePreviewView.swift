@@ -15,21 +15,16 @@ enum MeadowPreviewPalette {
         let base=UIFont.systemFont(ofSize:size,weight:weight)
         return UIFont(descriptor:base.fontDescriptor.withDesign(.rounded) ?? base.fontDescriptor,size:size)
     }
-    static let glassTint = UIColor(red: 0.06, green: 0.12, blue: 0.09, alpha: 0.5)
-    /// Frosted glass panel: live blur of whatever is behind, a light dark tint so text stays legible
-    /// (the tint alone also carries the panel in the teacher mirror, which cannot capture blur), a hairline highlight.
+    static let glassTint = UIColor(red: 0.07, green: 0.13, blue: 0.10, alpha: 0.74)
+    /// Glass-style panel: translucent dark tint, continuous corners and a hairline highlight (static, no live blur).
     static func stylePanel(_ view: UIView) {
         view.backgroundColor = glassTint
         view.layer.cornerRadius = 18
         view.layer.cornerCurve = .continuous
         view.layer.borderWidth = 1
         view.layer.borderColor = UIColor.white.withAlphaComponent(0.22).cgColor
-        guard !view.subviews.contains(where:{$0.accessibilityIdentifier=="glass"}) else{return}
-        let blur = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterialDark))
-        blur.accessibilityIdentifier = "glass"; blur.isUserInteractionEnabled = false
-        blur.layer.cornerRadius = 18; blur.layer.cornerCurve = .continuous; blur.clipsToBounds = true
-        blur.frame = view.bounds; blur.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        view.insertSubview(blur, at: 0)
+        // No live UIVisualEffectView: panels sit over the animating Metal battle/map, and a blur there is
+        // recomputed every frame (and cannot be captured by the teacher mirror anyway).
     }
     /// Icon-first glass button: an SF Symbol with an optional short caption.
     static func iconButton(_ symbol:String,_ title:String?=nil,prominent:Bool=false)->UIButton {
@@ -37,9 +32,8 @@ enum MeadowPreviewPalette {
         style.image = UIImage(systemName:symbol,withConfiguration:UIImage.SymbolConfiguration(pointSize:18,weight:.semibold))
         style.title = title; style.imagePadding = 6; style.cornerStyle = .capsule
         style.titleTextAttributesTransformer=UIConfigurationTextAttributesTransformer { value in var v=value;v.font=font(16,.semibold);return v }
-        style.baseBackgroundColor = prominent ? gold:UIColor.white.withAlphaComponent(0.16)
+        style.baseBackgroundColor = prominent ? gold:UIColor.white.withAlphaComponent(0.18)
         style.baseForegroundColor = prominent ? panel:ink
-        style.background.visualEffect = prominent ? nil:UIBlurEffect(style:.systemUltraThinMaterialDark)
         style.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 14)
         let button = UIButton(type: .system); button.configuration = style
         if let title {button.accessibilityLabel = title}

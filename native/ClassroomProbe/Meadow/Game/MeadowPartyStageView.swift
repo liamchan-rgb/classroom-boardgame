@@ -218,12 +218,12 @@ final class MeadowPartyStageView:UIView {
         text.append(NSAttributedString(string:"  "+who,attributes:[.font:MeadowPreviewPalette.font(22,.medium),.foregroundColor:color.withAlphaComponent(0.95)]))
         label.attributedText=text;label.sizeToFit()
         let pill=UIView(frame:CGRect(x:0,y:0,width:label.bounds.width+44,height:label.bounds.height+18));pill.isUserInteractionEnabled=false
-        let blur=UIVisualEffectView(effect:UIBlurEffect(style:.systemUltraThinMaterialDark));blur.frame=pill.bounds
-        blur.layer.cornerRadius=pill.bounds.height/2;blur.layer.cornerCurve = .continuous;blur.clipsToBounds=true
-        pill.backgroundColor=UIColor(red:0.05,green:0.08,blue:0.07,alpha:0.45);pill.layer.cornerRadius=pill.bounds.height/2;pill.layer.cornerCurve = .continuous
+        pill.backgroundColor=UIColor(red:0.05,green:0.08,blue:0.07,alpha:0.68);pill.layer.cornerRadius=pill.bounds.height/2;pill.layer.cornerCurve = .continuous
         pill.layer.borderWidth=1.2;pill.layer.borderColor=color.withAlphaComponent(0.65).cgColor
+        // Explicit shadow path: no offscreen pass to find the shape each frame it drifts.
         pill.layer.shadowColor=color.cgColor;pill.layer.shadowOpacity=0.35;pill.layer.shadowRadius=14;pill.layer.shadowOffset = .zero
-        pill.addSubview(blur);label.center=CGPoint(x:pill.bounds.midX,y:pill.bounds.midY);pill.addSubview(label)
+        pill.layer.shadowPath=UIBezierPath(roundedRect:pill.bounds,cornerRadius:pill.bounds.height/2).cgPath
+        label.center=CGPoint(x:pill.bounds.midX,y:pill.bounds.midY);pill.addSubview(label)
         let top=foot.y-(unit.kind == .monster ? 330:262)
         let x=min(worldWidth-Double(pill.bounds.width)/2-8,max(Double(pill.bounds.width)/2+8,foot.x))
         pill.center=CGPoint(x:x,y:top+18);pill.alpha=0;pill.transform=CGAffineTransform(scaleX:0.8,y:0.8);pill.layer.zPosition=1150

@@ -90,7 +90,6 @@ final class MeadowShopViewController:UIViewController {
             c.subtitleTextAttributesTransformer=UIConfigurationTextAttributesTransformer{v in var v=v;v.font=MeadowPreviewPalette.font(13,.medium);return v}
             let chosen=item.id==selected,affordable=selling || unit.coins>=p
             c.baseBackgroundColor=chosen ? MeadowPreviewPalette.gold:UIColor.white.withAlphaComponent(0.10)
-            c.background.visualEffect=chosen ? nil:UIBlurEffect(style:.systemUltraThinMaterialDark)
             c.background.strokeColor=UIColor.white.withAlphaComponent(chosen ? 0.6:0.18);c.background.strokeWidth=1
             c.baseForegroundColor=chosen ? MeadowPreviewPalette.panel:(affordable ? MeadowPreviewPalette.ink:MeadowPreviewPalette.muted)
             let card=UIButton(configuration:c);card.alpha=affordable || chosen ? 1:0.6

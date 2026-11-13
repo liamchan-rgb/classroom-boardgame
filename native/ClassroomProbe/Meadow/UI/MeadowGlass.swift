@@ -10,13 +10,14 @@ enum MeadowGlassBackdrop {
         gradient.startPoint=CGPoint(x:0,y:0);gradient.endPoint=CGPoint(x:1,y:1)
         gradient.frame=CGRect(x:0,y:0,width:3000,height:2000)
         backdrop.layer.addSublayer(gradient)
-        for (x,y,r,color) in [(0.18,0.22,420.0,UIColor(red:0.35,green:0.70,blue:0.45,alpha:0.55)),(0.82,0.78,460.0,UIColor(red:0.95,green:0.70,blue:0.35,alpha:0.40)),(0.70,0.15,320.0,UIColor(red:0.40,green:0.62,blue:0.90,alpha:0.35))] {
-            let blob=CALayer();blob.backgroundColor=color.cgColor;blob.cornerRadius=r/2
-            blob.frame=CGRect(x:x*1400-r/2,y:y*1000-r/2,width:r,height:r)
-            backdrop.layer.addSublayer(blob)
+        // Soft colour pools as radial gradients (static; no blur view).
+        for (x,y,r,color) in [(0.18,0.22,520.0,UIColor(red:0.35,green:0.70,blue:0.45,alpha:0.30)),(0.82,0.78,560.0,UIColor(red:0.95,green:0.70,blue:0.35,alpha:0.22)),(0.70,0.15,420.0,UIColor(red:0.40,green:0.62,blue:0.90,alpha:0.20))] {
+            let pool=CAGradientLayer();pool.type = .radial
+            pool.colors=[color.cgColor,color.withAlphaComponent(0).cgColor]
+            pool.startPoint=CGPoint(x:0.5,y:0.5);pool.endPoint=CGPoint(x:1,y:1)
+            pool.frame=CGRect(x:x*1400-r,y:y*1000-r,width:r*2,height:r*2)
+            backdrop.layer.addSublayer(pool)
         }
-        let soften=UIVisualEffectView(effect:UIBlurEffect(style:.systemThickMaterialDark));soften.frame=backdrop.bounds;soften.autoresizingMask=[.flexibleWidth,.flexibleHeight];soften.alpha=0.85
-        backdrop.addSubview(soften)
         view.insertSubview(backdrop,at:0)
     }
 }

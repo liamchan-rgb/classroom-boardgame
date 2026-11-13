@@ -19,9 +19,9 @@ struct TeacherBookGrantBar:View {
                 }
             }label:{Label("\(selected.count)",systemImage:"person.2.fill")}
             HStack(spacing:4){Image(systemName:"diamond.fill").foregroundStyle(GameTheme.action);ClassroomTextField(placeholder:"1",text:$ap,limit:3,keyboard:.numberPad).frame(width:40,height:36)}
-                .padding(.horizontal,10).background(.ultraThinMaterial,in:Capsule())
+                .padding(.horizontal,10).background(GlassFill.field,in:Capsule())
             HStack(spacing:4){Image(systemName:"bitcoinsign.circle.fill").foregroundStyle(GameTheme.accent);ClassroomTextField(placeholder:"10",text:$coins,limit:5,keyboard:.numberPad).frame(width:54,height:36)}
-                .padding(.horizontal,10).background(.ultraThinMaterial,in:Capsule())
+                .padding(.horizontal,10).background(GlassFill.field,in:Capsule())
             Button{
                 prepare();guard let a=Int(ap),let c=Int(coins) else{return}
                 game.grantBookPlayers(selected,ap:a,coins:c)

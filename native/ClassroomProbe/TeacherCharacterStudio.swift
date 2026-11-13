@@ -95,7 +95,7 @@ struct TeacherCharacterStudio:View {
                 ForEach(0..<8,id:\.self){i in
                     Button{turning=false;facingIndex=i}label:{
                         ZStack{
-                            RoundedRectangle(cornerRadius:10,style:.continuous).fill(.ultraThinMaterial)
+                            RoundedRectangle(cornerRadius:10,style:.continuous).fill(GlassFill.button)
                             if let image=cell(facing:Self.turn[i],column:0,look:appearance){Image(uiImage:image).interpolation(.none).resizable().scaledToFit()}
                         }.frame(height:76).overlay(RoundedRectangle(cornerRadius:8).stroke(!turning && facingIndex==i ? GameTheme.accent:.clear,lineWidth:2))
                     }.buttonStyle(.plain)
@@ -146,7 +146,7 @@ struct TeacherCharacterStudio:View {
                             }.frame(height:96)
                             Text(label).font(.caption.weight(selected ? .bold:.regular)).lineLimit(1).minimumScaleFactor(0.7)
                         }.padding(5)
-                        .background(.ultraThinMaterial,in:RoundedRectangle(cornerRadius:14,style:.continuous))
+                        .background(GlassFill.button,in:RoundedRectangle(cornerRadius:14,style:.continuous))
                         .overlay(RoundedRectangle(cornerRadius:14,style:.continuous).stroke(selected ? GameTheme.accent:.white.opacity(0.5),lineWidth:selected ? 3:1))
                         .overlay(alignment:.topTrailing){if selected{Image(systemName:"checkmark.circle.fill").foregroundStyle(.white,GameTheme.accent).font(.system(size:18)).padding(6)}}
                         .scaleEffect(selected ? 1.03:1)
@@ -169,7 +169,7 @@ struct TeacherCharacterStudio:View {
                 Button{readPlayer()}label:{Label("还原",systemImage:"arrow.uturn.backward")}.buttonStyle(GlassIconButtonStyle()).disabled(players.isEmpty)
                 Divider().frame(height:40)
                 Picker("人物槽",selection:$slot){ForEach(1...MeadowSlotStore.profileCount,id:\.self){s in Text("\(s)"+(used[s].map{" · "+$0} ?? " · 空")).tag(s)}}
-                    .pickerStyle(.menu).padding(.horizontal,6).frame(minHeight:48).background(.ultraThinMaterial,in:RoundedRectangle(cornerRadius:14,style:.continuous))
+                    .pickerStyle(.menu).padding(.horizontal,6).frame(minHeight:48).background(GlassFill.button,in:RoundedRectangle(cornerRadius:14,style:.continuous))
                 Button{
                     let profile=MeadowPlayerProfile(name:name.trimmingCharacters(in:.whitespacesAndNewlines),appearance:appearance),target=slot
                     let save={try store.saveProfile(profile,slot:target,title:profile.name);notice="已保存到人物槽\(target)。";scanSlots()}
