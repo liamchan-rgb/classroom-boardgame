@@ -52,6 +52,11 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             2>&1 | tee build/logs/simulator-build.log
 
+      - name: Show compiler errors
+        if: ${{ failure() }}
+        run: |
+          grep -hE "error:|warning: .*will be an error" build/logs/*.log | sort -u | head -80 || true
+
       - name: Choose a simulator
         id: simulator
         run: |

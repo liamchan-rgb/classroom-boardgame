@@ -120,14 +120,22 @@ enum HairKit {
         }
 
         // 按深度从远到近排；深度相同的保持原顺序（与网页端的稳定排序一致）
-        let items = locks.enumerated().map { i, k -> (Lock, [Proj], Double, Int) in
-            let pts = lockPath(pose, cx, cy, k, i)
-            return (k, pts, pts[8].near + Double(k.tier) * 0.6, i)
+        struct Item {
+            let lock: Lock
+            let pts: [Proj]
+            let depth: Double
+            let index: Int
         }
-        .filter { ($0.1[8].near < -0.12) == back }
-        .sorted { $0.2 != $1.2 ? $0.2 < $1.2 : $0.3 < $1.3 }
+        var items: [Item] = []
+        for (i, k) in locks.enumerated() {
+            let pts = lockPath(pose, cx, cy, k, i)
+            if (pts[8].near < -0.12) != back { continue }
+            items.append(Item(lock: k, pts: pts, depth: pts[8].near + Double(k.tier) * 0.6, index: i))
+        }
+        items.sort { $0.depth != $1.depth ? $0.depth < $1.depth : $0.index < $1.index }
 
-        for (k, pts, _, _) in items {
+        for item in items {
+            let k = item.lock, pts = item.pts
             let points = pts.map { SpritePoint(x: $0.x, y: $0.y) }
             g.ribbon(points, halfW: { s in k.width * hs * profile(s) }) { lam, o, s, u, v in
                 if k.tier == 2 { return o > 0.2 ? Shade.dark : s > 0.5 ? Shade.light : Shade.base }
