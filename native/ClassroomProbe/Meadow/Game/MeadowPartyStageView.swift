@@ -275,6 +275,8 @@ final class MeadowPartyStageView:UIView {
         if ids != playerIDs { configureUnits(players:ids,foes:monsterIDs,pvp:false) }
         state=value;self.current=current;self.catalog=catalog;fx.friend=friend;fx.foe=foe;fx.current=current;chosenFriend=friend;chosenFoe=foe
         MeadowMonsterFrames.retain(Set(value.units.values.filter{$0.kind == .monster && renderIDs.contains($0.id)}.compactMap{MonsterVisualSpec.find($0.templateID)?.id}))
+        // A shield carried in from the map (or an earlier battle) forms up on entry and keeps moving like a fresh one.
+        for id in renderIDs where birth[id]==nil && (value.units[id]?.shield ?? 0)>0 && value.units[id]?.isAlive==true { birth[id]=sceneTime }
         for id in renderIDs where value.units[id]?.isAlive==false {
             if id.hasPrefix("m"),deaths[id]==nil {deaths[id]=sceneTime-MeadowBattleVisualMotion.deathDuration}
             if id.hasPrefix("p"),fallen[id]==nil {fallen[id]=sceneTime-2}
@@ -699,7 +701,7 @@ final class MeadowPartyStageView:UIView {
             guard shield>0,let baseFoot=PartyVisual.foot(unit.id) else { return nil }
             let foot=liveFeet[unit.id] ?? baseFoot,baseChest=PartyVisual.skillEffectCenter(targets:[unit.id],actor:unit.id,templates:healTemplates)
             let monster=unit.kind == .monster,defaultAngle=monster ? Double.pi:0.0
-            return (foot:foot,chest:PartyPoint(foot.x+(baseChest.x-baseFoot.x),foot.y+(baseChest.y-baseFoot.y)),level:min(1.5,max(0.25,Double(shield)/8.0)),age:birth[unit.id].map { sceneTime-$0 } ?? 10,hitAge:contact[unit.id].map { sceneTime-$0 } ?? -1,hitAngle:contactAngle[unit.id] ?? defaultAngle,wide:monster ? 1.35:1.0)
+            return (foot:foot,chest:PartyPoint(foot.x+(baseChest.x-baseFoot.x),foot.y+(baseChest.y-baseFoot.y)),level:min(1.5,max(0.25,Double(shield)/8.0)),age:birth[unit.id].map { sceneTime-$0 } ?? (sceneTime+10),hitAge:contact[unit.id].map { sceneTime-$0 } ?? -1,hitAngle:contactAngle[unit.id] ?? defaultAngle,wide:monster ? 1.35:1.0)
         }
         if let gpu {
             // Skills are drawn on the GPU; a full-screen flash goes to the pane-wide wash.

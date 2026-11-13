@@ -39,7 +39,7 @@ final class MeadowInventoryViewController:UIViewController,UIDocumentPickerDeleg
     override var supportedInterfaceOrientations:UIInterfaceOrientationMask { .landscape }
     override func viewDidLoad() {
         super.viewDidLoad();view.backgroundColor=UIColor(red:0.045,green:0.085,blue:0.058,alpha:1);MeadowGlassBackdrop.install(in:view)
-        [header,left,middle,right].forEach { MeadowPreviewPalette.stylePanel($0);view.addSubview($0) }
+        [header,left,middle,right].forEach { MeadowPreviewPalette.stylePanel($0,liveBlur:true);view.addSubview($0) }
         [titleLabel,saveLabel,close,exportButton,importButton].forEach(header.addSubview)
         view.addSubview(footer);right.addSubview(detailScroll);detailScroll.addSubview(detailContent);right.addSubview(primary)
         primary.addAction(UIAction { [weak self] _ in self?.activateSelected() },for:.touchUpInside)
@@ -70,7 +70,8 @@ final class MeadowInventoryViewController:UIViewController,UIDocumentPickerDeleg
         for row in rows { row.removeFromSuperview() };rows=[]
         for entry in entries {
             let row=UIButton(type:.system);row.backgroundColor=MeadowPreviewPalette.panel.withAlphaComponent(0.65)
-            row.layer.cornerRadius=6;row.layer.borderWidth=entry.id==selected ? 2:1;row.layer.borderColor=(entry.id==selected ? MeadowPreviewPalette.gold:MeadowPreviewPalette.border).cgColor
+            row.backgroundColor=UIColor.white.withAlphaComponent(entry.id==selected ? 0.16:0.08)
+            row.layer.cornerRadius=12;row.layer.cornerCurve = .continuous;row.layer.borderWidth=entry.id==selected ? 2:1;row.layer.borderColor=(entry.id==selected ? MeadowPreviewPalette.gold:UIColor.white.withAlphaComponent(0.16)).cgColor
             let icon=UIImageView(image:inventoryIcon(entry.id));icon.contentMode = .scaleAspectFit;icon.tag=1
             let name=MeadowPreviewPalette.label(entry.name,size:18,weight:.bold);name.numberOfLines=2;name.tag=2
             let amount=MeadowPreviewPalette.label("背包 ×\(entry.quantity)"+(entry.equipped ? " · 已装备":""),size:15);amount.tag=3
@@ -234,7 +235,7 @@ final class MeadowCampaignInventoryViewController:UIViewController {
     override var supportedInterfaceOrientations:UIInterfaceOrientationMask{.landscape}
     override func viewDidLoad(){
         super.viewDidLoad();view.backgroundColor=UIColor(red:0.045,green:0.085,blue:0.058,alpha:1);MeadowGlassBackdrop.install(in:view)
-        [header,left,middle,right].forEach{MeadowPreviewPalette.stylePanel($0);view.addSubview($0)}
+        [header,left,middle,right].forEach{MeadowPreviewPalette.stylePanel($0,liveBlur:true);view.addSubview($0)}
         [titleLabel,saveLabel,members,close].forEach(header.addSubview);view.addSubview(footer)
         [refillActions,hero,health,ap,stats].forEach(left.addSubview);hero.contentMode = .scaleAspectFit;hero.layer.magnificationFilter = .nearest
         refillActions.accessibilityIdentifier="campaignRefillInventoryActions"
@@ -273,7 +274,9 @@ final class MeadowCampaignInventoryViewController:UIViewController {
             // The item's picture at the front of its row.
             row.configuration?.image=MeadowItemIcon.image(e.id,item:try? catalog.item(e.id),side:54);row.configuration?.imagePlacement = .leading;row.configuration?.imagePadding=14
             row.contentHorizontalAlignment = .leading
-            row.configuration?.baseBackgroundColor=e.id==selected ? MeadowPreviewPalette.gold:MeadowPreviewPalette.panel
+            row.configuration?.baseBackgroundColor=e.id==selected ? MeadowPreviewPalette.gold:UIColor.white.withAlphaComponent(0.10)
+            row.configuration?.cornerStyle = .large
+            row.configuration?.background.strokeColor=UIColor.white.withAlphaComponent(e.id==selected ? 0.6:0.16);row.configuration?.background.strokeWidth=1
             row.configuration?.baseForegroundColor=e.id==selected ? MeadowPreviewPalette.panel:MeadowPreviewPalette.ink
             row.configuration?.subtitleTextAttributesTransformer=UIConfigurationTextAttributesTransformer { value in var v=value;v.font=MeadowPreviewPalette.font(15,.medium);return v }
             row.accessibilityIdentifier="campaignInventoryItem-"+e.id

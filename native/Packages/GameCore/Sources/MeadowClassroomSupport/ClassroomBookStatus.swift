@@ -14,7 +14,25 @@ public struct ClassroomBookPlayerStatus:Codable,Equatable,Identifiable {
         ap=unit.ap;maximumAP=stats.maximumAP;coins=unit.coins
     }
 }
+/// Floating status cards over the bottom of a picture-book page: one row up to four players, two rows for
+/// five to seven (3+2, 3+3, 4+3). Cards keep a compact width instead of stretching across the screen.
+public struct ClassroomBookCardLayout:Equatable {
+    public let rows:[Int]
+    public let card:CGSize
+    public let spacing:CGFloat
+}
 public enum ClassroomBookStatusLayout {
+    public static func cards(in host:CGSize,players:Int)->ClassroomBookCardLayout? {
+        guard host.width.isFinite,host.height.isFinite,host.width>0,host.height>0,(1...7).contains(players) else{return nil}
+        let columns=players<=4 ? players:(players+1)/2
+        var rows=[Int](),left=players
+        while left>0 {let n=min(columns,left);rows.append(n);left-=n}
+        let spacing=max(4,host.height*0.012)
+        let height=max(44,host.height*(rows.count==1 ? 0.11:0.095))
+        let fit=(host.width*0.94-CGFloat(columns-1)*spacing)/CGFloat(columns)
+        let width=max(80,min(host.width*0.24,height*2.8,fit))
+        return ClassroomBookCardLayout(rows:rows,card:CGSize(width:width,height:height),spacing:spacing)
+    }
     public static let heightFraction=0.09
     public static func height(in host:CGSize,players:Int)->CGFloat {
         guard host.width.isFinite,host.height.isFinite,host.width>0,host.height>0,(1...7).contains(players) else{return 0}

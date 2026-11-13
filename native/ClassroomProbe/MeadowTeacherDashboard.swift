@@ -19,7 +19,7 @@ struct MeadowTeacherDashboard:View {
     private func workspace(fullScreen:Bool)->some View {
         VStack(spacing:8){
             HStack(spacing:8){
-                Label("v0.21.1",systemImage:"leaf.fill").font(.system(size:13,weight:.bold,design:.rounded)).foregroundStyle(GameTheme.primary)
+                Label("v0.22.0",systemImage:"leaf.fill").font(.system(size:13,weight:.bold,design:.rounded)).foregroundStyle(GameTheme.primary)
                 GlassChip(icon:game.externalConnected ? "tv.fill":"ipad.landscape",text:game.externalConnected ? "TV":"本机",tint:game.externalConnected ? .green:GameTheme.muted)
                 if let c=game.campaign,!inBattle {
                     GlassChip(icon:"figure.walk.motion",text:"\(Int(ceil(c.movementRemaining)))/\(Int(ceil(c.movementCapacity)))")
@@ -90,7 +90,14 @@ struct MeadowTeacherDashboard:View {
                         }.scaleEffect(1.3)
                     }
                 }else{Color.black}
-                if !inBattle,game.surface != .exploration {
+                if game.surface == .book {
+                    VStack(spacing:14){
+                        Image(systemName:"book.pages.fill").font(.system(size:44))
+                        Text("TV 正在显示绘本").font(.headline)
+                        Button{TeacherSession.shared.concealNotes();game.project(.exploration)}label:{Label("切回游戏",systemImage:"gamecontroller.fill")}
+                            .buttonStyle(GlassIconButtonStyle(prominent:true)).scaleEffect(1.2)
+                    }.foregroundStyle(.white).padding(28).background(.black.opacity(0.55),in:RoundedRectangle(cornerRadius:22,style:.continuous))
+                }else if !inBattle,game.surface != .exploration {
                     VStack{HStack{Spacer();Button{game.project(.exploration)}label:{Label("地图",systemImage:"map")}.buttonStyle(GlassIconButtonStyle(tint:.white)).padding(12)};Spacer()}
                 }
             }.frame(maxWidth:.infinity,maxHeight:.infinity).background(.black).clipShape(RoundedRectangle(cornerRadius:18,style:.continuous))

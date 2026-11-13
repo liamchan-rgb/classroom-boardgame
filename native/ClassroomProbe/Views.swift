@@ -4,17 +4,23 @@ import UniformTypeIdentifiers
 
 struct TeacherConsole:View {
     @ObservedObject var session:TeacherSession
+    @State private var tab=0
     var body:some View {
-        TabView {
-            MeadowTeacherDashboard(game:session.game).tabItem{Label("游戏",systemImage:"gamecontroller.fill")}
-            TeacherBookConsole(session:session,game:session.game).tabItem{Label("绘本",systemImage:"book.pages.fill")}
+        TabView(selection:$tab) {
+            MeadowTeacherDashboard(game:session.game).tabItem{Label("游戏",systemImage:"gamecontroller.fill")}.tag(0)
+            TeacherBookConsole(session:session,game:session.game,showGame:{tab=0}).tabItem{Label("绘本",systemImage:"book.pages.fill")}.tag(1)
         }.preferredColorScheme(.light)
+        // Opening the game tab while the book is on the TV brings the game back to the TV as well.
+        .onChange(of:tab){_,value in
+            if value==0,session.game.surface == .book {session.concealNotes();session.game.project(.exploration)}
+        }
     }
 }
 
 private struct TeacherBookConsole:View {
     @ObservedObject var session:TeacherSession
     @ObservedObject var game:MeadowTeacherCoordinator
+    var showGame:()->Void={}
     @State private var importer=false
     @State private var importingBackup=false
     @State private var report=false
@@ -42,7 +48,7 @@ private struct TeacherBookConsole:View {
             }.buttonStyle(GlassIconButtonStyle()).menuStyle(.button).padding(.horizontal,10).padding(.vertical,6).glassPanel(radius:20,padding:0)
             HStack(spacing:8){
                 Button{notesFocused=false;game.project(.book)}label:{Label("投放",systemImage:"tv.and.mediabox")}.buttonStyle(GlassIconButtonStyle(prominent:true)).disabled(game.busy)
-                Button{notesFocused=false;session.concealNotes();game.project(.exploration)}label:{Label("游戏",systemImage:"gamecontroller.fill")}
+                Button{notesFocused=false;session.concealNotes();game.project(.exploration);showGame()}label:{Label("游戏",systemImage:"gamecontroller.fill")}
                 Divider().frame(height:36)
                 Button{session.turnPage(-1)}label:{Label("上页",systemImage:"chevron.left")}
                 GlassChip(icon:"doc.plaintext",text:"\(session.state.pageCount==0 ? 0:session.state.pageIndex+1) / \(session.state.pageCount)")

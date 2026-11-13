@@ -303,6 +303,22 @@ final class CampaignTests:XCTestCase {
         XCTAssertEqual(session.engine.archive,battle)
     }
 
+    func testShieldCarriesThroughBattleEndIntoTheNextBattle()throws {
+        let session=try MeadowCampaignSession.new(layout:layout(combat:true))
+        let start=session.engine.state.units["p1"]!.nodeID,target=session.engine.state.map.neighbors(start)[0]
+        try session.beginTravel(to:target);try finishTravel(session);try session.interactCurrentNode()
+        XCTAssertNotNil(session.engine.state.battle)
+        // A shield gained inside the battle (not from a potion before it).
+        try session.engine.apply(.editResources(unit:"p1",value:.init(shield:6)))
+        for monster in session.engine.state.battle!.queue where session.engine.state.units[monster]?.kind == .monster {
+            if session.engine.state.battle == nil {break}
+            try session.engine.apply(.setHealth(unit:monster,value:0,killer:"p1"))
+        }
+        XCTAssertNil(session.engine.state.battle);XCTAssertEqual(session.engine.state.units["p1"]?.shield,6)
+        let restored=try MeadowCampaignSession(save:.decoded(session.snapshot.encoded()))
+        XCTAssertEqual(restored.engine.state.units["p1"]?.shield,6)
+    }
+
     func finishTravel(_ session:MeadowCampaignSession)throws {
         for _ in 0..<30 where session.travel != nil {
             if !session.isMoving {try session.refillMovement(usingCoins:false);try session.setPaused(false)}

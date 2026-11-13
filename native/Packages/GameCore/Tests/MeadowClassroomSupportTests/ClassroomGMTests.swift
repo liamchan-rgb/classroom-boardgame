@@ -159,4 +159,18 @@ final class ClassroomGMTests:XCTestCase {
         XCTAssertTrue(c.engine.state.pauseReasons.contains(.book));XCTAssertEqual(b.surface,.book)
     }
 
+    func testBookCardsStayCompactAndWrapForLargeParties()throws {
+        let tv=CGSize(width:1920,height:1080)
+        XCTAssertNil(ClassroomBookStatusLayout.cards(in:tv,players:0));XCTAssertNil(ClassroomBookStatusLayout.cards(in:.zero,players:3))
+        XCTAssertEqual(ClassroomBookStatusLayout.cards(in:tv,players:2)?.rows,[2])
+        XCTAssertEqual(ClassroomBookStatusLayout.cards(in:tv,players:4)?.rows,[4])
+        XCTAssertEqual(ClassroomBookStatusLayout.cards(in:tv,players:5)?.rows,[3,2])
+        XCTAssertEqual(ClassroomBookStatusLayout.cards(in:tv,players:7)?.rows,[4,3])
+        for n in 1...7 {
+            let l=try XCTUnwrap(ClassroomBookStatusLayout.cards(in:tv,players:n)),columns=l.rows.max()!
+            XCTAssertLessThanOrEqual(l.card.width,tv.width*0.24+0.001)
+            XCTAssertLessThanOrEqual(CGFloat(columns)*l.card.width+CGFloat(columns-1)*l.spacing,tv.width)
+            XCTAssertLessThan(CGFloat(l.rows.count)*l.card.height,tv.height*0.25)
+        }
+    }
 }

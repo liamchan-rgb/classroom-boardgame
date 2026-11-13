@@ -1366,7 +1366,8 @@ private func refreshCampaignStatus(allowBattleOpen:Bool=true) {
         setRenderingPaused(true)
     }
     func classroomResumeRenderer(){
-        classroomOverlayDirty=true
+        // Re-send a whole mirror frame (map and overlay): the teacher preview must not keep the book-time picture.
+        classroomOverlayDirty=true;classroomDeliveredMap = -1;classroomDeliveryClock=ClassroomPreviewClock()
         classroomSuspended=false
         if battlePreviewActive {battlePreviewView?.classroomResume()}
         setRenderingPaused(!mapPresented || loadingFailed)

@@ -177,8 +177,14 @@ final class MeadowTeacherCoordinator:ObservableObject {
     func project(_ value:ClassroomPublicSurface){
         do{
             if value == .book {try renderer?.classroomSuspend();try campaign?.engine.setPause(.book,enabled:true)}
-            else if backend.surface == .book {try campaign?.engine.setPause(.book,enabled:false);renderer?.classroomResumeRenderer()}
+            else if backend.surface == .book {
+                // Leave the book first so the TV always switches, even if clearing the saved book pause fails.
+                try backend.project(value,role:.teacher);renderer?.classroomResumeRenderer()
+                do{try campaign?.engine.setPause(.book,enabled:false)}catch{message=error.localizedDescription}
+                renderer?.classroomRefresh()
+            }
             try backend.project(value,role:.teacher)
+            updateMirrorDemand()
             if case .encounter(let id)=value {renderer?.classroomPreviewEncounter(id)}else{renderer?.classroomPreviewEncounter(nil)}
             revision += 1
         }catch{message=error.localizedDescription}

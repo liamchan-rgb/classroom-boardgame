@@ -22,6 +22,30 @@ enum MeadowGlassBackdrop {
     }
 }
 
+/// The glass "sheen" of a panel: a light top highlight fading down (static), plus, on request, a real blur for
+/// panels that sit over a static backdrop (shop / pack sheets), where the blur costs nothing per frame.
+final class MeadowGlassSheen: UIView {
+    override class var layerClass: AnyClass { CAGradientLayer.self }
+    static func install(in view: UIView, liveBlur: Bool) {
+        // A scroll view would scroll its sheen away with the content: it keeps the plain tint.
+        guard !(view is UIScrollView), !view.subviews.contains(where: { $0 is MeadowGlassSheen }) else { return }
+        let sheen = MeadowGlassSheen(frame: view.bounds)
+        sheen.autoresizingMask = [.flexibleWidth, .flexibleHeight]; sheen.isUserInteractionEnabled = false
+        sheen.layer.cornerRadius = view.layer.cornerRadius; sheen.layer.cornerCurve = .continuous; sheen.clipsToBounds = true
+        if let g = sheen.layer as? CAGradientLayer {
+            g.colors = [UIColor.white.withAlphaComponent(0.13).cgColor, UIColor.white.withAlphaComponent(0.03).cgColor, UIColor.white.withAlphaComponent(0).cgColor]
+            g.locations = [0, 0.35, 1]
+        }
+        if liveBlur {
+            let blur = UIVisualEffectView(effect: UIBlurEffect(style: .systemThinMaterialDark))
+            blur.frame = sheen.bounds; blur.autoresizingMask = [.flexibleWidth, .flexibleHeight]; blur.isUserInteractionEnabled = false
+            sheen.insertSubview(blur, at: 0)
+            view.backgroundColor = UIColor(red: 0.05, green: 0.10, blue: 0.08, alpha: 0.42)
+        }
+        view.insertSubview(sheen, at: 0)
+    }
+}
+
 /// An SF Symbol followed by a short number or word, for icon-first labels.
 enum MeadowGlassText {
     static func iconLine(_ symbol:String,_ text:String,size:CGFloat,tint:UIColor=MeadowPreviewPalette.ink,weight:UIFont.Weight = .bold)->NSAttributedString {

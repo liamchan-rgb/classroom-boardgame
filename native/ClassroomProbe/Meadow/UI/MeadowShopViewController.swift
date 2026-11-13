@@ -49,7 +49,7 @@ final class MeadowShopViewController:UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad();view.backgroundColor=UIColor(red:0.045,green:0.085,blue:0.058,alpha:1)
         MeadowGlassBackdrop.install(in:view)
-        [header,grid,detail].forEach{MeadowPreviewPalette.stylePanel($0);view.addSubview($0)}
+        [header,grid,detail].forEach{MeadowPreviewPalette.stylePanel($0,liveBlur:true);view.addSubview($0)}
         [titleLabel,coinsLabel,buyers,mode,close].forEach(header.addSubview)
         [bigIcon,nameLabel,infoLabel,priceLabel,afterLabel,action].forEach(detail.addSubview)
         bigIcon.contentMode = .scaleAspectFit;bigIcon.layer.magnificationFilter = .nearest

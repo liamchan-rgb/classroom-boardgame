@@ -477,7 +477,7 @@ final class MeadowEncounterEditorViewController:UIViewController {
         stack.addArrangedSubview(MeadowPreviewPalette.label("敌人数量",size:18,weight:.bold));stack.addArrangedSubview(countButton)
         countButton.showsMenuAsPrimaryAction=true;countButton.heightAnchor.constraint(equalToConstant:44).isActive=true
         for index in 0..<3 {
-            let row=UIStackView();row.axis = .vertical;row.spacing=8;row.isLayoutMarginsRelativeArrangement=true;row.layoutMargins=UIEdgeInsets(top:12,left:12,bottom:12,right:12);row.backgroundColor=MeadowPreviewPalette.card;row.layer.cornerRadius=12
+            let row=UIStackView();row.axis = .vertical;row.spacing=8;row.isLayoutMarginsRelativeArrangement=true;row.layoutMargins=UIEdgeInsets(top:12,left:12,bottom:12,right:12);row.backgroundColor=UIColor.white.withAlphaComponent(0.08);row.layer.cornerRadius=14;row.layer.cornerCurve = .continuous;row.layer.borderWidth=1;row.layer.borderColor=UIColor.white.withAlphaComponent(0.14).cgColor
             let name=MeadowPreviewPalette.label("怪物 \(index+1)",size:18,weight:.bold),button=MeadowPreviewPalette.button(""),detail=MeadowPreviewPalette.label("",size:16)
             button.showsMenuAsPrimaryAction=true;button.heightAnchor.constraint(equalToConstant:44).isActive=true;detail.numberOfLines=0
             row.addArrangedSubview(name);row.addArrangedSubview(button);row.addArrangedSubview(detail)

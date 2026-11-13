@@ -17,14 +17,15 @@ enum MeadowPreviewPalette {
     }
     static let glassTint = UIColor(red: 0.07, green: 0.13, blue: 0.10, alpha: 0.74)
     /// Glass-style panel: translucent dark tint, continuous corners and a hairline highlight (static, no live blur).
-    static func stylePanel(_ view: UIView) {
+    static func stylePanel(_ view: UIView, liveBlur: Bool = false) {
         view.backgroundColor = glassTint
         view.layer.cornerRadius = 18
         view.layer.cornerCurve = .continuous
         view.layer.borderWidth = 1
         view.layer.borderColor = UIColor.white.withAlphaComponent(0.22).cgColor
-        // No live UIVisualEffectView: panels sit over the animating Metal battle/map, and a blur there is
-        // recomputed every frame (and cannot be captured by the teacher mirror anyway).
+        // Panels over the animating Metal battle/map never use a live blur (it is recomputed every frame and the
+        // teacher mirror cannot capture it); only full-screen sheets over a static backdrop ask for one.
+        MeadowGlassSheen.install(in: view, liveBlur: liveBlur)
     }
     /// Icon-first glass button: an SF Symbol with an optional short caption.
     static func iconButton(_ symbol:String,_ title:String?=nil,prominent:Bool=false)->UIButton {

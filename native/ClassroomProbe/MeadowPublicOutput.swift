@@ -37,47 +37,87 @@ struct PublicSurface:View {
     }
 }
 
-/// Same read-only page on TV and in the teacher's book preview.
+/// Same read-only page on TV and in the teacher's book preview. The page fills the screen; the players'
+/// status floats over its bottom edge as compact frosted cards laid out by party size.
 struct PublicBookPage:View {
     @ObservedObject var model:PublicDisplayModel
     let players:[ClassroomBookPlayerStatus]
     var body:some View {
         GeometryReader { geometry in
-            let height=ClassroomBookStatusLayout.height(in:geometry.size,players:players.count)
-            VStack(spacing:0){
-                ZStack(alignment:.topTrailing){
-                    Group {
-                        if let image=model.image {Image(uiImage:image).resizable().scaledToFit()}
-                        else{Text("教师正在准备绘本").font(.title)}
-                    }.frame(maxWidth:.infinity,maxHeight:.infinity)
-                    Text("\(model.snapshot.pageCount==0 ? 0:model.snapshot.pageIndex+1) / \(model.snapshot.pageCount)")
-                        .font(.caption.bold()).padding(6).background(.black.opacity(0.45),in:RoundedRectangle(cornerRadius:6)).padding(6)
-                }.frame(height:max(0,geometry.size.height-height))
-                if height>0 {
-                    HStack(spacing:4){
-                        ForEach(players){unit in BookPlayerBadge(unit:unit,height:height).frame(maxWidth:.infinity)}
-                    }.padding(.horizontal,6).frame(height:height).background(Color(red:0.06,green:0.11,blue:0.08)).clipped()
+            ZStack(alignment:.bottom){
+                Group {
+                    if let image=model.image {Image(uiImage:image).resizable().scaledToFit()}
+                    else{Label("绘本准备中",systemImage:"book.closed").font(.title)}
+                }.frame(maxWidth:.infinity,maxHeight:.infinity)
+                if let layout=ClassroomBookStatusLayout.cards(in:geometry.size,players:players.count) {
+                    VStack(spacing:layout.spacing){
+                        ForEach(Array(rowSlices(layout.rows).enumerated()),id:\.offset){_,range in
+                            HStack(spacing:layout.spacing){
+                                ForEach(range,id:\.self){i in BookPlayerCard(unit:players[i],index:i,size:layout.card)}
+                            }
+                        }
+                    }.padding(.bottom,layout.spacing*1.6)
                 }
+            }
+            .overlay(alignment:.topTrailing){
+                Text("\(model.snapshot.pageCount==0 ? 0:model.snapshot.pageIndex+1) / \(model.snapshot.pageCount)")
+                    .font(.system(size:max(11,geometry.size.height*0.022),weight:.bold,design:.rounded)).monospacedDigit()
+                    .padding(.horizontal,10).padding(.vertical,5).background(.black.opacity(0.45),in:Capsule()).padding(10)
             }
         }.foregroundStyle(.white).background(.black).allowsHitTesting(false)
     }
+    private func rowSlices(_ rows:[Int])->[Range<Int>] {
+        var start=0;return rows.map{n in defer{start+=n};return start..<start+n}
+    }
 }
-private struct BookPlayerBadge:View {
+/// One student's frosted card: initial badge, name, a short health bar, action points and coins.
+private struct BookPlayerCard:View {
     let unit:ClassroomBookPlayerStatus
-    let height:CGFloat
+    let index:Int
+    let size:CGSize
+    private static let tints:[Color]=[Color(red:0.36,green:0.72,blue:0.52),Color(red:0.42,green:0.62,blue:0.95),Color(red:0.95,green:0.62,blue:0.36),Color(red:0.78,green:0.52,blue:0.92),Color(red:0.95,green:0.80,blue:0.38),Color(red:0.40,green:0.80,blue:0.85),Color(red:0.92,green:0.50,blue:0.55)]
     private func number(_ value:Int)->String {value.formatted(.number.notation(.compactName).locale(Locale(identifier:"zh_CN")))}
+    private var ratio:Double {Double(max(0,unit.health))/Double(max(1,unit.maximumHealth))}
+    private var barColor:Color {ratio>0.5 ? Color(red:0.40,green:0.86,blue:0.52):ratio>0.25 ? Color(red:0.98,green:0.80,blue:0.35):Color(red:0.96,green:0.42,blue:0.40)}
     var body:some View {
-        VStack(alignment:.leading,spacing:1){
-            Text(unit.name).font(.system(size:min(16,max(8,height*0.24)),weight:.bold)).foregroundStyle(unit.health>0 ? Color.white:.gray)
-            HStack(spacing:3){
-                Text("HP \(number(unit.health))/\(number(unit.maximumHealth))")
-                ProgressView(value:Double(unit.health),total:Double(max(1,unit.maximumHealth))).tint(.green).frame(maxWidth:.infinity)
-            }.font(.system(size:min(14,max(8,height*0.21)),weight:.medium))
-            HStack(spacing:3){Text("◆ \(number(unit.ap))/\(number(unit.maximumAP))");Spacer(minLength:0);Text("金币 \(number(unit.coins))")}
-                .font(.system(size:min(14,max(8,height*0.21)),weight:.semibold)).foregroundStyle(Color(red:0.94,green:0.81,blue:0.46))
-        }.lineLimit(1).minimumScaleFactor(0.45).padding(.horizontal,3)
-            .accessibilityElement(children:.ignore)
-            .accessibilityLabel("\(unit.name)，生命\(unit.health)/\(unit.maximumHealth)，行动点\(unit.ap)/\(unit.maximumAP)，金币\(unit.coins)")
+        let h=size.height,tint=Self.tints[index%Self.tints.count],alive=unit.health>0
+        let short=unit.name.components(separatedBy:" · ").first ?? unit.name
+        VStack(alignment:.leading,spacing:h*0.07){
+            HStack(spacing:h*0.1){
+                Text(String(short.prefix(1)).uppercased()).font(.system(size:h*0.2,weight:.heavy,design:.rounded))
+                    .frame(width:h*0.32,height:h*0.32).background(tint.opacity(0.85),in:Circle()).foregroundStyle(.white)
+                Text(unit.name).font(.system(size:h*0.2,weight:.bold,design:.rounded)).lineLimit(1).minimumScaleFactor(0.6)
+                Spacer(minLength:0)
+                Image(systemName:alive ? "heart.fill":"heart.slash").font(.system(size:h*0.15,weight:.bold)).foregroundStyle(alive ? barColor:.gray)
+                Text("\(number(unit.health))/\(number(unit.maximumHealth))").font(.system(size:h*0.16,weight:.semibold,design:.rounded)).monospacedDigit()
+            }
+            GeometryReader{g in
+                ZStack(alignment:.leading){
+                    Capsule().fill(.white.opacity(0.16))
+                    Capsule().fill(LinearGradient(colors:[barColor.opacity(0.85),barColor],startPoint:.leading,endPoint:.trailing)).frame(width:g.size.width*ratio)
+                }
+            }.frame(height:max(4,h*0.085))
+            HStack(spacing:h*0.06){
+                Image(systemName:"diamond.fill").foregroundStyle(Color(red:0.70,green:0.60,blue:1.0))
+                Text("\(number(unit.ap))/\(number(unit.maximumAP))").monospacedDigit()
+                Spacer(minLength:0)
+                Image(systemName:"bitcoinsign.circle.fill").foregroundStyle(Color(red:0.98,green:0.80,blue:0.40))
+                Text(number(unit.coins)).monospacedDigit()
+            }.font(.system(size:h*0.16,weight:.semibold,design:.rounded))
+        }
+        .padding(.horizontal,h*0.14).padding(.vertical,h*0.1)
+        .frame(width:size.width,height:size.height)
+        .background {
+            // Frosted: a real blur is cheap here (the page under it is a still picture) plus a dark tint for legibility.
+            ZStack{
+                RoundedRectangle(cornerRadius:h*0.2,style:.continuous).fill(.ultraThinMaterial).environment(\.colorScheme,.dark)
+                RoundedRectangle(cornerRadius:h*0.2,style:.continuous).fill(LinearGradient(colors:[.black.opacity(0.30),.black.opacity(0.48)],startPoint:.top,endPoint:.bottom))
+            }
+        }
+        .overlay(RoundedRectangle(cornerRadius:h*0.2,style:.continuous).stroke(LinearGradient(colors:[.white.opacity(0.45),.white.opacity(0.1)],startPoint:.top,endPoint:.bottom),lineWidth:1))
+        .opacity(alive ? 1:0.6).saturation(alive ? 1:0.2)
+        .accessibilityElement(children:.ignore)
+        .accessibilityLabel("\(unit.name)，生命\(unit.health)/\(unit.maximumHealth)，行动点\(unit.ap)/\(unit.maximumAP)，金币\(unit.coins)")
     }
 }
 
