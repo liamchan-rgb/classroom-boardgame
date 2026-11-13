@@ -10,35 +10,39 @@ struct MeadowTeacherDashboard:View {
     @State private var selectingNode=false
     @State private var fullPreview=false
     var body:some View {
-        workspace(fullScreen:false).padding(8).background(GameTheme.background)
-            .fullScreenCover(isPresented:$fullPreview){workspace(fullScreen:true).background(GameTheme.background)}
+        workspace(fullScreen:false).padding(8).background(GlassBackdrop())
+            .fullScreenCover(isPresented:$fullPreview){workspace(fullScreen:true).padding(8).background(GlassBackdrop())}
             .onChange(of:fullPreview){_,value in game.localOutputPreview=value}
     }
     private var inBattle:Bool {game.campaign?.engine.state.battle != nil}
     private var targetName:String {game.campaign?.engine.state.units[game.selectedTarget]?.name ?? "选择目标"}
     private func workspace(fullScreen:Bool)->some View {
-        VStack(spacing:0){
-            HStack(spacing:10){
-                Text("教师游戏 · v0.20.0").font(.headline)
-                Text(game.externalConnected ? "电视已连接":"本机预览").font(.caption).foregroundStyle(.secondary)
+        VStack(spacing:8){
+            HStack(spacing:8){
+                Label("v0.21.0",systemImage:"leaf.fill").font(.system(size:13,weight:.bold,design:.rounded)).foregroundStyle(GameTheme.primary)
+                GlassChip(icon:game.externalConnected ? "tv.fill":"ipad.landscape",text:game.externalConnected ? "TV":"本机",tint:game.externalConnected ? .green:GameTheme.muted)
+                if let c=game.campaign,!inBattle {
+                    GlassChip(icon:"figure.walk.motion",text:"\(Int(ceil(c.movementRemaining)))/\(Int(ceil(c.movementCapacity)))")
+                    GlassChip(icon:"bitcoinsign.circle.fill",text:"\(c.engine.state.units[c.selectedPlayerID]?.coins ?? 0)",tint:GameTheme.accent)
+                }
                 Spacer(minLength:0)
-                Button{game.openCharacterStudio()}label:{Label("人物自定义",systemImage:"person.crop.circle.badge.plus")}.disabled(game.busy)
-                Button("GM"){game.openGM()}.disabled(!game.ready || game.busy || game.campaign==nil)
-                Button(fullScreen ? "退出全屏":"全屏"){fullPreview = !fullScreen}
+                Button{game.openCharacterStudio()}label:{Label("形象",systemImage:"person.crop.circle.badge.plus")}.disabled(game.busy)
+                Button{game.openGM()}label:{Label("GM",systemImage:"wand.and.stars")}.disabled(!game.ready || game.busy || game.campaign==nil)
+                Button{fullPreview = !fullScreen}label:{Label(fullScreen ? "退出":"全屏",systemImage:fullScreen ? "arrow.down.right.and.arrow.up.left":"arrow.up.left.and.arrow.down.right")}
                 Menu {
-                    Button("人物档案 / 行程槽 / 历史 / 老师参战"){game.openArchives()}.disabled(game.busy)
-                    Button("随机地图与新行程"){game.settings()}.disabled(game.busy || inBattle)
-                    Button("继续已保存行程"){game.restore()}.disabled(game.busy || inBattle)
-                    Button("保存行程"){game.operation(.save)}.disabled(!game.ready || game.busy)
+                    Button{game.openArchives()}label:{Label("档案 · 行程槽 · 历史",systemImage:"archivebox")}.disabled(game.busy)
+                    Button{game.settings()}label:{Label("新地图",systemImage:"map")}.disabled(game.busy || inBattle)
+                    Button{game.restore()}label:{Label("继续行程",systemImage:"arrow.clockwise.circle")}.disabled(game.busy || inBattle)
+                    Button{game.operation(.save)}label:{Label("保存",systemImage:"square.and.arrow.down")}.disabled(!game.ready || game.busy)
                     Divider()
-                    Button("奖励10金币"){game.award()}.disabled(game.busy || game.campaign==nil)
-                    Button("队伍与仓库"){game.openTeamConsole()}.disabled(!game.ready || game.busy)
-                    Button("路线与结算"){game.operation(.route)}.disabled(!game.ready || game.busy)
+                    Button{game.award()}label:{Label("+10 金币",systemImage:"bitcoinsign.circle")}.disabled(game.busy || game.campaign==nil)
+                    Button{game.openTeamConsole()}label:{Label("队伍与仓库",systemImage:"person.3")}.disabled(!game.ready || game.busy)
+                    Button{game.operation(.route)}label:{Label("路线与结算",systemImage:"flag.checkered")}.disabled(!game.ready || game.busy)
                     Divider()
-                    Button("编辑选中地点"){if let id=game.selectedNode{game.operation(.editNode(id))}}.disabled(game.selectedNode==nil || game.campaign?.travel != nil || inBattle)
-                    Button("投放选中怪物预览"){if let id=game.selectedNode{game.project(.encounter(id))}}.disabled(game.selectedNode==nil || inBattle)
-                }label:{Label("管理",systemImage:"slider.horizontal.3")}
-            }.frame(height:44).padding(.horizontal,12)
+                    Button{if let id=game.selectedNode{game.operation(.editNode(id))}}label:{Label("编辑地点",systemImage:"pencil")}.disabled(game.selectedNode==nil || game.campaign?.isMoving==true || inBattle)
+                    Button{if let id=game.selectedNode{game.project(.encounter(id))}}label:{Label("怪物预览",systemImage:"eye")}.disabled(game.selectedNode==nil || inBattle)
+                }label:{Label("更多",systemImage:"ellipsis.circle")}
+            }.buttonStyle(GlassIconButtonStyle()).menuStyle(.button).padding(.horizontal,10).padding(.vertical,6).glassPanel(radius:20,padding:0)
             if game.campaign != nil {
                 HStack(spacing:8){
                     if inBattle {
@@ -50,52 +54,71 @@ struct MeadowTeacherDashboard:View {
                             ForEach([PartyAction.smallPotion,.largePotion,.shieldPotion,.revivalStone],id:\.rawValue){action in
                                 Button(action.title){game.battle(action)}.disabled(!game.canUse(action))
                             }
-                        }label:{Label("道具",systemImage:"bag")}.disabled(!game.ready || game.busy)
-                        Button(game.campaign?.engine.state.pauseReasons.contains(.manual)==true ? "继续战斗":"暂停战斗"){game.toggleBattlePause()}.disabled(game.busy)
+                        }label:{Label("道具",systemImage:"cross.vial.fill")}.disabled(!game.ready || game.busy)
+                        let paused=game.campaign?.engine.state.pauseReasons.contains(.manual)==true
+                        Button{game.toggleBattlePause()}label:{Label(paused ? "继续":"暂停",systemImage:paused ? "play.fill":"pause.fill")}.disabled(game.busy)
                         Spacer(minLength:0)
-                        Button("结束行动"){game.battle(.endTurn)}.disabled(!game.canUse(.endTurn))
+                        Button{game.battle(.endTurn)}label:{Label("结束",systemImage:"forward.end.fill")}.buttonStyle(GlassIconButtonStyle(prominent:true)).disabled(!game.canUse(.endTurn))
                     }else{
-                        Menu {
-                            ForEach(game.campaign?.engine.state.players ?? []){u in Button(u.name){game.select(u.id)}}
-                        }label:{Label(game.campaign?.engine.state.units[game.campaign?.selectedPlayerID ?? ""]?.name ?? "成员",systemImage:"person")}
-                        .disabled(!game.ready || game.busy)
-                        Button(selectingNode ? "完成选点":"编辑地点"){selectingNode.toggle();if selectingNode{game.project(.exploration)}}
-                            .tint(selectingNode ? .orange:.accentColor).disabled(!game.ready || game.busy)
+                        memberPicker
+                        Button{selectingNode.toggle();if selectingNode{game.project(.exploration)}}label:{Label(selectingNode ? "完成":"选点",systemImage:selectingNode ? "checkmark.circle.fill":"mappin.and.ellipse")}
+                            .buttonStyle(GlassIconButtonStyle(tint:selectingNode ? .orange:GameTheme.primary)).disabled(!game.ready || game.busy)
                         if selectingNode {
-                            Button("修改内容"){if let id=game.selectedNode{game.operation(.editNode(id))}}.disabled(game.selectedNode==nil || game.campaign?.travel != nil)
+                            Button{if let id=game.selectedNode{game.operation(.editNode(id))}}label:{Label("修改",systemImage:"pencil")}.disabled(game.selectedNode==nil || game.campaign?.isMoving==true)
                         }else{
-                            Button("交互地点"){game.operation(.interact)}.disabled(!game.ready || game.busy || game.campaign?.isMoving==true)
-                            Button("行囊"){game.operation(.inventory)}.disabled(!game.ready || game.campaign?.canManageInventory != true)
+                            Button{game.operation(.interact)}label:{Label("交互",systemImage:"hand.tap.fill")}.disabled(!game.ready || game.busy || game.campaign?.isMoving==true)
+                            Button{game.operation(.inventory)}label:{Label("行囊",systemImage:"bag.fill")}.disabled(!game.ready || game.busy || game.campaign?.isCompleted != false)
+                            Button{game.operation(.shop)}label:{Label("商店",systemImage:"cart.fill")}.disabled(!game.ready || game.busy || game.campaign?.isCompleted != false)
                         }
                         Spacer(minLength:0)
-                        Button("补充移动"){game.operation(.refill)}.disabled(!game.ready || game.busy || game.campaign?.isMoving==true)
-                        Button("暂停 / 继续"){game.operation(.pauseOrResume)}.disabled(!game.ready || game.busy)
+                        Button{game.operation(.refill)}label:{Label("补充",systemImage:"bolt.fill")}.disabled(!game.ready || game.busy || game.campaign?.isMoving==true)
+                        Button{game.operation(.pauseOrResume)}label:{Label(game.campaign?.isMoving==true ? "暂停":"出发",systemImage:game.campaign?.isMoving==true ? "pause.fill":"play.fill")}
+                            .buttonStyle(GlassIconButtonStyle(prominent:true)).disabled(!game.ready || game.busy)
                     }
-                }.font(.system(size:15,weight:.semibold)).buttonStyle(.bordered).lineLimit(1).padding(.horizontal,10).frame(height:48)
+                }.buttonStyle(GlassIconButtonStyle()).menuStyle(.button).padding(.horizontal,10).padding(.vertical,6).glassPanel(radius:20,padding:0)
             }
             ZStack {
                 if game.renderer != nil && (fullScreen || !fullPreview) {
                     TeacherGamePreview(game:game,selectingNode:selectingNode)
                 }else if game.campaign==nil {
-                    VStack(spacing:20){
-                        Text("准备林间旅程").font(.title.bold())
-                        Button("随机地图与新行程"){game.settings()}
-                        Button("继续已保存行程"){game.restore()}
-                        Button("人物自定义"){game.openCharacterStudio()}
-                    }.buttonStyle(.borderedProminent).foregroundStyle(.white)
+                    VStack(spacing:22){
+                        Image(systemName:"leaf.circle.fill").font(.system(size:64)).foregroundStyle(.white.opacity(0.9))
+                        HStack(spacing:16){
+                            Button{game.settings()}label:{Label("新地图",systemImage:"map.fill")}.buttonStyle(GlassIconButtonStyle(prominent:true))
+                            Button{game.restore()}label:{Label("继续",systemImage:"arrow.clockwise.circle.fill")}.buttonStyle(GlassIconButtonStyle(tint:.white))
+                            Button{game.openCharacterStudio()}label:{Label("形象",systemImage:"person.crop.circle.badge.plus")}.buttonStyle(GlassIconButtonStyle(tint:.white))
+                        }.scaleEffect(1.3)
+                    }
                 }else{Color.black}
                 if !inBattle,game.surface != .exploration {
-                    VStack{HStack{Spacer();Button("返回探索地图"){game.project(.exploration)}.buttonStyle(.borderedProminent).padding(12)};Spacer()}
+                    VStack{HStack{Spacer();Button{game.project(.exploration)}label:{Label("地图",systemImage:"map")}.buttonStyle(GlassIconButtonStyle(tint:.white)).padding(12)};Spacer()}
                 }
-            }.frame(maxWidth:.infinity,maxHeight:.infinity).background(.black).clipped()
-            HStack(spacing:10){
-                Text(selectingNode && !inBattle ? "点建筑选取地点，再点「修改内容」":"\(game.message)").lineLimit(1).truncationMode(.tail)
+            }.frame(maxWidth:.infinity,maxHeight:.infinity).background(.black).clipShape(RoundedRectangle(cornerRadius:18,style:.continuous))
+            .overlay(RoundedRectangle(cornerRadius:18,style:.continuous).stroke(.white.opacity(0.5),lineWidth:1))
+            HStack(spacing:8){
+                Image(systemName:selectingNode && !inBattle ? "mappin.and.ellipse":(inBattle ? "hand.point.up.left.fill":"info.circle")).foregroundStyle(GameTheme.primary)
+                Text(selectingNode && !inBattle ? "点建筑选取地点":"\(game.message)").lineLimit(1).truncationMode(.tail)
                 Spacer(minLength:0)
-                if inBattle {Text("直接点画面内技能 · 点角色选目标")}
-                else if let c=game.campaign {Text("移动 \(Int(ceil(c.movementRemaining)))/\(Int(ceil(c.movementCapacity)))")}
-            }.font(.caption).foregroundStyle(.secondary).padding(.horizontal,12).frame(height:28)
-        }.foregroundStyle(GameTheme.ink).background(GameTheme.background,in:RoundedRectangle(cornerRadius:14))
-            .overlay{RoundedRectangle(cornerRadius:14).stroke(GameTheme.ink.opacity(0.18))}.clipShape(RoundedRectangle(cornerRadius:14))
+            }.font(.caption).foregroundStyle(GameTheme.muted).padding(.horizontal,14).frame(height:30).glassPanel(radius:15,padding:0)
+        }.foregroundStyle(GameTheme.ink).background(GlassBackdrop())
+    }
+    /// Members grouped by team: picking someone of another team switches the walking party (the other team's road is parked).
+    private var memberPicker:some View {
+        let c=game.campaign,teams=c?.engine.state.teams ?? [],players=c?.engine.state.players ?? []
+        let current=c?.engine.state.units[c?.selectedPlayerID ?? ""]
+        return Menu {
+            ForEach(teams){team in
+                let members=players.filter{$0.teamID==team.id}
+                if !members.isEmpty {
+                    Section(team.name+(c?.parkedTravels[team.id] != nil ? " · 路上":"")) {
+                        ForEach(members){u in
+                            Button{game.select(u.id)}label:{Label(u.name,systemImage:u.id==current?.id ? "checkmark.circle.fill":(u.isAlive ? "person.fill":"person.slash"))}
+                        }
+                    }
+                }
+            }
+        }label:{Label(current.map{$0.name.components(separatedBy:" · ").first ?? $0.name} ?? "成员",systemImage:teams.count>1 ? "person.2.fill":"person.fill")}
+        .disabled(!game.ready || game.busy)
     }
     private var battleTargets:[GameUnit] {
         guard let c=game.campaign else{return []}

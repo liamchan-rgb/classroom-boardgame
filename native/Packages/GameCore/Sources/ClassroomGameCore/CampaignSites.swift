@@ -38,6 +38,14 @@ public enum CampaignSiteRules {
         guard base>=0,!product.overflow else{throw GameError("商品价格超出范围。")}
         return base==0 ? 0:max(1,product.partialValue/100)
     }
+    /// The travelling peddler is always available during exploration: shop
+    /// sites keep their configured ratios, every other place trades at the
+    /// catalog's base prices.
+    public static func tradePrice(item:ItemDefinition,buy:Bool,node:MapNode,seed:UInt64)throws->Int {
+        if configuration(node:node,seed:seed)?.kind == .shop {return try price(item:item,buy:buy,node:node,seed:seed)}
+        guard let base=buy ? item.purchasePrice:item.sellPrice,base>=0 else{throw GameError("此商品不出售。")}
+        return base
+    }
 
 }
 extension Evaluation {
@@ -58,15 +66,16 @@ extension Evaluation {
         return(actor,index,kind)
     }
     mutating func tradeCampaignSite(actor id:String,item itemID:String,buy:Bool)throws {
-        var (actor,index,kind)=try siteActor(id)
-        guard kind == .shop else{throw GameError("请到商店交易。")}
+        var actor=try acting(id)
+        guard state.phase == .exploration,state.battle==nil,actor.kind == .player,
+              let index=state.map.nodes.firstIndex(where:{$0.id==actor.nodeID}) else{throw GameError("请在探索中交易。")}
         let item=try catalog.item(itemID),price:Int
         if buy {
             guard let purchase=item.purchasePrice,purchase>0,item.setID==nil else{throw GameError("此物品不出售。")}
-            price=try CampaignSiteRules.price(item:item,buy:true,node:state.map.nodes[index],seed:state.map.seed);guard actor.coins>=price else{throw GameError("购买者个人金币不足。")}
+            price=try CampaignSiteRules.tradePrice(item:item,buy:true,node:state.map.nodes[index],seed:state.map.seed);guard actor.coins>=price else{throw GameError("购买者个人金币不足。")}
             actor.inventory[itemID]=try checkedAdd(actor.inventory[itemID] ?? 0,1);actor.coins-=price
         }else {
-            price=try CampaignSiteRules.price(item:item,buy:false,node:state.map.nodes[index],seed:state.map.seed)
+            price=try CampaignSiteRules.tradePrice(item:item,buy:false,node:state.map.nodes[index],seed:state.map.seed)
             guard price>0,let count=actor.inventory[itemID],count>0 else{throw GameError("只能出售个人行囊内的物品，请先卸下已装备物品。")}
             actor.coins=try checkedAdd(actor.coins,price)
             if count==1{actor.inventory.removeValue(forKey:itemID)}else{actor.inventory[itemID]=count-1}

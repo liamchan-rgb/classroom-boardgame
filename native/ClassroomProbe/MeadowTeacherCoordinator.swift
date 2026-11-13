@@ -185,7 +185,9 @@ final class MeadowTeacherCoordinator:ObservableObject {
     }
     func select(_ id:String){do{try backend.selectPlayer(id,role:.teacher);selectedTarget=id;renderer?.classroomRefresh();revision += 1}catch{message=error.localizedDescription}}
     func canTapCanvas(_ point:CGPoint)->Bool {
-        guard ready,!busy,!modalOpen,surface != .book else{return false}
+        guard ready,!modalOpen,surface != .book else{return false}
+        if renderer?.classroomHasGainPopup==true {return true}
+        guard !busy else{return false}
         if campaign?.engine.state.battle != nil {return (try? renderer?.classroomBattleHit(at:point,role:.teacher)) != nil}
         return canBeginMapGesture(point)
     }
@@ -204,6 +206,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
     }
     func canvasTap(_ point:CGPoint,selectingNode:Bool){
         guard ready else{message="画面还在准备，请稍候。";return}
+        if !modalOpen,(try? renderer?.classroomGainPopupTap(at:point,role:.teacher))==true {revision += 1;return}
         guard !busy,!modalOpen else{message="请等待当前动作结束或关闭后台对话框。";return}
         if campaign?.engine.state.battle != nil {
             if let hit=try? renderer?.classroomBattleHit(at:point,role:.teacher) {

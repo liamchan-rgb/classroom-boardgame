@@ -10,28 +10,27 @@ struct TeacherBookGrantBar:View {
     private var players:[GameUnit] {game.campaign?.engine.state.players ?? []}
     private var selected:[String] {players.map(\.id).filter{recipients.contains($0)}}
     var body:some View {
-        HStack(spacing:10){
-            Menu("奖励对象 · \(selected.count)人") {
-                Button("全选"){recipients=Set(players.map(\.id))}
-                Button("清空选择"){recipients=[]}
+        HStack(spacing:8){
+            Menu {
+                Button{recipients=Set(players.map(\.id))}label:{Label("全选",systemImage:"checkmark.circle")}
+                Button{recipients=[]}label:{Label("清空",systemImage:"circle")}
                 ForEach(players){unit in
                     Button{if recipients.contains(unit.id){recipients.remove(unit.id)}else{recipients.insert(unit.id)}}label:{Label(unit.name,systemImage:recipients.contains(unit.id) ? "checkmark.circle.fill":"circle")}
                 }
-            }
-            HStack{Text("行动点");TextField("1",text:$ap).keyboardType(.numberPad).frame(width:48)}
-            HStack{Text("金币");TextField("10",text:$coins).keyboardType(.numberPad).frame(width:60)}
-            Button("发放"){
+            }label:{Label("\(selected.count)",systemImage:"person.2.fill")}
+            HStack(spacing:4){Image(systemName:"diamond.fill").foregroundStyle(GameTheme.action);ClassroomTextField(placeholder:"1",text:$ap,limit:3,keyboard:.numberPad).frame(width:40,height:36)}
+                .padding(.horizontal,10).background(.ultraThinMaterial,in:Capsule())
+            HStack(spacing:4){Image(systemName:"bitcoinsign.circle.fill").foregroundStyle(GameTheme.accent);ClassroomTextField(placeholder:"10",text:$coins,limit:5,keyboard:.numberPad).frame(width:54,height:36)}
+                .padding(.horizontal,10).background(.ultraThinMaterial,in:Capsule())
+            Button{
                 prepare();guard let a=Int(ap),let c=Int(coins) else{return}
                 game.grantBookPlayers(selected,ap:a,coins:c)
-            }.disabled(game.busy)
-            Menu("快捷奖励") {
-                Button("行动点＋1"){prepare();game.grantBookPlayers(selected,ap:1,coins:0)}.disabled(selected.isEmpty)
-                Button("金币＋10"){prepare();game.grantBookPlayers(selected,ap:0,coins:10)}.disabled(selected.isEmpty)
-                Divider()
-                Button("撤销最近一次GM/发放"){prepare();game.undoTeacherAction()}.disabled(!game.backend.canUndoTeacherAction)
-            }.disabled(game.busy)
+            }label:{Label("发放",systemImage:"gift.fill")}.buttonStyle(GlassIconButtonStyle(tint:GameTheme.accent,prominent:true)).disabled(game.busy)
+            Button{prepare();game.grantBookPlayers(selected,ap:1,coins:0)}label:{Label("+1",systemImage:"diamond")}.disabled(selected.isEmpty || game.busy)
+            Button{prepare();game.grantBookPlayers(selected,ap:0,coins:10)}label:{Label("+10",systemImage:"bitcoinsign.circle")}.disabled(selected.isEmpty || game.busy)
+            Button{prepare();game.undoTeacherAction()}label:{Label("撤销",systemImage:"arrow.uturn.backward")}.disabled(!game.backend.canUndoTeacherAction || game.busy)
             Spacer(minLength:0)
-        }.font(.callout).buttonStyle(.bordered).padding(10).background(.white.opacity(0.75),in:RoundedRectangle(cornerRadius:10))
+        }.buttonStyle(GlassIconButtonStyle()).menuStyle(.button).padding(.horizontal,10).padding(.vertical,6).glassPanel(radius:20,padding:0)
             .disabled(players.isEmpty || game.campaign?.isCompleted==true)
             .onAppear{if let id=game.campaign?.selectedPlayerID{recipients=[id]}}
     }

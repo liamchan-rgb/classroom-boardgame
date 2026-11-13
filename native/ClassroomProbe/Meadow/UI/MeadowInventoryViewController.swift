@@ -38,7 +38,7 @@ final class MeadowInventoryViewController:UIViewController,UIDocumentPickerDeleg
     override var prefersStatusBarHidden:Bool { true }
     override var supportedInterfaceOrientations:UIInterfaceOrientationMask { .landscape }
     override func viewDidLoad() {
-        super.viewDidLoad();view.backgroundColor=UIColor(red:0.045,green:0.085,blue:0.058,alpha:1)
+        super.viewDidLoad();view.backgroundColor=UIColor(red:0.045,green:0.085,blue:0.058,alpha:1);MeadowGlassBackdrop.install(in:view)
         [header,left,middle,right].forEach { MeadowPreviewPalette.stylePanel($0);view.addSubview($0) }
         [titleLabel,saveLabel,close,exportButton,importButton].forEach(header.addSubview)
         view.addSubview(footer);right.addSubview(detailScroll);detailScroll.addSubview(detailContent);right.addSubview(primary)
@@ -233,7 +233,7 @@ final class MeadowCampaignInventoryViewController:UIViewController {
     override var prefersStatusBarHidden:Bool{true}
     override var supportedInterfaceOrientations:UIInterfaceOrientationMask{.landscape}
     override func viewDidLoad(){
-        super.viewDidLoad();view.backgroundColor=UIColor(red:0.045,green:0.085,blue:0.058,alpha:1)
+        super.viewDidLoad();view.backgroundColor=UIColor(red:0.045,green:0.085,blue:0.058,alpha:1);MeadowGlassBackdrop.install(in:view)
         [header,left,middle,right].forEach{MeadowPreviewPalette.stylePanel($0);view.addSubview($0)}
         [titleLabel,saveLabel,members,close].forEach(header.addSubview);view.addSubview(footer)
         [refillActions,hero,health,ap,stats].forEach(left.addSubview);hero.contentMode = .scaleAspectFit;hero.layer.magnificationFilter = .nearest

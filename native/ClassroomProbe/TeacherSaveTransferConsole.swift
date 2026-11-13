@@ -49,9 +49,9 @@ struct TeacherSaveTransferConsole:View {
                     Picker("操作",selection:$importing){Text("导出备份").tag(false);Text("导入备份").tag(true)}.pickerStyle(.segmented)
                     Text(notice).font(.callout)
                     if working{ProgressView("正在校验与处理文件…")}
-                }
+                }.glassRow()
                 if importing{importForm}else{exportForm}
-            }.disabled(working).navigationTitle("人物与行程 · 导入导出")
+            }.glassSheet().disabled(working).navigationTitle("人物与行程 · 导入导出")
                 .toolbar{ToolbarItem(placement:.cancellationAction){Button("关闭"){onClose()}.disabled(working)}}
                 .interactiveDismissDisabled(working)
                 .onAppear{if !initialized{initialized=true;importing=request.importing;refresh(selectDefaults:true)}}
@@ -77,7 +77,7 @@ struct TeacherSaveTransferConsole:View {
                 }
                 if rows.isEmpty{Text("暂无已保存槽位。可返回上一页保存人物或行程。")}
                 Button("生成备份并存到文件（\(selectedAddresses.count)项）"){exportSelected()}.disabled(selectedAddresses.isEmpty)
-            }
+            }.glassRow()
         }
     }
     private var importForm:some View {
@@ -86,7 +86,7 @@ struct TeacherSaveTransferConsole:View {
                 Button("从“文件”选择JSON备份"){picker=true}
                 Text("支持新版批量备份、旧版人物/行程槽JSON及原地图工作档。先校验，再预览目标；不会立即替换正在玩的行程。").font(.caption)
                 if !sourceName.isEmpty{Text("来源："+sourceName).font(.caption).lineLimit(2)}
-            }
+            }.glassRow()
             if let package {
                 Section("勾选条目并指定目标槽") {
                     ForEach(package.addresses){address in
@@ -103,7 +103,7 @@ struct TeacherSaveTransferConsole:View {
                     }
                     Button("校对并导入（\(selectedAddresses.count)项）"){prepareConfirmation()}.disabled(selectedAddresses.isEmpty)
                     Text("覆盖前会保存目标槽的原始文件。导入只改所选槽；之后在人物/行程页点击读取，才会应用到游戏。").font(.caption)
-                }
+                }.glassRow()
             }
             Section("导入前的槽位备份") {
                 ForEach(backups.prefix(20)){backup in
@@ -112,7 +112,7 @@ struct TeacherSaveTransferConsole:View {
                 }
                 if backups.isEmpty{Text("暂无覆盖记录。")}
                 Text("选择后仍先进入预览，不会自动覆盖。原文件损坏时会报错并保留原始字节。").font(.caption)
-            }
+            }.glassRow()
         }
     }
     private func selected(_ address:MeadowSlotAddress)->Binding<Bool>{Binding(get:{selection.contains(address)},set:{if $0{selection.insert(address)}else{selection.remove(address)}})}

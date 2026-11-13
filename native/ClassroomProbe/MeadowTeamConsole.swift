@@ -31,43 +31,45 @@ struct MeadowTeamConsole:View {
                             ForEach(names.keys.sorted(),id:\.self){id in Text(names[id] ?? id).tag(id)}
                         }
                     }
-                    HStack {
-                        TextField("新队伍名称（用于建队或拆队）",text:$newName)
-                        Button("添加队伍"){
-                            names["team-"+UUID().uuidString]=newName.trimmingCharacters(in:.whitespacesAndNewlines);newName=""
-                        }.disabled(newName.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty)
+                    HStack(spacing:8) {
+                        GlassField(icon:"flag.fill",placeholder:"新队伍名",text:$newName,limit:20)
+                        Button{
+                            let clean=newName.trimmingCharacters(in:.whitespacesAndNewlines)
+                            names["team-"+UUID().uuidString]=clean.isEmpty ? nextTeamName:clean;newName=""
+                        }label:{Label("添加",systemImage:"plus.circle.fill")}.buttonStyle(GlassIconButtonStyle(prominent:true))
                     }
                     ForEach(names.keys.sorted(),id:\.self){id in
-                        TextField("队伍名称",text:Binding(get:{names[id] ?? ""},set:{names[id]=$0}))
+                        GlassField(icon:"flag",placeholder:"队伍名称",text:Binding(get:{names[id] ?? ""},set:{names[id]=$0}),limit:20)
                     }
-                    Button("保存分组"){
+                    Button{
                         game.teamCommand(.configureTeams(names:names,members:members));reload()
-                    }.disabled(game.busy || game.campaign?.travel != nil)
-                }
+                    }label:{Label("保存分组",systemImage:"checkmark.seal.fill")}.buttonStyle(GlassIconButtonStyle(prominent:true)).disabled(locked)
+                    if locked {Label("先让各队抵达地点再调整分组",systemImage:"figure.walk.motion").font(.caption).foregroundStyle(.secondary)}
+                }.glassRow()
                 Section("合并队伍") {
                     teamPicker("原队伍",selection:$source);teamPicker("合并到",selection:$destination)
                     Text("成员与共享仓库一起合并到目标队；原队保留为空队，个人资产不变。").font(.caption)
                     Button("执行合并"){
                         game.teamCommand(.mergeTeams(source:source,destination:destination));reload()
-                    }.disabled(source==destination || game.busy || game.campaign?.travel != nil)
-                }
+                    }.disabled(source==destination || locked)
+                }.glassRow()
                 Section("同队转交 / 仓库存取 · 仅探索") {
                     Picker("从",selection:$sender){ForEach(owners,id:\.0){Text($0.1).tag($0.0)}}
                     Picker("到",selection:$recipient){ForEach(owners,id:\.0){Text($0.1).tag($0.0)}}
-                    HStack{Text("金币数量");TextField("0",text:$coins).keyboardType(.numberPad).multilineTextAlignment(.trailing)}
+                    GlassField(icon:"bitcoinsign.circle.fill",placeholder:"金币",text:$coins,limit:6,keyboard:.numberPad)
                     Picker("物品",selection:$item){
                         Text("只转金币").tag("")
                         ForEach(game.campaign?.engine.catalog.items ?? []){Text($0.name).tag($0.id)}
                     }
-                    if !item.isEmpty {HStack{Text("物品数量");TextField("1",text:$quantity).keyboardType(.numberPad).multilineTextAlignment(.trailing)}}
+                    if !item.isEmpty {GlassField(icon:"number",placeholder:"数量",text:$quantity,limit:4,keyboard:.numberPad)}
                     Toggle("教师跨队调拨（记录后台操作）",isOn:$teacherTransfer)
                     Button(teacherTransfer ? "确认教师调拨":"确认同队转移"){
                         guard let value=Int(coins),let count=Int(quantity) else{return}
                         let command:GameCommand=teacherTransfer ? .teacherTransferTeamResource(from:owner(sender),to:owner(recipient),coins:value,item:item.isEmpty ? nil:item,count:item.isEmpty ? 0:count):.transferTeamResource(from:owner(sender),to:owner(recipient),coins:value,item:item.isEmpty ? nil:item,count:item.isEmpty ? 0:count)
                         game.teamCommand(command)
-                    }.disabled(game.busy || game.campaign?.travel != nil || game.campaign?.engine.state.battle != nil || sender==recipient)
+                    }.disabled(locked || game.campaign?.engine.state.battle != nil || sender==recipient)
                     Text("行动点不可转移；战斗不能取仓库物品。跨队资源需显式启用教师调拨。").font(.caption)
-                }
+                }.glassRow()
                 Section("仓库与实时队伍积分") {
                     ForEach(teams){team in
                         let score=players.filter{$0.teamID==team.id}.reduce(0){$0+$1.score}
@@ -78,10 +80,16 @@ struct MeadowTeamConsole:View {
                             }
                         }
                     }
-                }
-                Section{Text(game.message).foregroundStyle(.secondary)}
-            }.navigationTitle("队伍与仓库").toolbar{Button("完成"){if let onClose{onClose()}else{dismiss()}}}.onAppear{reload()}
+                }.glassRow()
+                Section{Text(game.message).foregroundStyle(.secondary)}.glassRow()
+            }.glassSheet().navigationTitle("队伍与仓库").toolbar{Button{if let onClose{onClose()}else{dismiss()}}label:{Image(systemName:"checkmark.circle.fill").font(.title2)}.accessibilityLabel("完成")}.onAppear{reload()}
         }
+    }
+    /// Grouping and merging change who walks together, so they wait until no team is on a road.
+    private var locked:Bool {game.busy || game.campaign?.travel != nil || game.campaign?.parkedTravels.isEmpty==false}
+    private var nextTeamName:String {
+        let used=Set(names.values);let pool=["红队","蓝队","绿队","金队","紫队","橙队"]
+        return pool.first{!used.contains($0)} ?? "第\(names.count+1)队"
     }
     private func reload(){names=Dictionary(uniqueKeysWithValues:teams.map{($0.id,$0.name)});members=Dictionary(uniqueKeysWithValues:players.map{($0.id,$0.teamID ?? "party")})}
     private func owner(_ value:String)->TeamResourceOwner {value.hasPrefix("w:") ? .warehouse(String(value.dropFirst(2))):.player(String(value.dropFirst(2)))}

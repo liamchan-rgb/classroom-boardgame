@@ -8,7 +8,8 @@ public struct MeadowCampaignCheckpoint:Codable,Equatable {
     public let movement:MeadowCampaignMovement?
     public let movementBalances:[String:Double]?
     public let selectedPlayerID:String?
-    public init(save:MeadowCampaignSave,operationID:String){self.operationID=operationID;travel=save.travel;camera=save.camera;movement=save.movement;movementBalances=save.movementBalances;selectedPlayerID=save.selectedPlayerID}
+    public let parkedTravels:[String:MeadowCampaignTravel]?
+    public init(save:MeadowCampaignSave,operationID:String){self.operationID=operationID;travel=save.travel;parkedTravels=save.parkedTravels;camera=save.camera;movement=save.movement;movementBalances=save.movementBalances;selectedPlayerID=save.selectedPlayerID}
 }
 extension MeadowCampaignSave {
     public func rollingBack(after operationID:String,book:Bool=false)throws->Self {
@@ -17,11 +18,11 @@ extension MeadowCampaignSave {
         next.archive.history=Array(archive.history.prefix(index+1));next.completion=nil
         if let c=checkpoints?.first(where:{$0.operationID==operationID}) {
             next.travel=c.travel;next.camera=c.camera;next.movement=c.movement
-            next.movementBalances=c.movementBalances;next.selectedPlayerID=c.selectedPlayerID
+            next.movementBalances=c.movementBalances;next.selectedPlayerID=c.selectedPlayerID;next.parkedTravels=c.parkedTravels
         } else {
             // Old saves have no road checkpoints. Never reuse a stale road cursor
             // or refill movement when restoring their rule state.
-            next.travel=nil
+            next.travel=nil;next.parkedTravels=nil
             if !next.archive.state.players.contains(where:{$0.id==next.selectedPlayerID}){next.selectedPlayerID=next.archive.state.players.first?.id}
             let limit=next.movementLimit;if let remaining=next.movement?.remaining{next.movement?.remaining=min(remaining,limit)}
         }

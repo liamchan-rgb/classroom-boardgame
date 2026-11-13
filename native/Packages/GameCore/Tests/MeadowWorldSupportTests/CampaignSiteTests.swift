@@ -68,8 +68,20 @@ final class CampaignSiteTests:XCTestCase {
         XCTAssertEqual(poor.snapshot,before)
         let start=s.engine.state.units["p1"]!.nodeID
         try s.beginTravel(to:s.engine.state.map.neighbors(start)[0]);try s.setPaused(true)
-        let paused=s.snapshot
-        XCTAssertThrowsError(try s.tradeAtSite(actor:"p1",item:"smallPotion",buy:true));XCTAssertEqual(s.snapshot,paused)
+        let coins=s.engine.state.units["p1"]!.coins
+        try s.tradeAtSite(actor:"p1",item:"smallPotion",buy:true)
+        XCTAssertEqual(s.engine.state.units["p1"]!.coins,coins-(try s.engine.catalog.item("smallPotion").purchasePrice!))
+        try s.setPaused(false);let moving=s.snapshot
+        XCTAssertThrowsError(try s.tradeAtSite(actor:"p1",item:"smallPotion",buy:true));XCTAssertEqual(s.snapshot,moving)
+    }
+    func testPeddlerTradesAnywhereAtBasePrice()throws {
+        let s=try session();try move(s,to:.spring)
+        let item=try s.engine.catalog.item("smallPotion"),old=s.engine.state.units["p1"]!
+        try s.tradeAtSite(actor:"p1",item:"smallPotion",buy:true)
+        XCTAssertEqual(s.engine.state.units["p1"]!.coins,old.coins-item.purchasePrice!)
+        try s.tradeAtSite(actor:"p1",item:"smallPotion",buy:false)
+        XCTAssertEqual(s.engine.state.units["p1"]!.coins,old.coins-item.purchasePrice!+item.sellPrice)
+        XCTAssertEqual(s.engine.state.units["p1"]!.inventory["smallPotion"],old.inventory["smallPotion"])
     }
     func testSeededSitesDoNotAdvanceRNGAndOldOmittedFlagLoads()throws {
         let s=try session(),before=s.snapshot

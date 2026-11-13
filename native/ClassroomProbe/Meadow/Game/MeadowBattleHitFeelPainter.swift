@@ -89,12 +89,7 @@ enum MeadowBattleHitFeelPainter {
     static func drawNumber(in ctx: CGContext, text: String, age: Double, tier: MeadowBattleHitTier, impact: CGPoint, unit: CGFloat) {
         guard let pop = MeadowBattleHitFeel.number(age: age, tier: tier) else { return }
         let color: UIColor = tier == .heavy ? UIColor(red: 1, green: 0.886, blue: 0.51, alpha: 1) : .white
-        let attrs: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: CGFloat(pop.fontSize) * unit, weight: .heavy),
-            .foregroundColor: color.withAlphaComponent(CGFloat(pop.alpha)),
-            .strokeColor: UIColor(red: 0.15, green: 0.10, blue: 0.04, alpha: CGFloat(pop.alpha)),
-            .strokeWidth: -3
-        ]
+        let attrs = MeadowBattleText.attributes(text, size: CGFloat(pop.fontSize) * unit, fill: color, alpha: CGFloat(pop.alpha), stroke: -3)
         let label = NSAttributedString(string: text, attributes: attrs)
         let size = label.size()
         ctx.saveGState()

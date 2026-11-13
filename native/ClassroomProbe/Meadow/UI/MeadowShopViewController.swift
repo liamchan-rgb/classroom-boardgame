@@ -18,7 +18,7 @@ final class MeadowShopViewController:UIViewController {
     private let titleLabel=MeadowPreviewPalette.label("",size:26,weight:.heavy)
     private let coinsLabel=MeadowPreviewPalette.label("",size:18,weight:.bold)
     private let buyers=UISegmentedControl(),mode=UISegmentedControl(items:["购买","出售"])
-    private let close=MeadowPreviewPalette.button("离开商店")
+    private let close=MeadowPreviewPalette.iconButton("xmark")
     private let bigIcon=UIImageView(),nameLabel=MeadowPreviewPalette.label("",size:24,weight:.heavy),infoLabel=MeadowPreviewPalette.label("",size:16)
     private let priceLabel=MeadowPreviewPalette.label("",size:20,weight:.heavy),afterLabel=MeadowPreviewPalette.label("",size:15)
     private let action=MeadowPreviewPalette.button("购买"),toast=MeadowPreviewPalette.label("",size:16,weight:.bold)
@@ -31,12 +31,14 @@ final class MeadowShopViewController:UIViewController {
     required init?(coder:NSCoder){fatalError("init(coder:) has not been implemented")}
     override var supportedInterfaceOrientations:UIInterfaceOrientationMask{.landscape}
 
-    private var node:MapNode? {session.engine.state.map.nodes.first{$0.id==nodeID}}
+    /// The buyer's own place: a shop site keeps its ratios, anywhere else trades at base price.
+    private var node:MapNode? {let at=unit?.nodeID ?? nodeID;return session.engine.state.map.nodes.first{$0.id==at}}
     private var unit:GameUnit? {session.engine.state.units[actor]}
-    private var people:[GameUnit] {session.engine.state.players.filter{$0.isAlive && $0.nodeID==nodeID}}
+    /// The peddler travels with the party: every living member of the buyer's team can trade, wherever they stand.
+    private var people:[GameUnit] {let team=session.engine.state.units[actor]?.teamID;return session.engine.state.players.filter{$0.isAlive && $0.teamID==team}}
     private func price(_ item:ItemDefinition,buy:Bool)->Int {
         guard let node else{return buy ? item.purchasePrice ?? 0:item.sellPrice}
-        return (try? CampaignSiteRules.price(item:item,buy:buy,node:node,seed:session.engine.state.map.seed)) ?? (buy ? item.purchasePrice ?? 0:item.sellPrice)
+        return (try? CampaignSiteRules.tradePrice(item:item,buy:buy,node:node,seed:session.engine.state.map.seed)) ?? (buy ? item.purchasePrice ?? 0:item.sellPrice)
     }
     private var items:[ItemDefinition] {
         let catalog=session.engine.catalog.items
@@ -46,6 +48,7 @@ final class MeadowShopViewController:UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad();view.backgroundColor=UIColor(red:0.045,green:0.085,blue:0.058,alpha:1)
+        MeadowGlassBackdrop.install(in:view)
         [header,grid,detail].forEach{MeadowPreviewPalette.stylePanel($0);view.addSubview($0)}
         [titleLabel,coinsLabel,buyers,mode,close].forEach(header.addSubview)
         [bigIcon,nameLabel,infoLabel,priceLabel,afterLabel,action].forEach(detail.addSubview)
@@ -70,8 +73,9 @@ final class MeadowShopViewController:UIViewController {
 
     private func reload() {
         guard let unit else{return}
-        titleLabel.text="行商 · "+(node?.name ?? "#\(nodeID)")
-        coinsLabel.text="\(unit.name) · 个人金币 \(unit.coins)"
+        let shopSite=node.map{CampaignSiteRules.configuration(node:$0,seed:session.engine.state.map.seed)?.kind == .shop} ?? false
+        titleLabel.attributedText=MeadowGlassText.iconLine("cart.fill",shopSite ? "商店":"行商",size:26)
+        coinsLabel.attributedText=MeadowGlassText.iconLine("bitcoinsign.circle.fill","\(unit.coins)",size:18,tint:MeadowPreviewPalette.gold)
         buyers.selectedSegmentIndex=people.firstIndex{$0.id==actor} ?? 0
         let list=items
         if !list.contains(where:{$0.id==selected}) { selected=list.first?.id }
@@ -80,12 +84,14 @@ final class MeadowShopViewController:UIViewController {
             let p=price(item,buy:!selling),owned=unit.inventory[item.id] ?? 0
             var c=UIButton.Configuration.filled()
             c.image=MeadowItemIcon.image(item.id,item:item,side:64);c.imagePlacement = .top;c.imagePadding=6
-            c.title=item.name;c.subtitle="\(p) 金币"+(owned>0 ? " · 已有×\(owned)":"")
+            c.title=item.name;c.subtitle="◎ \(p)"+(owned>0 ? "  ×\(owned)":"")
             c.titleAlignment = .center;c.cornerStyle = .large
             c.titleTextAttributesTransformer=UIConfigurationTextAttributesTransformer{v in var v=v;v.font=MeadowPreviewPalette.font(16,.bold);return v}
             c.subtitleTextAttributesTransformer=UIConfigurationTextAttributesTransformer{v in var v=v;v.font=MeadowPreviewPalette.font(13,.medium);return v}
             let chosen=item.id==selected,affordable=selling || unit.coins>=p
-            c.baseBackgroundColor=chosen ? MeadowPreviewPalette.gold:MeadowPreviewPalette.card
+            c.baseBackgroundColor=chosen ? MeadowPreviewPalette.gold:UIColor.white.withAlphaComponent(0.10)
+            c.background.visualEffect=chosen ? nil:UIBlurEffect(style:.systemUltraThinMaterialDark)
+            c.background.strokeColor=UIColor.white.withAlphaComponent(chosen ? 0.6:0.18);c.background.strokeWidth=1
             c.baseForegroundColor=chosen ? MeadowPreviewPalette.panel:(affordable ? MeadowPreviewPalette.ink:MeadowPreviewPalette.muted)
             let card=UIButton(configuration:c);card.alpha=affordable || chosen ? 1:0.6
             card.accessibilityIdentifier="shopItem-"+item.id
@@ -96,7 +102,7 @@ final class MeadowShopViewController:UIViewController {
             grid.addSubview(card);cards.append((item.id,card))
         }
         if list.isEmpty {
-            var c=UIButton.Configuration.plain();c.title=selling ? "行囊里没有可出售的物品":"商店暂时没有货物";c.baseForegroundColor=MeadowPreviewPalette.muted
+            var c=UIButton.Configuration.plain();c.image=UIImage(systemName:selling ? "bag":"shippingbox");c.imagePlacement = .top;c.imagePadding=8;c.title=selling ? "行囊空":"无货";c.baseForegroundColor=MeadowPreviewPalette.muted
             let empty=UIButton(configuration:c);empty.isEnabled=false;grid.addSubview(empty);cards=[("",empty)]
         }
         showDetail()
@@ -105,7 +111,7 @@ final class MeadowShopViewController:UIViewController {
 
     private func showDetail() {
         guard let unit,let id=selected,let item=try? session.engine.catalog.item(id) else {
-            bigIcon.image=nil;nameLabel.text="选择一件物品";infoLabel.text="";priceLabel.text="";afterLabel.text="";action.isHidden=true;return
+            bigIcon.image=UIImage(systemName:"hand.tap");bigIcon.tintColor=MeadowPreviewPalette.muted;nameLabel.text="";infoLabel.text="";priceLabel.text="";afterLabel.text="";action.isHidden=true;return
         }
         action.isHidden=false
         let p=price(item,buy:!selling),owned=unit.inventory[id] ?? 0
@@ -114,14 +120,15 @@ final class MeadowShopViewController:UIViewController {
         let kind=item.slot.map{CampInventoryProjection.slotTitle($0)} ?? (item.kind == .revivalStone ? "复活道具":"补给")
         let summary=CampInventoryProjection.summary(item)
         infoLabel.text=kind+(summary.isEmpty ? "":"\n"+summary)+(item.setID != nil ? "\n套装部件":"")
-        priceLabel.text=(selling ? "卖出得 ":"售价 ")+"\(p) 金币"
-        if selling {
-            afterLabel.text="行囊 ×\(owned) → ×\(owned-1)\n金币 \(unit.coins) → \(unit.coins+p)"+(unit.equipment[item.slot ?? .weapon]==id && owned<=1 ? "\n正在装备的这件不会被卖出。":"")
-        } else {
-            afterLabel.text="行囊 ×\(owned) → ×\(owned+1)（放入行囊，不自动装备）\n金币 \(unit.coins) → \(unit.coins-p)"
-        }
+        priceLabel.attributedText=MeadowGlassText.iconLine(selling ? "arrow.down.circle.fill":"tag.fill","\(p)",size:22,tint:MeadowPreviewPalette.gold)
+        let bag=MeadowGlassText.iconLine("bag.fill","\(owned) → \(selling ? owned-1:owned+1)",size:16,tint:MeadowPreviewPalette.muted)
+        let coin=MeadowGlassText.iconLine("bitcoinsign.circle","\(unit.coins) → \(selling ? unit.coins+p:unit.coins-p)",size:16,tint:MeadowPreviewPalette.muted)
+        let after=NSMutableAttributedString(attributedString:bag);after.append(NSAttributedString(string:"\n"));after.append(coin)
+        afterLabel.attributedText=after
         let allowed=selling ? owned>0:unit.coins>=p
-        action.configuration?.title=selling ? "出售 1 件 · +\(p) 金币":(allowed ? "购买 1 件 · \(p) 金币":"金币不足")
+        action.configuration?.image=UIImage(systemName:selling ? "arrow.down.to.line":"cart.badge.plus")
+        action.configuration?.imagePadding=8
+        action.configuration?.title=selling ? "+\(p)":(allowed ? "-\(p)":"金币不足")
         action.isEnabled=allowed
     }
 
@@ -157,8 +164,8 @@ final class MeadowShopViewController:UIViewController {
         header.frame=CGRect(x:b.minX,y:b.minY,width:b.width,height:110)
         let w=header.bounds.width
         titleLabel.frame=CGRect(x:16,y:10,width:w*0.45,height:34);coinsLabel.frame=CGRect(x:16,y:48,width:w*0.45,height:24)
-        close.frame=CGRect(x:w-150,y:12,width:136,height:44)
-        mode.frame=CGRect(x:w-370,y:12,width:200,height:40)
+        close.frame=CGRect(x:w-64,y:12,width:50,height:44)
+        mode.frame=CGRect(x:w-280,y:12,width:200,height:40)
         buyers.frame=CGRect(x:w*0.5,y:62,width:w*0.5-14,height:36)
         let top=header.frame.maxY+12,panel=min(380,b.width*0.34)
         detail.frame=CGRect(x:b.maxX-panel,y:top,width:panel,height:b.maxY-top)

@@ -1,3 +1,7 @@
+## v0.21.0/build26候选 · 用户六项反馈修复（2026-11-13）
+
+用户实机反馈六项：①人物自定义不能输入名字→教师表单输入框全部改为UIKit UITextField包装（ClassroomTextField/GlassField，组字中不回写），另加系统弹窗改名兜底；有文本输入焦点时硬件快捷键（1/2/g/a/e/空格）不再拦截。②行囊打不开→canManageInventory改为“未在行进”即可（道路选点暂停后原先永远不可开），打开前自动暂停；新增探索中随时可开的商店按钮（TeacherOperation.shop），非商店地点按目录基础价交易，商店地点保留比例（CampaignSiteRules.tradePrice）；事件/地点编辑仍要求抵达。③胜利弹窗：取消4.5秒自动消失，教师窗口点击转发到公开画面弹窗（收下按钮或卡片外关闭）。④教师后台/绘本/档案/GM/队伍/导入导出与UIKit面板统一毛玻璃底+SF Symbols图标化、少文字，字体改无衬线圆体。⑤战斗技能名飘字改玻璃胶囊+无描边白字；含中文的飘字去描边改柔影（MeadowBattleText）。⑥分队独立行走：MeadowCampaignSave.parkedTravels按队伍停放暂停中的道路游标，切换到别队成员时停放/恢复，存档校验（暂停、同队、不重叠）、回退快照、结算前须无停放；队伍控制台在有队伍在路上时锁定分组/合并，可一键自动命名添加队伍；仪表盘按队伍分组选择成员。新增/修改规则测试：暂停中可交易、任意地点基础价、分队停放往返与存档恢复。只做CI编译，不运行App/模拟器/实机。
+
 ## v0.20.0/build25候选 · 视觉重构接入、50存档槽、人物自定义界面、商店界面（2026-11-12）
 
 用户要求把experiment视觉重构分支（claude/meadowjourney-visual-refactor-kh0zpr）的美术接入课堂端，并改进：存档槽加到50、人物自定义与保存界面做成可见、商店做界面且商店与背包物品有图标。工作分支claude/meadowjourney-visual-refactor-kh0zpr（基于feat/teacher-backend-meadow-v0.13）。按docs/integration/experiment-art-sync.md逐文件三方合并，源固定89dcbdf1，基线13cbe2e2；保留教师路由/6学生+P7/自定义外观/镜像回读，未导入特效审核台与该分支P1图集。接入记录docs/integration/experiment-art-sync/2026-11-12-visual-refactor.json。新增workflow visual-refactor-classroom-ipa.yml：提交信息含[ipa]时跑核心测试、设备Release归档并发布预发布直链IPA。只做CI编译，不运行App/模拟器/实机；用户实机验收待反馈，新美术认可null。

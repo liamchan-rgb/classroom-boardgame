@@ -42,6 +42,8 @@ public struct MeadowCampaignCompletion:Codable,Equatable {
 public struct MeadowCampaignSave:Codable,Equatable {
     public var checkpoints:[MeadowCampaignCheckpoint]?=nil
     public var movementBalances:[String:Double]?=nil
+    /// Paused road cursors of teams that are not currently selected, keyed by team ID.
+    public var parkedTravels:[String:MeadowCampaignTravel]?=nil
     public var movementTeam:String {archive.state.units[selectedPlayerID ?? "p1"]?.teamID ?? "party"}
     public var movementLimit:Double {MeadowMovementRules.capacity(archive,team:movementTeam)}
     public var completion:MeadowCampaignCompletion?=nil
@@ -84,7 +86,7 @@ public struct MeadowCampaignSave:Codable,Equatable {
         if let result=completion {
             let encounters=archive.state.map.nodes.filter{$0.kind == .combat || $0.kind == .boss}.count
             guard UUID(uuidString:result.id) != nil,result.gameID==archive.state.gameID,result.completedAt.timeIntervalSince1970.isFinite,
-                  result.players==archive.state.players,result.historyCount==archive.history.count,archive.state.battle==nil,travel==nil,
+                  result.players==archive.state.players,result.historyCount==archive.history.count,archive.state.battle==nil,travel==nil,(parkedTravels ?? [:]).isEmpty,
                   result.exploredNodes==archive.state.map.revealed.count,result.totalNodes==archive.state.map.nodes.count,
                   result.totalEncounters==encounters,result.clearedEncounters==archive.state.map.nodes.filter({n in (n.kind == .combat || n.kind == .boss) && !archive.state.units.values.contains{$0.kind == .monster && $0.isAlive && $0.nodeID==n.id}}).count,
                   result.collectedRewards==archive.state.map.nodes.filter({$0.kind == .reward && $0.rewardCompleted}).count,
@@ -102,16 +104,25 @@ public struct MeadowCampaignSave:Codable,Equatable {
         }
         if let selectedPlayerID {guard archive.state.players.contains(where:{$0.id==selectedPlayerID}) else{throw GameError("操作成员无效。")}}
         try camera?.validate()
-        if let t=travel {
-            if let stop=t.stopDistance {
-                guard stop.isFinite,stop>0,let last=t.path.last,t.path.count>=2,let p=Self.road(layout,from:t.path[t.path.count-2],to:last),stop<Self.length(p) else{throw GameError("道路目标无效。")}
+        if let t=travel {try validateTravel(t,parked:false)}
+        if let parked=parkedTravels {
+            var seen=Set(travel?.actors ?? [])
+            for (team,t) in parked {
+                guard !team.isEmpty,t.paused,team != travel.flatMap({archive.state.units[$0.actors[0]].map{$0.teamID ?? "party"}}),
+                      t.actors.allSatisfy({archive.state.units[$0].map{($0.teamID ?? "party")==team}==true}),seen.isDisjoint(with:t.actors) else{throw GameError("分队暂停行程无效。")}
+                seen.formUnion(t.actors);try validateTravel(t,parked:true)
             }
-            guard archive.state.battle==nil,!t.id.isEmpty,!t.actors.isEmpty,Set(t.actors).count==t.actors.count,
-                  t.path.count>=2,t.leg>=0,t.leg<t.path.count-1,t.distance.isFinite,t.distance>=0,
-                  t.actors.allSatisfy({archive.state.units[$0]?.isAlive==true && archive.state.units[$0]?.kind == .player && (archive.state.units[$0]?.nodeID==t.path[t.leg] || archive.state.units[$0]?.nodeID==t.path[t.leg+1])}),
-                  (1..<t.path.count).allSatisfy({archive.state.map.neighbors(t.path[$0-1]).contains(t.path[$0])}),
-                  let points=Self.road(layout,from:t.path[t.leg],to:t.path[t.leg+1]),t.distance<Self.length(points)+0.000001 else {throw GameError("存档中的移动游标无效。")}
         }
+    }
+    func validateTravel(_ t:MeadowCampaignTravel,parked:Bool)throws {
+        if let stop=t.stopDistance {
+            guard stop.isFinite,stop>0,let last=t.path.last,t.path.count>=2,let p=Self.road(layout,from:t.path[t.path.count-2],to:last),stop<Self.length(p) else{throw GameError("道路目标无效。")}
+        }
+        guard parked || archive.state.battle==nil,!t.id.isEmpty,!t.actors.isEmpty,Set(t.actors).count==t.actors.count,
+              t.path.count>=2,t.leg>=0,t.leg<t.path.count-1,t.distance.isFinite,t.distance>=0,
+              t.actors.allSatisfy({archive.state.units[$0]?.kind == .player && (parked || archive.state.units[$0]?.isAlive==true) && (archive.state.units[$0]?.nodeID==t.path[t.leg] || archive.state.units[$0]?.nodeID==t.path[t.leg+1])}),
+              (1..<t.path.count).allSatisfy({archive.state.map.neighbors(t.path[$0-1]).contains(t.path[$0])}),
+              let points=Self.road(layout,from:t.path[t.leg],to:t.path[t.leg+1]),t.distance<Self.length(points)+0.000001 else {throw GameError("存档中的移动游标无效。")}
     }
     public func encoded()throws->Data {try validate();let e=JSONEncoder();e.outputFormatting=[.sortedKeys];return try e.encode(self)}
     public static func decoded(_ bytes:Data)throws->Self {let s=try JSONDecoder().decode(Self.self,from:bytes);try s.validate();return s}
@@ -187,6 +198,13 @@ public final class MeadowCampaignSession {
         return !(t.leg==t.path.count-2 && t.stopDistance.map{t.distance>=$0-0.000001}==true)
     }
     public var isMoving:Bool {travel.map{!$0.paused} ?? false}
+    /// Paused road cursors of the teams that are not selected right now.
+    public var parkedTravels:[String:MeadowCampaignTravel] {writer.snapshot.parkedTravels ?? [:]}
+    /// The road cursor (active or parked) that currently holds this member.
+    public func travel(holding id:String)->MeadowCampaignTravel? {
+        if let t=travel,t.actors.contains(id){return t}
+        return parkedTravels.values.first{$0.actors.contains(id)}
+    }
     public var playerIDs:[String] {engine.state.players.map(\.id)}
     public var completion:MeadowCampaignCompletion? {writer.snapshot.completion}
     public var isCompleted:Bool {completion != nil}
@@ -197,7 +215,7 @@ public final class MeadowCampaignSession {
         return engine.state.map.nodes.allSatisfy{engine.state.map.revealed.contains($0.id)}
     }
     public var canComplete:Bool {
-        guard !isCompleted,travel==nil,engine.state.battle==nil,completionGoalMet,let start=engine.state.map.nodes.first(where:{$0.kind == .start})?.id else{return false}
+        guard !isCompleted,travel==nil,parkedTravels.isEmpty,engine.state.battle==nil,completionGoalMet,let start=engine.state.map.nodes.first(where:{$0.kind == .start})?.id else{return false}
         let survivors=engine.state.players.filter(\.isAlive);return !survivors.isEmpty && survivors.allSatisfy{$0.nodeID==start}
     }
     public var completionProgress:String {
@@ -285,14 +303,14 @@ public final class MeadowCampaignSession {
             var next=writer.snapshot;next.archive=archive
             let limit=next.movementLimit
             if next.completion==nil,let remaining=next.movement?.remaining{next.movement?.remaining=min(remaining,limit)}
-            if writer.closingAsDefeat{next.travel=nil;next.completion=MeadowCampaignSession.makeCompletion(archive:archive,save:next,outcome:"defeat")}
+            if writer.closingAsDefeat{next.travel=nil;next.parkedTravels=nil;next.completion=MeadowCampaignSession.makeCompletion(archive:archive,save:next,outcome:"defeat")}
             try writer.write(next)
         })
     }
     public func point(at nodeID:Int)->MeadowWorldPoint {let n=writer.snapshot.layout.map.nodes.first{$0.id==nodeID}!;return .init(n.x*1280,n.y*writer.snapshot.layout.coordinateHeight)}
     public func position(of id:String)->MeadowWorldPoint {
         guard let u=engine.state.units[id] else{return writer.snapshot.layout.spawn}
-        guard let t=travel,t.actors.contains(id),let p=MeadowCampaignSave.road(writer.snapshot.layout,from:t.path[t.leg],to:t.path[t.leg+1]) else{return point(at:u.nodeID)}
+        guard let t=travel(holding:id),let p=MeadowCampaignSave.road(writer.snapshot.layout,from:t.path[t.leg],to:t.path[t.leg+1]) else{return point(at:u.nodeID)}
         var d=t.distance
         for (a,b) in zip(p,p.dropFirst()) {let l=hypot(b.x-a.x,b.y-a.y);if d<=l,l>0{return .init(a.x+(b.x-a.x)*d/l,a.y+(b.y-a.y)*d/l)};d-=l}
         return p.last!
@@ -316,14 +334,27 @@ public final class MeadowCampaignSession {
     }
     public var selectedPlayerID:String {writer.snapshot.selectedPlayerID ?? "p1"}
     public func selectPlayer(_ id:String)throws {
-        guard playerIDs.contains(id) else{throw GameError("成员不存在。")}
-        guard travel==nil else{throw GameError("请先结束当前道路行程再切换成员。")}
+        guard playerIDs.contains(id),let target=engine.state.units[id] else{throw GameError("成员不存在。")}
         var next=snapshot
-        if next.movementBalances==nil{next.movementBalances=[next.movementTeam:movementRemaining]}
-        let oldKey=next.movementTeam
+        let oldKey=next.movementTeam,newKey=target.teamID ?? "party"
+        if oldKey==newKey {
+            // Same team: only the operator changes; road members must stay together.
+            if let t=travel,!t.actors.contains(id){throw GameError("该成员不在当前道路行程中，请先让队伍抵达地点。")}
+            next.selectedPlayerID=id;try writer.write(next);return
+        }
+        if let t=travel {
+            guard t.paused else{throw GameError("请先暂停当前队伍的移动，再切换到其他队伍。")}
+            var parked=next.parkedTravels ?? [:];parked[oldKey]=t;next.parkedTravels=parked;next.travel=nil
+        }
+        if next.movementBalances==nil{next.movementBalances=[oldKey:movementRemaining]}
         next.movementBalances?[oldKey]=movementRemaining
         next.selectedPlayerID=id
-        let amount=min(next.movementBalances?[next.movementTeam] ?? movementRemaining,next.movementLimit)
+        if var resumed=next.parkedTravels?.removeValue(forKey:newKey) {
+            let alive=resumed.actors.filter{engine.state.units[$0]?.isAlive==true}
+            if !alive.isEmpty {resumed=MeadowCampaignTravel(id:resumed.id,actors:alive,path:resumed.path,leg:resumed.leg,distance:resumed.distance,paused:true,stopDistance:resumed.stopDistance);next.travel=resumed}
+        }
+        if next.parkedTravels?.isEmpty==true{next.parkedTravels=nil}
+        let amount=min(next.movementBalances?[newKey] ?? next.movementLimit,next.movementLimit)
         next.movement?.remaining=amount
         try writer.write(next)
     }
@@ -477,9 +508,9 @@ public final class MeadowCampaignSession {
         guard travel==nil,engine.state.battle==nil else{throw GameError("请先停下移动并结束当前战斗，再编辑地点。")}
         return try engine.apply(.resetNodeReward(node:node))
     }
-    public var canManageInventory:Bool {!isCompleted && travel==nil && engine.state.battle==nil && engine.state.phase == .exploration}
+    public var canManageInventory:Bool {!isCompleted && !isMoving && engine.state.battle==nil && engine.state.phase == .exploration}
     private func requireInventoryAccess()throws {
-        guard canManageInventory else{throw GameError("请先完成移动并结束战斗，再管理行囊。")}
+        guard canManageInventory else{throw GameError("请先暂停移动并结束战斗，再管理行囊。")}
     }
     public var inventoryActionRefillNeeded:Bool {
         canManageInventory && engine.state.players.contains{unit in

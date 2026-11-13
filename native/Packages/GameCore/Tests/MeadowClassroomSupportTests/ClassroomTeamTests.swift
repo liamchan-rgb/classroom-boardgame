@@ -93,6 +93,29 @@ final class ClassroomTeamTests:XCTestCase {
         let restored=try MeadowCampaignSession(save:.decoded(c.snapshot.encoded()))
         XCTAssertEqual(restored.movementRemaining,c.movementRemaining)
     }
+    func testSeparateTeamsParkTheirRoadsAndWalkIndependently()throws {
+        let c=try campaign();try c.engine.apply(.configureTeams(names:["red":"红队"],members:["p4":"red","p5":"red","p6":"red"]))
+        let start=c.engine.state.units["p1"]!.nodeID,roads=c.engine.state.map.neighbors(start)
+        try c.beginTravel(to:roads[0],actor:"p1");try c.advanceTravel(distance:10)
+        XCTAssertThrowsError(try c.selectPlayer("p4"))
+        try c.setPaused(true);let partyPoint=c.position(of:"p1")
+        try c.selectPlayer("p4")
+        XCTAssertNil(c.travel);XCTAssertEqual(Set(c.parkedTravels["party"]!.actors),Set(["p1","p2","p3"]))
+        XCTAssertEqual(c.position(of:"p2"),partyPoint)
+        try c.beginTravel(to:roads[roads.count>1 ? 1:0],actor:"p4");try c.advanceTravel(distance:5)
+        XCTAssertEqual(Set(c.travel!.actors),Set(["p4","p5","p6"]))
+        XCTAssertEqual(c.position(of:"p1"),partyPoint)
+        XCTAssertFalse(c.canComplete)
+        let restored=try MeadowCampaignSession(save:.decoded(c.snapshot.encoded()))
+        XCTAssertEqual(restored.parkedTravels,c.parkedTravels);XCTAssertEqual(restored.position(of:"p1"),partyPoint)
+        try c.setPaused(true);try c.selectPlayer("p2")
+        XCTAssertEqual(Set(c.travel!.actors),Set(["p1","p2","p3"]));XCTAssertEqual(Set(c.parkedTravels["red"]!.actors),Set(["p4","p5","p6"]))
+        try c.setPaused(false);try c.advanceTravel(distance:100000)
+        while c.travel != nil {if !c.isMoving{try c.refillMovement(usingCoins:false);try c.setPaused(false)};try c.advanceTravel(distance:100000)}
+        XCTAssertEqual(c.engine.state.units["p1"]?.nodeID,roads[0]);XCTAssertEqual(c.engine.state.units["p4"]?.nodeID,start)
+        var broken=c.snapshot;broken.parkedTravels?["red"]?.paused=false
+        XCTAssertThrowsError(try broken.validate())
+    }
     func testTeamMovementBalancesRemainIndependentAndDoNotTouchAP()throws {
         let c=try campaign();try c.engine.apply(.configureTeams(names:["red":"红队"],members:["p3":"red"]))
         var save=c.snapshot;save.movementBalances=["party":120,"red":75];save.movement?.remaining=120

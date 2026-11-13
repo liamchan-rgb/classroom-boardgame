@@ -55,15 +55,15 @@ struct TeacherArchiveConsole:View {
     var body:some View {
         NavigationStack {
             VStack(spacing:0) {
-                Picker("管理内容",selection:$tab){Text("人物档案").tag(0);Text("行程槽位").tag(1);Text("操作历史").tag(2);Text("老师参战").tag(3)}.pickerStyle(.segmented).padding()
+                Picker("管理内容",selection:$tab){Label("人物",systemImage:"person.crop.square").tag(0);Label("行程",systemImage:"map").tag(1);Label("历史",systemImage:"clock.arrow.circlepath").tag(2);Label("老师",systemImage:"graduationcap").tag(3)}.pickerStyle(.segmented).padding()
                 Text(notice).font(.callout).foregroundStyle(.secondary).padding(.horizontal)
                 Form {
                     if tab==0{profileForm}
                     else if tab==1{journeyForm}
                     else if tab==2{historyForm}
                     else{teacherForm}
-                }
-            }.navigationTitle("教师 · 档案与行程")
+                }.scrollContentBackground(.hidden)
+            }.background(GlassBackdrop()).navigationTitle("教师 · 档案与行程")
                 .toolbar{
                     ToolbarItem(placement:.cancellationAction){Button("关闭"){onClose()}}
                     ToolbarItem(placement:.confirmationAction){Menu("导入导出"){
@@ -88,7 +88,7 @@ struct TeacherArchiveConsole:View {
         Group {
             Section("姓名与自定义外观") {
                 if !players.isEmpty{Picker("当前角色",selection:$player){ForEach(players){Text($0.name).tag($0.id)}}}
-                TextField("人物名（最多40字）",text:$name)
+                ClassroomTextField(placeholder:"人物名（最多40字）",text:$name)
                 Picker("外观款式",selection:$bodyStyle){Text("林间绿衣").tag("forester");Text("行旅蓝衣").tag("wayfarer")}
                 Picker("衣装装扮",selection:$outfit){Text("跟随实际护甲").tag("follow");Text("基础衣装").tag("blue");Text("皮甲").tag("leatherArmor");Text("符文甲").tag("runeArmor");Text("星辉甲 · 天仪礼甲").tag("starlightArmor");Text("龙纹甲 · 龙翼巡游甲").tag("dragonArmor")}
                 Picker("发型（可自由搭配）",selection:$hair){Text("原有发型").tag("original");ForEach(Array(PlayerAppearance.hairOptions.enumerated()),id:\.element){i,id in Text(["男式 · 短碎发","男式 · 偏分发","男式 · 小束发","女式 · 紫色盖耳长发","女式 · 侧马尾","女式 · 盘发"][i]).tag(id)}}
@@ -97,7 +97,7 @@ struct TeacherArchiveConsole:View {
                 Text("发型与五官自由组合，同步到探索、背包和战斗。保存人物槽后可在新行程复用。衣装不提供装备属性，武器跟随实际装备；沿用原人物体型与动作。").font(.caption)
                 Button("应用到当前角色"){let p=profile;ask("将姓名和装扮应用到当前角色，保留职业、数值、装备和行程？"){try game.applyProfile(p,to:player);notice=game.message}}.disabled(game.busy || game.campaign==nil || game.campaign?.isCompleted==true)
                 Button("从当前角色重新读取"){readPlayer()}.disabled(players.isEmpty)
-            }
+            }.glassRow()
             Section("人物槽 · 共\(MeadowSlotStore.profileCount)个，可供新行程复用") {
                 ForEach(listedProfileSlots,id:\.self){slot in
                     VStack(alignment:.leading,spacing:6) {
@@ -112,22 +112,22 @@ struct TeacherArchiveConsole:View {
                     }
                 }
                 Button(showAllProfiles ? "只显示已用槽位和3个空槽":"显示全部\(MeadowSlotStore.profileCount)个人物槽"){showAllProfiles.toggle()}
-            }
+            }.glassRow()
         }
     }
     private var journeyForm:some View {
         Group {
             Section("完整行程") {
-                TextField("存档标题",text:$title)
+                ClassroomTextField(placeholder:"存档标题",text:$title)
                 Text("保存地图、队伍、背包、战斗队列/骰子状态、各队移动条和镜头。原自动存档继续生效；读取前另存当前进度。读取战斗槽会保持暂停，等待教师继续。").font(.caption)
-            }
+            }.glassRow()
             Section("查找已保存行程") {
-                HStack{Text("搜索");TextField("标题 / 成员 / 队伍 / 种子",text:$journeyQuery.text)}
+                HStack{Text("搜索");ClassroomTextField(placeholder:"标题 / 成员 / 队伍 / 种子",text:$journeyQuery.text)}
                 Picker("状态",selection:$journeyQuery.state){ForEach(MeadowJourneyState.allCases,id:\.rawValue){Text($0.title).tag($0)}}
                 Picker("人数",selection:$journeyQuery.players){Text("全部人数").tag(0);ForEach(1...7,id:\.self){Text("\($0)人").tag($0)}}
                 Picker("排序",selection:$journeyQuery.order){ForEach(MeadowArchiveOrder.allCases,id:\.rawValue){Text($0.title).tag($0)}}
                 HStack{Text("匹配 \(matchingJourneys.count) / 已保存 \(journeyRows.count)");Spacer();Button("清除筛选"){journeyQuery=MeadowJourneyQuery()}.disabled(journeyQuery==MeadowJourneyQuery())}.font(.caption)
-            }
+            }.glassRow()
             Section("已保存行程 · 原槽号保持") {
                 ForEach(matchingJourneys){row in
                     VStack(alignment:.leading,spacing:6) {
@@ -141,33 +141,33 @@ struct TeacherArchiveConsole:View {
                     }
                 }
                 if matchingJourneys.isEmpty{Text(journeyRows.isEmpty ? "暂无已保存行程。":"没有匹配的行程，可清除筛选。")}
-            }
+            }.glassRow()
             if !damagedJourneySlots.isEmpty {
                 Section("无法读取 · 不受筛选隐藏") {
                     ForEach(damagedJourneySlots,id:\.self){slot in
                         Text("行程槽\(slot) · 原文件保留："+(errors["j\(slot)"] ?? "未知错误")).font(.caption).foregroundStyle(.red)
                         Button("覆盖保存到行程槽\(slot)"){saveJourney(slot)}.disabled(game.campaign==nil || game.busy)
                     }
-                }
+                }.glassRow()
             }
             Section("空槽 · 新建保存") {
                 ForEach(showAllEmptyJourneys ? emptyJourneySlots:Array(emptyJourneySlots.prefix(4)),id:\.self){slot in Button("保存到行程槽\(slot)"){saveJourney(slot)}.disabled(game.campaign==nil || game.busy)}
                 if emptyJourneySlots.count>4{Button(showAllEmptyJourneys ? "收起空槽":"显示全部\(emptyJourneySlots.count)个空槽"){showAllEmptyJourneys.toggle()}}
                 if emptyJourneySlots.isEmpty{Text("没有空槽，可在已保存行程中选择覆盖。")}
-            }
+            }.glassRow()
             Section("读取前自动备份") {
                 if recoveries.isEmpty{Text("暂无备份。")}
                 ForEach(recoveries.prefix(20),id:\.path){url in
                     Button("恢复 · "+recoveryTitle(url)){ask("恢复这份自动备份？当前进度也会先保留。"){try load(MeadowCampaignSave.decoded(Data(contentsOf:url)))}}
                 }
                 Text("仅显示最近20份，旧文件保留在本机。人物槽和行程槽不会随新地图被清空。").font(.caption)
-            }
+            }.glassRow()
         }
     }
     private var historyForm:some View {
         Group {
             Section("查找操作") {
-                HStack{Text("搜索");TextField("操作 / 成员姓名 / ID / 序号",text:$historyQuery.text)}
+                HStack{Text("搜索");ClassroomTextField(placeholder:"操作 / 成员姓名 / ID / 序号",text:$historyQuery.text)}
                 Picker("类别",selection:$historyQuery.category){ForEach(MeadowHistoryCategory.allCases,id:\.rawValue){Text($0.title).tag($0)}}
                 Picker("涉及人物 / 怪物",selection:Binding(get:{historyQuery.participant ?? ""},set:{historyQuery.participant=$0.isEmpty ? nil:$0})){
                     Text("全部对象").tag("")
@@ -175,7 +175,7 @@ struct TeacherArchiveConsole:View {
                 }
                 Toggle("最新操作在前",isOn:$historyQuery.newestFirst)
                 HStack{Text("匹配 \(matchingHistory.count) / 全部 \(historyRows.count)");Spacer();Button("清除筛选"){historyQuery=MeadowHistoryQuery()}.disabled(historyQuery==MeadowHistoryQuery())}.font(.caption)
-            }
+            }.glassRow()
             Section("回退到所选操作之后") {
                 Text("筛选只影响列表。回退会保留所选记录，撤回其后所有操作，包括被筛选隐藏的操作；先备份当前行程，再恢复骰子、队列和移动检查点并暂停。").font(.caption)
                 if indexingHistory{ProgressView("正在整理历史索引…")}
@@ -186,7 +186,7 @@ struct TeacherArchiveConsole:View {
                 }
                 if !indexingHistory && matchingHistory.isEmpty{Text(historyRows.isEmpty ? "暂无操作记录。":"没有匹配的记录，可清除筛选。")}
                 if matchingHistory.count>historyLimit{Button("再显示50条（已显示\(min(historyLimit,matchingHistory.count)) / \(matchingHistory.count)）"){historyLimit += 50}}
-            }
+            }.glassRow()
         }
     }
     private func historyRecord(_ entry:OperationReceipt,row:MeadowHistoryIndex)->some View {
@@ -219,13 +219,13 @@ struct TeacherArchiveConsole:View {
         Section("独立老师席位 P7") {
             if let host=players.first(where:{$0.host}){Text("老师已参战："+host.name)}
             else {
-                TextField("老师人物名",text:$teacherName)
+                ClassroomTextField(placeholder:"老师人物名",text:$teacherName)
                 Picker("职业",selection:$teacherClass){ForEach(MeadowPartyConfiguration.classIDs,id:\.self){id in Text((try? game.campaign?.engine.catalog.playerClass(id).name) ?? id).tag(id)}}
                 Picker("加入队伍",selection:$teacherTeam){ForEach(game.campaign?.engine.state.teams ?? []){Text($0.name).tag($0.id)}}
                 Button("以现有角色动作加入"){ask("老师加入独立P7席位，不占学生名额。使用当前人物编辑区的装扮？"){try game.joinTeacher(name:teacherName,classID:teacherClass,team:teacherTeam,appearance:appearance);notice=game.message}}.disabled(game.campaign==nil || game.busy || game.campaign?.travel != nil || game.campaign?.engine.state.battle != nil || game.campaign?.isCompleted==true)
                 Text("最多6名学生+1名老师；仅探索且停止移动时可加入。老师沿用正式战斗/背包/组队与个人行动值，不新建第二套引擎。").font(.caption)
             }
-        }
+        }.glassRow()
     }
     private func updateThumbnail(){let index=HeroFrames.appearanceIDs.firstIndex(of:bodyStyle) ?? 0;thumbnail=HeroFrames.inventoryImages(appearanceIndex:index,weaponID:nil,armorID:appearance.armor(worn:game.campaign?.engine.state.units[player]?.equipment.armor),hair:appearance.hair,face:appearance.face).first}
     private func readPlayer(){guard let u=game.campaign?.engine.state.units[player] else{updateThumbnail();return};name=u.name;let a=u.appearance ?? .init(body:game.campaign?.snapshot.appearanceID ?? "forester");bodyStyle=a.body;outfit=a.outfit ?? "follow";hair=a.hair ?? "original";face=a.face ?? "original";updateThumbnail()}

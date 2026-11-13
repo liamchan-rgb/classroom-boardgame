@@ -25,14 +25,14 @@ struct TeacherGMConsole:View {
             Form {
                 Section("编辑对象 · 仅教师可见") {
                     Picker("玩家",selection:$selected){ForEach(players){Text($0.name+($0.host ? " · 老师":"")).tag($0.id)}}
-                    TextField("姓名",text:$name)
+                    ClassroomTextField(placeholder:"姓名",text:$name)
                     Text(notice).font(.callout).foregroundStyle(.secondary)
-                }
+                }.glassRow()
                 resources
                 attributes
                 buffsAndSkills
                 backpack
-            }.navigationTitle("GM · 玩家数值与背包")
+            }.glassSheet().navigationTitle("GM · 玩家数值与背包")
                 .toolbar {
                     ToolbarItem(placement:.cancellationAction){Button("关闭"){onClose()}}
                     ToolbarItem(placement:.bottomBar){Button("撤销最近一次GM/发放"){if game.undoTeacherAction(){reload();notice=game.message}else{notice=game.message}}.disabled(game.busy || !game.backend.canUndoTeacherAction)}
@@ -47,7 +47,7 @@ struct TeacherGMConsole:View {
             ForEach(resourceFields,id:\.0){field in numeric(field.1,key:field.0)}
             Text("生命不能超过含装备加成的最大生命，行动点不能超过个人上限。设为倒地会清除护盾和增伤；复活沿用下一轮可行动规则。").font(.caption)
             if let c=game.campaign,c.travel?.actors.contains(selected)==true{Text("该成员仍在道路上；设为倒地需先抵达建筑节点。").font(.caption)}
-        }
+        }.glassRow()
     }
     private var attributes:some View {
         Section("基础属性 · 装备加成另计") {
@@ -56,42 +56,42 @@ struct TeacherGMConsole:View {
                 Text("当前最终值：生命上限 \(result.maximumHealth) · 伤害加成 \(result.damage) · 基础行动 \(result.baseAP) · 行动上限 \(result.maximumAP) · 射程加成 \(result.range)").font(.caption)
             }
             Text("提高上限不会自动回满生命、行动点或地图移动条。降低上限时，请同时将当前资源改到合法范围。").font(.caption)
-        }
+        }.glassRow()
     }
     private var buffsAndSkills:some View {
         Section("临时增伤与技能次数") {
             Toggle("启用临时增伤",isOn:$buffEnabled)
             if buffEnabled {
-                HStack{Text("增伤数值");TextField("0",text:$buffAmount).keyboardType(.numbersAndPunctuation).multilineTextAlignment(.trailing)}
-                HStack{Text("剩余轮数");TextField("1",text:$buffRounds).keyboardType(.numberPad).multilineTextAlignment(.trailing)}
+                HStack{Text("增伤数值");ClassroomTextField(placeholder:"0",text:$buffAmount,limit:12,keyboard:.numbersAndPunctuation,alignment:.right)}
+                HStack{Text("剩余轮数");ClassroomTextField(placeholder:"1",text:$buffRounds,limit:12,keyboard:.numberPad,alignment:.right)}
             }
             ForEach(skillUses.keys.sorted(),id:\.self){id in
                 HStack {
                     Text((try? catalog?.skill(id).name) ?? id)
                     Spacer()
                     Text("已用")
-                    TextField("0",text:Binding(get:{skillUses[id] ?? "0"},set:{skillUses[id]=$0})).keyboardType(.numberPad).multilineTextAlignment(.trailing).frame(width:70)
+                    ClassroomTextField(placeholder:"0",text:Binding(get:{skillUses[id] ?? "0"},set:{skillUses[id]=$0}),limit:12,keyboard:.numberPad,alignment:.right).frame(width:70)
                     if let c=catalog,let definition=try? c.skill(id),let limit=definition.uses{Text("/\(limit)").foregroundStyle(.secondary)}
                 }
             }
             Button("将这些技能的已用次数设为0"){for id in skillUses.keys{skillUses[id]="0"}}
-        }
+        }.glassRow()
     }
     private var backpack:some View {
         Section("个人背包 · 数量0表示移除") {
-            TextField("按物品名称搜索",text:$search)
+            ClassroomTextField(placeholder:"按物品名称搜索",text:$search)
             ForEach((catalog?.items ?? []).filter{search.isEmpty || $0.name.localizedCaseInsensitiveContains(search)}){item in
                 HStack {
                     Text(item.name)
                     Spacer()
-                    TextField("0",text:Binding(get:{inventory[item.id] ?? "0"},set:{inventory[item.id]=$0})).keyboardType(.numberPad).multilineTextAlignment(.trailing).frame(width:100)
+                    ClassroomTextField(placeholder:"0",text:Binding(get:{inventory[item.id] ?? "0"},set:{inventory[item.id]=$0}),limit:12,keyboard:.numberPad,alignment:.right).frame(width:100)
                 }
             }
             Text("这里只调整个人背包。已穿戴物品、队伍仓库和物品定义保持原样；允许教师直接增加或移除数量。").font(.caption)
-        }
+        }.glassRow()
     }
     private func numeric(_ title:String,key:String)->some View {
-        HStack{Text(title);Spacer();TextField("0",text:Binding(get:{values[key] ?? "0"},set:{values[key]=$0})).keyboardType(.numbersAndPunctuation).multilineTextAlignment(.trailing).frame(width:140)}
+        HStack{Text(title);Spacer();ClassroomTextField(placeholder:"0",text:Binding(get:{values[key] ?? "0"},set:{values[key]=$0}),limit:12,keyboard:.numbersAndPunctuation,alignment:.right).frame(width:140)}
     }
     private func reload(){
         guard let unit=current else{return}

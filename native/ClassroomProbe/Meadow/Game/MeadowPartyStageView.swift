@@ -74,7 +74,7 @@ final class MeadowPartyStageView:UIView {
     private var monsterFlash:[String:UIImageView]=[:]
     private let diceView=MeadowBattleDiceView(),dicePlate=UIView()
     /// Floating captions for actions ("P1 · 符文斩"): they fade in above the actor, drift up and fade out.
-    private var captions:[UILabel]=[]
+    private var captions:[UIView]=[]
     private var catalog=try? GameCatalog.initial()
     private var current:String?
     /// The targets picked in the battle UI (their health bars stay in full view).
@@ -205,17 +205,33 @@ final class MeadowPartyStageView:UIView {
         let skill=value.sourceSkillID.flatMap { id in try? catalog?.skill(id).name } ?? value.action.title
         let who=unit.name.components(separatedBy:" · ").first ?? unit.name
         let color:UIColor=unit.kind == .monster ? UIColor(red:1,green:0.55,blue:0.45,alpha:1):UIColor(red:1,green:0.88,blue:0.5,alpha:1)
+        // A frosted capsule with clean, unoutlined text: an outline stroke on Chinese glyphs reads as broken black line segments.
         let label=UILabel();label.isUserInteractionEnabled=false;label.textAlignment = .center
-        label.attributedText=NSAttributedString(string:who+" · "+skill,attributes:[.font:UIFont.systemFont(ofSize:38,weight:.heavy),.foregroundColor:color,.strokeColor:UIColor(red:0.10,green:0.07,blue:0.04,alpha:1),.strokeWidth:-4])
-        label.sizeToFit();label.bounds.size.width += 16
+        let font=MeadowPreviewPalette.font(34,.semibold)
+        let text=NSMutableAttributedString()
+        let symbol=unit.kind == .monster ? "flame.fill":"sparkles"
+        if let icon=UIImage(systemName:symbol,withConfiguration:UIImage.SymbolConfiguration(pointSize:28,weight:.bold))?.withTintColor(color,renderingMode:.alwaysOriginal) {
+            let attachment=NSTextAttachment(image:icon);attachment.bounds=CGRect(x:0,y:-3,width:icon.size.width,height:icon.size.height)
+            text.append(NSAttributedString(attachment:attachment));text.append(NSAttributedString(string:"  "))
+        }
+        text.append(NSAttributedString(string:skill,attributes:[.font:font,.foregroundColor:UIColor.white,.kern:1.5]))
+        text.append(NSAttributedString(string:"  "+who,attributes:[.font:MeadowPreviewPalette.font(22,.medium),.foregroundColor:color.withAlphaComponent(0.95)]))
+        label.attributedText=text;label.sizeToFit()
+        let pill=UIView(frame:CGRect(x:0,y:0,width:label.bounds.width+44,height:label.bounds.height+18));pill.isUserInteractionEnabled=false
+        let blur=UIVisualEffectView(effect:UIBlurEffect(style:.systemUltraThinMaterialDark));blur.frame=pill.bounds
+        blur.layer.cornerRadius=pill.bounds.height/2;blur.layer.cornerCurve = .continuous;blur.clipsToBounds=true
+        pill.backgroundColor=UIColor(red:0.05,green:0.08,blue:0.07,alpha:0.45);pill.layer.cornerRadius=pill.bounds.height/2;pill.layer.cornerCurve = .continuous
+        pill.layer.borderWidth=1.2;pill.layer.borderColor=color.withAlphaComponent(0.65).cgColor
+        pill.layer.shadowColor=color.cgColor;pill.layer.shadowOpacity=0.35;pill.layer.shadowRadius=14;pill.layer.shadowOffset = .zero
+        pill.addSubview(blur);label.center=CGPoint(x:pill.bounds.midX,y:pill.bounds.midY);pill.addSubview(label)
         let top=foot.y-(unit.kind == .monster ? 330:262)
-        let x=min(worldWidth-Double(label.bounds.width)/2-8,max(Double(label.bounds.width)/2+8,foot.x))
-        label.center=CGPoint(x:x,y:top+18);label.alpha=0;label.transform=CGAffineTransform(scaleX:0.8,y:0.8);label.layer.zPosition=1150
-        captions.forEach { $0.removeFromSuperview() };captions=[label];world.addSubview(label)
-        UIView.animate(withDuration:0.28,delay:0,options:[.curveEaseOut]) { label.alpha=1;label.transform = .identity }
-        UIView.animate(withDuration:1.9,delay:0,options:[.curveEaseOut]) { label.center.y=top-26 }
-        UIView.animate(withDuration:0.55,delay:1.3,options:[.curveEaseIn],animations:{ label.alpha=0 }) { [weak self,weak label] _ in
-            label?.removeFromSuperview();self?.captions.removeAll { $0 === label }
+        let x=min(worldWidth-Double(pill.bounds.width)/2-8,max(Double(pill.bounds.width)/2+8,foot.x))
+        pill.center=CGPoint(x:x,y:top+18);pill.alpha=0;pill.transform=CGAffineTransform(scaleX:0.8,y:0.8);pill.layer.zPosition=1150
+        captions.forEach { $0.removeFromSuperview() };captions=[pill];world.addSubview(pill)
+        UIView.animate(withDuration:0.28,delay:0,options:[.curveEaseOut]) { pill.alpha=1;pill.transform = .identity }
+        UIView.animate(withDuration:1.9,delay:0,options:[.curveEaseOut]) { pill.center.y=top-26 }
+        UIView.animate(withDuration:0.55,delay:1.3,options:[.curveEaseIn],animations:{ pill.alpha=0 }) { [weak self,weak pill] _ in
+            pill?.removeFromSuperview();self?.captions.removeAll { $0 === pill }
         }
     }
     /// With many units on the field only the one acting, the picked targets and whoever was just hurt keep the full name-and-numbers header;
@@ -886,7 +902,7 @@ private final class MeadowPartyEffectsView:UIView {
         guard alpha>0.003,scale>0.01 else { return }
         let size=MeadowBattleNumber.fontSize(kind:m.kind,rank:m.rank),a=CGFloat(alpha)
         let fill:UIColor = m.kind == .damage ? (m.rank >= 2 ? UIColor(red:1,green:0.886,blue:0.51,alpha:1):.white):m.color
-        let attrs:[NSAttributedString.Key:Any]=[.font:UIFont.systemFont(ofSize:CGFloat(size),weight:.heavy),.foregroundColor:fill.withAlphaComponent(a),.strokeColor:UIColor(red:0.10,green:0.07,blue:0.04,alpha:a),.strokeWidth:-4]
+        let attrs=MeadowBattleText.attributes(m.text,size:CGFloat(size),fill:fill,alpha:a)
         let label=NSAttributedString(string:m.text,attributes:attrs),box=label.size()
         let rise=CGFloat(MeadowBattleNumber.rise(age:age,kind:m.kind)),sway=CGFloat(MeadowBattleNumber.sway(age:age,seed:abs(Int(m.point.x))))
         var cx:CGFloat,cy:CGFloat

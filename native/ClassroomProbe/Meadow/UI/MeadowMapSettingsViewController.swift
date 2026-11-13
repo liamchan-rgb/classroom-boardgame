@@ -37,7 +37,7 @@ final class MeadowMapSettingsViewController: UIViewController {
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask { .landscape }
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor(red:0.055,green:0.09,blue:0.065,alpha:1)
+        view.backgroundColor = UIColor(red:0.055,green:0.09,blue:0.065,alpha:1);MeadowGlassBackdrop.install(in:view)
         let scroll=UIScrollView(), rightScroll=UIScrollView(), form=UIStackView(), right=UIStackView()
         form.axis = .vertical; form.spacing=10; right.axis = .vertical; right.spacing=12
         let title=UILabel();title.text="随机林地";title.font = .boldSystemFont(ofSize:26);title.textColor=gold

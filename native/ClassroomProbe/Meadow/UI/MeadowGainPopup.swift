@@ -26,7 +26,7 @@ struct MeadowGain {
 /// A dim backdrop, a parchment-green card that springs in, one row per hero with a chip for every gain (the chips pop in one after
 /// another), and a button to put it away. Tapping outside also closes it.
 final class MeadowGainPopup: UIView {
-    private let card = UIView(), stack = UIStackView(), button = MeadowPreviewPalette.button("收下")
+    private let card = UIView(), stack = UIStackView(), button = MeadowPreviewPalette.iconButton("checkmark", "收下", prominent: true)
     private var chips: [UIView] = []
     private var onClose: (() -> Void)?
 
@@ -38,14 +38,14 @@ final class MeadowGainPopup: UIView {
         popup.autoresizingMask = [.flexibleWidth, .flexibleHeight]; popup.onClose = onClose
         popup.build(title: title, subtitle: subtitle, gains: gains, catalog: catalog, emptyText: emptyText)
         host.addSubview(popup); popup.appear()
-        // On a screen nobody touches (the classroom's public display) the card puts itself away.
+        // Stays until put away (button / outside tap, or a tap relayed from the teacher window).
         if let autoDismiss { DispatchQueue.main.asyncAfter(deadline: .now() + autoDismiss) { [weak popup] in popup?.close() } }
     }
 
     private func build(title: String, subtitle: String?, gains: [MeadowGain], catalog: GameCatalog?, emptyText: String?) {
-        backgroundColor = UIColor.black.withAlphaComponent(0.55); layer.zPosition = 5000
+        backgroundColor = UIColor.black.withAlphaComponent(0.35); layer.zPosition = 5000
         accessibilityIdentifier = "meadowGainPopup"; accessibilityViewIsModal = true
-        MeadowPreviewPalette.stylePanel(card); card.layer.borderWidth = 2; card.layer.borderColor = MeadowPreviewPalette.gold.cgColor
+        MeadowPreviewPalette.stylePanel(card); card.layer.borderWidth = 1.5; card.layer.borderColor = MeadowPreviewPalette.gold.withAlphaComponent(0.7).cgColor
         card.layer.shadowColor = MeadowPreviewPalette.gold.cgColor; card.layer.shadowRadius = 24; card.layer.shadowOpacity = 0.45; card.layer.shadowOffset = .zero
         addSubview(card)
         stack.axis = .vertical; stack.spacing = 12; stack.alignment = .fill
@@ -63,8 +63,8 @@ final class MeadowGainPopup: UIView {
             let name = MeadowPreviewPalette.label(gain.unitName, size: 16, weight: .bold)
             stack.addArrangedSubview(name)
             let flow = MeadowChipFlow()
-            if gain.coins > 0 { flow.add(chip(icon: UIImage(systemName: "circle.hexagongrid.circle.fill"), tint: MeadowPreviewPalette.gold, text: "金币 +\(gain.coins)")) }
-            if gain.score > 0 { flow.add(chip(icon: UIImage(systemName: "star.circle.fill"), tint: UIColor(red: 0.55, green: 0.85, blue: 1, alpha: 1), text: "积分 +\(gain.score)")) }
+            if gain.coins > 0 { flow.add(chip(icon: UIImage(systemName: "circle.hexagongrid.circle.fill"), tint: MeadowPreviewPalette.gold, text: "+\(gain.coins)")) }
+            if gain.score > 0 { flow.add(chip(icon: UIImage(systemName: "star.circle.fill"), tint: UIColor(red: 0.55, green: 0.85, blue: 1, alpha: 1), text: "+\(gain.score)")) }
             for item in gain.items {
                 let itemName = (try? catalog?.item(item.id).name) ?? item.id
                 flow.add(chip(icon: MeadowItemIcon.image(item.id, item: try? catalog?.item(item.id)), tint: nil, text: "\(itemName) ×\(item.count)"))
@@ -87,7 +87,7 @@ final class MeadowGainPopup: UIView {
     }
 
     private func chip(icon: UIImage?, tint: UIColor?, text: String) -> UIView {
-        let view = UIView(); view.backgroundColor = MeadowPreviewPalette.card; view.layer.cornerRadius = 10; view.layer.borderWidth = 1; view.layer.borderColor = MeadowPreviewPalette.border.cgColor
+        let view = UIView(); view.backgroundColor = UIColor.white.withAlphaComponent(0.12); view.layer.cornerRadius = 22; view.layer.cornerCurve = .continuous; view.layer.borderWidth = 1; view.layer.borderColor = UIColor.white.withAlphaComponent(0.22).cgColor
         let image = UIImageView(image: tint == nil ? icon?.withRenderingMode(.alwaysOriginal) : icon); image.tintColor = tint ?? MeadowPreviewPalette.gold
         image.contentMode = .scaleAspectFit; image.layer.magnificationFilter = .nearest
         let label = MeadowPreviewPalette.label(text, size: 16, weight: .bold); label.adjustsFontSizeToFitWidth = false
@@ -121,7 +121,15 @@ final class MeadowGainPopup: UIView {
         UIAccessibility.post(notification: .screenChanged, argument: card)
     }
     @objc private func backdropTapped(_ r: UITapGestureRecognizer) { if !card.frame.contains(r.location(in: self)) { close() } }
-    private func close() {
+    /// A tap relayed from the teacher window (the public display itself takes no touches): the button or
+    /// anywhere outside the card puts the card away. Returns true when the tap closed it.
+    @discardableResult func relayTap(_ point: CGPoint) -> Bool {
+        let onButton = button.convert(button.bounds, to: self).insetBy(dx: -12, dy: -12).contains(point)
+        guard onButton || !card.frame.contains(point) else { return false }
+        if onButton { button.transform = CGAffineTransform(scaleX: 0.92, y: 0.92) }
+        close(); return true
+    }
+    func close() {
         guard isUserInteractionEnabled else { return }
         isUserInteractionEnabled = false
         UIView.animate(withDuration: 0.2, animations: { self.alpha = 0; self.card.transform = CGAffineTransform(scaleX: 0.9, y: 0.9) }) { _ in

@@ -80,6 +80,13 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         guard classroomMode,ready,battlePreviewActive,!classroomBusy,let battle=battlePreviewView else{return nil}
         return battle.classroomHit(at:view.convert(point,to:battle))
     }
+    /// The "you received" card on the public display, put away from the teacher window.
+    var classroomHasGainPopup:Bool {view.subviews.contains{$0 is MeadowGainPopup}}
+    func classroomGainPopupTap(at point:CGPoint,role:ClassroomRole)throws->Bool {
+        try ClassroomGameBackend.requireTeacher(role)
+        guard let popup=view.subviews.compactMap({$0 as? MeadowGainPopup}).last else{return false}
+        popup.relayTap(view.convert(point,to:popup));classroomOverlayDirty=true;return true
+    }
     func classroomToggleBattleMap(role:ClassroomRole)throws {
         try ClassroomGameBackend.requireTeacher(role);battlePreviewView?.classroomToggleMap()
     }
@@ -935,7 +942,7 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     /// The "you received" card for whatever the heroes gained since `before` (nothing gained: no card).
     private func showGains(title:String,subtitle:String?,since before:GameState,emptyText:String?=nil) {
         guard let campaign else{return}
-        MeadowGainPopup.present(in:view,title:title,subtitle:subtitle,gains:MeadowGain.between(before,campaign.engine.state),catalog:campaign.engine.catalog,emptyText:emptyText,autoDismiss:classroomMode ? 4.5:nil)
+        MeadowGainPopup.present(in:view,title:title,subtitle:subtitle,gains:MeadowGain.between(before,campaign.engine.state),catalog:campaign.engine.catalog,emptyText:emptyText){[weak self] in self?.classroomOverlayDirty=true}
     }
     /// Remembers the state a battle started from; when the battle ends, everything won in it is shown on one card.
     private func trackBattleGains(_ receipt:OperationReceipt) {
@@ -1282,9 +1289,24 @@ private func refreshCampaignStatus(allowBattleOpen:Bool=true) {
         for id in campaign.playerIDs{menu.addAction(UIAlertAction(title:"切换操作成员 · \(id.uppercased())"+(id==campaign.selectedPlayerID ? " ✓":""),style:.default){[weak self] _ in do{try self?.scene.selectCampaignPlayer(id);self?.refreshCampaignStatus()}catch{self?.showCampaignMessage(error.localizedDescription)}})}
         menu.addAction(UIAlertAction(title:"关闭",style:.cancel));menu.popoverPresentationController?.sourceView=campaignTeam;menu.popoverPresentationController?.sourceRect=campaignTeam.bounds;present(menu,animated:true)
     }
+    /// The shop opens anywhere during exploration: a moving party is paused first; prices follow the buyer's place.
+    private func openTravellingShop() {
+        guard ready,let campaign else{showCampaignMessage("画面准备中，请稍候。");return}
+        if battlePreviewActive {classroomPreviewEncounter(nil)}
+        if campaign.isMoving {try? campaign.setPaused(true);scene.refreshCampaign();refreshCampaignStatus()}
+        let actor=scene.selectedCampaignPlayerID
+        guard campaign.canManageInventory,let unit=campaign.engine.state.units[actor],unit.isAlive else{showCampaignMessage(campaign.engine.state.battle != nil ? "战斗中不能交易。":"请选择存活的成员。");return}
+        cancelNodeSelection()
+        let shop=MeadowShopViewController(session:campaign,node:unit.nodeID,actor:actor)
+        shop.onTrade={[weak self] _ in self?.scene.refreshCampaign();self?.refreshCampaignStatus()}
+        present(shop,animated:true)
+    }
     private func openCampaignInventory() {
-        guard ready,!battlePreviewActive,presentedViewController==nil,let campaign else{return}
-        guard campaign.canManageInventory else{showCampaignMessage("请先完成移动并结束战斗。");return}
+        guard ready,let campaign else{showCampaignMessage("画面准备中，请稍候。");return}
+        guard classroomMode || presentedViewController==nil else{return}
+        if battlePreviewActive {classroomPreviewEncounter(nil)}
+        if campaign.isMoving {try? campaign.setPaused(true);scene.refreshCampaign();refreshCampaignStatus()}
+        guard campaign.canManageInventory else{showCampaignMessage("请先结束战斗再打开行囊。");return}
         cancelNodeSelection()
         let screen=MeadowCampaignInventoryViewController(session:campaign,actor:scene.selectedCampaignPlayerID)
         if classroomMode {classroomInventoryChanged?(scene.selectedCampaignPlayerID)}
@@ -1305,12 +1327,13 @@ private func refreshCampaignStatus(allowBattleOpen:Bool=true) {
         screen.onClose={ [weak self] in self?.classroomInventoryChanged?(nil);self?.refreshCampaignStatus() }
         present(screen,animated:true)
     }
-    enum TeacherOperation {case inventory,interact,refill,team,route,editNode(Int),pauseOrResume,save,zoom(Int),pan(CGPoint)}
+    enum TeacherOperation {case inventory,shop,interact,refill,team,route,editNode(Int),pauseOrResume,save,zoom(Int),pan(CGPoint)}
     func classroomPerform(_ operation:TeacherOperation,role:ClassroomRole)throws {
         try ClassroomGameBackend.requireTeacher(role)
         guard classroomMode,ready,!classroomBusy else{throw GameError("画面准备中或动作尚未结束。")}
         switch operation {
         case .inventory:openCampaignInventory()
+        case .shop:openTravellingShop()
         case .interact:showCampaignInteraction()
         case .refill:refillCampaign()
         case .team:showCampaignTeam()

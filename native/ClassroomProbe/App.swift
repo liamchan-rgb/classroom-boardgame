@@ -60,7 +60,7 @@ final class TeacherHostController: UIViewController {
     override func resignFirstResponder() -> Bool { heldKeys.removeAll(); return super.resignFirstResponder() }
     override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
         let session = TeacherSession.shared
-        guard !session.isEditingNotes,!session.game.modalOpen else{heldKeys.removeAll();super.pressesBegan(presses,with:event);return}
+        guard !session.isEditingNotes,!session.game.modalOpen,!UIResponder.classroomTyping else{heldKeys.removeAll();super.pressesBegan(presses,with:event);return}
         var handled=false
         for press in presses {
             guard let key=press.key,key.modifierFlags.intersection([.command,.control,.alternate]).isEmpty else{continue}
@@ -112,5 +112,16 @@ final class PublicSceneDelegate: UIResponder, UIWindowSceneDelegate {
         TeacherSession.shared.setConnection(id: scene.session.persistentIdentifier, connected: false)
         window?.isHidden = true
         window = nil
+    }
+}
+
+extension UIResponder {
+    private static weak var found:UIResponder?
+    @objc private func classroomReportFirstResponder(_ sender:Any?){UIResponder.found=self}
+    /// True while any text field or text view has the keyboard: shortcut keys must then reach the text.
+    static var classroomTyping:Bool {
+        found=nil
+        UIApplication.shared.sendAction(#selector(classroomReportFirstResponder(_:)),to:nil,from:nil,for:nil)
+        return found is UITextInput
     }
 }

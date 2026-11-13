@@ -10,15 +10,40 @@ enum MeadowPreviewPalette {
     static let muted = UIColor(red: 0.72, green: 0.79, blue: 0.66, alpha: 1)
     static let gold = UIColor(red: 0.92, green: 0.77, blue: 0.42, alpha: 1)
     static let border = UIColor(red: 0.60, green: 0.57, blue: 0.34, alpha: 0.65)
+    /// Flat sans-serif (the earlier serif design read as broken strokes in Chinese at game sizes).
     static func font(_ size:CGFloat,_ weight:UIFont.Weight = .bold)->UIFont {
         let base=UIFont.systemFont(ofSize:size,weight:weight)
-        return UIFont(descriptor:base.fontDescriptor.withDesign(.serif) ?? base.fontDescriptor,size:size)
+        return UIFont(descriptor:base.fontDescriptor.withDesign(.rounded) ?? base.fontDescriptor,size:size)
     }
+    static let glassTint = UIColor(red: 0.06, green: 0.12, blue: 0.09, alpha: 0.5)
+    /// Frosted glass panel: live blur of whatever is behind, a light dark tint so text stays legible
+    /// (the tint alone also carries the panel in the teacher mirror, which cannot capture blur), a hairline highlight.
     static func stylePanel(_ view: UIView) {
-        view.backgroundColor = panel
-        view.layer.cornerRadius = 14
+        view.backgroundColor = glassTint
+        view.layer.cornerRadius = 18
+        view.layer.cornerCurve = .continuous
         view.layer.borderWidth = 1
-        view.layer.borderColor = border.cgColor
+        view.layer.borderColor = UIColor.white.withAlphaComponent(0.22).cgColor
+        guard !view.subviews.contains(where:{$0.accessibilityIdentifier=="glass"}) else{return}
+        let blur = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterialDark))
+        blur.accessibilityIdentifier = "glass"; blur.isUserInteractionEnabled = false
+        blur.layer.cornerRadius = 18; blur.layer.cornerCurve = .continuous; blur.clipsToBounds = true
+        blur.frame = view.bounds; blur.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        view.insertSubview(blur, at: 0)
+    }
+    /// Icon-first glass button: an SF Symbol with an optional short caption.
+    static func iconButton(_ symbol:String,_ title:String?=nil,prominent:Bool=false)->UIButton {
+        var style = prominent ? UIButton.Configuration.filled():UIButton.Configuration.gray()
+        style.image = UIImage(systemName:symbol,withConfiguration:UIImage.SymbolConfiguration(pointSize:18,weight:.semibold))
+        style.title = title; style.imagePadding = 6; style.cornerStyle = .capsule
+        style.titleTextAttributesTransformer=UIConfigurationTextAttributesTransformer { value in var v=value;v.font=font(16,.semibold);return v }
+        style.baseBackgroundColor = prominent ? gold:UIColor.white.withAlphaComponent(0.16)
+        style.baseForegroundColor = prominent ? panel:ink
+        style.background.visualEffect = prominent ? nil:UIBlurEffect(style:.systemUltraThinMaterialDark)
+        style.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 14)
+        let button = UIButton(type: .system); button.configuration = style
+        if let title {button.accessibilityLabel = title}
+        return button
     }
     static func label(_ text: String, size: CGFloat, weight: UIFont.Weight = .medium) -> UILabel {
         let label = UILabel(); label.text = text
@@ -27,9 +52,9 @@ enum MeadowPreviewPalette {
         return label
     }
     static func button(_ title: String) -> UIButton {
-        var style = UIButton.Configuration.filled(); style.title = title
-        style.titleTextAttributesTransformer=UIConfigurationTextAttributesTransformer { value in var v=value;v.font=font(18);return v }; style.baseBackgroundColor = gold; style.baseForegroundColor = panel
-        style.contentInsets = NSDirectionalEdgeInsets(top: 5, leading: 8, bottom: 5, trailing: 8)
+        var style = UIButton.Configuration.filled(); style.title = title; style.cornerStyle = .capsule
+        style.titleTextAttributesTransformer=UIConfigurationTextAttributesTransformer { value in var v=value;v.font=font(18,.semibold);return v }; style.baseBackgroundColor = gold.withAlphaComponent(0.92); style.baseForegroundColor = panel
+        style.contentInsets = NSDirectionalEdgeInsets(top: 6, leading: 12, bottom: 6, trailing: 12)
         let button = UIButton(type: .system); button.configuration = style
         return button
     }
