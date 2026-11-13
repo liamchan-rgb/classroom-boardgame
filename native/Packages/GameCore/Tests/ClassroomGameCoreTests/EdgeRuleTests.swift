@@ -50,7 +50,7 @@ final class EdgeRuleTests: XCTestCase {
         XCTAssertEqual(engine.state.lastOutcome?.winners, ["blue"])
         XCTAssertEqual(engine.state.lastOutcome?.personalRanking.first?.score, 2)
         XCTAssertEqual(engine.state.units["p2"]?.coins, 25)
-        XCTAssertEqual(engine.state.units["p1"]?.shield, 7)
+        XCTAssertEqual(engine.state.units["p1"]?.shield, 0)
         XCTAssertNil(engine.state.battle)
     }
     func testNaturalTwentyAlsoDefeatsShieldedPvPPlayer() throws {

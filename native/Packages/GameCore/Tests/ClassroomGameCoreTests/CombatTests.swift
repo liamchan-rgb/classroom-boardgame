@@ -78,7 +78,7 @@ final class CombatTests: XCTestCase {
         XCTAssertEqual(receipt.dice.filter { $0.source=="damage" }.count,1)
         XCTAssertTrue(engine.state.units.values.filter { $0.kind == .monster }.allSatisfy { !$0.isAlive && $0.shield == 0 })
         let player=try XCTUnwrap(engine.state.units["p1"])
-        XCTAssertEqual(player.ap,1); XCTAssertEqual(player.health,11); XCTAssertEqual(player.shield,6)
+        XCTAssertEqual(player.ap,1); XCTAssertEqual(player.health,11); XCTAssertEqual(player.shield,0) // battle won: shields end with it
         XCTAssertEqual(player.coins,40); XCTAssertEqual(player.score,7)
         XCTAssertEqual(player.inventory["starlightBlade"],3); XCTAssertEqual(player.inventory["dragonCharm"],3)
         XCTAssertEqual(player.inventory["smallPotion"],2)

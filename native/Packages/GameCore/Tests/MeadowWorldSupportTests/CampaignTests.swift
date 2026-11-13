@@ -303,20 +303,24 @@ final class CampaignTests:XCTestCase {
         XCTAssertEqual(session.engine.archive,battle)
     }
 
-    func testShieldCarriesThroughBattleEndIntoTheNextBattle()throws {
+    func testShieldEndsWithBattleButPotionBeforeBattleCarriesIn()throws {
         let session=try MeadowCampaignSession.new(layout:layout(combat:true))
         let start=session.engine.state.units["p1"]!.nodeID,target=session.engine.state.map.neighbors(start)[0]
-        try session.beginTravel(to:target);try finishTravel(session);try session.interactCurrentNode()
-        XCTAssertNotNil(session.engine.state.battle)
-        // A shield gained inside the battle (not from a potion before it).
-        try session.engine.apply(.editResources(unit:"p1",value:.init(shield:6)))
+        try session.beginTravel(to:target);try finishTravel(session)
+        // A potion drunk on the map, before the fight, is the only way to open a battle shielded.
+        try session.useInventory(actor:"p1",item:"shieldPotion",target:"p1")
+        let potion=try XCTUnwrap(session.engine.state.units["p1"]?.shield);XCTAssertGreaterThan(potion,0)
+        try session.interactCurrentNode();XCTAssertNotNil(session.engine.state.battle)
+        XCTAssertEqual(session.engine.state.units["p1"]?.shield,potion)
+        try session.engine.apply(.editResources(unit:"p2",value:.init(shield:6)))
         for monster in session.engine.state.battle!.queue where session.engine.state.units[monster]?.kind == .monster {
             if session.engine.state.battle == nil {break}
             try session.engine.apply(.setHealth(unit:monster,value:0,killer:"p1"))
         }
-        XCTAssertNil(session.engine.state.battle);XCTAssertEqual(session.engine.state.units["p1"]?.shield,6)
+        XCTAssertNil(session.engine.state.battle)
+        XCTAssertTrue(session.engine.state.players.allSatisfy{$0.shield==0})
         let restored=try MeadowCampaignSession(save:.decoded(session.snapshot.encoded()))
-        XCTAssertEqual(restored.engine.state.units["p1"]?.shield,6)
+        XCTAssertTrue(restored.engine.state.players.allSatisfy{$0.shield==0})
     }
 
     func finishTravel(_ session:MeadowCampaignSession)throws {

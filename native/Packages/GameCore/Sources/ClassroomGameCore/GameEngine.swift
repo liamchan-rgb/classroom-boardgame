@@ -592,8 +592,11 @@ struct Evaluation {
         }
         state.lastOutcome = BattleOutcome(kind: battle.kind, winners: winners, scoreSettlement: byScore,
                                           personalRanking: individual, teamRanking: teams)
+        // Shields last only for the battle they were raised in. A shield at the start of a battle can only
+        // come from an item used beforehand (exploration), never from an earlier fight.
         for id in state.units.keys {
             state.units[id]?.damageBuff = nil
+            if battle.queue.contains(id) { state.units[id]?.shield = 0 }
             if state.units[id]?.kind == .monster { state.units[id]?.active = false }
         }
         state.battle = nil; state.phase = battle.kind == .pve ? .exploration : .settlement

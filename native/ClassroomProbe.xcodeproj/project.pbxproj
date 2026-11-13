@@ -1107,8 +1107,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				"CURRENT_PROJECT_VERSION" = "28";
-				"MARKETING_VERSION" = "0.22.0";
+				"CURRENT_PROJECT_VERSION" = "29";
+				"MARKETING_VERSION" = "0.22.1";
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 			};
 		};
@@ -1148,8 +1148,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				"CURRENT_PROJECT_VERSION" = "28";
-				"MARKETING_VERSION" = "0.22.0";
+				"CURRENT_PROJECT_VERSION" = "29";
+				"MARKETING_VERSION" = "0.22.1";
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 			};
 		};

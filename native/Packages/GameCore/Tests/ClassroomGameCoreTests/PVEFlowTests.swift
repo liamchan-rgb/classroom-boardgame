@@ -95,7 +95,7 @@ final class PVEFlowTests: XCTestCase {
         XCTAssertEqual(receipt.dice.first?.values,[20])
         XCTAssertEqual(session.engine.state.phase,.exploration)
         XCTAssertEqual(session.engine.state.units["p1"]?.health,11)
-        XCTAssertEqual(session.engine.state.units["p1"]?.shield,6)
+        XCTAssertEqual(session.engine.state.units["p1"]?.shield,0) // shields end with the battle
         XCTAssertEqual(session.engine.state.units["p1"]?.score,7)
         XCTAssertGreaterThanOrEqual(try XCTUnwrap(session.engine.state.units["p1"]?.coins),30)
         XCTAssertTrue(session.engine.state.units.values.filter { $0.kind == .monster }.allSatisfy { !$0.isAlive })
