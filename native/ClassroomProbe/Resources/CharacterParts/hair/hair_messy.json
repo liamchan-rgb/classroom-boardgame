@@ -1,0 +1,30 @@
+{
+  "id": "hair_messy",
+  "name": "蓬松短发",
+  "palette": ["#1c100c", "#4a2a1a", "#7c4a2a", "#b47c42", "#ecc27a"],
+  "variants": [
+    { "id": "brown", "name": "棕色", "palette": ["#1c100c", "#4a2a1a", "#7c4a2a", "#b47c42", "#ecc27a"] },
+    { "id": "black", "name": "墨黑", "palette": ["#08080e", "#1a1a26", "#30323e", "#52566a", "#9098b0"] },
+    { "id": "blonde", "name": "金色", "palette": ["#4a2c10", "#96641e", "#d4a036", "#f2cc5e", "#fff2ac"] },
+    { "id": "red", "name": "赤红", "base": "#b03a26" },
+    { "id": "silver", "name": "银白", "palette": ["#2e3246", "#6a7088", "#a8b0c2", "#d8dee8", "#ffffff"] },
+    { "id": "teal", "name": "青绿", "base": "#2a8e84" }
+  ],
+  "hairline": [[0, 50], [70, 50], [100, 95], [100, 118.02], [180, 129]],
+  "locks": [
+    { "phi": -47.26, "a1": 63.06, "twist": 16, "width": 3.3 },
+    { "phi": -16.02, "a1": 72.16, "twist": 16, "width": 3.3 },
+    { "phi": 13.55, "a1": 66.35, "twist": 16, "width": 3.3 },
+    { "phi": 41.44, "a1": 61.39, "twist": 16, "width": 3.3 },
+    { "phi": 100, "a1": 96, "flick": 1.08, "width": 3.4 },
+    { "phi": -100, "a1": 96, "flick": 1.08, "width": 3.4 },
+    { "phi": 125.28, "a1": 127.97, "twist": 4.28, "width": 3.8 },
+    { "phi": 158.46, "a1": 126.81, "twist": 6.9, "width": 3.8 },
+    { "phi": -167.29, "a1": 126.08, "twist": 1.91, "width": 3.8 },
+    { "phi": -138.69, "a1": 123.94, "twist": -7.48, "width": 3.8 },
+    { "phi": -150, "a0": 3, "a1": 40, "twist": 18, "flick": 1.18, "lift": 0.04, "width": 2.6, "tier": 1 },
+    { "phi": -40, "a0": 3, "a1": 40, "twist": 18, "flick": 1.18, "lift": 0.04, "width": 2.6, "tier": 1 },
+    { "phi": 75, "a0": 3, "a1": 40, "twist": 18, "flick": 1.18, "lift": 0.04, "width": 2.6, "tier": 1 },
+    { "phi": 30, "a0": 0, "a1": 34, "twist": 40, "flick": 1.6, "lift": 0.04, "width": 0.9, "tier": 2 }
+  ]
+}

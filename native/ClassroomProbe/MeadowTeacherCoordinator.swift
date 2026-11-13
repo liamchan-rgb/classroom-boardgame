@@ -124,6 +124,13 @@ final class MeadowTeacherCoordinator:ObservableObject {
         screen.modalPresentationStyle = .formSheet;screen.preferredContentSize=CGSize(width:1000,height:760)
         presenter.present(screen,animated:true)
     }
+    /// 像素人物测试（教师窗口）：用游戏内 Swift 烘焙器现场合成人物，换装后实时预览八个方向。
+    func openPixelCharacterLab(){
+        guard !busy,!modalOpen,let presenter=presentationHost else{return}
+        let screen=UIHostingController(rootView:PixelCharacterLab(onClose:{[weak self] in self?.presentationHost?.dismiss(animated:true)}))
+        screen.modalPresentationStyle = .formSheet;screen.preferredContentSize=CGSize(width:1100,height:820)
+        presenter.present(screen,animated:true)
+    }
     func loadJourney(_ save:MeadowCampaignSave)throws {
         guard !busy else{throw GameError("请等待动作结束。")}
         try save.validate()

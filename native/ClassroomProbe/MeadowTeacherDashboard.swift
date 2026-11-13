@@ -30,6 +30,7 @@ struct MeadowTeacherDashboard:View {
                 }
                 Spacer(minLength:0)
                 Button{game.openCharacterStudio()}label:{Label("形象",systemImage:"person.crop.circle.badge.plus")}.disabled(game.busy)
+                Button{game.openPixelCharacterLab()}label:{Label("像素人物",systemImage:"square.grid.3x3.square")}.disabled(game.busy)
                 Button{game.openGM()}label:{Label("GM",systemImage:"wand.and.stars")}.disabled(!game.ready || game.busy || game.campaign==nil)
                 Button{fullPreview = !fullScreen}label:{Label(fullScreen ? "退出":"全屏",systemImage:fullScreen ? "arrow.down.right.and.arrow.up.left":"arrow.up.left.and.arrow.down.right")}
                 Menu {
@@ -95,6 +96,7 @@ struct MeadowTeacherDashboard:View {
                             Button{game.settings()}label:{Label("新地图",systemImage:"map.fill")}.buttonStyle(GlassIconButtonStyle(prominent:true))
                             Button{game.restore()}label:{Label("继续",systemImage:"arrow.clockwise.circle.fill")}.buttonStyle(GlassIconButtonStyle(tint:.white))
                             Button{game.openCharacterStudio()}label:{Label("形象",systemImage:"person.crop.circle.badge.plus")}.buttonStyle(GlassIconButtonStyle(tint:.white))
+                            Button{game.openPixelCharacterLab()}label:{Label("像素人物",systemImage:"square.grid.3x3.square")}.buttonStyle(GlassIconButtonStyle(tint:.white))
                         }.scaleEffect(1.3)
                     }
                 }else{Color.black}

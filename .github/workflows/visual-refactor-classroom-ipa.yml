@@ -4,7 +4,7 @@ name: Classroom visual refactor IPA
 # Never runs a simulator or a device.
 on:
   push:
-    branches: [claude/meadowjourney-visual-refactor-kh0zpr]
+    branches: [claude/meadowjourney-visual-refactor-kh0zpr, claude/hd2d-pixel-character-walk-s2pdwi]
 permissions:
   contents: write
 concurrency:
