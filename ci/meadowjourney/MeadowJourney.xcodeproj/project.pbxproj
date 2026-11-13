@@ -235,6 +235,16 @@
 			"isa" = "PBXBuildFile";
 			"fileRef" = 5595A96AECADD87EFD6DE6D6;
 		};
+		8C639BA29C6D0E583C1EC368 = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "SceneDelegate.swift";
+			"sourceTree" = "<group>";
+		};
+		29ADE655EE5D037C2642B1B7 = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = 8C639BA29C6D0E583C1EC368;
+		};
 		3010D05254CDB3E5CA6C1B15 = {
 			"isa" = "PBXFileReference";
 			"lastKnownFileType" = "sourcecode.swift";
@@ -336,6 +346,7 @@
 				4B5D87B0E3C770DAA09EE100,
 				D0760787AC13759F118D8DE8,
 				5595A96AECADD87EFD6DE6D6,
+				8C639BA29C6D0E583C1EC368,
 				3010D05254CDB3E5CA6C1B15,
 				3685E330EC5277A9DD5661C6,
 				59BD0A3FF43B32849B319E64,
@@ -403,8 +414,8 @@
 				"TARGETED_DEVICE_FAMILY" = "1,2";
 				"SUPPORTED_PLATFORMS" = "iphoneos iphonesimulator";
 				"CODE_SIGN_STYLE" = "Automatic";
-				"MARKETING_VERSION" = "1.1.0";
-				"CURRENT_PROJECT_VERSION" = "3";
+				"MARKETING_VERSION" = "1.2.0";
+				"CURRENT_PROJECT_VERSION" = "4";
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 				"LD_RUNPATH_SEARCH_PATHS" = (
 					"$(inherited)",
@@ -430,8 +441,8 @@
 				"TARGETED_DEVICE_FAMILY" = "1,2";
 				"SUPPORTED_PLATFORMS" = "iphoneos iphonesimulator";
 				"CODE_SIGN_STYLE" = "Automatic";
-				"MARKETING_VERSION" = "1.1.0";
-				"CURRENT_PROJECT_VERSION" = "3";
+				"MARKETING_VERSION" = "1.2.0";
+				"CURRENT_PROJECT_VERSION" = "4";
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 				"LD_RUNPATH_SEARCH_PATHS" = (
 					"$(inherited)",
@@ -479,6 +490,7 @@
 				7A73B65B6F0455441E0B5B86,
 				BB374ADDA90DD49DAF266AD2,
 				ACC04BAE083F06BFDC7ED36E,
+				29ADE655EE5D037C2642B1B7,
 				3CECB03B99CDC07317983836,
 			);
 			"runOnlyForDeploymentPostprocessing" = 0;
