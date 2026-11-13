@@ -61,16 +61,24 @@ jobs:
         id: simulator
         run: |
           set -euo pipefail
-          if python3 scripts/select-simulator.py iPad > build/udid.txt; then
-            :
-          else
-            status=$?
-            if [ "$status" -ne 2 ]; then exit "$status"; fi
-            xcodebuild -downloadPlatform iOS 2>&1 | tee build/logs/runtime-download.log
-            python3 scripts/select-simulator.py iPad > build/udid.txt
-          fi
-          udid="$(cat build/udid.txt)"
-          echo "udid=$udid" >> "$GITHUB_OUTPUT"
+          # 用最新的 iOS 运行时：优先已有的 iPad / iPhone；没有就从该运行时声明支持的机型里创建一台
+          udid="$(python3 - <<'PY'
+          import json, subprocess
+          inv = json.loads(subprocess.check_output(['xcrun', 'simctl', 'list', '--json']))
+          ver = lambda r: tuple(int(x) for x in r['version'].split('.')[:2])
+          runtimes = [r for r in inv['runtimes'] if r.get('isAvailable') and '.iOS-' in r['identifier']]
+          rt = max(runtimes, key=ver)
+          for family in ('iPad', 'iPhone'):
+              for d in inv['devices'].get(rt['identifier'], []):
+                  if d.get('isAvailable') and d['name'].startswith(family):
+                      print(d['udid']); raise SystemExit
+          supported = [t for t in rt.get('supportedDeviceTypes', []) if t.get('productFamily') in ('iPad', 'iPhone')]
+          kind = next((t for t in supported if t['productFamily'] == 'iPad'), supported[0])
+          print(subprocess.check_output(['xcrun', 'simctl', 'create', 'MeadowJourney CI', kind['identifier'], rt['identifier']], text=True).strip())
+          PY
+          )"
+          echo "udid=$udid" | tee -a "$GITHUB_OUTPUT"
+          xcrun simctl list devices | grep "$udid" | tee build/logs/simulator.txt || true
           xcrun simctl bootstatus "$udid" -b 2>&1 | tee build/logs/simulator-boot.log
 
       - name: Unit tests (including Swift / web parity)
