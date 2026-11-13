@@ -19,11 +19,14 @@ struct MeadowTeacherDashboard:View {
     private func workspace(fullScreen:Bool)->some View {
         VStack(spacing:8){
             HStack(spacing:8){
-                Label("v0.22.1",systemImage:"leaf.fill").font(.system(size:13,weight:.bold,design:.rounded)).foregroundStyle(GameTheme.primary)
+                Label("v0.23.0",systemImage:"leaf.fill").font(.system(size:13,weight:.bold,design:.rounded)).foregroundStyle(GameTheme.primary)
                 GlassChip(icon:game.externalConnected ? "tv.fill":"ipad.landscape",text:game.externalConnected ? "TV":"本机",tint:game.externalConnected ? .green:GameTheme.muted)
                 if let c=game.campaign,!inBattle {
                     GlassChip(icon:"figure.walk.motion",text:"\(Int(ceil(c.movementRemaining)))/\(Int(ceil(c.movementCapacity)))")
                     GlassChip(icon:"bitcoinsign.circle.fill",text:"\(c.engine.state.units[c.selectedPlayerID]?.coins ?? 0)",tint:GameTheme.accent)
+                }
+                if let c=game.campaign {
+                    GlassChip(icon:difficultyIcon(c.difficulty),text:c.difficulty.title,tint:difficultyTint(c.difficulty))
                 }
                 Spacer(minLength:0)
                 Button{game.openCharacterStudio()}label:{Label("形象",systemImage:"person.crop.circle.badge.plus")}.disabled(game.busy)
@@ -35,6 +38,11 @@ struct MeadowTeacherDashboard:View {
                     Button{game.restore()}label:{Label("继续行程",systemImage:"arrow.clockwise.circle")}.disabled(game.busy || inBattle)
                     Button{game.operation(.save)}label:{Label("保存",systemImage:"square.and.arrow.down")}.disabled(!game.ready || game.busy)
                     Divider()
+                    Menu {
+                        ForEach(GameDifficulty.allCases,id:\.self){level in
+                            Button{game.setDifficulty(level)}label:{Label(level.title+" · "+level.summary,systemImage:game.campaign?.difficulty==level ? "checkmark.circle.fill":difficultyIcon(level))}
+                        }
+                    }label:{Label("难度",systemImage:"gauge.with.dots.needle.67percent")}.disabled(game.busy || game.campaign==nil || inBattle || game.campaign?.isCompleted==true)
                     Button{game.award()}label:{Label("+10 金币",systemImage:"bitcoinsign.circle")}.disabled(game.busy || game.campaign==nil)
                     Button{game.openTeamConsole()}label:{Label("队伍与仓库",systemImage:"person.3")}.disabled(!game.ready || game.busy)
                     Button{game.operation(.route)}label:{Label("路线与结算",systemImage:"flag.checkered")}.disabled(!game.ready || game.busy)
@@ -126,6 +134,12 @@ struct MeadowTeacherDashboard:View {
             }
         }label:{Label(current.map{$0.name.components(separatedBy:" · ").first ?? $0.name} ?? "成员",systemImage:teams.count>1 ? "person.2.fill":"person.fill")}
         .disabled(!game.ready || game.busy)
+    }
+    private func difficultyIcon(_ level:GameDifficulty)->String {
+        switch level {case .easy:return "leaf";case .normal:return "shield.lefthalf.filled";case .hard:return "flame";case .nightmare:return "bolt.trianglebadge.exclamationmark"}
+    }
+    private func difficultyTint(_ level:GameDifficulty)->Color {
+        switch level {case .easy:return .green;case .normal:return GameTheme.primary;case .hard:return .orange;case .nightmare:return .red}
     }
     private var battleTargets:[GameUnit] {
         guard let c=game.campaign else{return []}

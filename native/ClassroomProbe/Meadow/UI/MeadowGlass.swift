@@ -1,4 +1,5 @@
 import UIKit
+import ClassroomGameCore
 
 /// Soft meadow-coloured light behind full-screen glass sheets (shop, pack): blurred colour blobs so the frosted
 /// panels above have something to frost.
@@ -74,5 +75,13 @@ enum MeadowBattleText {
             return [.font:font,.foregroundColor:fill.withAlphaComponent(alpha),.shadow:shadow,.kern:size*0.04]
         }
         return [.font:UIFont.systemFont(ofSize:size,weight:.heavy),.foregroundColor:fill.withAlphaComponent(alpha),.strokeColor:UIColor(red:0.10,green:0.07,blue:0.04,alpha:alpha),.strokeWidth:stroke]
+    }
+}
+
+extension GameDifficulty {
+    /// The teacher's last choice, used for the next new journey (a per-device convenience, not saved game state).
+    static var lastChosen:GameDifficulty {
+        get {UserDefaults.standard.string(forKey:"classroom.difficulty").flatMap(GameDifficulty.init(rawValue:)) ?? .normal}
+        set {UserDefaults.standard.set(newValue.rawValue,forKey:"classroom.difficulty")}
     }
 }

@@ -255,7 +255,7 @@ public final class MeadowCampaignSession {
         var elder=try c.monster("caveTroll");elder.id="meadowElderStag";elder.name="古树鹿王"
         c.monsters += [stag,elder];try c.validate();return c
     }
-    public static func new(layout:GeneratedMeadowMap,appearanceID:String="forester",playerClassID:String="spellblade",companionClassID:String="ranger",studentClasses:[String]?=nil,studentNames:[String]?=nil,playerAppearances:[String:PlayerAppearance]?=nil,loadouts:[String:GameUnit]?=nil,persist:((Data)throws->Void)?=nil)throws->MeadowCampaignSession {
+    public static func new(layout:GeneratedMeadowMap,appearanceID:String="forester",playerClassID:String="spellblade",companionClassID:String="ranger",studentClasses:[String]?=nil,studentNames:[String]?=nil,playerAppearances:[String:PlayerAppearance]?=nil,loadouts:[String:GameUnit]?=nil,difficulty:GameDifficulty = .normal,persist:((Data)throws->Void)?=nil)throws->MeadowCampaignSession {
         let catalog=try self.catalog(),start=layout.map.nodes.first{$0.kind == .start}!.id
         try MeadowPartyConfiguration(playerClassID:playerClassID,companionClassID:companionClassID).validate(catalog:catalog)
         let classes=studentClasses ?? [playerClassID,companionClassID]
@@ -273,7 +273,9 @@ public final class MeadowCampaignSession {
         for encounter in MeadowEncounterPlanner.plan(layout) {
             for (index,template) in encounter.templates.enumerated() {
                 let id="m-\(encounter.nodeID)-\(index+1)"
-                units[id]=try GameFactory.monster(id:id,templateID:template,nodeID:encounter.nodeID,catalog:catalog)
+                var monster=try GameFactory.monster(id:id,templateID:template,nodeID:encounter.nodeID,catalog:catalog)
+                monster.baseAttributes=difficulty.monsterAttributes(try catalog.monster(template).attributes);monster.health=monster.baseAttributes.maximumHealth
+                units[id]=monster
             }
         }
         let provisions=try MeadowProvisioning.plan(layout:layout,players:units.values.filter{$0.kind == .player},catalog:catalog)
@@ -281,7 +283,7 @@ public final class MeadowCampaignSession {
         var map=layout.map
         for i in map.nodes.indices {if let reward=provisions.rewards[map.nodes[i].id]{map.nodes[i].reward=reward}}
         var state=GameState(units:units,teams:[GameTeam(id:"party",name:"林间小队")],map:map,random:RandomState(seed:layout.configuration.seed ^ 0x43414d504149474e))
-        state.pauseReasons=[]
+        state.pauseReasons=[];state.difficulty=difficulty == .normal ? nil:difficulty
         let save=MeadowCampaignSave(layout:layout,archive:GameArchive(catalog:catalog,state:state,history:[]),appearanceID:appearanceID)
         let session=try MeadowCampaignSession(save:save,persist:persist);try session.checkpoint();return session
     }
@@ -507,6 +509,14 @@ public final class MeadowCampaignSession {
         try requireOpenCampaign()
         guard travel==nil,engine.state.battle==nil else{throw GameError("请先停下移动并结束当前战斗，再编辑地点。")}
         return try engine.apply(.resetNodeReward(node:node))
+    }
+    public var difficulty:GameDifficulty {engine.state.effectiveDifficulty}
+    /// Teacher switch: rescales every monster (health share kept) and new encounters follow it. Outside battle only.
+    @discardableResult public func setDifficulty(_ level:GameDifficulty)throws->OperationReceipt? {
+        try requireOpenCampaign()
+        guard engine.state.battle==nil else{throw GameError("请在战斗外调整难度。")}
+        guard level != difficulty else{return nil}
+        return try engine.apply(.setDifficulty(level))
     }
     public var canManageInventory:Bool {!isCompleted && !isMoving && engine.state.battle==nil && engine.state.phase == .exploration}
     private func requireInventoryAccess()throws {

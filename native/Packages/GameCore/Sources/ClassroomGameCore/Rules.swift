@@ -184,6 +184,7 @@ public enum GameCommand: Codable, Equatable {
     case configureNodeEncounter(node: Int, monsterTemplates: [String])
     case configureNodeReward(node: Int, reward: NodeReward)
     case resetNodeReward(node: Int)
+    case setDifficulty(GameDifficulty)
 }
 public struct DiceResult: Codable, Equatable {
     public var source: String

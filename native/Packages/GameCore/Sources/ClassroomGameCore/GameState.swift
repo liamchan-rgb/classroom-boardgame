@@ -194,6 +194,8 @@ public struct GameState: Codable, Equatable {
     public var pauseReasons: Set<GamePause>
     public var remainingSeconds: Double
     public var random: RandomState
+    /// Teacher-set monster challenge; nil = original numbers.
+    public var difficulty: GameDifficulty? = nil
     public init(gameID: String = UUID().uuidString, units: [String: GameUnit], teams: [GameTeam], map: GameMap, random: RandomState = RandomState()) {
         self.gameID = gameID; phase = .exploration; self.units = units; self.teams = teams; self.map = map
         battle = nil; lastOutcome = nil; pauseReasons = [.manual]; remainingSeconds = 30; self.random = random

@@ -41,7 +41,7 @@ public enum MeadowHistoryCategory:String,CaseIterable {case all,combat,travel,re
         case .tradeCampaignSite,.editPlayer,.grantPlayerResources,.editResources,.useItem,.reward,.setHealth,.revive,.equip,.refillExploration:return .resources
         case .configureTeams,.mergeTeams,.transferTeamResource,.teacherTransferTeamResource,.addHost,.changeTeam:return .team
         case .applyPlayerProfile:return .appearance
-        case .configureCampaignSite,.configureNodeEncounter,.configureNodeReward,.resetNodeReward:return .configuration
+        case .configureCampaignSite,.configureNodeEncounter,.configureNodeReward,.resetNodeReward,.setDifficulty:return .configuration
         }
     }
 }
@@ -101,6 +101,7 @@ public struct MeadowHistoryIndex:Identifiable,Equatable {
         case .joinMonster:return "怪物加入战斗"
         case .reorderQueue:return "调整战斗队列"
         case .refillExploration:return "补充探索资源"
+        case .setDifficulty(let level):return "难度改为"+level.title
         }
     }
 }

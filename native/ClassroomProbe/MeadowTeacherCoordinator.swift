@@ -271,6 +271,15 @@ final class MeadowTeacherCoordinator:ObservableObject {
         guard !busy,let c=campaign,c.travel==nil else{message="请先抵达道路目的地，再调整组队或仓库。";return}
         do{try c.checkpoint();try backend.apply(command,role:.teacher);renderer?.classroomRefresh();message="组队操作已保存。";revision += 1}catch{message=error.localizedDescription}
     }
+    /// Monster challenge switch (outside battle). Rescales every monster at once; the TV map/encounter previews refresh.
+    func setDifficulty(_ level:GameDifficulty){
+        guard !busy,let c=campaign else{return}
+        do{
+            GameDifficulty.lastChosen=level
+            if try c.setDifficulty(level) != nil {renderer?.classroomRefresh();message="难度：\(level.title)（\(level.summary)）"}
+            revision += 1
+        }catch{message=error.localizedDescription}
+    }
     func award(){
         guard !busy,let c=campaign else{return}
         do{try backend.apply(.reward(actors:[c.selectedPlayerID],value:ResourceReward(coins:10)),role:.teacher);renderer?.classroomRefresh();message="已向选中成员发放10金币。";revision += 1}catch{message=error.localizedDescription}

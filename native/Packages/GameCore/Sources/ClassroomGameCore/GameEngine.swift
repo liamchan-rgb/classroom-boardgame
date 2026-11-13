@@ -225,6 +225,7 @@ struct Evaluation {
         case .configureNodeEncounter(let id, let templates): try configureNodeEncounter(id, templates: templates)
         case .configureNodeReward(let id, let reward): try configureNodeReward(id, reward: reward)
         case .resetNodeReward(let id): try resetNodeReward(id)
+        case .setDifficulty(let level): try setDifficulty(level)
         }
         try checkOutcome()
         if let current = state.battle?.current, let actor = state.units[current], !actor.isAlive || actor.ap == 0 {
@@ -249,7 +250,7 @@ struct Evaluation {
         let old=state.units.values.filter{$0.kind == .monster && $0.nodeID==id}.map(\.id)
         for monster in old {state.units.removeValue(forKey:monster)}
         for (offset,template) in templates.enumerated() {
-            let monster=try GameFactory.monster(id:"m-\(id)-\(offset+1)",templateID:template,nodeID:id,catalog:catalog)
+            let monster=try scaledMonster(GameFactory.monster(id:"m-\(id)-\(offset+1)",templateID:template,nodeID:id,catalog:catalog))
             state.units[monster.id]=monster
         }
         events.append(GameEvent("nodeEncounterConfigured",amount:templates.count,detail:"node=\(id);templates=\(templates.joined(separator:","))"))
