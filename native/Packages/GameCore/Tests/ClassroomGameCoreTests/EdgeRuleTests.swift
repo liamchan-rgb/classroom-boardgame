@@ -14,7 +14,7 @@ final class EdgeRuleTests: XCTestCase {
         XCTAssertEqual(receipt.after, engine.state)
         try engine.undo(); XCTAssertEqual(engine.state, state)
     }
-    func testShieldTakesMaximumPersistsAfterBattleAndClearsOnDown() throws {
+    func testShieldTakesMaximumAndEndsWithBattle() throws {
         let (catalog, initial) = try fixture(monsters: ["stoneGuardian"])
         var state = initial
         state.units["p1"]?.shield = 5; state.units["p1"]?.ap = 6
@@ -26,8 +26,7 @@ final class EdgeRuleTests: XCTestCase {
         XCTAssertEqual(engine.state.units["p1"]?.shield, 8)
         try engine.apply(.setHealth(unit: "m1", value: 0, killer: nil))
         XCTAssertEqual(engine.state.phase, .exploration)
-        XCTAssertEqual(engine.state.units["p1"]?.shield, 8)
-        try engine.apply(.setHealth(unit: "p1", value: 0, killer: nil))
+        // Shields end with the battle; only an item used before the next one can open it shielded.
         XCTAssertEqual(engine.state.units["p1"]?.shield, 0)
     }
     func testWeakerBuffDoesNotReplaceOrRefreshStrongerBuff() throws {

@@ -86,7 +86,7 @@ public enum RuleExample: String, CaseIterable, Identifiable {
             _ = try engine.replay(receipt.id)
             _ = try engine.apply(command, id: receipt.id)
             checks = [RuleCheck("3个敌人共用1次伤害掷骰并全部击败", receipt.dice.count == 1 && resultState.units.values.filter { $0.kind == .monster }.allSatisfy { !$0.isAlive }),
-                      RuleCheck("自疗5→11，护盾6，行动点3→1", resultState.units["p1"]?.health == 11 && resultState.units["p1"]?.shield == 6 && resultState.units["p1"]?.ap == 1),
+                      RuleCheck("自疗5→11，战斗结束护盾清空，行动点3→1", resultState.units["p1"]?.health == 11 && resultState.units["p1"]?.shield == 0 && resultState.units["p1"]?.ap == 1),
                       RuleCheck("积分共7；Boss必掉30金币，其他掉落本例固定未触发", resultState.units["p1"]?.score == 7 && resultState.units["p1"]?.coins == 30),
                       RuleCheck("重复提交和查看历史不会重复发奖励", engine.state == resultState && engine.history.count == 1),
                       RuleCheck("所有效果完成后返回探索，战斗增益清除", resultState.phase == .exploration && resultState.units["p1"]?.damageBuff == nil)]
