@@ -255,7 +255,7 @@ final class MeadowPartyBattleView:UIView {
             let count=current.flatMap { state.units[$0]?.inventory[a.rawValue] } ?? 0
             let readout=model.actionReadout(a,ally:friend,enemy:foe)
             let allowed=readout.allowed
-            menu.append(UIAction(title:"\(a.title) ×\(count) · \(a == .revivalStone ? 2:1) AP"+(allowed ? "":" · "+readout.availability),image:UIImage(named:"MeadowParty"+a.rawValue.prefix(1).uppercased()+a.rawValue.dropFirst()),attributes:allowed && !busy ? []:.disabled,handler:{ [weak self] _ in guard let self,!self.classroomMode else{return};self.perform(a) }))
+            menu.append(UIAction(title:"\(a.title) ×\(count) · \(a == .revivalStone ? 2:1) AP"+(allowed ? "":" · "+readout.availability),image:MeadowItemIcon.image(a.rawValue,side:28),attributes:allowed && !busy ? []:.disabled,handler:{ [weak self] _ in guard let self,!self.classroomMode else{return};self.perform(a) }))
         }
         let inventoryInfo=UIAction(title:"查看双方个人资源",image:UIImage(systemName:"list.bullet.rectangle")){[weak self] _ in
             guard let self else{return};self.showResourceSummary(model)

@@ -1,8 +1,8 @@
 {
   "images": [
     {
-      "idiom": "universal",
-      "filename": "MeadowPartyTrainingSword.png"
+      "filename": "MeadowPartyTrainingSword.png",
+      "idiom": "universal"
     }
   ],
   "info": {

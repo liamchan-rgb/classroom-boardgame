@@ -1,6 +1,6 @@
 ## v0.30.0/build40候选 · 动捕动作、像素物品图标、pixelfx技能特效与新护盾（2026-11-14）
 
-基于v0.29.1快进，接入experiment这一轮成果（预览已经用户确认）。①人物：新pixel-baker.js（66帧/方向：斩击/重击/突刺按原型包动捕重定向8帧、射击/施法8帧、受击6帧含闪白、倒下6帧；脖子修正），info新增impact出手帧；战斗动作按帧数和出手帧排时间（约13帧/秒），弓弦/杖头发射点改取出手帧。②物品图标：18件统一像素画法（PixelIcon<Id>，512px），稀有以上带24帧发光动画（PixelIconFX<Id>，MeadowItemIcon切帧成动图，按钮缩放保留动画）；旧的12个图标素材同时换成新图。③技能特效：pixelfx（MIT）预渲染69个片段（PixelFX_*，约14MB）+配方PixelFXRecipes（46个游戏特效id：施法者/每个目标/目标中心/飞行，分back/front按脚y排前后，方向-1镜像）；MeadowPixelFXPlayer挂在战斗world层，接管有配方的特效与治疗，原程序化画面不再画；镜头/震屏/导演镜头/压暗仍用原代码。常驻护盾改为自制像素护盾（生成/4秒循环待机/挨打涟漪，被打碎走shieldBreak配方）。UserDefaults meadow.pixelFX=false可退回旧特效。③致谢写入ThirdPartyNotices（pixelfx MIT、Momji Pixel原型包CC BY 4.0）。只做CI编译，未运行App/模拟器/实机。
+基于v0.29.1快进，接入experiment这一轮成果（预览已经用户确认）。①人物：新pixel-baker.js（66帧/方向：斩击/重击/突刺按原型包动捕重定向8帧、射击/施法8帧、受击6帧含闪白、倒下6帧；脖子修正），info新增impact出手帧；战斗动作按帧数和出手帧排时间（约13帧/秒），弓弦/杖头发射点改取出手帧。②物品图标：18件统一像素画法（PixelIcon<Id>，512px），稀有以上带24帧发光动画（PixelIconFX<Id>，MeadowItemIcon切帧成动图，按钮缩放保留动画）；旧图标素材有哈希校验保持不动，按名字取图处改为先取PixelIcon。③技能特效：pixelfx（MIT）预渲染69个片段（PixelFX_*，约14MB）+配方PixelFXRecipes（46个游戏特效id：施法者/每个目标/目标中心/飞行，分back/front按脚y排前后，方向-1镜像）；MeadowPixelFXPlayer挂在战斗world层，接管有配方的特效与治疗，原程序化画面不再画；镜头/震屏/导演镜头/压暗仍用原代码。常驻护盾改为自制像素护盾（生成/4秒循环待机/挨打涟漪，被打碎走shieldBreak配方）。UserDefaults meadow.pixelFX=false可退回旧特效。③致谢写入ThirdPartyNotices（pixelfx MIT、Momji Pixel原型包CC BY 4.0）。只做CI编译，未运行App/模拟器/实机。
 
 ## v0.29.1/build39候选 · 地图标记、行囊排版、战斗面板细节（2026-11-14）
 

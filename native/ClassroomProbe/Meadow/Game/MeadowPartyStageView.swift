@@ -1011,7 +1011,7 @@ private final class MeadowPartyEffectsView:UIView {
             }
             if intent.action.isItem,age<intent.action.impact,let foot=PartyVisual.foot(intent.target) {
                 let name="MeadowParty"+intent.action.rawValue.prefix(1).uppercased()+intent.action.rawValue.dropFirst()
-                if let image=UIImage(named:name) { sprite(image,PartyPoint(foot.x,foot.y-130-age*15),38,38,PartyVisual.pulse(age,0,0.25,0.85)) }
+                if let image=UIImage(named:"PixelIcon"+intent.action.rawValue.prefix(1).uppercased()+intent.action.rawValue.dropFirst()) ?? UIImage(named:name) { sprite(image,PartyPoint(foot.x,foot.y-130-age*15),38,38,PartyVisual.pulse(age,0,0.25,0.85)) }
             }
             if !Self.proceduralBlows,intent.ranged,let foot=PartyVisual.foot(intent.actor) {
                 let tip=PixelHeroAtlas.enabled ? PixelHeroAtlas.bowTip:BowRig.releaseArrowTip
