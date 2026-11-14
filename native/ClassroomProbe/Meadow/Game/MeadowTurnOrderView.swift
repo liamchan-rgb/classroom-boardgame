@@ -14,6 +14,8 @@ final class MeadowTurnOrderView: UIView {
         let id: String, name: String
         let hp: Int, maxHP: Int, shield: Int
         let enemy: Bool, acted: Bool, down: Bool
+        /// The person's own face (pixel hero head); nil keeps the generic portrait.
+        var portrait: UIImage? = nil
     }
     var onSelect: ((String) -> Void)?
     private let round = UILabel()
@@ -148,8 +150,10 @@ private final class MeadowTurnOrderToken: UIView {
         self.status = status
         // The short name: "P1" for heroes, the species for monsters.
         name.text = entry.name.components(separatedBy: " · ").first ?? entry.name
+        portrait.layer.minificationFilter = .nearest
         name.textColor = status == .current ? MeadowPreviewPalette.gold : MeadowPreviewPalette.ink
-        if entry.id.hasPrefix("p"), let number = Int(entry.id.dropFirst()) { portrait.image = Self.portraits[(number - 1) % Self.portraits.count]; portrait.tintColor = nil }
+        if let face = entry.portrait { portrait.image = face; portrait.tintColor = nil }
+        else if entry.id.hasPrefix("p"), let number = Int(entry.id.dropFirst()) { portrait.image = Self.portraits[(number - 1) % Self.portraits.count]; portrait.tintColor = nil }
         else { portrait.image = UIImage(systemName: "pawprint.fill"); portrait.tintColor = UIColor(red: 0.93, green: 0.45, blue: 0.38, alpha: 1) }
         let side: UIColor = entry.enemy ? UIColor(red: 0.92, green: 0.36, blue: 0.30, alpha: 1) : UIColor(red: 0.40, green: 0.85, blue: 0.56, alpha: 1)
         circle.layer.borderColor = (status == .current ? MeadowPreviewPalette.gold : targeted ? UIColor.white : status == .down ? UIColor.gray : side).cgColor

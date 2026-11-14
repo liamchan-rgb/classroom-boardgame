@@ -576,6 +576,16 @@
 			"isa" = "PBXBuildFile";
 			"fileRef" = "C50D242C078E2DD0DBC67299";
 		};
+		"CF609FE3A514C9A6BF925D28" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/UI/MeadowLotteryView.swift";
+			"sourceTree" = "<group>";
+		};
+		"695750EC6EF3ABEC171D9317" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "CF609FE3A514C9A6BF925D28";
+		};
 		"5D81AFD1A677819D20E21CBA" = {
 			"isa" = "PBXFileReference";
 			"lastKnownFileType" = "sourcecode.swift";
@@ -919,6 +929,7 @@
 				"BA1214086742441D7CAE6C08",
 				"396DA8529BFE27E9FAB0A8A6",
 				"C50D242C078E2DD0DBC67299",
+				"CF609FE3A514C9A6BF925D28",
 				"5D81AFD1A677819D20E21CBA",
 				"76E35111C17956DF8AEB3B3C",
 				"E7404666D43A7B9ECAC76699",
@@ -1081,6 +1092,7 @@
 				"A4398D5D6CE0D037E439045C",
 				"705163158F9AA2FE42B2C567",
 				"DB6A7539B0D579AFB9C7E5AF",
+				"695750EC6EF3ABEC171D9317",
 				"84129D168353308255E0DDA5",
 				"BDBE10460BB68495C34C758B",
 				"545976A2418B9F6DC9B7EDEF",
@@ -1167,8 +1179,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				"CURRENT_PROJECT_VERSION" = "36";
-				"MARKETING_VERSION" = "0.27.0";
+				"CURRENT_PROJECT_VERSION" = "37";
+				"MARKETING_VERSION" = "0.28.0";
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 			};
 		};
@@ -1208,8 +1220,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				"CURRENT_PROJECT_VERSION" = "36";
-				"MARKETING_VERSION" = "0.27.0";
+				"CURRENT_PROJECT_VERSION" = "37";
+				"MARKETING_VERSION" = "0.28.0";
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 			};
 		};

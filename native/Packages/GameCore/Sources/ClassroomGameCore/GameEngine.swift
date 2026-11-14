@@ -226,6 +226,15 @@ struct Evaluation {
         case .configureNodeReward(let id, let reward): try configureNodeReward(id, reward: reward)
         case .resetNodeReward(let id): try resetNodeReward(id)
         case .setDifficulty(let level): try setDifficulty(level)
+        case .campaignLottery(let actor, let tier): try campaignLottery(actor: actor, tier: tier)
+        case .retreatAfterDefeat:
+            guard let battle = state.battle, battle.kind == .pve, !state.players.contains(where: \.isAlive) else { throw GameError("只有全队倒地时才能撤回地图。") }
+            try finish(winner: "monsters", byScore: false)
+            for player in state.players {
+                var unit = player; unit.health = 1; unit.shield = 0; unit.damageBuff = nil; unit.canActFromRound = 1
+                state.units[unit.id] = unit
+            }
+            events.append(GameEvent("retreat", detail: "全队倒地，撤回地图"))
         }
         try checkOutcome()
         if let current = state.battle?.current, let actor = state.units[current], !actor.isAlive || actor.ap == 0 {
@@ -456,7 +465,8 @@ struct Evaluation {
 
     mutating func useItem(actor id: String, itemID: String, target targetID: String) throws {
         let item = try itemPlan(actor: id, itemID: itemID, target: targetID)
-        try spend(id, cost: 1); try consume(id, itemID: itemID)
+        if state.battle != nil { try spend(id, cost: 1) }
+        try consume(id, itemID: itemID)
         try heal(targetID, amount: item.heal, actor: id); try shield(targetID, amount: item.shield, actor: id)
         state.remainingSeconds = catalog.rules.decisionSeconds
     }
@@ -468,7 +478,8 @@ struct Evaluation {
     }
     mutating func rescue(actor id: String, target targetID: String) throws {
         try rescuePlan(actor: id, target: targetID)
-        try spend(id, cost: catalog.rules.rescueCost); try consume(id, itemID: catalog.rules.revivalStone)
+        if state.battle != nil { try spend(id, cost: catalog.rules.rescueCost) }
+        try consume(id, itemID: catalog.rules.revivalStone)
         try revive(targetID)
         try addScore(id, amount: catalog.rules.rescueScore, source: "rescue", target: targetID)
         state.remainingSeconds = catalog.rules.decisionSeconds

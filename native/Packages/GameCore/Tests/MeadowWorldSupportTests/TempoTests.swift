@@ -23,7 +23,9 @@ final class TempoTests:XCTestCase {
         let s=try MeadowCampaignSession.new(layout:MeadowMapGenerator.generate(c))
         let templates=s.engine.state.units.values.filter{$0.kind == .monster}.map(\.templateID)
         XCTAssertEqual(templates.filter{$0=="ruinDragon"}.count,1);XCTAssertEqual(templates.filter{$0=="caveTroll"}.count,2)
-        XCTAssertEqual(try GameCatalog.initial().monsters,Array(s.engine.catalog.monsters.prefix(6)))
+        // Combat stats stay the tabletop ones; only the journey's drops are richer.
+        func stats(_ m:[MonsterDefinition])->[MonsterDefinition] {m.map{var x=$0;x.drops=[];return x}}
+        XCTAssertEqual(stats(try GameCatalog.initial().monsters),stats(Array(s.engine.catalog.monsters.prefix(6))))
         let plan=try MeadowProvisioning.plan(layout:s.snapshot.layout,players:s.engine.state.players,catalog:s.engine.catalog)
         XCTAssertTrue(plan.bossSupplyNodes.isEmpty);XCTAssertTrue(plan.rewards.isEmpty)
     }

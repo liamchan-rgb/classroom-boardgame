@@ -7,7 +7,8 @@ final class ProvisionsPreviewTests:XCTestCase {
         for n in [4,10,30] {for seed:UInt64 in [0,31827,UInt64.max] {
             let layout=try MeadowMapGenerator.generate(.suggested(total:n,seed:seed)),s=try MeadowCampaignSession.new(layout:layout)
             let plan=try MeadowProvisioning.plan(layout:layout,players:s.engine.state.players,catalog:s.engine.catalog)
-            let issued=plan.startingCoins.values.reduce(0,+)+plan.rewards.values.map(\.coins).reduce(0,+)*s.playerIDs.count
+            let treasure=plan.treasure.values.reduce(0,+)*s.playerIDs.count
+            let issued=plan.startingCoins.values.reduce(0,+)+plan.rewards.values.map(\.coins).reduce(0,+)*s.playerIDs.count-treasure
             XCTAssertGreaterThanOrEqual(issued,plan.movementCoinBudget)
             XCTAssertLessThan(issued,plan.movementCoinBudget+s.playerIDs.count)
             XCTAssertGreaterThan(plan.treeTourDistance,0)

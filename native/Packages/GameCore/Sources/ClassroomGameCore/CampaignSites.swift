@@ -91,10 +91,17 @@ extension Evaluation {
         if accept {
             if kind == .satchel {amount=config.gold;actor.coins=try checkedAdd(actor.coins,amount)}
             else {
-                let maximum=try GameRules.attributes(actor,catalog:catalog).maximumHealth
-                amount=min(config.healing,max(0,maximum-actor.health))
-                guard amount>0 else{throw GameError("当前成员生命已满，可换成员或离开此事件。")}
-                actor.health+=amount
+                // The spring restores every living teammate standing here to full health.
+                let team=actor.teamID
+                for mate in state.players where mate.isAlive && mate.nodeID==actor.nodeID && mate.teamID==team {
+                    let maximum=try GameRules.attributes(mate,catalog:catalog).maximumHealth
+                    let gained=max(0,maximum-mate.health)
+                    guard gained>0 else{continue}
+                    amount=try checkedAdd(amount,gained)
+                    if mate.id==id {actor.health=maximum} else {state.units[mate.id]?.health=maximum}
+                    events.append(GameEvent("heal",actor:id,target:mate.id,amount:gained,detail:"spring"))
+                }
+                guard amount>0 else{throw GameError("这里的同伴生命都已满，可以稍后再来或离开此事件。")}
             }
         }
         state.units[id]=actor;state.map.nodes[index].siteResolved=true

@@ -60,7 +60,8 @@ extension Evaluation {
     }
     func itemPlan(actor id: String, itemID: String, target targetID: String) throws -> ItemDefinition {
         let actor = try acting(id), target = try unit(targetID), item = try catalog.item(itemID)
-        guard item.kind == .consumable, actor.ap >= 1, (actor.inventory[itemID] ?? 0) >= 1,
+        // Action points are a battle resource: on the map, supplies are used freely.
+        guard item.kind == .consumable, state.battle == nil || actor.ap >= 1, (actor.inventory[itemID] ?? 0) >= 1,
               target.isAlive, GameRules.allies(actor, target, in: state) else { throw GameError("药水、背包或队友目标无效。") }
         try inRange(actor, node: target.nodeID, range: item.range)
         return item
@@ -69,8 +70,8 @@ extension Evaluation {
         let actor = try acting(id), target = try unit(targetID)
         guard actor.kind == .player, target.kind == .player, !target.isAlive,
               actor.nodeID == target.nodeID, GameRules.allies(actor, target, in: state),
-              actor.ap >= catalog.rules.rescueCost,
-              (actor.inventory[catalog.rules.revivalStone] ?? 0) > 0 else { throw GameError("救援需要同节点倒地队友、2行动点和个人复活石。") }
+              state.battle == nil || actor.ap >= catalog.rules.rescueCost,
+              (actor.inventory[catalog.rules.revivalStone] ?? 0) > 0 else { throw GameError("救援需要同节点倒地队友、个人复活石（战斗中另需2行动点）。") }
     }
 
     func preview(_ command: GameCommand) throws -> ActionPreview {
@@ -86,7 +87,7 @@ extension Evaluation {
             return ActionPreview(allowed: true, cost: skill.cost, message: "\(skill.name)：消耗\(skill.cost)行动点，确认后执行全部效果。")
         case .useItem(let actor, let itemID, let target):
             let item = try itemPlan(actor: actor, itemID: itemID, target: target)
-            return ActionPreview(allowed: true, cost: 1, message: "消耗1行动点及1份\(item.name)。")
+            return ActionPreview(allowed: true, cost: state.battle == nil ? 0:1, message: state.battle == nil ? "消耗1份\(item.name)（地图上不耗行动点）。":"消耗1行动点及1份\(item.name)。")
         case .rescue(let actor, let target):
             try rescuePlan(actor: actor, target: target)
             return ActionPreview(allowed: true, cost: catalog.rules.rescueCost, message: "消耗2行动点及1复活石；恢复半生命，战斗中下一轮可行动。")

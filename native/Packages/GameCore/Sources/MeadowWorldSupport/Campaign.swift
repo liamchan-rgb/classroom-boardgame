@@ -61,7 +61,7 @@ public struct MeadowCampaignSave:Codable,Equatable {
               layout.coordinateHeight.isFinite,layout.coordinateHeight>0,
               [.exploration,.pve].contains(archive.state.phase),archive.state.battle == nil || archive.state.battle?.kind == .pve,
               (1...6).contains(archive.state.players.filter{!$0.host}.count),archive.state.players.filter({$0.host}).count<=1,
-              archive.state.players.allSatisfy({$0.host ? $0.id=="p7":(1...6).map{"p\($0)"}.contains($0.id)}),archive.catalog == (try MeadowCampaignSession.catalog()),
+              archive.state.players.allSatisfy({$0.host ? $0.id=="p7":(1...6).map{"p\($0)"}.contains($0.id)}),MeadowCampaignSession.isKnownCatalog(archive.catalog),
               archive.state.map.nodes.map(\.id)==layout.map.nodes.map(\.id),archive.state.map.roads==layout.map.roads else {throw GameError("探索存档与当前地图或规则不匹配。")}
         if let checkpoints {
             let operations=Set(archive.history.map(\.id))
@@ -247,13 +247,39 @@ public final class MeadowCampaignSession {
     }
     private func requireOpenCampaign()throws {guard !isCompleted else{throw GameError("本行程已结算，请查看结果或返回设置开始新行程。")}}
     public var cleared:Bool {!engine.state.units.values.contains{$0.kind == .monster && $0.isAlive}}
+    /// Journey rules: the tabletop catalog with richer drops (every common monster drops coins, bosses drop a big
+    /// purse, gear and set pieces are more likely). Earlier saves keep the catalog they were made with.
     public static func catalog()throws->GameCatalog {
+        if let cached=currentCatalog{return cached}
+        var c=try GameCatalog.initial()
+        for i in c.monsters.indices {
+            let health=c.monsters[i].attributes.maximumHealth,boss=health>=40
+            c.monsters[i].drops=c.monsters[i].drops.map{drop in
+                var d=drop
+                if d.itemID==nil {d.coins=max(d.coins*3,health+(boss ? 40:0));d.percent=100}
+                else if c.items.first(where:{$0.id==d.itemID})?.setID != nil {d.percent=min(100,d.percent*2)}
+                else {d.percent=min(100,d.percent*3/2)}
+                return d
+            }
+        }
+        var stag=try c.monster("wolf");stag.id="meadowStag";stag.name="林地鹿灵"
+        var elder=try c.monster("caveTroll");elder.id="meadowElderStag";elder.name="古树鹿王"
+        c.monsters += [stag,elder];try c.validate();currentCatalog=c;return c
+    }
+    private static var currentCatalog:GameCatalog?
+    private static var legacy:GameCatalog?
+    /// The catalog of journeys saved before the richer drops (still loadable; their drops stay as they were).
+    public static func legacyCatalog()throws->GameCatalog {
+        if let legacy{return legacy}
         var c=try GameCatalog.initial()
         // Explicit local skins. All source monster stats/AI/drops and original
         // six definitions remain unchanged; only ID/name match the existing art.
         var stag=try c.monster("wolf");stag.id="meadowStag";stag.name="林地鹿灵"
         var elder=try c.monster("caveTroll");elder.id="meadowElderStag";elder.name="古树鹿王"
-        c.monsters += [stag,elder];try c.validate();return c
+        c.monsters += [stag,elder];try c.validate();legacy=c;return c
+    }
+    static func isKnownCatalog(_ c:GameCatalog)->Bool {
+        ((try? catalog()).map{$0==c} ?? false) || ((try? legacyCatalog()).map{$0==c} ?? false)
     }
     public static func new(layout:GeneratedMeadowMap,appearanceID:String="forester",playerClassID:String="spellblade",companionClassID:String="ranger",studentClasses:[String]?=nil,studentNames:[String]?=nil,playerAppearances:[String:PlayerAppearance]?=nil,loadouts:[String:GameUnit]?=nil,difficulty:GameDifficulty = .normal,persist:((Data)throws->Void)?=nil)throws->MeadowCampaignSession {
         let catalog=try self.catalog(),start=layout.map.nodes.first{$0.kind == .start}!.id
@@ -511,6 +537,13 @@ public final class MeadowCampaignSession {
         return try engine.apply(.resetNodeReward(node:node))
     }
     public var difficulty:GameDifficulty {engine.state.effectiveDifficulty}
+    /// Everyone fell in a fight: end it and stand everyone back up on the map with 1 health (the journey goes on).
+    public var mustRetreat:Bool {!isCompleted && engine.state.battle?.kind == .pve && !engine.state.players.contains(where: \.isAlive)}
+    @discardableResult public func retreatAfterWipe()throws->OperationReceipt {
+        try requireOpenCampaign()
+        guard mustRetreat else{throw GameError("只有全队倒地时才能撤回地图。")}
+        return try engine.apply(.retreatAfterDefeat)
+    }
     /// Teacher switch: rescales every monster (health share kept) and new encounters follow it. Outside battle only.
     @discardableResult public func setDifficulty(_ level:GameDifficulty)throws->OperationReceipt? {
         try requireOpenCampaign()

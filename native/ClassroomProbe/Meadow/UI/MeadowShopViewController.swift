@@ -17,7 +17,9 @@ final class MeadowShopViewController:UIViewController {
     private let header=UIView(),grid=UIScrollView(),detail=UIView()
     private let titleLabel=MeadowPreviewPalette.label("",size:26,weight:.heavy)
     private let coinsLabel=MeadowPreviewPalette.label("",size:18,weight:.bold)
-    private let buyers=UISegmentedControl(),mode=UISegmentedControl(items:["购买","出售"])
+    private let buyers=UISegmentedControl(),mode=UISegmentedControl(items:["购买","出售","抽奖"])
+    private let lottery=MeadowLotteryView()
+    private var lotteryMode:Bool {mode.selectedSegmentIndex==2}
     private let close=MeadowPreviewPalette.iconButton("xmark")
     private let bigIcon=UIImageView(),nameLabel=MeadowPreviewPalette.label("",size:24,weight:.heavy),infoLabel=MeadowPreviewPalette.label("",size:16)
     private let priceLabel=MeadowPreviewPalette.label("",size:20,weight:.heavy),afterLabel=MeadowPreviewPalette.label("",size:15)
@@ -65,6 +67,26 @@ final class MeadowShopViewController:UIViewController {
         buyers.addAction(UIAction{[weak self] _ in guard let self else{return};let list=self.people;if list.indices.contains(self.buyers.selectedSegmentIndex){self.actor=list[self.buyers.selectedSegmentIndex].id};self.selected=nil;self.reload()},for:.valueChanged)
         mode.selectedSegmentIndex=0
         mode.addAction(UIAction{[weak self] _ in guard let self else{return};self.selling=self.mode.selectedSegmentIndex==1;self.selected=nil;self.reload()},for:.valueChanged)
+        // Prize wheel: the rules draw the prize (recorded and undoable); the wheel only shows it.
+        lottery.catalog=session.engine.catalog
+        lottery.onSpin={[weak self] tier in
+            guard let self else{return nil}
+            let before=self.session.engine.state
+            do{
+                let receipt=try self.session.spinLottery(actor:self.actor,tier:tier)
+                self.onTrade?(before);self.reload()
+                return receipt.events.first{$0.kind=="lottery"}?.amount
+            }catch{self.flash("未完成："+error.localizedDescription);return nil}
+        }
+        lottery.onFinished={[weak self] tier,slot in
+            guard let self,CampaignLottery.tiers.indices.contains(tier),CampaignLottery.tiers[tier].prizes.indices.contains(slot) else{return}
+            let prize=CampaignLottery.tiers[tier].prizes[slot]
+            if let id=prize.item {
+                let item=try? self.session.engine.catalog.item(id)
+                self.flash((item?.setID != nil ? "套装部件！":"抽中 ")+(item?.name ?? id)+(prize.count>1 ? " ×\(prize.count)":""))
+            } else {self.flash("抽中 \(prize.coins) 金币")}
+        }
+        view.addSubview(lottery)
         close.addAction(UIAction{[weak self] _ in self?.dismiss(animated:true)},for:.touchUpInside)
         action.addAction(UIAction{[weak self] _ in self?.trade()},for:.touchUpInside)
         grid.alwaysBounceVertical=true
@@ -73,6 +95,8 @@ final class MeadowShopViewController:UIViewController {
 
     private func reload() {
         guard let unit else{return}
+        grid.isHidden=lotteryMode;detail.isHidden=lotteryMode;lottery.isHidden = !lotteryMode
+        view.bringSubviewToFront(toast)
         let shopSite=node.map{CampaignSiteRules.configuration(node:$0,seed:session.engine.state.map.seed)?.kind == .shop} ?? false
         titleLabel.attributedText=MeadowGlassText.iconLine("cart.fill",shopSite ? "商店":"行商",size:26)
         coinsLabel.attributedText=MeadowGlassText.iconLine("bitcoinsign.circle.fill","\(unit.coins)",size:18,tint:MeadowPreviewPalette.gold)
@@ -164,7 +188,7 @@ final class MeadowShopViewController:UIViewController {
         let w=header.bounds.width
         titleLabel.frame=CGRect(x:16,y:10,width:w*0.45,height:34);coinsLabel.frame=CGRect(x:16,y:48,width:w*0.45,height:24)
         close.frame=CGRect(x:w-64,y:12,width:50,height:44)
-        mode.frame=CGRect(x:w-280,y:12,width:200,height:40)
+        mode.frame=CGRect(x:w-340,y:12,width:260,height:40)
         buyers.frame=CGRect(x:w*0.5,y:62,width:w*0.5-14,height:36)
         let top=header.frame.maxY+12,panel=min(380,b.width*0.34)
         detail.frame=CGRect(x:b.maxX-panel,y:top,width:panel,height:b.maxY-top)
@@ -182,5 +206,7 @@ final class MeadowShopViewController:UIViewController {
         afterLabel.frame=CGRect(x:18,y:priceLabel.frame.maxY+8,width:dw-36,height:afterH)
         action.frame=CGRect(x:18,y:detail.bounds.height-70,width:dw-36,height:52)
         toast.frame=CGRect(x:grid.frame.midX-180,y:b.maxY-64,width:360,height:44)
+        lottery.frame=CGRect(x:b.minX,y:top,width:b.width,height:b.maxY-top)
+        if lotteryMode {toast.frame=CGRect(x:b.midX-200,y:b.maxY-64,width:400,height:44)}
     }
 }

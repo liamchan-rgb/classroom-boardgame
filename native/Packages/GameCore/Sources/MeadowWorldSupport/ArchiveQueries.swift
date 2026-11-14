@@ -36,9 +36,9 @@ public enum MeadowHistoryCategory:String,CaseIterable {case all,combat,travel,re
     public var title:String {switch self{case .all:return "全部类别";case .combat:return "战斗";case .travel:return "移动与地点";case .resources:return "资源与物品";case .team:return "组队与老师";case .appearance:return "人物外观";case .configuration:return "地点配置";case .other:return "其他"}}
     public static func of(_ command:GameCommand)->Self {
         switch command {
-        case .startBattle,.attack,.cast,.monsterStep,.endTurn,.joinMonster,.reorderQueue,.finishBattle,.rescue:return .combat
+        case .startBattle,.attack,.cast,.monsterStep,.endTurn,.joinMonster,.reorderQueue,.finishBattle,.rescue,.retreatAfterDefeat:return .combat
         case .campaignMove,.move,.interactCampaignNode,.resolveCampaignSite,.refillCampaignMovement:return .travel
-        case .tradeCampaignSite,.editPlayer,.grantPlayerResources,.editResources,.useItem,.reward,.setHealth,.revive,.equip,.refillExploration:return .resources
+        case .tradeCampaignSite,.campaignLottery,.editPlayer,.grantPlayerResources,.editResources,.useItem,.reward,.setHealth,.revive,.equip,.refillExploration:return .resources
         case .configureTeams,.mergeTeams,.transferTeamResource,.teacherTransferTeamResource,.addHost,.changeTeam:return .team
         case .applyPlayerProfile:return .appearance
         case .configureCampaignSite,.configureNodeEncounter,.configureNodeReward,.resetNodeReward,.setDifficulty:return .configuration
@@ -102,6 +102,8 @@ public struct MeadowHistoryIndex:Identifiable,Equatable {
         case .reorderQueue:return "调整战斗队列"
         case .refillExploration:return "补充探索资源"
         case .setDifficulty(let level):return "难度改为"+level.title
+        case .retreatAfterDefeat:return "全队倒地，撤回地图"
+        case .campaignLottery(_,let tier):return "商店抽奖 · "+((try? CampaignLottery.tier(tier).title) ?? "")+"档"
         }
     }
 }

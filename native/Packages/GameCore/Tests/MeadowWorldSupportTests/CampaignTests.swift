@@ -283,7 +283,7 @@ final class CampaignTests:XCTestCase {
         fail=false;try session.useInventory(actor:"p2",item:"smallPotion",target:"p1")
         XCTAssertEqual(session.engine.state.units["p1"]!.inventory["smallPotion"],p1Count)
         XCTAssertEqual(session.engine.state.units["p2"]!.inventory["smallPotion"],(p2Before.inventory["smallPotion"] ?? 0)-1)
-        XCTAssertEqual(session.engine.state.units["p2"]!.ap,p2Before.ap-1)
+        XCTAssertEqual(session.engine.state.units["p2"]!.ap,p2Before.ap) // supplies are free on the map
         XCTAssertGreaterThan(session.engine.state.units["p1"]!.health,5)
         let restored=try MeadowCampaignSession(save:.decoded(stored))
         XCTAssertEqual(restored.engine.archive,session.engine.archive)
@@ -523,6 +523,22 @@ final class CampaignTests:XCTestCase {
         XCTAssertEqual(result.outcome,"defeat");XCTAssertNil(s.engine.state.battle);XCTAssertTrue(result.players.allSatisfy{!$0.isAlive})
         XCTAssertEqual(result.players.map(\.coins),before.state.players.map(\.coins));XCTAssertEqual(try s.completeCampaign(),result)
         XCTAssertEqual(try MeadowCampaignSave.decoded(stored).completion,result)
+    }
+
+    func testWipeRetreatsToMapWithOneHealthAndKeepsJourney()throws {
+        let s=try MeadowCampaignSession.new(layout:layout(combat:true))
+        let start=s.engine.state.units["p1"]!.nodeID;try s.beginTravel(to:s.engine.state.map.neighbors(start)[0]);try finishTravel(s);try s.interactCurrentNode()
+        XCTAssertFalse(s.mustRetreat);XCTAssertThrowsError(try s.retreatAfterWipe())
+        for id in s.playerIDs{try s.engine.apply(.setHealth(unit:id,value:0,killer:nil))}
+        XCTAssertTrue(s.mustRetreat)
+        let monsters=s.engine.state.units.values.filter{$0.kind == .monster}.map(\.health)
+        try s.retreatAfterWipe()
+        XCTAssertNil(s.engine.state.battle);XCTAssertEqual(s.engine.state.phase,.exploration);XCTAssertNil(s.completion)
+        XCTAssertTrue(s.engine.state.players.allSatisfy{$0.health==1 && $0.shield==0})
+        XCTAssertEqual(s.engine.state.units.values.filter{$0.kind == .monster}.map(\.health).sorted(),monsters.sorted())
+        XCTAssertFalse(s.mustRetreat);XCTAssertFalse(s.canCompleteDefeat)
+        let restored=try MeadowCampaignSession(save:.decoded(s.snapshot.encoded()))
+        XCTAssertTrue(restored.engine.state.players.allSatisfy{$0.health==1})
     }
 
     func testThreeDistinctMonstersResumeAndTakeRealAITurns()throws {

@@ -185,6 +185,10 @@ public enum GameCommand: Codable, Equatable {
     case configureNodeReward(node: Int, reward: NodeReward)
     case resetNodeReward(node: Int)
     case setDifficulty(GameDifficulty)
+    /// The whole party fell in a PVE fight: the fight ends and everyone gets back up on the map with 1 health.
+    case retreatAfterDefeat
+    /// One spin of the shop prize wheel (tier 0…2).
+    case campaignLottery(actor: String, tier: Int)
 }
 public struct DiceResult: Codable, Equatable {
     public var source: String

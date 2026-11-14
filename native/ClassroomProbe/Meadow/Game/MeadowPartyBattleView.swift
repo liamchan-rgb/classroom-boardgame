@@ -214,7 +214,12 @@ final class MeadowPartyBattleView:UIView {
             guard let unit=state.units[id] else { return nil }
             let shown=stage.displayedVitals(for:id,health:unit.health,shield:unit.shield)
             let maximum=(try? GameRules.attributes(unit,catalog:model.engine.catalog).maximumHealth) ?? unit.baseAttributes.maximumHealth
-            return MeadowTurnOrderView.Entry(id:id,name:unit.name,hp:shown.health,maxHP:maximum,shield:shown.shield,enemy:unit.kind == .monster,acted:acted.contains(id) && id != showing,down:!unit.isAlive)
+            var face:UIImage?
+            if unit.kind == .player,PixelHeroAtlas.enabled {
+                let slot=state.players.firstIndex{$0.id==id} ?? MeadowPartyStageView.playerSlot(id)
+                face=PixelHeroAtlas.portrait(PixelHeroLook.battle(unit:unit,slot:slot)){[weak self] in self?.classroomRefresh()}
+            }
+            return MeadowTurnOrderView.Entry(id:id,name:unit.shortName,hp:shown.health,maxHP:maximum,shield:shown.shield,enemy:unit.kind == .monster,acted:acted.contains(id) && id != showing,down:!unit.isAlive,portrait:face)
         }
         track.show(entries:entries,current:showing,round:model.round,selected:[friend,foe],finished:model.terminal ? (state.players.contains(where: \.isAlive) ? "战斗胜利":"小队倒地"):nil)
         UIView.animate(withDuration:0.2) { self.panel.alpha=busy ? 0.55:1 }

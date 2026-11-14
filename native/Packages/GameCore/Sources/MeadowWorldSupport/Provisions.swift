@@ -10,6 +10,8 @@ public struct MeadowProvisionPlan:Codable,Equatable {
     public let movementCoinBudget:Int
     public let healingPressure:Int
     public let bossSupplyNodes:[Int:Int]
+    /// Treasure on top of the movement budget, per member, per supply node: grows the farther the cache is from camp.
+    public let treasure:[Int:Int]
 }
 public enum MeadowProvisioning {
     public static let version=2
@@ -71,7 +73,7 @@ public enum MeadowProvisioning {
         let shieldCaches:Set<Int>
         if bosses.count==1 {shieldCaches=Set(caches.first.map{[$0.id]} ?? [])}
         else{shieldCaches=preparation}
-        var rewards=[Int:NodeReward]()
+        var rewards=[Int:NodeReward](),treasure=[Int:Int]()
         for (i,node) in caches.enumerated() {
             var items=[String:Int]()
             if !encounters.isEmpty {
@@ -81,8 +83,11 @@ public enum MeadowProvisioning {
                 if revivals>0{items["revivalStone"]=revivals}
             }
             let amount=perMember/caches.count+(i<perMember%caches.count ? 1:0)
-            rewards[node.id]=NodeReward(coins:amount,score:2,items:items)
+            // Rising treasure curve: 25 coins at the nearest cache, +20 for each cache farther out, plus a little score.
+            let bonus=25+20*i
+            treasure[node.id]=bonus
+            rewards[node.id]=NodeReward(coins:amount+bonus,score:2+i,items:items)
         }
-        return .init(startingCoins:coins,rewards:rewards,treeTourDistance:tour,movementCoinBudget:budget,healingPressure:pressure,bossSupplyNodes:bossSupplies)
+        return .init(startingCoins:coins,rewards:rewards,treeTourDistance:tour,movementCoinBudget:budget,healingPressure:pressure,bossSupplyNodes:bossSupplies,treasure:treasure)
     }
 }

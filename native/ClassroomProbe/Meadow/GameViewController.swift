@@ -109,6 +109,13 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     func classroomToggleBattleMap(role:ClassroomRole)throws {
         try ClassroomGameBackend.requireTeacher(role);battlePreviewView?.classroomToggleMap()
     }
+    /// After a full-party wipe was turned into a retreat: close the battle and say so on the TV.
+    func classroomShowRetreat(){
+        battleGainBase=nil
+        classroomFinishBattleIfReady()
+        guard let campaign else{return}
+        MeadowGainPopup.present(in:view,title:"小队倒地",subtitle:"已撤回地图",gains:[],catalog:campaign.engine.catalog,emptyText:"每人以 1 点生命继续前进，记得用行囊里的药水恢复。"){[weak self] in self?.classroomOverlayDirty=true}
+    }
     func classroomFinishBattleIfReady(){
         if classroomMode,battlePreviewActive,!classroomBusy,campaign?.engine.state.battle==nil {setBattlePreviewActive(false)}
     }

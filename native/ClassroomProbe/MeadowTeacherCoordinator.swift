@@ -63,10 +63,21 @@ final class MeadowTeacherCoordinator:ObservableObject {
     private var enemyWork:DispatchWorkItem?
     private var lastTick=ProcessInfo.processInfo.systemUptime
     private var aiKey:String?
+    private var wipeSince:Double?
     private func tick(){
         let now=ProcessInfo.processInfo.systemUptime,delta=min(0.5,max(0,now-lastTick));lastTick=now
         defer{publishChanges();updateMirrorDemand()}
         renderer?.classroomFinishBattleIfReady()
+        // Whole party down: let the fall play for a moment, then stand everyone up on the map with 1 health.
+        if let c=campaign,c.mustRetreat,!busy,surface != .book {
+            if wipeSince==nil {wipeSince=now}
+            if let since=wipeSince,now-since>=2.5 {
+                wipeSince=nil
+                do{try c.retreatAfterWipe();renderer?.classroomRefresh();renderer?.classroomShowRetreat();message="全队倒地，已撤回地图：每人以 1 点生命继续，可用行囊里的药水恢复。";revision += 1}
+                catch{message=error.localizedDescription}
+            }
+            return
+        } else {wipeSince=nil}
         guard UIApplication.shared.applicationState == .active,ready,!modalOpen,let c=campaign,c.engine.state.battle != nil,surface != .book,c.engine.state.pauseReasons.isEmpty else{enemyWork?.cancel();enemyWork=nil;aiKey=nil;return}
         guard !busy else{return}
         do{

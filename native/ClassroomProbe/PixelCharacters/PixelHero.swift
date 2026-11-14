@@ -389,3 +389,49 @@ enum PixelHeroAtlas {
         return UIImage(cgImage: context.makeImage() ?? raw, scale: 1, orientation: .up)
     }
 }
+
+// MARK: 顺序条头像
+//
+// 顺序条只放脸：取人物正面待机那一帧，按不透明像素找到头顶，裁出头部方块。烘焙在后台串行队列里做（和其它烘焙共用，
+// JavaScriptCore 不能并发），做好前顺序条先用旧头像。
+extension PixelHeroAtlas {
+    private static let portraitCache = NSCache<NSString, UIImage>()
+    private static var portraitPending = Set<String>()
+    /// 已经做好的头像；没有就排队去做（主线程调用），做好后 `ready` 在主线程回调。
+    static func portrait(_ look: PixelHeroLook, ready: @escaping () -> Void = {}) -> UIImage? {
+        if let hit = portraitCache.object(forKey: look.key as NSString) { return hit }
+        guard !portraitPending.contains(look.key) else { return nil }
+        portraitPending.insert(look.key)
+        workQueue.async {
+            let face = cell(look: look, facing: 0, column: 0).flatMap(headCrop)
+            DispatchQueue.main.async {
+                portraitPending.remove(look.key)
+                if let face { portraitCache.setObject(face, forKey: look.key as NSString); ready() }
+            }
+        }
+        return nil
+    }
+    /// 头部方块：在人物中线附近找第一行足够宽的不透明像素当头顶（细细的武器尖不算），往下取一个方块
+    private static func headCrop(_ image: UIImage) -> UIImage? {
+        guard let cg = image.cgImage else { return nil }
+        let w = cg.width, h = cg.height
+        var pixels = [UInt8](repeating: 0, count: w * h * 4)
+        guard let ctx = CGContext(data: &pixels, width: w, height: h, bitsPerComponent: 8, bytesPerRow: w * 4, space: CGColorSpaceCreateDeviceRGB(),
+                                  bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return nil }
+        ctx.draw(cg, in: CGRect(x: 0, y: 0, width: w, height: h))
+        let mid = Int(mapFoot.x), band = 40
+        func opaque(_ x: Int, _ y: Int) -> Bool { pixels[(y * w + x) * 4 + 3] > 40 }
+        var top: Int?
+        for y in 0..<h {
+            var count = 0
+            for x in max(0, mid - band)..<min(w, mid + band) where opaque(x, y) { count += 1 }
+            if count >= 16 { top = y; break }
+        }
+        guard let top else { return nil }
+        var sum = 0, n = 0
+        for y in top..<min(h, top + 40) { for x in max(0, mid - band)..<min(w, mid + band) where opaque(x, y) { sum += x; n += 1 } }
+        let cx = n > 0 ? sum / n : mid, side = 76
+        let rect = CGRect(x: max(0, min(w - side, cx - side / 2)), y: max(0, top - 6), width: side, height: side)
+        return cg.cropping(to: rect).map { UIImage(cgImage: $0) }
+    }
+}
