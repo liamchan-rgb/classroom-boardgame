@@ -47,6 +47,8 @@ public struct MeadowCampaignSave:Codable,Equatable {
     public var movementTeam:String {archive.state.units[selectedPlayerID ?? "p1"]?.teamID ?? "party"}
     public var movementLimit:Double {MeadowMovementRules.capacity(archive,team:movementTeam)}
     public var completion:MeadowCampaignCompletion?=nil
+    /// Teacher-imported multiple-choice questions; when present, roadside-find events on the map become quiz events.
+    public var quizBank:[QuizQuestion]?=nil
     public var formatVersion=1
     public let layout:GeneratedMeadowMap
     public var archive:GameArchive
@@ -103,6 +105,7 @@ public struct MeadowCampaignSave:Codable,Equatable {
             }else{guard !archive.state.players.contains(where: \.isAlive) else{throw GameError("队伍未全员倒地。")}}
         }
         if let selectedPlayerID {guard archive.state.players.contains(where:{$0.id==selectedPlayerID}) else{throw GameError("操作成员无效。")}}
+        if let quizBank {guard quizBank.count<=500 else{throw GameError("题库最多500题。")};for q in quizBank{try q.validate()}}
         try camera?.validate()
         if let t=travel {try validateTravel(t,parked:false)}
         if let parked=parkedTravels {
@@ -220,9 +223,9 @@ public final class MeadowCampaignSession {
     }
     public var completionProgress:String {
         if isCompleted{return "行程已结算，可查看结果"}
-        if canCompleteDefeat{return "队伍全部倒地，可结束本次行程"}
-        if !completionGoalMet{return totalEncounterNodes>0 ? "清理地点 \(clearedEncounterNodes)/\(totalEncounterNodes)，之后返回营地结算":"探索地点 \(engine.state.map.revealed.count)/\(engine.state.map.nodes.count)，之后返回营地结算"}
-        return canComplete ? "目标达成，可结束行程并结算":"目标达成，请返回营地结算"
+        if canCompleteDefeat{return "全队倒地"}
+        if !completionGoalMet{return totalEncounterNodes>0 ? "清理 \(clearedEncounterNodes)/\(totalEncounterNodes)":"探索 \(engine.state.map.revealed.count)/\(engine.state.map.nodes.count)"}
+        return canComplete ? "目标达成 · 可结算":"目标达成 · 回营地"
     }
     public var canCompleteDefeat:Bool {!isCompleted && !isMoving && !engine.state.players.contains(where: \.isAlive)}
     static func makeCompletion(archive:GameArchive,save:MeadowCampaignSave,outcome:String)->MeadowCampaignCompletion {
@@ -247,41 +250,56 @@ public final class MeadowCampaignSession {
     }
     private func requireOpenCampaign()throws {guard !isCompleted else{throw GameError("本行程已结算，请查看结果或返回设置开始新行程。")}}
     public var cleared:Bool {!engine.state.units.values.contains{$0.kind == .monster && $0.isAlive}}
-    /// Journey rules: the tabletop catalog with richer drops (every common monster drops coins, bosses drop a big
-    /// purse, gear and set pieces are more likely). Earlier saves keep the catalog they were made with.
+    /// Journey rules: the tabletop catalog with journey drops. Every common monster drops coins; rare equipment
+    /// (shop gear and set pieces) comes from about one common monster in 8-10, and bosses roll double (twice the
+    /// rare chance and twice the purse). Combat stats are untouched. Saves keep the catalog they were made with.
     public static func catalog()throws->GameCatalog {
-        if let cached=currentCatalog{return cached}
+        if let cached=catalogs[2]{return cached}
+        let c=try journeyCatalog(version:2);catalogs[2]=c;return c
+    }
+    /// The catalog of journeys saved before journey drops (still loadable; their drops stay as they were).
+    public static func legacyCatalog()throws->GameCatalog {
+        if let cached=catalogs[0]{return cached}
+        let c=try journeyCatalog(version:0);catalogs[0]=c;return c
+    }
+    private static var catalogs:[Int:GameCatalog]=[:]
+    /// 0: tabletop drops; 1: v0.28.0 rich drops (kept so those saves load); 2: current journey drops.
+    static func journeyCatalog(version:Int)throws->GameCatalog {
         var c=try GameCatalog.initial()
-        for i in c.monsters.indices {
-            let health=c.monsters[i].attributes.maximumHealth,boss=health>=40
-            c.monsters[i].drops=c.monsters[i].drops.map{drop in
-                var d=drop
-                if d.itemID==nil {d.coins=max(d.coins*3,health+(boss ? 40:0));d.percent=100}
-                else if c.items.first(where:{$0.id==d.itemID})?.setID != nil {d.percent=min(100,d.percent*2)}
-                else {d.percent=min(100,d.percent*3/2)}
-                return d
+        if version>0 {
+            for i in c.monsters.indices {
+                let health=c.monsters[i].attributes.maximumHealth,boss=c.monsters[i].boss || health>=40
+                c.monsters[i].drops=c.monsters[i].drops.map{drop in
+                    var d=drop
+                    let isSet=d.itemID.flatMap{id in c.items.first{$0.id==id}?.setID} != nil
+                    let isGear=d.itemID.flatMap{id in c.items.first{$0.id==id}?.slot} != nil
+                    if version==1 {
+                        if d.itemID==nil {d.coins=max(d.coins*3,health+(boss ? 40:0));d.percent=100}
+                        else if isSet {d.percent=min(100,d.percent*2)}
+                        else {d.percent=min(100,d.percent*3/2)}
+                    } else {
+                        // Six set pieces at 1% + one shop gear at 4% ≈ 10% per common monster (1 in ~10); bosses double.
+                        if d.itemID==nil {d.coins=boss ? health*2:max(10,health);d.percent=100}
+                        else if isSet {d.percent=boss ? 2:1}
+                        else if isGear {d.percent=boss ? 5:4}
+                    }
+                    return d
+                }
             }
         }
+        // Explicit local skins: only ID/name match the existing art.
         var stag=try c.monster("wolf");stag.id="meadowStag";stag.name="林地鹿灵"
         var elder=try c.monster("caveTroll");elder.id="meadowElderStag";elder.name="古树鹿王"
-        c.monsters += [stag,elder];try c.validate();currentCatalog=c;return c
-    }
-    private static var currentCatalog:GameCatalog?
-    private static var legacy:GameCatalog?
-    /// The catalog of journeys saved before the richer drops (still loadable; their drops stay as they were).
-    public static func legacyCatalog()throws->GameCatalog {
-        if let legacy{return legacy}
-        var c=try GameCatalog.initial()
-        // Explicit local skins. All source monster stats/AI/drops and original
-        // six definitions remain unchanged; only ID/name match the existing art.
-        var stag=try c.monster("wolf");stag.id="meadowStag";stag.name="林地鹿灵"
-        var elder=try c.monster("caveTroll");elder.id="meadowElderStag";elder.name="古树鹿王"
-        c.monsters += [stag,elder];try c.validate();legacy=c;return c
+        c.monsters += [stag,elder];try c.validate();return c
     }
     static func isKnownCatalog(_ c:GameCatalog)->Bool {
-        ((try? catalog()).map{$0==c} ?? false) || ((try? legacyCatalog()).map{$0==c} ?? false)
+        for version in 0...2 {
+            if catalogs[version]==nil,let made=try? journeyCatalog(version:version){catalogs[version]=made}
+            if catalogs[version]==c{return true}
+        }
+        return false
     }
-    public static func new(layout:GeneratedMeadowMap,appearanceID:String="forester",playerClassID:String="spellblade",companionClassID:String="ranger",studentClasses:[String]?=nil,studentNames:[String]?=nil,playerAppearances:[String:PlayerAppearance]?=nil,loadouts:[String:GameUnit]?=nil,difficulty:GameDifficulty = .normal,persist:((Data)throws->Void)?=nil)throws->MeadowCampaignSession {
+    public static func new(layout:GeneratedMeadowMap,appearanceID:String="forester",playerClassID:String="spellblade",companionClassID:String="ranger",studentClasses:[String]?=nil,studentNames:[String]?=nil,playerAppearances:[String:PlayerAppearance]?=nil,loadouts:[String:GameUnit]?=nil,difficulty:GameDifficulty = .normal,quizBank:[QuizQuestion]?=nil,persist:((Data)throws->Void)?=nil)throws->MeadowCampaignSession {
         let catalog=try self.catalog(),start=layout.map.nodes.first{$0.kind == .start}!.id
         try MeadowPartyConfiguration(playerClassID:playerClassID,companionClassID:companionClassID).validate(catalog:catalog)
         let classes=studentClasses ?? [playerClassID,companionClassID]
@@ -311,7 +329,8 @@ public final class MeadowCampaignSession {
         var state=GameState(units:units,teams:[GameTeam(id:"party",name:"林间小队")],map:map,random:RandomState(seed:layout.configuration.seed ^ 0x43414d504149474e))
         state.pauseReasons=[];state.difficulty=difficulty == .normal ? nil:difficulty
         let save=MeadowCampaignSave(layout:layout,archive:GameArchive(catalog:catalog,state:state,history:[]),appearanceID:appearanceID)
-        let session=try MeadowCampaignSession(save:save,persist:persist);try session.checkpoint();return session
+        var bank=save;bank.quizBank=(quizBank?.isEmpty ?? true) ? nil:quizBank
+        let session=try MeadowCampaignSession(save:bank,persist:persist);try session.checkpoint();return session
     }
     public init(save:MeadowCampaignSave,persist:((Data)throws->Void)?=nil)throws {
         var restored=save

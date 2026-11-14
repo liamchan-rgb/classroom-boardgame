@@ -568,6 +568,28 @@ final class MeadowPreviewCard: UIView {
         addSubview(title); addSubview(detail); addSubview(button)
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    private let icon = UIImageView(), pip = UILabel()
+    private var compact = false
+    /// Classroom card: tinted icon + name, an AP pip in the corner, at most one short stat line.
+    func updateCompact(name: String, cost: Int, symbol: String, tint: UIColor, stat: String?, enabled: Bool) {
+        if !compact {
+            compact = true
+            icon.contentMode = .scaleAspectFit; pip.textAlignment = .center; pip.layer.cornerRadius = 11; pip.clipsToBounds = true
+            insertSubview(icon, belowSubview: button); insertSubview(pip, belowSubview: button)
+            layer.cornerRadius = 14; layer.cornerCurve = .continuous
+        }
+        icon.image = UIImage(systemName: symbol, withConfiguration: UIImage.SymbolConfiguration(pointSize: 22, weight: .bold)); icon.tintColor = tint
+        title.text = name; title.font = MeadowPreviewPalette.font(20, .heavy); title.adjustsFontSizeToFitWidth = true; title.minimumScaleFactor = 0.7
+        detail.text = stat; detail.font = MeadowPreviewPalette.font(15, .semibold); detail.textColor = tint.withAlphaComponent(0.9); detail.numberOfLines = 1
+        pip.text = cost > 0 ? "◆\(cost)" : "—"; pip.font = MeadowPreviewPalette.font(14, .heavy)
+        pip.textColor = UIColor(red: 0.08, green: 0.10, blue: 0.09, alpha: 1); pip.backgroundColor = enabled ? MeadowPreviewPalette.gold : UIColor.white.withAlphaComponent(0.3)
+        backgroundColor = enabled ? tint.withAlphaComponent(0.14) : UIColor.white.withAlphaComponent(0.04)
+        button.isEnabled = enabled; button.isUserInteractionEnabled = enabled; button.backgroundColor = .clear
+        alpha = enabled ? 1 : 0.42
+        layer.borderWidth = enabled ? 1.2 : 0; layer.borderColor = tint.withAlphaComponent(0.6).cgColor
+        button.accessibilityLabel = name + (stat.map { "，" + $0 } ?? ""); button.accessibilityValue = enabled ? "可用" : "不可用"
+        setNeedsLayout()
+    }
     func update(title titleText: String, detail detailText: String, enabled: Bool) {
         title.text = titleText; detail.text = detailText
         button.isEnabled = enabled
@@ -581,9 +603,19 @@ final class MeadowPreviewCard: UIView {
     }
     override func layoutSubviews() {
         super.layoutSubviews(); guard bounds.width > 0, bounds.height > 0 else { return }
+        button.frame = bounds
+        if compact {
+            let h = bounds.height, iconSide = min(30, h * 0.42)
+            icon.frame = CGRect(x: 12, y: (h - iconSide) / 2 - (detail.text == nil ? 0 : 0), width: iconSide, height: iconSide)
+            pip.frame = CGRect(x: bounds.width - 46, y: 8, width: 38, height: 22)
+            let x = icon.frame.maxX + 10, w = max(1, bounds.width - x - 50)
+            if detail.text?.isEmpty == false {
+                title.frame = CGRect(x: x, y: h / 2 - 25, width: w, height: 26); detail.frame = CGRect(x: x, y: h / 2 + 2, width: w + 40, height: 20)
+            } else { title.frame = CGRect(x: x, y: (h - 26) / 2, width: w, height: 26); detail.frame = .zero }
+            return
+        }
         title.frame = CGRect(x: 10, y: 6, width: max(1, bounds.width - 20), height: 27)
         detail.frame = CGRect(x: 10, y: 35, width: max(1, bounds.width - 20), height: max(1, bounds.height - 40))
-        button.frame = bounds
     }
 }
 

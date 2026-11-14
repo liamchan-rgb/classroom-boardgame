@@ -1,4 +1,5 @@
 import UIKit
+import UniformTypeIdentifiers
 import MeadowBattleSupport
 import MeadowWorldSupport
 import ClassroomGameCore
@@ -110,9 +111,17 @@ final class MeadowMapSettingsViewController: UIViewController {
             let row=UIStackView(arrangedSubviews:[label,name,profiles,selector,summary]);row.axis = .vertical;row.spacing=6
             classRows.append(row);right.addArrangedSubview(row)
         }
-        let partyNote=UILabel();partyNote.text="支持相同职业。以上为职业基础值，装备另计；职业与衣装、武器独立。继续存档沿用原队伍。";partyNote.numberOfLines=0;partyNote.font = .systemFont(ofSize:16);partyNote.textColor=gold
-        right.addArrangedSubview(partyNote)
         refreshPartySummary()
+        // Optional question bank: roadside-find events become quiz events (format: docs/question-bank-format.md).
+        var quizStyle=UIButton.Configuration.gray();quizStyle.image=UIImage(systemName:"questionmark.bubble.fill");quizStyle.imagePadding=8
+        quizStyle.title="导入题库";quizStyle.baseForegroundColor=gold;quizStyle.cornerStyle = .capsule
+        quizButton.configuration=quizStyle
+        quizButton.addAction(UIAction{[weak self] _ in self?.importQuizBank()},for:.touchUpInside)
+        quizClear.setImage(UIImage(systemName:"xmark.circle.fill"),for:.normal);quizClear.tintColor=UIColor.white.withAlphaComponent(0.5)
+        quizClear.addAction(UIAction{[weak self] _ in self?.quizBank=nil;self?.refreshQuizLabel()},for:.touchUpInside)
+        quizLabel.font = .systemFont(ofSize:15,weight:.semibold);quizLabel.textColor=UIColor.white.withAlphaComponent(0.7);quizLabel.numberOfLines=2
+        let quizRow=UIStackView(arrangedSubviews:[quizButton,quizLabel,quizClear]);quizRow.spacing=10;quizRow.alignment = .center
+        right.addArrangedSubview(quizRow);refreshQuizLabel()
         right.addArrangedSubview(startCampaignButton)
         right.addArrangedSubview(button("继续已保存行程",action:#selector(continueCampaign)))
         right.addArrangedSubview(button("历史结算",action:#selector(showCompletedCampaigns)))
@@ -135,6 +144,24 @@ final class MeadowMapSettingsViewController: UIViewController {
             right.widthAnchor.constraint(equalTo:rightScroll.frameLayoutGuide.widthAnchor)
         ])
         changed()
+    }
+    private let quizButton=UIButton(type:.system),quizLabel=UILabel(),quizClear=UIButton(type:.system)
+    private var quizBank:[QuizQuestion]?
+    private func refreshQuizLabel(){
+        if let bank=quizBank,!bank.isEmpty {quizLabel.text="✓ \(bank.count) 题 · 路边事件改为答题";quizLabel.textColor=gold;quizClear.isHidden=false}
+        else {quizLabel.text="可选 · 不导入则保持原随机事件";quizLabel.textColor=UIColor.white.withAlphaComponent(0.6);quizClear.isHidden=true}
+    }
+    private func importQuizBank(){
+        DocumentImportPresenter.shared.present(types:[.plainText,.utf8PlainText,.json,.text]){[weak self] url in
+            guard let self,let url else{return}
+            do{
+                let scoped=url.startAccessingSecurityScopedResource();defer{if scoped{url.stopAccessingSecurityScopedResource()}}
+                self.quizBank=try QuizBankParser.parse(Data(contentsOf:url));self.refreshQuizLabel()
+            }catch{
+                let alert=UIAlertController(title:"题库没有导入",message:error.localizedDescription,preferredStyle:.alert)
+                alert.addAction(UIAlertAction(title:"好",style:.default));self.present(alert,animated:true)
+            }
+        }
     }
     private func button(_ title:String,action:Selector) -> UIButton {
         let b=UIButton(type:.system);var c=UIButton.Configuration.filled();c.title=title
@@ -250,7 +277,7 @@ final class MeadowMapSettingsViewController: UIViewController {
                     units=save.archive.state.units;appearance=save.appearanceID
                 }
                 try store.preserveCompletedCampaign()
-                let session=try MeadowCampaignSession.new(layout:result,appearanceID:appearance,playerClassID:config.playerClassID,companionClassID:config.companionClassID,studentClasses:Array(self.classControls.prefix(Int(self.studentCount.value))).map{MeadowPartyConfiguration.classIDs[max(0,$0.selectedSegmentIndex)]},studentNames:self.studentNames.prefix(Int(self.studentCount.value)).map{$0.text ?? ""},playerAppearances:self.profileLooks,loadouts:units,difficulty:GameDifficulty.lastChosen,persist:store.write)
+                let session=try MeadowCampaignSession.new(layout:result,appearanceID:appearance,playerClassID:config.playerClassID,companionClassID:config.companionClassID,studentClasses:Array(self.classControls.prefix(Int(self.studentCount.value))).map{MeadowPartyConfiguration.classIDs[max(0,$0.selectedSegmentIndex)]},studentNames:self.studentNames.prefix(Int(self.studentCount.value)).map{$0.text ?? ""},playerAppearances:self.profileLooks,loadouts:units,difficulty:GameDifficulty.lastChosen,quizBank:self.quizBank,persist:store.write)
                 self.presentCampaign(session)
             } catch {self.status.text="未开始新行程："+error.localizedDescription}
         }

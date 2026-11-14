@@ -191,9 +191,9 @@ final class MeadowPartyBattleView:UIView {
         let busy=stage.isPlaying || model.pending != nil
         title.text=model.terminal ? (state.players.contains(where: \.isAlive) ? "小队胜利":"小队倒地") : (campaignEngine == nil ? "小队支援":"林地遭遇")+" · 第\(model.round)轮"
         let showing=busy ? (stage.actorInAction ?? model.pending?.actor ?? current):current
-        let name=showing.flatMap { state.units[$0]?.name } ?? "演练结束"
+        let name=showing.flatMap { state.units[$0]?.shortName } ?? "—"
         if busy { armed=nil }
-        if armed==nil { hint.text=busy ? "\(name) · 动作进行中" : classroomMode ? "\(name)行动"+(state.pauseReasons.isEmpty ? "":" · 已暂停") : "\(name)行动 · 友方 \(model.state.units[friend]?.shortName ?? friend.uppercased()) / 敌方 \(model.state.units[foe]?.name ?? foe) · 点角色或上方顺序条选目标" }
+        if armed==nil { hint.text=busy ? "\(name) · ⋯" : classroomMode ? "▶ \(name)"+(state.pauseReasons.isEmpty ? "":"  ⏸") : "\(name)行动 · 友方 \(model.state.units[friend]?.shortName ?? friend.uppercased()) / 敌方 \(model.state.units[foe]?.name ?? foe) · 点角色或上方顺序条选目标" }
         let displayActor=showing ?? "p1"
         if let unit=state.units[displayActor] {
             let visible=stage.displayedVitals(for:displayActor,health:unit.health,shield:unit.shield)
@@ -231,7 +231,13 @@ final class MeadowPartyBattleView:UIView {
             guard i<actions.count else { continue }
             let a=actions[i];let result=model.preview(a,target:target(a))
             let allowed=active && !busy && result.allowed
-            b.update(title:a.title+" · \(model.cost(a)) AP",detail:(!busy && !result.allowed) ? result.message:detail(a,model:model,actor:displayActor),enabled:allowed)
+            if classroomMode {
+                // Compact card: icon + name, AP pip, one short stat (dice / uses left). Colour carries the kind of action.
+                let look=Self.look(a)
+                b.updateCompact(name:a.title,cost:model.cost(a),symbol:look.symbol,tint:look.tint,stat:shortStat(a,model:model,actor:displayActor),enabled:allowed)
+            } else {
+                b.update(title:a.title+" · \(model.cost(a)) AP",detail:(!busy && !result.allowed) ? result.message:detail(a,model:model,actor:displayActor),enabled:allowed)
+            }
             b.previewStrength=0;b.previewColor = .clear
             b.button.removeTarget(nil,action:nil,for:.touchUpInside)
             b.button.removeAction(identifiedBy:UIAction.Identifier("party-skill"),for:.touchUpInside)
@@ -266,6 +272,33 @@ final class MeadowPartyBattleView:UIView {
         let actions=model.playerActions().map{model.actionReadout($0,ally:friend,enemy:foe).text}.joined(separator:"\n\n")
         let alert=UIAlertController(title:"个人资源与当前技能",message:"查看时快照，回合计时继续。\n\n"+model.partyResourceSummary+"\n\n"+actions,preferredStyle:.alert)
         alert.addAction(UIAlertAction(title:"关闭",style:.cancel));controller.present(alert,animated:true)
+    }
+    static func look(_ a:PartyAction)->(symbol:String,tint:UIColor) {
+        switch a {
+        case .dragonFlame:return ("flame.fill",UIColor(red:1,green:0.55,blue:0.25,alpha:1))
+        case .runeSlash,.starlightPulse:return ("wand.and.rays",UIColor(red:0.72,green:0.55,blue:1,alpha:1))
+        case .ambush:return ("eye.slash.fill",UIColor(red:0.72,green:0.55,blue:1,alpha:1))
+        case .endTurn:return ("hourglass",UIColor(white:0.8,alpha:1))
+        default:break
+        }
+        switch a.visual {
+        case "heal":return ("heart.fill",UIColor(red:0.45,green:0.90,blue:0.55,alpha:1))
+        case "guard","runeWard":return ("shield.fill",UIColor(red:0.45,green:0.80,blue:1,alpha:1))
+        case "support","battleRune":return ("sparkles",UIColor(red:1,green:0.84,blue:0.38,alpha:1))
+        case "revive":return ("arrow.counterclockwise.heart.fill",UIColor(red:0.45,green:0.90,blue:0.55,alpha:1))
+        default:return ("burst.fill",UIColor(red:1,green:0.42,blue:0.38,alpha:1))
+        }
+    }
+    /// One short stat for the compact card: weapon dice for the plain attack, uses left for limited skills.
+    private func shortStat(_ a:PartyAction,model:PartyEncounter,actor:String)->String? {
+        guard let unit=model.state.units[actor] else{return nil}
+        if a == .attack {
+            guard let weapon=unit.equipment.weapon,let dice=(try? model.engine.catalog.item(weapon))?.attack?.dice else{return "无武器"}
+            let bonus=(try? GameRules.attributes(unit,catalog:model.engine.catalog).damage) ?? 0
+            return "\(dice.count)D\(dice.sides)"+(bonus>0 ? "+\(bonus)":"")
+        }
+        guard let skill=try? model.engine.catalog.skill(a.rawValue),let limit=skill.uses else{return nil}
+        return "剩 \(max(0,limit-(unit.skillUses[a.rawValue] ?? 0)))"
     }
     private func detail(_ a:PartyAction,model:PartyEncounter,actor:String)->String {
         guard a != .attack else {

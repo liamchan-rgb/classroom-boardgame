@@ -227,6 +227,7 @@ struct Evaluation {
         case .resetNodeReward(let id): try resetNodeReward(id)
         case .setDifficulty(let level): try setDifficulty(level)
         case .campaignLottery(let actor, let tier): try campaignLottery(actor: actor, tier: tier)
+        case .answerCampaignQuiz(let actor, let correct, let coins): try answerCampaignQuiz(actor: actor, correct: correct, coins: coins)
         case .retreatAfterDefeat:
             guard let battle = state.battle, battle.kind == .pve, !state.players.contains(where: \.isAlive) else { throw GameError("只有全队倒地时才能撤回地图。") }
             try finish(winner: "monsters", byScore: false)

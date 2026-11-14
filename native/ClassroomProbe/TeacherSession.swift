@@ -14,7 +14,7 @@ final class TeacherSession: ObservableObject {
     static let shared = TeacherSession()
     let display = PublicDisplayModel()
     @Published private(set) var state = ProbeState()
-    @Published private(set) var message = "阶段0：先验证安装与独立公开画面。"
+    @Published private(set) var message = "就绪"
     @Published private(set) var connectionCount = 0
     @Published private(set) var registrationStatus = "正在准备公开画面。"
     @Published private(set) var importReport = "尚未导入PPTX。"
@@ -203,7 +203,7 @@ final class TeacherSession: ObservableObject {
         state = candidate.state; display.image = rendered?.image; showNotes = false; isEditingNotes = false
         lastTick = ProcessInfo.processInfo.systemUptime
         publish(); refreshReport(rendered?.warnings ?? [])
-        message = "测试状态与绘本已恢复；计时保持暂停。"
+        message = "绘本已恢复"
     }
     private func backup(state: ProbeState) -> ProbeBackup {
         ProbeBackup(state: state, pptxData: pptxData, sourceName: sourceName, editedNotes: editedNotes)

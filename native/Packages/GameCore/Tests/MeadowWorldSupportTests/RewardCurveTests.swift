@@ -9,9 +9,18 @@ final class RewardCurveTests:XCTestCase {
             let rich=try journey.monster(monster.id)
             XCTAssertEqual(rich.attributes,monster.attributes);XCTAssertEqual(rich.attack,monster.attack)
             let coins=try XCTUnwrap(rich.drops.first{$0.itemID==nil})
-            XCTAssertEqual(coins.percent,100);XCTAssertGreaterThanOrEqual(coins.coins,monster.attributes.maximumHealth)
-            for (a,b) in zip(monster.drops,rich.drops) where a.itemID != nil {XCTAssertGreaterThanOrEqual(b.percent,a.percent)}
+            XCTAssertEqual(coins.percent,100);XCTAssertGreaterThan(coins.coins,0)
+            // Chance that a monster drops at least one piece of rare equipment.
+            var none=1.0
+            for d in rich.drops {if let id=d.itemID,(try journey.item(id)).slot != nil {none *= 1-Double(d.percent)/100}}
+            let rare=1-none
+            if monster.boss {XCTAssertEqual(rare,0.21,accuracy:0.04)} else {XCTAssertEqual(rare,0.10,accuracy:0.02)}
         }
+    }
+    func testSavesFromEveryEarlierJourneyCatalogStillLoad()throws {
+        let s=try MeadowCampaignSession.new(layout:MeadowMapGenerator.generate(.suggested(total:10,seed:31827)))
+        var rich=s.snapshot;rich.archive.catalog=try MeadowCampaignSession.journeyCatalog(version:1)
+        XCTAssertNoThrow(try MeadowCampaignSave.decoded(rich.encoded()))
     }
     func testSavesFromTheOldCatalogStillLoad()throws {
         let s=try MeadowCampaignSession.new(layout:MeadowMapGenerator.generate(.suggested(total:10,seed:31827)))
@@ -25,8 +34,8 @@ final class RewardCurveTests:XCTestCase {
         let s=try MeadowCampaignSession.new(layout:layout)
         let plan=try MeadowProvisioning.plan(layout:layout,players:s.engine.state.players,catalog:s.engine.catalog)
         let values=plan.treasure.values.sorted()
-        XCTAssertFalse(values.isEmpty);XCTAssertEqual(values.first,25)
-        for (a,b) in zip(values,values.dropFirst()){XCTAssertEqual(b-a,20)}
+        XCTAssertFalse(values.isEmpty);XCTAssertEqual(values.first,6)
+        for (a,b) in zip(values,values.dropFirst()){XCTAssertEqual(b-a,3)}
         for (id,bonus) in plan.treasure {XCTAssertGreaterThanOrEqual(plan.rewards[id]!.coins,bonus)}
     }
     func testSpringRestoresEveryTeammateHereToFull()throws {

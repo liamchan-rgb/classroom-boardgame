@@ -346,6 +346,7 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
             }
         }
         scene.onMetrics = { [weak self] text in DispatchQueue.main.async { self?.metricsLabel.text = text } }
+        scene.onArrival = { [weak self] node in DispatchQueue.main.async { self?.promptArrival(node) } }
         scene.onDiscovery = { [weak self] text in
             DispatchQueue.main.async {
             guard let self else { return }
@@ -1042,6 +1043,23 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         menu.addAction(UIAlertAction(title:"取消",style:.cancel));menu.popoverPresentationController?.sourceView=campaignRefill;menu.popoverPresentationController?.sourceRect=campaignRefill.bounds
         present(menu,animated:true)
     }
+    /// Arrived (and stopped) on a node with something to do: ask right away instead of waiting for a tap.
+    private func promptArrival(_ nodeID:Int) {
+        guard let campaign,!battlePreviewActive,campaign.engine.state.battle==nil,campaign.travel==nil,!campaign.isCompleted else{return}
+        let actor=scene.selectedCampaignPlayerID
+        guard let unit=campaign.engine.state.units[actor],unit.nodeID==nodeID,let node=campaign.engine.state.map.nodes.first(where:{$0.id==nodeID}) else{return}
+        if campaign.siteAvailable(actor:actor) {
+            if campaign.siteKind(node:nodeID) == .shop {
+                let alert=UIAlertController(title:"🛒 "+node.name,message:"进入商店？",preferredStyle:.alert)
+                alert.addAction(UIAlertAction(title:"稍后",style:.cancel))
+                let enter=UIAlertAction(title:"进入",style:.default){[weak self] _ in self?.showCampaignSite(actor:actor,node:node)}
+                alert.addAction(enter);alert.preferredAction=enter;presentSiteScreen(alert)
+            } else {showCampaignSite(actor:actor,node:node)}
+            return
+        }
+        let combat=(node.kind == .combat || node.kind == .boss) && campaign.engine.state.units.values.contains{$0.kind == .monster && $0.nodeID==node.id && $0.isAlive}
+        if combat || (node.kind == .reward && !node.rewardCompleted) {showCampaignInteraction()}
+    }
     private func showCampaignInteraction() {
         guard let campaign else{return}
         if campaign.engine.state.battle != nil{setBattlePreviewActive(true);return}
@@ -1050,11 +1068,12 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         if campaign.siteAvailable(actor:actor){showCampaignSite(actor:actor,node:node);return}
         let combat=node.kind == .combat || node.kind == .boss
         guard (node.kind == .reward && !node.rewardCompleted) || (combat && campaign.engine.state.units.values.contains{$0.kind == .monster && $0.nodeID==node.id && $0.isAlive}) else{showCampaignMessage("此地点没有待处理事件，可继续前进。");return}
-        let supplies=(try? campaign.rewardSummary(node:node.id)) ?? "领取此处补给。"
-        let message=combat ? "主动进入此处战斗。人物各自按基础行动值开场；移动条独立保留。":supplies+"\n领取后不会重复发放。"
+        let supplies=(try? campaign.rewardSummary(node:node.id)) ?? "补给"
+        let foes=campaign.engine.state.units.values.filter{$0.kind == .monster && $0.nodeID==node.id && $0.isAlive}.map(\.name)
+        let message=combat ? "⚔︎ "+foes.joined(separator:"、"):supplies
         let alert=UIAlertController(title:node.name,message:message,preferredStyle:.alert)
-        alert.addAction(UIAlertAction(title:"暂不交互",style:.cancel))
-        alert.addAction(UIAlertAction(title:combat ? "开始战斗":"领取补给",style:.default){[weak self] _ in
+        alert.addAction(UIAlertAction(title:"稍后",style:.cancel))
+        alert.addAction(UIAlertAction(title:combat ? "开战":"领取",style:.default){[weak self] _ in
             do{let before=campaign.engine.state;try campaign.interactCurrentNode(actor:actor);self?.scene.refreshCampaign();self?.refreshCampaignStatus()
                 if !combat{self?.showGains(title:"获得补给",subtitle:node.name,since:before)}}
             catch{self?.showCampaignMessage(error.localizedDescription)}
@@ -1074,27 +1093,47 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
             shop.onTrade={[weak self] _ in self?.scene.refreshCampaign();self?.refreshCampaignStatus()}
             if let old=presentedViewController as? UIAlertController {old.dismiss(animated:true){[weak self] in self?.present(shop,animated:true)}}
             else {present(shop,animated:true)}
+        }else if kind == .satchel,let question=campaign.quizQuestion(node:node.id) {
+            showQuiz(actor:actor,node:node,question:question)
         }else {
             let title=kind == .satchel ? "路边失物":"林间清泉"
             let config=CampaignSiteRules.configuration(node:node,seed:campaign.engine.state.map.seed)!
-            let message=kind == .satchel ? "\(unit.name) 拾取\(config.gold)金币。":"\(unit.name) 恢复最多\(config.healing)生命，不超过个人上限；满血时可换成员再来。"
-            let alert=UIAlertController(title:title,message:message+"\n此地点全队仅处理一次。暂不处理可稍后回来；明确离开则结束事件。",preferredStyle:.alert)
-            alert.addAction(UIAlertAction(title:"暂不处理",style:.cancel))
-            for player in campaign.engine.state.players where player.isAlive && player.nodeID==node.id && player.id != actor {
-                alert.addAction(UIAlertAction(title:"改由 "+player.name+" 处理",style:.default){[weak self] _ in self?.showCampaignSite(actor:player.id,node:node)})
+            let mates=campaign.engine.state.players.filter{$0.isAlive && $0.nodeID==node.id && $0.teamID==unit.teamID}
+            let hurt=mates.contains{u in u.health<((try? GameRules.attributes(u,catalog:campaign.engine.catalog).maximumHealth) ?? u.health)}
+            let message=kind == .satchel ? "＋\(config.gold) 金币 → \(unit.shortName)":(hurt ? "此处的队友全部回满生命":"大家生命都是满的，可以稍后再来")
+            let alert=UIAlertController(title:title,message:message,preferredStyle:.alert)
+            alert.addAction(UIAlertAction(title:"稍后",style:.cancel))
+            let id=UUID().uuidString
+            let accept=UIAlertAction(title:kind == .satchel ? "拾取":"饮用泉水",style:.default){[weak self] _ in
+                do{let before=campaign.engine.state;try campaign.resolveSite(actor:actor,accept:true,id:id);self?.scene.refreshCampaign();self?.refreshCampaignStatus()
+                    self?.showGains(title:title,subtitle:nil,since:before)}
+                catch{self?.showCampaignMessage(error.localizedDescription)}
             }
-            for (label,accept) in [("接受",true),("明确离开（结束事件）",false)] {
-                let id=UUID().uuidString
-                let action=UIAlertAction(title:label,style:accept ? .default:.destructive){[weak self] _ in
-                    do{let before=campaign.engine.state;try campaign.resolveSite(actor:actor,accept:accept,id:id);self?.scene.refreshCampaign();self?.refreshCampaignStatus();self?.showCampaignMessage("事件已保存。")
-                        self?.showGains(title:title,subtitle:nil,since:before)}
-                    catch{self?.showCampaignMessage("事件未保存，可重试："+error.localizedDescription)}
-                }
-                let maximum=(try? GameRules.attributes(unit,catalog:campaign.engine.catalog).maximumHealth) ?? unit.baseAttributes.maximumHealth
-                action.isEnabled = !accept || kind != .spring || unit.health<maximum
-                alert.addAction(action)
-            }
+            accept.isEnabled = kind != .spring || hurt
+            alert.addAction(accept);alert.preferredAction=accept
             presentSiteScreen(alert)
+        }
+    }
+    /// Quiz event: the question goes up on the TV; the teacher taps the class's answer (or skips) on the iPad.
+    private func showQuiz(actor:String,node:MapNode,question:QuizQuestion) {
+        let card=MeadowQuizCard.present(in:view,question:question,place:node.name);classroomOverlayDirty=true
+        let letters=["A","B","C","D","E","F"]
+        let alert=UIAlertController(title:"答题 · 答对 +\(question.reward)",message:question.prompt,preferredStyle:.alert)
+        for (i,option) in question.options.enumerated() {
+            alert.addAction(UIAlertAction(title:letters[i]+". "+option,style:.default){[weak self] _ in self?.finishQuiz(actor:actor,choice:i,question:question,card:card)})
+        }
+        alert.addAction(UIAlertAction(title:"跳过（不计分）",style:.cancel){[weak self] _ in self?.finishQuiz(actor:actor,choice:nil,question:question,card:card)})
+        presentSiteScreen(alert)
+    }
+    private func finishQuiz(actor:String,choice:Int?,question:QuizQuestion,card:MeadowQuizCard) {
+        guard let campaign else{return}
+        let before=campaign.engine.state
+        do{try campaign.answerQuiz(actor:actor,choice:choice)}
+        catch{card.removeFromSuperview();classroomOverlayDirty=true;showCampaignMessage(error.localizedDescription);return}
+        scene.refreshCampaign();refreshCampaignStatus();classroomOverlayDirty=true
+        card.reveal(choice:choice,question:question){[weak self] in
+            self?.classroomOverlayDirty=true
+            if choice==question.answer {self?.showGains(title:"答对了",subtitle:nil,since:before)}
         }
     }
     private func confirmSiteTrade(actor:String,item:ItemDefinition,buy:Bool) {
@@ -1257,14 +1296,23 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
               let value=try? campaign.encounterPreview(node:id,actor:scene.selectedCampaignPlayerID) else{encounterPreview.isHidden=true;return}
         encounterPreview.show(value,completed:campaign.isCompleted);encounterPreview.classroomReadOnly=classroomMode;encounterPreview.isHidden=false
     }
-private func refreshCampaignStatus(allowBattleOpen:Bool=true) {
+/// A HUD line of icon + value pairs (colour and symbols instead of explanatory sentences).
+    private func hudLine(_ parts:[(String,String,UIColor)])->NSAttributedString {
+        let line=NSMutableAttributedString()
+        for (i,(symbol,text,tint)) in parts.enumerated() {
+            if i>0 {line.append(NSAttributedString(string:"   "))}
+            line.append(MeadowGlassText.iconLine(symbol,text,size:17,tint:tint,weight:.bold))
+        }
+        return line
+    }
+    private func refreshCampaignStatus(allowBattleOpen:Bool=true) {
         classroomOverlayDirty=true
         guard let campaign else{return}
         do{try prepareProfileVisuals()}catch{showCampaignMessage(error.localizedDescription)}
         for control in [shadowLabButton,gaitTestButton,battlePreviewButton,p1AppearanceButton] {control.isHidden=true}
         let state=campaign.engine.state,players=state.players
-        randomMapSummary.text="已探索 \(state.map.revealed.count)/\(state.map.nodes.count) · 金币 \(players.reduce(0){$0+$1.coins}) · 积分 \(players.reduce(0){$0+$1.score})"+(campaign.cleared ? " · 敌人已清理":"")
-        if scene.selectingCampaignNode {randomMapSummary.text="编辑选点中 · 点击建筑 · 再次点按钮取消"}
+        randomMapSummary.attributedText=hudLine([("map.fill","\(state.map.revealed.count)/\(state.map.nodes.count)",MeadowPreviewPalette.ink),("bitcoinsign.circle.fill","\(players.reduce(0){$0+$1.coins})",MeadowPreviewPalette.gold),("star.fill","\(players.reduce(0){$0+$1.score})",UIColor(red:0.55,green:0.85,blue:1,alpha:1))]+(campaign.cleared ? [("checkmark.seal.fill","清理完成",UIColor.systemGreen)]:[]))
+        if scene.selectingCampaignNode {randomMapSummary.attributedText=hudLine([("mappin.and.ellipse","选择建筑",UIColor.orange)])}
         let busy=campaign.travel != nil || state.battle != nil || campaign.isCompleted
         campaignRefill.isEnabled = !campaign.isCompleted && !campaign.isMoving && state.battle==nil && campaign.movementRefillCost>0
         campaignItems.isEnabled = !busy;campaignEdit.isEnabled = !busy
@@ -1280,18 +1328,18 @@ private func refreshCampaignStatus(allowBattleOpen:Bool=true) {
         }else{
             campaignRouteTitle.text=campaign.isCompleted ? "行程已结算":campaign.completionProgress
             let supplies=state.map.nodes.filter{$0.kind == .reward && !$0.rewardCompleted}.count
-            campaignRouteDetail.text=campaign.isCompleted ? "可查看结算，或返回设置开始新行程":"剩余补给 \(supplies)处 · 全队金币 \(campaign.partyCoins) · 抵达后由教师选择交互"
+            campaignRouteDetail.attributedText=campaign.isCompleted ? hudLine([("flag.checkered","查看结算",MeadowPreviewPalette.gold)]):hudLine([("shippingbox.fill","\(supplies)",MeadowPreviewPalette.gold),("bitcoinsign.circle.fill","\(campaign.partyCoins)",MeadowPreviewPalette.gold)])
             campaignRouteDetail.textColor=MeadowPreviewPalette.ink
         }
         playButton.isHidden=battlePreviewActive || !campaign.hasPendingTravel;resetButton.isHidden=true
         playButton.isPlaying=campaign.isMoving
         for i in players.indices {
             let u=players[i],stats=(try? GameRules.attributes(u,catalog:campaign.engine.catalog)) ?? u.baseAttributes
-            campaignHealth[i].show((u.host && u.shortName==u.id.uppercased() ? "师":u.shortName)+" · "+(state.teams.first{$0.id==u.teamID}?.name ?? "未分队")+" · 上限 \(stats.maximumAP)",value:u.health,maximum:stats.maximumHealth,color:.systemGreen)
+            campaignHealth[i].show((u.host && u.shortName==u.id.uppercased() ? "师":u.shortName)+(state.teams.count>1 ? " · "+(state.teams.first{$0.id==u.teamID}?.name ?? ""):""),value:u.health,maximum:stats.maximumHealth,color:.systemGreen)
             campaignAP[i].show(value:u.ap,maximum:max(u.ap,stats.baseAP))
         }
         campaignEnd.configuration?.title=campaign.isCompleted ? "查看结算":"路线与目标"
-        if campaign.isCompleted{randomMapSummary.text="行程已结算 · 可查看结果或返回设置"}
+        if campaign.isCompleted{randomMapSummary.attributedText=hudLine([("flag.checkered.2.crossed","行程完成",MeadowPreviewPalette.gold)])}
         refreshEncounterPreview()
         if ready,allowBattleOpen,state.battle != nil,players.contains(where: \.isAlive),!battlePreviewActive {setBattlePreviewActive(true)}
     }

@@ -37,7 +37,7 @@ public enum MeadowHistoryCategory:String,CaseIterable {case all,combat,travel,re
     public static func of(_ command:GameCommand)->Self {
         switch command {
         case .startBattle,.attack,.cast,.monsterStep,.endTurn,.joinMonster,.reorderQueue,.finishBattle,.rescue,.retreatAfterDefeat:return .combat
-        case .campaignMove,.move,.interactCampaignNode,.resolveCampaignSite,.refillCampaignMovement:return .travel
+        case .campaignMove,.move,.interactCampaignNode,.resolveCampaignSite,.answerCampaignQuiz,.refillCampaignMovement:return .travel
         case .tradeCampaignSite,.campaignLottery,.editPlayer,.grantPlayerResources,.editResources,.useItem,.reward,.setHealth,.revive,.equip,.refillExploration:return .resources
         case .configureTeams,.mergeTeams,.transferTeamResource,.teacherTransferTeamResource,.addHost,.changeTeam:return .team
         case .applyPlayerProfile:return .appearance
@@ -103,6 +103,7 @@ public struct MeadowHistoryIndex:Identifiable,Equatable {
         case .refillExploration:return "补充探索资源"
         case .setDifficulty(let level):return "难度改为"+level.title
         case .retreatAfterDefeat:return "全队倒地，撤回地图"
+        case .answerCampaignQuiz(_,let correct,_):return correct ? "答题正确":"答题未答对"
         case .campaignLottery(_,let tier):return "商店抽奖 · "+((try? CampaignLottery.tier(tier).title) ?? "")+"档"
         }
     }

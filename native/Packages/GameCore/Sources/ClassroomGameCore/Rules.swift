@@ -189,6 +189,8 @@ public enum GameCommand: Codable, Equatable {
     case retreatAfterDefeat
     /// One spin of the shop prize wheel (tier 0…2).
     case campaignLottery(actor: String, tier: Int)
+    /// A quiz event answered (right or wrong) by the class for this actor.
+    case answerCampaignQuiz(actor: String, correct: Bool, coins: Int)
 }
 public struct DiceResult: Codable, Equatable {
     public var source: String

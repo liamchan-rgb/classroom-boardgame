@@ -83,8 +83,8 @@ public enum MeadowProvisioning {
                 if revivals>0{items["revivalStone"]=revivals}
             }
             let amount=perMember/caches.count+(i<perMember%caches.count ? 1:0)
-            // Rising treasure curve: 25 coins at the nearest cache, +20 for each cache farther out, plus a little score.
-            let bonus=25+20*i
+            // Rising treasure curve: 6 coins at the nearest cache, +3 for each cache farther out, plus a little score.
+            let bonus=6+3*i
             treasure[node.id]=bonus
             rewards[node.id]=NodeReward(coins:amount+bonus,score:2+i,items:items)
         }

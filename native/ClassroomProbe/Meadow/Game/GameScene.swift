@@ -19,6 +19,7 @@ final class GameScene: SKScene {
     private func campaignSiteSymbol(_ id:Int?)->String? {
         guard let id,let campaign,let kind=campaign.siteKind(node:id) else{return nil}
         if campaign.engine.state.map.nodes.first(where:{$0.id==id})?.siteResolved==true{return "✓"}
+        if kind == .satchel,campaign.quizQuestion(node:id) != nil {return "题"}
         return kind == .shop ? "商":kind == .spring ? "泉":"事"
     }
     /// The person's own name when the teacher gave one, else the seat (P1, P2 ...).
@@ -40,7 +41,9 @@ final class GameScene: SKScene {
         for (index,d) in world.definition.discoveries.enumerated() {
             guard let id=d.nodeID,let node=campaign.engine.state.map.nodes.first(where:{$0.id==id}) else{continue}
             let cleared=node.rewardCompleted || ((node.kind == .combat || node.kind == .boss) && !campaign.engine.state.units.values.contains{$0.kind == .monster && $0.nodeID==id && $0.isAlive})
-            discoveryNodes[index].children.compactMap{$0 as? SKLabelNode}.first?.text=cleared ? "✓":campaignSiteSymbol(id) ?? ["combat":"战","boss":"首","reward":"奖","empty":"空"][node.kind.rawValue]
+            let symbol=cleared ? "✓":campaignSiteSymbol(id) ?? ["combat":"战","boss":"首","reward":"奖","empty":"空"][node.kind.rawValue] ?? "?"
+            discoveryNodes[index].children.compactMap{$0 as? SKLabelNode}.first?.text=symbol
+            discoveryNodes[index].setPixelMarker(MeadowPixelMarker(symbol:symbol))
         }
         refreshCampaignRoute()
         updateActors(before:nil)
@@ -136,6 +139,8 @@ final class GameScene: SKScene {
     var onDiagnostics: ((String) -> Void)?
     var onMetrics: ((String) -> Void)?
     var onDiscovery: ((String) -> Void)?
+    /// The walking party stopped on a node (the end of its route).
+    var onArrival: ((Int) -> Void)?
     private let selectionRing = SKShapeNode(ellipseOf: CGSize(width: 30, height: 12))
     private let destinationRing = SKShapeNode(ellipseOf: CGSize(width: 25, height: 10))
     private let campaignRoute = SKShapeNode()
@@ -231,19 +236,22 @@ final class GameScene: SKScene {
             root.position = LivingWorld.position(world.definition.landmarkBadgePoint(nodeID:discovery.nodeID) ?? (discovery.kind == nil ? CGPoint(x: discovery.x + 28, y: discovery.y - 40) : CGPoint(x:discovery.x,y:discovery.y-24)))
             root.zPosition = 22500
             root.name = "discovery-\(index)"
-            let diamond = SKShapeNode(circleOfRadius: 13)
-            diamond.fillColor = SKColor(red: 0.25, green: 0.27, blue: 0.23, alpha: 0.9)
-            diamond.strokeColor = SKColor(red: 0.87, green: 0.73, blue: 0.46, alpha: 1)
-            diamond.lineWidth = 1.5
+            // Invisible hit disc (taps still land on the node) + the floating pixel icon; the label keeps the marker's
+            // state as text but is not drawn.
+            let diamond = SKShapeNode(circleOfRadius: 15)
+            diamond.fillColor = SKColor(white: 0, alpha: 0.001)
+            diamond.strokeColor = .clear
             diamond.name = root.name
             root.addChild(diamond)
             let label = SKLabelNode(fontNamed: "Georgia-Bold")
+            label.isHidden = true
             label.text = campaignSiteSymbol(discovery.nodeID) ?? ["combat":"战","boss":"首","reward":"奖","empty":"空"][discovery.kind ?? ""] ?? "?"
             label.fontSize = 20
             label.fontColor = SKColor(red: 1, green: 0.95, blue: 0.81, alpha: 1)
             label.verticalAlignmentMode = .center
             label.name = root.name
             root.addChild(label)
+            root.setPixelMarker(MeadowPixelMarker(symbol:label.text ?? "?"))
             world.addChild(root)
             discoveryNodes.append(root)
             let footprint = SKShapeNode(ellipseOf: CGSize(width: 18, height: 8))
@@ -482,8 +490,9 @@ final class GameScene: SKScene {
         for (index,node) in discoveryNodes.enumerated() {
             node.alpha = 1
             let kind=world.definition.discoveries[index].kind ?? ""
-            node.children.compactMap { $0 as? SKLabelNode }.first?.text = ["combat":"战","boss":"首","reward":"奖","empty":"空"][kind] ?? "?"
-            node.children.compactMap { $0 as? SKShapeNode }.first?.fillColor = .init(red: 0.25, green: 0.27, blue: 0.23, alpha: 0.9)
+            let symbol=["combat":"战","boss":"首","reward":"奖","empty":"空"][kind] ?? "?"
+            node.children.compactMap { $0 as? SKLabelNode }.first?.text = symbol
+            node.setPixelMarker(MeadowPixelMarker(symbol:symbol))
         }
         selectionRing.isHidden = true
         destinationRing.isHidden = true
@@ -525,7 +534,8 @@ final class GameScene: SKScene {
                         refreshCampaign();onCampaignChanged?()
                         let coins=receipt.after.players.reduce(0){$0+$1.coins}-receipt.before.players.reduce(0){$0+$1.coins}
                         if coins>0 {onDiscovery?("小队获得金币 ＋\(coins)")}
-                        else if campaign.travel==nil{onDiscovery?("已抵达，可点击交互地点或继续前进")}
+                        else if campaign.travel==nil{onDiscovery?("已抵达")}
+                        if campaign.travel==nil{onArrival?(receipt.after.units[campaign.selectedPlayerID]?.nodeID ?? -1)}
                     }
                 } catch {campaign.pauseAfterFailure();onCampaignError?(error.localizedDescription)}
             }
@@ -674,7 +684,7 @@ final class GameScene: SKScene {
         discovered.insert(index)
         let marker = discoveryNodes[index]
         marker.children.compactMap { $0 as? SKLabelNode }.first?.text = "✓"
-        marker.children.compactMap { $0 as? SKShapeNode }.first?.fillColor = .init(red: 0.62, green: 0.45, blue: 0.19, alpha: 0.95)
+        marker.setPixelMarker(.done)
         for particle in 0..<24 {
             let dot = SKShapeNode(circleOfRadius: 1.4)
             dot.fillColor = SKColor(red: 1, green: 0.9, blue: 0.6, alpha: 1)
