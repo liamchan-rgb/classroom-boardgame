@@ -19,7 +19,7 @@ struct MeadowTeacherDashboard:View {
     private func workspace(fullScreen:Bool)->some View {
         VStack(spacing:8){
             HStack(spacing:8){
-                Image(systemName:"leaf.fill").font(.system(size:18,weight:.bold)).foregroundStyle(GameTheme.primary).accessibilityLabel("林间旅程 v0.29.1")
+                Image(systemName:"leaf.fill").font(.system(size:18,weight:.bold)).foregroundStyle(GameTheme.primary).accessibilityLabel("林间旅程 v0.30.0")
                 GlassChip(icon:game.externalConnected ? "tv.fill":"ipad.landscape",text:game.externalConnected ? "TV":"本机",tint:game.externalConnected ? .green:GameTheme.muted)
                 if let c=game.campaign,!inBattle {
                     GlassChip(icon:"figure.walk.motion",text:"\(Int(ceil(c.movementRemaining)))/\(Int(ceil(c.movementCapacity)))")

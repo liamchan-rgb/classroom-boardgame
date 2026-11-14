@@ -1,0 +1,12 @@
+{
+  "data": [
+    {
+      "idiom": "universal",
+      "filename": "recipes.json"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}

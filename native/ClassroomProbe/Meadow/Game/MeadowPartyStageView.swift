@@ -102,6 +102,8 @@ final class MeadowPartyStageView:UIView {
     private var emissions:[MeadowBattleLightEmission]=[]
     private var skillVFX:[MeadowPartySkillVFXEvent]=[]
     private var procVFX:[MeadowPartyProcEvent]=[]
+    /// 像素特效（MeadowPixelFX）：接管有配方的特效和常驻护盾，贴在世界视图上和人物一起排前后
+    private lazy var pixelFX=MeadowPixelFXPlayer(host:world.layer)
     /// Where every unit is drawn right now (after travel and knock-back); effects follow these.
     private var liveFeet:[String:PartyPoint]=[:]
     private var washBase=UIColor.clear
@@ -266,8 +268,8 @@ final class MeadowPartyStageView:UIView {
         }
     }
     func classroomPause(_ value:Bool){if value{clock.stop()}else{clock.start()}}
-    func start() { MeadowBattleVFXAssets.prewarm();victoryAt=nil;sceneTime=0;recovery=[:];recoveryTier=[:];formation=[:];birth=[:];contact=[:];contactAngle=[:];revivedAt=[:];buffBirth=[:];labBuff=[:];broken=[:];deaths=[:];hurt=[:];hitFeel=[:];kickFeel=nil;messages=[];emissions=[];skillVFX=[];procVFX=[];pendingStatusCues=[];statusSnapshots=[:];poseKeys=[:];fallen=[:];diceAction=nil;diceConfirmedAt=nil;diceView.confirmationAge=nil;diceView.dice=[];diceSettledAt=nil;diceExitAt=nil;dimFrom=0;dimTarget=0;clock.start() }
-    func stop() { MeadowMonsterFrames.retain([]);clock.stop();intent=nil;impact=nil;completion=nil;focus=nil;skillVFX=[];procVFX=[];pendingStatusCues=[];statusSnapshots=[:] }
+    func start() { MeadowBattleVFXAssets.prewarm();MeadowPixelFX.prewarm();pixelFX.reset();victoryAt=nil;sceneTime=0;recovery=[:];recoveryTier=[:];formation=[:];birth=[:];contact=[:];contactAngle=[:];revivedAt=[:];buffBirth=[:];labBuff=[:];broken=[:];deaths=[:];hurt=[:];hitFeel=[:];kickFeel=nil;messages=[];emissions=[];skillVFX=[];procVFX=[];pendingStatusCues=[];statusSnapshots=[:];poseKeys=[:];fallen=[:];diceAction=nil;diceConfirmedAt=nil;diceView.confirmationAge=nil;diceView.dice=[];diceSettledAt=nil;diceExitAt=nil;dimFrom=0;dimTarget=0;clock.start() }
+    func stop() { pixelFX.reset();MeadowMonsterFrames.retain([]);clock.stop();intent=nil;impact=nil;completion=nil;focus=nil;skillVFX=[];procVFX=[];pendingStatusCues=[];statusSnapshots=[:] }
     func displayedVitals(for unitID:String,health:Int,shield:Int)->(health:Int,shield:Int) { statusSnapshots[unitID] ?? (health,shield) }
     func show(_ value:GameState,friend:String,foe:String,current:String?,catalog:GameCatalog) {
         // The classroom battle has 1-6 students and the teacher (P7): the field is laid out for whoever plays.
@@ -699,6 +701,24 @@ final class MeadowPartyStageView:UIView {
             return (foot:base,chest:PartyPoint(base.x+5*PartyVisual.heroScale*PartyVisual.facing(unit.id),base.y-70*PartyVisual.heroScale),tier:tier,age:sceneTime-at)
         }
         fx.procEffects=procVFX;fx.liveFeet=liveFeet
+        // 像素特效接管有配方的特效（原来的程序化画面就不画了；镜头、震屏、压暗还按 procVFX 全部算）
+        var pixelSources:[MeadowPixelFXSource]=[]
+        if MeadowPixelFX.enabled {
+            fx.procEffects=procVFX.filter { !MeadowPixelFX.covers($0.skill) }
+            for e in procVFX where MeadowPixelFX.covers(e.skill) {
+                pixelSources.append(MeadowPixelFXSource(key:"\(e.skill)|\(e.start)|\(e.casterID)|\(e.targetIDs.joined(separator:","))",skill:e.skill,start:e.start,direction:e.direction,geo:e.geometry(live:liveFeet)))
+            }
+            // 治疗（按单位的回复状态播）
+            for (id,at) in recovery {
+                guard let tier=recoveryTier[id],let unit=state.units[id],unit.isAlive,renderIDs.contains(id),let base=PartyVisual.foot(id) else { continue }
+                let skill=MeadowSkillProceduralDrawing.heal(tier)
+                guard MeadowPixelFX.covers(skill) else { continue }
+                let foot=liveFeet[id] ?? base,chest=MeadowSkillProcedural.Pt(foot.x,foot.y-70*PartyVisual.heroScale)
+                let geo=MeadowSkillProcedural.Geometry(caster:chest,casterFoot:.init(foot.x,foot.y),targets:[.init(chest:chest,foot:.init(foot.x,foot.y))],ground:foot.y)
+                pixelSources.append(MeadowPixelFXSource(key:"heal|\(id)|\(at)",skill:skill,start:at,direction:1,geo:geo))
+            }
+            fx.allyRecoveries=[];fx.monsterRecoveries=[]
+        }
         fx.buffs=state.units.values.filter { renderIDs.contains($0.id) && $0.isAlive }.compactMap { unit in
             guard let amount=unit.damageBuff?.amount ?? labBuff[unit.id],amount>0,let baseFoot=PartyVisual.foot(unit.id) else { return nil }
             let foot=liveFeet[unit.id] ?? baseFoot,baseChest=PartyVisual.skillEffectCenter(targets:[unit.id],actor:unit.id,templates:healTemplates)
@@ -715,6 +735,16 @@ final class MeadowPartyStageView:UIView {
             let monster=unit.kind == .monster,defaultAngle=monster ? Double.pi:0.0
             return (foot:foot,chest:PartyPoint(foot.x+(baseChest.x-baseFoot.x),foot.y+(baseChest.y-baseFoot.y)),level:min(1.5,max(0.25,Double(shield)/8.0)),age:birth[unit.id].map { sceneTime-$0 } ?? (sceneTime+10),hitAge:contact[unit.id].map { sceneTime-$0 } ?? -1,hitAngle:contactAngle[unit.id] ?? defaultAngle,wide:monster ? 1.35:1.0)
         }
+        var pixelShields:[MeadowPixelShield]=[]
+        if MeadowPixelFX.drawsShields {
+            for unit in state.units.values where renderIDs.contains(unit.id) && unit.isAlive {
+                let shield=displayedVitals(for:unit.id,health:unit.health,shield:unit.shield).shield
+                guard shield>0,let baseFoot=PartyVisual.foot(unit.id) else { continue }
+                pixelShields.append(MeadowPixelShield(id:unit.id,foot:liveFeet[unit.id] ?? baseFoot,wide:unit.kind == .monster ? 1.6:1.0,age:birth[unit.id].map { sceneTime-$0 } ?? (sceneTime+10),hitAge:contact[unit.id].map { sceneTime-$0 } ?? -1))
+            }
+            fx.shields=[]
+        }
+        pixelFX.update(time:sceneTime,sources:pixelSources,shields:pixelShields)
         if let gpu {
             // Skills are drawn on the GPU; a full-screen flash goes to the pane-wide wash.
             if let flash=gpu.draw(fx.skillPrimitives()) { wash.backgroundColor=UIColor(red:CGFloat(flash.color.r/255),green:CGFloat(flash.color.g/255),blue:CGFloat(flash.color.b/255),alpha:CGFloat(min(1,flash.alpha*0.85))) }
@@ -1384,7 +1414,7 @@ extension MeadowPartyStageView {
     }
     /// Back to a clean stage with the given state.
     func labReset(_ value:GameState,catalog:GameCatalog,foe:String="m1") {
-        procVFX=[];messages=[];deaths=[:];fallen=[:];contact=[:];contactAngle=[:];revivedAt=[:];buffBirth=[:];labBuff=[:];birth=[:];broken=[:];recovery=[:];recoveryTier=[:];hitFeel=[:];kickFeel=nil;hurt=[:];statusSnapshots=[:];emissions=[]
+        pixelFX.reset();procVFX=[];messages=[];deaths=[:];fallen=[:];contact=[:];contactAngle=[:];revivedAt=[:];buffBirth=[:];labBuff=[:];birth=[:];broken=[:];recovery=[:];recoveryTier=[:];hitFeel=[:];kickFeel=nil;hurt=[:];statusSnapshots=[:];emissions=[]
         show(value,friend:"p1",foe:foe,current:nil,catalog:catalog)
     }
 }

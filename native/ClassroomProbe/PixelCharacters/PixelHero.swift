@@ -324,17 +324,22 @@ enum PixelHeroAtlas {
         return sprite
     }
 
+    /// 出手帧在动画里的序号（脚本里给的；老脚本没有就按 4 帧动作的旧值）
+    static func impactIndex(_ name: String) -> Int {
+        baker.info.impact?[name] ?? ["slash": 1, "heavy": 2, "dash": 2, "shoot": 2, "cast": 2][name] ?? 2
+    }
+
     /// 弓箭离弦的位置（战斗画布坐标）：放箭那一帧持弓的左手，往前一点
     static let bowTip: PartyPoint = {
-        guard let release = baker.info.frames["shoot"]?[2], let hand = baker.hand(hold: "bow", dir: "E", frame: release) else {
+        guard let release = baker.info.frames["shoot"]?[safe: impactIndex("shoot")], let hand = baker.hand(hold: "bow", dir: "E", frame: release) else {
             return PartyPoint(Double(battleFoot.x) + 40, Double(battleFoot.y) - 120)
         }
         return canvasPoint(hand.point.x + 3 * hand.scale, hand.point.y)
     }()
 
-    /// 法杖施法释放的位置（战斗画布坐标）：施法第 3 帧的杖头宝珠
+    /// 法杖施法释放的位置（战斗画布坐标）：施法出手帧的杖头宝珠
     static let staffGem: PartyPoint = {
-        guard let burst = baker.info.frames["cast"]?[2], let hand = baker.hand(hold: "up", dir: "E", frame: burst) else {
+        guard let burst = baker.info.frames["cast"]?[safe: impactIndex("cast")], let hand = baker.hand(hold: "up", dir: "E", frame: burst) else {
             return PartyPoint(Double(battleFoot.x) + 30, Double(battleFoot.y) - 160)
         }
         let length = 38 * hand.scale * hand.reach
@@ -435,4 +440,8 @@ extension PixelHeroAtlas {
         let rect = CGRect(x: max(0, min(w - side, cx - side / 2)), y: max(0, top - 14), width: side, height: side)
         return cg.cropping(to: rect).map { UIImage(cgImage: $0) }
     }
+}
+
+extension Array {
+    subscript(safe i: Int) -> Element? { indices.contains(i) ? self[i] : nil }
 }

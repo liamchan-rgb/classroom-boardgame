@@ -321,33 +321,35 @@ final class MeadowBattleActorView: UIView {
         }
         // 战斗待机：2.4 秒一轮，呼吸 4 次
         let ready = pick("ready", Int(p * 4) % 2)
-        /// 4 帧的动作：出手帧之前的帧均分在出手前 0.3 的进度里，出手帧停一小会，之后的帧收势，再回到战斗待机
-        func action(_ name: String, key: CGFloat) -> PixelHeroAtlas.BattleSprite.Frame? {
-            guard let list = sprite.frames[name], list.count == 4 else { return ready }
-            let impact = ["slash": 1, "heavy": 2, "shoot": 2, "cast": 2][name] ?? 2
-            let start = max(0, key - 0.3), hold = min(1, key + 0.08), end = min(1, key + 0.34)
+        /// 动作（动捕的 8 帧）：出手帧之前的帧按约 13 帧 / 秒排在出手前，出手帧停一小会，之后的帧收势，再回到战斗待机。
+        /// step = 一帧占多少进度（攻击片段 1.2 秒走完 0…1）
+        func action(_ name: String, key: CGFloat, step: CGFloat = 0.064) -> PixelHeroAtlas.BattleSprite.Frame? {
+            guard let list = sprite.frames[name], list.count >= 2 else { return ready }
+            let impact = min(list.count - 1, PixelHeroAtlas.impactIndex(name))
+            let start = max(0, key - CGFloat(impact) * step), hold = key + 0.08
+            let end = hold + CGFloat(list.count - 1 - impact) * step
             if p < start { return ready }
             if p < key {
                 let f = key - start > 0.001 ? (p - start) / (key - start) : 1
                 return list[min(impact - 1, max(0, Int(f * CGFloat(impact))))]
             }
             if p < hold { return list[impact] }
-            if p < end {
-                let rest = 3 - impact
-                if rest <= 0 { return list[3] }
-                let f = end - hold > 0.001 ? (p - hold) / (end - hold) : 1
-                return list[min(3, impact + 1 + Int(f * CGFloat(rest)))]
-            }
+            if p < end { return list[min(list.count - 1, impact + 1 + Int((p - hold) / step))] }
             return ready
+        }
+        /// 整段播完的动作（受击 / 倒下）：进度 0…span 均分到每一帧
+        func spread(_ name: String, _ span: CGFloat) -> PixelHeroAtlas.BattleSprite.Frame? {
+            guard let list = sprite.frames[name], !list.isEmpty else { return ready }
+            return list[min(list.count - 1, Int(p / span * CGFloat(list.count)))]
         }
         switch clip {
         case "attack": return action(sprite.attack, key: pixelKeyProgress ?? 0.54)
         case "guard":
-            if pixelCasting { return action("cast", key: pixelKeyProgress ?? 0.4) }
+            if pixelCasting { return action("cast", key: pixelKeyProgress ?? 0.4, step: 0.05) }
             return pick("guard", p < 0.3 || p > 0.8 ? 0 : 1)
-        case "hit": return p < 0.85 ? pick("hurt", p < 0.35 ? 0 : 1) : ready
+        case "hit": return p < 0.85 ? spread("hurt", 0.85) : ready
         case "victory": return p < 0.12 ? ready : pick("victory", p < 0.55 ? 0 : 1)
-        case "defeat": return pick("defeat", p < 0.45 ? 0 : 1)
+        case "defeat": return spread("defeat", 1.0001)
         default: return ready
         }
     }

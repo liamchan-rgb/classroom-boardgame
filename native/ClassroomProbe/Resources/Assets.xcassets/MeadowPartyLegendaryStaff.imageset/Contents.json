@@ -1,1 +1,12 @@
-{"images":[{"filename":"MeadowPartyLegendaryStaff.png","idiom":"universal"}],"info":{"author":"xcode","version":1}}
+{
+  "images": [
+    {
+      "idiom": "universal",
+      "filename": "MeadowPartyLegendaryStaff.png"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}

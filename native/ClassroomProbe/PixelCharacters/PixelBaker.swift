@@ -31,6 +31,8 @@ final class PixelBaker {
         let footPx: [Double]
         /// 动画名 → sheet 列号
         let frames: [String: [Int]]
+        /// 攻击 / 施法的出手帧（动画内序号）：slash 2、heavy 3、dash 3、shoot 4、cast 4
+        let impact: [String: Int]?
         /// 槽位 → 可选装备
         let items: [String: [Item]]
         let skins: [String]

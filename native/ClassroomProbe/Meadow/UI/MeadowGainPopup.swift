@@ -83,7 +83,7 @@ final class MeadowGainPopup: UIView {
     /// The pack icon of an item, if the app has one.
     private static func icon(_ id: String) -> UIImage? {
         let cap = id.prefix(1).uppercased() + id.dropFirst()
-        return UIImage(named: "MeadowParty" + cap) ?? UIImage(named: "Meadow" + cap + "Icon") ?? UIImage(named: HeroFrames.accessoryVisual(id)?.iconAsset ?? "") ?? UIImage(systemName: "shippingbox.fill")
+        return UIImage(named: "PixelIcon" + cap) ?? UIImage(named: "MeadowParty" + cap) ?? UIImage(named: "Meadow" + cap + "Icon") ?? UIImage(named: HeroFrames.accessoryVisual(id)?.iconAsset ?? "") ?? UIImage(systemName: "shippingbox.fill")
     }
 
     private func chip(icon: UIImage?, tint: UIColor?, text: String) -> UIView {

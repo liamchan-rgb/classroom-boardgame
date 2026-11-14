@@ -786,6 +786,16 @@
 			"isa" = "PBXBuildFile";
 			"fileRef" = "6DD4E146027F79C47AD9F73B";
 		};
+		"7F15BAE5E8D1394B7AC021E5" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Meadow/Game/MeadowPixelFX.swift";
+			"sourceTree" = "<group>";
+		};
+		"D051950269AE5CEBF31304CE" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "7F15BAE5E8D1394B7AC021E5";
+		};
 		"06271BAF49532C879AA3C58B" = {
 			"isa" = "PBXFileReference";
 			"lastKnownFileType" = "text.plist.xml";
@@ -970,6 +980,7 @@
 				"A9F83BB89F6D773BC41AACC2",
 				"229E2AB1262C1A437061BCED",
 				"6DD4E146027F79C47AD9F73B",
+				"7F15BAE5E8D1394B7AC021E5",
 				"06271BAF49532C879AA3C58B",
 				"6BFC76380CC79F82566884C6",
 				"2BF35B3FB72A3D4E876979D6",
@@ -1135,6 +1146,7 @@
 				"A5289BBC25A2281854936615",
 				"713B10068A60737284B0F1C2",
 				"3A7E0C23D4F572D16101B196",
+				"D051950269AE5CEBF31304CE",
 			);
 			"runOnlyForDeploymentPostprocessing" = "0";
 		};
@@ -1203,8 +1215,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				"CURRENT_PROJECT_VERSION" = "39";
-				"MARKETING_VERSION" = "0.29.1";
+				"CURRENT_PROJECT_VERSION" = "40";
+				"MARKETING_VERSION" = "0.30.0";
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 			};
 		};
@@ -1244,8 +1256,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				"CURRENT_PROJECT_VERSION" = "39";
-				"MARKETING_VERSION" = "0.29.1";
+				"CURRENT_PROJECT_VERSION" = "40";
+				"MARKETING_VERSION" = "0.30.0";
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 			};
 		};

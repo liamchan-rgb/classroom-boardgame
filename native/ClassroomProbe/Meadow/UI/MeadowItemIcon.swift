@@ -9,6 +9,9 @@ enum MeadowItemIcon {
 
     static func image(_ id:String,item:ItemDefinition?=nil)->UIImage {
         if let image=cache[id] { return image }
+        // 像素图标（和人物同一套像素画法）：稀有以上带发光动画（PixelIconFX<Id>，24 帧横排，12 帧 / 秒），其余是静态图
+        let cap=id.prefix(1).uppercased()+id.dropFirst()
+        if let animated=animatedPixelIcon(cap) ?? UIImage(named:"PixelIcon"+cap) { cache[id]=animated;return animated }
         let asset=HeroFrames.weaponVisual(id)?.iconAsset ?? HeroFrames.armorVisual(id)?.iconAsset ?? HeroFrames.accessoryVisual(id)?.iconAsset
             ?? ["smallPotion":"MeadowPartySmallPotion","largePotion":"MeadowPartyLargePotion","shieldPotion":"MeadowPartyShieldPotion","revivalStone":"MeadowPartyRevivalStone"][id]
         let image=asset.flatMap { UIImage(named:$0) } ?? badge(id,item:item)
@@ -42,13 +45,26 @@ enum MeadowItemIcon {
         }
     }
 
-    /// The image scaled to a square of `side` points (for button images).
+    /// The image scaled to a square of `side` points (for button images). Animated icons stay animated.
     static func image(_ id:String,item:ItemDefinition?=nil,side:CGFloat)->UIImage {
         let source=image(id,item:item)
-        return UIGraphicsImageRenderer(size:CGSize(width:side,height:side)).image { r in
-            r.cgContext.interpolationQuality = .none
-            let k=min(side/source.size.width,side/source.size.height),w=source.size.width*k,h=source.size.height*k
-            source.draw(in:CGRect(x:(side-w)/2,y:(side-h)/2,width:w,height:h))
+        func scaled(_ frame:UIImage)->UIImage {
+            UIGraphicsImageRenderer(size:CGSize(width:side,height:side)).image { r in
+                r.cgContext.interpolationQuality = .none
+                let k=min(side/frame.size.width,side/frame.size.height),w=frame.size.width*k,h=frame.size.height*k
+                frame.draw(in:CGRect(x:(side-w)/2,y:(side-h)/2,width:w,height:h))
+            }
         }
+        if let frames=source.images,frames.count>1 { return UIImage.animatedImage(with:frames.map(scaled),duration:source.duration) ?? scaled(frames[0]) }
+        return scaled(source)
+    }
+
+    /// 发光动画：素材是一条横排的帧，切开做成会动的 UIImage（UIImageView / 按钮直接播放）
+    private static func animatedPixelIcon(_ cap:String)->UIImage? {
+        guard let strip=UIImage(named:"PixelIconFX"+cap)?.cgImage,strip.height>0 else { return nil }
+        let side=strip.height,count=strip.width/side
+        guard count>1 else { return nil }
+        let frames=(0..<count).compactMap { k in strip.cropping(to:CGRect(x:k*side,y:0,width:side,height:side)).map { UIImage(cgImage:$0) } }
+        return UIImage.animatedImage(with:frames,duration:Double(count)/12)
     }
 }
