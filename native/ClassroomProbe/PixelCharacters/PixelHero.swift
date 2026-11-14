@@ -170,7 +170,7 @@ enum PixelHeroAtlas {
         inFlight[key] = [completion]
         workQueue.async {
             for look in mapNeeded { for half in 0...1 { _ = atlas(named: name(look: look, half: half)) } }
-            for look in battleNeeded { _ = battle(look) }
+            for look in battleNeeded { _ = PixelHeroAtlas.battle(look) }
             DispatchQueue.main.async {
                 let callbacks = inFlight.removeValue(forKey: key) ?? []
                 callbacks.forEach { $0() }
