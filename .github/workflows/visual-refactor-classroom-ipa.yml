@@ -29,7 +29,8 @@ jobs:
           set -euo pipefail
           swift test --package-path native/Packages/ProbeCore 2>&1 | tee artifacts/core-tests.log | tail -5
           status=0; swift test --package-path native/Packages/GameCore > artifacts/game-core-tests.log 2>&1 || status=$?
-          grep -E "error:|failed|Executed" artifacts/game-core-tests.log | tail -40
+          grep -E "error:" artifacts/game-core-tests.log | head -60 || true
+          grep -E "Executed .* tests" artifacts/game-core-tests.log | tail -3
           exit $status
       - name: Build unsigned iPad app
         shell: bash
