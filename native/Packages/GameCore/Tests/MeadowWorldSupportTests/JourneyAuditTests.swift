@@ -33,7 +33,7 @@ final class JourneyAuditTests:XCTestCase {
     func testManualRestUsesEachBaseAPAndEnablesRealRescueWithoutFreeVitalsOrMovement()throws {
         let s=try MeadowCampaignSession(save:depletedSave()),before=s.snapshot
         let command=try s.inventoryItemCommand(actor:"p1",item:"revivalStone",target:"p2")
-        XCTAssertFalse(s.engine.preview(command).allowed)
+        XCTAssertTrue(s.engine.preview(command).allowed) // on the map a revival stone needs no action points
         XCTAssertTrue(s.inventoryActionRefillNeeded)
         let receipt=try XCTUnwrap(s.refillInventoryActions());XCTAssertEqual(receipt.command,.refillExploration)
         for u in s.engine.state.players {
@@ -48,9 +48,9 @@ final class JourneyAuditTests:XCTestCase {
         XCTAssertNil(try s.refillInventoryActions());XCTAssertEqual(s.engine.history.count,count)
         try s.useInventory(actor:"p1",item:"revivalStone",target:"p2")
         XCTAssertEqual(s.engine.state.units["p2"]!.health,9)
-        XCTAssertEqual(s.engine.state.units["p1"]!.ap,2);XCTAssertNil(s.engine.state.units["p1"]!.inventory["revivalStone"])
+        XCTAssertEqual(s.engine.state.units["p1"]!.ap,4);XCTAssertNil(s.engine.state.units["p1"]!.inventory["revivalStone"])
         try s.useInventory(actor:"p1",item:"smallPotion",target:"p2")
-        XCTAssertEqual(s.engine.state.units["p2"]!.health,15);XCTAssertEqual(s.engine.state.units["p1"]!.ap,1)
+        XCTAssertEqual(s.engine.state.units["p2"]!.health,15);XCTAssertEqual(s.engine.state.units["p1"]!.ap,4)
         XCTAssertEqual(s.snapshot.movement,before.movement)
     }
     func testManualRestKeepsSurplusAPAndSaveFailureRollsBack()throws {
