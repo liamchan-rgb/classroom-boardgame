@@ -7,11 +7,14 @@ import CoreGraphics
 public enum ClassroomPreviewPolicy {
     public static let framesPerSecond=30.0
     public static let pixelScale=0.75
+    /// Battle teacher preview: a whole-screen GPU snapshot, smaller and slower than the TV (which runs at 60 Hz).
+    public static let battleFramesPerSecond=20.0
+    public static let battleScale=0.5
     public static func size(for source:CGSize)->CGSize {
         CGSize(width:max(1,(source.width*pixelScale).rounded(.down)),height:max(1,(source.height*pixelScale).rounded(.down)))
     }
     public static func refreshOverlay(now:Double,last:Double,dirty:Bool,battle:Bool)->Bool {
-        (dirty || battle) && now-last >= 1/(battle ? framesPerSecond:10)
+        (dirty || battle) && now-last >= 1/(battle ? battleFramesPerSecond:10)
     }
     public static func enabled(external:Bool,visible:Bool,foreground:Bool,privateModal:Bool,surface:ClassroomPublicSurface)->Bool {
         external && visible && foreground && !privateModal && surface != .book && surface != .waiting

@@ -98,27 +98,39 @@ final class XMLTree: NSObject, XMLParserDelegate {
     }
 }
 
+/// Size limits for classroom decks (photo-heavy lesson slides are often well over 32 MiB).
+public enum PPTXLimits {
+    public static let fileBytes = 150 * 1024 * 1024
+    public static let partBytes = 64 * 1024 * 1024
+    public static let totalBytes: UInt64 = 512 * 1024 * 1024
+    public static let slides = 300
+    /// A JSON backup carries the deck base64-encoded.
+    public static let backupBytes = 220 * 1024 * 1024
+    public static var fileLabel: String { "\(fileBytes / 1024 / 1024) MiB" }
+}
+
 public enum PPTXReader {
     private struct Relationship {
         var kind: String
         var target: String
         var external: Bool
     }
-    public static func read(_ source: Data) throws -> ParsedDeck {
-        guard source.count <= 32 * 1024 * 1024 else { throw ProbeError("阶段0支持最多32 MiB的PPTX。") }
+    /// `progress(done, total)` is called after each slide is read (from the calling thread).
+    public static func read(_ source: Data, progress: ((Int, Int) -> Void)? = nil) throws -> ParsedDeck {
+        guard source.count <= PPTXLimits.fileBytes else { throw ProbeError("PPTX超过\(PPTXLimits.fileLabel)，请压缩图片后再导入。") }
         let archive = try Archive(data: source, accessMode: .read)
         let entries = Array(archive)
         let names = entries.map(\.path)
         guard entries.count <= 10_000, Set(names).count == names.count,
-              entries.allSatisfy({ UInt64($0.uncompressedSize) <= 16 * 1024 * 1024 }),
-              entries.reduce(UInt64(0), { $0 + UInt64($1.uncompressedSize) }) <= 128 * 1024 * 1024 else {
+              entries.allSatisfy({ UInt64($0.uncompressedSize) <= UInt64(PPTXLimits.partBytes) }),
+              entries.reduce(UInt64(0), { $0 + UInt64($1.uncompressedSize) }) <= PPTXLimits.totalBytes else {
             throw ProbeError("PPTX解压大小超限或包含重复部件。")
         }
         func bytes(_ name: String) throws -> Data {
             guard let entry = archive[name], entry.type == .file else { throw ProbeError("PPTX缺少部件：\(name)") }
             var result = Data()
             let checksum = try archive.extract(entry, consumer: { chunk in
-                guard result.count + chunk.count <= 16 * 1024 * 1024 else { throw ProbeError("PPTX部件解压超限：\(name)") }
+                guard result.count + chunk.count <= PPTXLimits.partBytes else { throw ProbeError("PPTX部件解压超限：\(name)") }
                 result.append(chunk)
             })
             guard checksum == entry.checksum, result.count == Int(entry.uncompressedSize) else {
@@ -153,7 +165,7 @@ public enum PPTXReader {
             throw ProbeError("PPTX页面比例无效。")
         }
         let ids = presentation.first("sldIdLst")?.children.filter { $0.name == "sldId" } ?? []
-        guard (1...60).contains(ids.count) else { throw ProbeError("阶段0支持1—60页PPTX。") }
+        guard (1...PPTXLimits.slides).contains(ids.count) else { throw ProbeError("支持1—\(PPTXLimits.slides)页的PPTX。") }
         var slides: [ParsedSlide] = []
         for (index, id) in ids.enumerated() {
             let relationshipID = id.attributes.first { $0.key.hasSuffix(":id") }?.value ?? ""
@@ -173,6 +185,31 @@ public enum PPTXReader {
             guard notes.count <= 40_000 else { throw ProbeError("第\(index + 1)页备注超过阶段0的40000字符限制。") }
             var warnings: [String] = []
             var elements: [SlideElement] = []
+            // Placeholders (title, body, subtitle...) usually carry no position on the slide itself: it is inherited from
+            // the slide layout, then the master. Resolve it there instead of dropping the text.
+            var inherited: [XMLNode] = []
+            if let layout = slideLinks.values.first(where: { $0.kind == "slideLayout" && !$0.external }) {
+                if let tree = try? xml(layout.target).first("spTree") { inherited += tree.children }
+                if let master = (try? relationships(layout.target))?.values.first(where: { $0.kind == "slideMaster" && !$0.external }),
+                   let tree = try? xml(master.target).first("spTree") { inherited += tree.children }
+            }
+            func placeholderFrame(_ node: XMLNode) -> SlideRect? {
+                guard let ph = node.first("ph") else { return nil }
+                let type = ph.attributes["type"] ?? "body", idx = ph.attributes["idx"]
+                func matches(_ other: XMLNode) -> Bool {
+                    guard let o = other.first("ph") else { return false }
+                    if let idx, o.attributes["idx"] == idx { return true }
+                    let otherType = o.attributes["type"] ?? "body"
+                    return otherType == type || (["title", "ctrTitle"].contains(type) && ["title", "ctrTitle"].contains(otherType))
+                }
+                for candidate in inherited where matches(candidate) { if let f = frame(candidate) { return f } }
+                // Last resort: the usual place of that kind of placeholder on the page.
+                switch type {
+                case "title", "ctrTitle": return SlideRect(x: width * 0.06, y: height * 0.05, width: width * 0.88, height: height * 0.18)
+                case "subTitle": return SlideRect(x: width * 0.12, y: height * 0.45, width: width * 0.76, height: height * 0.2)
+                default: return SlideRect(x: width * 0.06, y: height * 0.26, width: width * 0.88, height: height * 0.66)
+                }
+            }
             var plainTexts: [String] = []
             let tree = slide.first("spTree")
             for node in tree?.children ?? [] {
@@ -181,8 +218,8 @@ public enum PPTXReader {
                     warnings.append("不支持对象：\(node.name)（包括组合、表格或图表等）")
                     continue
                 }
-                guard let frame = frame(node) else {
-                    warnings.append("对象没有直接定位，母版／布局继承尚未支持。")
+                guard let frame = frame(node) ?? placeholderFrame(node) else {
+                    warnings.append("有对象没有位置信息，已跳过。")
                     continue
                 }
                 if let transform = node.first("xfrm"), transform.attributes["rot"] != nil {
@@ -227,10 +264,12 @@ public enum PPTXReader {
             if slide.first("timing") != nil { warnings.append("动画被忽略；只支持静态页。") }
             warnings.append("阶段0基础渲染：母版、主题、字体替换和复杂排版需要视觉核对。")
             let background = slide.first("bg")?.first("srgbClr")?.attributes["val"] ?? "FFFFFF"
-            guard !elements.isEmpty else { throw ProbeError("第\(index + 1)页没有可渲染内容。\(warnings.joined(separator: "；"))") }
+            // A page made only of unsupported objects still keeps its place (and its notes) as a plain page.
+            if elements.isEmpty { warnings.append("第\(index + 1)页没有可显示的对象（可能是组合、表格或图表），显示为空白页。") }
             slides.append(ParsedSlide(partName: link.target, width: width, height: height, background: background,
                                       elements: elements, notes: notes, warnings: warnings,
                                       plainText: plainTexts.joined(separator: "\n")))
+            progress?(slides.count, ids.count)
         }
         return ParsedDeck(slides: slides)
     }

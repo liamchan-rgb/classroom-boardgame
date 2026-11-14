@@ -39,8 +39,8 @@ final class ClassroomPreviewTests:XCTestCase {
         XCTAssertFalse(ClassroomPreviewPolicy.refreshOverlay(now:100,last:0,dirty:false,battle:false))
         XCTAssertFalse(ClassroomPreviewPolicy.refreshOverlay(now:0.05,last:0,dirty:true,battle:false))
         XCTAssertTrue(ClassroomPreviewPolicy.refreshOverlay(now:0.11,last:0,dirty:true,battle:false))
-        XCTAssertFalse(ClassroomPreviewPolicy.refreshOverlay(now:0.02,last:0,dirty:false,battle:true))
-        XCTAssertTrue(ClassroomPreviewPolicy.refreshOverlay(now:0.034,last:0,dirty:false,battle:true))
+        XCTAssertFalse(ClassroomPreviewPolicy.refreshOverlay(now:0.034,last:0,dirty:false,battle:true))
+        XCTAssertTrue(ClassroomPreviewPolicy.refreshOverlay(now:0.051,last:0,dirty:false,battle:true))
     }
     func testPreviewIsOffWhenHiddenLocalBookBackgroundOrPrivateModal(){
         func allowed(_ external:Bool=true,_ visible:Bool=true,_ foreground:Bool=true,_ modal:Bool=false,_ surface:ClassroomPublicSurface = .exploration)->Bool {

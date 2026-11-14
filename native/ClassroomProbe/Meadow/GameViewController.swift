@@ -10,7 +10,8 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     private let classroomMode:Bool
     private var classroomSuspended=false
     var classroomMirrorEnabled=false {didSet{
-        groundRenderer?.classroomMirrorEnabled=classroomMirrorEnabled
+        // In battle the teacher frame is one GPU snapshot of the whole screen (map drawer included): no separate map readback.
+        groundRenderer?.classroomMirrorEnabled=classroomMirrorEnabled && !battlePreviewActive
         if classroomMirrorEnabled && !oldValue {classroomOverlayDirty=true;classroomDeliveredMap = -1;classroomDeliveryClock=ClassroomPreviewClock()}
     }}
     private var classroomMapFrame:CGImage?
@@ -29,6 +30,24 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         let needsOverlay=ClassroomPreviewPolicy.refreshOverlay(now:now,last:classroomOverlayAt,dirty:classroomOverlayDirty || !ready,battle:battlePreviewActive)
         guard classroomDeliveredMap != classroomMapSerial || needsOverlay else{return nil}
         guard classroomDeliveryClock.take(at:now) else{return nil}
+        if needsOverlay,battlePreviewActive {
+            // Battle: re-rasterizing the whole battle layer tree on the CPU 30 times a second stole the main thread from the
+            // 60 Hz battle on the TV, and could not show content drawn by the GPU. Take the render server's finished picture
+            // instead (what the TV actually shows), at a lower size and rate.
+            let format=UIGraphicsImageRendererFormat();format.scale=ClassroomPreviewPolicy.battleScale;format.opaque=true;format.preferredRange = .standard
+            let bounds=CGRect(origin:.zero,size:ClassroomCanvas.size)
+            classroomOverlay=UIGraphicsImageRenderer(size:ClassroomCanvas.size,format:format).image{context in
+                if !view.drawHierarchy(in:bounds,afterScreenUpdates:false) {
+                    for subview in view.subviews where !subview.isHidden && subview.alpha>0 {
+                        context.cgContext.saveGState();context.cgContext.translateBy(x:subview.frame.minX,y:subview.frame.minY)
+                        subview.layer.render(in:context.cgContext);context.cgContext.restoreGState()
+                    }
+                }
+            }
+            classroomOverlayAt=now;classroomOverlayDirty=false;classroomOverlaySerial += 1
+            classroomDeliveredOverlay=classroomOverlaySerial
+            return MeadowTeacherPreviewFrame(map:nil,mapRect:.zero,overlay:classroomOverlay,background:.black)
+        }
         if needsOverlay {
             let format=UIGraphicsImageRendererFormat();format.scale=ClassroomPreviewPolicy.pixelScale;format.opaque=false;format.preferredRange = .standard
             classroomOverlay=UIGraphicsImageRenderer(size:ClassroomCanvas.size,format:format).image{context in
@@ -873,6 +892,10 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         if active { scene.beginBattlePreviewCamera() }
         battlePreviewActive = active
         battlePreviewView?.isHidden = !active
+        // The map is only a small drawer during battle: half its frame rate and no separate mirror readback there.
+        groundView?.preferredFramesPerSecond = active && classroomMode ? 30:60
+        groundRenderer?.classroomMirrorEnabled = classroomMirrorEnabled && !active
+        if !active {classroomDeliveredMap = -1}
         if let campaign {
             guard !active || campaign.engine.state.battle != nil else{return}
             battlePreviewView?.configureCampaign(engine:campaign.engine,onCommit:{ [weak self] receipt in self?.scene.refreshCampaign();self?.trackBattleGains(receipt) })

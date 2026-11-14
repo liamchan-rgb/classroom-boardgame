@@ -88,7 +88,7 @@ public struct ProbeState: Codable, Equatable {
     public func validate() throws {
         guard (1...7).contains(players.count), Set(players.map(\.id)).count == players.count,
               players.contains(where: { $0.id == selectedPlayerID }),
-              (0...60).contains(pageCount), pageIndex >= 0,
+              (0...PPTXLimits.slides).contains(pageCount), pageIndex >= 0,
               pageIndex < max(1, pageCount), remainingSeconds.isFinite,
               (0...30).contains(remainingSeconds),
               players.allSatisfy({ player in
@@ -122,17 +122,17 @@ public struct ProbeBackup: Codable {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys]
         let data = try encoder.encode(self)
-        guard data.count <= 48 * 1024 * 1024 else { throw ProbeError("测试备份超过48 MiB。") }
+        guard data.count <= PPTXLimits.backupBytes else { throw ProbeError("绘本备份过大。") }
         return data
     }
 
     public static func decoded(_ data: Data) throws -> ProbeBackup {
-        guard data.count <= 48 * 1024 * 1024 else { throw ProbeError("测试备份超过48 MiB。") }
+        guard data.count <= PPTXLimits.backupBytes else { throw ProbeError("绘本备份过大。") }
         var backup = try JSONDecoder().decode(ProbeBackup.self, from: data)
         try backup.state.validate()
-        guard backup.formatVersion == 1, (backup.pptxData?.count ?? 0) <= 32 * 1024 * 1024,
+        guard backup.formatVersion == 1, (backup.pptxData?.count ?? 0) <= PPTXLimits.fileBytes,
               (backup.sourceName?.count ?? 0) <= 300,
-              backup.editedNotes.count <= 60,
+              backup.editedNotes.count <= PPTXLimits.slides,
               backup.editedNotes.allSatisfy({ key, value in
                   key >= 0 && key < backup.state.pageCount && value.count <= 40_000
               }), backup.pptxData != nil || backup.state.pageCount == 0 else {

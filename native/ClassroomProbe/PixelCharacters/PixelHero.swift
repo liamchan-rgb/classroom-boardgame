@@ -373,10 +373,19 @@ enum PixelHeroAtlas {
     }
 
     static func makeImage(_ bytes: [UInt8], width: Int, height: Int) -> UIImage? {
+        // Draw once into a display-ready sRGB bitmap: the raw data-provider image in device RGB made Core Animation
+        // colour-convert and re-upload it each time a battle frame changed.
         guard let provider = CGDataProvider(data: Data(bytes) as CFData),
-              let image = CGImage(width: width, height: height, bitsPerComponent: 8, bitsPerPixel: 32, bytesPerRow: width * 4,
-                                  space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue),
-                                  provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent) else { return nil }
-        return UIImage(cgImage: image, scale: 1, orientation: .up)
+              let space = CGColorSpace(name: CGColorSpace.sRGB),
+              let raw = CGImage(width: width, height: height, bitsPerComponent: 8, bitsPerPixel: 32, bytesPerRow: width * 4,
+                                space: space, bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue),
+                                provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent) else { return nil }
+        guard let context = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0, space: space,
+                                      bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue) else {
+            return UIImage(cgImage: raw, scale: 1, orientation: .up)
+        }
+        context.interpolationQuality = .none
+        context.draw(raw, in: CGRect(x: 0, y: 0, width: width, height: height))
+        return UIImage(cgImage: context.makeImage() ?? raw, scale: 1, orientation: .up)
     }
 }

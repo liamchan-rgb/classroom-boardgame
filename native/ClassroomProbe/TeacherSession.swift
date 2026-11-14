@@ -19,6 +19,10 @@ final class TeacherSession: ObservableObject {
     @Published private(set) var registrationStatus = "正在准备公开画面。"
     @Published private(set) var importReport = "尚未导入PPTX。"
     @Published var showNotes = false
+    /// PPTX import in progress (stage text and 0…1), nil when idle.
+    @Published private(set) var importProgress: (stage: String, fraction: Double)?
+    /// One-line result of the last import, shown to the teacher as an alert (success or the reason it failed).
+    @Published var importOutcome: String?
     private(set) var isEditingNotes = false
     lazy var game = MeadowTeacherCoordinator()
     private var connectedIDs: Set<String> = []
@@ -31,7 +35,7 @@ final class TeacherSession: ObservableObject {
 
     private init() {
         if let url = try? saveURL(), FileManager.default.fileExists(atPath: url.path) {
-            do { try restore(Data(contentsOf: url), saveAfterValidation: false) }
+            do { try restore(Data(contentsOf: url), saveAfterValidation: false); applyLiteSave() }
             catch { message = "本地恢复失败，原文件保留：\(error.localizedDescription)" }
         }
         publish()
@@ -109,26 +113,58 @@ final class TeacherSession: ObservableObject {
         }
         loadPPTX(url)
     }
+    /// Reads, checks and renders the first page in the background with a progress bar; the current book stays in use
+    /// until the new one is fully ready. Large photo decks take a few seconds.
     func loadPPTX(_ url: URL) {
-        let scoped = url.startAccessingSecurityScopedResource()
-        defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+        guard importProgress == nil else { message = "正在导入上一个文件，请稍候。"; return }
+        importProgress = ("读取文件", 0.02)
+        let name = url.lastPathComponent
+        let report: @Sendable (String, Double) -> Void = { stage, fraction in
+            Task { @MainActor in if TeacherSession.shared.importProgress != nil { TeacherSession.shared.importProgress = (stage, fraction) } }
+        }
+        Task.detached(priority: .userInitiated) {
+            let scoped = url.startAccessingSecurityScopedResource()
+            defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+            do {
+                let size = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
+                guard size <= PPTXLimits.fileBytes else { throw ProbeError("PPTX超过\(PPTXLimits.fileLabel)，请压缩图片后再导入。") }
+                let data = try Data(contentsOf: url)
+                report("解析页面", 0.08)
+                let parsed = try PPTXReader.read(data) { done, total in
+                    report("解析第 \(done)/\(total) 页", 0.08 + 0.72 * Double(done) / Double(max(1, total)))
+                }
+                report("生成第一页", 0.85)
+                let first = try parsed.slides.first.map { try DeckRenderer.render($0) }
+                report("保存绘本", 0.93)
+                await MainActor.run { TeacherSession.shared.adoptImported(parsed, data: data, name: name, first: first) }
+            } catch {
+                let reason = error.localizedDescription
+                await MainActor.run {
+                    let session = TeacherSession.shared
+                    session.importProgress = nil
+                    session.message = "导入失败，当前资料保留：\(reason)"
+                    session.importOutcome = "导入失败：\(reason)"
+                }
+            }
+        }
+    }
+    private func adoptImported(_ parsed: ParsedDeck, data: Data, name: String, first: DeckRenderer.Result?) {
+        defer { importProgress = nil }
+        var candidate = state
+        candidate.pageIndex = 0
+        candidate.pageCount = parsed.slides.count
+        candidate.pauseReasons.insert(.manual)
         do {
-            let size = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
-            guard size <= 32 * 1024 * 1024 else { throw ProbeError("阶段0支持最多32 MiB的PPTX。") }
-            let data = try Data(contentsOf: url)
-            let parsed = try PPTXReader.read(data)
-            let firstPage = try render(deck: parsed, index: 0)
-            var candidate = state
-            candidate.pageIndex = 0
-            candidate.pageCount = parsed.slides.count
-            candidate.pauseReasons.insert(.manual)
-            let backup = ProbeBackup(state: candidate, pptxData: data, sourceName: url.lastPathComponent, editedNotes: [:])
-            try write(backup)
-            deck = parsed; pptxData = data; sourceName = url.lastPathComponent; editedNotes = [:]
-            state = candidate; display.image = firstPage?.image; showNotes = false
-            publish(); refreshReport(firstPage?.warnings ?? [])
-            message = "已离线读取\(parsed.slides.count)页，页序及备注来自PPTX。请核对页面。"
-        } catch { message = "导入失败，当前资料保留：\(error.localizedDescription)" }
+            try write(ProbeBackup(state: candidate, pptxData: data, sourceName: name, editedNotes: [:]))
+        } catch {
+            message = "导入失败，当前资料保留：\(error.localizedDescription)"; importOutcome = "导入失败：\(error.localizedDescription)"; return
+        }
+        deck = parsed; pptxData = data; sourceName = name; editedNotes = [:]
+        state = candidate; display.image = first?.image; showNotes = false
+        publish(); refreshReport(first?.warnings ?? [])
+        let skipped = parsed.slides.reduce(0) { $0 + ($1.warnings.isEmpty ? 0 : 1) }
+        message = "已导入 \(parsed.slides.count) 页：\(name)"
+        importOutcome = "已导入 \(parsed.slides.count) 页" + (skipped > 0 ? "，其中 \(skipped) 页有未支持的对象，可在「导入报告」查看。" : "。")
     }
 
     func save() {
@@ -144,7 +180,7 @@ final class TeacherSession: ObservableObject {
         defer { if scoped { url.stopAccessingSecurityScopedResource() } }
         do {
             let size = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
-            guard size <= 48 * 1024 * 1024 else { throw ProbeError("测试备份超过48 MiB。") }
+            guard size <= PPTXLimits.backupBytes else { throw ProbeError("绘本备份过大。") }
             try restore(Data(contentsOf: url), saveAfterValidation: true)
         } catch { message = "备份导入失败，当前状态保留：\(error.localizedDescription)" }
     }
@@ -172,10 +208,30 @@ final class TeacherSession: ObservableObject {
     private func backup(state: ProbeState) -> ProbeBackup {
         ProbeBackup(state: state, pptxData: pptxData, sourceName: sourceName, editedNotes: editedNotes)
     }
-    private func persist(state: ProbeState) throws { try write(backup(state: state)) }
+    /// Page turns, pauses and rewards save only the small state file; the deck itself is written once at import.
+    /// (Re-encoding a large photo deck as JSON on every page turn froze the teacher iPad.)
+    private struct LiteSave: Codable { var state: ProbeState; var editedNotes: [Int: String] }
+    private func persist(state: ProbeState) throws {
+        try state.validate()
+        guard pptxData != nil || state.pageCount == 0 else { try write(backup(state: state)); return }
+        let data = try JSONEncoder().encode(LiteSave(state: state, editedNotes: editedNotes))
+        try data.write(to: liteURL(), options: .atomic)
+    }
     private func write(_ value: ProbeBackup) throws {
         try value.state.validate()
         try value.encoded().write(to: saveURL(), options: .atomic)
+        try? FileManager.default.removeItem(at: liteURL())
+    }
+    private func liteURL() throws -> URL { try saveURL().deletingLastPathComponent().appendingPathComponent("session-state.json") }
+    /// After restoring the deck, the newer page / pause state from the small file (if it fits the deck).
+    private func applyLiteSave() {
+        guard let url = try? liteURL(), let data = try? Data(contentsOf: url),
+              let lite = try? JSONDecoder().decode(LiteSave.self, from: data),
+              (try? lite.state.validate()) != nil, lite.state.pageCount == state.pageCount else { return }
+        let rendered = try? render(deck: deck, index: lite.state.pageIndex)
+        state = lite.state; editedNotes = lite.editedNotes.filter { $0.key >= 0 && $0.key < lite.state.pageCount && $0.value.count <= 40_000 }
+        if let rendered { display.image = rendered.image }
+        publish()
     }
     private func saveURL() throws -> URL {
         let base = try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask,

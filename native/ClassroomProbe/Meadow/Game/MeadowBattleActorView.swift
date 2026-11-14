@@ -303,7 +303,9 @@ final class MeadowBattleActorView: UIView {
     private func updatePixelFrame() {
         guard pixelActive else { pixelView.isHidden = true; return }
         pixelFrame = pixelFrameFor(clip: currentPose.clip, progress: currentPose.progress)
-        pixelView.image = pixelFrame?.tall
+        // Called every frame for up to 7 heroes: only touch the layer when the picture actually changes.
+        if pixelView.image !== pixelFrame?.tall { pixelView.image = pixelFrame?.tall }
+        guard pixelView.isHidden else { return }
         pixelView.isHidden = false
         images.forEach { $0.isHidden = true }
         bowSurfaces.values.forEach { $0.isHidden = true }

@@ -69,6 +69,24 @@ private struct TeacherBookConsole:View {
             HStack(spacing:6){Image(systemName:"info.circle").foregroundStyle(GameTheme.primary);Text(game.message+" · "+session.message).lineLimit(1)}
                 .font(.caption).foregroundStyle(.secondary).padding(.horizontal,14).frame(height:28).glassPanel(radius:14,padding:0)
         }.padding(12).background(GlassBackdrop()).foregroundStyle(GameTheme.ink)
+        .overlay {
+            if let progress=session.importProgress {
+                ZStack {
+                    Color.black.opacity(0.25).ignoresSafeArea()
+                    VStack(alignment:.leading,spacing:14){
+                        Label("正在导入 PPTX",systemImage:"doc.badge.arrow.up").font(.headline)
+                        ProgressView(value:progress.fraction).progressViewStyle(.linear).tint(GameTheme.primary)
+                        HStack{Text(progress.stage);Spacer();Text("\(Int((progress.fraction*100).rounded()))%").monospacedDigit()}
+                            .font(.callout).foregroundStyle(GameTheme.muted)
+                    }.frame(width:420).glassPanel(radius:22,padding:22)
+                }.transition(.opacity)
+            }
+        }
+        .animation(.easeOut(duration:0.2),value:session.importProgress?.fraction)
+        .alert("PPTX 导入",isPresented:Binding(get:{session.importOutcome != nil},set:{if !$0{session.importOutcome=nil}})){
+            Button("好"){session.importOutcome=nil}
+            Button("导入报告"){session.importOutcome=nil;report=true}
+        }message:{Text(session.importOutcome ?? "")}
         .onChange(of:notesFocused){_,active in session.notesFocus(active)}
         .onChange(of:session.showNotes){_,value in if !value{notesFocused=false}}
         .sheet(isPresented:$report){NavigationStack{ScrollView{Text(session.importReport).padding()}.navigationTitle("PPTX导入报告").toolbar{Button("完成"){report=false}}}}

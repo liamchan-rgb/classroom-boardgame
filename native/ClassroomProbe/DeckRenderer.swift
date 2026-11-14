@@ -1,7 +1,9 @@
 import UIKit
+import ImageIO
 import ClassroomProbeCore
 
-@MainActor
+/// Renders one slide to a 1280-wide picture. Thread-safe (UIGraphicsImageRenderer / text drawing), so imports can
+/// render the first page in the background.
 enum DeckRenderer {
     struct Result {
         var image: UIImage
@@ -13,13 +15,14 @@ enum DeckRenderer {
         let scale = width / CGFloat(slide.width)
         let size = CGSize(width: width, height: CGFloat(slide.height) * scale)
         var warnings = slide.warnings
-        for element in slide.elements {
-            if case .image(_, let data) = element {
-                guard let image = UIImage(data: data), image.size.width > 0, image.size.height > 0,
-                      image.size.width * image.size.height <= 32_000_000 else {
-                    throw ProbeError("图片格式不支持或图片像素数超限。")
-                }
-            }
+        // Decode each picture once, downsampled to what the page needs: huge photos no longer fail the import, and
+        // formats iOS cannot draw (EMF/WMF from Office) are skipped with a note instead of rejecting the whole deck.
+        var pictures: [Int: UIImage] = [:]
+        for (index, element) in slide.elements.enumerated() {
+            guard case .image(let frame, let data) = element else { continue }
+            let longest = max(CGFloat(frame.width), CGFloat(frame.height)) * scale
+            if let picture = downsampled(data, maxPixels: max(64, min(2560, longest * 2))) { pictures[index] = picture }
+            else { warnings.append("有图片格式不支持（例如 EMF/WMF 矢量图），已跳过。") }
         }
         let format = UIGraphicsImageRendererFormat()
         format.scale = 1
@@ -31,10 +34,10 @@ enum DeckRenderer {
                 CGRect(x: CGFloat(frame.x) * scale, y: CGFloat(frame.y) * scale,
                        width: CGFloat(frame.width) * scale, height: CGFloat(frame.height) * scale)
             }
-            for element in slide.elements {
+            for (elementIndex, element) in slide.elements.enumerated() {
                 switch element {
-                case .image(let frame, let bytes):
-                    UIImage(data: bytes)?.draw(in: rectangle(frame))
+                case .image(let frame, _):
+                    pictures[elementIndex]?.draw(in: rectangle(frame))
                 case .shape(let frame, let kind, let fill):
                     color(fill).setFill()
                     let path = kind == "ellipse" ? UIBezierPath(ovalIn: rectangle(frame)) : UIBezierPath(rect: rectangle(frame))
@@ -76,6 +79,14 @@ enum DeckRenderer {
         return Result(image: image, warnings: Array(Set(warnings)).sorted())
     }
 
+    private static func downsampled(_ data: Data, maxPixels: CGFloat) -> UIImage? {
+        guard let source = CGImageSourceCreateWithData(data as CFData, [kCGImageSourceShouldCache: false] as CFDictionary),
+              CGImageSourceGetCount(source) > 0 else { return nil }
+        let options: [CFString: Any] = [kCGImageSourceCreateThumbnailFromImageAlways: true, kCGImageSourceCreateThumbnailWithTransform: true,
+                                        kCGImageSourceShouldCacheImmediately: true, kCGImageSourceThumbnailMaxPixelSize: Int(maxPixels)]
+        guard let image = CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary) else { return nil }
+        return UIImage(cgImage: image)
+    }
     private static func color(_ hex: String) -> UIColor {
         let value = UInt32(hex, radix: 16) ?? 0
         return UIColor(red: CGFloat((value >> 16) & 255) / 255,
