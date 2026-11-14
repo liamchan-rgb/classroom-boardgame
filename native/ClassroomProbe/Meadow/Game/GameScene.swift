@@ -58,13 +58,24 @@ final class GameScene: SKScene {
                 // 像素人物：没有自定义外观的旅人也按身上的武器、护甲画（用预设旅人的样子）
                 guard PixelHeroAtlas.enabled,id != "p1" else{continue}
                 let key="preset\(index%3)-\(unit.equipment.weapon ?? "none")-\(unit.equipment.armor ?? "none")";active.insert(key)
-                if profileFrames[key]==nil{profileFrames[key]=HeroFrames.load(index%3+1,weaponID:unit.equipment.weapon,armorID:unit.equipment.armor)}
+                if profileFrames[key]==nil{
+                    // 还没烘好就先保持原来的样子，后台烘好再刷新（不在主线程现烘）
+                    if let look=HeroFrames.pixelLook(heroIndex:index%3,weaponID:unit.equipment.weapon,armorID:unit.equipment.armor),!PixelHeroAtlas.isMapReady(look){
+                        PixelHeroAtlas.prepare(map:[look]){[weak self] in self?.refreshProfileFrames()};continue
+                    }
+                    profileFrames[key]=HeroFrames.load(index%3+1,weaponID:unit.equipment.weapon,armorID:unit.equipment.armor)
+                }
                 frames[index]=profileFrames[key]!
                 continue
             }
             let ai=HeroFrames.appearanceIDs.firstIndex(of:look.body) ?? 0,armor=look.armor(worn:unit.equipment.armor)
             let key="\(look.visualKey)-\(unit.equipment.weapon ?? "none")-\(armor ?? "none")";active.insert(key)
-            if profileFrames[key]==nil{profileFrames[key]=HeroFrames.load(1,appearanceIndex:ai,weaponID:unit.equipment.weapon,armorID:armor,hair:look.hair,face:look.face)}
+            if profileFrames[key]==nil{
+                if let pixel=HeroFrames.pixelLook(heroIndex:0,appearanceIndex:ai,weaponID:unit.equipment.weapon,armorID:armor,hair:look.hair,face:look.face),!PixelHeroAtlas.isMapReady(pixel){
+                    PixelHeroAtlas.prepare(map:[pixel]){[weak self] in self?.refreshProfileFrames()};continue
+                }
+                profileFrames[key]=HeroFrames.load(1,appearanceIndex:ai,weaponID:unit.equipment.weapon,armorID:armor,hair:look.hair,face:look.face)
+            }
             frames[index]=profileFrames[key]!
         }
         profileFrames=profileFrames.filter{active.contains($0.key)}

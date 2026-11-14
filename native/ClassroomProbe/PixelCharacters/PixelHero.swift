@@ -146,6 +146,38 @@ enum PixelHeroAtlas {
         (1, false), (1, true), (3, true), (3, false),    // 右下 左下 左上 右上
     ]
 
+    // MARK: 后台预烘
+    //
+    // App 里的 JavaScriptCore 没有 JIT，第一次烘一个人约 1 秒。所有「要用到新外观」的地方先问 isMapReady / isBattleReady，
+    // 没好就调 prepare 在后台烘，界面先保持原样，烘好后在主线程回调再刷新，这样换装、进战斗都不会卡住主线程。
+
+    private static let workQueue = DispatchQueue(label: "pixel-hero.prepare", qos: .userInitiated)
+    /// 正在后台烘的外观（只在主线程读写）
+    private static var inFlight: [String: [() -> Void]] = [:]
+
+    static func isMapReady(_ look: PixelHeroLook) -> Bool {
+        atlasCache.object(forKey: name(look: look, half: 0) as NSString) != nil && atlasCache.object(forKey: name(look: look, half: 1) as NSString) != nil
+    }
+    static func isBattleReady(_ look: PixelHeroLook) -> Bool { battleCache.object(forKey: look.key as NSString) != nil }
+
+    /// 在后台烘好这些外观的地图图集 / 战斗帧，全部完成后在主线程调用 completion。主线程调用。
+    static func prepare(map: [PixelHeroLook] = [], battle: [PixelHeroLook] = [], completion: @escaping () -> Void = {}) {
+        let mapNeeded = Array(Set(map.filter { !isMapReady($0) }))
+        let battleNeeded = Array(Set(battle.filter { !isBattleReady($0) }))
+        guard !mapNeeded.isEmpty || !battleNeeded.isEmpty else { completion(); return }
+        let key = "map:" + mapNeeded.map(\.key).sorted().joined(separator: ",") + "|battle:" + battleNeeded.map(\.key).sorted().joined(separator: ",")
+        if inFlight[key] != nil { inFlight[key]?.append(completion); return }
+        inFlight[key] = [completion]
+        workQueue.async {
+            for look in mapNeeded { for half in 0...1 { _ = atlas(named: name(look: look, half: half)) } }
+            for look in battleNeeded { _ = battle(look) }
+            DispatchQueue.main.async {
+                let callbacks = inFlight.removeValue(forKey: key) ?? []
+                callbacks.forEach { $0() }
+            }
+        }
+    }
+
     // MARK: 名字（HeroFrames 用名字找图集）
 
     static let prefix = "Pixel|"
@@ -168,7 +200,7 @@ enum PixelHeroAtlas {
     }
 
     private static let atlasCache: NSCache<NSString, UIImage> = {
-        let c = NSCache<NSString, UIImage>(); c.totalCostLimit = 160 * 1024 * 1024; return c
+        let c = NSCache<NSString, UIImage>(); c.totalCostLimit = 220 * 1024 * 1024; return c
     }()
 
     /// HeroFrames.image(named:) 的像素版：按名字烘焙（或读缓存）并排成图集

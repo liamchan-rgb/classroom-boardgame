@@ -284,7 +284,19 @@ final class MeadowBattleActorView: UIView {
 
     private func refreshPixelSprite() {
         let look = derivedPixelLook
-        if look?.key != pixelSprite?.look.key { pixelSprite = look.flatMap { PixelHeroAtlas.battle($0) } }
+        if let look, look.key != pixelSprite?.look.key {
+            if PixelHeroAtlas.isBattleReady(look) {
+                pixelSprite = PixelHeroAtlas.battle(look)
+            } else {
+                // 还没烘好：先保持现在的样子，后台烘好再换（不在主线程现烘，进战斗不会卡）
+                PixelHeroAtlas.prepare(battle: [look]) { [weak self] in self?.refreshPixelSprite() }
+                if pixelSprite == nil { pixelView.isHidden = true }
+                updatePixelFrame()
+                return
+            }
+        } else if look == nil {
+            pixelSprite = nil
+        }
         updatePixelFrame()
     }
 

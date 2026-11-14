@@ -21,7 +21,6 @@ private struct TeacherBookConsole:View {
     @ObservedObject var session:TeacherSession
     @ObservedObject var game:MeadowTeacherCoordinator
     var showGame:()->Void={}
-    @State private var importer=false
     @State private var importingBackup=false
     @State private var report=false
     @State private var exportingURL:URL?
@@ -72,14 +71,53 @@ private struct TeacherBookConsole:View {
         }.padding(12).background(GlassBackdrop()).foregroundStyle(GameTheme.ink)
         .onChange(of:notesFocused){_,active in session.notesFocus(active)}
         .onChange(of:session.showNotes){_,value in if !value{notesFocused=false}}
-        .fileImporter(isPresented:$importer,allowedContentTypes:importingBackup ? [.json]:[UTType(filenameExtension:"pptx") ?? .data]){result in
-            defer{session.pause(.filePicker,enabled:false)}
-            switch result{case .success(let url):if importingBackup{session.importBackup(url)}else{session.loadPPTX(url)};case .failure(let error):session.fileSelectionFailed(error)}
-        }
         .sheet(isPresented:$report){NavigationStack{ScrollView{Text(session.importReport).padding()}.navigationTitle("PPTX导入报告").toolbar{Button("完成"){report=false}}}}
         .sheet(isPresented:Binding(get:{exportingURL != nil},set:{if !$0{exportingURL=nil}})){if let url=exportingURL{ExportDocument(url:url)}}
     }
-    private func openImporter(){notesFocused=false;session.pause(.filePicker,enabled:true);importer=true}
+    /// 选文件改用 UIKit 的文档选择器，从最上层的界面弹出。原来的 SwiftUI .fileImporter 从「文件」菜单里点时，
+    /// 菜单还在收起就要弹窗，和同一视图上的两个 .sheet 冲突，会静默弹不出来（点了导入没反应）。
+    private func openImporter(){
+        notesFocused=false;session.pause(.filePicker,enabled:true)
+        let backup=importingBackup
+        let types:[UTType]=backup ? [.json]:[UTType("org.openxmlformats.presentationml.presentation"),UTType(filenameExtension:"pptx")].compactMap{$0}
+        DocumentImportPresenter.shared.present(types:types.isEmpty ? [.data]:types){url in
+            session.pause(.filePicker,enabled:false)
+            guard let url else{return}
+            if backup{session.importBackup(url)}else{session.loadPPTX(url)}
+        }
+    }
+}
+
+/// 用 UIKit 弹出系统的文件选择器：等「文件」菜单收起后，从当前最上层的界面弹出；选中的文件复制一份到本 App 再读，不依赖外部授权。
+@MainActor
+final class DocumentImportPresenter:NSObject,UIDocumentPickerDelegate {
+    static let shared=DocumentImportPresenter()
+    private var completion:((URL?)->Void)?
+    func present(types:[UTType],completion:@escaping (URL?)->Void) {
+        self.completion?(nil)
+        self.completion=completion
+        // 菜单收起的动画结束后再弹
+        DispatchQueue.main.asyncAfter(deadline:.now()+0.35){[weak self] in
+            guard let self else{return}
+            guard let top=Self.topController() else{self.finish(nil);return}
+            let picker=UIDocumentPickerViewController(forOpeningContentTypes:types,asCopy:true)
+            picker.delegate=self
+            picker.allowsMultipleSelection=false
+            picker.modalPresentationStyle = .formSheet
+            top.present(picker,animated:true)
+        }
+    }
+    private func finish(_ url:URL?){let done=completion;completion=nil;done?(url)}
+    func documentPicker(_ controller:UIDocumentPickerViewController,didPickDocumentsAt urls:[URL]){finish(urls.first)}
+    func documentPickerWasCancelled(_ controller:UIDocumentPickerViewController){finish(nil)}
+    /// 本机交互窗口（不是电视投放窗口）里最上层、没有正在消失的界面
+    static func topController()->UIViewController? {
+        let scenes=UIApplication.shared.connectedScenes.compactMap{$0 as? UIWindowScene}.filter{$0.session.role == .windowApplication}
+        let window=scenes.flatMap(\.windows).first{$0.isKeyWindow} ?? scenes.flatMap(\.windows).first
+        var top=window?.rootViewController
+        while let next=top?.presentedViewController,!next.isBeingDismissed{top=next}
+        return top
+    }
 }
 
 struct ExportDocument:UIViewControllerRepresentable {

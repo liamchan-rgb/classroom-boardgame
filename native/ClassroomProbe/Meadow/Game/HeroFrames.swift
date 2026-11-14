@@ -68,6 +68,11 @@ enum HeroFrames {
         if PixelHeroAtlas.isPixel(name) { return PixelHeroAtlas.atlas(named:name) }
         return CustomAppearanceAssets.isCustom(name) ? CustomAppearanceAssets.image(name):UIImage(named:name)
     }
+    /// 某位旅人（和 atlasName 同样的参数）对应的像素外观
+    static func pixelLook(heroIndex:Int,appearanceIndex:Int=0,weaponID:String?,armorID:String?,hair:String?=nil,face:String?=nil)->PixelHeroLook? {
+        guard PixelHeroAtlas.enabled else{return nil}
+        return PixelHeroAtlas.parse(atlasName(heroIndex:heroIndex,diagonal:false,appearanceIndex:appearanceIndex,weaponID:weaponID,armorID:armorID,hair:hair,face:face))?.look
+    }
     /// 运行时合成的图集（像素人物、旧的自定义外观）：不在素材目录里，要用 image(named:) 取
     static func isGenerated(_ name:String)->Bool { PixelHeroAtlas.isPixel(name) || CustomAppearanceAssets.isCustom(name) }
     static func isEquipmentAtlas(_ name:String)->Bool { armorAtlasNames.contains(name) || isGenerated(name) }

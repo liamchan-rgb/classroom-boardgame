@@ -752,6 +752,28 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         let units=campaign.engine.state.players.filter{$0.id=="p1" || $0.appearance != nil || PixelHeroAtlas.enabled}
         let signature=units.map{u in "\(u.id)-\((u.appearance?.body ?? campaign.snapshot.appearanceID))-\(u.appearance?.outfit ?? "follow")-\(u.appearance?.hair ?? "original")-\(u.appearance?.face ?? "original")-\(u.equipment.weapon ?? "none")-\(u.equipment.armor ?? "none")"}.joined(separator:"|")
         guard signature != profileVisualSignature else{return}
+        if PixelHeroAtlas.enabled {
+            // 像素人物：新外观先在后台烘好（地图图集 + 战斗帧），这期间画面保持原样，烘好再回来刷新，不卡主线程
+            var mapLooks:[PixelHeroLook]=[],battleLooks:[PixelHeroLook]=[]
+            for u in campaign.engine.state.players {
+                let slot=campaign.playerIDs.firstIndex(of:u.id) ?? 0
+                battleLooks.append(PixelHeroLook.battle(unit:u,slot:slot))
+                if u.id != "p1",u.appearance == nil {
+                    if let look=HeroFrames.pixelLook(heroIndex:slot%3,weaponID:u.equipment.weapon,armorID:u.equipment.armor){mapLooks.append(look)}
+                } else {
+                    let a=u.appearance ?? PlayerAppearance(body:campaign.snapshot.appearanceID),index=HeroFrames.appearanceIDs.firstIndex(of:a.body) ?? 0
+                    if let look=HeroFrames.pixelLook(heroIndex:0,appearanceIndex:index,weaponID:u.equipment.weapon,armorID:a.armor(worn:u.equipment.armor),hair:a.hair,face:a.face){mapLooks.append(look)}
+                }
+            }
+            // 战斗帧只在后台备好，不用等
+            PixelHeroAtlas.prepare(battle:battleLooks)
+            if !mapLooks.allSatisfy(PixelHeroAtlas.isMapReady) {
+                PixelHeroAtlas.prepare(map:mapLooks){[weak self] in
+                    do{try self?.prepareProfileVisuals()}catch{self?.showCampaignMessage(error.localizedDescription)}
+                }
+                return
+            }
+        }
         var names=Set<String>()
         for u in units {
             if PixelHeroAtlas.enabled,u.id != "p1",u.appearance == nil {

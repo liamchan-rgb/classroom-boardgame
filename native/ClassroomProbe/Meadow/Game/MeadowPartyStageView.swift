@@ -553,7 +553,7 @@ final class MeadowPartyStageView:UIView {
                 let pose=PartyVisual.pose(unit:unit,intent:intent,age:age,time:sceneTime,hurtAge:hurt[id].map { sceneTime-$0 },blocked:shownVitals.shield>0 || (hurt[id] != nil && broken[id]==hurt[id]),downAge:fallen[id].map { sceneTime-$0 },victoryAge:victoryAt.map { sceneTime-$0 })
                 if PixelHeroAtlas.enabled {
                     // 像素人物：外观按入队顺序和自定义外观定；出手帧对准命中 / 放箭 / 释放的时刻
-                    actor.pixelLookOverride=PixelHeroLook.battle(unit:unit,slot:Self.playerSlot(id))
+                    actor.pixelLookOverride=PixelHeroLook.battle(unit:unit,slot:state.players.firstIndex{$0.id==id} ?? Self.playerSlot(id))
                     if let intent,intent.actor==id {
                         let keyAge=intent.ranged ? BowRig.releaseAge:intent.magical ? LegendaryStaffRig.releaseAge:intent.action.impact
                         actor.pixelKeyProgress=CGFloat(PartyVisual.pose(unit:unit,intent:intent,age:keyAge,time:sceneTime).progress)
