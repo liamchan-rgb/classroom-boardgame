@@ -249,7 +249,7 @@ final class MeadowCampaignInventoryViewController:UIViewController {
         left.alwaysBounceVertical=true;list.alwaysBounceVertical=true;detail.alwaysBounceVertical=true
         middle.addSubview(filterButton);middle.addSubview(list);right.addSubview(detail);detail.addSubview(detailContent);right.addSubview(primary)
         close.addAction(UIAction{[weak self] _ in self?.dismiss(animated:true){self?.onClose?()}},for:.touchUpInside)
-        for (i,id) in session.playerIDs.enumerated(){members.insertSegment(withTitle:id.uppercased()+" 行囊",at:i,animated:false)}
+        for (i,id) in session.playerIDs.enumerated(){members.insertSegment(withTitle:(session.engine.state.units[id]?.shortName ?? id.uppercased())+" 行囊",at:i,animated:false)}
         for state in [UIControl.State.normal,.selected] {members.setTitleTextAttributes([.font:MeadowPreviewPalette.font(16),.foregroundColor:MeadowPreviewPalette.ink],for:state)}
         members.selectedSegmentTintColor=UIColor(red:0.40,green:0.35,blue:0.19,alpha:1)
         members.addAction(UIAction{[weak self] _ in
@@ -339,13 +339,13 @@ final class MeadowCampaignInventoryViewController:UIViewController {
                 text("换装不回血、不补行动或移动。地图移动上限按全队最大行动上限平均计算；基础行动加成不提高移动上限。",15);primary.isEnabled=true
             }catch{text(error.localizedDescription)}
         }else{
-            let targets=UISegmentedControl(items:session.playerIDs.map{$0.uppercased()});targets.selectedSegmentIndex=session.playerIDs.firstIndex(of:target) ?? 0
+            let targets=UISegmentedControl(items:session.playerIDs.map{session.engine.state.units[$0]?.shortName ?? $0.uppercased()});targets.selectedSegmentIndex=session.playerIDs.firstIndex(of:target) ?? 0
             for state in [UIControl.State.normal,.selected] {targets.setTitleTextAttributes([.font:MeadowPreviewPalette.font(16),.foregroundColor:MeadowPreviewPalette.ink],for:state)}
             targets.selectedSegmentTintColor=UIColor(red:0.40,green:0.35,blue:0.19,alpha:1)
             targets.frame=CGRect(x:12,y:y,width:width-24,height:36);detailContent.addSubview(targets);y+=48
             targets.addAction(UIAction{[weak self,weak targets] _ in guard let self else{return};self.target=self.session.playerIDs[max(0,targets?.selectedSegmentIndex ?? 0)];self.view.setNeedsLayout()},for:.valueChanged)
             primary.configuration?.title=item.kind == .revivalStone ? "复活队友 · 2 AP":"使用补给 · 1 AP"
-            if let receiver=session.engine.state.units[target],let a=try? GameRules.attributes(receiver,catalog:session.engine.catalog){text("使用者：\(actor.uppercased())\n目标：\(target.uppercased())\n生命 \(receiver.health) → \(item.kind == .revivalStone ? (a.maximumHealth+1)/2:min(a.maximumHealth,receiver.health+item.heal))/\(a.maximumHealth)\n护盾 \(receiver.shield) → \(max(receiver.shield,item.shield))")}
+            if let receiver=session.engine.state.units[target],let a=try? GameRules.attributes(receiver,catalog:session.engine.catalog){text("使用者：\(session.engine.state.units[actor]?.shortName ?? actor.uppercased())\n目标：\(receiver.shortName)\n生命 \(receiver.health) → \(item.kind == .revivalStone ? (a.maximumHealth+1)/2:min(a.maximumHealth,receiver.health+item.heal))/\(a.maximumHealth)\n护盾 \(receiver.shield) → \(max(receiver.shield,item.shield))")}
             do{let command=try session.inventoryItemCommand(actor:actor,item:id,target:target),preview=session.engine.preview(command);primary.isEnabled=preview.allowed;if !preview.allowed{text(preview.message)}}catch{text(error.localizedDescription)}
         }
         detailContent.frame=CGRect(x:0,y:0,width:width,height:y+12);detail.contentSize=detailContent.bounds.size

@@ -19,7 +19,7 @@ struct MeadowTeacherDashboard:View {
     private func workspace(fullScreen:Bool)->some View {
         VStack(spacing:8){
             HStack(spacing:8){
-                Label("v0.26.1",systemImage:"leaf.fill").font(.system(size:13,weight:.bold,design:.rounded)).foregroundStyle(GameTheme.primary)
+                Label("v0.27.0",systemImage:"leaf.fill").font(.system(size:13,weight:.bold,design:.rounded)).foregroundStyle(GameTheme.primary)
                 GlassChip(icon:game.externalConnected ? "tv.fill":"ipad.landscape",text:game.externalConnected ? "TV":"本机",tint:game.externalConnected ? .green:GameTheme.muted)
                 if let c=game.campaign,!inBattle {
                     GlassChip(icon:"figure.walk.motion",text:"\(Int(ceil(c.movementRemaining)))/\(Int(ceil(c.movementCapacity)))")
@@ -29,6 +29,8 @@ struct MeadowTeacherDashboard:View {
                     GlassChip(icon:difficultyIcon(c.difficulty),text:c.difficulty.title,tint:difficultyTint(c.difficulty))
                 }
                 Spacer(minLength:0)
+                Button{game.openTimer()}label:{Label("计时",systemImage:"timer")}
+                ClassroomScoreboardButton(overlays:game.overlays){game.toggleScoreboard()}
                 Button{game.openCharacterStudio()}label:{Label("形象",systemImage:"person.crop.circle.badge.plus")}.disabled(game.busy)
                 Button{game.openPixelCharacterLab()}label:{Label("像素人物",systemImage:"square.grid.3x3.square")}.disabled(game.busy)
                 Button{game.openGM()}label:{Label("GM",systemImage:"wand.and.stars")}.disabled(!game.ready || game.busy || game.campaign==nil)
@@ -45,6 +47,7 @@ struct MeadowTeacherDashboard:View {
                         }
                     }label:{Label("难度",systemImage:"gauge.with.dots.needle.67percent")}.disabled(game.busy || game.campaign==nil || inBattle || game.campaign?.isCompleted==true)
                     Button{game.award()}label:{Label("+10 金币",systemImage:"bitcoinsign.circle")}.disabled(game.busy || game.campaign==nil)
+                    Button{game.openShortcutEditor()}label:{Label("快捷键",systemImage:"keyboard")}
                     Toggle(isOn:$game.liveMirrorPreferred){Label("教师画面用 GPU 实时显示",systemImage:"display.2")}
                     Button{game.openTeamConsole()}label:{Label("队伍与仓库",systemImage:"person.3")}.disabled(!game.ready || game.busy)
                     Button{game.operation(.route)}label:{Label("路线与结算",systemImage:"flag.checkered")}.disabled(!game.ready || game.busy)

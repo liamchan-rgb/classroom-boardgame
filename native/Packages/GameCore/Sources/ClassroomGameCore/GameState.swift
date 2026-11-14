@@ -222,3 +222,15 @@ public enum GameFactory {
                         active: false, defeatRewarded: false)
     }
 }
+
+public extension GameUnit {
+    /// Short label for a person: the name the teacher gave (e.g. "小明"), or the seat ("P2") for a default
+    /// "P2 · 游侠"-style name. Monsters keep their own name.
+    var shortName: String {
+        guard kind == .player else { return name }
+        let seat = id.uppercased()
+        if host && name.isEmpty { return "老师" }
+        if name == seat || name.hasPrefix(seat + " · ") { return seat }
+        return name
+    }
+}

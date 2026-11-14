@@ -23,6 +23,22 @@ final class MeadowTeacherCoordinator:ObservableObject {
         if next != lastUIState {lastUIState=next;revision += 1}
     }
     /// While the GPU live mirror is on screen, the image mirror (map readback + overlay capture) is not needed at all.
+    let classTimer=ClassTimerModel()
+    let overlays=ClassOverlayModel()
+    /// Timer panel (teacher window); the countdown itself shows on the TV.
+    func openTimer(){
+        guard !modalOpen,let presenter=presentationHost else{return}
+        let screen=UIHostingController(rootView:ClassTimerPanel(timer:classTimer,onClose:{[weak self] in self?.presentationHost?.dismiss(animated:true)}))
+        screen.modalPresentationStyle = .formSheet;screen.preferredContentSize=CGSize(width:720,height:420)
+        presenter.present(screen,animated:true)
+    }
+    func toggleScoreboard(){withAnimation(.spring(response:0.35,dampingFraction:0.8)){overlays.scoreboard.toggle()}}
+    func openShortcutEditor(){
+        guard !modalOpen,let presenter=presentationHost else{return}
+        let screen=UIHostingController(rootView:ClassroomShortcutEditor(onClose:{[weak self] in self?.presentationHost?.dismiss(animated:true)}))
+        screen.modalPresentationStyle = .formSheet;screen.preferredContentSize=CGSize(width:640,height:760)
+        presenter.present(screen,animated:true)
+    }
     private var liveMirrors=0
     @Published var liveMirrorPreferred=MeadowLiveMirror.preferred {didSet{MeadowLiveMirror.preferred=liveMirrorPreferred}}
     func setLiveMirror(_ on:Bool){liveMirrors=max(0,liveMirrors+(on ? 1:-1));updateMirrorDemand()}

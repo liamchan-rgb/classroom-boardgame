@@ -21,6 +21,18 @@ final class GameScene: SKScene {
         if campaign.engine.state.map.nodes.first(where:{$0.id==id})?.siteResolved==true{return "✓"}
         return kind == .shop ? "商":kind == .spring ? "泉":"事"
     }
+    /// The person's own name when the teacher gave one, else the seat (P1, P2 ...).
+    private func mapName(_ index:Int)->String {
+        guard let campaign,index<campaign.playerIDs.count,let unit=campaign.engine.state.units[campaign.playerIDs[index]] else{return "P\(index + 1)"}
+        return unit.shortName
+    }
+    /// Sets a map name plate, widening the plate to fit longer names (only when the text changes).
+    private func setMapLabel(_ index:Int,_ text:String) {
+        guard let label=actorLabels[index].children.compactMap({ $0 as? SKLabelNode }).first,label.text != text else{return}
+        label.text=text
+        let width=max(23,label.frame.width+10)
+        (actorLabels[index] as SKNode as? SKShapeNode)?.path=CGPath(roundedRect:CGRect(x:-width/2,y:-7,width:width,height:14),cornerWidth:3,cornerHeight:3,transform:nil)
+    }
     func refreshCampaign() {
         guard let campaign,world != nil else{return}
         refreshProfileFrames()
@@ -279,7 +291,7 @@ final class GameScene: SKScene {
             plate.strokeColor = SKColor(red: 0.78, green: 0.70, blue: 0.46, alpha: 0.25)
             plate.lineWidth = 0.6
             plate.name = root.name
-            let label = SKLabelNode(fontNamed: "HelveticaNeue-Medium")
+            let label = SKLabelNode(fontNamed: "PingFangSC-Semibold")
             label.text = "P\(index + 1)"
             label.fontSize = 10
             label.verticalAlignmentMode = .center
@@ -619,8 +631,7 @@ final class GameScene: SKScene {
             actorRoots[index].position = LivingWorld.position(point)
             actorRoots[index].zPosition = 10000 + point.y
             actorLabels[index].position = actorRoots[index].position + CGPoint(x: 0, y: -13)
-            actorLabels[index].children.compactMap { $0 as? SKLabelNode }.first?.text = layeredPreview
-                ? (index == 0 ? "P1 原图" : "P1 分层蓝靴") : "P\(index + 1)"
+            setMapLabel(index, layeredPreview ? (index == 0 ? "P1 原图" : "P1 分层蓝靴") : mapName(index))
             world.effects.apply(world.effects.vegetation, to: actors[index],
                                 origin: CGPoint(x: point.x, y: point.y - 24), extent: actors[index].size, gait: gait)
         }
@@ -722,7 +733,7 @@ final class GameScene: SKScene {
             simulation.selected = index
             selectionRing.isHidden = false
             selectionRing.position = actorRoots[index].position
-            onSelectionChanged?("P\(index + 1)")
+            onSelectionChanged?(mapName(index))
             publishDiagnostics()
             return
         }

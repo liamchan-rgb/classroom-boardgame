@@ -26,6 +26,16 @@
 			"isa" = "PBXBuildFile";
 			"fileRef" = "8DAD735FF852A6E22D7C5ABA";
 		};
+		"BB1DD23B742D95140DD0D1D5" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "ClassroomTools.swift";
+			"sourceTree" = "<group>";
+		};
+		"CB8E34ADA3C5B9FBAE46DF56" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "BB1DD23B742D95140DD0D1D5";
+		};
 		"FEE4240556D460778CACF252" = {
 			"isa" = "PBXFileReference";
 			"lastKnownFileType" = "sourcecode.swift";
@@ -854,6 +864,7 @@
 			"children" = (
 				"B103E9354A9F3DDB1F1F5FFF",
 				"8DAD735FF852A6E22D7C5ABA",
+				"BB1DD23B742D95140DD0D1D5",
 				"FEE4240556D460778CACF252",
 				"94C083F25F57C56CA95198B7",
 				"694592A08B2026452F45432F",
@@ -1015,6 +1026,7 @@
 			"files" = (
 				"48CD02DF754AD4A38EF8C21B",
 				"324264E51A3197C213B72CE2",
+				"CB8E34ADA3C5B9FBAE46DF56",
 				"EBFCD21BF96244EFBA4F75E5",
 				"6499838B36F4B47F3BBDE495",
 				"6A55E5E5094B2CA6F96F69BA",
@@ -1155,8 +1167,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				"CURRENT_PROJECT_VERSION" = "35";
-				"MARKETING_VERSION" = "0.26.1";
+				"CURRENT_PROJECT_VERSION" = "36";
+				"MARKETING_VERSION" = "0.27.0";
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 			};
 		};
@@ -1196,8 +1208,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				"CURRENT_PROJECT_VERSION" = "35";
-				"MARKETING_VERSION" = "0.26.1";
+				"CURRENT_PROJECT_VERSION" = "36";
+				"MARKETING_VERSION" = "0.27.0";
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 			};
 		};

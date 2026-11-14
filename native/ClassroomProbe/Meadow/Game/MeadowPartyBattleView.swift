@@ -193,7 +193,7 @@ final class MeadowPartyBattleView:UIView {
         let showing=busy ? (stage.actorInAction ?? model.pending?.actor ?? current):current
         let name=showing.flatMap { state.units[$0]?.name } ?? "演练结束"
         if busy { armed=nil }
-        if armed==nil { hint.text=busy ? "\(name) · 动作进行中" : classroomMode ? "\(name)行动"+(state.pauseReasons.isEmpty ? "":" · 已暂停") : "\(name)行动 · 友方 \(friend.uppercased()) / 敌方 \(model.state.units[foe]?.name ?? foe) · 点角色或上方顺序条选目标" }
+        if armed==nil { hint.text=busy ? "\(name) · 动作进行中" : classroomMode ? "\(name)行动"+(state.pauseReasons.isEmpty ? "":" · 已暂停") : "\(name)行动 · 友方 \(model.state.units[friend]?.shortName ?? friend.uppercased()) / 敌方 \(model.state.units[foe]?.name ?? foe) · 点角色或上方顺序条选目标" }
         let displayActor=showing ?? "p1"
         if let unit=state.units[displayActor] {
             let visible=stage.displayedVitals(for:displayActor,health:unit.health,shield:unit.shield)
@@ -203,7 +203,7 @@ final class MeadowPartyBattleView:UIView {
             if apRound != model.round { apRound=model.round;actionPointCapacity=[:] }
             let capacity=max(stats.baseAP,max(unit.ap,actionPointCapacity[displayActor] ?? 0))
             actionPointCapacity[displayActor]=capacity
-            ap.show(value:unit.ap,maximum:capacity,owner:displayActor.hasPrefix("p") ? displayActor.uppercased():unit.name)
+            ap.show(value:unit.ap,maximum:capacity,owner:unit.shortName)
             accessory.show(try? AccessoryReadout.make(unit,catalog:model.engine.catalog),host:self)
             if let b=unit.damageBuff { buff.show(title:"增伤＋\(b.amount)",detail:"剩余 \(b.roundsLeft) 轮\n普攻和伤害技能生效",symbol:"arrow.up",color:MeadowPreviewPalette.gold) } else { buff.hide() }
             if visible.shield>0 { shieldBuff.show(title:"护盾 · \(visible.shield)",detail:"优先抵挡伤害\n新旧授盾取较高值\n战斗结束后清空",symbol:"shield.fill",color:.systemCyan) } else { shieldBuff.hide() }
@@ -250,7 +250,7 @@ final class MeadowPartyBattleView:UIView {
             guard let self else{return};self.showResourceSummary(model)
         }
         menu.append(inventoryInfo)
-        items.menu=UIMenu(title:(current.flatMap{state.units[$0]?.name} ?? "等待行动")+" · 对 \(friend.uppercased()) 使用",children:menu)
+        items.menu=UIMenu(title:(current.flatMap{state.units[$0]?.name} ?? "等待行动")+" · 对 \(state.units[friend]?.shortName ?? friend.uppercased()) 使用",children:menu)
         items.isEnabled=active && !busy && current?.hasPrefix("p")==true && !model.terminal
         setNeedsLayout()
     }

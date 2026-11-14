@@ -1,6 +1,7 @@
 import SwiftUI
 import UIKit
 import ClassroomProbeCore
+import MeadowWorldSupport
 
 @main
 struct ClassroomProbeApp: App {
@@ -63,32 +64,35 @@ final class TeacherHostController: UIViewController {
         guard !session.isEditingNotes,!session.game.modalOpen,!UIResponder.classroomTyping else{heldKeys.removeAll();super.pressesBegan(presses,with:event);return}
         var handled=false
         for press in presses {
-            guard let key=press.key,key.modifierFlags.intersection([.command,.control,.alternate]).isEmpty else{continue}
-            let code=key.charactersIgnoringModifiers.lowercased()
-            guard ["1","2","g","a","e"," "].contains(code) || key.keyCode == .keyboardLeftArrow || key.keyCode == .keyboardRightArrow else{continue}
-            handled=true;guard heldKeys.insert(code).inserted else{continue}
-            if key.keyCode == .keyboardLeftArrow {session.turnPage(-1)}
-            else if key.keyCode == .keyboardRightArrow {session.turnPage(1)}
-            else if code=="1" || code=="2" {session.game.select("p"+code)}
-            else if code=="g" {session.game.award()}
-            else if code=="a" {session.game.battle(.attack)}
-            else if code=="e" {session.game.battle(.endTurn)}
-            else if code==" " {session.game.operation(.pauseOrResume)}
+            guard let key=press.key,key.modifierFlags.intersection([.command,.control,.alternate]).isEmpty,
+                  let token=ClassroomShortcuts.token(key),let action=ClassroomShortcuts.action(for:token) else{continue}
+            handled=true;guard heldKeys.insert(token).inserted else{continue}
+            perform(action,session:session)
         }
         if !handled {super.pressesBegan(presses,with:event)}
     }
+    /// Teacher keyboard shortcuts (editable under 快捷键).
+    private func perform(_ action:ClassroomShortcutAction,session:TeacherSession) {
+        let game=session.game
+        switch action {
+        case .select1,.select2,.select3,.select4,.select5,.select6,.select7:
+            guard let seat=action.seat,let ids=game.campaign?.playerIDs,seat<=ids.count else{return}
+            game.select(ids[seat-1])
+        case .award:game.award()
+        case .attack:game.battle(.attack)
+        case .endTurn:game.battle(.endTurn)
+        case .pauseResume:game.operation(.pauseOrResume)
+        case .pageBack:session.turnPage(-1)
+        case .pageForward:session.turnPage(1)
+        case .openTimer:game.openTimer()
+        case .timerStartPause:game.classTimer.toggle()
+        case .timerPlus10:game.classTimer.add(10)
+        case .toggleScoreboard:game.toggleScoreboard()
+        }
+    }
 
     override func pressesEnded(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
-        for press in presses {
-            if let key = press.key {
-                heldKeys.remove(key.charactersIgnoringModifiers.lowercased())
-                if key.keyCode == .keyboardLeftArrow { heldKeys.remove("book-left") }
-                if key.keyCode == .keyboardRightArrow { heldKeys.remove("book-right") }
-                if (UIKeyboardHIDUsage.keyboard1.rawValue...UIKeyboardHIDUsage.keyboard7.rawValue).contains(key.keyCode.rawValue) {
-                    heldKeys.remove(String(key.keyCode.rawValue - UIKeyboardHIDUsage.keyboard1.rawValue + 1))
-                }
-            }
-        }
+        for press in presses {if let key=press.key,let token=ClassroomShortcuts.token(key) {heldKeys.remove(token)}}
         super.pressesEnded(presses, with: event)
     }
     override func pressesCancelled(_ presses: Set<UIPress>, with event: UIPressesEvent?) {

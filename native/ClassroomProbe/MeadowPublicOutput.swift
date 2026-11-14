@@ -34,6 +34,7 @@ struct PublicSurface:View {
                 }.allowsHitTesting(false)
             }
         }.background(.black)
+        .overlay{ClassroomTVOverlays(timer:game.classTimer,overlays:game.overlays,game:game)}
     }
 }
 

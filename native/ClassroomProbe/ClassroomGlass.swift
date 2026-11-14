@@ -10,6 +10,10 @@ struct ClassroomTextField:UIViewRepresentable {
     var limit:Int=40
     var keyboard:UIKeyboardType = .default
     var alignment:NSTextAlignment = .natural
+    /// Called on Return/Enter (the field keeps focus so the next value can be typed straight away).
+    var onSubmit:(()->Void)?=nil
+    /// Take the keyboard as soon as the field appears.
+    var autoFocus=false
     func makeCoordinator()->Coordinator {Coordinator(self)}
     func makeUIView(context:Context)->UITextField {
         let field=UITextField()
@@ -17,6 +21,8 @@ struct ClassroomTextField:UIViewRepresentable {
         field.borderStyle = .none;field.clearButtonMode = .whileEditing;field.returnKeyType = .done
         field.font = .systemFont(ofSize:17,weight:.medium);field.textColor = .label
         field.autocorrectionType = .no;field.spellCheckingType = .no
+        if onSubmit != nil {field.returnKeyType = .go}
+        if autoFocus {DispatchQueue.main.asyncAfter(deadline:.now()+0.35){field.becomeFirstResponder()}}
         field.setContentHuggingPriority(.defaultLow,for:.horizontal)
         field.setContentCompressionResistancePriority(.defaultLow,for:.horizontal)
         field.delegate=context.coordinator
@@ -39,7 +45,14 @@ struct ClassroomTextField:UIViewRepresentable {
             parent.text=value
         }
         func textFieldDidEndEditing(_ field:UITextField){parent.text=String((field.text ?? "").prefix(parent.limit))}
-        func textFieldShouldReturn(_ field:UITextField)->Bool {field.resignFirstResponder();return true}
+        func textFieldShouldReturn(_ field:UITextField)->Bool {
+            if let submit=parent.onSubmit {
+                parent.text=field.text ?? "";submit()
+                DispatchQueue.main.async{field.text=self.parent.text}
+                return false
+            }
+            field.resignFirstResponder();return true
+        }
     }
 }
 

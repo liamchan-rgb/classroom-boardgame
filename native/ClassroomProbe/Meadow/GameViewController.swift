@@ -1280,7 +1280,7 @@ private func refreshCampaignStatus(allowBattleOpen:Bool=true) {
         playButton.isPlaying=campaign.isMoving
         for i in players.indices {
             let u=players[i],stats=(try? GameRules.attributes(u,catalog:campaign.engine.catalog)) ?? u.baseAttributes
-            campaignHealth[i].show((u.host ? "师":u.id.uppercased())+" · "+(state.teams.first{$0.id==u.teamID}?.name ?? "未分队")+" · 上限 \(stats.maximumAP)",value:u.health,maximum:stats.maximumHealth,color:.systemGreen)
+            campaignHealth[i].show((u.host && u.shortName==u.id.uppercased() ? "师":u.shortName)+" · "+(state.teams.first{$0.id==u.teamID}?.name ?? "未分队")+" · 上限 \(stats.maximumAP)",value:u.health,maximum:stats.maximumHealth,color:.systemGreen)
             campaignAP[i].show(value:u.ap,maximum:max(u.ap,stats.baseAP))
         }
         campaignEnd.configuration?.title=campaign.isCompleted ? "查看结算":"路线与目标"

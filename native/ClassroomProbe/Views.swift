@@ -31,6 +31,9 @@ private struct TeacherBookConsole:View {
                 Label("绘本",systemImage:"book.pages.fill").font(.system(size:20,weight:.bold,design:.rounded))
                 GlassChip(icon:"tv",text:session.registrationStatus.contains("连接") ? "TV":"—",tint:GameTheme.muted).lineLimit(1)
                 Spacer()
+                Button{notesFocused=false;game.openTimer()}label:{Label("计时",systemImage:"timer")}
+                ClassroomScoreboardButton(overlays:game.overlays){game.toggleScoreboard()}
+                Button{notesFocused=false;game.openShortcutEditor()}label:{Label("快捷键",systemImage:"keyboard")}
                 Button{notesFocused=false;game.openGM()}label:{Label("GM",systemImage:"wand.and.stars")}.disabled(game.busy || game.campaign==nil)
                 Button{notesFocused=false;game.openArchives()}label:{Label("存档",systemImage:"archivebox")}.disabled(game.busy)
                 Button{notesFocused=false;game.openCharacterStudio()}label:{Label("形象",systemImage:"person.crop.circle.badge.plus")}.disabled(game.busy)
