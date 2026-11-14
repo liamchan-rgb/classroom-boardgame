@@ -13,7 +13,7 @@ final class CampInventoryTests:XCTestCase {
         XCTAssertEqual(restored.appearanceID,"wayfarer");XCTAssertEqual(restored.loadout.engine.archive,original)
         XCTAssertEqual(restored.loadout.units["p1"]?.inventory["smallPotion"],1)
         XCTAssertNil(restored.loadout.units["p1"]?.inventory["huntingBow"]);XCTAssertEqual(restored.loadout.units["p1"]?.inventory["trainingSword"],1)
-        XCTAssertEqual(restored.loadout.units["p1"]?.ap,2);XCTAssertEqual(restored.loadout.units["p1"]?.health,16)
+        XCTAssertEqual(restored.loadout.units["p1"]?.ap,3);XCTAssertEqual(restored.loadout.units["p1"]?.health,16) // supplies are free outside battle
     }
     func testEquipComparisonUsesOriginalRulesWithoutMutatingOrSaving() throws {
         let u=location();defer { cleanup(u) };let a=try CampInventorySession(store:CampSaveStore(url:u)),before=a.loadout.engine.archive,data=try Data(contentsOf:u)
@@ -67,9 +67,9 @@ final class CampInventoryTests:XCTestCase {
         XCTAssertFalse(CampInventoryProjection.entries(a.loadout.units["p1"]!,catalog:catalog,filter:"supplies").contains{$0.id=="shieldPotion"})
         let full=try CampInventoryProjection.detail("smallPotion",session:a);XCTAssertFalse(full.enabled);XCTAssertEqual(full.reason,"目标生命已满，无需使用。")
     }
-    func testSuppliesPayOriginalAPAndInvalidUseDoesNotPersist() throws {
+    func testSuppliesAreFreeOutsideBattleAndInvalidUseDoesNotPersist() throws {
         let u=location();defer { cleanup(u) };let a=try CampInventorySession(store:CampSaveStore(url:u));try a.equip(slot:.armor,item:"leatherArmor")
-        try a.use(item:"smallPotion",target:"p1");XCTAssertEqual(a.loadout.units["p1"]?.health,16);XCTAssertEqual(a.loadout.units["p1"]?.ap,2)
+        try a.use(item:"smallPotion",target:"p1");XCTAssertEqual(a.loadout.units["p1"]?.health,16);XCTAssertEqual(a.loadout.units["p1"]?.ap,3)
         let before=a.loadout.engine.archive,bytes=try Data(contentsOf:u)
         XCTAssertThrowsError(try a.use(item:"revivalStone",target:"p2"));XCTAssertEqual(a.loadout.engine.archive,before);XCTAssertEqual(try Data(contentsOf:u),bytes)
     }
