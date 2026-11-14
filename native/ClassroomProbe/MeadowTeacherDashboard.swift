@@ -19,7 +19,7 @@ struct MeadowTeacherDashboard:View {
     private func workspace(fullScreen:Bool)->some View {
         VStack(spacing:8){
             HStack(spacing:8){
-                Label("v0.26.0",systemImage:"leaf.fill").font(.system(size:13,weight:.bold,design:.rounded)).foregroundStyle(GameTheme.primary)
+                Label("v0.26.1",systemImage:"leaf.fill").font(.system(size:13,weight:.bold,design:.rounded)).foregroundStyle(GameTheme.primary)
                 GlassChip(icon:game.externalConnected ? "tv.fill":"ipad.landscape",text:game.externalConnected ? "TV":"本机",tint:game.externalConnected ? .green:GameTheme.muted)
                 if let c=game.campaign,!inBattle {
                     GlassChip(icon:"figure.walk.motion",text:"\(Int(ceil(c.movementRemaining)))/\(Int(ceil(c.movementCapacity)))")
@@ -45,6 +45,7 @@ struct MeadowTeacherDashboard:View {
                         }
                     }label:{Label("难度",systemImage:"gauge.with.dots.needle.67percent")}.disabled(game.busy || game.campaign==nil || inBattle || game.campaign?.isCompleted==true)
                     Button{game.award()}label:{Label("+10 金币",systemImage:"bitcoinsign.circle")}.disabled(game.busy || game.campaign==nil)
+                    Toggle(isOn:$game.liveMirrorPreferred){Label("教师画面用 GPU 实时显示",systemImage:"display.2")}
                     Button{game.openTeamConsole()}label:{Label("队伍与仓库",systemImage:"person.3")}.disabled(!game.ready || game.busy)
                     Button{game.operation(.route)}label:{Label("路线与结算",systemImage:"flag.checkered")}.disabled(!game.ready || game.busy)
                     Divider()

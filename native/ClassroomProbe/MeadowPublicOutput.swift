@@ -17,7 +17,7 @@ struct PublicSurface:View {
                 GeometryReader { geometry in
                     let rect=ClassroomCanvas.fitted(in:geometry.size)
                     ZStack {
-                    if teacherPreview && game.externalConnected {MeadowTeacherMirror(mirror:game.frameMirror)}
+                    if teacherPreview && game.externalConnected {MeadowLiveMirror(game:game)}
                     else if game.renderer != nil {MeadowRendererHost(game:game)}
                     else{Color(red:0.07,green:0.12,blue:0.08);Text("林间旅程 · 等待教师开始").font(.largeTitle.bold()).foregroundStyle(.white)}
                     if case .inventory(let id)=game.surface,let c=game.campaign,let unit=c.engine.state.units[id] {

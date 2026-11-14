@@ -22,8 +22,12 @@ final class MeadowTeacherCoordinator:ObservableObject {
         let next=UIState(gameID:state?.gameID,surface:surface,historyID:c?.engine.history.last?.id,historyCount:c?.engine.history.count ?? 0,movement:Int(ceil(c?.movementRemaining ?? 0)),current:state?.battle?.current,pauses:state?.pauseReasons ?? [],busy:busy,ready:ready,moving:c?.isMoving ?? false,travel:c?.travel != nil,player:c?.selectedPlayerID)
         if next != lastUIState {lastUIState=next;revision += 1}
     }
+    /// While the GPU live mirror is on screen, the image mirror (map readback + overlay capture) is not needed at all.
+    private var liveMirrors=0
+    @Published var liveMirrorPreferred=MeadowLiveMirror.preferred {didSet{MeadowLiveMirror.preferred=liveMirrorPreferred}}
+    func setLiveMirror(_ on:Bool){liveMirrors=max(0,liveMirrors+(on ? 1:-1));updateMirrorDemand()}
     private func updateMirrorDemand(){
-        let enabled=ClassroomPreviewPolicy.enabled(external:externalConnected,visible:!previewObservers.isEmpty,foreground:UIApplication.shared.applicationState == .active,privateModal:modalOpen,surface:surface)
+        let enabled=liveMirrors==0 && ClassroomPreviewPolicy.enabled(external:externalConnected,visible:!previewObservers.isEmpty,foreground:UIApplication.shared.applicationState == .active,privateModal:modalOpen,surface:surface)
         if renderer?.classroomMirrorEnabled != enabled {renderer?.classroomMirrorEnabled=enabled}
     }
     func previewVisibility(_ id:UUID,visible:Bool){
