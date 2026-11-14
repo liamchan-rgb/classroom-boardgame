@@ -4,7 +4,7 @@ import ClassroomGameCore
 /// A quiz event on the TV: the question large, the options as lettered cards. The teacher picks the class's answer
 /// on the iPad; the card then marks the right option green (and a wrong pick red), shows the explanation, and leaves.
 final class MeadowQuizCard: UIView {
-    private let card = UIView(), prompt = UILabel(), tag = UILabel(), result = UILabel()
+    private let card = UIView(), prompt = UILabel(), header = UILabel(), result = UILabel()
     private var optionViews: [UIView] = []
     private static let letters = ["A", "B", "C", "D", "E", "F"]
 
@@ -20,10 +20,10 @@ final class MeadowQuizCard: UIView {
         backgroundColor = UIColor.black.withAlphaComponent(0.45); layer.zPosition = 5200; isUserInteractionEnabled = false
         MeadowPreviewPalette.stylePanel(card); card.layer.borderColor = MeadowPreviewPalette.gold.withAlphaComponent(0.7).cgColor; card.layer.borderWidth = 1.5
         addSubview(card)
-        tag.attributedText = MeadowGlassText.iconLine("questionmark.bubble.fill", place + " · 答对 +\(q.reward)", size: 18, tint: MeadowPreviewPalette.gold)
+        header.attributedText = MeadowGlassText.iconLine("questionmark.bubble.fill", place + " · 答对 +\(q.reward)", size: 18, tint: MeadowPreviewPalette.gold)
         prompt.text = q.prompt; prompt.font = MeadowPreviewPalette.font(30, .bold); prompt.textColor = .white; prompt.numberOfLines = 0
         result.font = MeadowPreviewPalette.font(20, .semibold); result.textColor = MeadowPreviewPalette.ink; result.numberOfLines = 3; result.alpha = 0
-        [tag, prompt, result].forEach(card.addSubview)
+        [header, prompt, result].forEach(card.addSubview)
         for (i, text) in q.options.enumerated() {
             let v = UIView(); v.backgroundColor = UIColor.white.withAlphaComponent(0.10); v.layer.cornerRadius = 14; v.layer.cornerCurve = .continuous
             v.layer.borderWidth = 1; v.layer.borderColor = UIColor.white.withAlphaComponent(0.18).cgColor
@@ -62,8 +62,8 @@ final class MeadowQuizCard: UIView {
         let optionH: CGFloat = 70, gap: CGFloat = 14
         let height = 28 + 30 + 14 + promptH + 22 + CGFloat(rows) * optionH + CGFloat(max(0, rows - 1)) * gap + 18 + 56 + 24
         card.frame = CGRect(x: (bounds.width - width) / 2, y: max(20, (bounds.height - height) / 2), width: width, height: min(bounds.height - 40, height))
-        tag.frame = CGRect(x: 28, y: 24, width: inner, height: 30)
-        prompt.frame = CGRect(x: 28, y: tag.frame.maxY + 14, width: inner, height: promptH)
+        header.frame = CGRect(x: 28, y: 24, width: inner, height: 30)
+        prompt.frame = CGRect(x: 28, y: header.frame.maxY + 14, width: inner, height: promptH)
         let ow = (inner - CGFloat(columns - 1) * gap) / CGFloat(max(1, columns))
         for (i, v) in optionViews.enumerated() {
             let saved = v.transform; v.transform = .identity
