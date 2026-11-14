@@ -32,7 +32,9 @@ enum HeroFrames {
     }()
 
     static func authoredFrameCount(heroIndex: Int) -> Int {
-        layout.authoredFrames[min(2, max(0, heroIndex))]
+        // 像素人物：每位旅人都是 8 相位行走
+        if PixelHeroAtlas.enabled { return 8 }
+        return layout.authoredFrames[min(2, max(0, heroIndex))]
     }
 
     static let locomotionPlan: AuthoredLocomotion.Plan? = {
@@ -62,8 +64,18 @@ enum HeroFrames {
         let bowAtlas:String,bowTorso:String
     }
     static func armorVisual(_ id:String?)->ArmorVisualBinding? { id.flatMap { layout.armorVisuals?[$0] } }
-    static func image(named name:String)->UIImage? { CustomAppearanceAssets.isCustom(name) ? CustomAppearanceAssets.image(name):UIImage(named:name) }
-    static func isEquipmentAtlas(_ name:String)->Bool { armorAtlasNames.contains(name) || CustomAppearanceAssets.isCustom(name) }
+    static func image(named name:String)->UIImage? {
+        if PixelHeroAtlas.isPixel(name) { return PixelHeroAtlas.atlas(named:name) }
+        return CustomAppearanceAssets.isCustom(name) ? CustomAppearanceAssets.image(name):UIImage(named:name)
+    }
+    /// 运行时合成的图集（像素人物、旧的自定义外观）：不在素材目录里，要用 image(named:) 取
+    static func isGenerated(_ name:String)->Bool { PixelHeroAtlas.isPixel(name) || CustomAppearanceAssets.isCustom(name) }
+    static func isEquipmentAtlas(_ name:String)->Bool { armorAtlasNames.contains(name) || isGenerated(name) }
+    /// 战斗素材名 → 武器 id（没有明确外观的战斗预览用它推出人物拿的武器）
+    static func weaponID(forBattleAsset asset:String?)->String? {
+        guard let asset else { return nil }
+        return layout.equipmentVisuals?.first { $0.value.battleAsset == asset }?.key
+    }
     static var armorAtlasNames:Set<String> { Set(layout.modularP1?.loadouts.flatMap { $0.armorAtlasNames?.values.flatMap { $0.values.flatMap { $0 } } ?? [] } ?? []) }
     static func weaponVisual(_ id:String?)->EquipmentVisualBinding? { id.flatMap { layout.equipmentVisuals?[$0] } }
 
@@ -74,6 +86,11 @@ enum HeroFrames {
     static var appearanceTitles: [String] { layout.modularP1?.loadouts.map(\.title) ?? [] }
 
     static func atlasName(heroIndex: Int, diagonal: Bool, appearanceIndex: Int = 0,weaponID:String?="trainingSword",armorID:String?=nil,hair:String?=nil,face:String?=nil) -> String {
+        if PixelHeroAtlas.enabled {
+            // 所有旅人都换成像素人物：1 号按选的体型，2、3 号用预设旅人；护甲、武器、发型、五官都画出来
+            let body=heroIndex==0 ? (appearanceIDs.indices.contains(appearanceIndex) ? appearanceIDs[appearanceIndex]:"forester"):PixelHeroLook.presetBodies[min(2,max(0,heroIndex))]
+            return PixelHeroAtlas.name(look:PixelHeroLook(body:body,armor:armorID,weapon:weaponID,hair:hair,face:face),half:diagonal ? 1:0)
+        }
         if heroIndex==0, hair != nil || face != nil || ["starlightArmor","dragonArmor"].contains(armorID ?? "") { return CustomAppearanceAssets.name(body:appearanceIDs[appearanceIndex],armor:armorID,weapon:weaponID,hair:hair,face:face,half:diagonal ? 1:0) }
         if heroIndex == 0, let presets = layout.modularP1?.loadouts {
             precondition(presets.indices.contains(appearanceIndex))
@@ -86,6 +103,8 @@ enum HeroFrames {
 
     static var atlasNames: [String] {
         let defaults = (0..<3).flatMap { hero in [false, true].map { atlasName(heroIndex: hero, diagonal: $0) } }
+        // 像素人物不再需要预载旧的手绘图集
+        if PixelHeroAtlas.enabled { return Array(Set(defaults)).sorted() }
         return Array(Set(defaults + (layout.modularP1?.loadouts.flatMap { $0.atlasNames+($0.weaponAtlasNames?.values.flatMap { $0 } ?? []) } ?? []))).sorted()
     }
 
@@ -100,7 +119,8 @@ enum HeroFrames {
     }
 
     static func rasterColumns(heroIndex: Int) -> Int {
-        heroIndex == 0 ? layout.modularP1?.rasterColumns ?? authoredFrameCount(heroIndex: 0) + 1
+        if PixelHeroAtlas.enabled { return PixelHeroAtlas.columns }
+        return heroIndex == 0 ? layout.modularP1?.rasterColumns ?? authoredFrameCount(heroIndex: 0) + 1
             : authoredFrameCount(heroIndex: heroIndex) + 1
     }
 
@@ -114,7 +134,7 @@ enum HeroFrames {
 
     static func sourceColumn(frame: Int, heroIndex: Int = 0) -> Int {
         let frame = min(columns - 1, max(0, frame))
-        if frame > walkFrameCount { return heroIndex == 0 && layout.modularP1 != nil ? frame - walkFrameCount + 8 : 0 }
+        if frame > walkFrameCount { return (heroIndex == 0 && layout.modularP1 != nil) || PixelHeroAtlas.enabled ? frame - walkFrameCount + 8 : 0 }
         return frame == 0 ? 0 : 1 + (frame - 1) * authoredFrameCount(heroIndex: heroIndex) / walkFrameCount
     }
 
@@ -291,6 +311,7 @@ enum CustomAppearanceAssets {
     /// One 256 px cell of the composed atlas (facing 0-7, column 0 idle, 1-8 walk), drawn from the registered components without
     /// composing the whole atlas: the character studio previews every option this way.
     static func cell(body:String,armor:String?,weapon:String?,hair:String?,face:String?,facing:Int,column:Int)->UIImage? {
+        if PixelHeroAtlas.enabled { return PixelHeroAtlas.cell(look:PixelHeroLook(body:body,armor:armor,weapon:weapon,hair:hair,face:face),facing:facing,column:column) }
         let key="cell|"+name(body:body,armor:armor,weapon:weapon,hair:hair,face:face,half:facing>=4 ? 1:0)+"|\(facing%4)|\(column)"
         if let image=cache.object(forKey:key as NSString){return image}
         let half=facing>=4 ? 1:0,outfit=armor ?? body

@@ -34,7 +34,7 @@ enum MeadowLoader {
                 let names = Set(props.map(\.asset) + ["MeadowGround", "Banner"]
                     + HeroFrames.atlasNames).sorted()
                 for (index, name) in names.enumerated() {
-                    guard let image = UIImage(named: name)?.cgImage else { throw ShadowLabError.setup("素材缺失：\(name)") }
+                    guard let image = (HeroFrames.isGenerated(name) ? HeroFrames.image(named: name) : UIImage(named: name))?.cgImage else { throw ShadowLabError.setup("素材缺失：\(name)") }
                     images[name] = image
                     report(0.28 + Double(index + 1) / Double(names.count) * 0.13, "准备场景素材")
                 }

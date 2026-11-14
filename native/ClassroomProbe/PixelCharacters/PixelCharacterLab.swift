@@ -3,59 +3,66 @@ import SwiftUI
 import UIKit
 
 /// 像素人物测试界面（教师端）。
-/// 用游戏内 Swift 烘焙器现场合成人物：切换套装、上衣 / 围巾配色、发型、发色、五官、瞳色、肤色和武器，
-/// 右侧实时预览八个方向的待机与行走动画，下方显示整张 5 方向 × 8 帧的 sprite sheet。
-/// 发型、五官数据来自 Resources/CharacterParts（与网页制作工具共用）。
+/// 用游戏里同一个烘焙器（Resources/pixel-baker.js）现场合成人物：体型预设、发型、发色、五官、瞳色、上衣 / 护甲、肤色、武器，
+/// 右侧放大预览选中的动画（行走、战斗待机、四种攻击、格挡、受击、胜利、倒下），可以按方向看或自动转圈，下方是整张 sheet。
 struct PixelCharacterLab: View {
     var onClose: () -> Void
 
-    @State private var outfit = "traveler"
-    @State private var topVariant = ""
-    @State private var scarfVariant = ""
     @State private var hair = "hair_messy"
-    @State private var hairVariant = ""
+    @State private var hairColor = "chestnut"
     @State private var face = "face_round"
-    @State private var faceVariant = ""
+    @State private var eyes = "blue"
+    @State private var top = "top_traveler"
+    @State private var topVariant = "blue"
     @State private var skin = "fair"
-    @State private var weapon = ""
-    @State private var sheet: CGImage?
-    @State private var frames: [[CGImage]] = []
-    @State private var bakeMs = 0.0
-    @State private var message = ""
-    @State private var walking = true
-    @State private var turning = true
-    @State private var dir8 = 0
+    @State private var weapon = "weapon_training_sword"
+    @State private var animation = "ready"
+    @State private var dir8 = 2
+    @State private var turning = false
     @State private var tick = 0
+    @State private var sheet: CGImage?
+    @State private var bakeMs = 0.0
+    @State private var baking = false
+    @State private var bakedSignature = ""
 
-    private let catalog = CharacterCatalog.shared
+    private var info: PixelBaker.Info { PixelBaker.shared.info }
     private let timer = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
 
-    /// 八个方向 → (原生 sheet 的行, 是否水平镜像, 名称)
+    /// 8 个方向 → (sheet 的行, 是否镜像, 名称)。行顺序：S SE E NE N
     private static let dirs: [(row: Int, flip: Bool, name: String)] = [
         (0, false, "正面"), (1, false, "右前"), (2, false, "右侧"), (3, false, "右后"),
         (4, false, "背面"), (3, true, "左后"), (2, true, "左侧"), (1, true, "左前"),
     ]
+    private static let animations: [(String, String)] = [
+        ("idle", "普通待机"), ("walk", "行走"), ("ready", "战斗待机"), ("slash", "挥砍"), ("heavy", "重劈"),
+        ("shoot", "射箭"), ("cast", "施法"), ("guard", "格挡"), ("hurt", "受击"), ("victory", "胜利"), ("defeat", "倒下"),
+    ]
     private static let skins: [(String, String)] = [("fair", "白皙"), ("light", "浅"), ("tan", "小麦"), ("deep", "深")]
+    /// 游戏里的体型和预设旅人
+    private static let presets: [(String, PixelHeroLook)] = [
+        ("林地旅人", PixelHeroLook(body: "forester", weapon: "trainingSword")),
+        ("远行者", PixelHeroLook(body: "wayfarer", weapon: "legendaryStaff")),
+        ("红衣旅人", PixelHeroLook(body: "crimson", weapon: "greatSword")),
+        ("林间行者", PixelHeroLook(body: "grove", weapon: "huntingBow")),
+    ]
 
-    private var outfitDef: OutfitDef? { CharacterCatalog.outfits.first { $0.id == outfit } }
-
-    private func variants(of slot: Slot) -> [ItemVariant] {
-        guard let entry = outfitDef?.slots[slot], let id = entry, let item = catalog.item(id) else { return [] }
-        return item.variants
+    private func items(_ slot: String) -> [PixelBaker.Info.Item] { info.items[slot] ?? [] }
+    private func variants(_ slot: String, _ id: String) -> [(String, String)] {
+        (items(slot).first { $0.id == id }?.variants ?? []).map { ($0.id, $0.name) }
     }
 
-    private func variants(ofItem id: String) -> [ItemVariant] { catalog.item(id)?.variants ?? [] }
-
-    /// 所有会影响外观的选项拼成一个签名：任何一项变了就重新烘焙
-    private var signature: String {
-        [outfit, topVariant, scarfVariant, hair, hairVariant, face, faceVariant, skin, weapon].joined(separator: "|")
+    private var spec: [String: Any] {
+        var slots = ["hair": hair, "face": face, "top": top, "bottom": "bottom_trousers", "shoes": "shoes_boots"]
+        if !weapon.isEmpty { slots["weapon_main"] = weapon }
+        return ["slots": slots, "variants": ["hair": hairColor, "face": eyes, "top": topVariant, "bottom": "dark", "shoes": "brown"], "skin": skin]
     }
+    private var signature: String { [hair, hairColor, face, eyes, top, topVariant, skin, weapon].joined(separator: "|") }
 
     var body: some View {
         VStack(spacing: 0) {
             HStack {
                 Text("像素人物测试").font(.title2.bold())
-                Text("游戏内现场烘焙 · 每帧 \(SpriteRig.sprW)×\(SpriteRig.sprH)").foregroundStyle(.secondary)
+                Text("游戏内烘焙 · 每帧 \(info.sprW)×\(info.sprH) · 每方向 \(info.framesPerDir) 帧").foregroundStyle(.secondary)
                 Spacer()
                 Button("关闭", action: onClose).buttonStyle(.borderedProminent)
             }
@@ -70,7 +77,7 @@ struct PixelCharacterLab: View {
         .background(Color(white: 0.11))
         .foregroundStyle(.white)
         .preferredColorScheme(.dark)
-        .onAppear { apply(CharacterCatalog.characters[0]) }
+        .onAppear { rebake() }
         .onChange(of: signature) { _, _ in rebake() }
         .onReceive(timer) { _ in
             tick += 1
@@ -83,39 +90,27 @@ struct PixelCharacterLab: View {
     private var controls: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
-                section("角色预设") {
-                    HStack {
-                        ForEach(CharacterCatalog.characters, id: \.id) { p in
-                            Button(p.name) { apply(p) }.buttonStyle(.bordered)
-                        }
+                section("游戏里的旅人") {
+                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())]) {
+                        ForEach(Self.presets, id: \.0) { p in Button(p.0) { apply(p.1) }.buttonStyle(.bordered) }
                     }
                 }
-                section("衣服") {
-                    picker("套装", Binding(get: { outfit }, set: { outfit = $0; topVariant = ""; scarfVariant = "" }),
-                           CharacterCatalog.outfits.map { ($0.id, $0.name) })
-                    picker("上衣配色", $topVariant, [("", "套装默认")] + variants(of: .top).map { ($0.id, $0.name) })
-                    if !variants(of: .scarf).isEmpty {
-                        picker("围巾配色", $scarfVariant, [("", "套装默认")] + variants(of: .scarf).map { ($0.id, $0.name) })
-                    }
-                }
-                section("发型") {
-                    picker("发型", Binding(get: { hair }, set: { hair = $0; hairVariant = "" }),
-                           catalog.items(for: .hair).map { ($0.id, $0.name) })
-                    picker("发色", $hairVariant, [("", "默认")] + variants(ofItem: hair).map { ($0.id, $0.name) })
-                }
-                section("五官与肤色") {
-                    picker("五官", Binding(get: { face }, set: { face = $0; faceVariant = "" }),
-                           catalog.items(for: .face).map { ($0.id, $0.name) })
-                    picker("瞳色", $faceVariant, [("", "默认")] + variants(ofItem: face).map { ($0.id, $0.name) })
+                section("发型与五官") {
+                    picker("发型", $hair, items("hair").map { ($0.id, $0.name) })
+                    picker("发色", $hairColor, variants("hair", hair))
+                    picker("五官", $face, items("face").map { ($0.id, $0.name) })
+                    picker("瞳色", $eyes, [("", "默认")] + variants("face", face))
                     picker("肤色", $skin, Self.skins)
                 }
-                section("武器") {
-                    picker("主手", $weapon, [("", "空手")] + catalog.items(for: .weaponMain).map { ($0.id, $0.name) })
+                section("衣服与武器") {
+                    picker("上衣", Binding(get: { top }, set: { top = $0; topVariant = "" }), items("top").map { ($0.id, $0.name) })
+                    if !variants("top", top).isEmpty { picker("配色", $topVariant, [("", "默认")] + variants("top", top)) }
+                    picker("武器", $weapon, [("", "空手")] + items("weapon_main").map { ($0.id, $0.name) })
                 }
                 section("预览") {
-                    Toggle("行走（关闭为待机呼吸）", isOn: $walking)
+                    picker("动画", $animation, Self.animations)
                     Toggle("自动转向", isOn: $turning)
-                    HStack {
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4)) {
                         ForEach(0..<8, id: \.self) { i in
                             Button(Self.dirs[i].name) { turning = false; dir8 = i }
                                 .buttonStyle(.bordered).font(.caption2)
@@ -123,7 +118,8 @@ struct PixelCharacterLab: View {
                         }
                     }
                 }
-                Text(message).font(.footnote).foregroundStyle(.secondary)
+                Text(baking ? "烘焙中…" : "烘焙 \(String(format: "%.0f", bakeMs)) ms（第二次起读缓存）")
+                    .font(.footnote).foregroundStyle(.secondary)
             }
             .padding(16)
         }
@@ -138,7 +134,7 @@ struct PixelCharacterLab: View {
 
     private func picker(_ title: String, _ value: Binding<String>, _ options: [(String, String)]) -> some View {
         HStack {
-            Text(title).frame(width: 72, alignment: .leading).foregroundStyle(.secondary)
+            Text(title).frame(width: 56, alignment: .leading).foregroundStyle(.secondary)
             Picker(title, selection: value) {
                 ForEach(options, id: \.0) { Text($0.1).tag($0.0) }
             }
@@ -149,13 +145,19 @@ struct PixelCharacterLab: View {
 
     // MARK: 右侧预览
 
+    private var currentColumn: Int {
+        let frames = info.frames[animation] ?? [0]
+        // 战斗动作 4 帧一轮，待机 / 呼吸慢一点
+        let slow = ["idle", "ready", "guard", "hurt", "victory", "defeat"].contains(animation)
+        return frames[(slow ? tick / 5 : tick / 2) % frames.count]
+    }
+
     private var preview: some View {
         VStack(spacing: 16) {
             let d = Self.dirs[dir8]
-            let col = walking ? 2 + tick % 6 : (tick / 6) % 2
             ZStack {
                 RoundedRectangle(cornerRadius: 16).fill(Color(red: 0.36, green: 0.55, blue: 0.31))
-                if frames.count == 5, let image = frames[d.row].indices.contains(col) ? frames[d.row][col] : nil {
+                if let sheet, let image = sheet.cropping(to: CGRect(x: currentColumn * info.sprW, y: d.row * info.sprH, width: info.sprW, height: info.sprH)) {
                     Image(decorative: image, scale: 1)
                         .interpolation(.none)
                         .resizable()
@@ -167,18 +169,19 @@ struct PixelCharacterLab: View {
                 }
             }
             .frame(height: 400)
-            Text("\(d.name) · \(walking ? "行走" : "待机") 第 \(col) 列 · 烘焙 \(String(format: "%.0f", bakeMs)) ms")
+            Text("\(d.name) · \(Self.animations.first { $0.0 == animation }?.1 ?? animation) · 第 \(currentColumn) 列")
                 .font(.callout.monospacedDigit()).foregroundStyle(.secondary)
             if let sheet {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("原生 sheet：5 行（正面 / 右前 / 右侧 / 右后 / 背面）× 8 列（待机 0–1，行走 2–7）")
-                        .font(.caption).foregroundStyle(.secondary)
-                    Image(decorative: sheet, scale: 1)
-                        .interpolation(.none)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .background(Color(red: 0.36, green: 0.55, blue: 0.31))
-                        .frame(maxHeight: 220)
+                    Text("sheet：5 行（正面 / 右前 / 右侧 / 右后 / 背面）× \(info.framesPerDir) 列").font(.caption).foregroundStyle(.secondary)
+                    ScrollView(.horizontal) {
+                        Image(decorative: sheet, scale: 1)
+                            .interpolation(.none)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(height: 200)
+                            .background(Color(red: 0.36, green: 0.55, blue: 0.31))
+                    }
                 }
             }
             Spacer(minLength: 0)
@@ -188,50 +191,36 @@ struct PixelCharacterLab: View {
 
     // MARK: 烘焙
 
-    private func apply(_ p: CharacterPreset) {
-        let outfitVariants = CharacterCatalog.outfits.first { $0.id == p.outfit }?.variants ?? [:]
-        outfit = p.outfit
-        hair = p.hair
-        face = p.face
-        skin = p.skin ?? "fair"
-        weapon = p.weapon ?? ""
-        topVariant = p.variants[.top] ?? outfitVariants[.top] ?? ""
-        scarfVariant = p.variants[.scarf] ?? outfitVariants[.scarf] ?? ""
-        hairVariant = p.variants[.hair] ?? ""
-        faceVariant = p.variants[.face] ?? ""
-        message = "已载入预设：\(p.name)"
-        rebake()
+    private func apply(_ look: PixelHeroLook) {
+        let spec = look.spec
+        let slots = spec["slots"] as? [String: String] ?? [:]
+        let variants = spec["variants"] as? [String: String] ?? [:]
+        hair = slots["hair"] ?? hair
+        hairColor = variants["hair"] ?? ""
+        face = slots["face"] ?? face
+        eyes = variants["face"] ?? ""
+        top = slots["top"] ?? top
+        topVariant = variants["top"] ?? ""
+        skin = spec["skin"] as? String ?? "fair"
+        weapon = slots["weapon_main"] ?? ""
+        animation = "ready"
     }
 
     private func rebake() {
-        var p = CharacterPreset(id: "lab", name: "测试", outfit: outfit, hair: hair, face: face)
-        p.skin = skin
-        p.weapon = weapon.isEmpty ? nil : weapon
-        if !topVariant.isEmpty { p.variants[.top] = topVariant }
-        if !scarfVariant.isEmpty { p.variants[.scarf] = scarfVariant }
-        if !hairVariant.isEmpty { p.variants[.hair] = hairVariant }
-        if !faceVariant.isEmpty { p.variants[.face] = faceVariant }
-        do {
+        let spec = spec, signature = signature
+        let w = info.sprW, h = info.sprH, columns = info.framesPerDir
+        baking = true
+        DispatchQueue.global(qos: .userInitiated).async {
             let start = Date()
-            let eq = try catalog.equipment(for: p)
-            guard let image = SpriteBaker.sheet(eq) else {
-                message = "烘焙失败：无法生成图像"
-                return
-            }
-            bakeMs = Date().timeIntervalSince(start) * 1000
-            sheet = image
-            frames = Self.cut(image)
-        } catch {
-            message = "\(error)"
-        }
-    }
-
-    /// 原生 sheet → [行][列] 单帧
-    private static func cut(_ sheet: CGImage) -> [[CGImage]] {
-        let w = SpriteRig.sprW, h = SpriteRig.sprH
-        return (0..<5).map { r in
-            (0..<SpriteRig.framesPerDir).compactMap { c in
-                sheet.cropping(to: CGRect(x: c * w, y: r * h, width: w, height: h))
+            let bytes = PixelBaker.shared.bake(spec: spec, dirs: PixelBaker.shared.info.dirs, frames: Array(0..<columns))
+            let image = bytes.flatMap { PixelHeroAtlas.makeImage([UInt8]($0), width: w * columns, height: h * 5)?.cgImage }
+            let ms = Date().timeIntervalSince(start) * 1000
+            DispatchQueue.main.async {
+                guard signature == self.signature else { return }
+                sheet = image
+                bakeMs = ms
+                baking = false
+                bakedSignature = signature
             }
         }
     }

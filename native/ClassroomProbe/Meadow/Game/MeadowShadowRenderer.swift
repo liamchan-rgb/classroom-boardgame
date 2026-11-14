@@ -135,7 +135,7 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
         var art = images
         func assetImage(_ name: String) -> CGImage? {
             if let cached = art[name] { return cached }
-            let loaded = UIImage(named: name)?.cgImage; art[name] = loaded; return loaded
+            let loaded = (HeroFrames.isGenerated(name) ? HeroFrames.image(named: name) : UIImage(named: name))?.cgImage; art[name] = loaded; return loaded
         }
         for (index, prop) in props.enumerated() {
             guard let asset = ShadowLabAsset(rawValue: prop.asset), let image = assetImage(prop.asset) else { throw ShadowLabError.setup("未配置投影素材：\(prop.asset)") }
@@ -228,6 +228,10 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
     private func heroTexture(_ hero: MeadowHeroCaster) throws -> MTLTexture {
         let name = HeroFrames.atlasName(heroIndex: hero.index, diagonal: hero.facing >= 4,
                                        appearanceIndex: hero.appearanceIndex,weaponID:hero.weaponID,armorID:hero.armorID,hair:hero.hairID,face:hero.faceID)
+        if textures[name] == nil, HeroFrames.isGenerated(name), let image = HeroFrames.image(named: name)?.cgImage {
+            // 像素人物的图集按外观现烘：没预先上传的（比如没自定义外观的旅人换了武器）第一次用到时补传
+            textures[name] = try upload(image)
+        }
         guard let texture = textures[name] else { throw ShadowLabError.setup("人物投影图集未加载") }
         return texture
     }

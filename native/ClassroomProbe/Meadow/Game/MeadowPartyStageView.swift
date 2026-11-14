@@ -408,11 +408,11 @@ final class MeadowPartyStageView:UIView {
             name=spec.id == "ruinDragon" ? "projDragon":"projArcher";launch=0.24;charge=0
             from=PartyPoint(foot.x+(spec.id == "goblinArcher" ? -82:-143)*spec.scale,foot.y-(spec.id == "goblinArcher" ? 144:149)*spec.scale)
         } else if value.ranged {
-            let tip=BowRig.releaseArrowTip
+            let tip=PixelHeroAtlas.enabled ? PixelHeroAtlas.bowTip:BowRig.releaseArrowTip
             name="projBow";launch=BowRig.releaseAge;charge=0
             from=PartyPoint(foot.x+(tip.x-123)*PartyVisual.heroScale*PartyVisual.facing(value.actor),foot.y+(tip.y-214)*PartyVisual.heroScale)
         } else if value.magical {
-            let g=LegendaryStaffRig.gem(progress:LegendaryStaffRig.progress(age:LegendaryStaffRig.releaseAge))
+            let g=(PixelHeroAtlas.enabled ? PixelHeroAtlas.staffGem:LegendaryStaffRig.gem(progress:LegendaryStaffRig.progress(age:LegendaryStaffRig.releaseAge)))
             name="projStaff";launch=LegendaryStaffRig.releaseAge;charge=0.49
             from=PartyPoint(foot.x+(g.x-123)*PartyVisual.heroScale*PartyVisual.facing(value.actor),foot.y+(g.y-214)*PartyVisual.heroScale)
         } else { return }
@@ -523,6 +523,8 @@ final class MeadowPartyStageView:UIView {
         }
         onPresentationChanged?()
     }
+    /// p1…p7 → 0…6（没有自定义外观的旅人按这个轮流用三位预设）
+    static func playerSlot(_ id:String)->Int { max(0,(Int(id.drop { !$0.isNumber }) ?? 1)-1) }
     private func render() {
         guard let state else { return }
         let defeated=state.units.values.filter { $0.kind == .monster }
@@ -536,7 +538,8 @@ final class MeadowPartyStageView:UIView {
             guard i<trails.count,let intent,let actor=actors[intent.actor],let foot=PartyVisual.foot(intent.actor) else { ghost.isHidden=true;continue }
             let trail=trails[i],pose=MeadowBattleAnimation.sample(clip:"attack",progress:CGFloat(trail.progress)),s=PartyVisual.heroScale
             ghost.image=actor.trailImage(progress:CGFloat(trail.progress));ghost.alpha=trail.alpha;ghost.isHidden=false;ghost.layer.zPosition=foot.y-1
-            let r=CGRect(x:foot.x+trail.offset.x+(Double(pose.rootOffset.x)-123)*s,y:foot.y+trail.offset.y+(Double(pose.rootOffset.y)-214)*s,width:256*s,height:256*s)
+            let root=PixelHeroAtlas.enabled ? CGPoint.zero:pose.rootOffset
+            let r=CGRect(x:foot.x+trail.offset.x+(Double(root.x)-123)*s,y:foot.y+trail.offset.y+(Double(root.y)-214)*s,width:256*s,height:256*s)
             place(ghost,r,mirroredAbout:PartyVisual.facing(intent.actor)<0 ? CGFloat(foot.x+trail.offset.x):nil)
         }
         for id in renderIDs {
@@ -548,6 +551,15 @@ final class MeadowPartyStageView:UIView {
             liveFeet[id]=PartyPoint(Double(foot.x),Double(foot.y))
             if let actor=actors[id] {
                 let pose=PartyVisual.pose(unit:unit,intent:intent,age:age,time:sceneTime,hurtAge:hurt[id].map { sceneTime-$0 },blocked:shownVitals.shield>0 || (hurt[id] != nil && broken[id]==hurt[id]),downAge:fallen[id].map { sceneTime-$0 },victoryAge:victoryAt.map { sceneTime-$0 })
+                if PixelHeroAtlas.enabled {
+                    // 像素人物：外观按入队顺序和自定义外观定；出手帧对准命中 / 放箭 / 释放的时刻
+                    actor.pixelLookOverride=PixelHeroLook.battle(unit:unit,slot:Self.playerSlot(id))
+                    if let intent,intent.actor==id {
+                        let keyAge=intent.ranged ? BowRig.releaseAge:intent.magical ? LegendaryStaffRig.releaseAge:intent.action.impact
+                        actor.pixelKeyProgress=CGFloat(PartyVisual.pose(unit:unit,intent:intent,age:keyAge,time:sceneTime).progress)
+                        actor.pixelCasting=true
+                    } else { actor.pixelKeyProgress=nil;actor.pixelCasting=false }
+                }
                 actor.setWeaponAsset(HeroFrames.weaponVisual(unit.equipment.weapon)?.battleAsset)
                 let displayedArmor=unit.appearance != nil ? unit.appearance!.armor(worn:unit.equipment.armor):unit.equipment.armor
                 actor.setArmor(displayedArmor)
@@ -972,7 +984,7 @@ private final class MeadowPartyEffectsView:UIView {
                 if let image=UIImage(named:name) { sprite(image,PartyPoint(foot.x,foot.y-130-age*15),38,38,PartyVisual.pulse(age,0,0.25,0.85)) }
             }
             if !Self.proceduralBlows,intent.ranged,let foot=PartyVisual.foot(intent.actor) {
-                let tip=BowRig.releaseArrowTip
+                let tip=PixelHeroAtlas.enabled ? PixelHeroAtlas.bowTip:BowRig.releaseArrowTip
                 let from=PartyPoint(foot.x+(tip.x-123)*PartyVisual.heroScale*PartyVisual.facing(intent.actor),foot.y+(tip.y-214)*PartyVisual.heroScale)
                 let to=hitPoint(intent.target,shielded:meetsShield)
                 let projectile=intent.enemy ? MonsterVisualSpec.find(intent.monsterTemplateID)?.projectile(age:age,foot:foot,target:to):BowRig.projectile(age:age,from:from,to:to,impact:intent.action.impact,scale:PartyVisual.heroScale)
@@ -987,7 +999,8 @@ private final class MeadowPartyEffectsView:UIView {
                     ctx.move(to:CGPoint(x:a.x,y:a.y));ctx.addLine(to:CGPoint(x:b.x,y:b.y));ctx.strokePath();ctx.restoreGState()
                 }
             }
-            if intent.weaponID=="greatSword",!intent.enemy,visual=="attack",let from=PartyVisual.foot(intent.actor) {
+            // 像素人物的重剑自带挥砍拖影，不再叠旧美术的剑轨
+            if !PixelHeroAtlas.enabled,intent.weaponID=="greatSword",!intent.enemy,visual=="attack",let from=PartyVisual.foot(intent.actor) {
                 let points=GreatSwordRig.trail(age:age,from:from,to:hitPoint(intent.target,shielded:meetsShield,weaponID:intent.weaponID),scale:PartyVisual.heroScale)
                 if points.count>1 {
                     let power=PartyVisual.pulse(GreatSwordRig.artTime(age:age),0.86,1.0275,1.20)
@@ -1299,9 +1312,9 @@ extension MeadowPartyStageView {
             let from:PartyPoint
             switch id {
             case "projBow":
-                let tip=BowRig.releaseArrowTip;from=PartyPoint(aFoot.x+(tip.x-123)*PartyVisual.heroScale*PartyVisual.facing(actor),aFoot.y+(tip.y-214)*PartyVisual.heroScale)
+                let tip=PixelHeroAtlas.enabled ? PixelHeroAtlas.bowTip:BowRig.releaseArrowTip;from=PartyPoint(aFoot.x+(tip.x-123)*PartyVisual.heroScale*PartyVisual.facing(actor),aFoot.y+(tip.y-214)*PartyVisual.heroScale)
             case "projStaff":
-                let g=LegendaryStaffRig.gem(progress:LegendaryStaffRig.progress(age:LegendaryStaffRig.releaseAge));from=PartyPoint(aFoot.x+(g.x-123)*PartyVisual.heroScale*PartyVisual.facing(actor),aFoot.y+(g.y-214)*PartyVisual.heroScale)
+                let g=(PixelHeroAtlas.enabled ? PixelHeroAtlas.staffGem:LegendaryStaffRig.gem(progress:LegendaryStaffRig.progress(age:LegendaryStaffRig.releaseAge)));from=PartyPoint(aFoot.x+(g.x-123)*PartyVisual.heroScale*PartyVisual.facing(actor),aFoot.y+(g.y-214)*PartyVisual.heroScale)
             default:
                 let spec=MonsterVisualSpec.find(templateID),goblin=id == "projArcher",scale=spec?.scale ?? 0.88
                 from=PartyPoint(aFoot.x+(goblin ? -82:-143)*scale,aFoot.y-(goblin ? 144:149)*scale)

@@ -42,6 +42,10 @@ final class GameScene: SKScene {
     private var frames: [[[SKTexture]]] = []
     private var profileFrames:[String:[[SKTexture]]]=[:]
     private var profileLocomotion=Array(repeating:AuthoredLocomotion(plan:HeroFrames.locomotionPlan),count:7)
+    /// 任意一位旅人（不管有没有自定义外观）
+    private func campaignUnit(_ index:Int)->GameUnit? {
+        guard let campaign,campaign.playerIDs.indices.contains(index) else{return nil};return campaign.engine.state.units[campaign.playerIDs[index]]
+    }
     private func profileUnit(_ index:Int)->GameUnit? {
         guard let campaign,campaign.playerIDs.indices.contains(index),let unit=campaign.engine.state.units[campaign.playerIDs[index]],unit.appearance != nil else{return nil};return unit
     }
@@ -49,7 +53,15 @@ final class GameScene: SKScene {
         guard let campaign,world != nil else{return}
         var active=Set<String>()
         for (index,id) in campaign.playerIDs.enumerated() {
-            guard let unit=campaign.engine.state.units[id],let look=unit.appearance,frames.indices.contains(index) else{continue}
+            guard let unit=campaign.engine.state.units[id],frames.indices.contains(index) else{continue}
+            guard let look=unit.appearance else{
+                // 像素人物：没有自定义外观的旅人也按身上的武器、护甲画（用预设旅人的样子）
+                guard PixelHeroAtlas.enabled,id != "p1" else{continue}
+                let key="preset\(index%3)-\(unit.equipment.weapon ?? "none")-\(unit.equipment.armor ?? "none")";active.insert(key)
+                if profileFrames[key]==nil{profileFrames[key]=HeroFrames.load(index%3+1,weaponID:unit.equipment.weapon,armorID:unit.equipment.armor)}
+                frames[index]=profileFrames[key]!
+                continue
+            }
             let ai=HeroFrames.appearanceIDs.firstIndex(of:look.body) ?? 0,armor=look.armor(worn:unit.equipment.armor)
             let key="\(look.visualKey)-\(unit.equipment.weapon ?? "none")-\(armor ?? "none")";active.insert(key)
             if profileFrames[key]==nil{profileFrames[key]=HeroFrames.load(1,appearanceIndex:ai,weaponID:unit.equipment.weapon,armorID:armor,hair:look.hair,face:look.face)}
@@ -533,8 +545,10 @@ final class GameScene: SKScene {
         let heroes = heroIndices.map { index -> MeadowHeroCaster in
             let pose = actorPose(index)
             let u=profileUnit(index),look=u?.appearance
+            // 像素人物：没有自定义外观的旅人投影也要带上身上的武器、护甲（和地图上画的一致）
+            let worn=PixelHeroAtlas.enabled && u == nil ? campaignUnit(index):nil
             return MeadowHeroCaster(index: layeredPreview || look != nil ? 0 : index%3, foot: actorPoint(index), facing: pose.facing,
-                                    frame: pose.frame, phase: pose.phase, hairID:look?.hair,faceID:look?.face,appearanceIndex: look.flatMap{HeroFrames.appearanceIDs.firstIndex(of:$0.body)} ?? (index == 0 ? p1AppearanceIndex : 0),weaponID:u != nil ? u!.equipment.weapon:(index == 0 ? p1WeaponID:"trainingSword"),armorID:look != nil ? look!.armor(worn:u?.equipment.armor):(index == 0 ? p1ArmorID:nil),
+                                    frame: pose.frame, phase: pose.phase, hairID:look?.hair,faceID:look?.face,appearanceIndex: look.flatMap{HeroFrames.appearanceIDs.firstIndex(of:$0.body)} ?? (index == 0 ? p1AppearanceIndex : 0),weaponID:u != nil ? u!.equipment.weapon:(worn != nil ? worn!.equipment.weapon:(index == 0 ? p1WeaponID:"trainingSword")),armorID:look != nil ? look!.armor(worn:u?.equipment.armor):(worn != nil ? worn!.equipment.armor:(index == 0 ? p1ArmorID:nil)),
                                     breath: index < actors.count ? actors[index].yScale : 1)
         }
         return MeadowFrameState(world: world, camera: MeadowViewport(world: world, scene: self, viewSize: viewSize), time: environmentTime, heroes: heroes, includeEnvironment: gaitTest == nil)

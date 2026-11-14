@@ -232,6 +232,7 @@ final class MeadowBattleActorView: UIView {
     func setHead(hair:String?,face:String?) {
         guard hair != hairID || face != faceID else{return}
         hairID=hair;faceID=face;silhouetteCache.removeAllObjects();applyPose(currentPose)
+        refreshPixelSprite()
     }
     private func headPose(_ name:String,pose:MeadowBattlePoseSample,rig:BowRigSample?)->MeadowBattleLayerPose? {
         if customHead(name) != nil,let torso=rig?.parts["torso"] {
@@ -249,10 +250,93 @@ final class MeadowBattleActorView: UIView {
     let silhouette: UIImage?
     private(set) var currentPose = MeadowBattleAnimation.sample(clip: "idle", progress: 0)
     private let silhouetteCache = NSCache<NSString, UIImage>()
-    var poseRootOffset: CGPoint { currentPose.rootOffset }
-    var poseFootAnchorPx: CGPoint { currentPose.footAnchorPx }
-    var poseContacts: [CGPoint] { currentPose.contacts }
-    var poseSilhouette: UIImage { silhouette(for: currentPose) }
+    var poseRootOffset: CGPoint { pixelActive ? .zero:currentPose.rootOffset }
+    var poseFootAnchorPx: CGPoint { pixelActive ? PixelHeroAtlas.battleFoot:currentPose.footAnchorPx }
+    var poseContacts: [CGPoint] { pixelActive ? (pixelFrame?.contacts ?? []):currentPose.contacts }
+    var poseSilhouette: UIImage { pixelActive ? (pixelFrame?.canvas ?? UIImage()):silhouette(for: currentPose) }
+
+    // MARK: 像素人物
+    //
+    // 和地图一样换成像素人物（Resources/pixel-baker.js 现场烘焙）。整个人物是一张图，按动画名和进度选帧：
+    //   idle → 战斗待机呼吸；attack → 武器自己的攻击（挥砍 / 重劈 / 射箭 / 施法）；
+    //   guard → 自己放技能时是施法，被打时是格挡；hit → 受击；victory → 胜利；defeat → 倒下。
+    // 攻击、施法的出手帧对准 pixelKeyProgress（战斗场景按命中 / 放箭 / 释放的时刻算好传进来）。
+
+    private let pixelView = UIImageView()
+    /// 战斗场景直接指定外观（体型、护甲、武器、发型、五官）；不指定时按 setWeaponAsset / setArmor / setHead 推出来
+    var pixelLookOverride: PixelHeroLook? { didSet { if pixelLookOverride != oldValue { refreshPixelSprite() } } }
+    /// 攻击 / 施法的出手帧落在哪个进度上
+    var pixelKeyProgress: CGFloat?
+    /// guard 动画是不是自己在施法（否则是被打时的格挡）
+    var pixelCasting = false
+    private var pixelSprite: PixelHeroAtlas.BattleSprite?
+    private var pixelFrame: PixelHeroAtlas.BattleSprite.Frame?
+    private var pixelActive: Bool { pixelSprite != nil }
+
+    private var derivedPixelLook: PixelHeroLook? {
+        guard PixelHeroAtlas.enabled else { return nil }
+        if let pixelLookOverride { return pixelLookOverride }
+        let body = hairID == "hair-silver" || faceID == "face-amber" ? "wayfarer":"forester"
+        return PixelHeroLook(body: body, armor: armorID, weapon: HeroFrames.weaponID(forBattleAsset: weaponAsset),
+                             hair: hairID.flatMap { PixelHeroLook.hairStyles[$0] != nil ? $0:nil },
+                             face: faceID.flatMap { PixelHeroLook.eyeColors[$0] != nil ? $0:nil })
+    }
+
+    private func refreshPixelSprite() {
+        let look = derivedPixelLook
+        if look?.key != pixelSprite?.look.key { pixelSprite = look.flatMap { PixelHeroAtlas.battle($0) } }
+        updatePixelFrame()
+    }
+
+    private func updatePixelFrame() {
+        guard pixelActive else { pixelView.isHidden = true; return }
+        pixelFrame = pixelFrameFor(clip: currentPose.clip, progress: currentPose.progress)
+        pixelView.image = pixelFrame?.tall
+        pixelView.isHidden = false
+        images.forEach { $0.isHidden = true }
+        bowSurfaces.values.forEach { $0.isHidden = true }
+        bowGeometry.isHidden = true
+    }
+
+    private func pixelFrameFor(clip: String, progress raw: CGFloat) -> PixelHeroAtlas.BattleSprite.Frame? {
+        guard let sprite = pixelSprite else { return nil }
+        let p = min(1, max(0, raw))
+        func pick(_ name: String, _ i: Int) -> PixelHeroAtlas.BattleSprite.Frame? {
+            guard let list = sprite.frames[name], !list.isEmpty else { return nil }
+            return list[min(list.count - 1, max(0, i))]
+        }
+        // 战斗待机：2.4 秒一轮，呼吸 4 次
+        let ready = pick("ready", Int(p * 4) % 2)
+        /// 4 帧的动作：出手帧之前的帧均分在出手前 0.3 的进度里，出手帧停一小会，之后的帧收势，再回到战斗待机
+        func action(_ name: String, key: CGFloat) -> PixelHeroAtlas.BattleSprite.Frame? {
+            guard let list = sprite.frames[name], list.count == 4 else { return ready }
+            let impact = ["slash": 1, "heavy": 2, "shoot": 2, "cast": 2][name] ?? 2
+            let start = max(0, key - 0.3), hold = min(1, key + 0.08), end = min(1, key + 0.34)
+            if p < start { return ready }
+            if p < key {
+                let f = key - start > 0.001 ? (p - start) / (key - start) : 1
+                return list[min(impact - 1, max(0, Int(f * CGFloat(impact))))]
+            }
+            if p < hold { return list[impact] }
+            if p < end {
+                let rest = 3 - impact
+                if rest <= 0 { return list[3] }
+                let f = end - hold > 0.001 ? (p - hold) / (end - hold) : 1
+                return list[min(3, impact + 1 + Int(f * CGFloat(rest)))]
+            }
+            return ready
+        }
+        switch clip {
+        case "attack": return action(sprite.attack, key: pixelKeyProgress ?? 0.54)
+        case "guard":
+            if pixelCasting { return action("cast", key: pixelKeyProgress ?? 0.4) }
+            return pick("guard", p < 0.3 || p > 0.8 ? 0 : 1)
+        case "hit": return p < 0.85 ? pick("hurt", p < 0.35 ? 0 : 1) : ready
+        case "victory": return p < 0.12 ? ready : pick("victory", p < 0.55 ? 0 : 1)
+        case "defeat": return pick("defeat", p < 0.45 ? 0 : 1)
+        default: return ready
+        }
+    }
 
     override init(frame: CGRect) {
         let configuration = MeadowBattleActorConfiguration.load()
@@ -284,6 +368,13 @@ final class MeadowBattleActorView: UIView {
             let view=MeadowBowSurfaceView(frame:.zero);view.group=group;bowSurfaces[group]=view;addSubview(view);view.isHidden=true
         }
         addSubview(bowGeometry);bowGeometry.isHidden=true
+        pixelView.layer.magnificationFilter = .nearest
+        pixelView.layer.minificationFilter = .nearest
+        pixelView.contentMode = .scaleToFill
+        pixelView.isHidden = true
+        pixelView.layer.zPosition = 10_000
+        addSubview(pixelView)
+        refreshPixelSprite()
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
@@ -296,6 +387,9 @@ final class MeadowBattleActorView: UIView {
             $0.layer.position = bounds.origin
         }
         bowGeometry.frame=bounds
+        // 像素人物的高画布：比 256 画布往上多 headroom，举过头顶的武器不会被裁掉
+        let sx = bounds.width / 256, sy = bounds.height / 256
+        pixelView.frame = CGRect(x: 0, y: -CGFloat(PixelHeroAtlas.battleHeadroom) * sy, width: 256 * sx, height: CGFloat(256 + PixelHeroAtlas.battleHeadroom) * sy)
         applyPose(currentPose)
     }
 
@@ -305,6 +399,7 @@ final class MeadowBattleActorView: UIView {
         let pose = bodyPose(clip:clip,progress:progress)
         currentPose = pose
         applyPose(pose)
+        updatePixelFrame()
     }
     private func bodyPose(clip:String,progress:CGFloat)->MeadowBattlePoseSample {
         if isGreatSword || isStaff {
@@ -329,14 +424,17 @@ final class MeadowBattleActorView: UIView {
     func setWeaponAsset(_ asset:String?) {
         guard asset != weaponAsset else { return };weaponAsset=asset;silhouetteCache.removeAllObjects()
         if let i=layerNames.firstIndex(of:"MeadowBattleHeroWeapon") { images[i].image=asset.flatMap { UIImage(named:$0) };images[i].isHidden=asset==nil };currentPose=bodyPose(clip:currentPose.clip,progress:currentPose.progress);applyPose(currentPose)
+        refreshPixelSprite()
     }
     func setArmor(_ id:String?) {
         guard id != armorID else { return };armorID=id;silhouetteCache.removeAllObjects()
         for (index,name) in layerNames.enumerated() { images[index].image=sourceAsset(name).flatMap { UIImage(named:$0) } }
         applyPose(currentPose)
+        refreshPixelSprite()
     }
     func trailImage(progress:CGFloat)->UIImage {
-        silhouette(for:MeadowBattleAnimation.sample(clip:"attack",progress:progress))
+        if pixelActive { return pixelFrameFor(clip:"attack",progress:progress)?.canvas ?? UIImage() }
+        return silhouette(for:MeadowBattleAnimation.sample(clip:"attack",progress:progress))
     }
 
     /// Keep the original lower body here; the original head is painted once
@@ -389,6 +487,8 @@ final class MeadowBattleActorView: UIView {
         return name
     }
     private func applyPose(_ rawPose: MeadowBattlePoseSample) {
+        // 像素人物：旧的分层人物全部藏起来，只显示一张图
+        if pixelActive { updatePixelFrame();return }
         let pose=resolvedPose(rawPose)
         let rig=isBow ? bowSample(rawPose):nil
         let surfaceDepth=Dictionary(uniqueKeysWithValues:orderedLayerNames(for:pose.clip).enumerated().map { ($0.element,CGFloat($0.offset)) })

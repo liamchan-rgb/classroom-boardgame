@@ -748,11 +748,17 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     private var profileVisualSignature=""
     private func prepareProfileVisuals()throws {
         guard let campaign else{return}
-        let units=campaign.engine.state.players.filter{$0.id=="p1" || $0.appearance != nil}
+        // 像素人物：每位旅人的武器、护甲都画在身上，所以所有人的装备变化都要刷新
+        let units=campaign.engine.state.players.filter{$0.id=="p1" || $0.appearance != nil || PixelHeroAtlas.enabled}
         let signature=units.map{u in "\(u.id)-\((u.appearance?.body ?? campaign.snapshot.appearanceID))-\(u.appearance?.outfit ?? "follow")-\(u.appearance?.hair ?? "original")-\(u.appearance?.face ?? "original")-\(u.equipment.weapon ?? "none")-\(u.equipment.armor ?? "none")"}.joined(separator:"|")
         guard signature != profileVisualSignature else{return}
         var names=Set<String>()
         for u in units {
+            if PixelHeroAtlas.enabled,u.id != "p1",u.appearance == nil {
+                let slot=(campaign.playerIDs.firstIndex(of:u.id) ?? 0)%3
+                for diagonal in [false,true]{names.insert(HeroFrames.atlasName(heroIndex:slot,diagonal:diagonal,weaponID:u.equipment.weapon,armorID:u.equipment.armor))}
+                continue
+            }
             let a=u.appearance ?? PlayerAppearance(body:campaign.snapshot.appearanceID),index=HeroFrames.appearanceIDs.firstIndex(of:a.body) ?? 0,armor=a.armor(worn:u.equipment.armor)
             try groundRenderer?.prepareP1Equipment(appearance:index,weapon:u.equipment.weapon,armor:armor,retainingCurrent:true,hair:a.hair,face:a.face)
             for diagonal in [false,true]{names.insert(HeroFrames.atlasName(heroIndex:0,diagonal:diagonal,appearanceIndex:index,weaponID:u.equipment.weapon,armorID:armor,hair:a.hair,face:a.face))}

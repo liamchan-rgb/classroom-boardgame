@@ -716,95 +716,25 @@
 			"isa" = "PBXBuildFile";
 			"fileRef" = "68721AB0B096F524A9B42608";
 		};
-		"53DF5829C4631E32A6F5BB9C" = {
+		"A9F83BB89F6D773BC41AACC2" = {
 			"isa" = "PBXFileReference";
 			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "PixelCharacters/BodyItem.swift";
+			"path" = "PixelCharacters/PixelBaker.swift";
 			"sourceTree" = "<group>";
 		};
-		"B6BCBE6F13474F97D2AF7A81" = {
+		"A5289BBC25A2281854936615" = {
 			"isa" = "PBXBuildFile";
-			"fileRef" = "53DF5829C4631E32A6F5BB9C";
+			"fileRef" = "A9F83BB89F6D773BC41AACC2";
 		};
-		"39C32823B8DD3A617CC3B50B" = {
+		"229E2AB1262C1A437061BCED" = {
 			"isa" = "PBXFileReference";
 			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "PixelCharacters/CharacterCatalog.swift";
+			"path" = "PixelCharacters/PixelHero.swift";
 			"sourceTree" = "<group>";
 		};
-		"474ED66EDDCC2033E6302652" = {
+		"713B10068A60737284B0F1C2" = {
 			"isa" = "PBXBuildFile";
-			"fileRef" = "39C32823B8DD3A617CC3B50B";
-		};
-		"A1317B9B055F26D5B7D19BE8" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "PixelCharacters/CharacterRig.swift";
-			"sourceTree" = "<group>";
-		};
-		"D333ABB1DFA6DC67802AF387" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "A1317B9B055F26D5B7D19BE8";
-		};
-		"ECEE6527C58BB32CFCD4446E" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "PixelCharacters/CharacterTypes.swift";
-			"sourceTree" = "<group>";
-		};
-		"C9C8673DA1F714E70AF48AE0" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "ECEE6527C58BB32CFCD4446E";
-		};
-		"B63F5D15296E1E20173A8AD1" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "PixelCharacters/ClothingItems.swift";
-			"sourceTree" = "<group>";
-		};
-		"FC175B0FB06E1E219F0E87F0" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "B63F5D15296E1E20173A8AD1";
-		};
-		"39FD98325E8E86071DB5039A" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "PixelCharacters/FaceKit.swift";
-			"sourceTree" = "<group>";
-		};
-		"6286BADD625F40A171723FCF" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "39FD98325E8E86071DB5039A";
-		};
-		"5655544156B20384A0ADEED3" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "PixelCharacters/HairKit.swift";
-			"sourceTree" = "<group>";
-		};
-		"885C6899B71C323CF86CA6DE" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "5655544156B20384A0ADEED3";
-		};
-		"368A88BA2CFEB68E9F19E2E3" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "PixelCharacters/ItemHelpers.swift";
-			"sourceTree" = "<group>";
-		};
-		"7836A263385985580D42F2BD" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "368A88BA2CFEB68E9F19E2E3";
-		};
-		"B2557F3CDDE90B5D930CC1D7" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "PixelCharacters/Paperdoll.swift";
-			"sourceTree" = "<group>";
-		};
-		"E47F29854CF683AA79AB4E9E" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "B2557F3CDDE90B5D930CC1D7";
+			"fileRef" = "229E2AB1262C1A437061BCED";
 		};
 		"6DD4E146027F79C47AD9F73B" = {
 			"isa" = "PBXFileReference";
@@ -815,56 +745,6 @@
 		"3A7E0C23D4F572D16101B196" = {
 			"isa" = "PBXBuildFile";
 			"fileRef" = "6DD4E146027F79C47AD9F73B";
-		};
-		"7184FA6EE49605EF3EFAF716" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "PixelCharacters/PixelLayer.swift";
-			"sourceTree" = "<group>";
-		};
-		"C19E3FF30C008BDD458B065D" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "7184FA6EE49605EF3EFAF716";
-		};
-		"54B5BC6D6DF92AAEBC578430" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "PixelCharacters/SpriteBaker.swift";
-			"sourceTree" = "<group>";
-		};
-		"21558A8AE80789F03C742BA3" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "54B5BC6D6DF92AAEBC578430";
-		};
-		"B9800718E4EF263BF3397B09" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "PixelCharacters/SpriteBrush.swift";
-			"sourceTree" = "<group>";
-		};
-		"5B999E6A11680C7D43ECBD7A" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "B9800718E4EF263BF3397B09";
-		};
-		"CF518F5B888867B87DFEFD01" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "PixelCharacters/SpritePalette.swift";
-			"sourceTree" = "<group>";
-		};
-		"F5F5D616B6F7E4C321B6D669" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "CF518F5B888867B87DFEFD01";
-		};
-		"2254F4D7A646D99A6C0A7A00" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "PixelCharacters/WeaponItems.swift";
-			"sourceTree" = "<group>";
-		};
-		"B0E7B3EF4F3F326A871D8D32" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "2254F4D7A646D99A6C0A7A00";
 		};
 		"06271BAF49532C879AA3C58B" = {
 			"isa" = "PBXFileReference";
@@ -952,15 +832,15 @@
 			"isa" = "PBXBuildFile";
 			"fileRef" = "2C8922DAD5AD5F24E658760C";
 		};
-		"E18DEB55A90A2676591D5831" = {
+		"B872A696869DC1CD56AC8201" = {
 			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "folder";
-			"path" = "Resources/CharacterParts";
+			"lastKnownFileType" = "sourcecode.javascript";
+			"path" = "Resources/pixel-baker.js";
 			"sourceTree" = "<group>";
 		};
-		"BDB1D46966050397EF669E41" = {
+		"3FED87BEB22E65656D2AA29D" = {
 			"isa" = "PBXBuildFile";
-			"fileRef" = "E18DEB55A90A2676591D5831";
+			"fileRef" = "B872A696869DC1CD56AC8201";
 		};
 		"A8792157CB4F27FB949C035F" = {
 			"isa" = "PBXFileReference";
@@ -1043,21 +923,9 @@
 				"88898945DDBE4E9C4F72BD72",
 				"B1A3FE4A8FE761A756D23B4A",
 				"68721AB0B096F524A9B42608",
-				"53DF5829C4631E32A6F5BB9C",
-				"39C32823B8DD3A617CC3B50B",
-				"A1317B9B055F26D5B7D19BE8",
-				"ECEE6527C58BB32CFCD4446E",
-				"B63F5D15296E1E20173A8AD1",
-				"39FD98325E8E86071DB5039A",
-				"5655544156B20384A0ADEED3",
-				"368A88BA2CFEB68E9F19E2E3",
-				"B2557F3CDDE90B5D930CC1D7",
+				"A9F83BB89F6D773BC41AACC2",
+				"229E2AB1262C1A437061BCED",
 				"6DD4E146027F79C47AD9F73B",
-				"7184FA6EE49605EF3EFAF716",
-				"54B5BC6D6DF92AAEBC578430",
-				"B9800718E4EF263BF3397B09",
-				"CF518F5B888867B87DFEFD01",
-				"2254F4D7A646D99A6C0A7A00",
 				"06271BAF49532C879AA3C58B",
 				"6BFC76380CC79F82566884C6",
 				"2BF35B3FB72A3D4E876979D6",
@@ -1067,7 +935,7 @@
 				"38CE2342CBED6F5FFC3EDE78",
 				"BFC771FDC23F45EB511A5ECB",
 				"2C8922DAD5AD5F24E658760C",
-				"E18DEB55A90A2676591D5831",
+				"B872A696869DC1CD56AC8201",
 			);
 			"path" = "ClassroomProbe";
 			"sourceTree" = "<group>";
@@ -1216,21 +1084,9 @@
 				"04F6271CE9DA276B39728CAE",
 				"3D37AAC1141D10B6E3121AE3",
 				"0D99D4DB6ACD79E97AF4824E",
-				"B6BCBE6F13474F97D2AF7A81",
-				"474ED66EDDCC2033E6302652",
-				"D333ABB1DFA6DC67802AF387",
-				"C9C8673DA1F714E70AF48AE0",
-				"FC175B0FB06E1E219F0E87F0",
-				"6286BADD625F40A171723FCF",
-				"885C6899B71C323CF86CA6DE",
-				"7836A263385985580D42F2BD",
-				"E47F29854CF683AA79AB4E9E",
+				"A5289BBC25A2281854936615",
+				"713B10068A60737284B0F1C2",
 				"3A7E0C23D4F572D16101B196",
-				"C19E3FF30C008BDD458B065D",
-				"21558A8AE80789F03C742BA3",
-				"5B999E6A11680C7D43ECBD7A",
-				"F5F5D616B6F7E4C321B6D669",
-				"B0E7B3EF4F3F326A871D8D32",
 			);
 			"runOnlyForDeploymentPostprocessing" = "0";
 		};
@@ -1246,7 +1102,7 @@
 				"E78356E3A2C5B9015FD0080B",
 				"134918B81117951BF313F0AD",
 				"3A9772C84904171226FAEA67",
-				"BDB1D46966050397EF669E41",
+				"3FED87BEB22E65656D2AA29D",
 			);
 			"runOnlyForDeploymentPostprocessing" = "0";
 		};
@@ -1299,8 +1155,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				"CURRENT_PROJECT_VERSION" = "31";
-				"MARKETING_VERSION" = "0.24.0";
+				"CURRENT_PROJECT_VERSION" = "32";
+				"MARKETING_VERSION" = "0.25.0";
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 			};
 		};
@@ -1340,8 +1196,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				"CURRENT_PROJECT_VERSION" = "31";
-				"MARKETING_VERSION" = "0.24.0";
+				"CURRENT_PROJECT_VERSION" = "32";
+				"MARKETING_VERSION" = "0.25.0";
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 			};
 		};
