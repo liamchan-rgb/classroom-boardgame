@@ -74,7 +74,7 @@ private struct ClassTimerBadge:View {
     var body:some View {
         TimelineView(.periodic(from:.now,by:timer.running ? 0.1:3600)){context in
             let left=timer.remaining(at:context.date),done=left<=0.05
-            let urgent=!done && left<=3.05
+            let urgent = !done && left<=3.05
             let pulse=done ? (Int(context.date.timeIntervalSinceReferenceDate*2)%2==0 ? 1.0:0.55):1.0
             HStack(spacing:12*unit){
                 Image(systemName:done ? "bell.fill":(timer.running ? "timer":"pause.fill")).font(.system(size:34*unit,weight:.bold))
