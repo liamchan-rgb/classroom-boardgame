@@ -210,22 +210,20 @@ final class MeadowCampaignInventoryViewController:UIViewController {
     var onChange:(()->Void)?,onClose:(()->Void)?
     var onActorChanged:((String)->Void)?
     private var actor:String,target:String,selected:String?,filter="all"
-    private let header=UIView(),left=UIScrollView(),middle=UIView(),right=UIView()
-    private let titleLabel=MeadowPreviewPalette.label("行程行囊",size:24,weight:.heavy)
-    private let saveLabel=MeadowPreviewPalette.label("随操作自动保存到当前行程",size:14)
+    // Layout: a slim header; left = who (portrait, vitals, chips, worn gear); middle = item grid; right = the chosen item.
+    private let header=UIView(),left=UIView(),middle=UIView(),right=UIView()
+    private let titleLabel=UILabel(),saveLabel=MeadowPreviewPalette.label("",size:14)
     private let members=UISegmentedControl()
-    private let close=MeadowPreviewPalette.button("返回行程")
-    private let refillActions=MeadowPreviewPalette.button("手动整备")
+    private let close=MeadowPreviewPalette.iconButton("xmark")
+    private let refillActions=MeadowPreviewPalette.iconButton("bolt.fill","整备")
     private let hero=UIImageView(),health=MeadowBattleResourceBar(),ap=MeadowBattleActionPointsView()
-    private let stats=MeadowPreviewPalette.label("",size:16)
-    private let slots=ItemSlot.allCases.map{_ in MeadowPreviewPalette.button("")}
-    private let filterButton=MeadowPreviewPalette.button("全部物品 ▾"),list=UIScrollView()
+    private let chips=UILabel()
+    private let slots=ItemSlot.allCases.map{_ in UIButton(type:.system)}
+    private let filterBar=UISegmentedControl(),list=UIScrollView()
     private let detailContent=UIView()
     private let detail=UIScrollView(),primary=MeadowPreviewPalette.button("使用")
-    private let footer=MeadowPreviewPalette.label("手动整备补足各成员基础行动 · 用药和救援消耗使用者的行动与个人物品",size:14)
     private var rows:[UIButton]=[]
-    private let filters=[("all","全部物品"),("weapon","武器"),("armor","护甲"),("accessory","饰品"),("supplies","补给")]
-    private let visualEquipment:Set<String>=["trainingSword","huntingBow","greatSword","legendaryStaff","leatherArmor","runeArmor","powerBadge","actionRing"]
+    private let filters:[(String,String)]=[("all","square.grid.2x2.fill"),("weapon","bolt.horizontal.fill"),("armor","shield.lefthalf.filled"),("accessory","sparkle"),("supplies","cross.vial.fill")]
     init(session:MeadowCampaignSession,actor:String) {
         self.session=session;self.actor=session.playerIDs.contains(actor) ? actor:"p1";target=self.actor
         super.init(nibName:nil,bundle:nil);modalPresentationStyle = .fullScreen;isModalInPresentation=true
@@ -236,117 +234,175 @@ final class MeadowCampaignInventoryViewController:UIViewController {
     override func viewDidLoad(){
         super.viewDidLoad();view.backgroundColor=UIColor(red:0.045,green:0.085,blue:0.058,alpha:1);MeadowGlassBackdrop.install(in:view)
         [header,left,middle,right].forEach{MeadowPreviewPalette.stylePanel($0,liveBlur:true);view.addSubview($0)}
-        [titleLabel,saveLabel,members,close].forEach(header.addSubview);view.addSubview(footer)
-        [refillActions,hero,health,ap,stats].forEach(left.addSubview);hero.contentMode = .scaleAspectFit;hero.layer.magnificationFilter = .nearest
-        refillActions.accessibilityIdentifier="campaignRefillInventoryActions"
-        refillActions.accessibilityLabel="手动补足各成员基础行动"
+        titleLabel.attributedText=MeadowGlassText.iconLine("bag.fill","行囊",size:24,tint:MeadowPreviewPalette.gold,weight:.heavy)
+        saveLabel.textColor=MeadowPreviewPalette.gold;saveLabel.alpha=0
+        [titleLabel,saveLabel,members,refillActions,close].forEach(header.addSubview)
+        [hero,health,ap,chips].forEach(left.addSubview);hero.contentMode = .scaleAspectFit;hero.layer.magnificationFilter = .nearest
+        chips.numberOfLines=2
+        refillActions.accessibilityIdentifier="campaignRefillInventoryActions";refillActions.accessibilityLabel="手动补足各成员基础行动"
         refillActions.addAction(UIAction{[weak self] _ in
             guard let self else{return}
-            do{try self.session.refillInventoryActions();self.saveLabel.text="各成员已按自身基础行动补足";self.onChange?();self.refresh()}
-            catch{self.refresh();let alert=UIAlertController(title:"整备未完成",message:error.localizedDescription,preferredStyle:.alert);alert.addAction(UIAlertAction(title:"知道了",style:.default));self.present(alert,animated:true)}
+            do{try self.session.refillInventoryActions();self.flash("行动已补足");self.onChange?();self.refresh()}
+            catch{self.refresh();let alert=UIAlertController(title:"整备未完成",message:error.localizedDescription,preferredStyle:.alert);alert.addAction(UIAlertAction(title:"好",style:.default));self.present(alert,animated:true)}
         },for:.touchUpInside)
-        stats.numberOfLines=0;footer.numberOfLines=2
-        left.alwaysBounceVertical=true;list.alwaysBounceVertical=true;detail.alwaysBounceVertical=true
-        middle.addSubview(filterButton);middle.addSubview(list);right.addSubview(detail);detail.addSubview(detailContent);right.addSubview(primary)
+        list.alwaysBounceVertical=true;detail.alwaysBounceVertical=true
+        middle.addSubview(filterBar);middle.addSubview(list);right.addSubview(detail);detail.addSubview(detailContent);right.addSubview(primary)
         close.addAction(UIAction{[weak self] _ in self?.dismiss(animated:true){self?.onClose?()}},for:.touchUpInside)
-        for (i,id) in session.playerIDs.enumerated(){members.insertSegment(withTitle:(session.engine.state.units[id]?.shortName ?? id.uppercased())+" 行囊",at:i,animated:false)}
-        for state in [UIControl.State.normal,.selected] {members.setTitleTextAttributes([.font:MeadowPreviewPalette.font(16),.foregroundColor:MeadowPreviewPalette.ink],for:state)}
-        members.selectedSegmentTintColor=UIColor(red:0.40,green:0.35,blue:0.19,alpha:1)
+        for (i,id) in session.playerIDs.enumerated(){members.insertSegment(withTitle:session.engine.state.units[id]?.shortName ?? id.uppercased(),at:i,animated:false)}
+        for control in [members,filterBar] {
+            for state in [UIControl.State.normal,.selected] {control.setTitleTextAttributes([.font:MeadowPreviewPalette.font(16,.semibold),.foregroundColor:MeadowPreviewPalette.ink],for:state)}
+            control.selectedSegmentTintColor=UIColor(red:0.55,green:0.44,blue:0.18,alpha:1)
+        }
         members.addAction(UIAction{[weak self] _ in
             guard let self else{return};self.actor=self.session.playerIDs[max(0,self.members.selectedSegmentIndex)];self.target=self.actor;self.selected=nil;self.filter="all";self.onActorChanged?(self.actor);self.refresh()
         },for:.valueChanged)
+        for (i,(_,symbol)) in filters.enumerated(){filterBar.insertSegment(with:UIImage(systemName:symbol),at:i,animated:false)}
+        filterBar.selectedSegmentTintColor=UIColor(red:0.55,green:0.44,blue:0.18,alpha:1);filterBar.selectedSegmentIndex=0
+        filterBar.addAction(UIAction{[weak self] _ in guard let self else{return};self.filter=self.filters[max(0,self.filterBar.selectedSegmentIndex)].0;self.selected=nil;self.refresh()},for:.valueChanged)
         for (i,slot) in ItemSlot.allCases.enumerated(){
-            left.addSubview(slots[i]);slots[i].titleLabel?.numberOfLines=2
+            left.addSubview(slots[i])
             slots[i].addAction(UIAction{[weak self] _ in guard let self else{return};self.filter=slot.rawValue;self.selected=self.session.engine.state.units[self.actor]?.equipment[slot];self.refresh()},for:.touchUpInside)
         }
-        filterButton.showsMenuAsPrimaryAction=true
         primary.addAction(UIAction{[weak self] _ in self?.activate()},for:.touchUpInside)
         refresh()
     }
+    private func flash(_ text:String){
+        saveLabel.text=text;saveLabel.alpha=1
+        UIView.animate(withDuration:0.4,delay:1.8,options:[]){self.saveLabel.alpha=0}
+    }
+    private func chip(_ symbol:String,_ text:String,_ tint:UIColor)->NSAttributedString {MeadowGlassText.iconLine(symbol,text,size:17,tint:tint,weight:.bold)}
     private func refresh(){
         guard let unit=session.engine.state.units[actor] else{return};let catalog=session.engine.catalog
         let entries=CampInventoryProjection.entries(unit,catalog:catalog,filter:filter)
         if !entries.contains(where:{$0.id==selected}){selected=entries.first?.id}
         rows.forEach{$0.removeFromSuperview()};rows=[]
         for e in entries {
-            let row=MeadowPreviewPalette.button(e.name+"\n背包 ×\(e.quantity)"+(e.equipped ? " · 已装备":""))
-            row.configuration?.title=e.name;row.configuration?.subtitle="背包 ×\(e.quantity)"+(e.equipped ? " · 已装备":"")
-            // The item's picture at the front of its row.
-            row.configuration?.image=MeadowItemIcon.image(e.id,item:try? catalog.item(e.id),side:54);row.configuration?.imagePlacement = .leading;row.configuration?.imagePadding=14
-            row.contentHorizontalAlignment = .leading
-            row.configuration?.baseBackgroundColor=e.id==selected ? MeadowPreviewPalette.gold:UIColor.white.withAlphaComponent(0.10)
-            row.configuration?.cornerStyle = .large
-            row.configuration?.background.strokeColor=UIColor.white.withAlphaComponent(e.id==selected ? 0.6:0.16);row.configuration?.background.strokeWidth=1
-            row.configuration?.baseForegroundColor=e.id==selected ? MeadowPreviewPalette.panel:MeadowPreviewPalette.ink
-            row.configuration?.subtitleTextAttributesTransformer=UIConfigurationTextAttributesTransformer { value in var v=value;v.font=MeadowPreviewPalette.font(15,.medium);return v }
+            // Item tile: picture, name, count; a gold rim marks what is worn.
+            var c=UIButton.Configuration.filled()
+            c.image=MeadowItemIcon.image(e.id,item:try? catalog.item(e.id),side:52);c.imagePlacement = .top;c.imagePadding=6
+            c.title=e.name;c.subtitle=e.equipped ? "已装备":(e.quantity>1 ? "×\(e.quantity)":nil)
+            c.titleAlignment = .center;c.cornerStyle = .large
+            c.titleTextAttributesTransformer=UIConfigurationTextAttributesTransformer{v in var v=v;v.font=MeadowPreviewPalette.font(15,.bold);return v}
+            c.subtitleTextAttributesTransformer=UIConfigurationTextAttributesTransformer{v in var v=v;v.font=MeadowPreviewPalette.font(13,.semibold);return v}
+            let chosen=e.id==selected
+            c.baseBackgroundColor=chosen ? MeadowPreviewPalette.gold:UIColor.white.withAlphaComponent(0.08)
+            c.baseForegroundColor=chosen ? MeadowPreviewPalette.panel:(e.equipped ? MeadowPreviewPalette.gold:MeadowPreviewPalette.ink)
+            c.background.strokeColor=e.equipped ? MeadowPreviewPalette.gold:UIColor.white.withAlphaComponent(chosen ? 0.6:0.14);c.background.strokeWidth=e.equipped ? 2:1
+            let row=UIButton(configuration:c)
             row.accessibilityIdentifier="campaignInventoryItem-"+e.id
             row.addAction(UIAction{[weak self] _ in self?.selected=e.id;self?.refresh()},for:.touchUpInside)
             list.addSubview(row);rows.append(row)
         }
-        if rows.isEmpty{let row=MeadowPreviewPalette.button("暂无此类物品");row.isEnabled=false;list.addSubview(row);rows=[row]}
+        if rows.isEmpty{var c=UIButton.Configuration.plain();c.image=UIImage(systemName:"tray");c.imagePlacement = .top;c.title="空";c.baseForegroundColor=MeadowPreviewPalette.muted;let row=UIButton(configuration:c);row.isEnabled=false;list.addSubview(row);rows=[row]}
         members.selectedSegmentIndex=session.playerIDs.firstIndex(of:actor) ?? 0
-        refillActions.isEnabled=session.inventoryActionRefillNeeded;refillActions.alpha=refillActions.isEnabled ? 1:0.45
+        filterBar.selectedSegmentIndex=filters.firstIndex{$0.0==filter} ?? 0
+        refillActions.isEnabled=session.inventoryActionRefillNeeded;refillActions.alpha=refillActions.isEnabled ? 1:0.4
         let a=try? GameRules.attributes(unit,catalog:catalog)
         health.show("生命",value:unit.health,maximum:a?.maximumHealth ?? 1,color:.systemGreen);ap.show(value:unit.ap,maximum:a?.maximumAP ?? 8)
-        stats.text="\(unit.name)\n金币 \(unit.coins) · 积分 \(unit.score)\n额外伤害 ＋\(a?.damage ?? 0)"+(actor=="p2" ? "\nP2装备规则可用，地图形象暂沿用原资源。":"")
+        let line=NSMutableAttributedString()
+        line.append(chip("bitcoinsign.circle.fill","\(unit.coins)",MeadowPreviewPalette.gold));line.append(NSAttributedString(string:"   "))
+        line.append(chip("star.fill","\(unit.score)",UIColor(red:0.55,green:0.85,blue:1,alpha:1)))
+        if let damage=a?.damage,damage != 0 {line.append(NSAttributedString(string:"   "));line.append(chip("burst.fill","+\(damage)",UIColor(red:1,green:0.45,blue:0.4,alpha:1)))}
+        chips.attributedText=line
         let look=unit.appearance ?? PlayerAppearance(body:session.snapshot.appearanceID)
         hero.image=(actor=="p1" || unit.appearance != nil) ? HeroFrames.inventoryImages(appearanceIndex:HeroFrames.appearanceIDs.firstIndex(of:look.body) ?? 0,weaponID:unit.equipment.weapon,armorID:look.armor(worn:unit.equipment.armor),hair:look.hair,face:look.face).first:nil
-        for (i,slot) in ItemSlot.allCases.enumerated(){
-            let name=unit.equipment[slot].flatMap{try? catalog.item($0).name} ?? "未装备"
-            slots[i].configuration?.title=CampInventoryProjection.slotTitle(slot)+" · "+name
+        if hero.image==nil,PixelHeroAtlas.enabled {
+            let slot=session.playerIDs.firstIndex(of:actor) ?? 0
+            hero.image=PixelHeroAtlas.portrait(PixelHeroLook.battle(unit:unit,slot:slot)){[weak self] in self?.refresh()}
         }
-        filterButton.configuration?.title=(filters.first{$0.0==filter}?.1 ?? "全部物品")+" ▾"
-        filterButton.menu=UIMenu(children:filters.map{id,title in UIAction(title:title,state:id==filter ? .on:.off){[weak self] _ in self?.filter=id;self?.selected=nil;self?.refresh()}})
+        let slotIcons:[ItemSlot:String]=[.weapon:"bolt.horizontal.fill",.armor:"shield.lefthalf.filled",.accessory:"sparkle"]
+        for (i,slot) in ItemSlot.allCases.enumerated(){
+            let id=unit.equipment[slot],item=id.flatMap{try? catalog.item($0)}
+            var c=UIButton.Configuration.filled();c.cornerStyle = .large;c.imagePadding=10
+            c.image=id.map{MeadowItemIcon.image($0,item:item,side:34)} ?? UIImage(systemName:slotIcons[slot] ?? "circle")
+            c.title=item?.name ?? "—";c.baseForegroundColor=item == nil ? MeadowPreviewPalette.muted:MeadowPreviewPalette.ink
+            c.baseBackgroundColor=UIColor.white.withAlphaComponent(0.08);c.background.strokeColor=UIColor.white.withAlphaComponent(0.14);c.background.strokeWidth=1
+            c.titleTextAttributesTransformer=UIConfigurationTextAttributesTransformer{v in var v=v;v.font=MeadowPreviewPalette.font(16,.bold);return v}
+            slots[i].configuration=c;slots[i].contentHorizontalAlignment = .leading
+            slots[i].accessibilityLabel=CampInventoryProjection.slotTitle(slot)+" "+(item?.name ?? "未装备")
+        }
         view.setNeedsLayout()
     }
     override func viewDidLayoutSubviews(){
         super.viewDidLayoutSubviews();let s=view.safeAreaInsets
-        let l=CampInventoryLayout(width:Double(view.bounds.width),height:Double(view.bounds.height),left:Double(s.left),right:Double(s.right),top:Double(s.top),bottom:Double(s.bottom))
-        func frame(_ r:InventoryRect)->CGRect{CGRect(x:r.x,y:r.y,width:r.width,height:r.height)}
-        header.frame=frame(l.header);left.frame=frame(l.equipment);middle.frame=frame(l.bag);right.frame=frame(l.detail);footer.frame=frame(l.footer)
-        let w=header.bounds.width;titleLabel.frame=CGRect(x:12,y:2,width:max(1,w-650),height:29);saveLabel.frame=CGRect(x:12,y:31,width:max(1,w-650),height:22)
-        members.frame=CGRect(x:w-634,y:12,width:500,height:34);close.frame=CGRect(x:w-122,y:9,width:112,height:38)
-        let lw=left.bounds.width,hh:CGFloat=actor=="p1" ? 150:0
-        refillActions.frame=CGRect(x:10,y:8,width:lw-20,height:38)
-        hero.frame=CGRect(x:8,y:56,width:lw-16,height:hh);health.frame=CGRect(x:10,y:hh+64,width:lw-20,height:42);ap.frame=CGRect(x:10,y:hh+113,width:lw-20,height:38)
-        stats.frame=CGRect(x:10,y:hh+159,width:lw-20,height:actor=="p2" ? 100:72)
-        let sy=hh+(actor=="p2" ? 268:240)
-        for (i,b) in slots.enumerated(){b.frame=CGRect(x:10,y:sy+CGFloat(i)*56,width:lw-20,height:48)}
-        left.contentSize=CGSize(width:lw,height:sy+172)
-        filterButton.frame=CGRect(x:8,y:8,width:middle.bounds.width-16,height:38);list.frame=CGRect(x:8,y:54,width:middle.bounds.width-16,height:max(1,middle.bounds.height-62))
-        for(i,row) in rows.enumerated(){row.frame=CGRect(x:0,y:CGFloat(i)*82,width:list.bounds.width,height:74)}
-        list.contentSize=CGSize(width:list.bounds.width,height:CGFloat(rows.count)*82)
-        detail.frame=CGRect(x:0,y:0,width:right.bounds.width,height:max(1,right.bounds.height-64));primary.frame=CGRect(x:10,y:right.bounds.height-54,width:right.bounds.width-20,height:44)
+        let b=view.bounds.inset(by:UIEdgeInsets(top:max(14,s.top),left:max(18,s.left),bottom:max(14,s.bottom),right:max(18,s.right)))
+        let gap:CGFloat=14
+        header.frame=CGRect(x:b.minX,y:b.minY,width:b.width,height:64)
+        let top=header.frame.maxY+gap,h=b.maxY-top
+        let lw=min(300,b.width*0.24),rw=min(400,b.width*0.3)
+        left.frame=CGRect(x:b.minX,y:top,width:lw,height:h)
+        right.frame=CGRect(x:b.maxX-rw,y:top,width:rw,height:h)
+        middle.frame=CGRect(x:left.frame.maxX+gap,y:top,width:right.frame.minX-gap-left.frame.maxX-gap,height:h)
+        let w=header.bounds.width
+        titleLabel.frame=CGRect(x:18,y:14,width:140,height:36);saveLabel.frame=CGRect(x:150,y:20,width:240,height:24)
+        close.frame=CGRect(x:w-62,y:10,width:50,height:44);refillActions.frame=CGRect(x:w-170,y:10,width:100,height:44)
+        let mw=min(520,w-600);members.frame=CGRect(x:w-180-mw,y:14,width:mw,height:36)
+        let lw2=left.bounds.width
+        hero.frame=CGRect(x:16,y:14,width:lw2-32,height:min(170,left.bounds.height*0.3))
+        health.frame=CGRect(x:16,y:hero.frame.maxY+10,width:lw2-32,height:40)
+        ap.frame=CGRect(x:16,y:health.frame.maxY+8,width:lw2-32,height:36)
+        chips.frame=CGRect(x:16,y:ap.frame.maxY+8,width:lw2-32,height:28)
+        for (i,b) in slots.enumerated(){b.frame=CGRect(x:12,y:chips.frame.maxY+16+CGFloat(i)*62,width:lw2-24,height:54)}
+        filterBar.frame=CGRect(x:12,y:12,width:middle.bounds.width-24,height:40)
+        list.frame=CGRect(x:12,y:64,width:middle.bounds.width-24,height:max(1,middle.bounds.height-76))
+        let columns=max(2,Int(list.bounds.width/150)),tile=(list.bounds.width-CGFloat(columns-1)*10)/CGFloat(columns),th:CGFloat=128
+        for (i,row) in rows.enumerated(){row.frame=CGRect(x:CGFloat(i%columns)*(tile+10),y:CGFloat(i/columns)*(th+10),width:tile,height:th)}
+        list.contentSize=CGSize(width:list.bounds.width,height:CGFloat((rows.count+columns-1)/columns)*(th+10))
+        detail.frame=CGRect(x:0,y:0,width:right.bounds.width,height:max(1,right.bounds.height-76));primary.frame=CGRect(x:16,y:right.bounds.height-64,width:right.bounds.width-32,height:50)
         layoutDetail()
     }
     private func layoutDetail(){
         detailContent.subviews.forEach{$0.removeFromSuperview()}
-        detailContent.frame=CGRect(x:0,y:0,width:detail.bounds.width,height:100);detail.contentSize=detailContent.bounds.size
-        let width=detail.bounds.width;var y:CGFloat=12
-        func text(_ value:String,_ size:CGFloat=17){let label=MeadowPreviewPalette.label(value,size:size);label.numberOfLines=0;let h=max(24,label.sizeThatFits(CGSize(width:max(1,width-24),height:10000)).height);label.frame=CGRect(x:12,y:y,width:width-24,height:h);detailContent.addSubview(label);y+=h+12}
+        let width=detail.bounds.width;var y:CGFloat=20
+        func add(_ label:UILabel,gap:CGFloat=10){let h=max(22,label.sizeThatFits(CGSize(width:max(1,width-40),height:10000)).height);label.frame=CGRect(x:20,y:y,width:width-40,height:h);detailContent.addSubview(label);y+=h+gap}
+        func line(_ text:NSAttributedString){let l=UILabel();l.attributedText=text;l.numberOfLines=0;add(l)}
         primary.isHidden=true
-        guard let id=selected,let item=try? session.engine.catalog.item(id),let unit=session.engine.state.units[actor] else{text("选择物品查看详情");return}
+        guard let id=selected,let item=try? session.engine.catalog.item(id),let unit=session.engine.state.units[actor] else{
+            let l=UILabel();l.attributedText=MeadowGlassText.iconLine("hand.tap","选择物品",size:18,tint:MeadowPreviewPalette.muted);add(l)
+            detailContent.frame=CGRect(x:0,y:0,width:width,height:y);detail.contentSize=detailContent.bounds.size;return
+        }
         let picture=UIImageView(image:MeadowItemIcon.image(id,item:item));picture.contentMode = .scaleAspectFit;picture.layer.magnificationFilter = .nearest
-        picture.frame=CGRect(x:(width-96)/2,y:y,width:96,height:96);detailContent.addSubview(picture);y+=106
-        text(item.name,22);text(CampInventoryProjection.summary(item));text("背包 ×\(unit.inventory[id] ?? 0)")
+        picture.frame=CGRect(x:(width-110)/2,y:y,width:110,height:110);detailContent.addSubview(picture);y+=122
+        let name=MeadowPreviewPalette.label(item.name,size:26,weight:.heavy);name.textAlignment = .center;add(name,gap:4)
+        let kind=item.slot.map{CampInventoryProjection.slotTitle($0)} ?? (item.kind == .revivalStone ? "复活":"补给")
+        let tag=UILabel();tag.attributedText=MeadowGlassText.iconLine(item.setID != nil ? "seal.fill":"tag.fill",kind+(item.setID != nil ? " · 套装":"")+"  ×\(unit.inventory[id] ?? 0)",size:15,tint:item.setID != nil ? UIColor(red:0.75,green:0.55,blue:1,alpha:1):MeadowPreviewPalette.muted,weight:.semibold);tag.textAlignment = .center;add(tag,gap:14)
+        let summary=CampInventoryProjection.summary(item)
+        if !summary.isEmpty{line(MeadowGlassText.iconLine("info.circle.fill",summary,size:17,tint:MeadowPreviewPalette.gold,weight:.semibold))}
         primary.isHidden=false;primary.isEnabled=false
         if let slot=item.slot {
-            let equipped=unit.equipment[slot]==id;primary.configuration?.title=equipped ? "卸下装备":"装备"
-            if actor != "p1" || !visualEquipment.contains(id){text("专属外观尚有缺口，暂用现有形象；属性与技能按实际装备生效。")}
+            let equipped=unit.equipment[slot]==id;primary.configuration?.title=equipped ? "卸下":"装备"
             do{
-                let comparison=try session.equipmentComparison(actor:actor,slot:slot,item:equipped ? nil:id)
-                text(comparison.summary)
-                text("换装不回血、不补行动或移动。地图移动上限按全队最大行动上限平均计算；基础行动加成不提高移动上限。",15);primary.isEnabled=true
-            }catch{text(error.localizedDescription)}
+                // Only what actually changes, one coloured line each.
+                let c=try session.equipmentComparison(actor:actor,slot:slot,item:equipped ? nil:id)
+                var changes:[(String,String,Bool)]=[]
+                func diff(_ symbol:String,_ name:String,_ a:Int,_ b:Int){if a != b {changes.append((symbol,"\(name) \(a) → \(b)",b>a))}}
+                diff("heart.fill","生命上限",c.beforeStats.maximumHealth,c.afterStats.maximumHealth)
+                diff("burst.fill","额外伤害",c.beforeStats.damage,c.afterStats.damage)
+                diff("diamond.fill","基础行动",c.beforeStats.baseAP,c.afterStats.baseAP)
+                diff("diamond","行动上限",c.beforeStats.maximumAP,c.afterStats.maximumAP)
+                if c.attackBefore != c.attackAfter {changes.append(("scope","普攻 "+c.attackAfter,true))}
+                let gained=c.skillsAfter.filter{!c.skillsBefore.contains($0)},lost=c.skillsBefore.filter{!c.skillsAfter.contains($0)}
+                if !gained.isEmpty {changes.append(("sparkles","+ "+gained.joined(separator:"、"),true))}
+                if !lost.isEmpty {changes.append(("minus.circle","− "+lost.joined(separator:"、"),false))}
+                for (symbol,text,better) in changes {line(MeadowGlassText.iconLine(symbol,text,size:17,tint:better ? .systemGreen:.systemRed,weight:.semibold))}
+                if changes.isEmpty {line(MeadowGlassText.iconLine("equal.circle","属性不变",size:16,tint:MeadowPreviewPalette.muted,weight:.medium))}
+                primary.isEnabled=true
+            }catch{line(MeadowGlassText.iconLine("exclamationmark.triangle.fill",error.localizedDescription,size:15,tint:.orange,weight:.medium))}
         }else{
             let targets=UISegmentedControl(items:session.playerIDs.map{session.engine.state.units[$0]?.shortName ?? $0.uppercased()});targets.selectedSegmentIndex=session.playerIDs.firstIndex(of:target) ?? 0
-            for state in [UIControl.State.normal,.selected] {targets.setTitleTextAttributes([.font:MeadowPreviewPalette.font(16),.foregroundColor:MeadowPreviewPalette.ink],for:state)}
-            targets.selectedSegmentTintColor=UIColor(red:0.40,green:0.35,blue:0.19,alpha:1)
-            targets.frame=CGRect(x:12,y:y,width:width-24,height:36);detailContent.addSubview(targets);y+=48
+            for state in [UIControl.State.normal,.selected] {targets.setTitleTextAttributes([.font:MeadowPreviewPalette.font(16,.semibold),.foregroundColor:MeadowPreviewPalette.ink],for:state)}
+            targets.selectedSegmentTintColor=UIColor(red:0.55,green:0.44,blue:0.18,alpha:1)
+            targets.frame=CGRect(x:20,y:y,width:width-40,height:36);detailContent.addSubview(targets);y+=48
             targets.addAction(UIAction{[weak self,weak targets] _ in guard let self else{return};self.target=self.session.playerIDs[max(0,targets?.selectedSegmentIndex ?? 0)];self.view.setNeedsLayout()},for:.valueChanged)
-            primary.configuration?.title=item.kind == .revivalStone ? "复活队友":"使用补给"
-            if let receiver=session.engine.state.units[target],let a=try? GameRules.attributes(receiver,catalog:session.engine.catalog){text("使用者：\(session.engine.state.units[actor]?.shortName ?? actor.uppercased())\n目标：\(receiver.shortName)\n生命 \(receiver.health) → \(item.kind == .revivalStone ? (a.maximumHealth+1)/2:min(a.maximumHealth,receiver.health+item.heal))/\(a.maximumHealth)\n护盾 \(receiver.shield) → \(max(receiver.shield,item.shield))")}
-            do{let command=try session.inventoryItemCommand(actor:actor,item:id,target:target),preview=session.engine.preview(command);primary.isEnabled=preview.allowed;if !preview.allowed{text(preview.message)}}catch{text(error.localizedDescription)}
+            primary.configuration?.title=item.kind == .revivalStone ? "复活":"使用"
+            if let receiver=session.engine.state.units[target],let a=try? GameRules.attributes(receiver,catalog:session.engine.catalog){
+                let after=item.kind == .revivalStone ? (a.maximumHealth+1)/2:min(a.maximumHealth,receiver.health+item.heal)
+                if after != receiver.health {line(MeadowGlassText.iconLine("heart.fill","\(receiver.health) → \(after)",size:17,tint:.systemGreen,weight:.semibold))}
+                if max(receiver.shield,item.shield) != receiver.shield {line(MeadowGlassText.iconLine("shield.fill","\(receiver.shield) → \(item.shield)",size:17,tint:UIColor(red:0.45,green:0.8,blue:1,alpha:1),weight:.semibold))}
+            }
+            do{let command=try session.inventoryItemCommand(actor:actor,item:id,target:target),preview=session.engine.preview(command);primary.isEnabled=preview.allowed
+                if !preview.allowed{line(MeadowGlassText.iconLine("exclamationmark.circle",preview.message,size:15,tint:.orange,weight:.medium))}}
+            catch{line(MeadowGlassText.iconLine("exclamationmark.circle",error.localizedDescription,size:15,tint:.orange,weight:.medium))}
         }
         detailContent.frame=CGRect(x:0,y:0,width:width,height:y+12);detail.contentSize=detailContent.bounds.size
     }
@@ -357,7 +413,7 @@ final class MeadowCampaignInventoryViewController:UIViewController {
                 guard let performEquip else{throw GameError("装备入口不可用。")}
                 try performEquip(actor,slot,session.engine.state.units[actor]?.equipment[slot]==id ? nil:id)
             }else{try session.useInventory(actor:actor,item:id,target:target)}
-            saveLabel.text="操作已保存到当前行程";onChange?();refresh()
+            flash("已保存");onChange?();refresh()
         }catch{refresh();let alert=UIAlertController(title:"操作未完成",message:error.localizedDescription,preferredStyle:.alert);alert.addAction(UIAlertAction(title:"知道了",style:.default));present(alert,animated:true)}
     }
 }

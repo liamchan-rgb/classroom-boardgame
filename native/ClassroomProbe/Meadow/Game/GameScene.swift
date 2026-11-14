@@ -39,7 +39,9 @@ final class GameScene: SKScene {
         refreshProfileFrames()
         simulation.selected=campaign.playerIDs.firstIndex(of:campaign.selectedPlayerID) ?? 0
         for (index,d) in world.definition.discoveries.enumerated() {
-            guard let id=d.nodeID,let node=campaign.engine.state.map.nodes.first(where:{$0.id==id}) else{continue}
+            // Scenery discoveries (trees, bushes) belong to the free-roam demo: no markers on a journey map.
+            guard let id=d.nodeID,let node=campaign.engine.state.map.nodes.first(where:{$0.id==id}) else{discoveryNodes[index].isHidden=true;continue}
+            discoveryNodes[index].isHidden=false
             let cleared=node.rewardCompleted || ((node.kind == .combat || node.kind == .boss) && !campaign.engine.state.units.values.contains{$0.kind == .monster && $0.nodeID==id && $0.isAlive})
             let symbol=cleared ? "✓":campaignSiteSymbol(id) ?? ["combat":"战","boss":"首","reward":"奖","empty":"空"][node.kind.rawValue] ?? "?"
             discoveryNodes[index].children.compactMap{$0 as? SKLabelNode}.first?.text=symbol
@@ -227,8 +229,8 @@ final class GameScene: SKScene {
         start.name = world.definition.startNodeID.map { "landmark-\($0)" }
         start.zPosition = world.definition.startNodeID == nil ? 65:22500
         if world.definition.startNodeID != nil {
-            let text=SKLabelNode(fontNamed:"Georgia-Bold");text.text="起";text.fontSize=15
-            text.fontColor = .black;text.verticalAlignmentMode = .center;start.addChild(text)
+            start.fillColor = SKColor(white:0,alpha:0.001);start.strokeColor = .clear
+            start.setPixelMarker(.camp)
         }
         world.addChild(start)
         for (index, discovery) in world.definition.discoveries.enumerated() {

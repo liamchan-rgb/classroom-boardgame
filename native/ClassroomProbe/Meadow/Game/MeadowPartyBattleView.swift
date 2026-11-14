@@ -234,7 +234,7 @@ final class MeadowPartyBattleView:UIView {
             if classroomMode {
                 // Compact card: icon + name, AP pip, one short stat (dice / uses left). Colour carries the kind of action.
                 let look=Self.look(a)
-                b.updateCompact(name:a.title,cost:model.cost(a),symbol:look.symbol,tint:look.tint,stat:shortStat(a,model:model,actor:displayActor),enabled:allowed)
+                b.updateCompact(name:a.title,cost:model.cost(a),uses:usesLeft(a,model:model,actor:displayActor),symbol:look.symbol,tint:look.tint,stat:shortStat(a,model:model,actor:displayActor),enabled:allowed)
             } else {
                 b.update(title:a.title+" · \(model.cost(a)) AP",detail:(!busy && !result.allowed) ? result.message:detail(a,model:model,actor:displayActor),enabled:allowed)
             }
@@ -289,16 +289,36 @@ final class MeadowPartyBattleView:UIView {
         default:return ("burst.fill",UIColor(red:1,green:0.42,blue:0.38,alpha:1))
         }
     }
-    /// One short stat for the compact card: weapon dice for the plain attack, uses left for limited skills.
+    /// Every card says what the action does in the same words: 伤害 (with the actor's bonus folded in) / 治疗 / 护盾 / 增伤.
     private func shortStat(_ a:PartyAction,model:PartyEncounter,actor:String)->String? {
         guard let unit=model.state.units[actor] else{return nil}
-        if a == .attack {
+        let bonus=(try? GameRules.attributes(unit,catalog:model.engine.catalog).damage) ?? 0
+        func hit(_ dice:String,_ flat:Int)->String {let total=flat+bonus;return "伤害 "+dice+(total>0 ? "+\(total)":"")}
+        switch a {
+        case .attack:
             guard let weapon=unit.equipment.weapon,let dice=(try? model.engine.catalog.item(weapon))?.attack?.dice else{return "无武器"}
-            let bonus=(try? GameRules.attributes(unit,catalog:model.engine.catalog).damage) ?? 0
-            return "\(dice.count)D\(dice.sides)"+(bonus>0 ? "+\(bonus)":"")
+            return hit("\(dice.count)D\(dice.sides)",dice.flat)
+        case .heavyStrike:return hit("1D6",2)
+        case .ambush:return hit("2D8",2)+" · 治疗 3"
+        case .runeSlash:return hit("2D12",2)+" · 治疗 4 · 护盾 4"
+        case .dragonFlame:return hit("1D20",6)+" · 治疗 6 · 护盾 6"
+        case .starlightPulse:return hit("1D12",4)+" · 治疗 6 · 护盾 6"
+        case .sweep:return hit("1D12",0)
+        case .runeWard:return "治疗 8 · 护盾 6"
+        case .battleRune:return "护盾 4 · 增伤 3"
+        case .dragonSoulWard:return "治疗 10 · 护盾 10 · 增伤 3"
+        case .dragonScaleWard:return "治疗 12 · 护盾 10 · 增伤 2"
+        case .dragonOrder:return "治疗 6 · 护盾 8 · 增伤 4"
+        case .support:return "治疗 6 · 护盾 4"
+        case .rally:return "增伤 2"
+        case .breather,.regeneration:return "治疗 4"
+        case .endTurn:return "保留行动"
+        default:return a.isItem ? nil:"护盾 4"
         }
-        guard let skill=try? model.engine.catalog.skill(a.rawValue),let limit=skill.uses else{return nil}
-        return "剩 \(max(0,limit-(unit.skillUses[a.rawValue] ?? 0)))"
+    }
+    private func usesLeft(_ a:PartyAction,model:PartyEncounter,actor:String)->Int? {
+        guard let unit=model.state.units[actor],let limit=(try? model.engine.catalog.skill(a.rawValue))?.uses else{return nil}
+        return max(0,limit-(unit.skillUses[a.rawValue] ?? 0))
     }
     private func detail(_ a:PartyAction,model:PartyEncounter,actor:String)->String {
         guard a != .attack else {
@@ -352,10 +372,11 @@ final class MeadowPartyBattleView:UIView {
         title.frame=CGRect(x:16,y:8,width:max(1,w-(classroomMode ? 32:446)),height:32)
         hint.frame=CGRect(x:16,y:43,width:max(1,w-(classroomMode ? 32:446)),height:23)
         let pw=panel.bounds.width,gap:CGFloat=10,bw=max(1,(pw-28-143-gap*3)/3)
-        for (i,bar) in [health,ward,ap].enumerated() { bar.frame=CGRect(x:14+CGFloat(i)*(bw+gap),y:9,width:bw,height:43) }
+        // 50 tall: the AP diamonds sit 26 pt down and are 18 pt high, so a shorter bar clipped their lower tips.
+        for (i,bar) in [health,ward,ap].enumerated() { bar.frame=CGRect(x:14+CGFloat(i)*(bw+gap),y:8,width:bw,height:50) }
         accessory.frame=CGRect(x:pw-145,y:8,width:38,height:38)
         buff.frame=CGRect(x:pw-100,y:8,width:38,height:38);shieldBuff.frame=CGRect(x:pw-55,y:8,width:38,height:38)
-        skillScroll.frame=CGRect(x:14,y:62,width:max(1,pw-28),height:max(1,panel.bounds.height-72))
+        skillScroll.frame=CGRect(x:14,y:66,width:max(1,pw-28),height:max(1,panel.bounds.height-76))
         let visible=skills.filter { !$0.isHidden };let n=CGFloat(visible.count)
         let cw=classroomMode ? max(1,(skillScroll.bounds.width-max(0,n-1)*10)/max(1,n)):max(190,(skillScroll.bounds.width-110-n*10)/max(1,n))
         for (i,card) in visible.enumerated() { card.frame=CGRect(x:CGFloat(i)*(cw+10),y:0,width:cw,height:skillScroll.bounds.height) }

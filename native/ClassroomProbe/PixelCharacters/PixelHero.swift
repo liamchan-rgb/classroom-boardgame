@@ -430,8 +430,9 @@ extension PixelHeroAtlas {
         guard let top else { return nil }
         var sum = 0, n = 0
         for y in top..<min(h, top + 40) { for x in max(0, mid - band)..<min(w, mid + band) where opaque(x, y) { sum += x; n += 1 } }
-        let cx = n > 0 ? sum / n : mid, side = 76
-        let rect = CGRect(x: max(0, min(w - side, cx - side / 2)), y: max(0, top - 6), width: side, height: side)
+        // Generous square (whole head plus a margin) so the round frame of the turn bar never clips hair or chin.
+        let cx = n > 0 ? sum / n : mid, side = 100
+        let rect = CGRect(x: max(0, min(w - side, cx - side / 2)), y: max(0, top - 14), width: side, height: side)
         return cg.cropping(to: rect).map { UIImage(cgImage: $0) }
     }
 }

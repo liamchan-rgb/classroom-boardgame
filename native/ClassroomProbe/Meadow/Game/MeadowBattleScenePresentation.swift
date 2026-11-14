@@ -595,7 +595,7 @@ final class MeadowAccessoryBadge:UIButton {
         tooltipHost=host
         guard let readout else { isHidden=true;key=nil;pinned=false;hover=false;tip.isHidden=true;return }
         if key != readout.itemID { pinned=false;hover=false };key=readout.itemID;isHidden=false
-        setImage(UIImage(named:HeroFrames.accessoryVisual(readout.itemID)?.iconAsset ?? "")?.withRenderingMode(.alwaysOriginal),for:.normal)
+        setImage((UIImage(named:HeroFrames.accessoryVisual(readout.itemID)?.iconAsset ?? "") ?? MeadowItemIcon.image(readout.itemID,side:32)).withRenderingMode(.alwaysOriginal),for:.normal)
         tip.text=" \(readout.name) · \(readout.summary)\n \(readout.detail.replacingOccurrences(of:"\n",with:"\n "))"
         accessibilityLabel=readout.name+"，"+readout.summary+"，"+readout.detail;disclose()
     }
