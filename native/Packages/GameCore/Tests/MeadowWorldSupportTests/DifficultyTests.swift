@@ -54,4 +54,19 @@ final class DifficultyTests:XCTestCase {
         XCTAssertFalse(String(decoding:bytes,as:UTF8.self).contains("difficulty"))
         XCTAssertEqual(try MeadowCampaignSession(save:.decoded(bytes)).difficulty,.normal)
     }
+    func testLeavingBattleKeepsHealthAndMonstersForLater()throws {
+        let s=try MeadowCampaignSession.new(layout:layout())
+        let monster=monsters(s)[0]
+        XCTAssertFalse(s.canLeaveBattle);XCTAssertThrowsError(try s.leaveBattle())
+        try s.engine.apply(.startBattle(kind:.pve,monsters:[monster.id]))
+        try s.engine.apply(.setHealth(unit:monster.id,value:1,killer:nil))
+        let coins=s.engine.state.players.map(\.coins),health=s.engine.state.players.map(\.health)
+        XCTAssertTrue(s.canLeaveBattle)
+        try s.leaveBattle()
+        XCTAssertNil(s.engine.state.battle);XCTAssertEqual(s.engine.state.phase,.exploration)
+        XCTAssertEqual(s.engine.state.lastOutcome?.winners,[])
+        XCTAssertEqual(s.engine.state.players.map(\.coins),coins);XCTAssertEqual(s.engine.state.players.map(\.health),health)
+        let left=s.engine.state.units[monster.id]!
+        XCTAssertEqual(left.health,1);XCTAssertFalse(left.active);XCTAssertEqual(left.nodeID,monster.nodeID)
+    }
 }

@@ -440,7 +440,7 @@ final class MeadowBattleResourceBar: UIView {
     override init(frame:CGRect) {
         super.init(frame:frame);isAccessibilityElement=true
         caption.font=MeadowPreviewPalette.font(17);caption.textColor=MeadowPreviewPalette.ink
-        track.backgroundColor=UIColor(red:0.03,green:0.07,blue:0.05,alpha:0.95)
+        track.backgroundColor=MeadowPreviewPalette.ink.withAlphaComponent(0.14)
         track.layer.borderColor=MeadowPreviewPalette.border.cgColor;track.layer.borderWidth=1;track.layer.cornerRadius=3;track.clipsToBounds=true
         addSubview(caption);addSubview(track);track.addSubview(fill)
     }

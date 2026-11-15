@@ -4,25 +4,42 @@ import MeadowBattleSupport
 import CoreImage
 
 enum MeadowPreviewPalette {
-    static let panel = UIColor(red: 0.10, green: 0.17, blue: 0.13, alpha: 0.97)
-    static let card = UIColor(red: 0.17, green: 0.25, blue: 0.19, alpha: 1)
-    static let ink = UIColor(red: 0.98, green: 0.93, blue: 0.77, alpha: 1)
-    static let muted = UIColor(red: 0.72, green: 0.79, blue: 0.66, alpha: 1)
-    static let gold = UIColor(red: 0.92, green: 0.77, blue: 0.42, alpha: 1)
-    static let border = UIColor(red: 0.60, green: 0.57, blue: 0.34, alpha: 0.65)
+    // Light frosted glass, matching the teacher console outside the game (white glass over a soft meadow wash,
+    // deep teal ink). Regions are told apart by how thick the glass is, not by colour: thick glass for panels,
+    // medium for cards inside them, thin for chips and slots.
+    static let panel = UIColor(red: 0.95, green: 0.98, blue: 0.98, alpha: 0.94)
+    static let card = UIColor.white.withAlphaComponent(0.52)
+    static let ink = UIColor(red: 0.09, green: 0.25, blue: 0.31, alpha: 1)
+    static let muted = UIColor(red: 0.30, green: 0.41, blue: 0.46, alpha: 1)
+    static let gold = UIColor(red: 0.74, green: 0.52, blue: 0.12, alpha: 1)
+    static let primary = UIColor(red: 0.09, green: 0.42, blue: 0.53, alpha: 1)
+    static let border = UIColor.white.withAlphaComponent(0.72)
+    /// The light cream once used for text; now only for strokes and trails drawn over the battle scene.
+    static let fxLight = UIColor(red: 0.98, green: 0.93, blue: 0.77, alpha: 1)
+    enum Glass { case thick, medium, thin }
+    static func glass(_ level: Glass) -> UIColor {
+        switch level { case .thick: return UIColor.white.withAlphaComponent(0.62); case .medium: return UIColor.white.withAlphaComponent(0.46); case .thin: return UIColor.white.withAlphaComponent(0.30) }
+    }
+    /// A tint deep enough to read as text on light glass (skill colours were picked for a dark panel).
+    static func readable(_ tint: UIColor) -> UIColor {
+        var h: CGFloat = 0, sat: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        guard tint.getHue(&h, saturation: &sat, brightness: &b, alpha: &a) else { return ink }
+        if sat < 0.15 { return muted }
+        return UIColor(hue: h, saturation: min(1, sat * 1.1 + 0.15), brightness: min(b, 0.58), alpha: 1)
+    }
     /// Flat sans-serif (the earlier serif design read as broken strokes in Chinese at game sizes).
     static func font(_ size:CGFloat,_ weight:UIFont.Weight = .bold)->UIFont {
         let base=UIFont.systemFont(ofSize:size,weight:weight)
         return UIFont(descriptor:base.fontDescriptor.withDesign(.rounded) ?? base.fontDescriptor,size:size)
     }
-    static let glassTint = UIColor(red: 0.07, green: 0.13, blue: 0.10, alpha: 0.74)
-    /// Glass-style panel: translucent dark tint, continuous corners and a hairline highlight (static, no live blur).
-    static func stylePanel(_ view: UIView, liveBlur: Bool = false) {
-        view.backgroundColor = glassTint
+    static let glassTint = glass(.thick)
+    /// Glass panel: light frosted fill, continuous corners and a bright hairline rim (static, no live blur).
+    static func stylePanel(_ view: UIView, liveBlur: Bool = false, level: Glass = .thick) {
+        view.backgroundColor = glass(level)
         view.layer.cornerRadius = 18
         view.layer.cornerCurve = .continuous
         view.layer.borderWidth = 1
-        view.layer.borderColor = UIColor.white.withAlphaComponent(0.22).cgColor
+        view.layer.borderColor = UIColor.white.withAlphaComponent(level == .thick ? 0.75 : 0.6).cgColor
         // Panels over the animating Metal battle/map never use a live blur (it is recomputed every frame and the
         // teacher mirror cannot capture it); only full-screen sheets over a static backdrop ask for one.
         MeadowGlassSheen.install(in: view, liveBlur: liveBlur)
@@ -33,8 +50,9 @@ enum MeadowPreviewPalette {
         style.image = UIImage(systemName:symbol,withConfiguration:UIImage.SymbolConfiguration(pointSize:18,weight:.semibold))
         style.title = title; style.imagePadding = 6; style.cornerStyle = .capsule
         style.titleTextAttributesTransformer=UIConfigurationTextAttributesTransformer { value in var v=value;v.font=font(16,.semibold);return v }
-        style.baseBackgroundColor = prominent ? gold:UIColor.white.withAlphaComponent(0.18)
-        style.baseForegroundColor = prominent ? panel:ink
+        style.baseBackgroundColor = prominent ? primary:UIColor.white.withAlphaComponent(0.55)
+        style.baseForegroundColor = prominent ? .white:ink
+        style.background.strokeColor = UIColor.white.withAlphaComponent(prominent ? 0.35:0.7); style.background.strokeWidth = 1
         style.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 14)
         let button = UIButton(type: .system); button.configuration = style
         if let title {button.accessibilityLabel = title}
@@ -48,7 +66,7 @@ enum MeadowPreviewPalette {
     }
     static func button(_ title: String) -> UIButton {
         var style = UIButton.Configuration.filled(); style.title = title; style.cornerStyle = .capsule
-        style.titleTextAttributesTransformer=UIConfigurationTextAttributesTransformer { value in var v=value;v.font=font(18,.semibold);return v }; style.baseBackgroundColor = gold.withAlphaComponent(0.92); style.baseForegroundColor = panel
+        style.titleTextAttributesTransformer=UIConfigurationTextAttributesTransformer { value in var v=value;v.font=font(18,.semibold);return v }; style.baseBackgroundColor = primary.withAlphaComponent(0.92); style.baseForegroundColor = .white
         style.contentInsets = NSDirectionalEdgeInsets(top: 6, leading: 12, bottom: 6, trailing: 12)
         let button = UIButton(type: .system); button.configuration = style
         return button
@@ -579,17 +597,17 @@ final class MeadowPreviewCard: UIView {
             insertSubview(icon, belowSubview: button); insertSubview(pip, belowSubview: button); insertSubview(usesPip, belowSubview: button)
             layer.cornerRadius = 14; layer.cornerCurve = .continuous
         }
-        icon.image = UIImage(systemName: symbol, withConfiguration: UIImage.SymbolConfiguration(pointSize: 22, weight: .bold)); icon.tintColor = tint
+        icon.image = UIImage(systemName: symbol, withConfiguration: UIImage.SymbolConfiguration(pointSize: 22, weight: .bold)); icon.tintColor = MeadowPreviewPalette.readable(tint)
         title.text = name; title.font = MeadowPreviewPalette.font(20, .heavy); title.adjustsFontSizeToFitWidth = true; title.minimumScaleFactor = 0.7
-        detail.text = stat; detail.font = MeadowPreviewPalette.font(15, .semibold); detail.textColor = tint.withAlphaComponent(0.9); detail.numberOfLines = 1
+        detail.text = stat; detail.font = MeadowPreviewPalette.font(15, .semibold); detail.textColor = MeadowPreviewPalette.readable(tint); detail.numberOfLines = 1
         pip.text = cost > 0 ? "◆\(cost)" : "—"; pip.font = MeadowPreviewPalette.font(14, .heavy)
         usesPip.isHidden = uses == nil; usesPip.text = uses.map { "×\($0)" }; usesPip.font = MeadowPreviewPalette.font(13, .heavy)
-        usesPip.textColor = tint; usesPip.layer.borderColor = tint.withAlphaComponent(0.7).cgColor
-        pip.textColor = UIColor(red: 0.08, green: 0.10, blue: 0.09, alpha: 1); pip.backgroundColor = enabled ? MeadowPreviewPalette.gold : UIColor.white.withAlphaComponent(0.3)
-        backgroundColor = enabled ? tint.withAlphaComponent(0.14) : UIColor.white.withAlphaComponent(0.04)
+        usesPip.textColor = MeadowPreviewPalette.readable(tint); usesPip.layer.borderColor = MeadowPreviewPalette.readable(tint).withAlphaComponent(0.6).cgColor
+        pip.textColor = .white; pip.backgroundColor = enabled ? MeadowPreviewPalette.primary : MeadowPreviewPalette.muted.withAlphaComponent(0.5)
+        backgroundColor = enabled ? MeadowPreviewPalette.glass(.medium) : MeadowPreviewPalette.glass(.thin)
         button.isEnabled = enabled; button.isUserInteractionEnabled = enabled; button.backgroundColor = .clear
         alpha = enabled ? 1 : 0.42
-        layer.borderWidth = enabled ? 1.2 : 0; layer.borderColor = tint.withAlphaComponent(0.6).cgColor
+        layer.borderWidth = enabled ? 1.5 : 1; layer.borderColor = (enabled ? MeadowPreviewPalette.readable(tint).withAlphaComponent(0.55) : UIColor.white.withAlphaComponent(0.5)).cgColor
         button.accessibilityLabel = name + (stat.map { "，" + $0 } ?? ""); button.accessibilityValue = enabled ? "可用" : "不可用"
         setNeedsLayout()
     }

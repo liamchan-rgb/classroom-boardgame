@@ -4,7 +4,7 @@ import MeadowBattleSupport
 
 /// A real two-player/two-target training encounter backed by the tabletop engine.
 final class MeadowPartyBattleView:UIView {
-    var classroomMode=false {didSet {if classroomMode {[back,reset,end,items].forEach{$0.removeFromSuperview()}}}}
+    var classroomMode=false {didSet {if classroomMode {[back,reset,end,items].forEach{$0.removeFromSuperview()};header.addSubview(leave);disarmLeave()}}}
     var classroomModelFactory:(()throws->PartyEncounter)?
     func classroomEnemyStep(){guard active,let target=model?.nextEnemyTarget() else{return};friend=target;performEnemy(target:target)}
     private var classroomPaused=false
@@ -14,7 +14,7 @@ final class MeadowPartyBattleView:UIView {
     var classroomActions:[PartyAction] {model?.playerActions() ?? []}
     func classroomAction(_ action:PartyAction,target:String){choose(target);perform(action)}
     func classroomFocus(_ action:PartyAction?,target:String){choose(target);focusedAction=action;stage.preview(action,target:action.map{self.target($0)} ?? target)}
-    enum ClassroomHit {case action(PartyAction),target(String),toggleMap}
+    enum ClassroomHit {case action(PartyAction),target(String),toggleMap,leave}
     func classroomHit(at point:CGPoint)->ClassroomHit? {
         guard classroomMode,active,!classroomBusy,let model else{return nil}
         layoutIfNeeded()
@@ -24,11 +24,32 @@ final class MeadowPartyBattleView:UIView {
             if skillScroll.bounds.contains(p),card.frame.contains(p){return .action(actions[index])}
         }
         if !drawer.isHidden,drawer.frame.insetBy(dx:-8,dy:-8).contains(point){return .toggleMap}
+        if leave.superview != nil,!leave.isHidden,leave.frame.insetBy(dx:-6,dy:-6).contains(convert(point,to:header)) {return .leave}
         if let id=track.unit(at:convert(point,to:track)){return .target(id)}
         return stage.classroomTarget(at:convert(point,to:stage)).map{.target($0)}
     }
     /// The teacher's click on the pull tab (the public screen has no touch of its own).
     func classroomToggleMap(){toggleMap()}
+    /// "撤离" in the header (classroom only): leave the fight and go back to the map.
+    private let leave=MeadowPreviewPalette.iconButton("figure.walk.departure","撤离")
+    private var leaveArmed=false
+    private var leaveDisarm:DispatchWorkItem?
+    /// Two taps: the first arms the button (it turns red and asks again), the second confirms (returns true).
+    func classroomLeaveTap()->Bool {
+        if leaveArmed {disarmLeave();return true}
+        armLeave();return false
+    }
+    private func armLeave() {
+        leaveArmed=true;leave.configuration?.title="再点一次撤离";leave.configuration?.baseBackgroundColor=UIColor(red:0.86,green:0.30,blue:0.26,alpha:0.92);leave.configuration?.baseForegroundColor = .white
+        setNeedsLayout()
+        leaveDisarm?.cancel();let work=DispatchWorkItem{[weak self] in self?.disarmLeave()};leaveDisarm=work
+        DispatchQueue.main.asyncAfter(deadline:.now()+3,execute:work)
+    }
+    private func disarmLeave() {
+        leaveDisarm?.cancel();leaveDisarm=nil;leaveArmed=false
+        leave.configuration?.title="撤离";leave.configuration?.baseBackgroundColor=UIColor.white.withAlphaComponent(0.55);leave.configuration?.baseForegroundColor=MeadowPreviewPalette.ink
+        setNeedsLayout()
+    }
     var onClose:(()->Void)?
     var campaignEngine:GameEngine?
     var onCommit:((OperationReceipt)->Void)?
@@ -83,8 +104,8 @@ final class MeadowPartyBattleView:UIView {
         for _ in 0..<6 { let card=MeadowPreviewCard(title:"",text:"");skills.append(card);skillScroll.addSubview(card) }
         skillScroll.addSubview(items);items.showsMenuAsPrimaryAction=true
         stage.onChoose={ [weak self] id in guard let self,!self.classroomMode else{return};self.choose(id) }
-        drawer.backgroundColor=MeadowPreviewPalette.gold;drawer.tintColor=MeadowPreviewPalette.panel
-        drawer.layer.cornerRadius=10;drawer.layer.borderWidth=1.5;drawer.layer.borderColor=MeadowPreviewPalette.panel.cgColor
+        drawer.backgroundColor=MeadowPreviewPalette.primary;drawer.tintColor = .white
+        drawer.layer.cornerRadius=10;drawer.layer.borderWidth=1.5;drawer.layer.borderColor=UIColor.white.cgColor
         drawer.layer.shadowColor=UIColor.black.cgColor;drawer.layer.shadowOpacity=0.5;drawer.layer.shadowRadius=5;drawer.layer.shadowOffset = .zero
         drawer.accessibilityIdentifier="battleMapDrawer"
         drawer.addAction(UIAction { [weak self] _ in self?.toggleMap() },for:.touchUpInside)
@@ -369,8 +390,11 @@ final class MeadowPartyBattleView:UIView {
         back.frame=CGRect(x:w-124,y:16,width:112,height:44)
         end.frame=CGRect(x:w-310,y:16,width:178,height:44)
         reset.frame=CGRect(x:w-414,y:20,width:96,height:36)
-        title.frame=CGRect(x:16,y:8,width:max(1,w-(classroomMode ? 32:446)),height:32)
-        hint.frame=CGRect(x:16,y:43,width:max(1,w-(classroomMode ? 32:446)),height:23)
+        let leaveW:CGFloat=leaveArmed ? 176:104
+        leave.frame=CGRect(x:w-leaveW-14,y:(header.bounds.height-44)/2,width:leaveW,height:44)
+        let reserved:CGFloat=classroomMode ? leaveW+44:446
+        title.frame=CGRect(x:16,y:8,width:max(1,w-reserved),height:32)
+        hint.frame=CGRect(x:16,y:43,width:max(1,w-reserved),height:23)
         let pw=panel.bounds.width,gap:CGFloat=10,bw=max(1,(pw-28-143-gap*3)/3)
         // 50 tall: the AP diamonds sit 26 pt down and are 18 pt high, so a shorter bar clipped their lower tips.
         for (i,bar) in [health,ward,ap].enumerated() { bar.frame=CGRect(x:14+CGFloat(i)*(bw+gap),y:8,width:bw,height:50) }
@@ -395,7 +419,7 @@ private final class MeadowPartyBuffButton:UIButton {
         addAction(UIAction { [weak self] _ in guard let self else { return };self.pinned.toggle();self.disclose() },for:.touchUpInside);isPointerInteractionEnabled=true
     }
     required init?(coder:NSCoder) { fatalError("init(coder:) has not been implemented") }
-    func show(title:String,detail:String,symbol:String,color:UIColor) { isHidden=false;setImage(UIImage(systemName:symbol),for:.normal);tintColor=color;layer.borderColor=color.cgColor;tip.text=" \(title)\n \(detail.replacingOccurrences(of:"\n",with:"\n "))";accessibilityLabel=title+"，"+detail;disclose() }
+    func show(title:String,detail:String,symbol:String,color:UIColor) { isHidden=false;setImage(UIImage(systemName:symbol),for:.normal);tintColor=MeadowPreviewPalette.readable(color);layer.borderColor=MeadowPreviewPalette.readable(color).cgColor;tip.text=" \(title)\n \(detail.replacingOccurrences(of:"\n",with:"\n "))";accessibilityLabel=title+"，"+detail;disclose() }
     func hide() { isHidden=true;pinned=false;hover=false;disclose() }
     @objc private func hovered(_ r:UIHoverGestureRecognizer) { hover=r.state == .began || r.state == .changed;disclose() }
     private func disclose() {

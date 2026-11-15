@@ -563,6 +563,14 @@ public final class MeadowCampaignSession {
         guard mustRetreat else{throw GameError("只有全队倒地时才能撤回地图。")}
         return try engine.apply(.retreatAfterDefeat)
     }
+    /// The teacher may leave a monster fight at any time: the fight ends with no winner and no drops, the heroes keep
+    /// their health, and the monsters stay where they are (with their wounds) for a later attempt.
+    public var canLeaveBattle:Bool {!isCompleted && engine.state.battle?.kind == .pve && engine.state.players.contains(where: \.isAlive)}
+    @discardableResult public func leaveBattle()throws->OperationReceipt {
+        try requireOpenCampaign()
+        guard canLeaveBattle else{throw GameError("当前没有可以撤离的战斗。")}
+        return try engine.apply(.finishBattle(winner:nil,byScore:false))
+    }
     /// Teacher switch: rescales every monster (health share kept) and new encounters follow it. Outside battle only.
     @discardableResult public func setDifficulty(_ level:GameDifficulty)throws->OperationReceipt? {
         try requireOpenCampaign()

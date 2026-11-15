@@ -34,7 +34,7 @@ enum MeadowItemIcon {
             let c=r.cgContext,box=CGRect(origin:.zero,size:size).insetBy(dx:8,dy:8)
             let path=UIBezierPath(roundedRect:box,cornerRadius:22)
             c.saveGState();path.addClip()
-            let colors=[tint.withAlphaComponent(0.55).cgColor,UIColor(red:0.08,green:0.12,blue:0.09,alpha:1).cgColor] as CFArray
+            let colors=[tint.withAlphaComponent(0.55).cgColor,UIColor(red:0.10,green:0.22,blue:0.28,alpha:1).cgColor] as CFArray
             if let g=CGGradient(colorsSpace:CGColorSpaceCreateDeviceRGB(),colors:colors,locations:[0,1]) { c.drawRadialGradient(g,startCenter:CGPoint(x:64,y:50),startRadius:4,endCenter:CGPoint(x:64,y:64),endRadius:80,options:[]) }
             c.restoreGState()
             tint.setStroke();path.lineWidth=5;path.stroke()

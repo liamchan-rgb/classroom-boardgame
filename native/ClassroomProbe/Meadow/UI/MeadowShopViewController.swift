@@ -49,7 +49,7 @@ final class MeadowShopViewController:UIViewController {
     }
 
     override func viewDidLoad() {
-        super.viewDidLoad();view.backgroundColor=UIColor(red:0.045,green:0.085,blue:0.058,alpha:1)
+        super.viewDidLoad();view.backgroundColor=UIColor(red:0.80,green:0.88,blue:0.88,alpha:1);MeadowGlassBackdrop.install(in:view)
         MeadowGlassBackdrop.install(in:view)
         [header,grid,detail].forEach{MeadowPreviewPalette.stylePanel($0,liveBlur:true);view.addSubview($0)}
         [titleLabel,coinsLabel,buyers,mode,close].forEach(header.addSubview)
@@ -57,11 +57,11 @@ final class MeadowShopViewController:UIViewController {
         bigIcon.contentMode = .scaleAspectFit;bigIcon.layer.magnificationFilter = .nearest
         infoLabel.numberOfLines=0;afterLabel.numberOfLines=0;nameLabel.numberOfLines=2;infoLabel.textColor=MeadowPreviewPalette.muted
         priceLabel.textColor=MeadowPreviewPalette.gold
-        toast.textAlignment = .center;toast.backgroundColor=MeadowPreviewPalette.gold;toast.textColor=MeadowPreviewPalette.panel;toast.layer.cornerRadius=12;toast.clipsToBounds=true;toast.alpha=0
+        toast.textAlignment = .center;toast.backgroundColor=MeadowPreviewPalette.primary;toast.textColor = .white;toast.layer.cornerRadius=12;toast.clipsToBounds=true;toast.alpha=0
         view.addSubview(toast)
         for control in [buyers,mode] {
             for state in [UIControl.State.normal,.selected] {control.setTitleTextAttributes([.font:MeadowPreviewPalette.font(16),.foregroundColor:MeadowPreviewPalette.ink],for:state)}
-            control.selectedSegmentTintColor=UIColor(red:0.40,green:0.35,blue:0.19,alpha:1)
+            control.selectedSegmentTintColor=MeadowPreviewPalette.primary
         }
         for (i,p) in people.enumerated() { buyers.insertSegment(withTitle:p.name,at:i,animated:false) }
         buyers.addAction(UIAction{[weak self] _ in guard let self else{return};let list=self.people;if list.indices.contains(self.buyers.selectedSegmentIndex){self.actor=list[self.buyers.selectedSegmentIndex].id};self.selected=nil;self.reload()},for:.valueChanged)
@@ -113,9 +113,9 @@ final class MeadowShopViewController:UIViewController {
             c.titleTextAttributesTransformer=UIConfigurationTextAttributesTransformer{v in var v=v;v.font=MeadowPreviewPalette.font(16,.bold);return v}
             c.subtitleTextAttributesTransformer=UIConfigurationTextAttributesTransformer{v in var v=v;v.font=MeadowPreviewPalette.font(13,.medium);return v}
             let chosen=item.id==selected,affordable=selling || unit.coins>=p
-            c.baseBackgroundColor=chosen ? MeadowPreviewPalette.gold:UIColor.white.withAlphaComponent(0.10)
-            c.background.strokeColor=UIColor.white.withAlphaComponent(chosen ? 0.6:0.18);c.background.strokeWidth=1
-            c.baseForegroundColor=chosen ? MeadowPreviewPalette.panel:(affordable ? MeadowPreviewPalette.ink:MeadowPreviewPalette.muted)
+            c.baseBackgroundColor=chosen ? MeadowPreviewPalette.primary:MeadowPreviewPalette.glass(.thin)
+            c.background.strokeColor=UIColor.white.withAlphaComponent(0.7);c.background.strokeWidth=1
+            c.baseForegroundColor=chosen ? .white:(affordable ? MeadowPreviewPalette.ink:MeadowPreviewPalette.muted)
             let card=UIButton(configuration:c);card.alpha=affordable || chosen ? 1:0.6
             card.accessibilityIdentifier="shopItem-"+item.id
             card.addAction(UIAction{[weak self,weak card] _ in

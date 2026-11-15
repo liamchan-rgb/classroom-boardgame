@@ -7,12 +7,13 @@ enum MeadowGlassBackdrop {
     static func install(in view:UIView) {
         let backdrop=UIView(frame:view.bounds);backdrop.autoresizingMask=[.flexibleWidth,.flexibleHeight];backdrop.isUserInteractionEnabled=false
         let gradient=CAGradientLayer()
-        gradient.colors=[UIColor(red:0.05,green:0.14,blue:0.10,alpha:1).cgColor,UIColor(red:0.08,green:0.16,blue:0.20,alpha:1).cgColor,UIColor(red:0.16,green:0.13,blue:0.08,alpha:1).cgColor]
+        // Same soft meadow wash as the teacher console's GlassBackdrop.
+        gradient.colors=[UIColor(red:0.80,green:0.90,blue:0.86,alpha:1).cgColor,UIColor(red:0.70,green:0.82,blue:0.90,alpha:1).cgColor,UIColor(red:0.86,green:0.84,blue:0.74,alpha:1).cgColor]
         gradient.startPoint=CGPoint(x:0,y:0);gradient.endPoint=CGPoint(x:1,y:1)
         gradient.frame=CGRect(x:0,y:0,width:3000,height:2000)
         backdrop.layer.addSublayer(gradient)
         // Soft colour pools as radial gradients (static; no blur view).
-        for (x,y,r,color) in [(0.18,0.22,520.0,UIColor(red:0.35,green:0.70,blue:0.45,alpha:0.30)),(0.82,0.78,560.0,UIColor(red:0.95,green:0.70,blue:0.35,alpha:0.22)),(0.70,0.15,420.0,UIColor(red:0.40,green:0.62,blue:0.90,alpha:0.20))] {
+        for (x,y,r,color) in [(0.18,0.22,520.0,UIColor(red:0.55,green:0.78,blue:0.62,alpha:0.55)),(0.82,0.78,560.0,UIColor(red:0.98,green:0.80,blue:0.55,alpha:0.45)),(0.70,0.15,420.0,UIColor(red:0.62,green:0.78,blue:0.95,alpha:0.35))] {
             let pool=CAGradientLayer();pool.type = .radial
             pool.colors=[color.cgColor,color.withAlphaComponent(0).cgColor]
             pool.startPoint=CGPoint(x:0.5,y:0.5);pool.endPoint=CGPoint(x:1,y:1)
@@ -34,14 +35,14 @@ final class MeadowGlassSheen: UIView {
         sheen.autoresizingMask = [.flexibleWidth, .flexibleHeight]; sheen.isUserInteractionEnabled = false
         sheen.layer.cornerRadius = view.layer.cornerRadius; sheen.layer.cornerCurve = .continuous; sheen.clipsToBounds = true
         if let g = sheen.layer as? CAGradientLayer {
-            g.colors = [UIColor.white.withAlphaComponent(0.13).cgColor, UIColor.white.withAlphaComponent(0.03).cgColor, UIColor.white.withAlphaComponent(0).cgColor]
+            g.colors = [UIColor.white.withAlphaComponent(0.45).cgColor, UIColor.white.withAlphaComponent(0.10).cgColor, UIColor.white.withAlphaComponent(0).cgColor]
             g.locations = [0, 0.35, 1]
         }
         if liveBlur {
-            let blur = UIVisualEffectView(effect: UIBlurEffect(style: .systemThinMaterialDark))
+            let blur = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterialLight))
             blur.frame = sheen.bounds; blur.autoresizingMask = [.flexibleWidth, .flexibleHeight]; blur.isUserInteractionEnabled = false
             sheen.insertSubview(blur, at: 0)
-            view.backgroundColor = UIColor(red: 0.05, green: 0.10, blue: 0.08, alpha: 0.42)
+            view.backgroundColor = UIColor.white.withAlphaComponent(0.38)
         }
         view.insertSubview(sheen, at: 0)
     }

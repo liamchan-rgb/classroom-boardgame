@@ -20,7 +20,7 @@ final class MeadowLotteryView: UIView {
         for state in [UIControl.State.normal, .selected] {
             tiers.setTitleTextAttributes([.font: MeadowPreviewPalette.font(16, .bold), .foregroundColor: MeadowPreviewPalette.ink], for: state)
         }
-        tiers.selectedSegmentTintColor = UIColor(red: 0.62, green: 0.48, blue: 0.18, alpha: 1)
+        tiers.selectedSegmentTintColor = MeadowPreviewPalette.primary
         tiers.selectedSegmentIndex = 0
         tiers.addAction(UIAction { [weak self] _ in self?.selectTier() }, for: .valueChanged)
         pointer.tintColor = MeadowPreviewPalette.gold; pointer.contentMode = .scaleAspectFit
@@ -86,7 +86,7 @@ final class MeadowWheelView: UIView {
         guard let ctx = UIGraphicsGetCurrentContext() else { return }
         let c = CGPoint(x: bounds.midX, y: bounds.midY), r = min(bounds.width, bounds.height) / 2 - 4
         let n = tier.prizes.count, sector = 2 * CGFloat.pi / CGFloat(n)
-        let palette = [UIColor(red: 0.20, green: 0.36, blue: 0.27, alpha: 1), UIColor(red: 0.27, green: 0.45, blue: 0.33, alpha: 1)]
+        let palette = [UIColor(red: 0.22, green: 0.52, blue: 0.60, alpha: 1), UIColor(red: 0.33, green: 0.63, blue: 0.68, alpha: 1)]
         for (i, prize) in tier.prizes.enumerated() {
             // Slice i is centred on angle (i + 0.5) * sector measured clockwise from the top.
             let start = -CGFloat.pi / 2 + CGFloat(i) * sector, end = start + sector
@@ -95,7 +95,7 @@ final class MeadowWheelView: UIView {
             ctx.move(to: c); ctx.addArc(center: c, radius: r, startAngle: start, endAngle: end, clockwise: false); ctx.closePath()
             fill.setFill(); ctx.fillPath()
             ctx.move(to: c); ctx.addArc(center: c, radius: r, startAngle: start, endAngle: end, clockwise: false); ctx.closePath()
-            UIColor.white.withAlphaComponent(0.25).setStroke(); ctx.setLineWidth(1.5); ctx.strokePath()
+            UIColor.white.withAlphaComponent(0.7).setStroke(); ctx.setLineWidth(1.5); ctx.strokePath()
             // Prize picture (or the coin amount) near the rim, upright along the slice.
             let mid = start + sector / 2, iconR = r * 0.72, side = min(r * 0.32, r * sector * 0.7)
             ctx.saveGState(); ctx.translateBy(x: c.x + cos(mid) * iconR, y: c.y + sin(mid) * iconR); ctx.rotate(by: mid + .pi / 2)
@@ -103,7 +103,7 @@ final class MeadowWheelView: UIView {
                 let image = MeadowItemIcon.image(id, item: try? catalog?.item(id), side: 64)
                 image.draw(in: CGRect(x: -side / 2, y: -side / 2, width: side, height: side))
                 if prize.count > 1 { draw("×\(prize.count)", at: CGPoint(x: 0, y: side / 2 + 8), size: side * 0.32) }
-            } else { draw("\(prize.coins)", at: .zero, size: side * 0.42, color: MeadowPreviewPalette.gold) }
+            } else { draw("\(prize.coins)", at: .zero, size: side * 0.42, color: UIColor(red: 1, green: 0.90, blue: 0.50, alpha: 1)) }
             ctx.restoreGState()
         }
         ctx.addEllipse(in: CGRect(x: c.x - r, y: c.y - r, width: 2 * r, height: 2 * r))

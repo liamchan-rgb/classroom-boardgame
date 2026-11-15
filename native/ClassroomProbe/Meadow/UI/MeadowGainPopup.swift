@@ -43,10 +43,11 @@ final class MeadowGainPopup: UIView {
     }
 
     private func build(title: String, subtitle: String?, gains: [MeadowGain], catalog: GameCatalog?, emptyText: String?) {
-        backgroundColor = UIColor.black.withAlphaComponent(0.35); layer.zPosition = 5000
+        backgroundColor = UIColor(red: 0.05, green: 0.15, blue: 0.18, alpha: 0.28); layer.zPosition = 5000
         accessibilityIdentifier = "meadowGainPopup"; accessibilityViewIsModal = true
-        MeadowPreviewPalette.stylePanel(card); card.layer.borderWidth = 1.5; card.layer.borderColor = MeadowPreviewPalette.gold.withAlphaComponent(0.7).cgColor
-        card.layer.shadowColor = MeadowPreviewPalette.gold.cgColor; card.layer.shadowRadius = 24; card.layer.shadowOpacity = 0.45; card.layer.shadowOffset = .zero
+        // Over a moving battle the card needs the thickest glass to stay readable.
+        MeadowPreviewPalette.stylePanel(card); card.backgroundColor = MeadowPreviewPalette.panel; card.layer.borderWidth = 1.5; card.layer.borderColor = UIColor.white.cgColor
+        card.layer.shadowColor = UIColor(red: 0.05, green: 0.18, blue: 0.22, alpha: 1).cgColor; card.layer.shadowRadius = 24; card.layer.shadowOpacity = 0.3; card.layer.shadowOffset = .zero
         addSubview(card)
         stack.axis = .vertical; stack.spacing = 12; stack.alignment = .fill
         card.addSubview(stack)
@@ -64,7 +65,7 @@ final class MeadowGainPopup: UIView {
             stack.addArrangedSubview(name)
             let flow = MeadowChipFlow()
             if gain.coins > 0 { flow.add(chip(icon: UIImage(systemName: "circle.hexagongrid.circle.fill"), tint: MeadowPreviewPalette.gold, text: "+\(gain.coins)")) }
-            if gain.score > 0 { flow.add(chip(icon: UIImage(systemName: "star.circle.fill"), tint: UIColor(red: 0.55, green: 0.85, blue: 1, alpha: 1), text: "+\(gain.score)")) }
+            if gain.score > 0 { flow.add(chip(icon: UIImage(systemName: "star.circle.fill"), tint: UIColor(red: 0.12, green: 0.45, blue: 0.72, alpha: 1), text: "+\(gain.score)")) }
             for item in gain.items {
                 let itemName = (try? catalog?.item(item.id).name) ?? item.id
                 flow.add(chip(icon: MeadowItemIcon.image(item.id, item: try? catalog?.item(item.id)), tint: nil, text: "\(itemName) ×\(item.count)"))
@@ -87,7 +88,7 @@ final class MeadowGainPopup: UIView {
     }
 
     private func chip(icon: UIImage?, tint: UIColor?, text: String) -> UIView {
-        let view = UIView(); view.backgroundColor = UIColor.white.withAlphaComponent(0.12); view.layer.cornerRadius = 22; view.layer.cornerCurve = .continuous; view.layer.borderWidth = 1; view.layer.borderColor = UIColor.white.withAlphaComponent(0.22).cgColor
+        let view = UIView(); view.backgroundColor = MeadowPreviewPalette.glass(.medium); view.layer.cornerRadius = 22; view.layer.cornerCurve = .continuous; view.layer.borderWidth = 1; view.layer.borderColor = UIColor.white.withAlphaComponent(0.8).cgColor
         let image = UIImageView(image: tint == nil ? icon?.withRenderingMode(.alwaysOriginal) : icon); image.tintColor = tint ?? MeadowPreviewPalette.gold
         image.contentMode = .scaleAspectFit; image.layer.magnificationFilter = .nearest
         let label = MeadowPreviewPalette.label(text, size: 16, weight: .bold); label.adjustsFontSizeToFitWidth = false

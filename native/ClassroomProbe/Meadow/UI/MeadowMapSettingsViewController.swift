@@ -33,12 +33,12 @@ final class MeadowMapSettingsViewController: UIViewController {
     private var classControls:[UISegmentedControl] {[campaignClass,companionClass]+extraClasses}
     private var result: GeneratedMeadowMap?
     private var revision = 0
-    private let gold = UIColor(red:0.91,green:0.77,blue:0.43,alpha:1)
+    private let gold = MeadowPreviewPalette.gold
 
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask { .landscape }
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor(red:0.055,green:0.09,blue:0.065,alpha:1);MeadowGlassBackdrop.install(in:view)
+        view.backgroundColor = UIColor(red:0.80,green:0.88,blue:0.88,alpha:1);MeadowGlassBackdrop.install(in:view)
         let scroll=UIScrollView(), rightScroll=UIScrollView(), form=UIStackView(), right=UIStackView()
         form.axis = .vertical; form.spacing=10; right.axis = .vertical; right.spacing=12
         let title=UILabel();title.text="随机林地";title.font = .boldSystemFont(ofSize:26);title.textColor=gold
@@ -46,11 +46,11 @@ final class MeadowMapSettingsViewController: UIViewController {
         let defaults=["10","4","1","3","1","1","31827"]
         for (index,name) in fields.enumerated() {
             let row=UIStackView();row.spacing=8;row.alignment = .center
-            let label=UILabel();label.text=name;label.font = .boldSystemFont(ofSize:17);label.textColor = .white
+            let label=UILabel();label.text=name;label.font = .boldSystemFont(ofSize:17);label.textColor = MeadowPreviewPalette.ink
             label.widthAnchor.constraint(equalToConstant:90).isActive=true
             let field=UITextField();field.text=defaults[index];field.tag=index
             field.font = .monospacedDigitSystemFont(ofSize:19,weight:.semibold);field.textColor=gold
-            field.backgroundColor=UIColor(white:1,alpha:0.07);field.borderStyle = .roundedRect
+            field.backgroundColor=MeadowPreviewPalette.glass(.medium);field.borderStyle = .roundedRect
             field.keyboardType = .numberPad;field.accessibilityLabel=name
             field.addTarget(self,action:#selector(inputChanged(_:)),for:.editingChanged)
             inputs.append(field);row.addArrangedSubview(label);row.addArrangedSubview(field)
@@ -72,9 +72,9 @@ final class MeadowMapSettingsViewController: UIViewController {
         let close=button("返回原地图",action:#selector(close));form.addArrangedSubview(close)
         let heading=UILabel();heading.text="建筑与道路预览";heading.font = .boldSystemFont(ofSize:22);heading.textColor=gold
         let note=UILabel();note.text="生成地图后开始1—6名学生的行程；逐人选择职业，默认同队，进入后可调整分组。"
-        note.font = .systemFont(ofSize:17,weight:.medium);note.textColor = .white;note.numberOfLines=0
+        note.font = .systemFont(ofSize:17,weight:.medium);note.textColor = MeadowPreviewPalette.ink;note.numberOfLines=0
         status.textColor=gold;status.numberOfLines=0;status.font = .boldSystemFont(ofSize:17)
-        encounters.textColor = .white;encounters.numberOfLines=0;encounters.font = .systemFont(ofSize:16,weight:.semibold)
+        encounters.textColor = MeadowPreviewPalette.ink;encounters.numberOfLines=0;encounters.font = .systemFont(ofSize:16,weight:.semibold)
         generateButton.configuration=button("生成道路预览",action:#selector(generate)).configuration
         generateButton.addTarget(self,action:#selector(generate),for:.touchUpInside)
         enterButton.configuration=button("进入林地预览",action:#selector(enter)).configuration
@@ -91,13 +91,13 @@ final class MeadowMapSettingsViewController: UIViewController {
             let label=UILabel();label.text="P\(i+1)职业";label.font = .boldSystemFont(ofSize:17);label.textColor=gold
             selector.accessibilityLabel="P\(i+1)职业"
             selector.selectedSegmentIndex=i==0 ? 2:1
-            selector.setTitleTextAttributes([.foregroundColor:UIColor.white,.font:UIFont.boldSystemFont(ofSize:16)],for:.normal)
+            selector.setTitleTextAttributes([.foregroundColor:MeadowPreviewPalette.ink,.font:UIFont.boldSystemFont(ofSize:16)],for:.normal)
             selector.setTitleTextAttributes([.foregroundColor:UIColor.white],for:.selected)
-            selector.selectedSegmentTintColor=UIColor(red:0.35,green:0.35,blue:0.15,alpha:1)
+            selector.selectedSegmentTintColor=MeadowPreviewPalette.primary
             selector.heightAnchor.constraint(equalToConstant:44).isActive=true
             selector.addTarget(self,action:#selector(refreshPartySummary),for:.valueChanged)
-            let summary=classSummaries[i];summary.numberOfLines=0;summary.textColor = .white;summary.font = .systemFont(ofSize:16,weight:.semibold)
-            let name=UITextField();name.placeholder="学生姓名（可选）";name.borderStyle = .roundedRect;name.textColor = .white;name.backgroundColor=UIColor(white:1,alpha:0.08);studentNames.append(name)
+            let summary=classSummaries[i];summary.numberOfLines=0;summary.textColor = MeadowPreviewPalette.ink;summary.font = .systemFont(ofSize:16,weight:.semibold)
+            let name=UITextField();name.placeholder="学生姓名（可选）";name.borderStyle = .roundedRect;name.textColor = MeadowPreviewPalette.ink;name.backgroundColor=MeadowPreviewPalette.glass(.medium);studentNames.append(name)
             let profiles=UIButton(type:.system);profiles.setTitle("读取人物档案",for:.normal);profiles.showsMenuAsPrimaryAction=true
             // Only the used slots (of 50) are offered.
             profiles.menu=UIMenu(children:(1...MeadowSlotStore.profileCount).compactMap{slot in
@@ -114,12 +114,12 @@ final class MeadowMapSettingsViewController: UIViewController {
         refreshPartySummary()
         // Optional question bank: roadside-find events become quiz events (format: docs/question-bank-format.md).
         var quizStyle=UIButton.Configuration.gray();quizStyle.image=UIImage(systemName:"questionmark.bubble.fill");quizStyle.imagePadding=8
-        quizStyle.title="导入题库";quizStyle.baseForegroundColor=gold;quizStyle.cornerStyle = .capsule
+        quizStyle.title="导入题库";quizStyle.baseForegroundColor=MeadowPreviewPalette.primary;quizStyle.cornerStyle = .capsule
         quizButton.configuration=quizStyle
         quizButton.addAction(UIAction{[weak self] _ in self?.importQuizBank()},for:.touchUpInside)
-        quizClear.setImage(UIImage(systemName:"xmark.circle.fill"),for:.normal);quizClear.tintColor=UIColor.white.withAlphaComponent(0.5)
+        quizClear.setImage(UIImage(systemName:"xmark.circle.fill"),for:.normal);quizClear.tintColor=MeadowPreviewPalette.muted
         quizClear.addAction(UIAction{[weak self] _ in self?.quizBank=nil;self?.refreshQuizLabel()},for:.touchUpInside)
-        quizLabel.font = .systemFont(ofSize:15,weight:.semibold);quizLabel.textColor=UIColor.white.withAlphaComponent(0.7);quizLabel.numberOfLines=2
+        quizLabel.font = .systemFont(ofSize:15,weight:.semibold);quizLabel.textColor=MeadowPreviewPalette.muted;quizLabel.numberOfLines=2
         let quizRow=UIStackView(arrangedSubviews:[quizButton,quizLabel,quizClear]);quizRow.spacing=10;quizRow.alignment = .center
         right.addArrangedSubview(quizRow);refreshQuizLabel()
         right.addArrangedSubview(startCampaignButton)
@@ -149,7 +149,7 @@ final class MeadowMapSettingsViewController: UIViewController {
     private var quizBank:[QuizQuestion]?
     private func refreshQuizLabel(){
         if let bank=quizBank,!bank.isEmpty {quizLabel.text="✓ \(bank.count) 题 · 路边事件改为答题";quizLabel.textColor=gold;quizClear.isHidden=false}
-        else {quizLabel.text="可选 · 不导入则保持原随机事件";quizLabel.textColor=UIColor.white.withAlphaComponent(0.6);quizClear.isHidden=true}
+        else {quizLabel.text="可选 · 不导入则保持原随机事件";quizLabel.textColor=MeadowPreviewPalette.muted;quizClear.isHidden=true}
     }
     private func importQuizBank(){
         DocumentImportPresenter.shared.present(types:[.plainText,.utf8PlainText,.json,.text]){[weak self] url in
@@ -165,7 +165,7 @@ final class MeadowMapSettingsViewController: UIViewController {
     }
     private func button(_ title:String,action:Selector) -> UIButton {
         let b=UIButton(type:.system);var c=UIButton.Configuration.filled();c.title=title
-        c.baseBackgroundColor=gold;c.baseForegroundColor=UIColor(red:0.12,green:0.17,blue:0.12,alpha:1)
+        c.baseBackgroundColor=MeadowPreviewPalette.primary;c.baseForegroundColor = .white
         c.contentInsets=NSDirectionalEdgeInsets(top:9,leading:10,bottom:9,trailing:10);b.configuration=c
         b.addTarget(self,action:action,for:.touchUpInside);return b
     }
@@ -327,7 +327,7 @@ final class MeadowMapSettingsViewController: UIViewController {
 private final class MeadowMapThumbnail: UIView {
     var map: GeneratedMeadowMap? { didSet { setNeedsDisplay() } }
     override func draw(_ rect:CGRect) {
-        UIColor(red:0.1,green:0.19,blue:0.13,alpha:1).setFill();UIBezierPath(roundedRect:bounds,cornerRadius:12).fill()
+        UIColor(red:0.86,green:0.92,blue:0.88,alpha:0.9).setFill();UIBezierPath(roundedRect:bounds,cornerRadius:12).fill()
         guard let map else { return }
         let scale=min((bounds.width-24)/1280,(bounds.height-24)/CGFloat(map.coordinateHeight))
         func point(_ x:Double,_ y:Double) -> CGPoint { CGPoint(x:bounds.midX+CGFloat(x-640)*scale,y:bounds.midY+CGFloat(y-map.coordinateHeight/2)*scale) }
@@ -412,9 +412,9 @@ private final class MeadowMonsterGalleryController:UIViewController {
         super.viewDidLoad();view.backgroundColor=MeadowPreviewPalette.panel
         for v in [gallery,pick,titleLabel,phase,close,replay]{view.addSubview(v)}
         phase.numberOfLines=2;phase.font=MeadowPreviewPalette.font(17)
-        pick.selectedSegmentIndex=0;pick.selectedSegmentTintColor=MeadowPreviewPalette.gold
+        pick.selectedSegmentIndex=0;pick.selectedSegmentTintColor=MeadowPreviewPalette.primary
         pick.setTitleTextAttributes([.foregroundColor:MeadowPreviewPalette.panel,.font:MeadowPreviewPalette.font(18)],for:.selected)
-        pick.setTitleTextAttributes([.foregroundColor:UIColor.white,.font:MeadowPreviewPalette.font(18)],for:.normal)
+        pick.setTitleTextAttributes([.foregroundColor:MeadowPreviewPalette.ink,.font:MeadowPreviewPalette.font(18)],for:.normal)
         pick.addAction(UIAction{[weak self] _ in guard let self else{return};self.gallery.select(MonsterVisualSpec.ids[self.pick.selectedSegmentIndex])},for:.valueChanged)
         gallery.onPhase={ [weak self] value in self?.phase.text=value+" · 仅外观检视，不消耗行程资源" }
         close.addAction(UIAction{[weak self] _ in self?.dismiss(animated:true)},for:.touchUpInside)
@@ -504,7 +504,7 @@ final class MeadowEncounterEditorViewController:UIViewController {
         stack.addArrangedSubview(MeadowPreviewPalette.label("敌人数量",size:18,weight:.bold));stack.addArrangedSubview(countButton)
         countButton.showsMenuAsPrimaryAction=true;countButton.heightAnchor.constraint(equalToConstant:44).isActive=true
         for index in 0..<3 {
-            let row=UIStackView();row.axis = .vertical;row.spacing=8;row.isLayoutMarginsRelativeArrangement=true;row.layoutMargins=UIEdgeInsets(top:12,left:12,bottom:12,right:12);row.backgroundColor=UIColor.white.withAlphaComponent(0.08);row.layer.cornerRadius=14;row.layer.cornerCurve = .continuous;row.layer.borderWidth=1;row.layer.borderColor=UIColor.white.withAlphaComponent(0.14).cgColor
+            let row=UIStackView();row.axis = .vertical;row.spacing=8;row.isLayoutMarginsRelativeArrangement=true;row.layoutMargins=UIEdgeInsets(top:12,left:12,bottom:12,right:12);row.backgroundColor=MeadowPreviewPalette.glass(.medium);row.layer.cornerRadius=14;row.layer.cornerCurve = .continuous;row.layer.borderWidth=1;row.layer.borderColor=UIColor.white.withAlphaComponent(0.8).cgColor
             let name=MeadowPreviewPalette.label("怪物 \(index+1)",size:18,weight:.bold),button=MeadowPreviewPalette.button(""),detail=MeadowPreviewPalette.label("",size:16)
             button.showsMenuAsPrimaryAction=true;button.heightAnchor.constraint(equalToConstant:44).isActive=true;detail.numberOfLines=0
             row.addArrangedSubview(name);row.addArrangedSubview(button);row.addArrangedSubview(detail)

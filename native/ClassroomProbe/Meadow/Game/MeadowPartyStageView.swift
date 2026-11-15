@@ -143,7 +143,9 @@ final class MeadowPartyStageView:UIView {
         if let view=MeadowSkillGPUView(worldRect:fx.worldRect) { view.layer.zPosition=1000;fx.layer.zPosition=1001;world.insertSubview(view,belowSubview:fx);gpu=view;fx.gpuDrawsSkills=true }
         fx.onFlash={ [weak self] flash in guard let self else { return };self.wash.backgroundColor=flash ?? self.washBase }
         // The dice always roll in the same place: the top middle of the pane, on a dark plate, not above whoever acts.
-        dicePlate.backgroundColor=UIColor(red:0.04,green:0.07,blue:0.05,alpha:0.78);dicePlate.layer.cornerRadius=16;dicePlate.layer.borderWidth=1.5;dicePlate.layer.borderColor=MeadowPreviewPalette.gold.withAlphaComponent(0.8).cgColor
+        // A slim, light frosted strip just behind the dice (not a dark slab over the battlefield).
+        dicePlate.backgroundColor=UIColor.white.withAlphaComponent(0.16);dicePlate.layer.cornerCurve = .continuous;dicePlate.layer.borderWidth=1;dicePlate.layer.borderColor=UIColor.white.withAlphaComponent(0.45).cgColor
+        dicePlate.layer.shadowColor=UIColor.black.cgColor;dicePlate.layer.shadowOpacity=0.18;dicePlate.layer.shadowRadius=10;dicePlate.layer.shadowOffset=CGSize(width:0,height:4)
         dicePlate.isUserInteractionEnabled=false;dicePlate.alpha=0;addSubview(dicePlate);addSubview(diceView)
         clock.onTick={ [weak self] delta in self?.advance(delta) }
         applyFormation(pvp:false)
@@ -212,18 +214,18 @@ final class MeadowPartyStageView:UIView {
         let font=MeadowPreviewPalette.font(34,.semibold)
         let text=NSMutableAttributedString()
         let symbol=unit.kind == .monster ? "flame.fill":"sparkles"
-        if let icon=UIImage(systemName:symbol,withConfiguration:UIImage.SymbolConfiguration(pointSize:28,weight:.bold))?.withTintColor(color,renderingMode:.alwaysOriginal) {
+        if let icon=UIImage(systemName:symbol,withConfiguration:UIImage.SymbolConfiguration(pointSize:28,weight:.bold))?.withTintColor(MeadowPreviewPalette.readable(color),renderingMode:.alwaysOriginal) {
             let attachment=NSTextAttachment(image:icon);attachment.bounds=CGRect(x:0,y:-3,width:icon.size.width,height:icon.size.height)
             text.append(NSAttributedString(attachment:attachment));text.append(NSAttributedString(string:"  "))
         }
-        text.append(NSAttributedString(string:skill,attributes:[.font:font,.foregroundColor:UIColor.white,.kern:1.5]))
-        text.append(NSAttributedString(string:"  "+who,attributes:[.font:MeadowPreviewPalette.font(22,.medium),.foregroundColor:color.withAlphaComponent(0.95)]))
+        text.append(NSAttributedString(string:skill,attributes:[.font:font,.foregroundColor:MeadowPreviewPalette.ink,.kern:1.5]))
+        text.append(NSAttributedString(string:"  "+who,attributes:[.font:MeadowPreviewPalette.font(22,.medium),.foregroundColor:MeadowPreviewPalette.readable(color)]))
         label.attributedText=text;label.sizeToFit()
         let pill=UIView(frame:CGRect(x:0,y:0,width:label.bounds.width+44,height:label.bounds.height+18));pill.isUserInteractionEnabled=false
-        pill.backgroundColor=UIColor(red:0.05,green:0.08,blue:0.07,alpha:0.68);pill.layer.cornerRadius=pill.bounds.height/2;pill.layer.cornerCurve = .continuous
-        pill.layer.borderWidth=1.2;pill.layer.borderColor=color.withAlphaComponent(0.65).cgColor
+        pill.backgroundColor=UIColor.white.withAlphaComponent(0.80);pill.layer.cornerRadius=pill.bounds.height/2;pill.layer.cornerCurve = .continuous
+        pill.layer.borderWidth=1.5;pill.layer.borderColor=UIColor.white.cgColor
         // Explicit shadow path: no offscreen pass to find the shape each frame it drifts.
-        pill.layer.shadowColor=color.cgColor;pill.layer.shadowOpacity=0.35;pill.layer.shadowRadius=14;pill.layer.shadowOffset = .zero
+        pill.layer.shadowColor=color.cgColor;pill.layer.shadowOpacity=0.45;pill.layer.shadowRadius=14;pill.layer.shadowOffset = .zero
         pill.layer.shadowPath=UIBezierPath(roundedRect:pill.bounds,cornerRadius:pill.bounds.height/2).cgPath
         label.center=CGPoint(x:pill.bounds.midX,y:pill.bounds.midY);pill.addSubview(label)
         let top=foot.y-(unit.kind == .monster ? 330:262)
@@ -672,12 +674,15 @@ final class MeadowPartyStageView:UIView {
         dim.backgroundColor=grade>0.004 ? gradeTint:.black
         dim.alpha=max(dim.alpha,CGFloat(grade))
         washBase=washColor;wash.backgroundColor=washColor
-        let diceScale=max(0.9,min(1.7,bounds.width/620)),diceCount=max(1,diceView.dice.count)
+        // Compact: the dice stay readable on the big screen but only take a thin band at the top of the battlefield.
+        let diceScale=max(0.7,min(0.95,bounds.width/900)),diceCount=max(1,diceView.dice.count)
+        let dieSpan=CGFloat(PolyhedralDice.spacing(count:diceCount))*CGFloat(diceCount-1)+CGFloat(PolyhedralDice.radius(count:diceCount))*2.5
+        let plateHeight=CGFloat(PolyhedralDice.radius(count:diceCount))*2.5*diceScale+10
         diceView.transform = .identity;diceView.bounds=CGRect(x:0,y:0,width:220,height:100)
-        diceView.center=CGPoint(x:bounds.midX,y:14+50*diceScale);diceView.transform=CGAffineTransform(scaleX:diceScale,y:diceScale)
+        diceView.center=CGPoint(x:bounds.midX,y:6+plateHeight/2+7*diceScale);diceView.transform=CGAffineTransform(scaleX:diceScale,y:diceScale)
         let diceShown = !diceView.dice.isEmpty && (diceExitAt.map { sceneTime-$0<0.3 } ?? true) && (intent != nil || focus != nil)
-        let plateWidth=min(bounds.width-24,(CGFloat(diceCount)*70+50)*diceScale)
-        dicePlate.frame=CGRect(x:bounds.midX-plateWidth/2,y:8,width:plateWidth,height:100*diceScale+8)
+        let plateWidth=min(bounds.width-24,(dieSpan+28)*diceScale)
+        dicePlate.frame=CGRect(x:bounds.midX-plateWidth/2,y:6,width:plateWidth,height:plateHeight);dicePlate.layer.cornerRadius=plateHeight/2
         dicePlate.alpha += ((diceShown ? 1:0)-dicePlate.alpha)*0.25
         diceView.time=sceneTime;diceView.visibleAge=sceneTime-diceVisibleAt
         diceView.confirmationAge=diceConfirmedAt.map { sceneTime-$0 }
@@ -1025,7 +1030,7 @@ private final class MeadowPartyEffectsView:UIView {
                     ctx.setShadow(offset:.zero,blur:8,color:missileColor.cgColor)
                     ctx.setStrokeColor(missileColor.withAlphaComponent(0.5).cgColor);ctx.setLineWidth(5)
                     ctx.move(to:CGPoint(x:a.x,y:a.y));ctx.addLine(to:CGPoint(x:b.x,y:b.y));ctx.strokePath()
-                    ctx.setStrokeColor(MeadowPreviewPalette.ink.cgColor);ctx.setLineWidth(2)
+                    ctx.setStrokeColor(MeadowPreviewPalette.fxLight.cgColor);ctx.setLineWidth(2)
                     ctx.move(to:CGPoint(x:a.x,y:a.y));ctx.addLine(to:CGPoint(x:b.x,y:b.y));ctx.strokePath();ctx.restoreGState()
                 }
             }
@@ -1037,7 +1042,7 @@ private final class MeadowPartyEffectsView:UIView {
                     ctx.saveGState();ctx.setBlendMode(.plusLighter);ctx.setLineCap(.round)
                     ctx.setShadow(offset:.zero,blur:7,color:MeadowPreviewPalette.gold.cgColor)
                     for (width,alpha) in [(10.0,0.22),(4.0,0.70),(1.5,0.95)] {
-                        ctx.setLineWidth(width);ctx.setStrokeColor(MeadowPreviewPalette.ink.withAlphaComponent(CGFloat(power*alpha)).cgColor)
+                        ctx.setLineWidth(width);ctx.setStrokeColor(MeadowPreviewPalette.fxLight.withAlphaComponent(CGFloat(power*alpha)).cgColor)
                         ctx.beginPath();ctx.move(to:CGPoint(x:points[0].x,y:points[0].y));for p in points.dropFirst() { ctx.addLine(to:CGPoint(x:p.x,y:p.y)) };ctx.strokePath()
                     };ctx.restoreGState()
                 }
@@ -1070,7 +1075,7 @@ private final class MeadowPartyEffectsView:UIView {
                     let path=UIBezierPath();for (j,p) in slash.points.enumerated() { if j==0 { path.move(to:CGPoint(x:p.x,y:p.y)) } else { path.addLine(to:CGPoint(x:p.x,y:p.y)) } }
                     ctx.saveGState();ctx.setBlendMode(.plusLighter);ctx.setLineCap(.round)
                     UIColor.systemGreen.withAlphaComponent(slash.alpha*0.35).setStroke();path.lineWidth=12;path.stroke()
-                    MeadowPreviewPalette.ink.withAlphaComponent(slash.alpha).setStroke();path.lineWidth=3;path.stroke();ctx.restoreGState()
+                    MeadowPreviewPalette.fxLight.withAlphaComponent(slash.alpha).setStroke();path.lineWidth=3;path.stroke();ctx.restoreGState()
                 }
             }
         }

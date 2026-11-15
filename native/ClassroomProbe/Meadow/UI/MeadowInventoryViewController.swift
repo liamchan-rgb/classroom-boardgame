@@ -38,7 +38,7 @@ final class MeadowInventoryViewController:UIViewController,UIDocumentPickerDeleg
     override var prefersStatusBarHidden:Bool { true }
     override var supportedInterfaceOrientations:UIInterfaceOrientationMask { .landscape }
     override func viewDidLoad() {
-        super.viewDidLoad();view.backgroundColor=UIColor(red:0.045,green:0.085,blue:0.058,alpha:1);MeadowGlassBackdrop.install(in:view)
+        super.viewDidLoad();view.backgroundColor=UIColor(red:0.80,green:0.88,blue:0.88,alpha:1);MeadowGlassBackdrop.install(in:view)
         [header,left,middle,right].forEach { MeadowPreviewPalette.stylePanel($0,liveBlur:true);view.addSubview($0) }
         [titleLabel,saveLabel,close,exportButton,importButton].forEach(header.addSubview)
         view.addSubview(footer);right.addSubview(detailScroll);detailScroll.addSubview(detailContent);right.addSubview(primary)
@@ -52,7 +52,7 @@ final class MeadowInventoryViewController:UIViewController,UIDocumentPickerDeleg
         clothes.addTarget(self,action:#selector(changeClothes),for:.valueChanged)
         clothes.setTitleTextAttributes([.font:MeadowPreviewPalette.font(16),.foregroundColor:MeadowPreviewPalette.ink],for:.normal)
         clothes.setTitleTextAttributes([.font:MeadowPreviewPalette.font(16),.foregroundColor:MeadowPreviewPalette.ink],for:.selected)
-        clothes.selectedSegmentTintColor=UIColor(red:0.40,green:0.35,blue:0.19,alpha:1)
+        clothes.selectedSegmentTintColor=MeadowPreviewPalette.primary
         for (index,button) in slots.enumerated() {
             left.addSubview(button);button.titleLabel?.font=MeadowPreviewPalette.font(17);button.titleLabel?.numberOfLines=2;button.contentHorizontalAlignment = .left
             button.setTitleColor(MeadowPreviewPalette.ink,for:.normal);button.layer.borderWidth=1;button.layer.borderColor=MeadowPreviewPalette.border.cgColor;button.layer.cornerRadius=5
@@ -60,7 +60,7 @@ final class MeadowInventoryViewController:UIViewController,UIDocumentPickerDeleg
         }
         middle.addSubview(filterButton);middle.addSubview(list);list.addSubview(empty)
         filterButton.showsMenuAsPrimaryAction=true;list.alwaysBounceVertical=true;left.alwaysBounceVertical=true;detailScroll.alwaysBounceVertical=true
-        for scroll in [left,list,detailScroll] { scroll.indicatorStyle = .white }
+        for scroll in [left,list,detailScroll] { scroll.indicatorStyle = .black }
         refresh()
     }
     func refresh() {
@@ -70,8 +70,8 @@ final class MeadowInventoryViewController:UIViewController,UIDocumentPickerDeleg
         for row in rows { row.removeFromSuperview() };rows=[]
         for entry in entries {
             let row=UIButton(type:.system);row.backgroundColor=MeadowPreviewPalette.panel.withAlphaComponent(0.65)
-            row.backgroundColor=UIColor.white.withAlphaComponent(entry.id==selected ? 0.16:0.08)
-            row.layer.cornerRadius=12;row.layer.cornerCurve = .continuous;row.layer.borderWidth=entry.id==selected ? 2:1;row.layer.borderColor=(entry.id==selected ? MeadowPreviewPalette.gold:UIColor.white.withAlphaComponent(0.16)).cgColor
+            row.backgroundColor=MeadowPreviewPalette.glass(entry.id==selected ? .thick:.thin)
+            row.layer.cornerRadius=12;row.layer.cornerCurve = .continuous;row.layer.borderWidth=entry.id==selected ? 2:1;row.layer.borderColor=(entry.id==selected ? MeadowPreviewPalette.primary:UIColor.white.withAlphaComponent(0.6)).cgColor
             let icon=UIImageView(image:inventoryIcon(entry.id));icon.contentMode = .scaleAspectFit;icon.tag=1
             let name=MeadowPreviewPalette.label(entry.name,size:18,weight:.bold);name.numberOfLines=2;name.tag=2
             let amount=MeadowPreviewPalette.label("背包 ×\(entry.quantity)"+(entry.equipped ? " · 已装备":""),size:15);amount.tag=3
@@ -146,7 +146,7 @@ final class MeadowInventoryViewController:UIViewController,UIDocumentPickerDeleg
             if d.category=="supplies" {
                 let targets=UISegmentedControl(items:["P1","P2"]);targets.selectedSegmentIndex=target=="p1" ? 0:1
                 for state in [UIControl.State.normal,.selected] { targets.setTitleTextAttributes([.font:MeadowPreviewPalette.font(16),.foregroundColor:MeadowPreviewPalette.ink],for:state) }
-                targets.selectedSegmentTintColor=UIColor(red:0.40,green:0.35,blue:0.19,alpha:1)
+                targets.selectedSegmentTintColor=MeadowPreviewPalette.primary
                 targets.addAction(UIAction { [weak self,weak targets] _ in self?.target=targets?.selectedSegmentIndex==1 ? "p2":"p1";self?.view.setNeedsLayout() },for:.valueChanged)
                 targets.frame=CGRect(x:12,y:y,width:w-24,height:36);detailContent.addSubview(targets);y+=46
             }
@@ -232,7 +232,7 @@ final class MeadowCampaignInventoryViewController:UIViewController {
     override var prefersStatusBarHidden:Bool{true}
     override var supportedInterfaceOrientations:UIInterfaceOrientationMask{.landscape}
     override func viewDidLoad(){
-        super.viewDidLoad();view.backgroundColor=UIColor(red:0.045,green:0.085,blue:0.058,alpha:1);MeadowGlassBackdrop.install(in:view)
+        super.viewDidLoad();view.backgroundColor=UIColor(red:0.80,green:0.88,blue:0.88,alpha:1);MeadowGlassBackdrop.install(in:view)
         [header,left,middle,right].forEach{MeadowPreviewPalette.stylePanel($0,liveBlur:true);view.addSubview($0)}
         titleLabel.attributedText=MeadowGlassText.iconLine("bag.fill","行囊",size:24,tint:MeadowPreviewPalette.gold,weight:.heavy)
         saveLabel.textColor=MeadowPreviewPalette.gold;saveLabel.alpha=0
@@ -251,13 +251,13 @@ final class MeadowCampaignInventoryViewController:UIViewController {
         for (i,id) in session.playerIDs.enumerated(){members.insertSegment(withTitle:session.engine.state.units[id]?.shortName ?? id.uppercased(),at:i,animated:false)}
         for control in [members,filterBar] {
             for state in [UIControl.State.normal,.selected] {control.setTitleTextAttributes([.font:MeadowPreviewPalette.font(16,.semibold),.foregroundColor:MeadowPreviewPalette.ink],for:state)}
-            control.selectedSegmentTintColor=UIColor(red:0.55,green:0.44,blue:0.18,alpha:1)
+            control.selectedSegmentTintColor=MeadowPreviewPalette.primary
         }
         members.addAction(UIAction{[weak self] _ in
             guard let self else{return};self.actor=self.session.playerIDs[max(0,self.members.selectedSegmentIndex)];self.target=self.actor;self.selected=nil;self.filter="all";self.onActorChanged?(self.actor);self.refresh()
         },for:.valueChanged)
         for (i,(_,symbol)) in filters.enumerated(){filterBar.insertSegment(with:UIImage(systemName:symbol),at:i,animated:false)}
-        filterBar.selectedSegmentTintColor=UIColor(red:0.55,green:0.44,blue:0.18,alpha:1);filterBar.selectedSegmentIndex=0
+        filterBar.selectedSegmentTintColor=MeadowPreviewPalette.primary;filterBar.selectedSegmentIndex=0
         filterBar.addAction(UIAction{[weak self] _ in guard let self else{return};self.filter=self.filters[max(0,self.filterBar.selectedSegmentIndex)].0;self.selected=nil;self.refresh()},for:.valueChanged)
         for (i,slot) in ItemSlot.allCases.enumerated(){
             left.addSubview(slots[i])
@@ -285,9 +285,9 @@ final class MeadowCampaignInventoryViewController:UIViewController {
             c.titleTextAttributesTransformer=UIConfigurationTextAttributesTransformer{v in var v=v;v.font=MeadowPreviewPalette.font(15,.bold);return v}
             c.subtitleTextAttributesTransformer=UIConfigurationTextAttributesTransformer{v in var v=v;v.font=MeadowPreviewPalette.font(13,.semibold);return v}
             let chosen=e.id==selected
-            c.baseBackgroundColor=chosen ? MeadowPreviewPalette.gold:UIColor.white.withAlphaComponent(0.08)
-            c.baseForegroundColor=chosen ? MeadowPreviewPalette.panel:(e.equipped ? MeadowPreviewPalette.gold:MeadowPreviewPalette.ink)
-            c.background.strokeColor=e.equipped ? MeadowPreviewPalette.gold:UIColor.white.withAlphaComponent(chosen ? 0.6:0.14);c.background.strokeWidth=e.equipped ? 2:1
+            c.baseBackgroundColor=chosen ? MeadowPreviewPalette.primary:MeadowPreviewPalette.glass(.thin)
+            c.baseForegroundColor=chosen ? .white:(e.equipped ? MeadowPreviewPalette.primary:MeadowPreviewPalette.ink)
+            c.background.strokeColor=e.equipped ? MeadowPreviewPalette.gold:UIColor.white.withAlphaComponent(0.7);c.background.strokeWidth=e.equipped ? 2:1
             let row=UIButton(configuration:c)
             row.accessibilityIdentifier="campaignInventoryItem-"+e.id
             row.addAction(UIAction{[weak self] _ in self?.selected=e.id;self?.refresh()},for:.touchUpInside)
@@ -301,14 +301,18 @@ final class MeadowCampaignInventoryViewController:UIViewController {
         health.show("生命",value:unit.health,maximum:a?.maximumHealth ?? 1,color:.systemGreen);ap.show(value:unit.ap,maximum:a?.maximumAP ?? 8)
         let line=NSMutableAttributedString()
         line.append(chip("bitcoinsign.circle.fill","\(unit.coins)",MeadowPreviewPalette.gold));line.append(NSAttributedString(string:"   "))
-        line.append(chip("star.fill","\(unit.score)",UIColor(red:0.55,green:0.85,blue:1,alpha:1)))
-        if let damage=a?.damage,damage != 0 {line.append(NSAttributedString(string:"   "));line.append(chip("burst.fill","+\(damage)",UIColor(red:1,green:0.45,blue:0.4,alpha:1)))}
+        line.append(chip("star.fill","\(unit.score)",UIColor(red:0.12,green:0.45,blue:0.72,alpha:1)))
+        if let damage=a?.damage,damage != 0 {line.append(NSAttributedString(string:"   "));line.append(chip("burst.fill","+\(damage)",UIColor(red:0.78,green:0.20,blue:0.18,alpha:1)))}
         chips.attributedText=line
         let look=unit.appearance ?? PlayerAppearance(body:session.snapshot.appearanceID)
-        hero.image=(actor=="p1" || unit.appearance != nil) ? HeroFrames.inventoryImages(appearanceIndex:HeroFrames.appearanceIDs.firstIndex(of:look.body) ?? 0,weaponID:unit.equipment.weapon,armorID:look.armor(worn:unit.equipment.armor),hair:look.hair,face:look.face).first:nil
-        if hero.image==nil,PixelHeroAtlas.enabled {
-            let slot=session.playerIDs.firstIndex(of:actor) ?? 0
-            hero.image=PixelHeroAtlas.portrait(PixelHeroLook.battle(unit:unit,slot:slot)){[weak self] in self?.refresh()}
+        // Every member gets the same full-body pixel preview (front idle frame, cropped to the figure) wearing what they wear.
+        let slot=session.playerIDs.firstIndex(of:actor) ?? 0
+        let appearanceIndex=HeroFrames.appearanceIDs.firstIndex(of:look.body) ?? 0
+        if PixelHeroAtlas.enabled {
+            let pixel=(actor=="p1" && unit.appearance==nil) ? (HeroFrames.pixelLook(heroIndex:0,appearanceIndex:appearanceIndex,weaponID:unit.equipment.weapon,armorID:look.armor(worn:unit.equipment.armor),hair:look.hair,face:look.face) ?? PixelHeroLook.battle(unit:unit,slot:slot)):PixelHeroLook.battle(unit:unit,slot:slot)
+            hero.image=PixelHeroAtlas.fullBody(pixel){[weak self] in self?.refresh()}
+        } else {
+            hero.image=HeroFrames.inventoryImages(appearanceIndex:appearanceIndex,weaponID:unit.equipment.weapon,armorID:look.armor(worn:unit.equipment.armor),hair:look.hair,face:look.face).first
         }
         let slotIcons:[ItemSlot:String]=[.weapon:"bolt.horizontal.fill",.armor:"shield.lefthalf.filled",.accessory:"sparkle"]
         for (i,slot) in ItemSlot.allCases.enumerated(){
@@ -316,7 +320,7 @@ final class MeadowCampaignInventoryViewController:UIViewController {
             var c=UIButton.Configuration.filled();c.cornerStyle = .large;c.imagePadding=10
             c.image=id.map{MeadowItemIcon.image($0,item:item,side:34)} ?? UIImage(systemName:slotIcons[slot] ?? "circle")
             c.title=item?.name ?? "—";c.baseForegroundColor=item == nil ? MeadowPreviewPalette.muted:MeadowPreviewPalette.ink
-            c.baseBackgroundColor=UIColor.white.withAlphaComponent(0.08);c.background.strokeColor=UIColor.white.withAlphaComponent(0.14);c.background.strokeWidth=1
+            c.baseBackgroundColor=MeadowPreviewPalette.glass(.thin);c.background.strokeColor=UIColor.white.withAlphaComponent(0.7);c.background.strokeWidth=1
             c.titleTextAttributesTransformer=UIConfigurationTextAttributesTransformer{v in var v=v;v.font=MeadowPreviewPalette.font(16,.bold);return v}
             slots[i].configuration=c;slots[i].contentHorizontalAlignment = .leading
             slots[i].accessibilityLabel=CampInventoryProjection.slotTitle(slot)+" "+(item?.name ?? "未装备")
@@ -338,7 +342,7 @@ final class MeadowCampaignInventoryViewController:UIViewController {
         close.frame=CGRect(x:w-62,y:10,width:50,height:44);refillActions.frame=CGRect(x:w-170,y:10,width:100,height:44)
         let mw=min(520,w-600);members.frame=CGRect(x:w-180-mw,y:14,width:mw,height:36)
         let lw2=left.bounds.width
-        hero.frame=CGRect(x:16,y:14,width:lw2-32,height:min(170,left.bounds.height*0.3))
+        hero.frame=CGRect(x:16,y:14,width:lw2-32,height:min(230,left.bounds.height*0.36))
         health.frame=CGRect(x:16,y:hero.frame.maxY+10,width:lw2-32,height:40)
         ap.frame=CGRect(x:16,y:health.frame.maxY+8,width:lw2-32,height:36)
         chips.frame=CGRect(x:16,y:ap.frame.maxY+8,width:lw2-32,height:28)
@@ -365,7 +369,7 @@ final class MeadowCampaignInventoryViewController:UIViewController {
         picture.frame=CGRect(x:(width-110)/2,y:y,width:110,height:110);detailContent.addSubview(picture);y+=122
         let name=MeadowPreviewPalette.label(item.name,size:26,weight:.heavy);name.textAlignment = .center;add(name,gap:4)
         let kind=item.slot.map{CampInventoryProjection.slotTitle($0)} ?? (item.kind == .revivalStone ? "复活":"补给")
-        let tag=UILabel();tag.attributedText=MeadowGlassText.iconLine(item.setID != nil ? "seal.fill":"tag.fill",kind+(item.setID != nil ? " · 套装":"")+"  ×\(unit.inventory[id] ?? 0)",size:15,tint:item.setID != nil ? UIColor(red:0.75,green:0.55,blue:1,alpha:1):MeadowPreviewPalette.muted,weight:.semibold);tag.textAlignment = .center;add(tag,gap:14)
+        let tag=UILabel();tag.attributedText=MeadowGlassText.iconLine(item.setID != nil ? "seal.fill":"tag.fill",kind+(item.setID != nil ? " · 套装":"")+"  ×\(unit.inventory[id] ?? 0)",size:15,tint:item.setID != nil ? UIColor(red:0.50,green:0.30,blue:0.80,alpha:1):MeadowPreviewPalette.muted,weight:.semibold);tag.textAlignment = .center;add(tag,gap:14)
         let summary=CampInventoryProjection.summary(item)
         if !summary.isEmpty{line(MeadowGlassText.iconLine("info.circle.fill",summary,size:17,tint:MeadowPreviewPalette.gold,weight:.semibold))}
         primary.isHidden=false;primary.isEnabled=false
@@ -391,14 +395,14 @@ final class MeadowCampaignInventoryViewController:UIViewController {
         }else{
             let targets=UISegmentedControl(items:session.playerIDs.map{session.engine.state.units[$0]?.shortName ?? $0.uppercased()});targets.selectedSegmentIndex=session.playerIDs.firstIndex(of:target) ?? 0
             for state in [UIControl.State.normal,.selected] {targets.setTitleTextAttributes([.font:MeadowPreviewPalette.font(16,.semibold),.foregroundColor:MeadowPreviewPalette.ink],for:state)}
-            targets.selectedSegmentTintColor=UIColor(red:0.55,green:0.44,blue:0.18,alpha:1)
+            targets.selectedSegmentTintColor=MeadowPreviewPalette.primary
             targets.frame=CGRect(x:20,y:y,width:width-40,height:36);detailContent.addSubview(targets);y+=48
             targets.addAction(UIAction{[weak self,weak targets] _ in guard let self else{return};self.target=self.session.playerIDs[max(0,targets?.selectedSegmentIndex ?? 0)];self.view.setNeedsLayout()},for:.valueChanged)
             primary.configuration?.title=item.kind == .revivalStone ? "复活":"使用"
             if let receiver=session.engine.state.units[target],let a=try? GameRules.attributes(receiver,catalog:session.engine.catalog){
                 let after=item.kind == .revivalStone ? (a.maximumHealth+1)/2:min(a.maximumHealth,receiver.health+item.heal)
                 if after != receiver.health {line(MeadowGlassText.iconLine("heart.fill","\(receiver.health) → \(after)",size:17,tint:.systemGreen,weight:.semibold))}
-                if max(receiver.shield,item.shield) != receiver.shield {line(MeadowGlassText.iconLine("shield.fill","\(receiver.shield) → \(item.shield)",size:17,tint:UIColor(red:0.45,green:0.8,blue:1,alpha:1),weight:.semibold))}
+                if max(receiver.shield,item.shield) != receiver.shield {line(MeadowGlassText.iconLine("shield.fill","\(receiver.shield) → \(item.shield)",size:17,tint:UIColor(red:0.12,green:0.45,blue:0.72,alpha:1),weight:.semibold))}
             }
             do{let command=try session.inventoryItemCommand(actor:actor,item:id,target:target),preview=session.engine.preview(command);primary.isEnabled=preview.allowed
                 if !preview.allowed{line(MeadowGlassText.iconLine("exclamationmark.circle",preview.message,size:15,tint:.orange,weight:.medium))}}

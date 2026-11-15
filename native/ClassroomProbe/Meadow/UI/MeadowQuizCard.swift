@@ -17,19 +17,19 @@ final class MeadowQuizCard: UIView {
         return view
     }
     private func build(_ q: QuizQuestion, place: String) {
-        backgroundColor = UIColor.black.withAlphaComponent(0.45); layer.zPosition = 5200; isUserInteractionEnabled = false
-        MeadowPreviewPalette.stylePanel(card); card.layer.borderColor = MeadowPreviewPalette.gold.withAlphaComponent(0.7).cgColor; card.layer.borderWidth = 1.5
+        backgroundColor = UIColor(red: 0.05, green: 0.15, blue: 0.18, alpha: 0.32); layer.zPosition = 5200; isUserInteractionEnabled = false
+        MeadowPreviewPalette.stylePanel(card); card.backgroundColor = MeadowPreviewPalette.panel; card.layer.borderColor = UIColor.white.cgColor; card.layer.borderWidth = 1.5
         addSubview(card)
         header.attributedText = MeadowGlassText.iconLine("questionmark.bubble.fill", place + " · 答对 +\(q.reward)", size: 18, tint: MeadowPreviewPalette.gold)
-        prompt.text = q.prompt; prompt.font = MeadowPreviewPalette.font(30, .bold); prompt.textColor = .white; prompt.numberOfLines = 0
+        prompt.text = q.prompt; prompt.font = MeadowPreviewPalette.font(30, .bold); prompt.textColor = MeadowPreviewPalette.ink; prompt.numberOfLines = 0
         result.font = MeadowPreviewPalette.font(20, .semibold); result.textColor = MeadowPreviewPalette.ink; result.numberOfLines = 3; result.alpha = 0
         [header, prompt, result].forEach(card.addSubview)
         for (i, text) in q.options.enumerated() {
-            let v = UIView(); v.backgroundColor = UIColor.white.withAlphaComponent(0.10); v.layer.cornerRadius = 14; v.layer.cornerCurve = .continuous
-            v.layer.borderWidth = 1; v.layer.borderColor = UIColor.white.withAlphaComponent(0.18).cgColor
+            let v = UIView(); v.backgroundColor = MeadowPreviewPalette.glass(.medium); v.layer.cornerRadius = 14; v.layer.cornerCurve = .continuous
+            v.layer.borderWidth = 1; v.layer.borderColor = UIColor.white.withAlphaComponent(0.85).cgColor
             let letter = UILabel(); letter.text = Self.letters[i]; letter.textAlignment = .center; letter.font = MeadowPreviewPalette.font(22, .heavy)
-            letter.textColor = UIColor(red: 0.08, green: 0.12, blue: 0.10, alpha: 1); letter.backgroundColor = MeadowPreviewPalette.gold; letter.layer.cornerRadius = 18; letter.clipsToBounds = true; letter.tag = 1
-            let body = UILabel(); body.text = text; body.font = MeadowPreviewPalette.font(24, .semibold); body.textColor = .white; body.numberOfLines = 2; body.adjustsFontSizeToFitWidth = true; body.minimumScaleFactor = 0.6; body.tag = 2
+            letter.textColor = .white; letter.backgroundColor = MeadowPreviewPalette.primary; letter.layer.cornerRadius = 18; letter.clipsToBounds = true; letter.tag = 1
+            let body = UILabel(); body.text = text; body.font = MeadowPreviewPalette.font(24, .semibold); body.textColor = MeadowPreviewPalette.ink; body.numberOfLines = 2; body.adjustsFontSizeToFitWidth = true; body.minimumScaleFactor = 0.6; body.tag = 2
             v.addSubview(letter); v.addSubview(body); card.addSubview(v); optionViews.append(v)
         }
     }
@@ -38,7 +38,7 @@ final class MeadowQuizCard: UIView {
         for (i, v) in optionViews.enumerated() {
             let right = i == q.answer, picked = i == choice
             UIView.animate(withDuration: 0.3) {
-                v.backgroundColor = right ? UIColor.systemGreen.withAlphaComponent(0.55) : picked ? UIColor.systemRed.withAlphaComponent(0.5) : UIColor.white.withAlphaComponent(0.05)
+                v.backgroundColor = right ? UIColor.systemGreen.withAlphaComponent(0.55) : picked ? UIColor.systemRed.withAlphaComponent(0.5) : MeadowPreviewPalette.glass(.thin)
                 v.alpha = right || picked ? 1 : 0.5
             }
             if right { v.transform = CGAffineTransform(scaleX: 0.94, y: 0.94); UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.45, initialSpringVelocity: 0.8) { v.transform = .identity } }

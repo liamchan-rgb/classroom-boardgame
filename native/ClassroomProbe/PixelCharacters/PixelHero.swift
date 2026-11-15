@@ -442,6 +442,41 @@ extension PixelHeroAtlas {
     }
 }
 
+// 行囊里的全身预览：正面待机那一帧，按不透明像素裁到人物（含武器）外框，四周留一点边。
+extension PixelHeroAtlas {
+    private static let fullBodyCache = NSCache<NSString, UIImage>()
+    private static var fullBodyPending = Set<String>()
+    static func fullBody(_ look: PixelHeroLook, ready: @escaping () -> Void = {}) -> UIImage? {
+        if let hit = fullBodyCache.object(forKey: look.key as NSString) { return hit }
+        guard !fullBodyPending.contains(look.key) else { return nil }
+        fullBodyPending.insert(look.key)
+        workQueue.async {
+            let body = cell(look: look, facing: 0, column: 0).flatMap(opaqueCrop)
+            DispatchQueue.main.async {
+                fullBodyPending.remove(look.key)
+                if let body { fullBodyCache.setObject(body, forKey: look.key as NSString); ready() }
+            }
+        }
+        return nil
+    }
+    private static func opaqueCrop(_ image: UIImage) -> UIImage? {
+        guard let cg = image.cgImage else { return nil }
+        let w = cg.width, h = cg.height
+        var pixels = [UInt8](repeating: 0, count: w * h * 4)
+        guard let ctx = CGContext(data: &pixels, width: w, height: h, bitsPerComponent: 8, bytesPerRow: w * 4, space: CGColorSpaceCreateDeviceRGB(),
+                                  bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return nil }
+        ctx.draw(cg, in: CGRect(x: 0, y: 0, width: w, height: h))
+        var minX = w, minY = h, maxX = -1, maxY = -1
+        for y in 0..<h { for x in 0..<w where pixels[(y * w + x) * 4 + 3] > 20 {
+            minX = min(minX, x); maxX = max(maxX, x); minY = min(minY, y); maxY = max(maxY, y)
+        } }
+        guard maxX >= minX, maxY >= minY else { return image }
+        let pad = 8
+        let rect = CGRect(x: max(0, minX - pad), y: max(0, minY - pad), width: min(w, maxX + pad + 1) - max(0, minX - pad), height: min(h, maxY + pad + 1) - max(0, minY - pad))
+        return cg.cropping(to: rect).map { UIImage(cgImage: $0) }
+    }
+}
+
 extension Array {
     subscript(safe i: Int) -> Element? { indices.contains(i) ? self[i] : nil }
 }

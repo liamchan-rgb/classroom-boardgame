@@ -27,15 +27,15 @@ final class MeadowTurnOrderView: UIView {
 
     override init(frame: CGRect) {
         super.init(frame: frame); MeadowPreviewPalette.stylePanel(self)
-        round.font = .systemFont(ofSize: 15, weight: .heavy); round.textColor = MeadowPreviewPalette.gold; round.textAlignment = .center
-        round.layer.cornerRadius = 9; round.layer.borderWidth = 1.5; round.layer.borderColor = MeadowPreviewPalette.gold.withAlphaComponent(0.7).cgColor
-        round.backgroundColor = UIColor(red: 0.23, green: 0.19, blue: 0.07, alpha: 1); round.clipsToBounds = true
-        rail.backgroundColor = UIColor.black.withAlphaComponent(0.55); rail.layer.cornerRadius = 4
+        round.font = .systemFont(ofSize: 15, weight: .heavy); round.textColor = .white; round.textAlignment = .center
+        round.layer.cornerRadius = 9; round.layer.borderWidth = 1.5; round.layer.borderColor = UIColor.white.withAlphaComponent(0.8).cgColor
+        round.backgroundColor = MeadowPreviewPalette.primary; round.clipsToBounds = true
+        rail.backgroundColor = MeadowPreviewPalette.glass(.medium); rail.layer.cornerRadius = 4
         rail.layer.borderWidth = 1; rail.layer.borderColor = MeadowPreviewPalette.border.cgColor
         fill.backgroundColor = MeadowPreviewPalette.gold; fill.layer.cornerRadius = 4
         fill.layer.shadowColor = MeadowPreviewPalette.gold.cgColor; fill.layer.shadowRadius = 6; fill.layer.shadowOpacity = 0.8; fill.layer.shadowOffset = .zero
-        spark.backgroundColor = .white; spark.layer.cornerRadius = 3
-        spark.layer.shadowColor = UIColor.white.cgColor; spark.layer.shadowRadius = 5; spark.layer.shadowOpacity = 1; spark.layer.shadowOffset = .zero
+        spark.backgroundColor = MeadowPreviewPalette.primary; spark.layer.cornerRadius = 3
+        spark.layer.shadowColor = MeadowPreviewPalette.primary.cgColor; spark.layer.shadowRadius = 5; spark.layer.shadowOpacity = 1; spark.layer.shadowOffset = .zero
         [rail, fill, spark, round].forEach(addSubview)
         accessibilityIdentifier = "meadowTurnOrder"
     }
@@ -151,12 +151,12 @@ private final class MeadowTurnOrderToken: UIView {
         // The short name: "P1" for heroes, the species for monsters.
         name.text = entry.name.components(separatedBy: " · ").first ?? entry.name
         portrait.layer.minificationFilter = .nearest
-        name.textColor = status == .current ? MeadowPreviewPalette.gold : MeadowPreviewPalette.ink
+        name.textColor = status == .current ? MeadowPreviewPalette.primary : MeadowPreviewPalette.ink
         if let face = entry.portrait { portrait.image = face; portrait.tintColor = nil }
         else if entry.id.hasPrefix("p"), let number = Int(entry.id.dropFirst()) { portrait.image = Self.portraits[(number - 1) % Self.portraits.count]; portrait.tintColor = nil }
         else { portrait.image = UIImage(systemName: "pawprint.fill"); portrait.tintColor = UIColor(red: 0.93, green: 0.45, blue: 0.38, alpha: 1) }
         let side: UIColor = entry.enemy ? UIColor(red: 0.92, green: 0.36, blue: 0.30, alpha: 1) : UIColor(red: 0.40, green: 0.85, blue: 0.56, alpha: 1)
-        circle.layer.borderColor = (status == .current ? MeadowPreviewPalette.gold : targeted ? UIColor.white : status == .down ? UIColor.gray : side).cgColor
+        circle.layer.borderColor = (status == .current ? MeadowPreviewPalette.gold : targeted ? MeadowPreviewPalette.primary : status == .down ? UIColor.gray : side).cgColor
         circle.layer.borderWidth = status == .current ? 3.5 : targeted ? 3 : 2
         circle.layer.shadowColor = MeadowPreviewPalette.gold.cgColor; circle.layer.shadowOffset = .zero; circle.layer.shadowRadius = 9
         circle.layer.shadowOpacity = status == .current ? 0.95 : 0

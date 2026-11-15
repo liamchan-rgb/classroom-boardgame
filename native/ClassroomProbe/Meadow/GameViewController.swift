@@ -112,12 +112,28 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     /// After a full-party wipe was turned into a retreat: close the battle and say so on the TV.
     func classroomShowRetreat(){
         battleGainBase=nil
-        classroomFinishBattleIfReady()
-        guard let campaign else{return}
-        MeadowGainPopup.present(in:view,title:"小队倒地",subtitle:"已撤回地图",gains:[],catalog:campaign.engine.catalog,emptyText:"每人以 1 点生命继续前进，记得用行囊里的药水恢复。"){[weak self] in self?.classroomOverlayDirty=true}
+        showBattleEndCard(title:"小队倒地",subtitle:"即将撤回地图",gains:[],emptyText:"每人以 1 点生命继续前进，记得用行囊里的药水恢复。")
     }
     func classroomFinishBattleIfReady(){
+        // The end-of-battle card is shown over the battlefield; the map comes back once it is put away.
+        guard !battleEndPending,!battleEndCardOpen else{return}
         if classroomMode,battlePreviewActive,!classroomBusy,campaign?.engine.state.battle==nil {setBattlePreviewActive(false)}
+    }
+    func classroomLeaveTap()->Bool {battlePreviewView?.classroomLeaveTap() ?? false}
+    /// The party left a fight on purpose: say so over the battlefield, then return to the map.
+    func classroomShowLeftBattle(){
+        battleGainBase=nil
+        showBattleEndCard(title:"已撤离战斗",subtitle:"怪物仍留在原地",gains:[],emptyText:"小队保留当前生命返回地图，准备好后可以再来挑战。")
+    }
+    /// The battle-end card over the still-open battlefield; closing it returns to the map.
+    private func showBattleEndCard(title:String,subtitle:String?,gains:[MeadowGain],emptyText:String?) {
+        guard let campaign else{return}
+        battleEndPending=false;battleEndCardOpen=true
+        MeadowGainPopup.present(in:view,title:title,subtitle:subtitle,gains:gains,catalog:campaign.engine.catalog,emptyText:emptyText){[weak self] in
+            guard let self else{return}
+            self.battleEndCardOpen=false;self.classroomOverlayDirty=true
+            if self.battlePreviewActive,self.campaign?.engine.state.battle==nil {self.setBattlePreviewActive(false)}
+        }
     }
     private let campaign:MeadowCampaignSession?
     private let campaignRefill=MeadowPreviewPalette.button("补充移动")
@@ -179,6 +195,8 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     private let zoomButton = ParchmentButton(symbol: .zoom)
     private let shadowLabButton = UIButton(type: .system)
     private var battleGainBase:GameState?
+    /// A battle ended and its card is about to show / is showing over the battlefield: keep the battle view up until it is put away.
+    private var battleEndPending=false,battleEndCardOpen=false
     private let gaitTestButton = UIButton(type: .system)
     private let battlePreviewButton = UIButton(type: .system)
     private var battlePreviewView: MeadowBattlePreviewView?
@@ -293,8 +311,8 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         if !classroomMode {view.addSubview(randomMapButton)}
         randomMapSummary.isHidden=previewMap == nil
         randomMapSummary.text=previewMap.map { "地点预览 · \($0.map.nodes.count)节点 · 战斗与奖励暂不结算" }
-        randomMapSummary.textColor=UIColor(red:1,green:0.94,blue:0.75,alpha:1)
-        randomMapSummary.backgroundColor=UIColor(red:0.09,green:0.16,blue:0.11,alpha:0.9)
+        randomMapSummary.textColor=MeadowPreviewPalette.ink
+        randomMapSummary.backgroundColor=MeadowPreviewPalette.panel
         randomMapSummary.font = .boldSystemFont(ofSize:14)
         randomMapSummary.textAlignment = .center;randomMapSummary.numberOfLines=2
         if !classroomMode {view.addSubview(randomMapSummary)}
@@ -302,8 +320,8 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
             for control in [shadowLabButton,gaitTestButton,battlePreviewButton,p1AppearanceButton] { control.isHidden=true }
         }
         for label in [metricsLabel, discoveryLabel] {
-            label.textColor = UIColor(red: 1, green: 0.94, blue: 0.75, alpha: 1)
-            label.backgroundColor = UIColor(red: 0.17, green: 0.22, blue: 0.17, alpha: 0.82)
+            label.textColor = MeadowPreviewPalette.ink
+            label.backgroundColor = MeadowPreviewPalette.panel
             label.font = .monospacedDigitSystemFont(ofSize: 12, weight: .medium)
             label.textAlignment = .center
             label.layer.cornerRadius = 6
@@ -1009,9 +1027,13 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         guard receipt.after.battle==nil,let base=battleGainBase ?? (receipt.before.battle != nil ? receipt.before:nil) else{return}
         battleGainBase=nil
         let won=receipt.after.players.contains(where:\.isAlive)
-        // After the last blow and its death effect have played.
+        // Fled on purpose (no winner): that card is shown by classroomShowLeftBattle.
+        if won,receipt.after.lastOutcome?.winners.isEmpty==true {return}
+        // After the last blow and its death effect have played, still over the battlefield.
+        battleEndPending=true
         DispatchQueue.main.asyncAfter(deadline:.now()+1.6){[weak self] in
-            self?.showGains(title:won ? "战斗胜利":"小队倒地",subtitle:won ? "战利品已放入各自行囊":nil,since:base,emptyText:won ? "这场战斗没有掉落物品。":"全员倒地，行程结束。")
+            guard let self,let campaign=self.campaign else{self?.battleEndPending=false;return}
+            self.showBattleEndCard(title:won ? "战斗胜利":"小队倒地",subtitle:won ? "战利品已放入各自行囊":nil,gains:MeadowGain.between(base,campaign.engine.state),emptyText:won ? "这场战斗没有掉落物品。":"全员倒地，行程结束。")
         }
     }
     private func showCampaignMessage(_ text:String) {
@@ -1311,7 +1333,7 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         do{try prepareProfileVisuals()}catch{showCampaignMessage(error.localizedDescription)}
         for control in [shadowLabButton,gaitTestButton,battlePreviewButton,p1AppearanceButton] {control.isHidden=true}
         let state=campaign.engine.state,players=state.players
-        randomMapSummary.attributedText=hudLine([("map.fill","\(state.map.revealed.count)/\(state.map.nodes.count)",MeadowPreviewPalette.ink),("bitcoinsign.circle.fill","\(players.reduce(0){$0+$1.coins})",MeadowPreviewPalette.gold),("star.fill","\(players.reduce(0){$0+$1.score})",UIColor(red:0.55,green:0.85,blue:1,alpha:1))]+(campaign.cleared ? [("checkmark.seal.fill","清理完成",UIColor.systemGreen)]:[]))
+        randomMapSummary.attributedText=hudLine([("map.fill","\(state.map.revealed.count)/\(state.map.nodes.count)",MeadowPreviewPalette.ink),("bitcoinsign.circle.fill","\(players.reduce(0){$0+$1.coins})",MeadowPreviewPalette.gold),("star.fill","\(players.reduce(0){$0+$1.score})",UIColor(red:0.12,green:0.45,blue:0.72,alpha:1))]+(campaign.cleared ? [("checkmark.seal.fill","清理完成",UIColor.systemGreen)]:[]))
         if scene.selectingCampaignNode {randomMapSummary.attributedText=hudLine([("mappin.and.ellipse","选择建筑",UIColor.orange)])}
         let busy=campaign.travel != nil || state.battle != nil || campaign.isCompleted
         campaignRefill.isEnabled = !campaign.isCompleted && !campaign.isMoving && state.battle==nil && campaign.movementRefillCost>0

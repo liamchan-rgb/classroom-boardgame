@@ -15,12 +15,12 @@ final class MeadowLoadingView: UIView {
         // Keep the first SpriteKit/Metal frames eligible for presentation under
         // the loading page; readiness must not depend on an occluded surface.
         isOpaque = false
-        backgroundColor = UIColor(red: 0.10, green: 0.15, blue: 0.10, alpha: 0.99)
+        backgroundColor = UIColor(red: 0.84, green: 0.91, blue: 0.91, alpha: 0.99)
         accessibilityIdentifier = "meadowLoading"
         let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "?"
         title.text = "林间行旅 · 诊断 b\(build)"
         title.font = .systemFont(ofSize: 25, weight: .semibold)
-        title.textColor = UIColor(red: 1, green: 0.94, blue: 0.76, alpha: 1)
+        title.textColor = MeadowPreviewPalette.ink
         status.font = .monospacedDigitSystemFont(ofSize: 14, weight: .regular)
         status.numberOfLines = 0
         status.lineBreakMode = .byWordWrapping
@@ -28,8 +28,8 @@ final class MeadowLoadingView: UIView {
         status.accessibilityIdentifier = "loadingStatus"
         for label in [title, status] { label.textAlignment = .center }
         spinner.color = title.textColor
-        bar.progressTintColor = .init(red: 0.86, green: 0.72, blue: 0.42, alpha: 1)
-        bar.trackTintColor = .init(white: 1, alpha: 0.15)
+        bar.progressTintColor = MeadowPreviewPalette.primary
+        bar.trackTintColor = MeadowPreviewPalette.ink.withAlphaComponent(0.12)
         bar.accessibilityIdentifier = "loadingProgress"
         retry.setTitle("重新加载", for: .normal)
         retry.addTarget(self, action: #selector(retryLoading), for: .touchUpInside)

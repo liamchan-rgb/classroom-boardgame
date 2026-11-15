@@ -254,7 +254,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
         guard !busy,!modalOpen else{message="请等待当前动作结束或关闭后台对话框。";return}
         if campaign?.engine.state.battle != nil {
             if let hit=try? renderer?.classroomBattleHit(at:point,role:.teacher) {
-                switch hit {case .action(let action):battle(action);case .target(let id):chooseBattleTarget(id);case .toggleMap:try? renderer?.classroomToggleBattleMap(role:.teacher)}
+                switch hit {case .action(let action):battle(action);case .target(let id):chooseBattleTarget(id);case .toggleMap:try? renderer?.classroomToggleBattleMap(role:.teacher);case .leave:if renderer?.classroomLeaveTap()==true {leaveBattle()} else {message="再点一次「撤离」确认离开战斗。";revision += 1}}
             }
             return
         }
@@ -321,6 +321,19 @@ final class MeadowTeacherCoordinator:ObservableObject {
     func award(){
         guard !busy,let c=campaign else{return}
         do{try backend.apply(.reward(actors:[c.selectedPlayerID],value:ResourceReward(coins:10)),role:.teacher);renderer?.classroomRefresh();message="已向选中成员发放10金币。";revision += 1}catch{message=error.localizedDescription}
+    }
+    /// Leave the current monster fight: no winner, no drops; heroes keep their health and the monsters stay for later.
+    func leaveBattle(){
+        guard ready,!busy,let c=campaign,c.canLeaveBattle else{return}
+        do{
+            enemyWork?.cancel();enemyWork=nil;aiKey=nil
+            let paused=c.engine.state.pauseReasons.contains(.manual)
+            if paused {try c.engine.setPause(.manual,enabled:false)}
+            try c.leaveBattle()
+            if paused {renderer?.classroomResumeRenderer()}
+            renderer?.classroomRefresh();renderer?.classroomShowLeftBattle()
+            message="小队已撤离战斗，怪物仍留在原地，可稍后再来挑战。";revision += 1
+        }catch{message=error.localizedDescription}
     }
     func toggleBattlePause(){
         guard !busy,let c=campaign,c.engine.state.battle != nil else{return}

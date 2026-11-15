@@ -105,29 +105,30 @@ private struct ClassroomScoreboard:View {
                 Spacer()
                 Label("积分",systemImage:"star.fill").frame(width:150*unit,alignment:.trailing)
                 Label("金币",systemImage:"bitcoinsign.circle.fill").frame(width:150*unit,alignment:.trailing)
-            }.font(.system(size:20*unit,weight:.bold,design:.rounded)).foregroundStyle(.white.opacity(0.9))
+            }.font(.system(size:20*unit,weight:.bold,design:.rounded)).foregroundStyle(GameTheme.muted)
             ForEach(Array(ranked.enumerated()),id:\.element.id){rank,u in
                 let seat=(players.firstIndex{$0.id==u.id} ?? rank)
                 HStack(spacing:14*unit){
                     Text("\(rank+1)").font(.system(size:24*unit,weight:.heavy,design:.rounded)).frame(width:34*unit)
-                        .foregroundStyle(rank==0 ? Color(red:1,green:0.84,blue:0.35):.white.opacity(0.8))
+                        .foregroundStyle(rank==0 ? Color(red:0.74,green:0.52,blue:0.12):GameTheme.muted)
                     Text(String(u.shortName.prefix(1)).uppercased()).font(.system(size:20*unit,weight:.heavy,design:.rounded))
                         .frame(width:40*unit,height:40*unit).background(Self.tints[seat%Self.tints.count],in:Circle())
                     Text(u.name).font(.system(size:26*unit,weight:.bold,design:.rounded)).lineLimit(1).minimumScaleFactor(0.6)
                     Spacer(minLength:0)
-                    Text("\(u.score)").frame(width:150*unit,alignment:.trailing).foregroundStyle(Color(red:1,green:0.86,blue:0.45))
-                    Text("\(u.coins)").frame(width:150*unit,alignment:.trailing).foregroundStyle(Color(red:0.98,green:0.80,blue:0.40))
+                    Text("\(u.score)").frame(width:150*unit,alignment:.trailing).foregroundStyle(GameTheme.primary)
+                    Text("\(u.coins)").frame(width:150*unit,alignment:.trailing).foregroundStyle(Color(red:0.74,green:0.52,blue:0.12))
                 }
-                .font(.system(size:28*unit,weight:.heavy,design:.rounded)).monospacedDigit().foregroundStyle(.white)
+                .font(.system(size:28*unit,weight:.heavy,design:.rounded)).monospacedDigit().foregroundStyle(GameTheme.ink)
                 .padding(.horizontal,16*unit).padding(.vertical,8*unit)
-                .background(RoundedRectangle(cornerRadius:16*unit,style:.continuous).fill(.white.opacity(rank==0 ? 0.16:0.08)))
+                .background(RoundedRectangle(cornerRadius:16*unit,style:.continuous).fill(.white.opacity(rank==0 ? 0.7:0.42)))
             }
-            if players.isEmpty {Text("还没有进行中的行程").font(.system(size:22*unit)).foregroundStyle(.white.opacity(0.7))}
+            if players.isEmpty {Text("还没有进行中的行程").font(.system(size:22*unit)).foregroundStyle(GameTheme.muted)}
         }
         .padding(26*unit).frame(width:820*unit)
-        // A static dark glass (no live blur over the moving game, which would cost every frame).
-        .background(RoundedRectangle(cornerRadius:28*unit,style:.continuous).fill(Color(red:0.04,green:0.08,blue:0.07).opacity(0.86)))
-        .overlay(RoundedRectangle(cornerRadius:28*unit,style:.continuous).stroke(LinearGradient(colors:[.white.opacity(0.45),.white.opacity(0.08)],startPoint:.top,endPoint:.bottom),lineWidth:1.5*unit))
+        // Static light glass like the console (no live blur over the moving game, which would cost every frame);
+        // thick sheet, thinner rows inside it.
+        .background(RoundedRectangle(cornerRadius:28*unit,style:.continuous).fill(LinearGradient(colors:[Color(red:0.95,green:0.98,blue:0.98).opacity(0.94),Color(red:0.90,green:0.95,blue:0.96).opacity(0.90)],startPoint:.top,endPoint:.bottom)))
+        .overlay(RoundedRectangle(cornerRadius:28*unit,style:.continuous).stroke(.white,lineWidth:1.5*unit))
         .transition(.scale(scale:0.92).combined(with:.opacity))
     }
 }
