@@ -52,7 +52,6 @@ import MeadowWorldSupport
         guard let end=endDate,end<=Date() else{return}
         endDate=nil;pausedRemaining=nil;visible=false
     }
-    }
     /// "45" → 45 s, "1:30" → 90 s, "+10" / "-10" → adjust the running timer. Returns false for anything else.
     @discardableResult func apply(_ raw:String)->Bool {
         let text=raw.trimmingCharacters(in:.whitespaces).replacingOccurrences(of:"：",with:":")
