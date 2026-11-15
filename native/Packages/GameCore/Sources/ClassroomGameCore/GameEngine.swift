@@ -233,9 +233,9 @@ struct Evaluation {
         case .campaignLottery(let actor, let tier): try campaignLottery(actor: actor, tier: tier)
         case .answerCampaignQuiz(let actor, let correct, let coins): try answerCampaignQuiz(actor: actor, correct: correct, coins: coins)
         case .retreatAfterDefeat:
-            guard let battle = state.battle, battle.kind == .pve, !state.players.contains(where: \.isAlive) else { throw GameError("只有全队倒地时才能撤回地图。") }
+            guard let battle = state.battle, battle.kind == .pve, !state.players.contains(where: { $0.isAlive && battle.queue.contains($0.id) }) else { throw GameError("只有全队倒地时才能撤回地图。") }
             try finish(winner: "monsters", byScore: false)
-            for player in state.players {
+            for player in state.players where battle.queue.contains(player.id) {
                 var unit = player; unit.health = 1; unit.shield = 0; unit.damageBuff = nil; unit.canActFromRound = 1
                 state.units[unit.id] = unit
             }
@@ -296,6 +296,11 @@ struct Evaluation {
         if kind == .pve {
             guard !monsters.isEmpty, Set(monsters).count == monsters.count else { throw GameError("PVE需要有效的敌人列表。") }
             for id in monsters { let enemy = try unit(id); guard enemy.kind == .monster && enemy.isAlive else { throw GameError("战败怪物不能自动重新加入。") } }
+            // Only the heroes standing where the monsters are join (split teams fight their own encounters);
+            // if nobody stands there (scripted/training fights), everyone joins as before.
+            let fields = Set(try monsters.map { try unit($0).nodeID })
+            let present = state.players.filter { fields.contains($0.nodeID) }.map(\.id)
+            if !present.isEmpty { participants = present }
             participants += monsters
         } else {
             guard monsters.isEmpty else { throw GameError("PVP不加入怪物。") }
@@ -637,7 +642,8 @@ struct Evaluation {
 
     mutating func checkOutcome() throws {
         guard let battle = state.battle else { return }
-        let players = state.players.filter(\.isAlive)
+        // Only the fighters in this battle decide it (other teams elsewhere on the map stay out).
+        let players = state.players.filter { $0.isAlive && battle.queue.contains($0.id) }
         if battle.kind == .pve {
             let enemies = battle.queue.compactMap { state.units[$0] }.filter { $0.kind == .monster && $0.isAlive }
             if enemies.isEmpty { try finish(winner: "players", byScore: false); return }

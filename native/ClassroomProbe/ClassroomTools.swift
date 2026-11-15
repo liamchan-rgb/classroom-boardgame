@@ -197,14 +197,14 @@ struct ClassTimerPanel:View {
 // MARK: - Keyboard shortcuts
 
 enum ClassroomShortcutAction:String,CaseIterable,Identifiable {
-    case select1,select2,select3,select4,select5,select6,select7,award,attack,endTurn,pauseResume,pageBack,pageForward,openTimer,timerStartPause,timerPlus10,toggleScoreboard
+    case select1,select2,select3,select4,select5,select6,select7,award,grantMovement,attack,endTurn,pauseResume,pageBack,pageForward,openTimer,timerStartPause,timerPlus10,toggleScoreboard
     /// Works everywhere, also over the pack / shop / sheets.
     var global:Bool {[.openTimer,.timerStartPause,.timerPlus10,.toggleScoreboard].contains(self)}
     var id:String {rawValue}
     var title:String {
         switch self {
         case .select1,.select2,.select3,.select4,.select5,.select6,.select7:return "选择第\(seat!)位成员"
-        case .award:return "奖励 10 金币";case .attack:return "战斗：普通攻击";case .endTurn:return "战斗：结束行动"
+        case .award:return "发金币（按下后输数字回车；连按两下按输入框）";case .grantMovement:return "发体力/移动（按下后输数字回车；连按两下按输入框）";case .attack:return "战斗：普通攻击";case .endTurn:return "战斗：结束行动"
         case .pauseResume:return "暂停 / 继续";case .pageBack:return "绘本上一页";case .pageForward:return "绘本下一页"
         case .openTimer:return "打开计时器";case .timerStartPause:return "计时开始 / 暂停";case .timerPlus10:return "计时 +10 秒"
         case .toggleScoreboard:return "显示 / 隐藏记分板"
@@ -213,7 +213,7 @@ enum ClassroomShortcutAction:String,CaseIterable,Identifiable {
     var icon:String {
         switch self {
         case .select1,.select2,.select3,.select4,.select5,.select6,.select7:return "person.fill"
-        case .award:return "bitcoinsign.circle";case .attack:return "burst";case .endTurn:return "forward.end";case .pauseResume:return "playpause"
+        case .award:return "bitcoinsign.circle";case .grantMovement:return "figure.walk";case .attack:return "burst";case .endTurn:return "forward.end";case .pauseResume:return "playpause"
         case .pageBack:return "chevron.left";case .pageForward:return "chevron.right";case .openTimer:return "timer";case .timerStartPause:return "playpause.circle"
         case .timerPlus10:return "plus.circle";case .toggleScoreboard:return "list.number"
         }
@@ -221,7 +221,7 @@ enum ClassroomShortcutAction:String,CaseIterable,Identifiable {
     var seat:Int? {["select1":1,"select2":2,"select3":3,"select4":4,"select5":5,"select6":6,"select7":7][rawValue]}
     var defaultKey:String {
         switch self {
-        case .select1:return "1";case .select2:return "2";case .award:return "g";case .attack:return "a";case .endTurn:return "e"
+        case .select1:return "1";case .select2:return "2";case .award:return "g";case .grantMovement:return "m";case .attack:return "a";case .endTurn:return "e"
         case .pauseResume:return " ";case .pageBack:return "←";case .pageForward:return "→";case .openTimer:return "t";case .toggleScoreboard:return "s"
         default:return ""
         }
@@ -323,5 +323,89 @@ struct ClassroomScoreboardButton:View {
     var body:some View {
         Button{action()}label:{Label("记分",systemImage:overlays.scoreboard ? "list.number.rtl":"list.number")}
             .buttonStyle(GlassIconButtonStyle(tint:overlays.scoreboard ? .orange:GameTheme.primary,prominent:overlays.scoreboard))
+    }
+}
+
+
+// MARK: - Quick grant by keyboard
+
+/// G (coins) / M (movement): press once, type a number, Enter grants it; press twice quickly to grant the book bar's
+/// amounts. Recipients: the ticked players on the book tab, otherwise the selected player.
+enum ClassroomGrantKind:Equatable {case coins,movement
+    var title:String {self == .coins ? "金币":"体力（移动步数）"}
+    var icon:String {self == .coins ? "bitcoinsign.circle.fill":"figure.walk"}
+}
+struct ClassroomGrantCapture:Equatable {var kind:ClassroomGrantKind;var digits:String}
+
+extension MeadowTeacherCoordinator {
+    var grantTargets:[String] {
+        guard let c=campaign else{return []}
+        if bookTabActive {return c.engine.state.players.map(\.id).filter{grantDraft.recipients.contains($0)}}
+        return [c.selectedPlayerID]
+    }
+    /// The grant key was pressed.
+    func grantKey(_ kind:ClassroomGrantKind) {
+        let now=Date()
+        if let last=lastGrantKey,last.kind==kind,now.timeIntervalSince(last.at)<0.45 {
+            // Double press: the amounts from the book bar's fields.
+            lastGrantKey=nil;grantCapture=nil
+            let amount=BookGrantDraft.amount(kind == .coins ? grantDraft.coins:grantDraft.steps)
+            grantNow(kind,amount:amount);return
+        }
+        lastGrantKey=(kind,now);grantCapture=ClassroomGrantCapture(kind:kind,digits:"")
+        message="输入\(kind.title)数量后按回车发放（Esc取消）"
+    }
+    func grantCaptureDigit(_ d:Character) {guard var c=grantCapture,c.digits.count<5 else{return};c.digits.append(d);grantCapture=c}
+    func grantCaptureBackspace() {guard var c=grantCapture else{return};if !c.digits.isEmpty{c.digits.removeLast()};grantCapture=c}
+    func grantCaptureCancel() {grantCapture=nil;lastGrantKey=nil}
+    func grantCaptureCommit() {
+        guard let c=grantCapture else{return}
+        grantCapture=nil;lastGrantKey=nil
+        grantNow(c.kind,amount:Int(c.digits) ?? 0)
+    }
+    private func grantNow(_ kind:ClassroomGrantKind,amount:Int) {
+        let ids=grantTargets
+        guard amount>0 else{message="数量为0，未发放。";return}
+        guard !ids.isEmpty else{message="请先选择发放对象。";return}
+        grantBookPlayers(ids,movement:kind == .movement ? amount:0,coins:kind == .coins ? amount:0)
+    }
+
+    // Seat numbers: which number key (1–7) means which player; changed by long-pressing a player in the grant picker.
+    private var seatKey:String {"classroom.seats."+(campaign?.engine.state.gameID ?? "none")}
+    func seatNumber(_ id:String)->Int {
+        let ids=campaign?.engine.state.players.map(\.id) ?? []
+        let saved=(UserDefaults.standard.dictionary(forKey:seatKey) as? [String:Int]) ?? [:]
+        return saved[id] ?? ((ids.firstIndex(of:id) ?? 0)+1)
+    }
+    func player(forSeat n:Int)->String? {campaign?.engine.state.players.map(\.id).first{seatNumber($0)==n}}
+    /// Give `id` number `n`; whoever had `n` takes `id`'s old number.
+    func setSeatNumber(_ id:String,_ n:Int) {
+        let ids=campaign?.engine.state.players.map(\.id) ?? []
+        var all=Dictionary(uniqueKeysWithValues:ids.map{($0,seatNumber($0))})
+        let old=all[id] ?? n
+        if let other=all.first(where:{$0.value==n && $0.key != id})?.key {all[other]=old}
+        all[id]=n
+        UserDefaults.standard.set(all,forKey:seatKey);revision += 1
+        message="已把编号 \(n) 给 \(campaign?.engine.state.units[id]?.shortName ?? id)。"
+    }
+}
+
+/// The small "type a number" banner while a grant key is waiting for its amount.
+struct ClassroomGrantCaptureBanner:View {
+    @ObservedObject var game:MeadowTeacherCoordinator
+    var body:some View {
+        if let c=game.grantCapture {
+            HStack(spacing:10){
+                Image(systemName:c.kind.icon).font(.title2.bold()).foregroundStyle(GameTheme.accent)
+                Text("发\(c.kind.title)").font(.headline)
+                Text(c.digits.isEmpty ? "输入数字":c.digits).font(.system(size:28,weight:.heavy,design:.rounded)).monospacedDigit()
+                    .foregroundStyle(c.digits.isEmpty ? GameTheme.muted:GameTheme.ink).frame(minWidth:80)
+                Text("→ \(game.grantTargets.count)人 · 回车发放 · Esc取消").font(.subheadline).foregroundStyle(GameTheme.muted)
+            }
+            .padding(.horizontal,18).padding(.vertical,10)
+            .background(GlassFill.panel,in:Capsule()).overlay(Capsule().stroke(.white.opacity(0.8),lineWidth:1))
+            .shadow(color:.black.opacity(0.12),radius:12,y:4)
+            .transition(.move(edge:.top).combined(with:.opacity))
+        }
     }
 }

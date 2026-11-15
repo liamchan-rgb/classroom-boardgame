@@ -10,6 +10,7 @@ struct TeacherConsole:View {
             MeadowTeacherDashboard(game:session.game).tabItem{Label("游戏",systemImage:"gamecontroller.fill")}.tag(0)
             TeacherBookConsole(session:session,game:session.game,showGame:{tab=0}).tabItem{Label("绘本",systemImage:"book.pages.fill")}.tag(1)
         }.preferredColorScheme(.light)
+        .overlay(alignment:.top){ClassroomGrantCaptureBanner(game:session.game).padding(.top,8)}
         // Opening the game tab while the book is on the TV brings the game back to the TV as well.
         .onChange(of:tab){_,value in
             session.game.bookTabActive = value==1

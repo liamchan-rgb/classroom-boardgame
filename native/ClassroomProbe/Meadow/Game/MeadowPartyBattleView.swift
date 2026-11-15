@@ -222,7 +222,11 @@ final class MeadowPartyBattleView:UIView {
             if state.units[friend]?.teamID != mine || !fighters.contains(friend) { friend=current ?? friend }
             if state.units[foe]?.isAlive != true || state.units[foe]?.teamID==mine || !fighters.contains(foe),
                let live=fighters.first(where:{ state.units[$0]?.isAlive==true && state.units[$0]?.teamID != mine }) { foe=live }
-        } else if state.units[foe]?.isAlive != true,let live=model.monsterIDs.first(where:{ state.units[$0]?.isAlive==true }) { foe=live }
+        } else {
+            if state.units[foe]?.isAlive != true,let live=model.monsterIDs.first(where:{ state.units[$0]?.isAlive==true }) { foe=live }
+            // The friendly target is always someone in this fight (P1 may be in another team's encounter).
+            if let queue=state.battle?.queue,!queue.contains(friend),let first=current.flatMap({ queue.contains($0) && state.units[$0]?.kind == .player ? $0:nil }) ?? queue.first(where:{ state.units[$0]?.kind == .player }) { friend=first }
+        }
         let busy=stage.isPlaying || model.pending != nil
         title.text=model.isDuel ? (model.terminal ? "PVP结束":"队伍PVP · 第\(model.round)轮") : model.terminal ? (state.players.contains(where: \.isAlive) ? "小队胜利":"小队倒地") : (campaignEngine == nil ? "小队支援":"林地遭遇")+" · 第\(model.round)轮"
         let showing=busy ? (stage.actorInAction ?? model.pending?.actor ?? current):current

@@ -10,7 +10,7 @@ extension Evaluation {
         }
         _ = try acting(id)
         let definition = try catalog.monster(actor.templateID)
-        let enemies = state.players.filter { $0.isAlive && GameRules.enemies(actor, $0, in: state) }
+        let enemies = state.players.filter { $0.isAlive && GameRules.enemies(actor, $0, in: state) && (state.battle?.queue.contains($0.id) ?? true) }
         guard !enemies.isEmpty else { state.battle?.current = nil; return }
         var skillChoices: [(priority: Int, skill: SkillDefinition, target: ActionTarget?)] = []
         for skillID in definition.skills {

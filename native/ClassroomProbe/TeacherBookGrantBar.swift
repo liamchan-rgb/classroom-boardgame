@@ -67,7 +67,10 @@ struct TeacherBookGrantBar:View {
     private var recipientPicker:some View {
         VStack(alignment:.leading,spacing:12){
             HStack{
-                Label("发放对象 · 已选 \(selected.count)",systemImage:"person.2.fill").font(.headline)
+                VStack(alignment:.leading,spacing:2){
+                    Label("发放对象 · 已选 \(selected.count)",systemImage:"person.2.fill").font(.headline)
+                    Text("数字键按编号勾选 · 长按成员改编号 · G发金币 M发体力（输数字回车；连按两下按输入框）").font(.caption).foregroundStyle(GameTheme.muted)
+                }
                 Spacer()
                 Button("完成"){picking=false}.bold()
             }
@@ -83,16 +86,29 @@ struct TeacherBookGrantBar:View {
                 }
             }
             LazyVGrid(columns:[GridItem(.adaptive(minimum:150),spacing:8)],spacing:8){
-                ForEach(players){unit in
+                ForEach(players.sorted{game.seatNumber($0.id)<game.seatNumber($1.id)}){unit in
                     let on=draft.recipients.contains(unit.id)
                     Button{if on{draft.recipients.remove(unit.id)}else{draft.recipients.insert(unit.id)}}label:{
                         HStack(spacing:8){
                             Image(systemName:on ? "checkmark.circle.fill":"circle").foregroundStyle(on ? GameTheme.primary:GameTheme.muted)
+                            // The number key that ticks this player (long-press to change it).
+                            Text("\(game.seatNumber(unit.id))").font(.system(size:13,weight:.heavy,design:.rounded)).foregroundStyle(.white)
+                                .frame(width:22,height:22).background(GameTheme.primary.opacity(0.85),in:Circle())
                             Text(unit.name).lineLimit(1).minimumScaleFactor(0.7)
                             Spacer(minLength:0)
                         }.padding(.horizontal,12).frame(height:44)
                         .background(on ? GameTheme.primary.opacity(0.14):Color.white.opacity(0.55),in:RoundedRectangle(cornerRadius:12,style:.continuous))
                     }.buttonStyle(.plain)
+                    .contextMenu{
+                        Section("长按改编号（数字键按编号勾选）"){
+                            ForEach(1...max(1,players.count),id:\.self){n in
+                                Button{game.setSeatNumber(unit.id,n)}label:{
+                                    let holder=game.player(forSeat:n).flatMap{game.campaign?.engine.state.units[$0]?.shortName}
+                                    Label("编号 \(n)"+(holder.map{" · 现为"+$0} ?? ""),systemImage:game.seatNumber(unit.id)==n ? "checkmark":"number")
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }.padding(16).frame(width:520).foregroundStyle(GameTheme.ink)

@@ -26,6 +26,8 @@ final class MeadowTeacherCoordinator:ObservableObject {
     let classTimer=ClassTimerModel()
     let overlays=ClassOverlayModel()
     let grantDraft=BookGrantDraft()
+    @Published var grantCapture:ClassroomGrantCapture?
+    var lastGrantKey:(kind:ClassroomGrantKind,at:Date)?
     /// The teacher has the picture-book tab open (G then grants the book bar's amounts).
     var bookTabActive=false
     /// Timer panel (teacher window); the countdown itself shows on the TV. Opens over anything (pack, shop, sheets).
@@ -55,9 +57,9 @@ final class MeadowTeacherCoordinator:ObservableObject {
         if visible{previewObservers.insert(id)}else{previewObservers.remove(id)}
         updateMirrorDemand()
     }
-    @Published private(set) var revision=0
+    @Published var revision=0
     @Published private(set) var externalIDs=Set<String>()
-    @Published private(set) var message="先在教师后台生成地图，或继续已保存的行程。"
+    @Published var message="先在教师后台生成地图，或继续已保存的行程。"
     @Published var selectedNode:Int?
     @Published var selectedTarget="p1"
     var localOutputPreview=false

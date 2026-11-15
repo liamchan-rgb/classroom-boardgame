@@ -64,6 +64,20 @@ final class TeacherHostController: UIViewController {
     override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
         let session = TeacherSession.shared
         guard !session.isEditingNotes,!UIResponder.classroomTyping else{heldKeys.removeAll();super.pressesBegan(presses,with:event);return}
+        // A grant key is waiting for its amount: digits / Enter / Backspace / Esc belong to it.
+        if session.game.grantCapture != nil,let key=presses.first?.key {
+            switch key.keyCode {
+            case .keyboardReturnOrEnter,.keypadEnter:session.game.grantCaptureCommit();return
+            case .keyboardEscape:session.game.grantCaptureCancel();return
+            case .keyboardDeleteOrBackspace:session.game.grantCaptureBackspace();return
+            default:
+                let c=key.charactersIgnoringModifiers
+                if c.count==1,let d=c.first,d.isASCII,d.isNumber {session.game.grantCaptureDigit(d);return}
+                // Any other key (except the grant keys themselves, which may be a double press) cancels the entry.
+                if let t=ClassroomShortcuts.token(key),let a=ClassroomShortcuts.action(for:t),a == .award || a == .grantMovement {break}
+                session.game.grantCaptureCancel()
+            }
+        }
         var handled=false
         for press in presses {
             guard let key=press.key,key.modifierFlags.intersection([.command,.control,.alternate]).isEmpty,
@@ -80,9 +94,13 @@ final class TeacherHostController: UIViewController {
         let game=session.game
         switch action {
         case .select1,.select2,.select3,.select4,.select5,.select6,.select7:
-            guard let seat=action.seat,let ids=game.campaign?.playerIDs,seat<=ids.count else{return}
-            game.select(ids[seat-1])
-        case .award:if game.bookTabActive {game.grantFromDraft()} else {game.award()}
+            // Number keys follow the seat numbers set by long-pressing in the grant picker.
+            guard let seat=action.seat,let id=game.player(forSeat:seat) else{return}
+            if game.bookTabActive {
+                if game.grantDraft.recipients.contains(id){game.grantDraft.recipients.remove(id)}else{game.grantDraft.recipients.insert(id)}
+            } else {game.select(id)}
+        case .award:game.grantKey(.coins)
+        case .grantMovement:game.grantKey(.movement)
         case .attack:game.battle(.attack)
         case .endTurn:game.battle(.endTurn)
         case .pauseResume:game.operation(.pauseOrResume)

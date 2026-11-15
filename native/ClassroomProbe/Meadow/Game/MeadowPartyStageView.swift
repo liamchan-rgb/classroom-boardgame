@@ -277,7 +277,8 @@ final class MeadowPartyStageView:UIView {
     func displayedVitals(for unitID:String,health:Int,shield:Int)->(health:Int,shield:Int) { statusSnapshots[unitID] ?? (health,shield) }
     func show(_ value:GameState,friend:String,foe:String,current:String?,catalog:GameCatalog) {
         // The classroom battle has 1-6 students and the teacher (P7): the field is laid out for whoever plays.
-        let ids=value.players.map(\.id)
+        // Only the heroes in this fight stand on the field (a split team fights alone).
+        let ids=value.players.map(\.id).filter{value.battle?.queue.contains($0) ?? true}
         // A duel keeps its two fixed teams (configured once); a monster fight follows whoever plays.
         if rivalIDs.isEmpty,ids != playerIDs { configureUnits(players:ids,foes:monsterIDs,pvp:false) }
         state=value;self.current=current;self.catalog=catalog;fx.friend=friend;fx.foe=foe;fx.current=current;chosenFriend=friend;chosenFoe=foe

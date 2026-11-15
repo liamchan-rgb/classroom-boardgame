@@ -607,7 +607,7 @@ public final class MeadowCampaignSession {
     }
     public var difficulty:GameDifficulty {engine.state.effectiveDifficulty}
     /// Everyone fell in a fight: end it and stand everyone back up on the map with 1 health (the journey goes on).
-    public var mustRetreat:Bool {!isCompleted && engine.state.battle?.kind == .pve && !engine.state.players.contains(where: \.isAlive)}
+    public var mustRetreat:Bool {guard !isCompleted,let b=engine.state.battle,b.kind == .pve else{return false};return !engine.state.players.contains{$0.isAlive && b.queue.contains($0.id)}}
     @discardableResult public func retreatAfterWipe()throws->OperationReceipt {
         try requireOpenCampaign()
         guard mustRetreat else{throw GameError("只有全队倒地时才能撤回地图。")}
@@ -625,7 +625,7 @@ public final class MeadowCampaignSession {
     }
     /// The teacher may leave a monster fight at any time: the fight ends with no winner and no drops, the heroes keep
     /// their health, and the monsters stay where they are (with their wounds) for a later attempt.
-    public var canLeaveBattle:Bool {!isCompleted && (engine.state.battle?.kind == .pve || engine.state.battle?.duel == true) && engine.state.players.contains(where: \.isAlive)}
+    public var canLeaveBattle:Bool {guard !isCompleted,let b=engine.state.battle,b.kind == .pve || b.duel == true else{return false};return engine.state.players.contains{$0.isAlive && b.queue.contains($0.id)}}
     /// Another team standing (alive) on the same node as `actor`'s team that has not duelled this team yet.
     public func duelOpponent(actor:String)->String? {
         guard !isCompleted,engine.state.battle==nil,engine.state.phase == .exploration,let u=engine.state.units[actor],u.isAlive,let mine=u.teamID,

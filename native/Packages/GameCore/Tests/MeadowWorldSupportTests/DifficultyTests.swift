@@ -122,4 +122,19 @@ final class DifficultyTests:XCTestCase {
         XCTAssertNil(s.duelOpponent(actor:"p1"));XCTAssertThrowsError(try s.startDuel(actor:"p1"))
         try s.resetDuelLimits();XCTAssertEqual(s.duelOpponent(actor:"p1"),b.teamID)
     }
+    func testSplitTeamsFightTheirOwnEncounters()throws {
+        var c=MeadowMapConfiguration.suggested(total:8,seed:9);c.starts=2
+        let fresh=try MeadowCampaignSession.new(layout:MeadowMapGenerator.generate(c),studentClasses:["spellblade","ranger"],studentTeams:[0,1])
+        let monster=try XCTUnwrap(fresh.engine.state.units.values.filter{$0.kind == .monster}.sorted{$0.id<$1.id}.first)
+        var save=fresh.snapshot;save.archive.state.units["p1"]!.nodeID=monster.nodeID
+        let s=try MeadowCampaignSession(save:save)
+        let others=s.engine.state.units.values.filter{$0.kind == .monster && $0.nodeID==monster.nodeID}.map(\.id).sorted()
+        try s.engine.apply(.startBattle(kind:.pve,monsters:others))
+        let queue=s.engine.state.battle?.queue ?? []
+        XCTAssertTrue(queue.contains("p1"));XCTAssertFalse(queue.contains("p2"))
+        try s.engine.apply(.setHealth(unit:"p1",value:0,killer:nil))
+        XCTAssertTrue(s.mustRetreat)
+        try s.retreatAfterWipe()
+        XCTAssertEqual(s.engine.state.units["p1"]!.health,1);XCTAssertEqual(s.engine.state.units["p2"]!.health,fresh.engine.state.units["p2"]!.health)
+    }
 }

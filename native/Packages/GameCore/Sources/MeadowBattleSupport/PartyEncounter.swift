@@ -219,5 +219,5 @@ public final class PartyEncounter {
         if action == .endTurn { return 0 };if action == .revivalStone { return 2 }
         return (try? engine.catalog.skill(action.rawValue).cost) ?? 1
     }
-    public func nextEnemyTarget()->String? { state.players.filter(\.isAlive).min { a,b in Double(a.health)/Double(a.baseAttributes.maximumHealth)<Double(b.health)/Double(b.baseAttributes.maximumHealth) }?.id }
+    public func nextEnemyTarget()->String? { state.players.filter{$0.isAlive && (state.battle?.queue.contains($0.id) ?? true)}.min { a,b in Double(a.health)/Double(a.baseAttributes.maximumHealth)<Double(b.health)/Double(b.baseAttributes.maximumHealth) }?.id }
 }
