@@ -26,6 +26,9 @@ final class MeadowMapSettingsViewController: UIViewController {
     private let classSummaries=(0..<6).map{_ in UILabel()}
     private let extraClasses=(0..<4).map{_ in UISegmentedControl(items:["冒险者","游侠","魔剑士","龙骑士"])}
     private let studentCount=UIStepper()
+    /// Team camps on the map: each team starts at its own camp; teams that meet can fight a PvP duel once.
+    private let teamCount=UISegmentedControl(items:["1队","2队","3队"])
+    private let teamPickers=(0..<6).map{_ in UISegmentedControl(items:["红队","蓝队","绿队"])}
     private let studentCountLabel=UILabel()
     private var classRows:[UIStackView]=[]
     private var studentNames:[UITextField]=[]
@@ -87,6 +90,19 @@ final class MeadowMapSettingsViewController: UIViewController {
         studentCount.addTarget(self,action:#selector(refreshPartySummary),for:.valueChanged)
         let countRow=UIStackView(arrangedSubviews:[studentCountLabel,studentCount]);countRow.distribution = .equalSpacing
         studentCountLabel.textColor=gold;right.addArrangedSubview(countRow)
+        teamCount.selectedSegmentIndex=0;teamCount.selectedSegmentTintColor=MeadowPreviewPalette.primary
+        teamCount.setTitleTextAttributes([.foregroundColor:MeadowPreviewPalette.ink,.font:UIFont.boldSystemFont(ofSize:16)],for:.normal)
+        teamCount.setTitleTextAttributes([.foregroundColor:UIColor.white],for:.selected)
+        teamCount.addAction(UIAction{[weak self] _ in
+            guard let self else{return}
+            // The camps are part of the map: a new team count needs a new road preview.
+            self.revision += 1;self.result=nil;self.startCampaignButton.isEnabled=false
+            self.status.text="队伍数已改为 \(self.teamCount.selectedSegmentIndex+1)，请重新生成道路预览（每队一个起点营地）。"
+            self.refreshPartySummary()
+        },for:.valueChanged)
+        let teamLabel=UILabel();teamLabel.text="队伍（各自起点，相遇可PVP一次）";teamLabel.font = .boldSystemFont(ofSize:17);teamLabel.textColor=gold
+        let teamRow=UIStackView(arrangedSubviews:[teamLabel,teamCount]);teamRow.axis = .vertical;teamRow.spacing=6
+        right.addArrangedSubview(teamRow)
         for (i,selector) in classControls.enumerated() {
             let label=UILabel();label.text="P\(i+1)职业";label.font = .boldSystemFont(ofSize:17);label.textColor=gold
             selector.accessibilityLabel="P\(i+1)职业"
@@ -108,7 +124,10 @@ final class MeadowMapSettingsViewController: UIViewController {
                     profiles.setTitle("已选："+entry.value.name,for:.normal)
                 }
             })
-            let row=UIStackView(arrangedSubviews:[label,name,profiles,selector,summary]);row.axis = .vertical;row.spacing=6
+            let team=teamPickers[i];team.selectedSegmentIndex=0;team.selectedSegmentTintColor=MeadowPreviewPalette.primary
+            team.setTitleTextAttributes([.foregroundColor:MeadowPreviewPalette.ink,.font:UIFont.boldSystemFont(ofSize:15)],for:.normal)
+            team.setTitleTextAttributes([.foregroundColor:UIColor.white],for:.selected);team.accessibilityLabel="P\(i+1)队伍"
+            let row=UIStackView(arrangedSubviews:[label,name,profiles,selector,team,summary]);row.axis = .vertical;row.spacing=6
             classRows.append(row);right.addArrangedSubview(row)
         }
         refreshPartySummary()
@@ -174,6 +193,7 @@ final class MeadowMapSettingsViewController: UIViewController {
               let reward=Int(inputs[3].text ?? ""),let empty=Int(inputs[4].text ?? ""),let roads=Int(inputs[5].text ?? ""),
               let seed=UInt64(inputs[6].text ?? "") else { throw NSError(domain:"地图",code:1,userInfo:[NSLocalizedDescriptionKey:"请输入完整的非负整数。总数范围4—30。种子为0—18446744073709551615。"]) }
         var c=MeadowMapConfiguration();c.total=total;c.combat=combat;c.boss=boss;c.reward=reward;c.empty=empty;c.extraRoads=roads;c.seed=seed
+        c.starts=teamCount.selectedSegmentIndex>0 ? teamCount.selectedSegmentIndex+1:nil
         try c.validate();return c
     }
     private func applyCounts(_ c: MeadowMapConfiguration) {
@@ -259,6 +279,14 @@ final class MeadowMapSettingsViewController: UIViewController {
             let catalog=try MeadowCampaignSession.catalog(),config=partyConfiguration
             studentCountLabel.text="学生人数：\(Int(studentCount.value)) / 6"
             for (i,control) in classControls.enumerated(){classRows[i].isHidden=i>=Int(studentCount.value);classSummaries[i].text=try MeadowPartyConfiguration.summary(for:MeadowPartyConfiguration.classIDs[max(0,control.selectedSegmentIndex)],catalog:catalog)}
+            // Team pickers: only with several teams, and only the teams that exist; new rows default to round-robin.
+            let teams=teamCount.selectedSegmentIndex+1
+            for (i,picker) in teamPickers.enumerated() {
+                picker.isHidden=teams<2
+                for s in 0..<3 {picker.setEnabled(s<teams,forSegmentAt:s)}
+                if picker.selectedSegmentIndex>=teams || (teams>1 && picker.tag==0) {picker.selectedSegmentIndex=i%teams;picker.tag=1}
+                if teams<2 {picker.tag=0}
+            }
         }catch{for label in classSummaries{label.text="职业信息读取失败："+error.localizedDescription}}
     }
     @objc private func startCampaign() {
@@ -277,7 +305,7 @@ final class MeadowMapSettingsViewController: UIViewController {
                     units=save.archive.state.units;appearance=save.appearanceID
                 }
                 try store.preserveCompletedCampaign()
-                let session=try MeadowCampaignSession.new(layout:result,appearanceID:appearance,playerClassID:config.playerClassID,companionClassID:config.companionClassID,studentClasses:Array(self.classControls.prefix(Int(self.studentCount.value))).map{MeadowPartyConfiguration.classIDs[max(0,$0.selectedSegmentIndex)]},studentNames:self.studentNames.prefix(Int(self.studentCount.value)).map{$0.text ?? ""},playerAppearances:self.profileLooks,loadouts:units,difficulty:GameDifficulty.lastChosen,quizBank:self.quizBank,persist:store.write)
+                let session=try MeadowCampaignSession.new(layout:result,appearanceID:appearance,playerClassID:config.playerClassID,companionClassID:config.companionClassID,studentClasses:Array(self.classControls.prefix(Int(self.studentCount.value))).map{MeadowPartyConfiguration.classIDs[max(0,$0.selectedSegmentIndex)]},studentNames:self.studentNames.prefix(Int(self.studentCount.value)).map{$0.text ?? ""},playerAppearances:self.profileLooks,loadouts:units,difficulty:GameDifficulty.lastChosen,quizBank:self.quizBank,studentTeams:self.teamPickers.prefix(Int(self.studentCount.value)).map{max(0,$0.selectedSegmentIndex)},persist:store.write)
                 self.presentCampaign(session)
             } catch {self.status.text="未开始新行程："+error.localizedDescription}
         }

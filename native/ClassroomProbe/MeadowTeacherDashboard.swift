@@ -50,6 +50,8 @@ struct MeadowTeacherDashboard:View {
                     Button{game.openShortcutEditor()}label:{Label("快捷键",systemImage:"keyboard")}
                     Toggle(isOn:$game.liveMirrorPreferred){Label("教师画面用 GPU 实时显示",systemImage:"display.2")}
                     Button{game.openTeamConsole()}label:{Label("队伍",systemImage:"person.3")}.disabled(!game.ready || game.busy)
+                    Button{game.startDuel()}label:{Label("队伍PVP",systemImage:"figure.fencing")}.disabled(!game.ready || game.busy || inBattle || game.duelOpponent==nil)
+                    Button{game.resetDuels()}label:{Label("重置PVP次数",systemImage:"arrow.counterclockwise.circle")}.disabled(game.busy || game.campaign==nil || (game.campaign?.engine.state.pvpPairs ?? []).isEmpty)
                     Button{game.operation(.route)}label:{Label("路线与结算",systemImage:"flag.checkered")}.disabled(!game.ready || game.busy)
                     Divider()
                     Button{if let id=game.selectedNode{game.operation(.editNode(id))}}label:{Label("编辑地点",systemImage:"pencil")}.disabled(game.selectedNode==nil || game.campaign?.isMoving==true || inBattle)

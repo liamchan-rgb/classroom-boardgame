@@ -121,8 +121,9 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     }
     func classroomLeaveTap()->Bool {battlePreviewView?.classroomLeaveTap() ?? false}
     /// The party left a fight on purpose: say so over the battlefield, then return to the map.
-    func classroomShowLeftBattle(){
+    func classroomShowLeftBattle(duel:Bool=false){
         battleGainBase=nil
+        if duel {showBattleEndCard(title:"PVP已中止",subtitle:"不分胜负",gains:[],emptyText:"双方保留当前生命返回地图；这两队的PVP次数已用掉，可由GM重置。");return}
         showBattleEndCard(title:"已撤离战斗",subtitle:"怪物仍留在原地",gains:[],emptyText:"小队保留当前生命返回地图，准备好后可以再来挑战。")
     }
     /// The battle-end card over the still-open battlefield; closing it returns to the map.
@@ -1022,6 +1023,12 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         MeadowGainPopup.present(in:view,title:title,subtitle:subtitle,gains:MeadowGain.between(before,campaign.engine.state),catalog:campaign.engine.catalog,emptyText:emptyText){[weak self] in self?.classroomOverlayDirty=true}
     }
     /// Remembers the state a battle started from; when the battle ends, everything won in it is shown on one card.
+    /// Start the team duel on `actor`'s node and open the battle view.
+    func startCampaignDuel(actor:String) {
+        guard let campaign else{return}
+        do{let receipt=try campaign.startDuel(actor:actor);battleGainBase=receipt.after;scene.refreshCampaign();refreshCampaignStatus()}
+        catch{showCampaignMessage(error.localizedDescription)}
+    }
     private func trackBattleGains(_ receipt:OperationReceipt) {
         if battleGainBase==nil,receipt.before.battle != nil{battleGainBase=receipt.before}
         guard receipt.after.battle==nil,let base=battleGainBase ?? (receipt.before.battle != nil ? receipt.before:nil) else{return}
@@ -1033,6 +1040,11 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         battleEndPending=true
         DispatchQueue.main.asyncAfter(deadline:.now()+1.6){[weak self] in
             guard let self,let campaign=self.campaign else{self?.battleEndPending=false;return}
+            if receipt.after.lastOutcome?.kind == .teamPvp,let winner=receipt.after.lastOutcome?.winners.first {
+                // Duel: what the winners took from the other team (30% coins and score, one item from their packs).
+                self.showBattleEndCard(title:campaign.teamName(winner)+" 获胜",subtitle:"获得对方三成金币与积分，以及背包里的一件物品",gains:MeadowGain.between(base,campaign.engine.state),emptyText:"对方没有可拿走的东西。")
+                return
+            }
             self.showBattleEndCard(title:won ? "战斗胜利":"小队倒地",subtitle:won ? "战利品已放入各自行囊":nil,gains:MeadowGain.between(base,campaign.engine.state),emptyText:won ? "这场战斗没有掉落物品。":"全员倒地，行程结束。")
         }
     }
@@ -1070,6 +1082,13 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         guard let campaign,!battlePreviewActive,campaign.engine.state.battle==nil,campaign.travel==nil,!campaign.isCompleted else{return}
         let actor=scene.selectedCampaignPlayerID
         guard let unit=campaign.engine.state.units[actor],unit.nodeID==nodeID,let node=campaign.engine.state.map.nodes.first(where:{$0.id==nodeID}) else{return}
+        // Two teams on one node: offer their one duel first.
+        if let rival=campaign.duelOpponent(actor:actor),let mine=unit.teamID {
+            let alert=UIAlertController(title:"⚔️ 遭遇"+campaign.teamName(rival),message:campaign.teamName(mine)+" 与 "+campaign.teamName(rival)+" 相遇，开启PVP？\n胜方拿走对方三成金币与积分和背包里的一件物品；两队之间只能对战一次。",preferredStyle:.alert)
+            alert.addAction(UIAlertAction(title:"不打",style:.cancel))
+            alert.addAction(UIAlertAction(title:"开战",style:.destructive){[weak self] _ in self?.startCampaignDuel(actor:actor)})
+            present(alert,animated:true);return
+        }
         if campaign.siteAvailable(actor:actor) {
             if campaign.siteKind(node:nodeID) == .shop {
                 let alert=UIAlertController(title:"🛒 "+node.name,message:"进入商店？",preferredStyle:.alert)

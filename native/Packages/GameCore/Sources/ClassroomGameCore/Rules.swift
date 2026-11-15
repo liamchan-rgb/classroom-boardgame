@@ -162,6 +162,10 @@ public enum GameCommand: Codable, Equatable {
     case grantPlayerSupplies(actors:[String],movement:Int,coins:Int)
     /// One teammate hands coins and/or an item (from the pack, never worn gear) to another; exploration only.
     case givePlayerResource(from:String,to:String,coins:Int,item:String?,count:Int)
+    /// Two teams met on a node: they fight once (per pair) as a team duel.
+    case startCampaignDuel(node:Int,teams:[String])
+    /// GM: every team pair may duel again.
+    case resetDuelLimits
     case editResources(unit: String, value: ResourcePatch)
     case startBattle(kind: BattleKind, monsters: [String])
     case move(actors: [String], path: [Int])

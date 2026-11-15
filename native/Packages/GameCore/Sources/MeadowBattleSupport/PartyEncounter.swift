@@ -82,12 +82,15 @@ public final class PartyEncounter {
     public private(set) var confirmedReceipt:OperationReceipt?
     private var confirmedEngine:GameEngine?
     public let monsterIDs:[String]
+    /// Campaign team duel: the two hero teams (left / mirrored right). Empty in a monster fight.
+    public private(set) var duelLeft:[String]=[],duelRight:[String]=[]
+    public var isDuel:Bool {!duelRight.isEmpty}
     public let sessionID:String
     private var serial=0
     public var state:GameState { engine.state }
     public var current:String? { state.battle?.current }
     public var round:Int { state.battle?.round ?? 0 }
-    public var terminal:Bool { state.battle == nil || state.pauseReasons.contains(.allPlayersDown) }
+    public var terminal:Bool { state.battle == nil || state.pauseReasons.contains(.allPlayersDown) || state.pauseReasons.contains(.noSurvivors) }
     public init(seed:UInt64=UInt64.random(in:1...UInt64.max),sessionID:String=UUID().uuidString,loadouts:[String:GameUnit]?=nil,playerClassID:String="adventurer") throws {
         guard ["adventurer","spellblade","dragonKnight"].contains(playerClassID) else { throw GameError("该职业尚未接入演练。") }
         self.sessionID=sessionID
@@ -128,8 +131,17 @@ public final class PartyEncounter {
         self.engine=try GameEngine(catalog:catalog,state:state)
     }
     public init(engine:GameEngine,sessionID:String=UUID().uuidString) throws {
-        guard let battle=engine.state.battle,battle.kind == .pve else {throw GameError("当前没有探索战斗。")}
+        guard let battle=engine.state.battle,battle.kind == .pve || battle.duel == true else {throw GameError("当前没有探索战斗。")}
         self.engine=engine;self.sessionID=sessionID
+        if battle.duel == true {
+            // Teams sorted by id: the first stands on the left, the other is drawn mirrored on the right.
+            let fighters=battle.queue.compactMap{engine.state.units[$0]}.filter{$0.kind == .player}
+            let teams=Array(Set(fighters.compactMap(\.teamID))).sorted()
+            guard teams.count==2 else {throw GameError("PVP需要两支队伍。")}
+            self.monsterIDs=[]
+            duelLeft=fighters.filter{$0.teamID==teams[0]}.map(\.id).sorted();duelRight=fighters.filter{$0.teamID==teams[1]}.map(\.id).sorted()
+            return
+        }
         self.monsterIDs=battle.queue.filter{engine.state.units[$0]?.kind == .monster}.sorted()
         guard (1...3).contains(monsterIDs.count) else {throw GameError("当前战场支持1—3个敌人。")}
     }
@@ -153,9 +165,12 @@ public final class PartyEncounter {
         guard pending==nil,preview(action,target:target).allowed,let actor=current,let command=command(action,target:target) else { return nil }
         serial += 1
         let targets:[String]
-        if action.isNodeSupport { targets=state.players.filter { $0.isAlive && $0.nodeID==state.units[target]?.nodeID }.map(\.id) }
-        else if action == .dragonFlame || action == .starlightPulse { targets=state.units.values.filter { $0.kind == .monster && $0.isAlive && $0.nodeID==state.units[target]?.nodeID }.map(\.id).sorted() }
-        else if action == .sweep { targets=state.players.filter { $0.isAlive && $0.nodeID==state.units[target]?.nodeID }.map(\.id).sorted() }
+        if action.isNodeSupport { targets=state.players.filter { $0.isAlive && $0.nodeID==state.units[target]?.nodeID && (!isDuel || $0.teamID==state.units[actor]?.teamID) }.map(\.id) }
+        else if action == .dragonFlame || action == .starlightPulse {
+            let me=state.units[actor]
+            targets=state.units.values.filter { u in u.isAlive && u.nodeID==state.units[target]?.nodeID && (isDuel ? (u.kind == .player && me.map{GameRules.enemies($0,u,in:state)} == true && (duelLeft+duelRight).contains(u.id)):u.kind == .monster) }.map(\.id).sorted()
+        }
+        else if action == .sweep { targets=state.players.filter { $0.isAlive && $0.nodeID==state.units[target]?.nodeID && (!isDuel || (duelLeft+duelRight).contains($0.id)) }.map(\.id).sorted() }
         else if action == .regeneration || action == .breather || action == .simpleGuard { targets=[actor] }
         else { targets=[target] }
         let intent=PartyIntent(id:sessionID+"/"+String(serial),action:action,actor:actor,target:target,targets:targets,command:command,enemy:state.units[actor]?.kind == .monster,weaponID:state.units[actor]?.equipment.weapon,targetTemplateID:state.units[target]?.templateID)

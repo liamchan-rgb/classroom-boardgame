@@ -36,7 +36,7 @@ public enum MeadowHistoryCategory:String,CaseIterable {case all,combat,travel,re
     public var title:String {switch self{case .all:return "全部类别";case .combat:return "战斗";case .travel:return "移动与地点";case .resources:return "资源与物品";case .team:return "组队与老师";case .appearance:return "人物外观";case .configuration:return "地点配置";case .other:return "其他"}}
     public static func of(_ command:GameCommand)->Self {
         switch command {
-        case .startBattle,.attack,.cast,.monsterStep,.endTurn,.joinMonster,.reorderQueue,.finishBattle,.rescue,.retreatAfterDefeat:return .combat
+        case .startCampaignDuel,.resetDuelLimits,.startBattle,.attack,.cast,.monsterStep,.endTurn,.joinMonster,.reorderQueue,.finishBattle,.rescue,.retreatAfterDefeat:return .combat
         case .campaignMove,.move,.interactCampaignNode,.resolveCampaignSite,.answerCampaignQuiz,.refillCampaignMovement:return .travel
         case .tradeCampaignSite,.campaignLottery,.editPlayer,.grantPlayerResources,.grantPlayerSupplies,.givePlayerResource,.editResources,.useItem,.reward,.setHealth,.revive,.equip,.refillExploration:return .resources
         case .configureTeams,.mergeTeams,.transferTeamResource,.teacherTransferTeamResource,.addHost,.changeTeam:return .team
@@ -80,6 +80,8 @@ public struct MeadowHistoryIndex:Identifiable,Equatable {
         case .grantPlayerResources:return "发放行动点 / 金币"
         case .grantPlayerSupplies:return "发放移动 / 金币"
         case .givePlayerResource:return "队友赠送"
+        case .startCampaignDuel:return "队伍PVP"
+        case .resetDuelLimits:return "重置PVP次数"
         case .editPlayer,.editResources:return "GM修改玩家"
         case .configureTeams,.mergeTeams,.changeTeam:return "调整队伍"
         case .transferTeamResource,.teacherTransferTeamResource:return "转移队伍资源"

@@ -169,6 +169,8 @@ struct Evaluation {
         case .grantPlayerResources(let ids,let ap,let coins):try grantPlayerResources(ids,ap:ap,coins:coins)
         case .grantPlayerSupplies(let ids,let movement,let coins):try grantPlayerSupplies(ids,movement:movement,coins:coins)
         case .givePlayerResource(let from,let to,let coins,let item,let count):try givePlayerResource(from:from,to:to,coins:coins,item:item,count:count)
+        case .startCampaignDuel(let node,let teams):try startDuel(node:node,teams:teams)
+        case .resetDuelLimits:state.pvpPairs=nil;events.append(GameEvent("duelLimitsReset"))
         case .editResources(let id, let patch):
             if let health = patch.health { try setHealth(id, value: health, killer: nil) }
             var edited = try unit(id)
@@ -216,7 +218,7 @@ struct Evaluation {
             state.battle?.queue = queue
         case .finishBattle(let winner, let byScore):
             guard let battle = state.battle else { throw GameError("当前没有战斗。") }
-            if battle.kind != .pve && winner == nil && !byScore { throw GameError("提前结束PVP须指定胜者或按积分结算。") }
+            if battle.kind != .pve && battle.duel != true && winner == nil && !byScore { throw GameError("提前结束PVP须指定胜者或按积分结算。") }
             if let winner {
                 guard battle.queue.contains(where: { state.units[$0].map { GameRules.faction($0, in: state) == winner } ?? false }) else { throw GameError("指定胜者不属于参战阵营。") }
             }
@@ -314,6 +316,60 @@ struct Evaluation {
         state.lastOutcome = nil; state.remainingSeconds = catalog.rules.decisionSeconds
         state.pauseReasons.remove(.allPlayersDown); state.pauseReasons.remove(.noSurvivors)
         events.append(GameEvent("battleStarted", detail: kind.rawValue))
+    }
+    static func duelKey(_ teams:[String])->String {teams.sorted().joined(separator:"|")}
+    mutating func startDuel(node:Int,teams:[String])throws {
+        guard state.phase == .exploration,state.battle==nil else{throw GameError("请先结束当前战斗。")}
+        guard teams.count==2,Set(teams).count==2 else{throw GameError("PVP需要两支不同的队伍。")}
+        let key=Self.duelKey(teams)
+        guard !(state.pvpPairs ?? []).contains(key) else{throw GameError("这两队已经进行过PVP，可由GM重置次数。")}
+        let fighters=state.players.filter{$0.isAlive && $0.nodeID==node && teams.contains($0.teamID ?? "")}
+        guard teams.allSatisfy({t in fighters.contains{$0.teamID==t}}) else{throw GameError("两队都要有存活成员在同一地点。")}
+        var initiatives:[Initiative]=[]
+        for u in fighters { initiatives.append(Initiative(unitID:u.id,value:try roll(DiceFormula(sides:20),source:"initiative").total)) }
+        let queue=try orderedInitiatives(initiatives)
+        for u in fighters {
+            var actor=try unit(u.id);actor.active=true;actor.canActFromRound=1;actor.skillUses=[:]
+            try GameRules.refill(&actor,catalog:catalog);state.units[u.id]=actor
+        }
+        var battle=BattleState(kind:.teamPvp,queue:queue,initiatives:initiatives);battle.duel=true
+        state.phase = .teamPvp;state.battle=battle
+        state.lastOutcome=nil;state.remainingSeconds=catalog.rules.decisionSeconds
+        state.pauseReasons.remove(.allPlayersDown);state.pauseReasons.remove(.noSurvivors)
+        state.pvpPairs=(state.pvpPairs ?? [])+[key]
+        events.append(GameEvent("battleStarted",detail:"duel:"+key))
+    }
+    /// Duel spoils: the winners take 30% of each loser's coins and score, plus one random item from the losers' packs.
+    /// Everybody who fell gets back up with 1 health, as after a wipe in the wild.
+    mutating func settleDuel(_ battle:BattleState,winner:String?)throws {
+        let fighters=battle.queue.compactMap{state.units[$0]}.filter{$0.kind == .player}
+        if let winner {
+            let winners=fighters.filter{$0.teamID==winner}.map(\.id).sorted(),losers=fighters.filter{$0.teamID != winner}.map(\.id).sorted()
+            if !winners.isEmpty {
+                var coins=0,score=0
+                for id in losers {
+                    let c=(state.units[id]!.coins*30)/100,s=(state.units[id]!.score*30)/100
+                    state.units[id]!.coins-=c;state.units[id]!.score-=s;coins+=c;score+=s
+                }
+                for (i,id) in winners.enumerated() {
+                    state.units[id]!.coins=try checkedAdd(state.units[id]!.coins,coins/winners.count+(i<coins%winners.count ? 1:0))
+                    state.units[id]!.score=try checkedAdd(state.units[id]!.score,score/winners.count+(i<score%winners.count ? 1:0))
+                }
+                var pool:[(String,String)]=[]
+                for id in losers { for (item,n) in state.units[id]!.inventory.sorted(by:{$0.key<$1.key}) where n>0 { pool+=Array(repeating:(id,item),count:n) } }
+                var taken="无"
+                if !pool.isEmpty {
+                    let (from,item)=pool[try state.random.next(upperBound:pool.count)-1]
+                    let to=winners[try state.random.next(upperBound:winners.count)-1]
+                    let left=(state.units[from]!.inventory[item] ?? 0)-1
+                    if left>0 {state.units[from]!.inventory[item]=left}else{state.units[from]!.inventory.removeValue(forKey:item)}
+                    state.units[to]!.inventory[item]=try checkedAdd(state.units[to]!.inventory[item] ?? 0,1)
+                    taken=item
+                }
+                events.append(GameEvent("duelSpoils",target:winner,amount:coins,detail:"score=\(score);item=\(taken)"))
+            }
+        }
+        for u in fighters where !u.isAlive { state.units[u.id]!.health=1 }
     }
     mutating func orderedInitiatives(_ entries: [Initiative]) throws -> [String] {
         var ordered: [String] = []
@@ -588,7 +644,9 @@ struct Evaluation {
             if players.isEmpty { state.pauseReasons.insert(.allPlayersDown); state.battle?.current = nil }
             else { state.pauseReasons.remove(.allPlayersDown) }
         } else {
-            let factions = Set(players.map { GameRules.faction($0, in: state) })
+            // Only the fighters count: in a campaign duel the other teams elsewhere on the map stay out of it.
+            let fighters = battle.duel == true ? players.filter { battle.queue.contains($0.id) } : players
+            let factions = Set(fighters.map { GameRules.faction($0, in: state) })
             if factions.count == 1 { try finish(winner: factions.first, byScore: false); return }
             if factions.isEmpty { state.pauseReasons.insert(.noSurvivors); state.battle?.current = nil }
             else { state.pauseReasons.remove(.noSurvivors) }
@@ -607,6 +665,7 @@ struct Evaluation {
         }
         state.lastOutcome = BattleOutcome(kind: battle.kind, winners: winners, scoreSettlement: byScore,
                                           personalRanking: individual, teamRanking: teams)
+        if battle.duel == true { try settleDuel(battle, winner: winners.count == 1 ? winners[0] : nil) }
         // Shields last only for the battle they were raised in. A shield at the start of a battle can only
         // come from an item used beforehand (exploration), never from an earlier fight.
         for id in state.units.keys {
@@ -614,7 +673,7 @@ struct Evaluation {
             if battle.queue.contains(id) { state.units[id]?.shield = 0 }
             if state.units[id]?.kind == .monster { state.units[id]?.active = false }
         }
-        state.battle = nil; state.phase = battle.kind == .pve ? .exploration : .settlement
+        state.battle = nil; state.phase = battle.kind == .pve || battle.duel == true ? .exploration : .settlement
         state.pauseReasons.remove(.allPlayersDown); state.pauseReasons.remove(.noSurvivors)
         events.append(GameEvent("battleEnded", detail: winners.joined(separator: ",")))
     }

@@ -143,6 +143,8 @@ public struct BattleState: Codable, Equatable {
     public var initiatives: [Initiative]
     public var monsterTargets: [String: String]? = nil
     public var onceSkillsThisTurn: Set<String>
+    /// A campaign team duel: only the two teams on one node fight, and the journey returns to exploration afterwards.
+    public var duel: Bool? = nil
     public init(kind: BattleKind, queue: [String], current: String? = nil, round: Int = 1, initiatives: [Initiative] = []) {
         self.kind = kind; self.queue = queue; self.current = current; self.round = round
         self.initiatives = initiatives; acted = []; onceSkillsThisTurn = []
@@ -196,6 +198,8 @@ public struct GameState: Codable, Equatable {
     public var random: RandomState
     /// Teacher-set monster challenge; nil = original numbers.
     public var difficulty: GameDifficulty? = nil
+    /// Team pairs ("a|b", sorted) that already had their one campaign duel; the GM can clear it.
+    public var pvpPairs: [String]? = nil
     public init(gameID: String = UUID().uuidString, units: [String: GameUnit], teams: [GameTeam], map: GameMap, random: RandomState = RandomState()) {
         self.gameID = gameID; phase = .exploration; self.units = units; self.teams = teams; self.map = map
         battle = nil; lastOutcome = nil; pauseReasons = [.manual]; remainingSeconds = 30; self.random = random

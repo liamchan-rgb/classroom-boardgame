@@ -322,16 +322,27 @@ final class MeadowTeacherCoordinator:ObservableObject {
         guard !busy,let c=campaign else{return}
         do{try backend.apply(.reward(actors:[c.selectedPlayerID],value:ResourceReward(coins:10)),role:.teacher);renderer?.classroomRefresh();message="已向选中成员发放10金币。";revision += 1}catch{message=error.localizedDescription}
     }
+    /// The other team on the selected player's node that this team may still duel.
+    var duelOpponent:String? {campaign.flatMap{c in c.duelOpponent(actor:c.selectedPlayerID)}}
+    func startDuel(){
+        guard ready,!busy,!modalOpen,let c=campaign,duelOpponent != nil else{message="这里没有可以对战的队伍（每两队只能对战一次）。";return}
+        renderer?.startCampaignDuel(actor:c.selectedPlayerID);message="队伍PVP开始。";revision += 1
+    }
+    /// GM: every pair of teams may duel again.
+    func resetDuels(){
+        guard !busy,let c=campaign else{return}
+        do{try c.resetDuelLimits();message="已重置PVP次数：各队之间可以再对战一次。";revision += 1}catch{message=error.localizedDescription}
+    }
     /// Leave the current monster fight: no winner, no drops; heroes keep their health and the monsters stay for later.
     func leaveBattle(){
         guard ready,!busy,let c=campaign,c.canLeaveBattle else{return}
         do{
             enemyWork?.cancel();enemyWork=nil;aiKey=nil
-            let paused=c.engine.state.pauseReasons.contains(.manual)
+            let paused=c.engine.state.pauseReasons.contains(.manual),duel=c.engine.state.battle?.duel==true
             if paused {try c.engine.setPause(.manual,enabled:false)}
             try c.leaveBattle()
             if paused {renderer?.classroomResumeRenderer()}
-            renderer?.classroomRefresh();renderer?.classroomShowLeftBattle()
+            renderer?.classroomRefresh();renderer?.classroomShowLeftBattle(duel:duel)
             message="小队已撤离战斗，怪物仍留在原地，可稍后再来挑战。";revision += 1
         }catch{message=error.localizedDescription}
     }

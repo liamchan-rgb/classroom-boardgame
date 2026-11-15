@@ -148,7 +148,9 @@ final class MeadowPartyBattleView:UIView {
         do { if classroomMode {guard let factory=classroomModelFactory else{throw GameError("教师后台尚未准备战斗。")};model=try factory()}else{model = try campaignEngine.map { try PartyEncounter(engine:$0) } ?? PartyEncounter(loadouts:loadoutUnits,playerClassID:playerClassID)} } catch { hint.text="演练加载失败：\(error.localizedDescription)";return }
         friend="p1";foe=model?.monsterIDs.first ?? "m1";actionPointCapacity=[:];apRound=0
         reset.isHidden=campaignEngine != nil;back.configuration?.title=campaignEngine == nil ? "返回单人":"返回行程"
-        stage.configureMonsters(model?.monsterIDs ?? ["m1","m2"]);stage.start();refresh();scheduleEnemy()
+        if let model,model.isDuel {stage.configureUnits(players:model.duelLeft,foes:model.duelRight,pvp:true)}
+        else {stage.configureMonsters(model?.monsterIDs ?? ["m1","m2"])}
+        stage.start();refresh();scheduleEnemy()
     }
     private func advanceDecisionClock() {
         guard active,campaignEngine != nil,let model,model.pending==nil,!stage.isPlaying,!model.terminal else{return}
@@ -158,6 +160,11 @@ final class MeadowPartyBattleView:UIView {
     private func choose(_ id:String) {
         guard model?.pending==nil else { return }
         disarm()
+        if let model,model.isDuel {
+            // Duel: a hero of the acting team is the friendly target, a hero of the other team the enemy.
+            let mine=model.current.flatMap{model.state.units[$0]?.teamID}
+            if model.state.units[id]?.teamID==mine { friend=id } else { foe=id };refresh();return
+        }
         if id.hasPrefix("p") { friend=id } else { foe=id };refresh()
     }
     private func target(_ action:PartyAction)->String {model?.preferredTarget(for:action,ally:friend,enemy:foe) ?? (action.isOffensive ? foe:friend)}
@@ -208,9 +215,16 @@ final class MeadowPartyBattleView:UIView {
     private func refresh() {
         guard let model else { return }
         let state=model.state;let current=model.current
-        if state.units[foe]?.isAlive != true,let live=model.monsterIDs.first(where:{ state.units[$0]?.isAlive==true }) { foe=live }
+        if model.isDuel {
+            // Keep the targets relative to whoever is acting: friend on their team, foe on the other.
+            let mine=current.flatMap{state.units[$0]?.teamID}
+            let fighters=model.duelLeft+model.duelRight
+            if state.units[friend]?.teamID != mine || !fighters.contains(friend) { friend=current ?? friend }
+            if state.units[foe]?.isAlive != true || state.units[foe]?.teamID==mine || !fighters.contains(foe),
+               let live=fighters.first(where:{ state.units[$0]?.isAlive==true && state.units[$0]?.teamID != mine }) { foe=live }
+        } else if state.units[foe]?.isAlive != true,let live=model.monsterIDs.first(where:{ state.units[$0]?.isAlive==true }) { foe=live }
         let busy=stage.isPlaying || model.pending != nil
-        title.text=model.terminal ? (state.players.contains(where: \.isAlive) ? "小队胜利":"小队倒地") : (campaignEngine == nil ? "小队支援":"林地遭遇")+" · 第\(model.round)轮"
+        title.text=model.isDuel ? (model.terminal ? "PVP结束":"队伍PVP · 第\(model.round)轮") : model.terminal ? (state.players.contains(where: \.isAlive) ? "小队胜利":"小队倒地") : (campaignEngine == nil ? "小队支援":"林地遭遇")+" · 第\(model.round)轮"
         let showing=busy ? (stage.actorInAction ?? model.pending?.actor ?? current):current
         let name=showing.flatMap { state.units[$0]?.shortName } ?? "—"
         if busy { armed=nil }
@@ -240,9 +254,9 @@ final class MeadowPartyBattleView:UIView {
                 let slot=state.players.firstIndex{$0.id==id} ?? MeadowPartyStageView.playerSlot(id)
                 face=PixelHeroAtlas.portrait(PixelHeroLook.battle(unit:unit,slot:slot)){[weak self] in self?.classroomRefresh()}
             }
-            return MeadowTurnOrderView.Entry(id:id,name:unit.shortName,hp:shown.health,maxHP:maximum,shield:shown.shield,enemy:unit.kind == .monster,acted:acted.contains(id) && id != showing,down:!unit.isAlive,portrait:face)
+            return MeadowTurnOrderView.Entry(id:id,name:unit.shortName,hp:shown.health,maxHP:maximum,shield:shown.shield,enemy:model.isDuel ? model.duelRight.contains(id):unit.kind == .monster,acted:acted.contains(id) && id != showing,down:!unit.isAlive,portrait:face)
         }
-        track.show(entries:entries,current:showing,round:model.round,selected:[friend,foe],finished:model.terminal ? (state.players.contains(where: \.isAlive) ? "战斗胜利":"小队倒地"):nil)
+        track.show(entries:entries,current:showing,round:model.round,selected:[friend,foe],finished:model.terminal ? (model.isDuel ? "PVP结束":state.players.contains(where: \.isAlive) ? "战斗胜利":"小队倒地"):nil)
         UIView.animate(withDuration:0.2) { self.panel.alpha=busy ? 0.55:1 }
         stage.show(state,friend:friend,foe:foe,current:current,catalog:model.engine.catalog)
         let actions:[PartyAction]=busy ? showing.map { model.actions(for:$0) } ?? []:model.playerActions()

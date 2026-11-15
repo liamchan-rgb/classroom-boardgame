@@ -105,8 +105,8 @@ public struct MeadowCampaignSave:Codable,Equatable {
             if result.outcome=="victory" {
                 guard !archive.state.units.values.contains(where:{$0.kind == .monster && $0.isAlive}),
                       (result.totalEncounters>0 || archive.state.map.nodes.allSatisfy({archive.state.map.revealed.contains($0.id)})),
-                      let start=archive.state.map.nodes.first(where:{$0.kind == .start})?.id,
-                      !archive.state.players.filter(\.isAlive).isEmpty,archive.state.players.filter(\.isAlive).allSatisfy({$0.nodeID==start}) else{throw GameError("通关条件未达成。")}
+                      case let camps=Set(archive.state.map.nodes.filter({$0.kind == .start}).map(\.id)),!camps.isEmpty,
+                      !archive.state.players.filter(\.isAlive).isEmpty,archive.state.players.filter(\.isAlive).allSatisfy({camps.contains($0.nodeID)}) else{throw GameError("通关条件未达成。")}
             }else{guard !archive.state.players.contains(where: \.isAlive) else{throw GameError("队伍未全员倒地。")}}
         }
         if let selectedPlayerID {guard archive.state.players.contains(where:{$0.id==selectedPlayerID}) else{throw GameError("操作成员无效。")}}
@@ -223,8 +223,10 @@ public final class MeadowCampaignSession {
         return engine.state.map.nodes.allSatisfy{engine.state.map.revealed.contains($0.id)}
     }
     public var canComplete:Bool {
-        guard !isCompleted,travel==nil,parkedTravels.isEmpty,engine.state.battle==nil,completionGoalMet,let start=engine.state.map.nodes.first(where:{$0.kind == .start})?.id else{return false}
-        let survivors=engine.state.players.filter(\.isAlive);return !survivors.isEmpty && survivors.allSatisfy{$0.nodeID==start}
+        guard !isCompleted,travel==nil,parkedTravels.isEmpty,engine.state.battle==nil,completionGoalMet else{return false}
+        // Every survivor back at a camp (with team camps, any of them).
+        let camps=Set(engine.state.map.nodes.filter{$0.kind == .start}.map(\.id))
+        let survivors=engine.state.players.filter(\.isAlive);return !camps.isEmpty && !survivors.isEmpty && survivors.allSatisfy{camps.contains($0.nodeID)}
     }
     public var completionProgress:String {
         if isCompleted{return "行程已结算，可查看结果"}
@@ -304,15 +306,20 @@ public final class MeadowCampaignSession {
         }
         return false
     }
-    public static func new(layout:GeneratedMeadowMap,appearanceID:String="forester",playerClassID:String="spellblade",companionClassID:String="ranger",studentClasses:[String]?=nil,studentNames:[String]?=nil,playerAppearances:[String:PlayerAppearance]?=nil,loadouts:[String:GameUnit]?=nil,difficulty:GameDifficulty = .normal,quizBank:[QuizQuestion]?=nil,persist:((Data)throws->Void)?=nil)throws->MeadowCampaignSession {
+    public static func new(layout:GeneratedMeadowMap,appearanceID:String="forester",playerClassID:String="spellblade",companionClassID:String="ranger",studentClasses:[String]?=nil,studentNames:[String]?=nil,playerAppearances:[String:PlayerAppearance]?=nil,loadouts:[String:GameUnit]?=nil,difficulty:GameDifficulty = .normal,quizBank:[QuizQuestion]?=nil,studentTeams:[Int]?=nil,persist:((Data)throws->Void)?=nil)throws->MeadowCampaignSession {
         let catalog=try self.catalog(),start=layout.map.nodes.first{$0.kind == .start}!.id
         try MeadowPartyConfiguration(playerClassID:playerClassID,companionClassID:companionClassID).validate(catalog:catalog)
         let classes=studentClasses ?? [playerClassID,companionClassID]
         guard (1...6).contains(classes.count),classes.allSatisfy(MeadowPartyConfiguration.classIDs.contains) else{throw GameError("请选择1至6名学生的职业。")}
         var units=[String:GameUnit]()
+        // Team camps: one team per camp on the map (a one-camp map keeps the single party).
+        let camps=layout.map.nodes.filter{$0.kind == .start}.map(\.id).sorted{$0==start ? true:($1==start ? false:$0<$1)}
+        let teamIDs=camps.indices.map{$0==0 ? "party":"team-\($0+1)"}
+        let teamNames=camps.count>1 ? Array(["红队","蓝队","绿队"].prefix(camps.count)):["林间小队"]
         for (index,classID) in classes.enumerated() {
             let id="p\(index+1)"
-            var u=try GameFactory.player(id:id,name:id.uppercased()+" · "+catalog.playerClass(classID).name,classID:classID,teamID:"party",nodeID:start,catalog:catalog)
+            let team=min(camps.count-1,max(0,studentTeams?[safe:index] ?? (index%camps.count)))
+            var u=try GameFactory.player(id:id,name:id.uppercased()+" · "+catalog.playerClass(classID).name,classID:classID,teamID:teamIDs[team],nodeID:camps[team],catalog:catalog)
             if let names=studentNames,names.indices.contains(index),!names[index].trimmingCharacters(in:.whitespacesAndNewlines).isEmpty{u.name=names[index].trimmingCharacters(in:.whitespacesAndNewlines)}
             u.appearance=playerAppearances?[id];try u.appearance?.validate()
             u.inventory=["smallPotion":2,"largePotion":1,"shieldPotion":1,"revivalStone":1]
@@ -331,7 +338,7 @@ public final class MeadowCampaignSession {
         for (id,coins) in provisions.startingCoins{units[id]?.coins=coins}
         var map=layout.map
         for i in map.nodes.indices {if let reward=provisions.rewards[map.nodes[i].id]{map.nodes[i].reward=reward}}
-        var state=GameState(units:units,teams:[GameTeam(id:"party",name:"林间小队")],map:map,random:RandomState(seed:layout.configuration.seed ^ 0x43414d504149474e))
+        var state=GameState(units:units,teams:zip(teamIDs,teamNames).map{GameTeam(id:$0.0,name:$0.1)},map:map,random:RandomState(seed:layout.configuration.seed ^ 0x43414d504149474e))
         state.pauseReasons=[];state.difficulty=difficulty == .normal ? nil:difficulty
         let save=MeadowCampaignSave(layout:layout,archive:GameArchive(catalog:catalog,state:state,history:[]),appearanceID:appearanceID)
         var bank=save;bank.quizBank=(quizBank?.isEmpty ?? true) ? nil:quizBank
@@ -618,7 +625,26 @@ public final class MeadowCampaignSession {
     }
     /// The teacher may leave a monster fight at any time: the fight ends with no winner and no drops, the heroes keep
     /// their health, and the monsters stay where they are (with their wounds) for a later attempt.
-    public var canLeaveBattle:Bool {!isCompleted && engine.state.battle?.kind == .pve && engine.state.players.contains(where: \.isAlive)}
+    public var canLeaveBattle:Bool {!isCompleted && (engine.state.battle?.kind == .pve || engine.state.battle?.duel == true) && engine.state.players.contains(where: \.isAlive)}
+    /// Another team standing (alive) on the same node as `actor`'s team that has not duelled this team yet.
+    public func duelOpponent(actor:String)->String? {
+        guard !isCompleted,engine.state.battle==nil,engine.state.phase == .exploration,let u=engine.state.units[actor],u.isAlive,let mine=u.teamID,
+              travel(holding:actor)==nil else{return nil}
+        let used=Set(engine.state.pvpPairs ?? [])
+        return engine.state.players.filter{$0.isAlive && $0.nodeID==u.nodeID && $0.teamID != nil && $0.teamID != mine && travel(holding:$0.id)==nil}
+            .compactMap(\.teamID).sorted().first{!used.contains([mine,$0].sorted().joined(separator:"|"))}
+    }
+    public func teamName(_ id:String)->String {engine.state.teams.first{$0.id==id}?.name ?? id}
+    @discardableResult public func startDuel(actor:String)throws->OperationReceipt {
+        try requireOpenCampaign()
+        guard let opponent=duelOpponent(actor:actor),let u=engine.state.units[actor],let mine=u.teamID else{throw GameError("这里没有可以对战的队伍（每两队只能对战一次）。")}
+        return try engine.apply(.startCampaignDuel(node:u.nodeID,teams:[mine,opponent]))
+    }
+    /// GM: every pair of teams may duel again.
+    @discardableResult public func resetDuelLimits()throws->OperationReceipt {
+        try requireOpenCampaign()
+        return try engine.apply(.resetDuelLimits)
+    }
     @discardableResult public func leaveBattle()throws->OperationReceipt {
         try requireOpenCampaign()
         guard canLeaveBattle else{throw GameError("当前没有可以撤离的战斗。")}
@@ -675,4 +701,8 @@ public final class MeadowCampaignSession {
         try engine.apply(inventoryItemCommand(actor:actor,item:item,target:target))
     }
 
+}
+
+extension Array {
+    subscript(safe index:Int)->Element? {indices.contains(index) ? self[index]:nil}
 }

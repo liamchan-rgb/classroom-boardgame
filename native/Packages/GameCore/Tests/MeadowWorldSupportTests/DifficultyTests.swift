@@ -95,4 +95,31 @@ final class DifficultyTests:XCTestCase {
         XCTAssertThrowsError(try s.give(from:"p1",to:"p1",coins:1))
         XCTAssertThrowsError(try s.give(from:"p2",to:"p1",item:"largePotion",count:99))
     }
+    func testTeamCampsDuelOnceWithSpoilsAndGMReset()throws {
+        var c=MeadowMapConfiguration.suggested(total:8,seed:9);c.starts=2
+        let layout=try MeadowMapGenerator.generate(c)
+        XCTAssertEqual(layout.map.nodes.filter{$0.kind == .start}.count,2)
+        let fresh=try MeadowCampaignSession.new(layout:layout,studentClasses:["spellblade","ranger"],studentTeams:[0,1])
+        let a=fresh.engine.state.units["p1"]!,b=fresh.engine.state.units["p2"]!
+        XCTAssertNotEqual(a.teamID,b.teamID);XCTAssertNotEqual(a.nodeID,b.nodeID)
+        XCTAssertNil(fresh.duelOpponent(actor:"p1"))
+        var save=fresh.snapshot
+        save.archive.state.units["p2"]!.nodeID=a.nodeID
+        save.archive.state.units["p1"]!.coins=0;save.archive.state.units["p1"]!.score=0
+        save.archive.state.units["p2"]!.coins=100;save.archive.state.units["p2"]!.score=10
+        let s=try MeadowCampaignSession(save:save)
+        XCTAssertEqual(s.duelOpponent(actor:"p1"),b.teamID)
+        let packA=s.engine.state.units["p1"]!.inventory.values.reduce(0,+),packB=s.engine.state.units["p2"]!.inventory.values.reduce(0,+)
+        try s.startDuel(actor:"p1")
+        XCTAssertEqual(s.engine.state.battle?.duel,true);XCTAssertEqual(Set(s.engine.state.battle?.queue ?? []),["p1","p2"])
+        try s.engine.apply(.setHealth(unit:"p2",value:0,killer:nil))
+        XCTAssertNil(s.engine.state.battle);XCTAssertEqual(s.engine.state.phase,.exploration)
+        XCTAssertEqual(s.engine.state.lastOutcome?.winners,[a.teamID!])
+        XCTAssertEqual(s.engine.state.units["p2"]!.health,1)
+        XCTAssertEqual(s.engine.state.units["p1"]!.coins,30);XCTAssertEqual(s.engine.state.units["p2"]!.coins,70)
+        XCTAssertEqual(s.engine.state.units["p1"]!.score,3);XCTAssertEqual(s.engine.state.units["p2"]!.score,7)
+        XCTAssertEqual(s.engine.state.units["p1"]!.inventory.values.reduce(0,+),packA+(packB>0 ? 1:0))
+        XCTAssertNil(s.duelOpponent(actor:"p1"));XCTAssertThrowsError(try s.startDuel(actor:"p1"))
+        try s.resetDuelLimits();XCTAssertEqual(s.duelOpponent(actor:"p1"),b.teamID)
+    }
 }

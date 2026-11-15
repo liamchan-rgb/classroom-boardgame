@@ -11,6 +11,8 @@ public struct MeadowMapConfiguration: Codable, Equatable {
     public var extraRoads = 1
     public var minimumBossHops = 0
     public var decorationCount = 100
+    /// Team camps (1–3). Each team starts at its own camp; extra camps take the place of the last empty/supply/combat nodes.
+    public var starts: Int? = nil
     public init() {}
     public static func suggested(total: Int, seed: UInt64 = 31827) -> Self {
         var c = Self(); c.seed = seed; c.total = total
@@ -52,6 +54,7 @@ public struct MeadowMapConfiguration: Codable, Equatable {
             throw GameError("此规模可增加0—\(MeadowMapGenerator.maximumExtraRoads(total: total))条环路道路。")
         }
         guard (0..<total).contains(minimumBossHops), (0...120).contains(decorationCount) else { throw GameError("Boss距离或装饰数量无效。") }
+        guard (1...3).contains(starts ?? 1), total-1-boss >= (starts ?? 1)-1 else { throw GameError("队伍起点须为1—3个，且地点数量足够。") }
     }
 }
 
@@ -297,10 +300,22 @@ public enum MeadowMapGenerator {
             let bosses=Array(remaining.prefix(c.boss));if bosses.contains(where:{distance[$0]<c.minimumBossHops}){continue}
             var kinds=Array(repeating:NodeKind.empty,count:c.total);kinds[start] = .start
             for id in bosses{kinds[id] = .boss};remaining.removeAll{bosses.contains($0)};topology.shuffle(&remaining)
+            // Extra team camps: each as far (in road hops) from the camps already placed as possible.
+            var camps=[start]
+            for _ in 1..<max(1,c.starts ?? 1) {
+                var hops=Array(repeating:Int.max,count:c.total)
+                for camp in camps {
+                    var d=Array(repeating:-1,count:c.total);d[camp]=0;var q=[camp],i=0
+                    while i<q.count {let u=q[i];i+=1;for road in roads {let v=road.from==u ? road.to:road.to==u ? road.from:-1;if v>=0 && d[v]<0 {d[v]=d[u]+1;q.append(v)}}}
+                    for n in 0..<c.total where d[n]>=0 {hops[n]=min(hops[n],d[n])}
+                }
+                guard let pick=remaining.max(by:{hops[$0]==hops[$1] ? $0>$1:hops[$0]<hops[$1]}) else{break}
+                camps.append(pick);kinds[pick] = .start;remaining.removeAll{$0==pick}
+            }
             for (id,kind) in zip(remaining,Array(repeating:NodeKind.combat,count:c.combat)+Array(repeating:NodeKind.reward,count:c.reward)+Array(repeating:NodeKind.empty,count:c.empty)){kinds[id]=kind}
             let titles:[NodeKind:String]=[.start:"起点营地",.combat:"林间战斗",.boss:"首领遗迹",.reward:"补给棚",.empty:"林间水井"]
             let nodes=positions.indices.map{MapNode(id:$0,name:"\(titles[kinds[$0]]!) · \($0+1)",kind:kinds[$0],x:positions[$0].x/1280,y:positions[$0].y/height,reward:kinds[$0] == .reward ? NodeReward():nil)}
-            let map=GameMap(nodes:nodes,roads:roads.map{MapRoad($0.from,$0.to)},seed:c.seed,revealed:[start]);try map.validate()
+            let map=GameMap(nodes:nodes,roads:roads.map{MapRoad($0.from,$0.to)},seed:c.seed,revealed:Set(camps));try map.validate()
             let catalog:[NodeKind:(String,Double)]=[.start:("CampTent",105),.combat:("NodeCombatOutpost",90),.boss:("NodeBossSanctum",104),.reward:("NodeRewardCache",86),.empty:("NodeWaystone",74)]
             var props=positions.indices.map{ id -> MeadowWorldProp in
                 let (asset,width)=catalog[kinds[id]]!

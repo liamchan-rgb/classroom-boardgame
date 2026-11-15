@@ -278,7 +278,8 @@ final class MeadowPartyStageView:UIView {
     func show(_ value:GameState,friend:String,foe:String,current:String?,catalog:GameCatalog) {
         // The classroom battle has 1-6 students and the teacher (P7): the field is laid out for whoever plays.
         let ids=value.players.map(\.id)
-        if ids != playerIDs { configureUnits(players:ids,foes:monsterIDs,pvp:false) }
+        // A duel keeps its two fixed teams (configured once); a monster fight follows whoever plays.
+        if rivalIDs.isEmpty,ids != playerIDs { configureUnits(players:ids,foes:monsterIDs,pvp:false) }
         state=value;self.current=current;self.catalog=catalog;fx.friend=friend;fx.foe=foe;fx.current=current;chosenFriend=friend;chosenFoe=foe
         MeadowMonsterFrames.retain(Set(value.units.values.filter{$0.kind == .monster && renderIDs.contains($0.id)}.compactMap{MonsterVisualSpec.find($0.templateID)?.id}))
         // A shield carried in from the map (or an earlier battle) forms up on entry and keeps moving like a fresh one.
