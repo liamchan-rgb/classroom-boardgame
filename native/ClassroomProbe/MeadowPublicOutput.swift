@@ -217,7 +217,7 @@ struct BookGainBurst:UIViewRepresentable {
                 DispatchQueue.main.asyncAfter(deadline:.now()+b.animationDuration){ b.removeFromSuperview() }
             }
             let label=UILabel()
-            label.text="+\(amount)";label.font=.systemFont(ofSize:h*0.3,weight:.black)
+            label.text="+\(amount)";label.font = .systemFont(ofSize:h*0.3,weight:.black)
             label.textColor=coins ? UIColor(red:1.0,green:0.84,blue:0.36,alpha:1):UIColor(red:0.80,green:0.70,blue:1.0,alpha:1)
             label.layer.shadowColor=UIColor.black.cgColor;label.layer.shadowOpacity=0.8;label.layer.shadowRadius=3;label.layer.shadowOffset = .zero
             label.sizeToFit();label.center=CGPoint(x:target.x,y:target.y-h*0.35);label.transform=CGAffineTransform(scaleX:0.4,y:0.4)
