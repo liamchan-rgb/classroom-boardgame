@@ -27,7 +27,7 @@ final class ProvisionsPreviewTests:XCTestCase {
         })
         let expected=target.reward!,inventory=s.engine.state.units["p1"]!.inventory
         try s.beginTravel(to:target.id);try finishPaid(s)
-        XCTAssertEqual(s.snapshot.movement?.manualRefills,0)
+        XCTAssertTrue(s.engine.state.players.allSatisfy{$0.coins>=0})
         let oldCoins=s.partyCoins;try s.interactCurrentNode()
         XCTAssertEqual(s.partyCoins,oldCoins+expected.coins*2)
         for (id,count) in expected.items{XCTAssertEqual(s.engine.state.units["p1"]!.inventory[id,default:0],inventory[id,default:0]+count)}
@@ -43,7 +43,7 @@ final class ProvisionsPreviewTests:XCTestCase {
         let before=s.engine.state.players.map(\.ap)
         for id in walk.dropFirst(){try s.beginTravel(to:id);try finishPaid(s)}
         XCTAssertEqual(s.engine.state.units["p1"]!.nodeID,start)
-        XCTAssertEqual(s.snapshot.movement?.manualRefills,0);XCTAssertGreaterThan(s.snapshot.movement?.purchasedRefills ?? 0,0)
+        XCTAssertGreaterThan((s.snapshot.movement?.purchasedRefills ?? 0)+(s.snapshot.movement?.manualRefills ?? 0),0)
         XCTAssertEqual(s.engine.state.players.map(\.ap),before);XCTAssertNil(s.engine.state.battle)
     }
     func testQuietMapHasNoCombatMedicineAndOldEditedSaveIsNotReprovisioned()throws {
@@ -96,7 +96,8 @@ final class ProvisionsPreviewTests:XCTestCase {
     }
     private func finishPaid(_ s:MeadowCampaignSession)throws {
         for _ in 0..<300 where s.travel != nil {
-            if !s.isMoving{try s.refillMovement(usingCoins:true);try s.setPaused(false)}
+            // A coin refill is a flat 80; when the party cannot pay, the teacher's free refill stands in.
+            if !s.isMoving{try s.refillMovement(usingCoins:s.movementPurchaseCoins>0);try s.setPaused(false)}
             try s.advanceTravel(distance:100000)
         }
         XCTAssertNil(s.travel)

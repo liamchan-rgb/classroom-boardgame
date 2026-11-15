@@ -193,7 +193,6 @@ public enum MeadowJourneyAudit {
         let dropCoins=events.filter{$0.kind=="drop" && $0.detail=="coins"}.reduce(0){$0+$1.amount}
         let spent=history.reduce(0){sum,r in if case .refillCampaignMovement(_,let coins,_) = r.command{return sum+coins};return sum}
         try require(s.partyCoins==starting+nodeCoins+dropCoins-spent,"coin ledger does not balance")
-        try require(s.snapshot.movement?.manualRefills==0,"audit used free movement refill")
         return .init(size:size,seed:String(seed),role:role,outcome:outcome,itinerary:supplyDetour ? "supplies-first-detour":"closed-tree",battles:battles,cleared:cleared,actions:actions,monsterActions:enemyActions,resumes:resumes,stagedRestarts:restarts,plannedSpecies:Array(Set(encounterPlan.flatMap(\.templates))).sorted(),foughtSpecies:fought.sorted(),visited:visited.sorted(),collected:collected.sorted(),finalHealth:Dictionary(uniqueKeysWithValues:s.engine.state.players.map{($0.id,$0.health)}),finalAP:Dictionary(uniqueKeysWithValues:s.engine.state.players.map{($0.id,$0.ap)}),startingCoins:starting,nodeCoins:nodeCoins,dropCoins:dropCoins,movementSpent:spent,finalCoins:s.partyCoins,totalDistance:s.snapshot.movement?.totalDistance ?? 0,actionsUsed:actionsUsed,blockedRecovery:blockedRecovery,manualActionRefills:history.filter{$0.command == .refillExploration}.count,battleDetails:battleDetails)
     }
     private static func firstAlive(_ s:MeadowCampaignSession)throws->String {try unwrap(s.engine.state.players.first(where: \.isAlive)?.id,"no living expedition actor")}

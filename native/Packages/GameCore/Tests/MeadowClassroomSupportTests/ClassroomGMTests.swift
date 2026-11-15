@@ -30,7 +30,7 @@ final class ClassroomGMTests:XCTestCase {
         let before=c.snapshot,rows=b.bookPlayers
         XCTAssertEqual(rows.count,7)
         let data=try JSONEncoder().encode(rows),json=try XCTUnwrap(JSONSerialization.jsonObject(with:data) as? [[String:Any]])
-        for row in json {XCTAssertEqual(Set(row.keys),Set(["id","name","health","maximumHealth","ap","maximumAP","coins"]))}
+        for row in json {XCTAssertEqual(Set(row.keys),Set(["id","name","health","maximumHealth","ap","maximumAP","coins","movement","maximumMovement"]))}
         XCTAssertEqual(c.snapshot,before)
     }
     func testBookGrantUpdatesSelectedPlayersWithIndividualCapsAndNoMovementDebit()throws {
