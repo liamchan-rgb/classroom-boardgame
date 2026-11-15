@@ -1,4 +1,5 @@
 import UIKit
+import ClassroomGameCore
 import MeadowBattleSupport
 
 /// 像素特效（pixelfx，MIT，二次创作见实验仓库 scripts/vfx-export.ts）：预渲染好的帧图 + 配方，贴在战斗舞台上播放。
@@ -186,5 +187,162 @@ final class MeadowPixelFXPlayer {
             }
         }
         for (id, pair) in shields where !alive.contains(id) { pair.0.removeFromSuperlayer(); pair.1.removeFromSuperlayer(); shields[id] = nil }
+    }
+}
+
+/// 怪物倒下时的掉落动画（按规则这一击实际掉了什么）：
+///   物品 / 金币从怪物身上弹出来，划一道弧落地、弹一下，在地上停一会儿（稀有以上站在品级颜色的光柱里，头顶飘着「品级 · 名字」），
+///   然后飞向拿到它的英雄，在英雄胸前炸开一团拾取光。金币是会转的像素金币。
+final class MeadowLootShower {
+    private weak var host: CALayer?
+    private struct Piece {
+        let start: Double, from: CGPoint, land: CGPoint, receiver: String, rest: Double
+        let rarity: MeadowItemRarity?, coin: Bool
+        let icon: CALayer, beam: CALayer?, label: CATextLayer?
+        var collected = false
+    }
+    private struct Burst { let clip: MeadowPixelFX.Clip; let start: Double; let at: CGPoint; let layer: CALayer }
+    private var pieces: [Piece] = []
+    private var bursts: [Burst] = []
+
+    init(host: CALayer) { self.host = host }
+
+    func reset() {
+        for p in pieces { p.icon.removeFromSuperlayer(); p.beam?.removeFromSuperlayer(); p.label?.removeFromSuperlayer() }
+        for b in bursts { b.layer.removeFromSuperlayer() }
+        pieces = []; bursts = []
+    }
+
+    private func layer(_ z: CGFloat) -> CALayer {
+        let l = CALayer(); l.magnificationFilter = .nearest; l.minificationFilter = .linear; l.zPosition = z; l.isHidden = true
+        host?.addSublayer(l); return l
+    }
+
+    /// drops：(物品 id，nil = 金币；数量)。foot：怪物脚底；receiver：拿到的英雄
+    func drop(_ drops: [(item: String?, count: Int)], foot: PartyPoint, height: Double, receiver: String, at start: Double, catalog: GameCatalog?) {
+        var list: [(item: String?, coin: Bool)] = []
+        for d in drops {
+            if let item = d.item { for _ in 0..<min(3, max(1, d.count)) { list.append((item, false)) } }
+            else { for _ in 0..<min(8, max(3, d.count / 6)) { list.append((nil, true)) } }
+        }
+        // 稀有的最后出来、落在最前面
+        list.sort { (a, b) in (a.item.map { MeadowItemRarity.of($0) }?.rawValue ?? -1) < (b.item.map { MeadowItemRarity.of($0) }?.rawValue ?? -1) }
+        let n = list.count
+        for (i, entry) in list.enumerated() {
+            let rarity = entry.item.map { MeadowItemRarity.of($0, item: try? catalog?.item($0)) }
+            let spread = Double(i) - Double(n - 1) / 2
+            let jitter = sin(Double(i) * 12.9898 + foot.x) * 14
+            let land = CGPoint(x: foot.x - 40 + spread * (entry.coin ? 30 : 56) + jitter, y: foot.y + 8 + Double(i % 3) * 12)
+            let rest = (rarity ?? .common) >= .rare ? 2.6 : entry.coin ? 1.3 : 1.7
+            let icon = layer(CGFloat(land.y + 1))
+            var beam: CALayer?, label: CATextLayer?
+            if let item = entry.item {
+                icon.contents = MeadowItemIcon.image(item).images?.first?.cgImage ?? MeadowItemIcon.image(item).cgImage
+                let side: CGFloat = (rarity ?? .common) >= .rare ? 78 : 62
+                icon.bounds = CGRect(x: 0, y: 0, width: side, height: side)
+                if let r = rarity, r >= .rare {
+                    beam = layer(CGFloat(land.y - 0.5))
+                    let text = CATextLayer()
+                    text.string = NSAttributedString(string: "\(r.title) · \((try? catalog?.item(item).name) ?? item)", attributes: [
+                        .font: UIFont.systemFont(ofSize: r == .legendary ? 26 : 22, weight: .heavy), .foregroundColor: r.color,
+                        .strokeColor: UIColor.black.withAlphaComponent(0.85), .strokeWidth: -4])
+                    text.alignmentMode = .center; text.contentsScale = 3; text.zPosition = 960; text.isHidden = true
+                    text.shadowColor = r.color.cgColor; text.shadowRadius = 8; text.shadowOpacity = 0.9; text.shadowOffset = .zero
+                    text.bounds = CGRect(x: 0, y: 0, width: 360, height: 36)
+                    host?.addSublayer(text); label = text
+                }
+            } else {
+                icon.bounds = CGRect(x: 0, y: 0, width: 34 * MeadowPixelFX.unit, height: 35 * MeadowPixelFX.unit)
+            }
+            pieces.append(Piece(start: start + Double(i) * 0.07, from: CGPoint(x: foot.x, y: foot.y - height), land: land, receiver: receiver,
+                                rest: rest, rarity: rarity, coin: entry.coin, icon: icon, beam: beam, label: label))
+        }
+    }
+
+    func update(time: Double, live: [String: PartyPoint]) {
+        CATransaction.begin(); CATransaction.setDisableActions(true)
+        defer { CATransaction.commit() }
+        let fps = MeadowPixelFX.book?.fps ?? 20, U = MeadowPixelFX.unit
+        let coinClip = MeadowPixelFX.clips["coinSpin"]
+        var keep: [Piece] = []
+        for var p in pieces {
+            let t = time - p.start
+            guard t >= 0 else { keep.append(p); continue }
+            let fly = 0.55, bounce = 0.25, collectAt = fly + bounce + p.rest, collectLen = 0.42
+            let target = (live[p.receiver] ?? PartyVisual.foot(p.receiver)).map { CGPoint(x: $0.x, y: $0.y - 80 * PartyVisual.heroScale) } ?? p.from
+            var pos: CGPoint, scale: CGFloat = 1
+            if t < fly {
+                // 弹出：抛物线，最高点比出发点高 90
+                let k = t / fly
+                pos = CGPoint(x: p.from.x + (p.land.x - p.from.x) * k, y: p.from.y + (p.land.y - p.from.y) * k - sin(k * .pi) * 90 - (1 - k) * 0)
+            } else if t < fly + bounce {
+                let k = (t - fly) / bounce
+                pos = CGPoint(x: p.land.x, y: p.land.y - sin(k * .pi) * 16)
+            } else if t < collectAt {
+                pos = CGPoint(x: p.land.x, y: p.land.y - (1 + sin((t - fly) * 4)) * 3)
+            } else if t < collectAt + collectLen {
+                let k = (t - collectAt) / collectLen, e = k * k
+                pos = CGPoint(x: p.land.x + (target.x - p.land.x) * e, y: p.land.y + (target.y - p.land.y) * e - sin(k * .pi) * 40)
+                scale = 1 - 0.55 * k
+            } else {
+                if !p.collected { burst(p.coin ? "collectGold" : "collect" + (p.rarity?.clipSuffix ?? "Rare"), at: target, time: time, big: (p.rarity ?? .common) >= .rare) }
+                p.icon.removeFromSuperlayer(); p.beam?.removeFromSuperlayer(); p.label?.removeFromSuperlayer()
+                continue
+            }
+            // 图标
+            p.icon.isHidden = false
+            if p.coin, let clip = coinClip {
+                let images = MeadowPixelFX.images(clip), f = Int(time * fps) % clip.n
+                let idx = clip.back && clip.front ? clip.n + f : f
+                if idx < images.count { p.icon.contents = images[idx] }
+                p.icon.position = CGPoint(x: pos.x - (Double(clip.ox) - Double(clip.w) / 2) * U, y: pos.y - (Double(clip.oy) - Double(clip.h) / 2) * U)
+            } else {
+                // 物品图标：底边落在地面
+                p.icon.position = CGPoint(x: pos.x, y: pos.y - p.icon.bounds.height / 2)
+            }
+            p.icon.transform = CATransform3DMakeScale(scale, scale, 1)
+            p.icon.zPosition = CGFloat(t < fly ? 955 : pos.y + 1)
+            // 稀有以上：落地后升起光柱、头顶飘名字
+            let settled = t >= fly && t < collectAt
+            if let beam = p.beam, let r = p.rarity, let suffix = r.clipSuffix, let clip = MeadowPixelFX.clips["lootBeam" + suffix] {
+                beam.isHidden = !settled
+                if settled {
+                    let images = MeadowPixelFX.images(clip), f = Int((t - fly) * fps) % clip.n
+                    let idx = f + (clip.back && clip.front ? clip.n : 0)
+                    if idx < images.count { beam.contents = images[idx] }
+                    beam.bounds = CGRect(x: 0, y: 0, width: Double(clip.w) * U, height: Double(clip.h) * U)
+                    beam.position = CGPoint(x: p.land.x - (Double(clip.ox) - Double(clip.w) / 2) * U, y: p.land.y - (Double(clip.oy) - Double(clip.h) / 2) * U)
+                    beam.opacity = Float(min(1, (t - fly) / 0.25))
+                }
+            }
+            if let label = p.label {
+                label.isHidden = !settled
+                if settled {
+                    let k = min(1, (t - fly) / 0.3)
+                    label.position = CGPoint(x: p.land.x, y: p.land.y - p.icon.bounds.height - 34 - 10 * k)
+                    let pop = 0.6 + 0.4 * k + (k < 1 ? sin(k * .pi) * 0.25 : 0)
+                    label.transform = CATransform3DMakeScale(pop, pop, 1)
+                }
+            }
+            keep.append(p)
+        }
+        pieces = keep
+        // 拾取光
+        bursts.removeAll { b in
+            let f = Int((time - b.start) * fps)
+            guard f < b.clip.n else { b.layer.removeFromSuperlayer(); return true }
+            let images = MeadowPixelFX.images(b.clip)
+            for idx in [b.clip.back && b.clip.front ? b.clip.n + f : f] where idx < images.count { b.layer.contents = images[idx] }
+            b.layer.isHidden = false
+            return false
+        }
+    }
+
+    private func burst(_ id: String, at p: CGPoint, time: Double, big: Bool) {
+        guard let clip = MeadowPixelFX.clips[id] else { return }
+        let U = MeadowPixelFX.unit * (big ? 1.4 : 1), l = layer(960)
+        l.bounds = CGRect(x: 0, y: 0, width: Double(clip.w) * U, height: Double(clip.h) * U)
+        l.position = CGPoint(x: p.x - (Double(clip.ox) - Double(clip.w) / 2) * U, y: p.y + 40 - (Double(clip.oy) - Double(clip.h) / 2) * U)
+        bursts.append(Burst(clip: clip, start: time, at: p, layer: l))
     }
 }

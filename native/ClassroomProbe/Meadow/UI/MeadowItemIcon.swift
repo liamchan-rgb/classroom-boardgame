@@ -68,3 +68,34 @@ enum MeadowItemIcon {
         return UIImage.animatedImage(with:frames,duration:Double(count)/12)
     }
 }
+
+/// 物品品级（和像素图标的特效一致）：普通 白 / 稀有 蓝 / 史诗 紫 / 传说 橙金。
+/// 掉落动画、获得物品的确认框按它决定文字颜色、光柱和特效强度。
+enum MeadowItemRarity: Int, Comparable {
+    case common = 0, rare, epic, legendary
+
+    static func < (a: Self, b: Self) -> Bool { a.rawValue < b.rawValue }
+
+    static func of(_ id: String, item: ItemDefinition? = nil) -> MeadowItemRarity {
+        switch id {
+        case "greatSword", "runeArmor", "actionRing", "revivalStone": return .rare
+        case "starlightBlade", "starlightArmor", "starlightCharm": return .epic
+        case "legendaryStaff", "dragonFangSword", "dragonArmor", "dragonCharm": return .legendary
+        default:
+            switch item?.setID { case "starlight"?: return .epic; case "dragonMark"?: return .legendary; default: return .common }
+        }
+    }
+
+    var title: String { ["普通", "稀有", "史诗", "传说"][rawValue] }
+    /// 名字的颜色
+    var color: UIColor {
+        switch self {
+        case .common: return UIColor(white: 0.93, alpha: 1)
+        case .rare: return UIColor(red: 0.36, green: 0.68, blue: 1.0, alpha: 1)
+        case .epic: return UIColor(red: 0.74, green: 0.48, blue: 1.0, alpha: 1)
+        case .legendary: return UIColor(red: 1.0, green: 0.66, blue: 0.2, alpha: 1)
+        }
+    }
+    /// 像素特效片段名的后缀（lootBeamRare / collectEpic …）；普通物品没有光柱
+    var clipSuffix: String? { [nil, "Rare", "Epic", "Legendary"][rawValue] }
+}

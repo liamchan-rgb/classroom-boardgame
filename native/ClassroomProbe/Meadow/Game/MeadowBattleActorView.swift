@@ -263,6 +263,8 @@ final class MeadowBattleActorView: UIView {
     // 攻击、施法的出手帧对准 pixelKeyProgress（战斗场景按命中 / 放箭 / 释放的时刻算好传进来）。
 
     private let pixelView = UIImageView()
+    /// 装备特效叠加层（权杖光芒、龙牙剑火苗……）：4 个相位按时间循环，站着不动时也在动
+    private let pixelFXView = UIImageView()
     /// 战斗场景直接指定外观（体型、护甲、武器、发型、五官）；不指定时按 setWeaponAsset / setArmor / setHead 推出来
     var pixelLookOverride: PixelHeroLook? { didSet { if pixelLookOverride != oldValue { refreshPixelSprite() } } }
     /// 攻击 / 施法的出手帧落在哪个进度上
@@ -301,10 +303,17 @@ final class MeadowBattleActorView: UIView {
     }
 
     private func updatePixelFrame() {
-        guard pixelActive else { pixelView.isHidden = true; return }
+        guard pixelActive else { pixelView.isHidden = true; pixelFXView.isHidden = true; return }
         pixelFrame = pixelFrameFor(clip: currentPose.clip, progress: currentPose.progress)
         // Called every frame for up to 7 heroes: only touch the layer when the picture actually changes.
         if pixelView.image !== pixelFrame?.tall { pixelView.image = pixelFrame?.tall }
+        if let fx = pixelFrame?.fx, !fx.isEmpty, alpha > 0.01 {
+            let phase = fx[Int(CACurrentMediaTime() * 8) % fx.count]
+            let k = pixelView.bounds.width / 256, origin = pixelView.frame.origin
+            if pixelFXView.image !== phase.image { pixelFXView.image = phase.image }
+            pixelFXView.frame = CGRect(x: origin.x + phase.rect.minX * k, y: origin.y + phase.rect.minY * k, width: phase.rect.width * k, height: phase.rect.height * k)
+            pixelFXView.isHidden = false
+        } else { pixelFXView.isHidden = true }
         guard pixelView.isHidden else { return }
         pixelView.isHidden = false
         images.forEach { $0.isHidden = true }
@@ -390,6 +399,9 @@ final class MeadowBattleActorView: UIView {
         pixelView.isHidden = true
         pixelView.layer.zPosition = 10_000
         addSubview(pixelView)
+        pixelFXView.layer.magnificationFilter = .nearest; pixelFXView.contentMode = .scaleToFill
+        pixelFXView.isHidden = true; pixelFXView.layer.zPosition = 10_001; pixelFXView.isUserInteractionEnabled = false
+        addSubview(pixelFXView)
         refreshPixelSprite()
     }
 

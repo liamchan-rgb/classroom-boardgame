@@ -63,22 +63,29 @@ final class PixelBaker {
 
     /// 烘一块：dirs 行 × frames 列，每格 sprW × sprH，RGBA（alpha 只有 0 / 255，预乘与否结果相同）。
     /// spec = ["slots": [槽位: 装备 id], "variants": [槽位: 换色 id], "skin": 肤色]。先查磁盘缓存。
-    func bake(spec: [String: Any], dirs: [String], frames: [Int]) -> Data? {
+    func bake(spec: [String: Any], dirs: [String], frames: [Int]) -> Data? { run("bake", spec: spec, dirs: dirs, frames: frames, layers: 1) }
+
+    /// 装备特效叠加层（权杖光芒、龙牙剑火苗……）：(dirs × 4 相位) 行 × frames 列，只有特效像素；
+    /// 这身装备没有特效时返回空 Data（不是 nil）。
+    func bakeFx(spec: [String: Any], dirs: [String], frames: [Int]) -> Data? { run("bakeFx", spec: spec, dirs: dirs, frames: frames, layers: 4) }
+
+    private func run(_ method: String, spec: [String: Any], dirs: [String], frames: [Int], layers: Int) -> Data? {
         var full = spec
         full["dirs"] = dirs
         full["frames"] = frames
         guard let json = try? JSONSerialization.data(withJSONObject: full, options: [.sortedKeys]),
               let text = String(data: json, encoding: .utf8) else { return nil }
-        let expected = info.sprW * info.sprH * 4 * dirs.count * frames.count
-        let key = SHA256.hash(data: Data((scriptVersion + text).utf8)).map { String(format: "%02x", $0) }.joined()
+        let expected = info.sprW * info.sprH * 4 * dirs.count * frames.count * layers
+        let key = SHA256.hash(data: Data((scriptVersion + method + text).utf8)).map { String(format: "%02x", $0) }.joined()
         let file = Self.cacheDirectory.appendingPathComponent(key + ".rgba")
-        if let cached = try? Data(contentsOf: file), cached.count == expected { return cached }
+        if let cached = try? Data(contentsOf: file), cached.count == expected || (method == "bakeFx" && cached.isEmpty) { return cached }
         let bytes: Data? = queue.sync {
-            guard let value = api.invokeMethod("bake", withArguments: [text]), value.isObject else { return nil }
+            guard let value = api.invokeMethod(method, withArguments: [text]), value.isObject else { return nil }
             let ctx = context.jsGlobalContextRef
             var exception: JSValueRef?
             guard let object = JSValueToObject(ctx, value.jsValueRef, &exception) else { return nil }
             let length = JSObjectGetTypedArrayByteLength(ctx, object, &exception)
+            if length == 0 && method == "bakeFx" { return Data() }
             guard length == expected, let pointer = JSObjectGetTypedArrayBytesPtr(ctx, object, &exception) else { return nil }
             return Data(bytes: pointer, count: length)
         }

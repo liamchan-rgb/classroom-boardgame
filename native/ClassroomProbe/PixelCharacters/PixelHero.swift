@@ -274,6 +274,8 @@ enum PixelHeroAtlas {
             let canvas: UIImage
             /// 画布坐标里的两只脚
             let contacts: [CGPoint]
+            /// 装备特效的 4 个相位（裁到特效的包围盒，原像素大小）和它在高画布里的位置；没有特效时为空
+            var fx: [(image: UIImage, rect: CGRect)] = []
         }
         init(look: PixelHeroLook, attack: String, frames: [String: [Frame]]) { self.look = look; self.attack = attack; self.frames = frames }
     }
@@ -294,6 +296,7 @@ enum PixelHeroAtlas {
         let frameIDs = names.flatMap { info.frames[$0] ?? [] }
         guard !frameIDs.isEmpty, let strip = baker.bake(spec: look.spec, dirs: ["E"], frames: frameIDs) else { return nil }
         let feet = baker.feet(hold: baker.hold(ofSpriteWeapon: weapon), dir: "E", frames: frameIDs)
+        let fxStrip = baker.bakeFx(spec: look.spec, dirs: ["E"], frames: frameIDs) ?? Data()
         let w = info.sprW, h = info.sprH, stripW = w * frameIDs.count
         let ox = Int((Double(battleFoot.x) - info.footPx[0] * Double(zoom)).rounded())
         let oy = Int((Double(battleFoot.y) - info.footPx[1] * Double(zoom)).rounded())
@@ -312,7 +315,9 @@ enum PixelHeroAtlas {
                         CGPoint(x: CGFloat(ox) + $0.x * CGFloat(zoom), y: CGFloat(oy) + $0.y * CGFloat(zoom))
                     }
                     if let t = makeImage(tall, width: cell, height: tallH), let c = makeImage(canvasBytes, width: cell, height: cell) {
-                        list.append(.init(tall: t, canvas: c, contacts: contacts))
+                        var frame = BattleSprite.Frame(tall: t, canvas: c, contacts: contacts)
+                        if !fxStrip.isEmpty { frame.fx = fxPhases(fxStrip, index: index, frameCount: frameIDs.count, ox: ox, oy: oy + battleHeadroom) }
+                        list.append(frame)
                     }
                     index += 1
                 }
@@ -327,6 +332,31 @@ enum PixelHeroAtlas {
     /// 出手帧在动画里的序号（脚本里给的；老脚本没有就按 4 帧动作的旧值）
     static func impactIndex(_ name: String) -> Int {
         baker.info.impact?[name] ?? ["slash": 1, "heavy": 2, "dash": 2, "shoot": 2, "cast": 2][name] ?? 2
+    }
+
+    /// 装备特效叠加层的一帧：4 个相位各裁出包围盒（没有像素的相位给一张 1×1 的透明图，位置不变）
+    private static func fxPhases(_ strip: Data, index: Int, frameCount: Int, ox: Int, oy: Int) -> [(image: UIImage, rect: CGRect)] {
+        let w = baker.info.sprW, h = baker.info.sprH, stride = w * frameCount
+        var out: [(image: UIImage, rect: CGRect)] = []
+        strip.withUnsafeBytes { (src: UnsafeRawBufferPointer) in
+            for phase in 0..<4 {
+                var x0 = w, y0 = h, x1 = -1, y1 = -1
+                for y in 0..<h { for x in 0..<w where src[((phase * h + y) * stride + index * w + x) * 4 + 3] != 0 {
+                    x0 = min(x0, x); x1 = max(x1, x); y0 = min(y0, y); y1 = max(y1, y)
+                } }
+                guard x1 >= 0 else { continue }
+                let bw = x1 - x0 + 1, bh = y1 - y0 + 1
+                var bytes = [UInt8](repeating: 0, count: bw * bh * 4)
+                for y in 0..<bh { for x in 0..<bw {
+                    let si = ((phase * h + y0 + y) * stride + index * w + x0 + x) * 4, di = (y * bw + x) * 4
+                    bytes[di] = src[si]; bytes[di + 1] = src[si + 1]; bytes[di + 2] = src[si + 2]; bytes[di + 3] = src[si + 3]
+                } }
+                if let image = makeImage(bytes, width: bw, height: bh) {
+                    out.append((image, CGRect(x: ox + x0 * zoom, y: oy + y0 * zoom, width: bw * zoom, height: bh * zoom)))
+                }
+            }
+        }
+        return out
     }
 
     /// 弓箭离弦的位置（战斗画布坐标）：放箭那一帧持弓的左手，往前一点

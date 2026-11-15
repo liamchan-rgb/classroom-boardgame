@@ -104,6 +104,8 @@ final class MeadowPartyStageView:UIView {
     private var procVFX:[MeadowPartyProcEvent]=[]
     /// 像素特效（MeadowPixelFX）：接管有配方的特效和常驻护盾，贴在世界视图上和人物一起排前后
     private lazy var pixelFX=MeadowPixelFXPlayer(host:world.layer)
+    /// 怪物倒下时按实际掉落弹出物品 / 金币，飞向拿到的英雄（稀有以上带品级光柱和名字）
+    private lazy var loot=MeadowLootShower(host:world.layer)
     /// Where every unit is drawn right now (after travel and knock-back); effects follow these.
     private var liveFeet:[String:PartyPoint]=[:]
     private var washBase=UIColor.clear
@@ -270,8 +272,8 @@ final class MeadowPartyStageView:UIView {
         }
     }
     func classroomPause(_ value:Bool){if value{clock.stop()}else{clock.start()}}
-    func start() { MeadowBattleVFXAssets.prewarm();MeadowPixelFX.prewarm();pixelFX.reset();victoryAt=nil;sceneTime=0;recovery=[:];recoveryTier=[:];formation=[:];birth=[:];contact=[:];contactAngle=[:];revivedAt=[:];buffBirth=[:];labBuff=[:];broken=[:];deaths=[:];hurt=[:];hitFeel=[:];kickFeel=nil;messages=[];emissions=[];skillVFX=[];procVFX=[];pendingStatusCues=[];statusSnapshots=[:];poseKeys=[:];fallen=[:];diceAction=nil;diceConfirmedAt=nil;diceView.confirmationAge=nil;diceView.dice=[];diceSettledAt=nil;diceExitAt=nil;dimFrom=0;dimTarget=0;clock.start() }
-    func stop() { pixelFX.reset();MeadowMonsterFrames.retain([]);clock.stop();intent=nil;impact=nil;completion=nil;focus=nil;skillVFX=[];procVFX=[];pendingStatusCues=[];statusSnapshots=[:] }
+    func start() { MeadowBattleVFXAssets.prewarm();MeadowPixelFX.prewarm();pixelFX.reset();loot.reset();victoryAt=nil;sceneTime=0;recovery=[:];recoveryTier=[:];formation=[:];birth=[:];contact=[:];contactAngle=[:];revivedAt=[:];buffBirth=[:];labBuff=[:];broken=[:];deaths=[:];hurt=[:];hitFeel=[:];kickFeel=nil;messages=[];emissions=[];skillVFX=[];procVFX=[];pendingStatusCues=[];statusSnapshots=[:];poseKeys=[:];fallen=[:];diceAction=nil;diceConfirmedAt=nil;diceView.confirmationAge=nil;diceView.dice=[];diceSettledAt=nil;diceExitAt=nil;dimFrom=0;dimTarget=0;clock.start() }
+    func stop() { pixelFX.reset();loot.reset();MeadowMonsterFrames.retain([]);clock.stop();intent=nil;impact=nil;completion=nil;focus=nil;skillVFX=[];procVFX=[];pendingStatusCues=[];statusSnapshots=[:] }
     func displayedVitals(for unitID:String,health:Int,shield:Int)->(health:Int,shield:Int) { statusSnapshots[unitID] ?? (health,shield) }
     func show(_ value:GameState,friend:String,foe:String,current:String?,catalog:GameCatalog) {
         // The classroom battle has 1-6 students and the teacher (P7): the field is laid out for whoever plays.
@@ -490,6 +492,12 @@ final class MeadowPartyStageView:UIView {
             }
             if before.isAlive && !after.isAlive && after.kind == .monster {
                 deaths[id]=sceneTime
+                // 掉落动画：这一击按规则掉了什么（金币 / 物品），等怪物开始倒下再弹出来
+                let drops=receipt.events.filter { $0.kind == "drop" && $0.target == id }
+                if !drops.isEmpty {
+                    let scale=MonsterVisualSpec.find(before.templateID)?.scale ?? PartyVisual.enemyScale
+                    loot.drop(drops.map { (item:$0.detail == "coins" ? nil:$0.detail,count:$0.amount) },foot:foot,height:110*scale,receiver:drops.first?.actor ?? intent.actor,at:sceneTime+0.35,catalog:catalog)
+                }
                 let deathName:String
                 switch before.templateID { case "slime":deathName="deathSlime";case "wolf":deathName="deathWolf";case "goblinArcher":deathName="deathGoblin";case "stoneGuardian":deathName="deathStone";case "caveTroll":deathName="deathTroll";case "ruinDragon":deathName="deathDragon";default:deathName="deathBurst" }
                 spawnProc(deathName,intent,target:id,hit:registered,foot:foot,templates:receipt.before.units.mapValues(\.templateID),power:1.0,delay:0)
@@ -750,6 +758,7 @@ final class MeadowPartyStageView:UIView {
             fx.shields=[]
         }
         pixelFX.update(time:sceneTime,sources:pixelSources,shields:pixelShields)
+        loot.update(time:sceneTime,live:liveFeet)
         if let gpu {
             // Skills are drawn on the GPU; a full-screen flash goes to the pane-wide wash.
             if let flash=gpu.draw(fx.skillPrimitives()) { wash.backgroundColor=UIColor(red:CGFloat(flash.color.r/255),green:CGFloat(flash.color.g/255),blue:CGFloat(flash.color.b/255),alpha:CGFloat(min(1,flash.alpha*0.85))) }
@@ -1419,7 +1428,7 @@ extension MeadowPartyStageView {
     }
     /// Back to a clean stage with the given state.
     func labReset(_ value:GameState,catalog:GameCatalog,foe:String="m1") {
-        pixelFX.reset();procVFX=[];messages=[];deaths=[:];fallen=[:];contact=[:];contactAngle=[:];revivedAt=[:];buffBirth=[:];labBuff=[:];birth=[:];broken=[:];recovery=[:];recoveryTier=[:];hitFeel=[:];kickFeel=nil;hurt=[:];statusSnapshots=[:];emissions=[]
+        pixelFX.reset();loot.reset();procVFX=[];messages=[];deaths=[:];fallen=[:];contact=[:];contactAngle=[:];revivedAt=[:];buffBirth=[:];labBuff=[:];birth=[:];broken=[:];recovery=[:];recoveryTier=[:];hitFeel=[:];kickFeel=nil;hurt=[:];statusSnapshots=[:];emissions=[]
         show(value,friend:"p1",foe:foe,current:nil,catalog:catalog)
     }
 }
