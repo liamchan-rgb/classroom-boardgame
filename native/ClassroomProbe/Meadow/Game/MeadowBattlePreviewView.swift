@@ -78,6 +78,7 @@ final class MeadowBattlePreviewView: UIView {
     var classroomModelFactory:(()throws->PartyEncounter)? {didSet{party.classroomModelFactory=classroomModelFactory}}
     func classroomEnemyStep(){party.classroomEnemyStep()}
     func classroomToggleMap(){party.classroomToggleMap()}
+    func classroomLeaveTap()->Bool {party.classroomLeaveTap()}
     func classroomHit(at point:CGPoint)->MeadowPartyBattleView.ClassroomHit? {party.classroomHit(at:convert(point,to:party))}
     var classroomMode=false {didSet {
         party.classroomMode=classroomMode
