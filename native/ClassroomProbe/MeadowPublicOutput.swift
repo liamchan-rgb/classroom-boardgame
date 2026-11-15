@@ -102,7 +102,8 @@ private struct BookPlayerCard:View {
     /// 发放后的动画（和战斗掉落同一套像素金币 / 拾取光）：金币或行动点增加时触发一次
     @State private var gain=BookGain()
     /// The old number stays up while the coins fly in; it switches when they land.
-    @State private var heldCoins:Int?=nil,heldMovement:Int?=nil
+    @State private var heldCoins:Int?=nil
+    @State private var heldMovement:Int?=nil
     @State private var holdToken=0
     @State private var coinPop=false
     @State private var apPop=false
