@@ -134,7 +134,9 @@ extension PartyTests {
         let settled=BattleDice.pose(time:0.9,index:0,resolvedAge:0.7,visibleAge:0.9)
         XCTAssertEqual(settled.angle,0);XCTAssertEqual(settled.offsetY,0);XCTAssertEqual(settled.resultMix,1)
         XCTAssertNotEqual(a.angle,BattleDice.pose(time:6.8,index:0,resolvedAge:nil,visibleAge:6.8).angle)
-        XCTAssertEqual(BattleDice.pose(time:3,index:0,resolvedAge:2,visibleAge:3).alpha,0)
+        // The rolled result stays readable for BattleDice.resultHold (2.6 s), then fades over 0.5 s.
+        XCTAssertEqual(BattleDice.pose(time:3,index:0,resolvedAge:2,visibleAge:3).alpha,1)
+        XCTAssertEqual(BattleDice.pose(time:4.2,index:0,resolvedAge:3.2,visibleAge:4.2).alpha,0)
         XCTAssertGreaterThan(BattleDice.darkness(.heavyStrike),BattleDice.darkness(.attack))
     }
     func testMonsterIdleHitPreparationAndRecovery() {
