@@ -78,35 +78,40 @@ final class JourneyAuditTests:XCTestCase {
         try s.completeCampaign();let completed=s.snapshot
         XCTAssertThrowsError(try s.refillInventoryActions());XCTAssertEqual(s.snapshot,completed)
     }
-    func testPartialMovementPurchaseUsesAffordableCoinsWithoutTouchingAP()throws {
+    func testCoinRefillIsAFlatFullPurchaseWithoutTouchingAP()throws {
         let initial=try MeadowCampaignSession.new(layout:MeadowMapGenerator.generate(.suggested(total:4)))
         var save=initial.snapshot;save.movement?.remaining=0
         save.archive.state.units["p1"]!.coins=2;save.archive.state.units["p2"]!.coins=3
         save.archive.state.units["p1"]!.ap=0;save.archive.state.units["p2"]!.ap=1
+        let poor=try MeadowCampaignSession(save:save)
+        XCTAssertEqual(poor.movementRefillCost,80);XCTAssertEqual(poor.movementPurchaseCoins,0);XCTAssertEqual(poor.movementPurchaseDistance,0)
+        let unchanged=poor.snapshot;XCTAssertThrowsError(try poor.refillMovement(usingCoins:true));XCTAssertEqual(poor.snapshot,unchanged)
+        save.archive.state.units["p1"]!.coins=50;save.archive.state.units["p2"]!.coins=30
         let s=try MeadowCampaignSession(save:save),ap=s.engine.state.players.map(\.ap),hp=s.engine.state.players.map(\.health)
-        XCTAssertEqual(s.movementRefillCost,8);XCTAssertEqual(s.movementPurchaseCoins,5);XCTAssertEqual(s.movementPurchaseDistance,250)
+        XCTAssertEqual(s.movementPurchaseCoins,80);XCTAssertEqual(s.movementPurchaseDistance,s.movementCapacity)
         try s.refillMovement(usingCoins:true)
-        XCTAssertEqual(s.movementRemaining,250);XCTAssertEqual(s.partyCoins,0)
+        XCTAssertEqual(s.movementRemaining,s.movementCapacity);XCTAssertEqual(s.partyCoins,0)
         XCTAssertEqual(s.engine.state.players.map(\.ap),ap);XCTAssertEqual(s.engine.state.players.map(\.health),hp)
         XCTAssertEqual(s.engine.state.random,save.archive.state.random)
-        let before=s.snapshot;XCTAssertThrowsError(try s.refillMovement(usingCoins:true));XCTAssertEqual(s.snapshot,before)
+        XCTAssertNil(try s.refillMovement(usingCoins:true))
         XCTAssertEqual(s.snapshot.movement?.purchasedRefills,1);XCTAssertEqual(s.snapshot.movement?.manualRefills,0)
     }
-    func testPartialPurchaseRollsBackAndFinalFractionNeverOverfills()throws {
+    func testCoinRefillRollsBackOnSaveFailureAndTopsUpAFraction()throws {
         let initial=try MeadowCampaignSession.new(layout:MeadowMapGenerator.generate(.suggested(total:4)))
         var save=initial.snapshot;save.movement?.remaining=100
-        save.archive.state.units["p1"]!.coins=1;save.archive.state.units["p2"]!.coins=1
+        save.archive.state.units["p1"]!.coins=40;save.archive.state.units["p2"]!.coins=40
         var fail=false,data=Data()
         let s=try MeadowCampaignSession(save:save,persist:{if fail{throw GameError("disk")};data=$0})
         try s.checkpoint();let before=s.snapshot,old=data
         fail=true;XCTAssertThrowsError(try s.refillMovement(usingCoins:true));XCTAssertEqual(s.snapshot,before);XCTAssertEqual(data,old)
-        fail=false;try s.refillMovement(usingCoins:true);XCTAssertEqual(s.movementRemaining,200)
+        fail=false;try s.refillMovement(usingCoins:true);XCTAssertEqual(s.movementRemaining,s.movementCapacity);XCTAssertEqual(s.partyCoins,0)
         XCTAssertEqual(try MeadowCampaignSession(save:.decoded(data)).snapshot,s.snapshot)
-        save.movement?.remaining=399.75
+        save.movement?.remaining=initial.movementCapacity-0.25
+        save.archive.state.units["p1"]!.coins=40;save.archive.state.units["p2"]!.coins=41
         let fraction=try MeadowCampaignSession(save:save)
-        XCTAssertEqual(fraction.movementPurchaseCoins,1);XCTAssertEqual(fraction.movementPurchaseDistance,0.25)
+        XCTAssertEqual(fraction.movementPurchaseCoins,80);XCTAssertEqual(fraction.movementPurchaseDistance,0.25,accuracy:1e-9)
         try fraction.refillMovement(usingCoins:true)
-        XCTAssertEqual(fraction.movementRemaining,400);XCTAssertEqual(fraction.partyCoins,1)
+        XCTAssertEqual(fraction.movementRemaining,fraction.movementCapacity);XCTAssertEqual(fraction.partyCoins,1)
         XCTAssertNil(try fraction.refillMovement(usingCoins:true))
     }
 }

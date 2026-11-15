@@ -1054,12 +1054,12 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     private func refillCampaign() {
         guard let campaign,!campaign.isMoving,campaign.engine.state.battle==nil else{return}
         let cost=campaign.movementRefillCost,affordable=campaign.movementPurchaseCoins
-        let menu=UIAlertController(title:"补充移动条",message:"剩余 \(Int(campaign.movementRemaining))/\(Int(campaign.movementCapacity)) 距离\n每50距离1金币，补满需要 \(cost) 金币。\n全队持有 \(campaign.partyCoins) 金币，可购买 \(Int(ceil(campaign.movementPurchaseDistance))) 距离。",preferredStyle:.actionSheet)
+        let menu=UIAlertController(title:"补充移动条",message:"剩余 \(MeadowMovementRules.steps(campaign.movementRemaining))/\(MeadowMovementRules.steps(campaign.movementCapacity)) 步\n一次补满需要 \(cost) 金币，全队持有 \(campaign.partyCoins) 金币。",preferredStyle:.actionSheet)
         func fill(_ coins:Bool) {
             do{try campaign.refillMovement(usingCoins:coins);refreshCampaignStatus();showCampaignMessage(campaign.hasPendingTravel ? "移动已补充，点击播放继续行走":"移动已补充，请点击新的道路目的地")}
             catch{showCampaignMessage(error.localizedDescription)}
         }
-        let buyTitle=affordable>0 ? "花费 \(affordable) 金币"+(affordable==cost ? "补满":"补充部分移动"):"金币不足，暂不能购买"
+        let buyTitle=affordable>0 ? "花费 \(affordable) 金币补满":"金币不足 \(cost)，暂不能购买"
         let buy=UIAlertAction(title:buyTitle,style:.default){_ in fill(true)};buy.isEnabled=affordable>0
         menu.addAction(buy);menu.addAction(UIAlertAction(title:"手动补满",style:.default){_ in fill(false)})
         menu.addAction(UIAlertAction(title:"取消",style:.cancel));menu.popoverPresentationController?.sourceView=campaignRefill;menu.popoverPresentationController?.sourceRect=campaignRefill.bounds
@@ -1342,7 +1342,7 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         let eventAvailable=campaign.siteAvailable(actor:actor) || (node.map{n in n.kind == .reward ? !n.rewardCompleted:((n.kind == .combat || n.kind == .boss) && state.units.values.contains{$0.kind == .monster && $0.nodeID==n.id && $0.isAlive})} ?? false)
         campaignBattle.configuration?.title=state.battle != nil ? "继续战斗":(eventAvailable ? (campaign.siteAvailable(actor:actor) ? (campaign.siteKind(node:node!.id) == .shop ? "进入商店":"处理事件"):"交互地点"):"暂无事件")
         campaignBattle.isHidden=battlePreviewActive;campaignBattle.isEnabled = !campaign.isCompleted && (state.battle != nil || (!busy && eventAvailable))
-        campaignMovement.show("地图移动",value:Int(ceil(campaign.movementRemaining)),maximum:max(1,Int(ceil(campaign.movementCapacity))),color:.systemYellow)
+        campaignMovement.show("移动",value:MeadowMovementRules.steps(campaign.movementRemaining),maximum:max(1,MeadowMovementRules.steps(campaign.movementCapacity)),color:.systemYellow)
         for view in [campaignHUD,campaignRoutePanel,campaignRefill,campaignItems,campaignEdit,campaignTeam,campaignEnd,randomMapSummary] {view.isHidden=battlePreviewActive}
         if let route=campaign.routeReadout {
             campaignRouteTitle.text=route.title;campaignRouteDetail.text=route.detail

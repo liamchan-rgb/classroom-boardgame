@@ -4,6 +4,11 @@ import ClassroomGameCore
 public enum MeadowMovementRules {
     public static let distancePerMaximumAP:Double=50
     public static let distancePerCoin:Double=50
+    /// One coin-bought refill tops the bar up completely and always costs this much (teacher refills stay free).
+    public static let refillPrice=80
+    /// The bar is shown and granted in steps; one step keeps the old distance of one point of maximum AP.
+    public static let distancePerStep:Double=distancePerMaximumAP
+    public static func steps(_ distance:Double)->Int {Int((max(0,distance)/distancePerStep).rounded())}
     public static func capacity(_ archive:GameArchive,team:String?=nil)->Double {
         let values=archive.state.players.filter{team==nil || $0.teamID==team}.compactMap{try? GameRules.attributes($0,catalog:archive.catalog).maximumAP}
         guard !values.isEmpty else{return 0}
@@ -370,11 +375,49 @@ public final class MeadowCampaignSession {
     }
     public var movementCapacity:Double {MeadowMovementRules.capacity(engine.archive,team:engine.state.units[selectedPlayerID]?.teamID)}
     public var movementRemaining:Double {min(writer.snapshot.movement?.remaining ?? movementCapacity,movementCapacity)}
-    public var movementRefillCost:Int {Int(ceil(max(0,movementCapacity-movementRemaining)/MeadowMovementRules.distancePerCoin))}
+    public var movementRefillCost:Int {movementRemaining+0.000001<movementCapacity ? MeadowMovementRules.refillPrice:0}
     public var travelingMembers:[GameUnit] {engine.state.players.filter{$0.teamID==engine.state.units[selectedPlayerID]?.teamID}}
     public var partyCoins:Int {travelingMembers.reduce(0){$0+$1.coins}}
-    public var movementPurchaseCoins:Int {min(movementRefillCost,partyCoins)}
-    public var movementPurchaseDistance:Double {min(max(0,movementCapacity-movementRemaining),Double(movementPurchaseCoins)*MeadowMovementRules.distancePerCoin)}
+    /// A refill is all or nothing: the whole price, or no purchase.
+    public var movementPurchaseCoins:Int {movementRefillCost>0 && partyCoins>=movementRefillCost ? movementRefillCost:0}
+    public var movementPurchaseDistance:Double {movementPurchaseCoins>0 ? max(0,movementCapacity-movementRemaining):0}
+    /// Remaining / full bar of one team (the selected team reads the live bar, others their parked balance).
+    public func movement(team:String?)->(remaining:Double,capacity:Double) {
+        let key=team ?? "party",cap=MeadowMovementRules.capacity(engine.archive,team:team)
+        if key==writer.snapshot.movementTeam {return (movementRemaining,movementCapacity)}
+        return (min(cap,writer.snapshot.movementBalances?[key] ?? cap),cap)
+    }
+    /// Teacher grant from the picture-book bar: coins to each chosen player, and `steps` of movement to each of their
+    /// teams' bars (capped at a full bar). One undoable operation.
+    @discardableResult public func grantSupplies(actors:[String],movementSteps:Int,coins:Int)throws->OperationReceipt {
+        try requireOpenCampaign()
+        guard movementSteps>=0,coins>=0,movementSteps>0 || coins>0,!actors.isEmpty else{throw GameError("请选择发放对象和数量。")}
+        let before=writer.snapshot
+        if movementSteps>0 {
+            let teams=Set(actors.compactMap{engine.state.units[$0]}.map{$0.teamID ?? "party"})
+            let add=Double(movementSteps)*MeadowMovementRules.distancePerStep
+            for key in teams {
+                let current=movement(team:key == "party" ? nil:key)
+                let value=min(current.capacity,current.remaining+add)
+                if key==writer.snapshot.movementTeam {writer.snapshot.movement?.remaining=value}
+                else {if writer.snapshot.movementBalances==nil{writer.snapshot.movementBalances=[:]};writer.snapshot.movementBalances?[key]=value}
+            }
+        }
+        do{return try engine.apply(.grantPlayerSupplies(actors:actors,movement:movementSteps,coins:coins))}
+        catch{writer.snapshot=before;throw error}
+    }
+    /// Undo of a supplies grant: the engine op is reverted, and the movement it added is taken back off each team.
+    public func undoSuppliesGrant()throws {
+        guard let entry=engine.history.last,case .grantPlayerSupplies(let actors,let steps,_)=entry.command else{throw GameError("最近操作不是发放。")}
+        let before=writer.snapshot
+        let teams=Set(actors.compactMap{engine.state.units[$0]}.map{$0.teamID ?? "party"})
+        let take=Double(steps)*MeadowMovementRules.distancePerStep
+        for key in teams where steps>0 {
+            let current=movement(team:key == "party" ? nil:key),value=max(0,current.remaining-take)
+            if key==writer.snapshot.movementTeam {writer.snapshot.movement?.remaining=value}else{writer.snapshot.movementBalances?[key]=value}
+        }
+        do{_ = try engine.undoPreservingPresentationPause()}catch{writer.snapshot=before;throw error}
+    }
     public func routeDistance(_ path:[Int])->Double {
         guard path.count>1 else{return 0}
         return zip(path,path.dropFirst()).reduce(0){sum,edge in sum+(MeadowCampaignSave.road(writer.snapshot.layout,from:edge.0,to:edge.1).map(MeadowCampaignSave.length) ?? 0)}
@@ -562,6 +605,16 @@ public final class MeadowCampaignSession {
         try requireOpenCampaign()
         guard mustRetreat else{throw GameError("只有全队倒地时才能撤回地图。")}
         return try engine.apply(.retreatAfterDefeat)
+    }
+    /// Teammates who can receive a gift from `actor` (same team, any health).
+    public func teammates(of actor:String)->[GameUnit] {
+        guard let u=engine.state.units[actor] else{return []}
+        return engine.state.players.filter{$0.id != actor && $0.teamID==u.teamID}
+    }
+    /// A gift inside the pack: coins and/or pack items from one teammate to another (never worn gear).
+    @discardableResult public func give(from:String,to:String,coins:Int=0,item:String?=nil,count:Int=0)throws->OperationReceipt {
+        try requireOpenCampaign()
+        return try engine.apply(.givePlayerResource(from:from,to:to,coins:coins,item:item,count:count))
     }
     /// The teacher may leave a monster fight at any time: the fight ends with no winner and no drops, the heroes keep
     /// their health, and the monsters stay where they are (with their wounds) for a later attempt.

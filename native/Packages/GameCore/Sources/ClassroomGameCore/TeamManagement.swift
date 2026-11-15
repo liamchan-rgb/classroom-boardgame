@@ -40,6 +40,16 @@ extension Evaluation {
             if let item {let n=try checkedAdd(state.teams[i].inventory[item] ?? 0,count);guard n>=0 else{throw GameError("仓库物品不足。")};if n==0{state.teams[i].inventory.removeValue(forKey:item)}else{state.teams[i].inventory[item]=n}}
         }
     }
+    mutating func givePlayerResource(from:String,to:String,coins:Int,item:String?,count:Int)throws {
+        let giver=try unit(from),receiver=try unit(to)
+        guard state.phase == .exploration,state.battle==nil else{throw GameError("请在战斗外赠送物品。")}
+        guard giver.kind == .player,receiver.kind == .player,from != to else{throw GameError("请选择另一名队友。")}
+        guard giver.teamID==receiver.teamID else{throw GameError("只能赠送给同队队友。")}
+        guard coins>=0,count>=0,coins>0 || (item != nil && count>0) else{throw GameError("请选择赠送的金币或物品。")}
+        if let item {_=try catalog.item(item)}else{guard count==0 else{throw GameError("未选择物品。")}}
+        try changeResource(.player(from),coins:-coins,item:item,count:-count);try changeResource(.player(to),coins:coins,item:item,count:count)
+        events.append(GameEvent("playerGift",actor:from,target:to,amount:coins,detail:item ?? "金币"))
+    }
     mutating func transferTeamResource(from:TeamResourceOwner,to:TeamResourceOwner,coins:Int,item:String?,count:Int,teacher:Bool=false)throws {
         let fromTeam=try ownerTeam(from),toTeam=try ownerTeam(to)
         guard state.phase == .exploration,state.battle==nil,from != to,coins>=0,count>=0,(coins>0 || item != nil && count>0),(teacher || fromTeam==toTeam) else{throw GameError("仅探索允许同队存取或转交；跨队请由教师调整。")}

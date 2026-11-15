@@ -14,7 +14,7 @@ public struct MeadowRouteReadout:Codable,Equatable {
     public var title:String {arrived ? "已抵达道路选点":(paused ? "路线暂停 · ":"前往 · ")+destination}
     public var detail:String {
         if arrived{return "点击新的道路目的地，或选择附近建筑。"}
-        let distance="剩余路程 \(Int(ceil(remainingDistance)))"
+        let distance="剩余 \(max(1,Int(ceil(remainingDistance/MeadowMovementRules.distancePerStep-0.000001)))) 步"
         if additionalCoins==0{return distance+" · 当前移动足够"}
         if coinsMissing>0{return distance+" · 途中需补\(additionalCoins)金币，尚差\(coinsMissing)"}
         return distance+" · 途中需补移动，至少\(additionalCoins)金币"
@@ -22,17 +22,15 @@ public struct MeadowRouteReadout:Codable,Equatable {
 }
 public struct MeadowRouteOption:Codable,Equatable {
     public let kind:String,nodeID:Int,name:String,distance:Double,additionalCoins:Int
-    public var title:String {name+" · \(Int(ceil(distance)))距离"+(additionalCoins>0 ? " · 至少\(additionalCoins)金币补移动":"")}
+    public var title:String {name+" · \(max(1,Int(ceil(distance/MeadowMovementRules.distancePerStep-0.000001)))) 步"+(additionalCoins>0 ? " · 至少\(additionalCoins)金币补移动":"")}
 }
 extension MeadowMovementRules {
-    /// Minimum coins to finish through the real capped refill operation. A
-    /// fractional party mean can yield a 375-distance bar: buying it twice costs
-    /// 8 + 8 coins, not ceil(750 / 50). The final purchase may be partial.
+    /// Minimum coins to finish through coin refills: every refill tops the bar up for the flat price, so the cost is
+    /// the number of bars still missing times that price.
     static func minimumRouteCoins(distance:Double,available:Double,capacity:Double)->Int {
         let deficit=max(0,distance-available-0.000001)
         guard deficit>0,capacity>0 else{return 0}
-        let full=max(0,Int(floor((deficit-0.000001)/capacity)))
-        return full*Int(ceil(capacity/distancePerCoin))+Int(ceil(max(0,deficit-Double(full)*capacity)/distancePerCoin))
+        return Int(ceil((deficit-0.000001)/capacity))*refillPrice
     }
 }
 public extension MeadowCampaignSession {

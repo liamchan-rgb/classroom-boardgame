@@ -103,9 +103,10 @@ private struct BookPlayerCard:View {
                 }
             }.frame(height:max(4,h*0.085))
             HStack(spacing:h*0.06){
-                Image(systemName:"diamond.fill").foregroundStyle(Color(red:0.70,green:0.60,blue:1.0))
-                Text("\(number(unit.ap))/\(number(unit.maximumAP))").monospacedDigit()
-                    .scaleEffect(apPop ? 1.4:1,anchor:.leading).foregroundStyle(apPop ? Color(red:0.82,green:0.72,blue:1.0):.white)
+                // The team's movement bar in steps (what the picture-book bar grants), replacing the old AP diamonds.
+                Image(systemName:"figure.walk").foregroundStyle(Color(red:0.45,green:0.85,blue:0.95))
+                Text("\(number(unit.movement))/\(number(unit.maximumMovement))").monospacedDigit()
+                    .scaleEffect(apPop ? 1.4:1,anchor:.leading).foregroundStyle(apPop ? Color(red:0.62,green:0.92,blue:1.0):.white)
                 Spacer(minLength:0)
                 Image(systemName:"bitcoinsign.circle.fill").foregroundStyle(Color(red:0.98,green:0.80,blue:0.40))
                 Text(number(unit.coins)).monospacedDigit()
@@ -129,13 +130,13 @@ private struct BookPlayerCard:View {
             gain=BookGain(serial:gain.serial+1,coins:new-old,ap:0)
             pop(coins:true)
         }
-        .onChange(of:unit.ap){old,new in
+        .onChange(of:unit.movement){old,new in
             guard new>old else{return}
             gain=BookGain(serial:gain.serial+1,coins:0,ap:new-old)
             pop(coins:false)
         }
         .accessibilityElement(children:.ignore)
-        .accessibilityLabel("\(unit.name)，生命\(unit.health)/\(unit.maximumHealth)，行动点\(unit.ap)/\(unit.maximumAP)，金币\(unit.coins)")
+        .accessibilityLabel("\(unit.name)，生命\(unit.health)/\(unit.maximumHealth)，移动\(unit.movement)/\(unit.maximumMovement)步，金币\(unit.coins)")
     }
 }
 
@@ -187,7 +188,7 @@ struct BookGainBurst:UIViewRepresentable {
             piece.layer.magnificationFilter = .nearest
             if coins,!spin.isEmpty { piece.animationImages=spin;piece.animationDuration=Double(spin.count)/20;piece.startAnimating() }
             else {
-                piece.image=UIImage(systemName:"diamond.fill")?.withTintColor(UIColor(red:0.72,green:0.60,blue:1.0,alpha:1),renderingMode:.alwaysOriginal)
+                piece.image=UIImage(systemName:"figure.walk")?.withTintColor(UIColor(red:0.45,green:0.85,blue:0.95,alpha:1),renderingMode:.alwaysOriginal)
                 piece.bounds=CGRect(x:0,y:0,width:side*0.55,height:side*0.55)
             }
             // 从卡片上方中间一带抛起来，划弧落进数字

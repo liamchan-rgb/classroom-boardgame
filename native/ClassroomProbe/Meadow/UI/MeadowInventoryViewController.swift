@@ -408,7 +408,33 @@ final class MeadowCampaignInventoryViewController:UIViewController {
                 if !preview.allowed{line(MeadowGlassText.iconLine("exclamationmark.circle",preview.message,size:15,tint:.orange,weight:.medium))}}
             catch{line(MeadowGlassText.iconLine("exclamationmark.circle",error.localizedDescription,size:15,tint:.orange,weight:.medium))}
         }
+        // Gifts between teammates live here (no separate team storage): one of this item, or 10 coins.
+        let mates=session.teammates(of:actor)
+        if !mates.isEmpty,session.engine.state.battle==nil {
+            y+=8
+            let header=UILabel();header.attributedText=MeadowGlassText.iconLine("gift.fill","赠送给队友",size:16,tint:MeadowPreviewPalette.primary,weight:.bold);add(header,gap:8)
+            func row(_ symbol:String,_ enabled:Bool,_ action:@escaping (GameUnit)->Void) {
+                let count=CGFloat(mates.count),gap:CGFloat=8,bw=max(60,(width-40-gap*(count-1))/count)
+                for (i,mate) in mates.enumerated() {
+                    let b=MeadowPreviewPalette.iconButton(symbol,mate.shortName)
+                    b.isEnabled=enabled;b.alpha=enabled ? 1:0.45
+                    b.frame=CGRect(x:20+CGFloat(i)*(bw+gap),y:y,width:bw,height:44)
+                    b.addAction(UIAction{_ in action(mate)},for:.touchUpInside)
+                    detailContent.addSubview(b)
+                }
+                y+=52
+            }
+            row("arrow.up.forward.square",(unit.inventory[id] ?? 0)>0){[weak self] mate in self?.gift(to:mate,item:id,coins:0)}
+            row("bitcoinsign.circle",unit.coins>=10){[weak self] mate in self?.gift(to:mate,item:nil,coins:10)}
+            let hint=UILabel();hint.attributedText=MeadowGlassText.iconLine("info.circle","上排送1件此物品，下排送10金币；穿着的装备需先卸下",size:13,tint:MeadowPreviewPalette.muted,weight:.medium);hint.numberOfLines=0;add(hint)
+        }
         detailContent.frame=CGRect(x:0,y:0,width:width,height:y+12);detail.contentSize=detailContent.bounds.size
+    }
+    private func gift(to mate:GameUnit,item:String?,coins:Int) {
+        do{
+            try session.give(from:actor,to:mate.id,coins:coins,item:item,count:item==nil ? 0:1)
+            flash("已送给 "+mate.shortName);onChange?();refresh()
+        }catch{let alert=UIAlertController(title:"赠送未完成",message:error.localizedDescription,preferredStyle:.alert);alert.addAction(UIAlertAction(title:"知道了",style:.default));present(alert,animated:true)}
     }
     private func activate(){
         guard let id=selected,let item=try? session.engine.catalog.item(id) else{return}

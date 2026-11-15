@@ -360,15 +360,15 @@ final class CampaignTests:XCTestCase {
     func testMovementPurchaseUsesPartyCoinsAndFailedSaveRollsBackBarAndCoins()throws {
         let initial=try MeadowCampaignSession.new(layout:layout());var save=initial.snapshot
         save.movement?.remaining=initial.movementCapacity-225
-        save.archive.state.units["p1"]!.coins=1;save.archive.state.units["p2"]!.coins=5
+        save.archive.state.units["p1"]!.coins=50;save.archive.state.units["p2"]!.coins=40
         var fail=false,stored=Data()
         let session=try MeadowCampaignSession(save:save,persist:{data in if fail{throw GameError("disk")};stored=data})
         try session.checkpoint();let before=session.snapshot,old=stored
-        XCTAssertEqual(session.movementRefillCost,5)
+        XCTAssertEqual(session.movementRefillCost,80)
         fail=true;XCTAssertThrowsError(try session.refillMovement(usingCoins:true));XCTAssertEqual(session.snapshot,before);XCTAssertEqual(stored,old)
         fail=false;try session.refillMovement(usingCoins:true)
         XCTAssertEqual(session.movementRemaining,session.movementCapacity)
-        XCTAssertEqual(session.engine.state.units["p1"]!.coins,0);XCTAssertEqual(session.engine.state.units["p2"]!.coins,1)
+        XCTAssertEqual(session.engine.state.units["p1"]!.coins,0);XCTAssertEqual(session.engine.state.units["p2"]!.coins,10)
         XCTAssertEqual(session.engine.state.units["p1"]!.ap,before.archive.state.units["p1"]!.ap)
         let restored=try MeadowCampaignSession(save:.decoded(stored));XCTAssertEqual(restored.snapshot,session.snapshot)
     }

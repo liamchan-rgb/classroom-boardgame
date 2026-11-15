@@ -162,18 +162,19 @@ struct ClassTimerPanel:View {
             .padding(.horizontal,12).background(GlassFill.field,in:RoundedRectangle(cornerRadius:12,style:.continuous))
             HStack(spacing:10){
                 ForEach([10,30,60,120],id:\.self){s in
-                    Button{timer.start(s)}label:{Label(ClassTimerModel.label(Double(s)),systemImage:"play.fill")}
+                    Button{timer.start(s);onClose()}label:{Label(ClassTimerModel.label(Double(s)),systemImage:"play.fill")}
                 }
                 Button{timer.add(10)}label:{Label("+10",systemImage:"plus")}
-                Button{timer.toggle()}label:{Label(timer.running ? "暂停":"继续",systemImage:timer.running ? "pause.fill":"play.fill")}.buttonStyle(GlassIconButtonStyle(prominent:true))
+                Button{timer.toggle();if timer.running{onClose()}}label:{Label(timer.running ? "暂停":"继续",systemImage:timer.running ? "pause.fill":"play.fill")}.buttonStyle(GlassIconButtonStyle(prominent:true))
                 Button{timer.reset()}label:{Label("重置",systemImage:"arrow.counterclockwise")}
             }.buttonStyle(GlassIconButtonStyle())
-            Label("默认 10 秒 · 输入数字按回车即开始，可连续输入", systemImage:"info.circle").font(.caption).foregroundStyle(GameTheme.muted)
+            Label("默认 10 秒 · 输入数字按回车即开始，开始后窗口自动关闭", systemImage:"info.circle").font(.caption).foregroundStyle(GameTheme.muted)
         }.padding(22).background(GlassBackdrop())
     }
     private func submit(){
         invalid = !timer.apply(input)
-        if !invalid {input=""}
+        // A countdown that is running is all the teacher wanted: the settings get out of the way.
+        if !invalid {input="";if timer.running{onClose()}}
     }
 }
 

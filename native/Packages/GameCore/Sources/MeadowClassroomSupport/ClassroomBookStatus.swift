@@ -3,15 +3,19 @@ import Foundation
 import CoreGraphics
 #endif
 import ClassroomGameCore
+import MeadowWorldSupport
 
 /// Deliberately excludes inventory, GM drafts, notes, permissions and history.
 public struct ClassroomBookPlayerStatus:Codable,Equatable,Identifiable {
     public let id:String,name:String
     public let health:Int,maximumHealth:Int,ap:Int,maximumAP:Int,coins:Int
-    public init(unit:GameUnit,catalog:GameCatalog)throws {
+    /// The player's team movement bar in steps (what the picture-book bar grants).
+    public var movement=0,maximumMovement=0
+    public init(unit:GameUnit,catalog:GameCatalog,movement:(remaining:Double,capacity:Double)?=nil)throws {
         let stats=try GameRules.attributes(unit,catalog:catalog)
         id=unit.id;name=unit.name;health=unit.health;maximumHealth=stats.maximumHealth
         ap=unit.ap;maximumAP=stats.maximumAP;coins=unit.coins
+        if let movement {self.movement=MeadowMovementRules.steps(movement.remaining);maximumMovement=MeadowMovementRules.steps(movement.capacity)}
     }
 }
 /// Floating status cards over the bottom of a picture-book page: one row up to four players, two rows for
@@ -42,15 +46,16 @@ public enum ClassroomBookStatusLayout {
 public extension ClassroomGameBackend {
     var bookPlayers:[ClassroomBookPlayerStatus] {
         guard let c=campaign else{return []}
-        return c.engine.state.players.compactMap{try? .init(unit:$0,catalog:c.engine.catalog)}
+        return c.engine.state.players.compactMap{try? .init(unit:$0,catalog:c.engine.catalog,movement:c.movement(team:$0.teamID))}
     }
     var canUndoTeacherAction:Bool {
         guard let command=campaign?.engine.history.last?.command else{return false}
-        switch command {case .editPlayer,.grantPlayerResources:return true;default:return false}
+        switch command {case .editPlayer,.grantPlayerResources,.grantPlayerSupplies:return true;default:return false}
     }
     func undoTeacherAction(role:ClassroomRole)throws {
         try Self.requireTeacher(role)
         guard let c=campaign,!c.isCompleted,canUndoTeacherAction else{throw GameError("最近操作不是GM修改或绘本发放，不能从此入口撤销。")}
+        if case .grantPlayerSupplies?=c.engine.history.last?.command {try c.undoSuppliesGrant();return}
         _=try c.engine.undoPreservingPresentationPause()
     }
     func editPlayer(_ id:String,value:TeacherPlayerEdit,role:ClassroomRole)throws {
@@ -63,5 +68,11 @@ public extension ClassroomGameBackend {
         try Self.requireTeacher(role)
         guard let c=campaign,!c.isCompleted else{throw GameError("请先开始未结算的行程。")}
         _=try c.engine.apply(.grantPlayerResources(actors:ids,ap:ap,coins:coins))
+    }
+    /// Picture-book grant: coins per player and movement steps for their teams' bars.
+    func grantSupplies(_ ids:[String],movement:Int,coins:Int,role:ClassroomRole)throws {
+        try Self.requireTeacher(role)
+        guard let c=campaign,!c.isCompleted else{throw GameError("请先开始未结算的行程。")}
+        _=try c.grantSupplies(actors:ids,movementSteps:movement,coins:coins)
     }
 }

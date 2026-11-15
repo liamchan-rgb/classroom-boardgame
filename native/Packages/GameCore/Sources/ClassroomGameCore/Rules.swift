@@ -158,6 +158,10 @@ public enum GameCommand: Codable, Equatable {
     case monsterStep
     case editPlayer(unit:String,value:TeacherPlayerEdit)
     case grantPlayerResources(actors:[String],ap:Int,coins:Int)
+    /// Picture-book grant: coins to each player; `movement` steps go to their teams' movement bars (kept by the campaign layer).
+    case grantPlayerSupplies(actors:[String],movement:Int,coins:Int)
+    /// One teammate hands coins and/or an item (from the pack, never worn gear) to another; exploration only.
+    case givePlayerResource(from:String,to:String,coins:Int,item:String?,count:Int)
     case editResources(unit: String, value: ResourcePatch)
     case startBattle(kind: BattleKind, monsters: [String])
     case move(actors: [String], path: [Int])

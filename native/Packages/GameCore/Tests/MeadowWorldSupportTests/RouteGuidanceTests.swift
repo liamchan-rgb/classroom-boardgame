@@ -4,9 +4,9 @@ import ClassroomGameCore
 
 final class RouteGuidanceTests:XCTestCase {
     func testFractionalPartyMeanAccountsForEachCappedRefillAndPartialLastPurchase() {
-        XCTAssertEqual(MeadowMovementRules.minimumRouteCoins(distance:800,available:0,capacity:375),17)
-        XCTAssertEqual(MeadowMovementRules.minimumRouteCoins(distance:750,available:0,capacity:375),16)
-        XCTAssertEqual(MeadowMovementRules.minimumRouteCoins(distance:800,available:375,capacity:375),9)
+        XCTAssertEqual(MeadowMovementRules.minimumRouteCoins(distance:800,available:0,capacity:375),240)
+        XCTAssertEqual(MeadowMovementRules.minimumRouteCoins(distance:750,available:0,capacity:375),160)
+        XCTAssertEqual(MeadowMovementRules.minimumRouteCoins(distance:800,available:375,capacity:375),160)
         XCTAssertEqual(MeadowMovementRules.minimumRouteCoins(distance:375,available:375,capacity:375),0)
         XCTAssertEqual(MeadowMovementRules.minimumRouteCoins(distance:375.00000001,available:375,capacity:375),0)
     }
@@ -62,7 +62,7 @@ final class RouteGuidanceTests:XCTestCase {
         let restored=try MeadowCampaignSession(save:save),before=restored.snapshot
         let options=restored.routeOptions()
         XCTAssertEqual(Set(options.map(\.kind)),Set(["supply","encounter"]))
-        XCTAssertTrue(options.allSatisfy{$0.distance>0 && $0.additionalCoins==Int(ceil($0.distance/50))})
+        XCTAssertTrue(options.allSatisfy{$0.distance>0 && $0.additionalCoins==Int(ceil(($0.distance-0.000001)/restored.movementCapacity))*MeadowMovementRules.refillPrice})
         XCTAssertEqual(restored.snapshot,before)
         XCTAssertThrowsError(try restored.beginTravel(to:options[0].nodeID))
     }
@@ -100,7 +100,7 @@ final class RouteGuidanceTests:XCTestCase {
         let restored=try MeadowCampaignSession(save:save),before=restored.snapshot
         let route=try XCTUnwrap(restored.routeReadout)
         XCTAssertTrue(route.paused);XCTAssertTrue(route.title.contains("暂停"))
-        XCTAssertEqual(route.additionalCoins,Int(ceil(max(0,route.remainingDistance-1)/50)))
+        XCTAssertEqual(route.additionalCoins,Int(ceil(max(0,route.remainingDistance-1-0.000001)/restored.movementCapacity))*MeadowMovementRules.refillPrice)
         XCTAssertEqual(route.coinsMissing,route.additionalCoins)
         XCTAssertTrue(route.detail.contains("尚差"))
         XCTAssertEqual(restored.snapshot,before)

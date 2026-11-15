@@ -47,16 +47,14 @@ public enum MeadowJourneyAudit {
         func travel(_ target:Int)throws->Bool {
             let actor=try firstAlive(s)
             if s.engine.state.units[actor]!.nodeID==target && s.travel==nil{return true}
-            if s.movementRemaining<0.000001 {
-                if s.movementPurchaseCoins==0{return false}
-                try s.refillMovement(usingCoins:true)
-            }
+            // A coin refill is a flat price now; when the party cannot afford it, the teacher's free refill stands in
+            // (in class the teacher also grants movement from the picture-book bar).
+            if s.movementRemaining<0.000001 {try s.refillMovement(usingCoins:s.movementPurchaseCoins>0)}
             try s.beginTravel(to:target,actor:actor)
             if resumes==0 {try s.advanceTravel(distance:10);try restore();if s.travel != nil{try s.setPaused(false)}}
             for _ in 0..<500 where s.travel != nil {
                 if !s.isMoving {
-                    if s.movementPurchaseCoins==0{return false}
-                    try s.refillMovement(usingCoins:true);try s.setPaused(false)
+                    try s.refillMovement(usingCoins:s.movementPurchaseCoins>0);try s.setPaused(false)
                 }
                 let ap=s.engine.state.players.map(\.ap),hp=s.engine.state.players.map(\.health)
                 let receipts=try s.advanceTravel(distance:100000)

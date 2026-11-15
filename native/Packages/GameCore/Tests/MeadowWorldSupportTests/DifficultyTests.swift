@@ -69,4 +69,30 @@ final class DifficultyTests:XCTestCase {
         let left=s.engine.state.units[monster.id]!
         XCTAssertEqual(left.health,1);XCTAssertFalse(left.active);XCTAssertEqual(left.nodeID,monster.nodeID)
     }
+    func testSuppliesGrantAddsCoinsAndMovementStepsAndUndoesBoth()throws {
+        let initial=try MeadowCampaignSession.new(layout:layout());var save=initial.snapshot
+        save.movement?.remaining=0
+        let s=try MeadowCampaignSession(save:save),coins=s.engine.state.units["p1"]!.coins
+        try s.grantSupplies(actors:["p1"],movementSteps:2,coins:15)
+        XCTAssertEqual(s.movementRemaining,2*MeadowMovementRules.distancePerStep,accuracy:1e-9)
+        XCTAssertEqual(s.engine.state.units["p1"]!.coins,coins+15)
+        try s.undoSuppliesGrant()
+        XCTAssertEqual(s.movementRemaining,0,accuracy:1e-9);XCTAssertEqual(s.engine.state.units["p1"]!.coins,coins)
+        try s.grantSupplies(actors:["p1","p2"],movementSteps:99,coins:0)
+        XCTAssertEqual(s.movementRemaining,s.movementCapacity,accuracy:1e-9)
+        XCTAssertThrowsError(try s.grantSupplies(actors:["p1"],movementSteps:0,coins:0))
+    }
+    func testTeammatesGiveItemsAndCoinsInsideThePack()throws {
+        let s=try MeadowCampaignSession.new(layout:layout())
+        try s.engine.apply(.reward(actors:["p1"],value:ResourceReward(coins:30,items:["smallPotion":2])))
+        let p1=s.engine.state.units["p1"]!,p2=s.engine.state.units["p2"]!
+        XCTAssertEqual(s.teammates(of:"p1").map(\.id),["p2"])
+        try s.give(from:"p1",to:"p2",item:"smallPotion",count:1)
+        try s.give(from:"p1",to:"p2",coins:10)
+        XCTAssertEqual(s.engine.state.units["p1"]!.inventory["smallPotion"] ?? 0,(p1.inventory["smallPotion"] ?? 0)-1)
+        XCTAssertEqual(s.engine.state.units["p2"]!.inventory["smallPotion"] ?? 0,(p2.inventory["smallPotion"] ?? 0)+1)
+        XCTAssertEqual(s.engine.state.units["p2"]!.coins,p2.coins+10);XCTAssertEqual(s.engine.state.units["p1"]!.coins,p1.coins-10)
+        XCTAssertThrowsError(try s.give(from:"p1",to:"p1",coins:1))
+        XCTAssertThrowsError(try s.give(from:"p2",to:"p1",item:"largePotion",count:99))
+    }
 }

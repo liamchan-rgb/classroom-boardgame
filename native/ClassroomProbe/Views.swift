@@ -60,6 +60,8 @@ private struct TeacherBookConsole:View {
             TeacherBookGrantBar(game:game,prepare:{notesFocused=false})
             HStack(alignment:.top,spacing:12){
                 PublicBookPage(model:session.display,players:game.backend.bookPlayers).frame(maxWidth:.infinity,maxHeight:.infinity)
+                    // The teacher's preview shows the same countdown / scoreboard as the TV.
+                    .overlay{ClassroomTVOverlays(timer:game.classTimer,overlays:game.overlays,game:game)}
                     .clipShape(RoundedRectangle(cornerRadius:18,style:.continuous)).overlay(RoundedRectangle(cornerRadius:18,style:.continuous).stroke(.white.opacity(0.5),lineWidth:1))
                 VStack(alignment:.leading,spacing:8){
                     Toggle(isOn:$session.showNotes){Label("备注",systemImage:"note.text")}.font(.headline)

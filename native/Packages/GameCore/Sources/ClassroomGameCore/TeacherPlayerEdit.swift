@@ -31,6 +31,14 @@ extension Evaluation {
         try setHealth(id,value:value.health,killer:nil)
         events.append(GameEvent("teacherPlayerEdited",target:id,detail:"个人数值与背包绝对设置；身份/队伍/装备/仓库保留"))
     }
+    mutating func grantPlayerSupplies(_ ids:[String],movement:Int,coins:Int)throws {
+        guard !ids.isEmpty,Set(ids).count==ids.count,movement>=0,coins>=0,movement>0 || coins>0 else{throw GameError("请选择奖励对象和非负发放数量。")}
+        for id in ids {
+            var player=try unit(id);guard player.kind == .player else{throw GameError("只能向玩家发放资源。")}
+            player.coins=try checkedAdd(player.coins,coins);state.units[id]=player
+            events.append(GameEvent("teacherPlayerGrant",target:id,amount:coins,detail:"移动+\(movement)"))
+        }
+    }
     mutating func grantPlayerResources(_ ids:[String],ap:Int,coins:Int)throws {
         guard !ids.isEmpty,Set(ids).count==ids.count,ap>=0,coins>=0,ap>0 || coins>0 else{throw GameError("请选择奖励对象和非负发放数量。")}
         for id in ids {

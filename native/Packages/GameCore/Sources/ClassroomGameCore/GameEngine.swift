@@ -167,6 +167,8 @@ struct Evaluation {
         case .monsterStep: try monsterStep()
         case .editPlayer(let id,let value):try editPlayer(id,value:value)
         case .grantPlayerResources(let ids,let ap,let coins):try grantPlayerResources(ids,ap:ap,coins:coins)
+        case .grantPlayerSupplies(let ids,let movement,let coins):try grantPlayerSupplies(ids,movement:movement,coins:coins)
+        case .givePlayerResource(let from,let to,let coins,let item,let count):try givePlayerResource(from:from,to:to,coins:coins,item:item,count:count)
         case .editResources(let id, let patch):
             if let health = patch.health { try setHealth(id, value: health, killer: nil) }
             var edited = try unit(id)

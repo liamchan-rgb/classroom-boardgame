@@ -362,9 +362,11 @@ final class MeadowTeacherCoordinator:ObservableObject {
         do{try backend.editPlayer(id,value:value,role:.teacher);renderer?.classroomRefresh();message="玩家数值与背包已保存。";revision += 1;return true}
         catch{message=error.localizedDescription;return false}
     }
-    @discardableResult func grantBookPlayers(_ ids:[String],ap:Int,coins:Int)->Bool {
+    @discardableResult func grantBookPlayers(_ ids:[String],movement:Int,coins:Int)->Bool {
         guard !busy else{message="请等待当前动作结束。";return false}
-        do{try backend.grantPlayers(ids,ap:ap,coins:coins,role:.teacher);renderer?.classroomRefresh();message="已向\(ids.count)名玩家发放行动点\(ap)、金币\(coins)。";revision += 1;return true}
+        guard !ids.isEmpty else{message="请先选择发放对象。";return false}
+        guard movement>0 || coins>0 else{message="请填写移动步数或金币数量。";return false}
+        do{try backend.grantSupplies(ids,movement:movement,coins:coins,role:.teacher);renderer?.classroomRefresh();message="已向\(ids.count)名玩家发放"+[movement>0 ? "移动\(movement)步":nil,coins>0 ? "金币\(coins)":nil].compactMap{$0}.joined(separator:"、")+"。";revision += 1;return true}
         catch{message=error.localizedDescription;return false}
     }
     func setConnection(_ id:String,connected:Bool){if connected{externalIDs.insert(id)}else{externalIDs.remove(id)};updateMirrorDemand();if !externalConnected{frameMirror.frame=nil};revision += 1}

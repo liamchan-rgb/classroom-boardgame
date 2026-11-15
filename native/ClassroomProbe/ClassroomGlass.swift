@@ -39,7 +39,9 @@ struct ClassroomTextField:UIViewRepresentable {
         var parent:ClassroomTextField
         init(_ parent:ClassroomTextField){self.parent=parent}
         @objc func changed(_ field:UITextField) {
-            guard field.markedTextRange==nil else{return}
+            // Number fields keep up even while a Chinese keyboard is still composing the digits (otherwise the
+            // binding kept the old/empty value and the grant button silently did nothing).
+            guard field.markedTextRange==nil || parent.keyboard != .default else{return}
             var value=field.text ?? ""
             if value.count>parent.limit {value=String(value.prefix(parent.limit));field.text=value}
             parent.text=value

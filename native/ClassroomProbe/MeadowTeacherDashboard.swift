@@ -22,7 +22,7 @@ struct MeadowTeacherDashboard:View {
                 Image(systemName:"leaf.fill").font(.system(size:18,weight:.bold)).foregroundStyle(GameTheme.primary).accessibilityLabel("林间旅程 v0.31.1")
                 GlassChip(icon:game.externalConnected ? "tv.fill":"ipad.landscape",text:game.externalConnected ? "TV":"本机",tint:game.externalConnected ? .green:GameTheme.muted)
                 if let c=game.campaign,!inBattle {
-                    GlassChip(icon:"figure.walk.motion",text:"\(Int(ceil(c.movementRemaining)))/\(Int(ceil(c.movementCapacity)))")
+                    GlassChip(icon:"figure.walk.motion",text:"\(MeadowMovementRules.steps(c.movementRemaining))/\(MeadowMovementRules.steps(c.movementCapacity))")
                     GlassChip(icon:"bitcoinsign.circle.fill",text:"\(c.engine.state.units[c.selectedPlayerID]?.coins ?? 0)",tint:GameTheme.accent)
                 }
                 if let c=game.campaign {
@@ -49,7 +49,7 @@ struct MeadowTeacherDashboard:View {
                     Button{game.award()}label:{Label("+10 金币",systemImage:"bitcoinsign.circle")}.disabled(game.busy || game.campaign==nil)
                     Button{game.openShortcutEditor()}label:{Label("快捷键",systemImage:"keyboard")}
                     Toggle(isOn:$game.liveMirrorPreferred){Label("教师画面用 GPU 实时显示",systemImage:"display.2")}
-                    Button{game.openTeamConsole()}label:{Label("队伍与仓库",systemImage:"person.3")}.disabled(!game.ready || game.busy)
+                    Button{game.openTeamConsole()}label:{Label("队伍",systemImage:"person.3")}.disabled(!game.ready || game.busy)
                     Button{game.operation(.route)}label:{Label("路线与结算",systemImage:"flag.checkered")}.disabled(!game.ready || game.busy)
                     Divider()
                     Button{if let id=game.selectedNode{game.operation(.editNode(id))}}label:{Label("编辑地点",systemImage:"pencil")}.disabled(game.selectedNode==nil || game.campaign?.isMoving==true || inBattle)
