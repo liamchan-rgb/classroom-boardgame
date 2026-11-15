@@ -216,6 +216,7 @@ final class MeadowCampaignInventoryViewController:UIViewController {
     private let members=UISegmentedControl()
     private let close=MeadowPreviewPalette.iconButton("xmark")
     private let refillActions=MeadowPreviewPalette.iconButton("bolt.fill","整备")
+    private let timerButton=ClassroomGlobalTools.timerButton()
     private let hero=UIImageView(),health=MeadowBattleResourceBar(),ap=MeadowBattleActionPointsView()
     private let chips=UILabel()
     private let slots=ItemSlot.allCases.map{_ in UIButton(type:.system)}
@@ -236,7 +237,7 @@ final class MeadowCampaignInventoryViewController:UIViewController {
         [header,left,middle,right].forEach{MeadowPreviewPalette.stylePanel($0,liveBlur:true);view.addSubview($0)}
         titleLabel.attributedText=MeadowGlassText.iconLine("bag.fill","行囊",size:24,tint:MeadowPreviewPalette.gold,weight:.heavy)
         saveLabel.textColor=MeadowPreviewPalette.gold;saveLabel.alpha=0
-        [titleLabel,saveLabel,members,refillActions,close].forEach(header.addSubview)
+        [titleLabel,saveLabel,members,refillActions,close,timerButton].forEach(header.addSubview)
         [hero,health,ap,chips].forEach(left.addSubview);hero.contentMode = .scaleAspectFit;hero.layer.magnificationFilter = .nearest
         chips.numberOfLines=2
         refillActions.accessibilityIdentifier="campaignRefillInventoryActions";refillActions.accessibilityLabel="手动补足各成员基础行动"
@@ -340,7 +341,8 @@ final class MeadowCampaignInventoryViewController:UIViewController {
         let w=header.bounds.width
         titleLabel.frame=CGRect(x:18,y:14,width:140,height:36);saveLabel.frame=CGRect(x:150,y:20,width:240,height:24)
         close.frame=CGRect(x:w-62,y:10,width:50,height:44);refillActions.frame=CGRect(x:w-170,y:10,width:100,height:44)
-        let mw=min(520,w-600);members.frame=CGRect(x:w-180-mw,y:14,width:mw,height:36)
+        timerButton.frame=CGRect(x:w-232,y:10,width:54,height:44)
+        let mw=min(520,w-660);members.frame=CGRect(x:w-244-mw,y:14,width:mw,height:36)
         let lw2=left.bounds.width
         hero.frame=CGRect(x:16,y:14,width:lw2-32,height:min(230,left.bounds.height*0.36))
         health.frame=CGRect(x:16,y:hero.frame.maxY+10,width:lw2-32,height:40)

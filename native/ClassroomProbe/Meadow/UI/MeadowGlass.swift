@@ -86,3 +86,14 @@ extension GameDifficulty {
         set {UserDefaults.standard.set(newValue.rawValue,forKey:"classroom.difficulty")}
     }
 }
+
+/// Classroom-wide tools reachable from any in-game sheet (pack, shop): set by the teacher coordinator.
+enum ClassroomGlobalTools {
+    nonisolated(unsafe) static var openTimer:(()->Void)?
+    /// A header button that opens the class timer.
+    static func timerButton()->UIButton {
+        let b=MeadowPreviewPalette.iconButton("timer");b.accessibilityLabel="计时器"
+        b.addAction(UIAction{_ in ClassroomGlobalTools.openTimer?()},for:.touchUpInside)
+        return b
+    }
+}

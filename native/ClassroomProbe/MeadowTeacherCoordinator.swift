@@ -25,10 +25,15 @@ final class MeadowTeacherCoordinator:ObservableObject {
     /// While the GPU live mirror is on screen, the image mirror (map readback + overlay capture) is not needed at all.
     let classTimer=ClassTimerModel()
     let overlays=ClassOverlayModel()
-    /// Timer panel (teacher window); the countdown itself shows on the TV.
+    let grantDraft=BookGrantDraft()
+    /// The teacher has the picture-book tab open (G then grants the book bar's amounts).
+    var bookTabActive=false
+    /// Timer panel (teacher window); the countdown itself shows on the TV. Opens over anything (pack, shop, sheets).
     func openTimer(){
-        guard !modalOpen,let presenter=presentationHost else{return}
-        let screen=UIHostingController(rootView:ClassTimerPanel(timer:classTimer,onClose:{[weak self] in self?.presentationHost?.dismiss(animated:true)}))
+        guard let presenter=presentationHost else{return}
+        if presenter is ClassTimerHost {return}
+        let screen=ClassTimerHost(rootView:ClassTimerPanel(timer:classTimer,onClose:{[weak self] in
+            guard let top=self?.presentationHost,top is ClassTimerHost else{return};top.dismiss(animated:true)}))
         screen.modalPresentationStyle = .formSheet;screen.preferredContentSize=CGSize(width:720,height:420)
         presenter.present(screen,animated:true)
     }
@@ -117,6 +122,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
             }
         }
         timer=Timer.scheduledTimer(withTimeInterval:0.15,repeats:true){[weak self] _ in Task{@MainActor in self?.tick()}}
+        ClassroomGlobalTools.openTimer={[weak self] in MainActor.assumeIsolated{self?.openTimer()}}
     }
     private func publishMirrorFrame(){
         guard renderer?.classroomMirrorEnabled==true,let frame=renderer?.classroomCaptureFrame() else{return}
@@ -419,3 +425,6 @@ final class MeadowRendererContainer:UIViewController {
     }
     override func viewDidLayoutSubviews(){super.viewDidLayoutSubviews();if let child=installed,child.parent === self{layoutCanvas(child)}}
 }
+
+/// The timer sheet's own controller type, so a second request does not stack another one.
+final class ClassTimerHost:UIHostingController<ClassTimerPanel> {}

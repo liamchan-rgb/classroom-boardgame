@@ -198,6 +198,8 @@ struct ClassTimerPanel:View {
 
 enum ClassroomShortcutAction:String,CaseIterable,Identifiable {
     case select1,select2,select3,select4,select5,select6,select7,award,attack,endTurn,pauseResume,pageBack,pageForward,openTimer,timerStartPause,timerPlus10,toggleScoreboard
+    /// Works everywhere, also over the pack / shop / sheets.
+    var global:Bool {[.openTimer,.timerStartPause,.timerPlus10,.toggleScoreboard].contains(self)}
     var id:String {rawValue}
     var title:String {
         switch self {

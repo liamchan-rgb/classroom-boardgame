@@ -12,7 +12,10 @@ struct TeacherConsole:View {
         }.preferredColorScheme(.light)
         // Opening the game tab while the book is on the TV brings the game back to the TV as well.
         .onChange(of:tab){_,value in
+            session.game.bookTabActive = value==1
             if value==0,session.game.surface == .book {session.concealNotes();session.game.project(.exploration)}
+            // Opening the book tab puts the picture book on the TV straight away.
+            if value==1,session.game.surface != .book,!session.game.busy {session.game.project(.book)}
         }
     }
 }
@@ -59,7 +62,7 @@ private struct TeacherBookConsole:View {
                 Button{session.turnPage(1)}label:{Label("下页",systemImage:"chevron.right")}
                 Spacer(minLength:0)
             }.buttonStyle(GlassIconButtonStyle()).padding(.horizontal,10).padding(.vertical,6).glassPanel(radius:20,padding:0)
-            TeacherBookGrantBar(game:game,prepare:{notesFocused=false})
+            TeacherBookGrantBar(game:game,draft:game.grantDraft,prepare:{notesFocused=false})
             HStack(alignment:.top,spacing:12){
                 PublicBookPage(model:session.display,players:game.backend.bookPlayers).frame(maxWidth:.infinity,maxHeight:.infinity)
                     // The teacher's preview shows the same countdown / scoreboard as the TV.

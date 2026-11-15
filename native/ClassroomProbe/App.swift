@@ -54,6 +54,8 @@ final class TeacherHostController: UIViewController {
     }
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated); becomeFirstResponder()
+        // A tap anywhere outside a text field ends typing (the shortcut keys work again right away).
+        if let window=view.window {EndEditingTap.install(on:window)}
 
     }
     deinit { NotificationCenter.default.removeObserver(self) }
@@ -61,11 +63,13 @@ final class TeacherHostController: UIViewController {
     override func resignFirstResponder() -> Bool { heldKeys.removeAll(); return super.resignFirstResponder() }
     override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
         let session = TeacherSession.shared
-        guard !session.isEditingNotes,!session.game.modalOpen,!UIResponder.classroomTyping else{heldKeys.removeAll();super.pressesBegan(presses,with:event);return}
+        guard !session.isEditingNotes,!UIResponder.classroomTyping else{heldKeys.removeAll();super.pressesBegan(presses,with:event);return}
         var handled=false
         for press in presses {
             guard let key=press.key,key.modifierFlags.intersection([.command,.control,.alternate]).isEmpty,
                   let token=ClassroomShortcuts.token(key),let action=ClassroomShortcuts.action(for:token) else{continue}
+            // Over the pack, shop or another sheet only the classroom-wide tools (timer, scoreboard) answer.
+            if session.game.modalOpen,!action.global {continue}
             handled=true;guard heldKeys.insert(token).inserted else{continue}
             perform(action,session:session)
         }
@@ -78,7 +82,7 @@ final class TeacherHostController: UIViewController {
         case .select1,.select2,.select3,.select4,.select5,.select6,.select7:
             guard let seat=action.seat,let ids=game.campaign?.playerIDs,seat<=ids.count else{return}
             game.select(ids[seat-1])
-        case .award:game.award()
+        case .award:if game.bookTabActive {game.grantFromDraft()} else {game.award()}
         case .attack:game.battle(.attack)
         case .endTurn:game.battle(.endTurn)
         case .pauseResume:game.operation(.pauseOrResume)
@@ -128,4 +132,27 @@ extension UIResponder {
         UIApplication.shared.sendAction(#selector(classroomReportFirstResponder(_:)),to:nil,from:nil,for:nil)
         return found is UITextInput
     }
+}
+
+/// Window-wide tap that ends text input when the tap lands outside any text field / text view. It never swallows the tap.
+@MainActor final class EndEditingTap:NSObject,UIGestureRecognizerDelegate {
+    static let shared=EndEditingTap()
+    static let name="classroomEndEditingTap"
+    static func install(on window:UIWindow) {
+        guard !(window.gestureRecognizers ?? []).contains(where:{$0.name==name}) else{return}
+        let tap=UITapGestureRecognizer(target:shared,action:#selector(fired(_:)))
+        tap.name=name;tap.cancelsTouchesInView=false;tap.delaysTouchesBegan=false;tap.delaysTouchesEnded=false;tap.delegate=shared
+        window.addGestureRecognizer(tap)
+    }
+    @objc private func fired(_ tap:UITapGestureRecognizer) {
+        tap.view?.endEditing(true)
+        // Hand the keys back to the console so shortcuts reach it.
+        tap.view?.window?.rootViewController?.becomeFirstResponder()
+    }
+    func gestureRecognizer(_ g:UIGestureRecognizer,shouldReceive touch:UITouch)->Bool {
+        var v=touch.view
+        while let current=v {if current is UITextField || current is UITextView || current is UISearchBar {return false};v=current.superview}
+        return UIResponder.classroomTyping
+    }
+    func gestureRecognizer(_ g:UIGestureRecognizer,shouldRecognizeSimultaneouslyWith other:UIGestureRecognizer)->Bool {true}
 }

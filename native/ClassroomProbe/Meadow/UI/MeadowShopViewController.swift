@@ -21,6 +21,7 @@ final class MeadowShopViewController:UIViewController {
     private let lottery=MeadowLotteryView()
     private var lotteryMode:Bool {mode.selectedSegmentIndex==2}
     private let close=MeadowPreviewPalette.iconButton("xmark")
+    private let timerButton=ClassroomGlobalTools.timerButton()
     private let bigIcon=UIImageView(),nameLabel=MeadowPreviewPalette.label("",size:24,weight:.heavy),infoLabel=MeadowPreviewPalette.label("",size:16)
     private let priceLabel=MeadowPreviewPalette.label("",size:20,weight:.heavy),afterLabel=MeadowPreviewPalette.label("",size:15)
     private let action=MeadowPreviewPalette.button("购买"),toast=MeadowPreviewPalette.label("",size:16,weight:.bold)
@@ -52,7 +53,7 @@ final class MeadowShopViewController:UIViewController {
         super.viewDidLoad();view.backgroundColor=UIColor(red:0.80,green:0.88,blue:0.88,alpha:1);MeadowGlassBackdrop.install(in:view)
         MeadowGlassBackdrop.install(in:view)
         [header,grid,detail].forEach{MeadowPreviewPalette.stylePanel($0,liveBlur:true);view.addSubview($0)}
-        [titleLabel,coinsLabel,buyers,mode,close].forEach(header.addSubview)
+        [titleLabel,coinsLabel,buyers,mode,close,timerButton].forEach(header.addSubview)
         [bigIcon,nameLabel,infoLabel,priceLabel,afterLabel,action].forEach(detail.addSubview)
         bigIcon.contentMode = .scaleAspectFit;bigIcon.layer.magnificationFilter = .nearest
         infoLabel.numberOfLines=0;afterLabel.numberOfLines=0;nameLabel.numberOfLines=2;infoLabel.textColor=MeadowPreviewPalette.muted
@@ -189,6 +190,7 @@ final class MeadowShopViewController:UIViewController {
         titleLabel.frame=CGRect(x:16,y:10,width:w*0.45,height:34);coinsLabel.frame=CGRect(x:16,y:48,width:w*0.45,height:24)
         close.frame=CGRect(x:w-64,y:12,width:50,height:44)
         mode.frame=CGRect(x:w-340,y:12,width:260,height:40)
+        timerButton.frame=CGRect(x:w-404,y:10,width:54,height:44)
         buyers.frame=CGRect(x:w*0.5,y:62,width:w*0.5-14,height:36)
         let top=header.frame.maxY+12,panel=min(380,b.width*0.34)
         detail.frame=CGRect(x:b.maxX-panel,y:top,width:panel,height:b.maxY-top)
