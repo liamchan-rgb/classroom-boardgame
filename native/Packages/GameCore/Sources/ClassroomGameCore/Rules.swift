@@ -116,8 +116,11 @@ extension GameState {
             }
             let queue = Set(battle.queue)
             let expected: GamePhase = battle.kind == .pve ? .pve : battle.kind == .teamPvp ? .teamPvp : .freeForAll
+            // Every player of a fighting team is in the queue (a campaign duel only takes those on the node).
+            let fightingTeams = Set(battle.queue.compactMap { units[$0] }.filter { $0.kind == .player }.map { $0.teamID ?? "" })
+            let mustJoin = battle.duel == true ? [] : players.filter { battle.kind != .pve || fightingTeams.isEmpty || fightingTeams.contains($0.teamID ?? "") }.map(\.id)
             guard phase == expected, battle.round >= 1, queue.count == battle.queue.count,
-                  Set(players.map(\.id)).isSubset(of: queue), battle.acted.isSubset(of: queue),
+                  Set(mustJoin).isSubset(of: queue), battle.acted.isSubset(of: queue),
                   battle.queue.allSatisfy({ units[$0] != nil }), battle.current.map(queue.contains) ?? true,
                   Set(battle.initiatives.map(\.unitID)).count == battle.initiatives.count,
                   battle.initiatives.allSatisfy({ queue.contains($0.unitID) && (1...20).contains($0.value) }) else {

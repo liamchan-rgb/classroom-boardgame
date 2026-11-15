@@ -296,11 +296,11 @@ struct Evaluation {
         if kind == .pve {
             guard !monsters.isEmpty, Set(monsters).count == monsters.count else { throw GameError("PVE需要有效的敌人列表。") }
             for id in monsters { let enemy = try unit(id); guard enemy.kind == .monster && enemy.isAlive else { throw GameError("战败怪物不能自动重新加入。") } }
-            // Only the heroes standing where the monsters are join (split teams fight their own encounters);
-            // if nobody stands there (scripted/training fights), everyone joins as before.
+            // Split teams fight their own encounters: only the teams with someone standing where the monsters are
+            // join (the whole team, as before). With one team, or nobody there, everyone joins as always.
             let fields = Set(try monsters.map { try unit($0).nodeID })
-            let present = state.players.filter { fields.contains($0.nodeID) }.map(\.id)
-            if !present.isEmpty { participants = present }
+            let teams = Set(state.players.filter { fields.contains($0.nodeID) }.map { $0.teamID ?? "" })
+            if !teams.isEmpty { participants = state.players.filter { teams.contains($0.teamID ?? "") }.map(\.id) }
             participants += monsters
         } else {
             guard monsters.isEmpty else { throw GameError("PVP不加入怪物。") }
