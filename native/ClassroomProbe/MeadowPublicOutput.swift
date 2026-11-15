@@ -79,6 +79,10 @@ private struct BookPlayerCard:View {
     private static let tints:[Color]=[Color(red:0.36,green:0.72,blue:0.52),Color(red:0.42,green:0.62,blue:0.95),Color(red:0.95,green:0.62,blue:0.36),Color(red:0.78,green:0.52,blue:0.92),Color(red:0.95,green:0.80,blue:0.38),Color(red:0.40,green:0.80,blue:0.85),Color(red:0.92,green:0.50,blue:0.55)]
     private func number(_ value:Int)->String {value.formatted(.number.notation(.compactName).locale(Locale(identifier:"zh_CN")))}
     private var ratio:Double {Double(max(0,unit.health))/Double(max(1,unit.maximumHealth))}
+    /// 发放后的动画（和战斗掉落同一套像素金币 / 拾取光）：金币或行动点增加时触发一次
+    @State private var gain=BookGain()
+    @State private var coinPop=false
+    @State private var apPop=false
     private var barColor:Color {ratio>0.5 ? Color(red:0.40,green:0.86,blue:0.52):ratio>0.25 ? Color(red:0.98,green:0.80,blue:0.35):Color(red:0.96,green:0.42,blue:0.40)}
     var body:some View {
         let h=size.height,tint=Self.tints[index%Self.tints.count],alive=unit.health>0
@@ -101,9 +105,11 @@ private struct BookPlayerCard:View {
             HStack(spacing:h*0.06){
                 Image(systemName:"diamond.fill").foregroundStyle(Color(red:0.70,green:0.60,blue:1.0))
                 Text("\(number(unit.ap))/\(number(unit.maximumAP))").monospacedDigit()
+                    .scaleEffect(apPop ? 1.4:1,anchor:.leading).foregroundStyle(apPop ? Color(red:0.82,green:0.72,blue:1.0):.white)
                 Spacer(minLength:0)
                 Image(systemName:"bitcoinsign.circle.fill").foregroundStyle(Color(red:0.98,green:0.80,blue:0.40))
                 Text(number(unit.coins)).monospacedDigit()
+                    .scaleEffect(coinPop ? 1.4:1,anchor:.trailing).foregroundStyle(coinPop ? Color(red:1.0,green:0.86,blue:0.42):.white)
             }.font(.system(size:h*0.16,weight:.semibold,design:.rounded))
         }
         .padding(.horizontal,h*0.14).padding(.vertical,h*0.1)
@@ -117,8 +123,108 @@ private struct BookPlayerCard:View {
         }
         .overlay(RoundedRectangle(cornerRadius:h*0.2,style:.continuous).stroke(LinearGradient(colors:[.white.opacity(0.45),.white.opacity(0.1)],startPoint:.top,endPoint:.bottom),lineWidth:1))
         .opacity(alive ? 1:0.6).saturation(alive ? 1:0.2)
+        .overlay{BookGainBurst(gain:gain,size:size).frame(width:size.width,height:size.height).allowsHitTesting(false)}
+        .onChange(of:unit.coins){old,new in
+            guard new>old else{return}
+            gain=BookGain(serial:gain.serial+1,coins:new-old,ap:0)
+            pop(coins:true)
+        }
+        .onChange(of:unit.ap){old,new in
+            guard new>old else{return}
+            gain=BookGain(serial:gain.serial+1,coins:0,ap:new-old)
+            pop(coins:false)
+        }
         .accessibilityElement(children:.ignore)
         .accessibilityLabel("\(unit.name)，生命\(unit.health)/\(unit.maximumHealth)，行动点\(unit.ap)/\(unit.maximumAP)，金币\(unit.coins)")
+    }
+}
+
+extension BookPlayerCard {
+    /// 金币飞进来以后数字弹一下
+    fileprivate func pop(coins:Bool) {
+        DispatchQueue.main.asyncAfter(deadline:.now()+0.75){
+            withAnimation(.spring(response:0.25,dampingFraction:0.45)){ if coins{coinPop=true}else{apPop=true} }
+            DispatchQueue.main.asyncAfter(deadline:.now()+0.5){ withAnimation(.easeOut(duration:0.35)){ if coins{coinPop=false}else{apPop=false} } }
+        }
+    }
+}
+
+/// 一次发放：序号变了就播一次
+struct BookGain:Equatable { var serial=0,coins=0,ap=0 }
+
+/// 绘本状态卡上的发放动画：像素金币（或行动点菱形）从卡片上方抛出、落进金币数字，落点炸开拾取光，飘起「+10」。
+/// 和战斗里的掉落动画用同一套像素片段（coinSpin / collectGold / collectEpic）。
+struct BookGainBurst:UIViewRepresentable {
+    let gain:BookGain
+    let size:CGSize
+    final class Coordinator { var serial=0 }
+    func makeCoordinator()->Coordinator { Coordinator() }
+    func makeUIView(context:Context)->UIView { let v=UIView();v.clipsToBounds=false;v.isUserInteractionEnabled=false;return v }
+    func updateUIView(_ view:UIView,context:Context) {
+        guard gain.serial != context.coordinator.serial else{return}
+        let first=context.coordinator.serial==0 && gain.serial==0
+        context.coordinator.serial=gain.serial
+        guard !first,gain.coins>0 || gain.ap>0 else{return}
+        DispatchQueue.main.async { play(in:view) }
+    }
+
+    private static func frames(_ id:String)->[UIImage] {
+        guard let clip=MeadowPixelFX.clips[id] else{return []}
+        let images=MeadowPixelFX.images(clip),start=clip.back && clip.front ? clip.n:0
+        return (start..<min(images.count,start+clip.n)).map{UIImage(cgImage:images[$0])}
+    }
+
+    private func play(in view:UIView) {
+        let h=size.height,w=size.width,coins=gain.coins>0
+        // 落点：金币图标（右下）/ 行动点菱形（左下）
+        let target=coins ? CGPoint(x:w*0.80,y:h*0.80):CGPoint(x:h*0.24,y:h*0.80)
+        let amount=coins ? gain.coins:gain.ap
+        let count=coins ? min(10,max(4,amount/3)):min(5,max(2,amount))
+        let spin=coins ? Self.frames("coinSpin"):[]
+        let side=h*0.42
+        for i in 0..<count {
+            let piece=UIImageView(frame:CGRect(x:0,y:0,width:side,height:side))
+            piece.layer.magnificationFilter = .nearest
+            if coins,!spin.isEmpty { piece.animationImages=spin;piece.animationDuration=Double(spin.count)/20;piece.startAnimating() }
+            else {
+                piece.image=UIImage(systemName:"diamond.fill")?.withTintColor(UIColor(red:0.72,green:0.60,blue:1.0,alpha:1),renderingMode:.alwaysOriginal)
+                piece.bounds=CGRect(x:0,y:0,width:side*0.55,height:side*0.55)
+            }
+            // 从卡片上方中间一带抛起来，划弧落进数字
+            let start=CGPoint(x:w*0.5+CGFloat(i-count/2)*h*0.16,y:-h*0.15)
+            let control=CGPoint(x:(start.x+target.x)/2+CGFloat((i%3)-1)*h*0.3,y:-h*(1.1+CGFloat(i%2)*0.35))
+            piece.layer.position=start;piece.alpha=0
+            view.addSubview(piece)
+            let path=UIBezierPath();path.move(to:start);path.addQuadCurve(to:target,controlPoint:control)
+            let move=CAKeyframeAnimation(keyPath:"position");move.path=path.cgPath
+            move.timingFunction=CAMediaTimingFunction(name:.easeIn)
+            let shrink=CABasicAnimation(keyPath:"transform.scale");shrink.fromValue=1.15;shrink.toValue=0.55
+            let fade=CAKeyframeAnimation(keyPath:"opacity");fade.values=[0,1,1,0.9];fade.keyTimes=[0,0.12,0.85,1]
+            let group=CAAnimationGroup();group.animations=[move,shrink,fade];group.duration=0.62
+            group.beginTime=CACurrentMediaTime()+Double(i)*0.07;group.fillMode = .both;group.isRemovedOnCompletion=false
+            piece.layer.add(group,forKey:"fly")
+            DispatchQueue.main.asyncAfter(deadline:.now()+Double(i)*0.07+0.64){ piece.removeFromSuperview() }
+        }
+        // 落点的拾取光 + 飘起的「+N」
+        let land=Double(count-1)*0.07+0.6
+        DispatchQueue.main.asyncAfter(deadline:.now()+land){
+            let burstFrames=Self.frames(coins ? "collectGold":"collectEpic")
+            if !burstFrames.isEmpty {
+                let b=UIImageView(frame:CGRect(x:0,y:0,width:h*1.1,height:h*1.2))
+                b.center=CGPoint(x:target.x,y:target.y-h*0.3);b.layer.magnificationFilter = .nearest
+                b.animationImages=burstFrames;b.animationDuration=Double(burstFrames.count)/20;b.animationRepeatCount=1
+                view.addSubview(b);b.startAnimating()
+                DispatchQueue.main.asyncAfter(deadline:.now()+b.animationDuration){ b.removeFromSuperview() }
+            }
+            let label=UILabel()
+            label.text="+\(amount)";label.font=.systemFont(ofSize:h*0.3,weight:.black)
+            label.textColor=coins ? UIColor(red:1.0,green:0.84,blue:0.36,alpha:1):UIColor(red:0.80,green:0.70,blue:1.0,alpha:1)
+            label.layer.shadowColor=UIColor.black.cgColor;label.layer.shadowOpacity=0.8;label.layer.shadowRadius=3;label.layer.shadowOffset = .zero
+            label.sizeToFit();label.center=CGPoint(x:target.x,y:target.y-h*0.35);label.transform=CGAffineTransform(scaleX:0.4,y:0.4)
+            view.addSubview(label)
+            UIView.animate(withDuration:0.3,delay:0,usingSpringWithDamping:0.5,initialSpringVelocity:0.8){ label.transform = .identity }
+            UIView.animate(withDuration:0.9,delay:0.5,options:.curveEaseOut,animations:{ label.center.y -= h*0.55;label.alpha=0 }){ _ in label.removeFromSuperview() }
+        }
     }
 }
 

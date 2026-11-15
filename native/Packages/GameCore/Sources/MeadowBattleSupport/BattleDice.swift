@@ -62,10 +62,13 @@ public enum BattleDice {
         if skill.effects.contains(where: { $0.kind == .damage }) { result += modifiers(actor,catalog:catalog,committed:receipt != nil) }
         return result
     }
+    /// 结果停留多久才开始淡出（秒）
+    public static let resultHold=2.6
     public static func pose(time:Double,index:Int,resolvedAge:Double?,visibleAge:Double,exitAge:Double?=nil)->BattleDiePose {
         let settle=resolvedAge.map { PartyVisual.smooth($0/0.65) } ?? 0
         let moving=1-settle,t=time*13+Double(index)*2.1
-        let fade=exitAge.map { 1-PartyVisual.smooth($0/0.22) } ?? (resolvedAge.map { 1-PartyVisual.smooth(($0-1.10)/0.4) } ?? 1)
+        // 掷出结果后停留约 2.6 秒再淡出（原来 1.1 秒，一晃而过看不清点数）
+        let fade=exitAge.map { 1-PartyVisual.smooth($0/0.22) } ?? (resolvedAge.map { 1-PartyVisual.smooth(($0-BattleDice.resultHold)/0.5) } ?? 1)
         return BattleDiePose(angle:(sin(t)*0.21+sin(t*0.47)*0.09)*moving,offsetY:(sin(t*0.79)*4)*moving,scale:1+sin(t*0.69)*0.035*moving,resultMix:settle,alpha:PartyVisual.smooth(visibleAge/0.18)*fade,face:Int(floor(max(0,time)*11+Double(index)*1.7)).quotientAndRemainder(dividingBy:6).remainder+1)
     }
     public static func darkness(_ action:PartyAction)->Double {

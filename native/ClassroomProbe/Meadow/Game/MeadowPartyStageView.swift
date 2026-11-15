@@ -306,7 +306,7 @@ final class MeadowPartyStageView:UIView {
             diceActor=actorID;diceAction=action;diceVisibleAt=sceneTime;diceSettledAt=nil;diceExitAt=nil
             diceView.locked=false;diceConfirmedAt=nil
             diceView.dice=BattleDice.channels(action,actor:actor,target:targetUnit,catalog:catalog)
-        } else { diceExitAt=sceneTime }
+        } else if diceSettledAt.map({ sceneTime-$0>=BattleDice.resultHold }) ?? true { diceExitAt=sceneTime }
     }
     func play(_ value:PartyIntent,before:GameState,confirmed:OperationReceipt?,onImpact:@escaping ()->OperationReceipt?,completion:@escaping ()->Void) {
         if value.action.isOffensive { MeadowBattleHaptics.prepare() }
@@ -688,7 +688,9 @@ final class MeadowPartyStageView:UIView {
         let plateHeight=CGFloat(PolyhedralDice.radius(count:diceCount))*2.5*diceScale+10
         diceView.transform = .identity;diceView.bounds=CGRect(x:0,y:0,width:220,height:100)
         diceView.center=CGPoint(x:bounds.midX,y:6+plateHeight/2+7*diceScale);diceView.transform=CGAffineTransform(scaleX:diceScale,y:diceScale)
-        let diceShown = !diceView.dice.isEmpty && (diceExitAt.map { sceneTime-$0<0.3 } ?? true) && (intent != nil || focus != nil)
+        // 行动放完后，掷出的结果也要留在屏幕上直到自己淡出（BattleDice.resultHold），不跟着行动一结束就收起
+        let resultHeld=diceSettledAt.map { sceneTime-$0<BattleDice.resultHold+0.5 } ?? false
+        let diceShown = !diceView.dice.isEmpty && (diceExitAt.map { sceneTime-$0<0.3 } ?? true) && (intent != nil || focus != nil || resultHeld)
         let plateWidth=min(bounds.width-24,(dieSpan+28)*diceScale)
         dicePlate.frame=CGRect(x:bounds.midX-plateWidth/2,y:6,width:plateWidth,height:plateHeight);dicePlate.layer.cornerRadius=plateHeight/2
         dicePlate.alpha += ((diceShown ? 1:0)-dicePlate.alpha)*0.25
