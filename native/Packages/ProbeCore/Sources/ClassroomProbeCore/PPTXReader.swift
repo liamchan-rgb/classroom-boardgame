@@ -67,6 +67,35 @@ final class XMLNode {
         if name == "br" { return "\n" }
         return children.map { $0.paragraphText() }.joined()
     }
+    /// A notes paragraph with its run formatting kept as light markup: **bold** and __underline__
+    /// (adjacent runs with the same style are merged so the markers do not pile up).
+    func formattedParagraphText() -> String {
+        var segments: [(text: String, bold: Bool, underline: Bool)] = []
+        for child in children {
+            switch child.name {
+            case "r", "fld":
+                let props = child.children.first { $0.name == "rPr" }?.attributes ?? [:]
+                let bold = ["1", "true"].contains(props["b"] ?? "")
+                let underline = (props["u"].map { $0 != "none" }) ?? false
+                let text = child.children.filter { $0.name == "t" }.map(\.text).joined()
+                guard !text.isEmpty else { continue }
+                if let last = segments.last, last.bold == bold, last.underline == underline { segments[segments.count - 1].text += text }
+                else { segments.append((text, bold, underline)) }
+            case "br": segments.append(("\n", false, false))
+            default: continue
+            }
+        }
+        return segments.map { s in
+            // Keep the spaces outside the markers, so "**word** " stays well formed.
+            let core = s.text.trimmingCharacters(in: .whitespaces)
+            guard (s.bold || s.underline), !core.isEmpty else { return s.text }
+            let lead = String(s.text.prefix { $0 == " " }), trail = String(String(s.text.reversed()).prefix { $0 == " " })
+            var marked = core
+            if s.bold { marked = "**" + marked + "**" }
+            if s.underline { marked = "__" + marked + "__" }
+            return lead + marked + trail
+        }.joined()
+    }
 }
 
 final class XMLTree: NSObject, XMLParserDelegate {
@@ -292,7 +321,7 @@ public enum PPTXReader {
         root.descendants("sp").compactMap { shape -> String? in
             let placeholders = shape.descendants("ph")
             if !placeholders.isEmpty && !placeholders.contains(where: { $0.attributes["type"] == "body" }) { return nil }
-            let text = shape.descendants("p").map { $0.paragraphText() }.joined(separator: "\n")
+            let text = shape.descendants("p").map { $0.formattedParagraphText() }.joined(separator: "\n")
                 .trimmingCharacters(in: .whitespacesAndNewlines)
             return text.isEmpty ? nil : text
         }.joined(separator: "\n\n")

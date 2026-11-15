@@ -25,6 +25,8 @@ private struct TeacherBookConsole:View {
     @State private var report=false
     @State private var exportingURL:URL?
     @FocusState private var notesFocused:Bool
+    /// Notes show formatted (bold / underline from the PPT); the pencil switches to the raw text with its ** / __ marks.
+    @State private var editingNotes=false
     var body:some View {
         VStack(alignment:.leading,spacing:10){
             HStack(spacing:8){
@@ -66,8 +68,19 @@ private struct TeacherBookConsole:View {
                 VStack(alignment:.leading,spacing:8){
                     Toggle(isOn:$session.showNotes){Label("备注",systemImage:"note.text")}.font(.headline)
                     if session.showNotes {
-                        TextEditor(text:Binding(get:{session.currentNote},set:{session.editNote($0)})).focused($notesFocused)
-                            .scrollContentBackground(.hidden).padding(6).background(.white.opacity(0.35),in:RoundedRectangle(cornerRadius:12,style:.continuous))
+                        HStack{
+                            Spacer()
+                            Button{editingNotes.toggle();notesFocused=editingNotes}label:{Image(systemName:editingNotes ? "checkmark.circle.fill":"pencil.circle").font(.title3)}
+                                .buttonStyle(.plain).foregroundStyle(GameTheme.primary).accessibilityLabel(editingNotes ? "完成编辑":"编辑备注")
+                        }
+                        if editingNotes {
+                            TextEditor(text:Binding(get:{session.currentNote},set:{session.editNote($0)})).focused($notesFocused)
+                                .scrollContentBackground(.hidden).padding(6).background(.white.opacity(0.35),in:RoundedRectangle(cornerRadius:12,style:.continuous))
+                            Text("**加粗**  __下划线__").font(.caption2).foregroundStyle(.secondary)
+                        } else {
+                            ScrollView{Text(NotesMarkup.attributed(session.currentNote)).font(.system(size:17)).frame(maxWidth:.infinity,alignment:.leading).textSelection(.enabled)}
+                                .padding(8).background(.white.opacity(0.35),in:RoundedRectangle(cornerRadius:12,style:.continuous))
+                        }
                     }else{Label("仅本机可见",systemImage:"eye.slash").font(.caption).foregroundStyle(.secondary);Spacer()}
                 }.frame(width:280).frame(maxHeight:.infinity,alignment:.top).glassPanel()
             }.frame(maxHeight:.infinity)
@@ -147,4 +160,26 @@ struct ExportDocument:UIViewControllerRepresentable {
     let url:URL
     func makeUIViewController(context:Context)->UIDocumentPickerViewController{UIDocumentPickerViewController(forExporting:[url],asCopy:true)}
     func updateUIViewController(_ controller:UIDocumentPickerViewController,context:Context){}
+}
+
+/// Speaker-notes markup from the PPT import: **bold** and __underline__ (they can nest).
+enum NotesMarkup {
+    static func attributed(_ raw:String)->AttributedString {
+        var out=AttributedString(),bold=false,underline=false,buffer=""
+        func flush(){
+            guard !buffer.isEmpty else{return}
+            var piece=AttributedString(buffer)
+            if bold {piece.inlinePresentationIntent = .stronglyEmphasized;piece.font = .system(size:17,weight:.bold)}
+            if underline {piece.underlineStyle = .single}
+            out.append(piece);buffer=""
+        }
+        let chars=Array(raw);var i=0
+        while i<chars.count {
+            if i+1<chars.count,chars[i]=="*",chars[i+1]=="*" {flush();bold.toggle();i+=2;continue}
+            if i+1<chars.count,chars[i]=="_",chars[i+1]=="_" {flush();underline.toggle();i+=2;continue}
+            buffer.append(chars[i]);i+=1
+        }
+        flush()
+        return out
+    }
 }

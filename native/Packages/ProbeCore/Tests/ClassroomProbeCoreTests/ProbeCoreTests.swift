@@ -89,5 +89,9 @@ final class ProbeCoreTests: XCTestCase {
         <p:notes xmlns:p="urn:p" xmlns:a="urn:a"><p:sp><p:ph type="body"/><a:p><a:r><a:t>Teacher note</a:t></a:r></a:p></p:sp><p:sp><p:ph type="sldNum"/><a:p><a:r><a:t>999</a:t></a:r></a:p></p:sp></p:notes>
         """
         XCTAssertEqual(PPTXReader.extractNotes(try XMLTree.read(Data(xml.utf8), part: "notes.xml")), "Teacher note")
+        let styled = """
+        <p:notes xmlns:p="urn:p" xmlns:a="urn:a"><p:sp><p:ph type="body"/><a:p><a:r><a:t>先读</a:t></a:r><a:r><a:rPr b="1"/><a:t>重点</a:t></a:r><a:r><a:rPr b="1"/><a:t>词</a:t></a:r><a:r><a:t>，再</a:t></a:r><a:r><a:rPr u="sng"/><a:t>划线</a:t></a:r><a:r><a:rPr u="none"/><a:t>结束</a:t></a:r></a:p></p:sp></p:notes>
+        """
+        XCTAssertEqual(PPTXReader.extractNotes(try XMLTree.read(Data(styled.utf8), part: "notes.xml")), "先读**重点词**，再__划线__结束")
     }
 }

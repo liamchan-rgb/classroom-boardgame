@@ -17,19 +17,35 @@ import MeadowWorldSupport
         if let endDate {return max(0,endDate.timeIntervalSince(now))}
         return pausedRemaining ?? Double(duration)
     }
+    /// "时间到" stays this long on the TV, then the badge goes away by itself.
+    static let doneHold=4.0
+    private var finishTask:Task<Void,Never>?
     func start(_ seconds:Int) {
-        duration=max(1,min(5999,seconds));endDate=Date().addingTimeInterval(Double(duration));pausedRemaining=nil;visible=true
+        duration=max(1,min(5999,seconds));endDate=Date().addingTimeInterval(Double(duration));pausedRemaining=nil;visible=true;scheduleFinish()
     }
     func toggle() {
-        if let endDate {pausedRemaining=max(0,endDate.timeIntervalSinceNow);self.endDate=nil;return}
+        if let endDate {pausedRemaining=max(0,endDate.timeIntervalSinceNow);self.endDate=nil;finishTask?.cancel();return}
         let left=pausedRemaining ?? Double(duration)
-        if left<=0.05 {start(duration)} else {endDate=Date().addingTimeInterval(left);pausedRemaining=nil;visible=true}
+        if left<=0.05 {start(duration)} else {endDate=Date().addingTimeInterval(left);pausedRemaining=nil;visible=true;scheduleFinish()}
     }
-    func reset() {endDate=nil;pausedRemaining=nil}
+    func reset() {finishTask?.cancel();endDate=nil;pausedRemaining=nil}
+    /// Put the badge away (also when "时间到" is showing).
+    func hide() {finishTask?.cancel();if let endDate,endDate<=Date() {self.endDate=nil;pausedRemaining=nil};visible=false}
     func add(_ seconds:Int) {
-        if let endDate {self.endDate=max(Date(),endDate).addingTimeInterval(Double(seconds))}
+        if let endDate {self.endDate=max(Date(),endDate).addingTimeInterval(Double(seconds));scheduleFinish()}
         else {pausedRemaining=max(0,(pausedRemaining ?? Double(duration))+Double(seconds))}
         visible=true
+    }
+    /// When the countdown runs out, show "时间到" for a few seconds, then stop and hide.
+    private func scheduleFinish() {
+        finishTask?.cancel()
+        guard let endDate else{return}
+        let wait=max(0,endDate.timeIntervalSinceNow)+Self.doneHold
+        finishTask=Task{@MainActor [weak self] in
+            try? await Task.sleep(nanoseconds:UInt64(wait*1_000_000_000))
+            guard !Task.isCancelled,let self,let end=self.endDate,end<=Date() else{return}
+            self.endDate=nil;self.pausedRemaining=nil;self.visible=false
+        }
     }
     /// "45" → 45 s, "1:30" → 90 s, "+10" / "-10" → adjust the running timer. Returns false for anything else.
     @discardableResult func apply(_ raw:String)->Bool {
