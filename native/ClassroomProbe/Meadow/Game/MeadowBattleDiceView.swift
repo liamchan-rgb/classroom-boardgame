@@ -9,6 +9,9 @@ final class MeadowBattleDiceView:UIView {
     var resolvedAge:Double?,exitAge:Double?,confirmationAge:Double?
     var locked=false
     private static var glyphs:[String:UIImage]=[:]
+    /// Distance between dice and their drawn radius (in the view's own points, before the stage scales it).
+    static let slot:CGFloat=80,dieRadius:CGFloat=33
+    static func width(count:Int)->CGFloat {CGFloat(max(0,count-1))*slot+dieRadius*2.8}
     override init(frame:CGRect) { super.init(frame:frame);backgroundColor = .clear;isOpaque=false;isUserInteractionEnabled=false;accessibilityIdentifier="battleHeadDice" }
     required init?(coder:NSCoder) { fatalError("init(coder:) has not been implemented") }
     private static func glyph(_ value:Int)->UIImage {
@@ -42,8 +45,10 @@ final class MeadowBattleDiceView:UIView {
             let p=PolyhedralDice.sample(die:die,time:time,index:index,count:dice.count,resolvedAge:resolvedAge,visibleAge:visibleAge,exitAge:exitAge,locked:locked,confirmationAge:confirmationAge)
             guard p.alpha>0 else { continue }
             let gem=Self.gems[die.color] ?? (UIColor(white:0.85,alpha:1),UIColor(white:0.6,alpha:1),UIColor(white:0.25,alpha:1))
-            let cx=bounds.midX+(CGFloat(index)-CGFloat(dice.count-1)/2)*PolyhedralDice.spacing(count:dice.count)
-            ctx.saveGState();ctx.setAlpha(p.alpha);ctx.translateBy(x:cx,y:bounds.midY+p.offsetY-7)
+            // Fixed slot and size whatever the count: with many bonuses the dice no longer shrink into unreadable chips.
+            let k=Self.dieRadius/CGFloat(max(1,p.radius))
+            let cx=bounds.midX+(CGFloat(index)-CGFloat(dice.count-1)/2)*Self.slot
+            ctx.saveGState();ctx.setAlpha(p.alpha);ctx.translateBy(x:cx,y:bounds.midY+CGFloat(p.offsetY)*k-7);ctx.scaleBy(x:k,y:k)
             // Soft contact shadow under every die / token.
             ctx.saveGState()
             ctx.setFillColor(UIColor.black.withAlphaComponent(0.22).cgColor)

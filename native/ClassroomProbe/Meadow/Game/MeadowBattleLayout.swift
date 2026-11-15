@@ -16,7 +16,8 @@ struct MeadowBattleLayout {
     let track: CGRect
     let details: CGRect
 
-    init(size: CGSize, safeArea: UIEdgeInsets, mode: MeadowBattlePreviewMode) {
+    /// `showsHeader: false` (classroom): no title bar, the battlefield and map start at the top.
+    init(size: CGSize, safeArea: UIEdgeInsets, mode: MeadowBattlePreviewMode, showsHeader: Bool = true) {
         let unit = size.height / 1080
         let left = max(safeArea.left + 12, size.width * 0.05)
         let right = max(safeArea.right + 12, size.width * 0.05)
@@ -33,7 +34,7 @@ struct MeadowBattleLayout {
         track = mode.showsBattle
             ? CGRect(x: left, y: trackBottom - trackHeight, width: width, height: trackHeight) : .zero
         let middleBottom = mode.showsBattle ? track.minY - gap : bottom
-        let middleY = header.maxY + gap
+        let middleY = showsHeader ? header.maxY + gap : top
         let middleHeight = max(1, middleBottom - middleY)
         // Historical references: 760:944 at 16:9, 596:676 at 4:3.
         let fraction: CGFloat = size.width / max(1, size.height) >= 1.6 ? 760 / 1704 : 596 / 1272

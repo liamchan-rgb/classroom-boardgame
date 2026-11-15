@@ -296,21 +296,33 @@ public enum MeadowMapGenerator {
                     if v>=0 && distance[v]<0 {distance[v]=distance[u]+1;queue.append(v)}
                 }
             }
-            var remaining=positions.indices.filter{$0 != start};topology.shuffle(&remaining);remaining.sort{distance[$0]>distance[$1]}
-            let bosses=Array(remaining.prefix(c.boss));if bosses.contains(where:{distance[$0]<c.minimumBossHops}){continue}
+            func hopsFrom(_ origin:Int)->[Int] {
+                var d=Array(repeating:-1,count:c.total);d[origin]=0;var q=[origin],i=0
+                while i<q.count {let u=q[i];i+=1;for road in roads {let v=road.from==u ? road.to:road.to==u ? road.from:-1;if v>=0 && d[v]<0 {d[v]=d[u]+1;q.append(v)}}}
+                return d
+            }
+            var remaining=positions.indices.filter{$0 != start};topology.shuffle(&remaining)
             var kinds=Array(repeating:NodeKind.empty,count:c.total);kinds[start] = .start
-            for id in bosses{kinds[id] = .boss};remaining.removeAll{bosses.contains($0)};topology.shuffle(&remaining)
-            // Extra team camps: each as far (in road hops) from the camps already placed as possible.
             var camps=[start]
-            for _ in 1..<max(1,c.starts ?? 1) {
-                var hops=Array(repeating:Int.max,count:c.total)
-                for camp in camps {
-                    var d=Array(repeating:-1,count:c.total);d[camp]=0;var q=[camp],i=0
-                    while i<q.count {let u=q[i];i+=1;for road in roads {let v=road.from==u ? road.to:road.to==u ? road.from:-1;if v>=0 && d[v]<0 {d[v]=d[u]+1;q.append(v)}}}
-                    for n in 0..<c.total where d[n]>=0 {hops[n]=min(hops[n],d[n])}
+            if (c.starts ?? 1)>1 {
+                // Team maps: camps first (each as far in road hops from the camps already placed as possible), then the
+                // bosses where every camp is about equally far away, so no team starts next to all the bosses.
+                for _ in 1..<(c.starts ?? 1) {
+                    var hops=Array(repeating:Int.max,count:c.total)
+                    for camp in camps {let d=hopsFrom(camp);for n in 0..<c.total where d[n]>=0 {hops[n]=min(hops[n],d[n])}}
+                    guard let pick=remaining.max(by:{hops[$0]==hops[$1] ? $0>$1:hops[$0]<hops[$1]}) else{break}
+                    camps.append(pick);kinds[pick] = .start;remaining.removeAll{$0==pick}
                 }
-                guard let pick=remaining.max(by:{hops[$0]==hops[$1] ? $0>$1:hops[$0]<hops[$1]}) else{break}
-                camps.append(pick);kinds[pick] = .start;remaining.removeAll{$0==pick}
+                let tables=camps.map(hopsFrom)
+                func spread(_ n:Int)->Int {let v=tables.map{$0[n]};return (v.max() ?? 0)-(v.min() ?? 0)}
+                func nearest(_ n:Int)->Int {tables.map{$0[n]}.min() ?? 0}
+                remaining.sort{spread($0)==spread($1) ? (nearest($0)==nearest($1) ? $0<$1:nearest($0)>nearest($1)):spread($0)<spread($1)}
+                let bosses=Array(remaining.prefix(c.boss));if bosses.contains(where:{nearest($0)<c.minimumBossHops}){continue}
+                for id in bosses{kinds[id] = .boss};remaining.removeAll{bosses.contains($0)};topology.shuffle(&remaining)
+            } else {
+                remaining.sort{distance[$0]>distance[$1]}
+                let bosses=Array(remaining.prefix(c.boss));if bosses.contains(where:{distance[$0]<c.minimumBossHops}){continue}
+                for id in bosses{kinds[id] = .boss};remaining.removeAll{bosses.contains($0)};topology.shuffle(&remaining)
             }
             for (id,kind) in zip(remaining,Array(repeating:NodeKind.combat,count:c.combat)+Array(repeating:NodeKind.reward,count:c.reward)+Array(repeating:NodeKind.empty,count:c.empty)){kinds[id]=kind}
             let titles:[NodeKind:String]=[.start:"起点营地",.combat:"林间战斗",.boss:"首领遗迹",.reward:"补给棚",.empty:"林间水井"]

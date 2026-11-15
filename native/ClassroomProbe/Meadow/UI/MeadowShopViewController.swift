@@ -7,6 +7,13 @@ import MeadowBattleSupport
 /// item does, the price and what the buyer will have left, and buy / sell. Buying puts one item into the buyer's own pack (not
 /// equipped); selling takes one out. Trades go through the same rule command as before (`tradeAtSite`), one item per press.
 final class MeadowShopViewController:UIViewController {
+    // Classroom-wide keys (timer, scoreboard) also work while this sheet is up.
+    override var canBecomeFirstResponder:Bool {true}
+    override func viewDidAppear(_ animated:Bool) {super.viewDidAppear(animated);becomeFirstResponder()}
+    override func pressesBegan(_ presses:Set<UIPress>,with event:UIPressesEvent?) {
+        if ClassroomGlobalTools.handlePresses?(presses)==true {return}
+        super.pressesBegan(presses,with:event)
+    }
     private let session:MeadowCampaignSession
     private let nodeID:Int
     private var actor:String

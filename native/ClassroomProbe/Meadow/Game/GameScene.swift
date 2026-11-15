@@ -110,6 +110,10 @@ final class GameScene: SKScene {
     private var gaitHiddenNodes: [(SKNode, Bool)] = []
     private var gaitMapCamera: (CGPoint, CGFloat)?
     private var battlePreviewCamera: (CGPoint, CGFloat)?
+    /// Where the camera is gliding to (the newly selected traveller).
+    private var cameraGlide: CGPoint?
+    /// Face + arrow on the screen edge for travellers outside the view, by player id.
+    private var edgeMarkers: [String: SKNode] = [:]
     private var gaitSunWasHidden = false
     private var discoveryNodes: [SKNode] = []
     private var discovered = Set<Int>()
@@ -520,6 +524,14 @@ final class GameScene: SKScene {
         let delta = min(rawDelta, 0.1)
         environmentTime += delta
         world.update(time: environmentTime)
+        if let target=cameraGlide,battlePreviewCamera==nil,gaitTest==nil {
+            let before=cameraCenter,t=min(1,CGFloat(delta)*5)
+            cameraCenter=CGPoint(x:cameraCenter.x+(target.x-cameraCenter.x)*t,y:cameraCenter.y+(target.y-cameraCenter.y)*t)
+            layoutWorld()
+            // Arrived (or held at the map edge by the clamp): stop gliding.
+            if hypot(cameraCenter.x-before.x,cameraCenter.y-before.y)<0.3 {cameraGlide=nil}
+        } else if battlePreviewCamera != nil {cameraGlide=nil}
+        updateEdgeMarkers()
         if gaitTest != nil {
             gaitTest?.advance(delta)
             updateActors(before: nil)
@@ -653,6 +665,8 @@ final class GameScene: SKScene {
     func selectCampaignPlayer(_ id:String)throws {
         guard let campaign,let index=campaign.playerIDs.firstIndex(of:id) else{return}
         try campaign.selectPlayer(id);simulation.selected=index;selectionRing.position=actorRoots[index].position;onCampaignChanged?()
+        // The camera glides over to whoever was picked.
+        if battlePreviewCamera==nil {cameraGlide=actorPoint(index)}
     }
     private func order(to point: CGPoint, discovery: Int? = nil) {
         if let campaign {
@@ -851,4 +865,49 @@ final class GameScene: SKScene {
 
 private extension CGPoint {
     static func + (lhs: CGPoint, rhs: CGPoint) -> CGPoint { CGPoint(x: lhs.x + rhs.x, y: lhs.y + rhs.y) }
+}
+
+// Off-screen travellers: a round face on the nearest screen edge with an arrow pointing their way.
+extension GameScene {
+    fileprivate static let markerRadius:CGFloat=24
+    func updateEdgeMarkers() {
+        guard let campaign,gaitTest==nil,battlePreviewCamera==nil,world != nil else {edgeMarkers.values.forEach{$0.isHidden=true};return}
+        let inset=Self.markerRadius+14
+        let safe=CGRect(x:inset,y:inset,width:max(1,size.width-inset*2),height:max(1,size.height-inset*2))
+        let center=CGPoint(x:size.width/2,y:size.height/2)
+        for (index,id) in campaign.playerIDs.enumerated() where index<actorRoots.count {
+            let point=convert(actorRoots[index].position,from:world)
+            let onScreen=CGRect(origin:.zero,size:size).insetBy(dx:-6,dy:-6).contains(point)
+            guard let unit=campaign.engine.state.units[id],!onScreen else {edgeMarkers[id]?.isHidden=true;continue}
+            let marker=edgeMarkers[id] ?? makeEdgeMarker(id:id,unit:unit,slot:index)
+            marker.isHidden=false
+            // Clamp the direction from the screen centre onto the inset rectangle.
+            let dx=point.x-center.x,dy=point.y-center.y
+            let sx=dx==0 ? CGFloat.greatestFiniteMagnitude:(safe.width/2)/abs(dx),sy=dy==0 ? CGFloat.greatestFiniteMagnitude:(safe.height/2)/abs(dy)
+            let k=min(sx,sy,1)
+            marker.position=CGPoint(x:center.x+dx*k,y:center.y+dy*k)
+            marker.childNode(withName:"arrow")?.zRotation=atan2(dy,dx)
+            if let face=marker.childNode(withName:"face") as? SKSpriteNode,face.texture==nil,
+               let image=PixelHeroAtlas.portrait(PixelHeroLook.battle(unit:unit,slot:index)) {face.texture=SKTexture(image:image);face.texture?.filteringMode = .nearest}
+        }
+        for (id,marker) in edgeMarkers where !campaign.playerIDs.contains(id) {marker.removeFromParent();edgeMarkers[id]=nil}
+    }
+    private func makeEdgeMarker(id:String,unit:GameUnit,slot:Int)->SKNode {
+        let r=Self.markerRadius
+        let node=SKNode();node.zPosition=900_000
+        let arrow=SKNode();arrow.name="arrow"
+        let tip=CGMutablePath();tip.move(to:CGPoint(x:r+14,y:0));tip.addLine(to:CGPoint(x:r+2,y:9));tip.addLine(to:CGPoint(x:r+2,y:-9));tip.closeSubpath()
+        let head=SKShapeNode(path:tip);head.fillColor=SKColor(red:0.09,green:0.42,blue:0.53,alpha:1);head.strokeColor = .white;head.lineWidth=2
+        arrow.addChild(head);node.addChild(arrow)
+        let disc=SKShapeNode(circleOfRadius:r);disc.fillColor = .white;disc.strokeColor=SKColor(red:0.09,green:0.42,blue:0.53,alpha:1);disc.lineWidth=3
+        node.addChild(disc)
+        let face=SKSpriteNode(color:.clear,size:CGSize(width:r*1.8,height:r*1.8));face.name="face"
+        // Keep the face inside the disc.
+        let crop=SKCropNode();let mask=SKShapeNode(circleOfRadius:r-2);mask.fillColor = .white;crop.maskNode=mask;crop.addChild(face);node.addChild(crop)
+        let label=SKLabelNode(text:unit.shortName);label.fontName="PingFangSC-Semibold";label.fontSize=12;label.fontColor=SKColor(red:0.09,green:0.25,blue:0.31,alpha:1)
+        label.position=CGPoint(x:0,y:-r-15);label.verticalAlignmentMode = .baseline
+        let tag=SKShapeNode(rectOf:CGSize(width:max(30,label.frame.width+10),height:17),cornerRadius:8.5);tag.fillColor=SKColor.white.withAlphaComponent(0.9);tag.strokeColor = .clear
+        tag.position=CGPoint(x:0,y:-r-10);node.addChild(tag);node.addChild(label)
+        addChild(node);edgeMarkers[id]=node;return node
+    }
 }

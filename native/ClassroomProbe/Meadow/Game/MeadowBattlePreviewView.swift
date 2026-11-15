@@ -122,7 +122,7 @@ final class MeadowBattlePreviewView: UIView {
     private var pendingEnemyAction: DispatchWorkItem?
     private var lastPrimaryActionTime = 0.0
     private var mode: MeadowBattlePreviewMode { encounter.phase == .exploration ? .exploration : .playerTurn }
-    var mapFrame: CGRect { MeadowBattleLayout(size: bounds.size, safeArea: safeAreaInsets, mode: partyMode ? .playerTurn:mode).map }
+    var mapFrame: CGRect { MeadowBattleLayout(size: bounds.size, safeArea: safeAreaInsets, mode: partyMode ? .playerTurn:mode, showsHeader: !(partyMode && classroomMode)).map }
 
     private let header = UIView()
     private let actor = MeadowPreviewPalette.label("", size: 26, weight: .heavy)

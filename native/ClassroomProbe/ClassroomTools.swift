@@ -19,18 +19,18 @@ import MeadowWorldSupport
     }
     /// "时间到" stays this long on the TV, then the badge goes away by itself.
     static let doneHold=4.0
-    private var finishTask:Task<Void,Never>?
+    private var finishTimer:Timer?
     func start(_ seconds:Int) {
         duration=max(1,min(5999,seconds));endDate=Date().addingTimeInterval(Double(duration));pausedRemaining=nil;visible=true;scheduleFinish()
     }
     func toggle() {
-        if let endDate {pausedRemaining=max(0,endDate.timeIntervalSinceNow);self.endDate=nil;finishTask?.cancel();return}
+        if let endDate {pausedRemaining=max(0,endDate.timeIntervalSinceNow);self.endDate=nil;finishTimer?.invalidate();finishTimer=nil;return}
         let left=pausedRemaining ?? Double(duration)
         if left<=0.05 {start(duration)} else {endDate=Date().addingTimeInterval(left);pausedRemaining=nil;visible=true;scheduleFinish()}
     }
-    func reset() {finishTask?.cancel();endDate=nil;pausedRemaining=nil}
+    func reset() {finishTimer?.invalidate();finishTimer=nil;endDate=nil;pausedRemaining=nil}
     /// Put the badge away (also when "时间到" is showing).
-    func hide() {finishTask?.cancel();if let endDate,endDate<=Date() {self.endDate=nil;pausedRemaining=nil};visible=false}
+    func hide() {finishTimer?.invalidate();finishTimer=nil;if let endDate,endDate<=Date() {self.endDate=nil;pausedRemaining=nil};visible=false}
     func add(_ seconds:Int) {
         if let endDate {self.endDate=max(Date(),endDate).addingTimeInterval(Double(seconds));scheduleFinish()}
         else {pausedRemaining=max(0,(pausedRemaining ?? Double(duration))+Double(seconds))}
@@ -38,14 +38,20 @@ import MeadowWorldSupport
     }
     /// When the countdown runs out, show "时间到" for a few seconds, then stop and hide.
     private func scheduleFinish() {
-        finishTask?.cancel()
+        finishTimer?.invalidate();finishTimer=nil
         guard let endDate else{return}
-        let wait=max(0,endDate.timeIntervalSinceNow)+Self.doneHold
-        finishTask=Task{@MainActor [weak self] in
-            try? await Task.sleep(nanoseconds:UInt64(wait*1_000_000_000))
-            guard !Task.isCancelled,let self,let end=self.endDate,end<=Date() else{return}
-            self.endDate=nil;self.pausedRemaining=nil;self.visible=false
+        // A plain run-loop timer on the main thread (no async task): fires once, a few seconds after time is up.
+        let fire=endDate.addingTimeInterval(Self.doneHold)
+        let t=Timer(fire:fire,interval:0,repeats:false){[weak self] _ in
+            DispatchQueue.main.async{self?.finishIfDone()}
         }
+        RunLoop.main.add(t,forMode:.common);finishTimer=t
+    }
+    private func finishIfDone() {
+        finishTimer=nil
+        guard let end=endDate,end<=Date() else{return}
+        endDate=nil;pausedRemaining=nil;visible=false
+    }
     }
     /// "45" → 45 s, "1:30" → 90 s, "+10" / "-10" → adjust the running timer. Returns false for anything else.
     @discardableResult func apply(_ raw:String)->Bool {
@@ -88,7 +94,7 @@ private struct ClassTimerBadge:View {
     @ObservedObject var timer:ClassTimerModel
     let unit:CGFloat
     var body:some View {
-        TimelineView(.periodic(from:.now,by:timer.running ? 0.1:3600)){context in
+        TimelineView(.periodic(from:.now,by:0.1)){context in
             let left=timer.remaining(at:context.date),done=left<=0.05
             let urgent = !done && left<=3.05
             let pulse=done ? (Int(context.date.timeIntervalSinceReferenceDate*2)%2==0 ? 1.0:0.55):1.0
@@ -164,7 +170,7 @@ struct ClassTimerPanel:View {
                 Toggle(isOn:$timer.visible){Label("投屏显示",systemImage:"tv")}.fixedSize()
                 Button{onClose()}label:{Image(systemName:"xmark.circle.fill").font(.title2)}.buttonStyle(.plain).foregroundStyle(GameTheme.muted)
             }
-            TimelineView(.periodic(from:.now,by:timer.running ? 0.1:3600)){context in
+            TimelineView(.periodic(from:.now,by:0.1)){context in
                 let left=timer.remaining(at:context.date)
                 Text(left<=0.05 && timer.running ? "时间到":ClassTimerModel.label(left))
                     .font(.system(size:84,weight:.heavy,design:.rounded)).monospacedDigit()

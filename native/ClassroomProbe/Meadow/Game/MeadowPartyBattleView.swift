@@ -4,7 +4,7 @@ import MeadowBattleSupport
 
 /// A real two-player/two-target training encounter backed by the tabletop engine.
 final class MeadowPartyBattleView:UIView {
-    var classroomMode=false {didSet {if classroomMode {[back,reset,end,items].forEach{$0.removeFromSuperview()};header.addSubview(leave);disarmLeave()}}}
+    var classroomMode=false {didSet {if classroomMode {[back,reset,end,items].forEach{$0.removeFromSuperview()};header.isHidden=true;addSubview(leave);disarmLeave()}}}
     var classroomModelFactory:(()throws->PartyEncounter)?
     func classroomEnemyStep(){guard active,let target=model?.nextEnemyTarget() else{return};friend=target;performEnemy(target:target)}
     private var classroomPaused=false
@@ -13,7 +13,25 @@ final class MeadowPartyBattleView:UIView {
     var classroomBusy:Bool {stage.isPlaying || model?.pending != nil}
     var classroomActions:[PartyAction] {model?.playerActions() ?? []}
     func classroomAction(_ action:PartyAction,target:String){choose(target);perform(action)}
-    func classroomFocus(_ action:PartyAction?,target:String){choose(target);focusedAction=action;stage.preview(action,target:action.map{self.target($0)} ?? target)}
+    func classroomFocus(_ action:PartyAction?,target:String){choose(target);focusedAction=action;stage.preview(action,target:action.map{self.target($0)} ?? target);highlightCard(action)}
+    /// The skill the teacher's pointer is on grows and glows on the TV, so the class sees which one is being previewed.
+    private var highlighted:PartyAction?
+    private func highlightCard(_ action:PartyAction?) {
+        guard action != highlighted else{return}
+        highlighted=action
+        let actions=model?.playerActions() ?? []
+        for (i,card) in skills.enumerated() {
+            let on=action != nil && i<actions.count && actions[i]==action
+            if on {skillScroll.bringSubviewToFront(card)}
+            card.layer.shadowColor=MeadowPreviewPalette.gold.cgColor;card.layer.shadowOffset = .zero
+            UIView.animate(withDuration:0.22,delay:0,usingSpringWithDamping:0.62,initialSpringVelocity:0.6,options:[.allowUserInteraction,.beginFromCurrentState]){
+                card.transform=on ? CGAffineTransform(scaleX:1.12,y:1.12).translatedBy(x:0,y:-6):.identity
+                card.layer.shadowRadius=on ? 16:0;card.layer.shadowOpacity=on ? 0.9:0
+            }
+        }
+        // Back to normal: refresh restores each card's own border and dimming.
+        if action==nil {refresh()}
+    }
     enum ClassroomHit {case action(PartyAction),target(String),toggleMap,leave}
     func classroomHit(at point:CGPoint)->ClassroomHit? {
         guard classroomMode,active,!classroomBusy,let model else{return nil}
@@ -24,7 +42,7 @@ final class MeadowPartyBattleView:UIView {
             if skillScroll.bounds.contains(p),card.frame.contains(p){return .action(actions[index])}
         }
         if !drawer.isHidden,drawer.frame.insetBy(dx:-8,dy:-8).contains(point){return .toggleMap}
-        if leave.superview != nil,!leave.isHidden,leave.frame.insetBy(dx:-6,dy:-6).contains(convert(point,to:header)) {return .leave}
+        if leave.superview != nil,!leave.isHidden,leave.frame.insetBy(dx:-6,dy:-6).contains(point) {return .leave}
         if let id=track.unit(at:convert(point,to:track)){return .target(id)}
         return stage.classroomTarget(at:convert(point,to:stage)).map{.target($0)}
     }
@@ -64,6 +82,19 @@ final class MeadowPartyBattleView:UIView {
     private var generation=0
     private var scheduled:DispatchWorkItem?
     private var friend="p1",foe="m1"
+    /// Who fought the last battle, kept after it ends so the turn bar does not fill up with the other teams.
+    private var lastQueue:[String]=[]
+    /// How the fight ended, judged by its own fighters (another team elsewhere being alive is not a win).
+    private func endTitle(_ state:GameState,short:Bool)->String {
+        if model?.isDuel == true {return "PVP结束"}
+        if let outcome=state.lastOutcome,state.battle==nil {
+            if outcome.winners.contains("players") {return short ? "战斗胜利":"小队胜利"}
+            if outcome.winners.contains("monsters") {return "小队倒地"}
+            return "已撤离"
+        }
+        let fighters=(state.battle?.queue ?? lastQueue).compactMap{state.units[$0]}.filter{$0.kind == .player}
+        return fighters.contains(where:\.isAlive) ? (short ? "战斗胜利":"小队胜利"):"小队倒地"
+    }
     private let title=MeadowPreviewPalette.label("小队支援",size:26,weight:.heavy)
     private let hint=MeadowPreviewPalette.label("",size:17,weight:.semibold)
     private let header=UIView(),panel=UIView()
@@ -145,6 +176,8 @@ final class MeadowPartyBattleView:UIView {
     }
     private func restart() {
         generation += 1;scheduled?.cancel();scheduled=nil;stage.stop();accessory.dismiss()
+        // After the fight ended (result card still up) there is nothing to reload: keep showing the finished fight.
+        if classroomMode,let current=model,(campaignEngine ?? current.engine).state.battle == nil {stage.start();refresh();return}
         do { if classroomMode {guard let factory=classroomModelFactory else{throw GameError("教师后台尚未准备战斗。")};model=try factory()}else{model = try campaignEngine.map { try PartyEncounter(engine:$0) } ?? PartyEncounter(loadouts:loadoutUnits,playerClassID:playerClassID)} } catch { hint.text="演练加载失败：\(error.localizedDescription)";return }
         friend="p1";foe=model?.monsterIDs.first ?? "m1";actionPointCapacity=[:];apRound=0
         reset.isHidden=campaignEngine != nil;back.configuration?.title=campaignEngine == nil ? "返回单人":"返回行程"
@@ -228,7 +261,7 @@ final class MeadowPartyBattleView:UIView {
             if let queue=state.battle?.queue,!queue.contains(friend),let first=current.flatMap({ queue.contains($0) && state.units[$0]?.kind == .player ? $0:nil }) ?? queue.first(where:{ state.units[$0]?.kind == .player }) { friend=first }
         }
         let busy=stage.isPlaying || model.pending != nil
-        title.text=model.isDuel ? (model.terminal ? "PVP结束":"队伍PVP · 第\(model.round)轮") : model.terminal ? (state.players.contains(where: \.isAlive) ? "小队胜利":"小队倒地") : (campaignEngine == nil ? "小队支援":"林地遭遇")+" · 第\(model.round)轮"
+        title.text=model.isDuel ? (model.terminal ? "PVP结束":"队伍PVP · 第\(model.round)轮") : model.terminal ? endTitle(state,short:false) : (campaignEngine == nil ? "小队支援":"林地遭遇")+" · 第\(model.round)轮"
         let showing=busy ? (stage.actorInAction ?? model.pending?.actor ?? current):current
         let name=showing.flatMap { state.units[$0]?.shortName } ?? "—"
         if busy { armed=nil }
@@ -247,7 +280,9 @@ final class MeadowPartyBattleView:UIView {
             if let b=unit.damageBuff { buff.show(title:"增伤＋\(b.amount)",detail:"剩余 \(b.roundsLeft) 轮\n普攻和伤害技能生效",symbol:"arrow.up",color:MeadowPreviewPalette.gold) } else { buff.hide() }
             if visible.shield>0 { shieldBuff.show(title:"护盾 · \(visible.shield)",detail:"优先抵挡伤害\n新旧授盾取较高值\n战斗结束后清空",symbol:"shield.fill",color:.systemCyan) } else { shieldBuff.hide() }
         }
-        let queue=state.battle?.queue ?? ["p1","p2"]+model.monsterIDs
+        if let q=state.battle?.queue {lastQueue=q}
+        // A finished fight keeps showing who was in it (not the whole class).
+        let queue=state.battle?.queue ?? (lastQueue.isEmpty ? ["p1","p2"]+model.monsterIDs:lastQueue)
         let acted=state.battle?.acted ?? []
         let entries:[MeadowTurnOrderView.Entry]=queue.compactMap { id in
             guard let unit=state.units[id] else { return nil }
@@ -260,7 +295,7 @@ final class MeadowPartyBattleView:UIView {
             }
             return MeadowTurnOrderView.Entry(id:id,name:unit.shortName,hp:shown.health,maxHP:maximum,shield:shown.shield,enemy:model.isDuel ? model.duelRight.contains(id):unit.kind == .monster,acted:acted.contains(id) && id != showing,down:!unit.isAlive,portrait:face)
         }
-        track.show(entries:entries,current:showing,round:model.round,selected:[friend,foe],finished:model.terminal ? (model.isDuel ? "PVP结束":state.players.contains(where: \.isAlive) ? "战斗胜利":"小队倒地"):nil)
+        track.show(entries:entries,current:showing,round:model.round,selected:[friend,foe],finished:model.terminal ? endTitle(state,short:true):nil)
         UIView.animate(withDuration:0.2) { self.panel.alpha=busy ? 0.55:1 }
         stage.show(state,friend:friend,foe:foe,current:current,catalog:model.engine.catalog)
         let actions:[PartyAction]=busy ? showing.map { model.actions(for:$0) } ?? []:model.playerActions()
@@ -390,7 +425,8 @@ final class MeadowPartyBattleView:UIView {
     }
     override func layoutSubviews() {
         super.layoutSubviews()
-        let layout=MeadowBattleLayout(size:bounds.size,safeArea:safeAreaInsets,mode:.playerTurn)
+        // Classroom: no title bar; the battlefield takes its height (the dice and the fight read better on the TV).
+        let layout=MeadowBattleLayout(size:bounds.size,safeArea:safeAreaInsets,mode:.playerTurn,showsHeader:!classroomMode)
         header.frame=layout.header;track.frame=layout.track;panel.frame=layout.details
         let field=mapHidden ? layout.map.union(layout.battlefield):layout.battlefield
         stage.frame=field
@@ -409,7 +445,8 @@ final class MeadowPartyBattleView:UIView {
         end.frame=CGRect(x:w-310,y:16,width:178,height:44)
         reset.frame=CGRect(x:w-414,y:20,width:96,height:36)
         let leaveW:CGFloat=leaveArmed ? 176:104
-        leave.frame=CGRect(x:w-leaveW-14,y:(header.bounds.height-44)/2,width:leaveW,height:44)
+        // "撤离" floats in the battlefield's top-right corner.
+        leave.frame=CGRect(x:field.maxX-leaveW-12,y:field.minY+12,width:leaveW,height:44);bringSubviewToFront(leave)
         let reserved:CGFloat=classroomMode ? leaveW+44:446
         title.frame=CGRect(x:16,y:8,width:max(1,w-reserved),height:32)
         hint.frame=CGRect(x:16,y:43,width:max(1,w-reserved),height:23)
@@ -421,7 +458,8 @@ final class MeadowPartyBattleView:UIView {
         skillScroll.frame=CGRect(x:14,y:66,width:max(1,pw-28),height:max(1,panel.bounds.height-76))
         let visible=skills.filter { !$0.isHidden };let n=CGFloat(visible.count)
         let cw=classroomMode ? max(1,(skillScroll.bounds.width-max(0,n-1)*10)/max(1,n)):max(190,(skillScroll.bounds.width-110-n*10)/max(1,n))
-        for (i,card) in visible.enumerated() { card.frame=CGRect(x:CGFloat(i)*(cw+10),y:0,width:cw,height:skillScroll.bounds.height) }
+        for (i,card) in visible.enumerated() { let t=card.transform;card.transform = .identity;card.frame=CGRect(x:CGFloat(i)*(cw+10),y:0,width:cw,height:skillScroll.bounds.height);card.transform=t }
+        skillScroll.clipsToBounds = !classroomMode
         items.frame=CGRect(x:n*(cw+10),y:0,width:100,height:skillScroll.bounds.height)
         skillScroll.contentSize=CGSize(width:classroomMode ? skillScroll.bounds.width:items.frame.maxX,height:skillScroll.bounds.height)
         if classroomMode {skillScroll.isScrollEnabled=false;skillScroll.contentOffset = .zero}

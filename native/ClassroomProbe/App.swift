@@ -34,6 +34,7 @@ final class TeacherHostController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         TeacherSession.shared.game.privatePresenter=self
+        ClassroomGlobalTools.handlePresses={[weak self] presses in MainActor.assumeIsolated{self?.globalPresses(presses) ?? false}}
         let host = UIHostingController(rootView: TeacherConsole(session: .shared))
         addChild(host)
         host.view.translatesAutoresizingMaskIntoConstraints = false
@@ -88,6 +89,17 @@ final class TeacherHostController: UIViewController {
             perform(action,session:session)
         }
         if !handled {super.pressesBegan(presses,with:event)}
+    }
+    /// Timer / scoreboard keys pressed while a game sheet (pack, shop) has the keyboard.
+    func globalPresses(_ presses:Set<UIPress>)->Bool {
+        guard !UIResponder.classroomTyping else{return false}
+        var handled=false
+        for press in presses {
+            guard let key=press.key,key.modifierFlags.intersection([.command,.control,.alternate]).isEmpty,
+                  let token=ClassroomShortcuts.token(key),let action=ClassroomShortcuts.action(for:token),action.global else{continue}
+            perform(action,session:TeacherSession.shared);handled=true
+        }
+        return handled
     }
     /// Teacher keyboard shortcuts (editable under 快捷键).
     private func perform(_ action:ClassroomShortcutAction,session:TeacherSession) {

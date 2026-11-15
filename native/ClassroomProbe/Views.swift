@@ -65,7 +65,7 @@ private struct TeacherBookConsole:View {
             }.buttonStyle(GlassIconButtonStyle()).padding(.horizontal,10).padding(.vertical,6).glassPanel(radius:20,padding:0)
             TeacherBookGrantBar(game:game,draft:game.grantDraft,prepare:{notesFocused=false})
             HStack(alignment:.top,spacing:12){
-                PublicBookPage(model:session.display,players:game.backend.bookPlayers).frame(maxWidth:.infinity,maxHeight:.infinity)
+                PublicBookPage(model:session.display,players:game.backend.bookPlayers,draggable:true).frame(maxWidth:.infinity,maxHeight:.infinity)
                     // The teacher's preview shows the same countdown / scoreboard as the TV.
                     .overlay{ClassroomTVOverlays(timer:game.classTimer,overlays:game.overlays,game:game)}
                     .clipShape(RoundedRectangle(cornerRadius:18,style:.continuous)).overlay(RoundedRectangle(cornerRadius:18,style:.continuous).stroke(.white.opacity(0.5),lineWidth:1))

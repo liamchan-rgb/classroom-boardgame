@@ -90,6 +90,8 @@ extension GameDifficulty {
 /// Classroom-wide tools reachable from any in-game sheet (pack, shop): set by the teacher coordinator.
 enum ClassroomGlobalTools {
     nonisolated(unsafe) static var openTimer:(()->Void)?
+    /// Key presses from an in-game sheet: true when a classroom-wide shortcut took them.
+    nonisolated(unsafe) static var handlePresses:((Set<UIPress>)->Bool)?
     /// A header button that opens the class timer.
     static func timerButton()->UIButton {
         let b=MeadowPreviewPalette.iconButton("timer");b.accessibilityLabel="计时器"

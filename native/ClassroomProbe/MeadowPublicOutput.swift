@@ -40,9 +40,19 @@ struct PublicSurface:View {
 
 /// Same read-only page on TV and in the teacher's book preview. The page fills the screen; the players'
 /// status floats over its bottom edge as compact frosted cards laid out by party size.
+/// Where the teacher dragged the players' cards over the picture book (fractions of the page, shared by TV and preview).
+@MainActor final class BookCardsPosition:ObservableObject {
+    static let shared=BookCardsPosition()
+    @Published var offset=CGSize.zero {didSet{UserDefaults.standard.set([offset.width,offset.height],forKey:"classroom.bookCardsOffset")}}
+    init(){if let v=UserDefaults.standard.array(forKey:"classroom.bookCardsOffset") as? [Double],v.count==2{offset=CGSize(width:v[0],height:v[1])}}
+}
 struct PublicBookPage:View {
     @ObservedObject var model:PublicDisplayModel
     let players:[ClassroomBookPlayerStatus]
+    /// The teacher's preview lets the cards be dragged out of the way of the slide (the TV follows).
+    var draggable=false
+    @ObservedObject private var position=BookCardsPosition.shared
+    @State private var dragStart:CGSize?
     var body:some View {
         GeometryReader { geometry in
             ZStack(alignment:.bottom){
@@ -58,6 +68,16 @@ struct PublicBookPage:View {
                             }
                         }
                     }.padding(.bottom,layout.spacing*1.6)
+                    .offset(x:position.offset.width*geometry.size.width,y:position.offset.height*geometry.size.height)
+                    .contentShape(Rectangle())
+                    .allowsHitTesting(draggable)
+                    .gesture(DragGesture(minimumDistance:4).onChanged{g in
+                        let start=dragStart ?? position.offset;if dragStart==nil{dragStart=start}
+                        // Keep the cards on the page (at most the full height up, a little sideways each way).
+                        position.offset=CGSize(width:min(0.45,max(-0.45,start.width+g.translation.width/geometry.size.width)),
+                                               height:min(0,max(-0.85,start.height+g.translation.height/geometry.size.height)))
+                    }.onEnded{_ in dragStart=nil})
+                    .onTapGesture(count:2){if draggable{withAnimation(.spring()){position.offset = .zero}}}
                 }
             }
             .overlay(alignment:.topTrailing){
@@ -65,7 +85,7 @@ struct PublicBookPage:View {
                     .font(.system(size:max(11,geometry.size.height*0.022),weight:.bold,design:.rounded)).monospacedDigit()
                     .padding(.horizontal,10).padding(.vertical,5).background(.black.opacity(0.45),in:Capsule()).padding(10)
             }
-        }.foregroundStyle(.white).background(.black).allowsHitTesting(false)
+        }.foregroundStyle(.white).background(.black)
     }
     private func rowSlices(_ rows:[Int])->[Range<Int>] {
         var start=0;return rows.map{n in defer{start+=n};return start..<start+n}
@@ -81,6 +101,9 @@ private struct BookPlayerCard:View {
     private var ratio:Double {Double(max(0,unit.health))/Double(max(1,unit.maximumHealth))}
     /// 发放后的动画（和战斗掉落同一套像素金币 / 拾取光）：金币或行动点增加时触发一次
     @State private var gain=BookGain()
+    /// The old number stays up while the coins fly in; it switches when they land.
+    @State private var heldCoins:Int?=nil,heldMovement:Int?=nil
+    @State private var holdToken=0
     @State private var coinPop=false
     @State private var apPop=false
     private var barColor:Color {ratio>0.5 ? Color(red:0.40,green:0.86,blue:0.52):ratio>0.25 ? Color(red:0.98,green:0.80,blue:0.35):Color(red:0.96,green:0.42,blue:0.40)}
@@ -105,11 +128,11 @@ private struct BookPlayerCard:View {
             HStack(spacing:h*0.06){
                 // The team's movement bar in steps (what the picture-book bar grants), replacing the old AP diamonds.
                 Image(systemName:"figure.walk").foregroundStyle(Color(red:0.45,green:0.85,blue:0.95))
-                Text("\(number(unit.movement))/\(number(unit.maximumMovement))").monospacedDigit()
+                Text("\(number(heldMovement ?? unit.movement))/\(number(unit.maximumMovement))").monospacedDigit()
                     .scaleEffect(apPop ? 1.4:1,anchor:.leading).foregroundStyle(apPop ? Color(red:0.62,green:0.92,blue:1.0):.white)
                 Spacer(minLength:0)
                 Image(systemName:"bitcoinsign.circle.fill").foregroundStyle(Color(red:0.98,green:0.80,blue:0.40))
-                Text(number(unit.coins)).monospacedDigit()
+                Text(number(heldCoins ?? unit.coins)).monospacedDigit()
                     .scaleEffect(coinPop ? 1.4:1,anchor:.trailing).foregroundStyle(coinPop ? Color(red:1.0,green:0.86,blue:0.42):.white)
             }.font(.system(size:h*0.16,weight:.semibold,design:.rounded))
         }
@@ -126,12 +149,14 @@ private struct BookPlayerCard:View {
         .opacity(alive ? 1:0.6).saturation(alive ? 1:0.2)
         .overlay{BookGainBurst(gain:gain,size:size).frame(width:size.width,height:size.height).allowsHitTesting(false)}
         .onChange(of:unit.coins){old,new in
-            guard new>old else{return}
+            guard new>old else{heldCoins=nil;return}
+            if heldCoins==nil{heldCoins=old}
             gain=BookGain(serial:gain.serial+1,coins:new-old,ap:0)
             pop(coins:true)
         }
         .onChange(of:unit.movement){old,new in
-            guard new>old else{return}
+            guard new>old else{heldMovement=nil;return}
+            if heldMovement==nil{heldMovement=old}
             gain=BookGain(serial:gain.serial+1,coins:0,ap:new-old)
             pop(coins:false)
         }
@@ -143,7 +168,10 @@ private struct BookPlayerCard:View {
 extension BookPlayerCard {
     /// 金币飞进来以后数字弹一下
     fileprivate func pop(coins:Bool) {
+        holdToken += 1;let token=holdToken
         DispatchQueue.main.asyncAfter(deadline:.now()+0.75){
+            // The pieces have landed: now the number changes (the latest grant releases the held value).
+            if token==holdToken {heldCoins=nil;heldMovement=nil}
             withAnimation(.spring(response:0.25,dampingFraction:0.45)){ if coins{coinPop=true}else{apPop=true} }
             DispatchQueue.main.asyncAfter(deadline:.now()+0.5){ withAnimation(.easeOut(duration:0.35)){ if coins{coinPop=false}else{apPop=false} } }
         }

@@ -205,6 +205,13 @@ final class MeadowInventoryViewController:UIViewController,UIDocumentPickerDeleg
 
 /// Uses the expedition's live engine; never stages a separate camp inventory.
 final class MeadowCampaignInventoryViewController:UIViewController {
+    // Classroom-wide keys (timer, scoreboard) also work while this sheet is up.
+    override var canBecomeFirstResponder:Bool {true}
+    override func viewDidAppear(_ animated:Bool) {super.viewDidAppear(animated);becomeFirstResponder()}
+    override func pressesBegan(_ presses:Set<UIPress>,with event:UIPressesEvent?) {
+        if ClassroomGlobalTools.handlePresses?(presses)==true {return}
+        super.pressesBegan(presses,with:event)
+    }
     let session:MeadowCampaignSession
     var performEquip:((String,ItemSlot,String?)throws->Void)?
     var onChange:(()->Void)?,onClose:(()->Void)?

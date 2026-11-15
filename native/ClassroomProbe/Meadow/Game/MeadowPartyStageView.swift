@@ -280,7 +280,7 @@ final class MeadowPartyStageView:UIView {
         // Only the heroes in this fight stand on the field (a split team fights alone).
         let ids=value.players.map(\.id).filter{value.battle?.queue.contains($0) ?? true}
         // A duel keeps its two fixed teams (configured once); a monster fight follows whoever plays.
-        if rivalIDs.isEmpty,ids != playerIDs { configureUnits(players:ids,foes:monsterIDs,pvp:false) }
+        if rivalIDs.isEmpty,value.battle != nil,ids != playerIDs { configureUnits(players:ids,foes:monsterIDs,pvp:false) }
         state=value;self.current=current;self.catalog=catalog;fx.friend=friend;fx.foe=foe;fx.current=current;chosenFriend=friend;chosenFoe=foe
         MeadowMonsterFrames.retain(Set(value.units.values.filter{$0.kind == .monster && renderIDs.contains($0.id)}.compactMap{MonsterVisualSpec.find($0.templateID)?.id}))
         // A shield carried in from the map (or an earlier battle) forms up on entry and keeps moving like a fresh one.
@@ -685,10 +685,11 @@ final class MeadowPartyStageView:UIView {
         dim.alpha=max(dim.alpha,CGFloat(grade))
         washBase=washColor;wash.backgroundColor=washColor
         // Compact: the dice stay readable on the big screen but only take a thin band at the top of the battlefield.
-        let diceScale=max(0.7,min(0.95,bounds.width/900)),diceCount=max(1,diceView.dice.count)
-        let dieSpan=CGFloat(PolyhedralDice.spacing(count:diceCount))*CGFloat(diceCount-1)+CGFloat(PolyhedralDice.radius(count:diceCount))*2.5
-        let plateHeight=CGFloat(PolyhedralDice.radius(count:diceCount))*2.5*diceScale+10
-        diceView.transform = .identity;diceView.bounds=CGRect(x:0,y:0,width:220,height:100)
+        // Bigger on the TV, and the dice keep their size however many bonuses join (the strip grows instead).
+        let diceCount=max(1,diceView.dice.count),dieSpan=MeadowBattleDiceView.width(count:diceCount)
+        let diceScale=max(0.8,min(1.2,bounds.width/760,(bounds.width-40)/max(1,dieSpan+28)))
+        let plateHeight=MeadowBattleDiceView.dieRadius*2.6*diceScale+12
+        diceView.transform = .identity;diceView.bounds=CGRect(x:0,y:0,width:max(220,dieSpan+20),height:100)
         diceView.center=CGPoint(x:bounds.midX,y:6+plateHeight/2+7*diceScale);diceView.transform=CGAffineTransform(scaleX:diceScale,y:diceScale)
         // 行动放完后，掷出的结果也要留在屏幕上直到自己淡出（BattleDice.resultHold），不跟着行动一结束就收起
         let resultHeld=diceSettledAt.map { sceneTime-$0<BattleDice.resultHold+0.5 } ?? false
