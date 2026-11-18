@@ -79,7 +79,9 @@ enum MeadowPixelMarker: String {
         let rows = grid, scale = 3, plate = 18, inset = 3
         let face = UIColor(red: 0.12, green: 0.15, blue: 0.13, alpha: 0.92), rim = UIColor(red: 0.93, green: 0.76, blue: 0.38, alpha: 1)
         let rimShade = UIColor(red: 0.55, green: 0.40, blue: 0.16, alpha: 1)
-        let format = UIGraphicsImageRendererFormat(); format.scale = 1
+        // Standard range: on a wide-colour Mac display the default (extended) bitmap turns the transparent corners into
+        // a white box once SpriteKit draws it.
+        let format = UIGraphicsImageRendererFormat(); format.scale = 1; format.preferredRange = .standard; format.opaque = false
         let image = UIGraphicsImageRenderer(size: CGSize(width: plate * scale, height: plate * scale), format: format).image { ctx in
             let c = Double(plate - 1) / 2
             for y in 0..<plate {

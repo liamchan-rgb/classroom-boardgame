@@ -897,6 +897,16 @@ extension GameScene {
         }
         for (id,marker) in edgeMarkers where !campaign.playerIDs.contains(id) {marker.removeFromParent();edgeMarkers[id]=nil}
     }
+    /// Clicking an off-screen marker jumps the camera straight to that traveller. `viewPoint` is in view
+    /// coordinates (y down). Returns whether a marker was hit.
+    func jumpToEdgeMarker(atViewPoint viewPoint:CGPoint)->Bool {
+        guard let campaign,battlePreviewCamera==nil,gaitTest==nil else{return false}
+        let p=CGPoint(x:viewPoint.x,y:size.height-viewPoint.y),reach=Self.markerRadius+8
+        guard let (id,_)=edgeMarkers.first(where:{!$0.value.isHidden && hypot($0.value.position.x-p.x,$0.value.position.y-p.y)<=reach}),
+              let index=campaign.playerIDs.firstIndex(of:id) else{return false}
+        cameraGlide=nil;cameraCenter=actorPoint(index);layoutWorld();updateEdgeMarkers()
+        return true
+    }
     private func makeEdgeMarker(id:String,unit:GameUnit,slot:Int)->SKNode {
         let r=Self.markerRadius
         let node=SKNode();node.zPosition=MeadowPostProcess.overlayDepth+2_000  // on-map UI (drawn after the grade, unblurred), above node plates

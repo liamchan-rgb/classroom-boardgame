@@ -192,7 +192,10 @@ final class LivingWorld: SKNode {
     }
 
     private func buildMotes() {
-        let renderer = UIGraphicsImageRenderer(size: CGSize(width: 16, height: 16))
+        // Standard range: on a wide-colour Mac display the default (extended) bitmap loses its transparent edge in
+        // SpriteKit and the motes draw as small flickering squares.
+        let format = UIGraphicsImageRendererFormat(); format.preferredRange = .standard; format.opaque = false
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: 16, height: 16), format: format)
         let dot = renderer.image { context in
             UIColor.white.setFill()
             context.cgContext.fillEllipse(in: CGRect(x: 4, y: 4, width: 8, height: 8))

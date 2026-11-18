@@ -325,7 +325,7 @@ enum CustomAppearanceAssets {
         let rect=CGRect(x:column*256,y:(facing%4)*256,width:256,height:256)
         let layers=[bs[half],fs[half],hs[half],front[half]].compactMap{UIImage(named:$0)?.cgImage?.cropping(to:rect)}
         guard layers.count==4 else{return nil}
-        let format=UIGraphicsImageRendererFormat();format.scale=1
+        let format=UIGraphicsImageRendererFormat();format.scale=1;format.preferredRange = .standard
         let image=UIGraphicsImageRenderer(size:CGSize(width:256,height:256),format:format).image{r in
             let c=r.cgContext;c.interpolationQuality = .none;c.translateBy(x:0,y:256);c.scaleBy(x:1,y:-1)
             for l in layers{c.draw(l,in:CGRect(x:0,y:0,width:256,height:256))}

@@ -53,6 +53,10 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
     private var textures: [String: MTLTexture] = [:]
     private var backgroundTarget: MTLTexture?
     private var foregroundRenderer: SKRenderer?
+    /// Draws only the on-map UI pass. SKRenderer keeps per-frame vertex/uniform buffers; rendering the same renderer
+    /// twice into one command buffer let the second pass overwrite data the first still needed (map badges drawn as
+    /// white boxes, objects at the map edge flickering). This one is never updated, only rendered.
+    private var overlayRenderer: SKRenderer?
     var classroomMirrorEnabled=false
     var onClassroomMapFrame:((CGImage)->Void)?
     private var mirrorBusy=false
@@ -317,6 +321,9 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
         let foreground = SKRenderer(device: device)
         foreground.scene = scene
         foregroundRenderer = foreground
+        let overlay = SKRenderer(device: device)
+        overlay.scene = scene
+        overlayRenderer = overlay
         lastCamera = nil; lastRenderTime = -.infinity; lastHeroes = []; lastIncludesEnvironment = nil
         view.delegate = self
         view.preferredFramesPerSecond = 60
@@ -403,7 +410,9 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
     private static func makeClassroomMirror(_ copy:MirrorCopy)->CGImage? {
         let data=Data(bytes:copy.buffer.contents(),count:copy.row*copy.height)
         guard let provider=CGDataProvider(data:data as CFData) else{return nil}
-        return CGImage(width:copy.width,height:copy.height,bitsPerComponent:8,bitsPerPixel:32,bytesPerRow:copy.row,space:CGColorSpaceCreateDeviceRGB(),bitmapInfo:CGBitmapInfo.byteOrder32Little.union(CGBitmapInfo(rawValue:CGImageAlphaInfo.premultipliedFirst.rawValue)),provider:provider,decode:nil,shouldInterpolate:false,intent:.defaultIntent)
+        // The map is opaque: ignore the drawable's alpha, which the on-map UI pass can leave below 1 at a sprite's
+        // transparent corners (they showed as white boxes over the teacher's light backdrop).
+        return CGImage(width:copy.width,height:copy.height,bitsPerComponent:8,bitsPerPixel:32,bytesPerRow:copy.row,space:CGColorSpaceCreateDeviceRGB(),bitmapInfo:CGBitmapInfo.byteOrder32Little.union(CGBitmapInfo(rawValue:CGImageAlphaInfo.noneSkipFirst.rawValue)),provider:provider,decode:nil,shouldInterpolate:false,intent:.defaultIntent)
     }
 
     /// The offscreen repeated probe and the live drawable use this same path.
@@ -455,7 +464,7 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
             if !overlays.isEmpty {
                 let restoreWorld = MeadowPostProcess.isolate(overlays, world: frame.world, scene: scene)
                 target.colorAttachments[0].loadAction = .load
-                foreground.render(withViewport: viewport, commandBuffer: command, renderPassDescriptor: target)
+                (overlayRenderer ?? foreground).render(withViewport: viewport, commandBuffer: command, renderPassDescriptor: target)
                 restoreWorld()
             }
             return

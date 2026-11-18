@@ -99,9 +99,9 @@ private final class MeadowLiveMirrorTarget:NSObject {
     @objc func tick(){view?.tick()}
 }
 
-/// The inventory and shop open on the teacher's own window (they take input). The public screen shows a live,
-/// read-only copy of exactly that screen — same art, same tab, same selection — using the same render-server
-/// snapshot as the teacher's live mirror. Only these two screens are copied; other teacher panels stay private.
+/// The inventory, shop and character studio open on the teacher's own window (they take input). The public screen
+/// shows a live, read-only copy of exactly that screen — same art, same tab, same selection — using the same
+/// render-server snapshot as the teacher's live mirror. Only these screens are copied; other teacher panels stay private.
 struct MeadowPanelMirror:UIViewRepresentable {
     let game:MeadowTeacherCoordinator
     func makeUIView(context:Context)->MeadowPanelMirrorView {let view=MeadowPanelMirrorView();view.game=game;return view}

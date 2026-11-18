@@ -79,6 +79,12 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         guard encounterPreview.isHidden || !encounterPreview.frame.contains(point) else{return nil}
         return scene.classroomWorldPoint(CGPoint(x:point.x-gameView.frame.minX,y:point.y-gameView.frame.minY))
     }
+    /// Teacher click on an off-screen traveller marker: the camera jumps to that traveller.
+    func classroomEdgeMarkerTap(at point:CGPoint,role:ClassroomRole)throws->Bool {
+        try ClassroomGameBackend.requireTeacher(role)
+        guard ready,!battlePreviewActive,gameView.frame.contains(point) else{return false}
+        return scene.jumpToEdgeMarker(atViewPoint:CGPoint(x:point.x-gameView.frame.minX,y:point.y-gameView.frame.minY))
+    }
     func classroomNode(atWorldPoint point:CGPoint,role:ClassroomRole)throws->Int? {
         try ClassroomGameBackend.requireTeacher(role)
         guard ready,!battlePreviewActive else{return nil}
@@ -248,6 +254,9 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
             if classroomMode {ground.contentScaleFactor=1;ground.drawableSize=ClassroomCanvas.size}
             ground.colorPixelFormat = .bgra8Unorm
             ground.isOpaque = true
+            // The on-map UI pass can leave drawable alpha below 1 at a sprite's transparent corners. An opaque layer
+            // ignores that alpha, so the teacher's live copy of the map never shows its white backdrop (white boxes).
+            ground.layer.isOpaque = true
             ground.clearColor = MTLClearColor(red: 0.15, green: 0.20, blue: 0.08, alpha: 1)
             ground.isPaused = true
             ground.isUserInteractionEnabled = false

@@ -112,11 +112,12 @@ final class MeadowTeacherCoordinator:ObservableObject {
         guard let first=privatePresenter?.presentedViewController else{return false}
         return !localOutputPreview || first.presentedViewController != nil
     }
-    /// The teacher-window inventory or shop screen that the public display copies live (nil when neither is open).
+    /// The teacher-window inventory, shop or character studio that the public display copies live (nil when none is open).
     var publicPanelSource:UIView? {
         var next=privatePresenter?.presentedViewController
         while let controller=next {
-            if controller is MeadowCampaignInventoryViewController || controller is MeadowShopViewController {return controller.view}
+            if controller is MeadowCampaignInventoryViewController || controller is MeadowShopViewController
+                || controller is UIHostingController<TeacherCharacterStudio> {return controller.view}
             next=controller.presentedViewController
         }
         return nil
@@ -276,6 +277,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
             return
         }
         guard surface.acceptsMapInput,let c=campaign,c.engine.state.battle==nil,!c.isCompleted else{message="请先收起当前面板或返回探索地图。";return}
+        if !selectingNode,(try? renderer?.classroomEdgeMarkerTap(at:point,role:.teacher))==true {revision += 1;return}
         do {
             guard let world=try renderer?.classroomWorldPoint(at:point,role:.teacher) else{message="请点击预览面板外的道路，或收起预览。";return}
             let wx=Double(world.x),wy=Double(world.y)
