@@ -264,9 +264,9 @@ struct ClassTimerPanel:View {
 // MARK: - Keyboard shortcuts
 
 enum ClassroomShortcutAction:String,CaseIterable,Identifiable {
-    case select1,select2,select3,select4,select5,select6,select7,award,grantMovement,attack,endTurn,pauseResume,pageBack,pageForward,openTimer,timerStartPause,timerPlus10,toggleScoreboard,toggleTeamScores,openQuizReport,openQuiz
+    case select1,select2,select3,select4,select5,select6,select7,award,grantMovement,attack,endTurn,pauseResume,pageBack,pageForward,openTimer,timerStartPause,timerPlus10,toggleScoreboard,toggleTeamScores,openQuizReport,openQuiz,openClassQuiz,openPractice
     /// Works everywhere, also over the pack / shop / sheets.
-    var global:Bool {[.openTimer,.timerStartPause,.timerPlus10,.toggleScoreboard,.toggleTeamScores,.openQuiz].contains(self)}
+    var global:Bool {[.openTimer,.timerStartPause,.timerPlus10,.toggleScoreboard,.toggleTeamScores,.openQuiz,.openClassQuiz,.openPractice].contains(self)}
     var id:String {rawValue}
     var title:String {
         switch self {
@@ -277,7 +277,9 @@ enum ClassroomShortcutAction:String,CaseIterable,Identifiable {
         case .toggleScoreboard:return "显示 / 隐藏记分板"
         case .toggleTeamScores:return "记分板：个人 / 队伍切换"
         case .openQuizReport:return "打开答题报告"
-        case .openQuiz:return "答题（选人出题）"
+        case .openQuiz:return "个人答题（回车即开题）"
+        case .openClassQuiz:return "全班题（公用题，手动发奖）"
+        case .openPractice:return "闪卡练习"
         }
     }
     var icon:String {
@@ -285,14 +287,14 @@ enum ClassroomShortcutAction:String,CaseIterable,Identifiable {
         case .select1,.select2,.select3,.select4,.select5,.select6,.select7:return "person.fill"
         case .award:return "bitcoinsign.circle";case .grantMovement:return "figure.walk";case .attack:return "burst";case .endTurn:return "forward.end";case .pauseResume:return "playpause"
         case .pageBack:return "chevron.left";case .pageForward:return "chevron.right";case .openTimer:return "timer";case .timerStartPause:return "playpause.circle"
-        case .timerPlus10:return "plus.circle";case .toggleScoreboard:return "list.number";case .toggleTeamScores:return "person.3";case .openQuizReport:return "chart.bar.doc.horizontal";case .openQuiz:return "questionmark.bubble"
+        case .timerPlus10:return "plus.circle";case .toggleScoreboard:return "list.number";case .toggleTeamScores:return "person.3";case .openQuizReport:return "chart.bar.doc.horizontal";case .openQuiz:return "questionmark.bubble";case .openClassQuiz:return "person.3.sequence";case .openPractice:return "rectangle.on.rectangle.angled"
         }
     }
     var seat:Int? {["select1":1,"select2":2,"select3":3,"select4":4,"select5":5,"select6":6,"select7":7][rawValue]}
     var defaultKey:String {
         switch self {
         case .select1:return "1";case .select2:return "2";case .award:return "g";case .grantMovement:return "m";case .attack:return "a";case .endTurn:return "e"
-        case .pauseResume:return " ";case .pageBack:return "←";case .pageForward:return "→";case .openTimer:return "t";case .toggleScoreboard:return "s";case .toggleTeamScores:return "d";case .openQuizReport:return "r";case .openQuiz:return "q"
+        case .pauseResume:return " ";case .pageBack:return "←";case .pageForward:return "→";case .openTimer:return "t";case .toggleScoreboard:return "s";case .toggleTeamScores:return "d";case .openQuizReport:return "r";case .openQuiz:return "q";case .openClassQuiz:return "⇧q";case .openPractice:return "k"
         default:return ""
         }
     }
@@ -324,10 +326,22 @@ enum ClassroomShortcuts {
         case .keyboardEscape,.keyboardReturnOrEnter,.keyboardTab,.keyboardDeleteOrBackspace:return nil
         default:
             let c=key.charactersIgnoringModifiers.lowercased()
-            return c.isEmpty ? nil:c
+            guard !c.isEmpty else{return nil}
+            // Shift + a letter is its own key (⇧Q next to Q).
+            if key.modifierFlags.contains(.shift),c.count==1,c.first!.isLetter {return "⇧"+c}
+            return c
         }
     }
-    static func label(_ key:String)->String {key.isEmpty ? "未设置":key==" " ? "空格":key.uppercased()}
+    static func label(_ key:String)->String {key.isEmpty ? "未设置":key==" " ? "空格":key.hasPrefix("⇧") ? "⇧"+key.dropFirst().uppercased():key.uppercased()}
+    /// Keys inside quiz panels: the shortcut token, plus ⏎ ⎋ ⌫ (which shortcuts leave alone).
+    static func panelToken(_ key:UIKey)->String? {
+        switch key.keyCode {
+        case .keyboardReturnOrEnter,.keypadEnter:return "⏎"
+        case .keyboardEscape:return "⎋"
+        case .keyboardDeleteOrBackspace:return "⌫"
+        default:return token(key)
+        }
+    }
 }
 
 struct ClassroomShortcutEditor:View {

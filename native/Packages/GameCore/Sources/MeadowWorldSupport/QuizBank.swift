@@ -126,7 +126,7 @@ public enum QuizBankParser {
     }
     private struct JSONQuestion:Decodable {
         let type:String?;let prompt:String?;let options:[String]?;let answer:JSONAnswer?;let coins:Int?;let explanation:String?
-        let difficulty:JSONAnswer?;let seconds:Int?;let tags:[String]?
+        let difficulty:JSONAnswer?;let seconds:Int?;let tags:[String]?;let audience:[String]?;let target:String?
         let front:String?;let back:String?;let distractors:[String]?
         let passage:String?;let questions:[JSONItem]?
     }
@@ -156,6 +156,7 @@ public enum QuizBankParser {
                                items:try subs.map{QuizItem(prompt:$0.prompt,options:$0.options,answer:try $0.answer.index($0.prompt ?? ""))})
             }
             q.coins=j.coins;q.explanation=j.explanation;q.seconds=j.seconds;q.tags=j.tags
+            q.audience=j.audience ?? j.target.map{QuizBankParser.list($0)}
             if let d=j.difficulty {
                 switch d {case .index(let i):q.difficulty=i;case .letter(let l):q.difficulty=difficulty(l)}
             }
@@ -207,7 +208,7 @@ public enum QuizBankParser {
     }
     private static func question(_ block:[String],number:Int)throws->QuizQuestion {
         var prompt=[String](),options=[(Int,String)](),answer:String?,coins:Int?,explanation:String?
-        var type:QuizKind?,level:Int?,limit:Int?,tags:[String]?,front:String?,back:String?,wrong:[String]=[]
+        var type:QuizKind?,level:Int?,limit:Int?,tags:[String]?,audience:[String]?,front:String?,back:String?,wrong:[String]=[]
         var passage:[String]?,subs:[(prompt:String,options:[(Int,String)],answer:String?)]=[]
         func fail(_ why:String)->GameError {GameError("第\(number)题：\(why)")}
         for line in block {
@@ -215,6 +216,7 @@ public enum QuizBankParser {
             else if let v=value(line,keys:["难度","Difficulty","difficulty"]) {level=difficulty(v);if level==nil{throw fail("难度应为 1–3 或 简单/中等/困难")}}
             else if let v=value(line,keys:["时间","限时","Time","time"]) {limit=seconds(v)}
             else if let v=value(line,keys:["标签","知识点","Tags","tags"]) {tags=list(v)}
+            else if let v=value(line,keys:["对象","专属","给","For","for"]) {audience=list(v)}
             else if let v=value(line,keys:["正面","Front","front"]) {front=v}
             else if let v=value(line,keys:["背面","Back","back"]) {back=v}
             else if let v=value(line,keys:["干扰","干扰项","Distractors","distractors"]) {wrong=list(v)}
@@ -255,7 +257,7 @@ public enum QuizBankParser {
             }
             q=QuizQuestion(prompt:first.isEmpty ? "阅读短文，回答问题":first,options:[],answer:0,kind:.reading,passage:passage.joined(separator:"\n"),items:items)
         }
-        q.coins=coins;q.explanation=explanation;q.difficulty=level;q.seconds=limit;q.tags=tags
+        q.coins=coins;q.explanation=explanation;q.difficulty=level;q.seconds=limit;q.tags=tags;q.audience=audience
         if resolved != .choice || type != nil {q.kind=resolved}
         return q
     }
@@ -280,12 +282,61 @@ public extension MeadowCampaignSession {
         guard isQuizNode(node),let i=nextQuizIndex else{return nil}
         return quizBank[i]
     }
-    /// Whose turn: `actor` may answer here if the event is open and they have not answered at this node yet.
+    /// Whose turn: `actor` may answer here if the event is open and they have not answered at this node yet;
+    /// they get their own next question (专属题 first, then an unused shared one).
     func quizTurn(actor:String)->(index:Int,question:QuizQuestion)? {
         guard let unit=engine.state.units[actor],isQuizNode(unit.nodeID),
               engine.state.map.nodes.first(where:{$0.id==unit.nodeID})?.siteResolved != true,
-              !quizLog.contains(where:{$0.player==actor && $0.node==unit.nodeID}),let i=nextQuizIndex else{return nil}
+              !quizLog.contains(where:{$0.player==actor && $0.node==unit.nodeID}),let i=personalQuizQuestion(for:actor) else{return nil}
         return(i,quizBank[i])
+    }
+    /// Bank indices in dealing order (from a start set by the map seed).
+    private var dealingOrder:[Int] {
+        let n=quizBank.count
+        guard n>0 else{return []}
+        let base=Int(engine.state.map.seed % UInt64(n))
+        return (0..<n).map{(base+$0)%n}
+    }
+    /// Whether `q` is one of this student's own questions (by name, short name or number: p3 → 3).
+    func isExclusive(_ q:QuizQuestion,for player:String)->Bool {
+        guard let u=engine.state.units[player] else{return false}
+        return q.isFor(names:[u.name,u.shortName],number:Int(player.dropFirst()))
+    }
+    /// Questions already asked (personally or to the class).
+    var usedQuizQuestions:Set<Int> {Set(quizLog.filter{$0.practice != true}.map(\.question))}
+    /// A student's next question: their own (专属) ones they have not answered, in bank order, then shared ones nobody
+    /// has had yet. `kind` narrows it; `skip` steps past that many (换一题). nil when nothing is left.
+    func personalQuizQuestion(for player:String,kind:QuizKind?=nil,skip:Int=0)->Int? {
+        let bank=quizBank,answered=Set(quizLog.filter{$0.player==player && $0.practice != true}.map(\.question)),used=usedQuizQuestions
+        let own=bank.indices.filter{isExclusive(bank[$0],for:player) && !answered.contains($0)}
+        let shared=dealingOrder.filter{bank[$0].isShared && !used.contains($0)}
+        let fits=(own+shared).filter{kind==nil || bank[$0].type==kind}
+        return fits.isEmpty ? nil:fits[skip%fits.count]
+    }
+    /// The next shared question for the whole class (one nobody has had yet).
+    func sharedQuizQuestion(kind:QuizKind?=nil,skip:Int=0)->Int? {
+        let bank=quizBank,used=usedQuizQuestions
+        let fits=dealingOrder.filter{bank[$0].isShared && !used.contains($0) && (kind==nil || bank[$0].type==kind)}
+        return fits.isEmpty ? nil:fits[skip%fits.count]
+    }
+    /// The question most recently asked (再出一次), optionally only shared ones.
+    func lastAskedQuestion(sharedOnly:Bool=false)->Int? {
+        quizLog.last{$0.practice != true && (!sharedOnly || quizBank.indices.contains($0.question) && quizBank[$0.question].isShared)}?.question
+    }
+    /// Flash-card practice for a student, endless: cards never practised or answered first, then ones they got
+    /// wrong (oldest first), then the rest; never the card just shown. Their own cards and shared ones.
+    func practiceCard(for player:String,after last:Int?=nil)->Int? {
+        let bank=quizBank
+        let cards=bank.indices.filter{bank[$0].type == .flashcard && (bank[$0].isShared || isExclusive(bank[$0],for:player))}
+        guard !cards.isEmpty else{return nil}
+        let mine=quizLog.filter{$0.player==player}
+        var lastSeen:[Int:Int]=[:],lastRight:[Int:Bool]=[:]
+        for (k,a) in mine.enumerated() {lastSeen[a.question]=k;lastRight[a.question]=a.correct.allSatisfy{$0}}
+        let ordered=cards.sorted{a,b in
+            func rank(_ i:Int)->Int {lastSeen[i]==nil ? 0:(lastRight[i]==false ? 1:2)}
+            return rank(a)==rank(b) ? (lastSeen[a] ?? -1,a)<(lastSeen[b] ?? -1,b):rank(a)<rank(b)
+        }
+        return ordered.first{$0 != last} ?? ordered.first
     }
     /// Teammates at this quiz node who still have to answer.
     func quizWaiting(node:Int,team:String?)->[GameUnit] {
@@ -296,25 +347,21 @@ public extension MeadowCampaignSession {
     /// and pays the reward. Returns the stored attempt.
     /// Records what the student said (the option per graded item, nil = did not know; `texts` for other answers)
     /// and pays the reward. `free`: called up by the teacher anywhere, not at a quiz spot. Returns the stored attempt.
-    @discardableResult func recordQuiz(actor:String,question index:Int,picks:[Int?],texts:[String?]?=nil,seconds:Double,at:Date=Date(),free:Bool=false,id:String=UUID().uuidString)throws->QuizAttempt {
+    /// `manualCoins`: the reward the teacher sends for a shared-bank question; `shared`: asked to the whole class;
+    /// `practice`: flash-card practice (recorded, no reward).
+    @discardableResult func recordQuiz(actor:String,question index:Int,picks:[Int?],texts:[String?]?=nil,seconds:Double,at:Date=Date(),free:Bool=false,manualCoins:Int?=nil,shared:Bool=false,practice:Bool=false,id:String=UUID().uuidString)throws->QuizAttempt {
         if !free {guard canManageInventory,travel==nil else{throw GameError("请抵达地点、结束战斗后答题。")}}
         guard let unit=engine.state.units[actor],quizBank.indices.contains(index) else{throw GameError("没有这道题。")}
         let q=quizBank[index],parts=q.parts
         guard picks.count==parts.count else{throw GameError("答题记录与题目不符。")}
         let texts=texts ?? Array(repeating:nil,count:parts.count)
         let correct=parts.indices.map{picks[$0]==parts[$0].answer}
-        let attempt=QuizAttempt(player:actor,playerName:unit.shortName,node:free ? -1:unit.nodeID,question:index,picks:picks,texts:texts,correct:correct,
-                                seconds:max(0,seconds),limit:q.timeLimit,at:at.timeIntervalSince1970)
-        try engine.apply(.recordCampaignQuiz(QuizRecord(attempt:attempt,fullCoins:q.reward,points:q.points,dropTier:q.difficulty.map{$0-1},free:free)),id:id)
+        var attempt=QuizAttempt(player:actor,playerName:unit.shortName,node:free ? -1:unit.nodeID,question:index,picks:picks,texts:texts,correct:correct,
+                                seconds:min(600,max(0,seconds)),limit:q.timeLimit,at:at.timeIntervalSince1970)
+        if shared {attempt.shared=true}
+        if practice {attempt.practice=true}
+        try engine.apply(.recordCampaignQuiz(QuizRecord(attempt:attempt,fullCoins:q.reward,points:q.points,dropTier:q.difficulty.map{$0-1},free:free,manualCoins:manualCoins)),id:id)
         return quizLog.last!
-    }
-    /// For a quiz called up anywhere: the next question in dealing order that fits the filter; `skip` steps past
-    /// that many (the teacher's "换一题"). nil when nothing in the bank fits.
-    func quizCandidate(kind:QuizKind?=nil,difficulty:Int?=nil,skip:Int=0)->Int? {
-        let bank=quizBank
-        guard let base=nextQuizIndex else{return nil}
-        let fits=(0..<bank.count).map{(base+$0)%bank.count}.filter{i in (kind==nil || bank[i].type==kind) && (difficulty==nil || bank[i].difficulty==difficulty)}
-        return fits.isEmpty ? nil:fits[skip%fits.count]
     }
     /// The class answered (choice = option index) or skipped (nil, no reward). Returns whether it was right.
     @discardableResult func answerQuiz(actor:String,choice:Int?,id:String=UUID().uuidString)throws->Bool {

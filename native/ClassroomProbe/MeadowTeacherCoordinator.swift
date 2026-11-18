@@ -48,53 +48,196 @@ final class MeadowTeacherCoordinator:ObservableObject {
     @Published var quiz:LiveQuiz?
     private var quizToken=0
     private weak var quizPanel:UIViewController?
-    /// "答题" from anywhere (button or Q): pick a student and a question from the trip's bank.
-    func openQuiz(){
-        guard quiz == nil,let presenter=presentationHost else{return}
-        if presenter is UIHostingController<QuizLauncherPanel> {return}
-        let screen=UIHostingController(rootView:QuizLauncherPanel(game:self,onStart:{[weak self] player,index in
-            self?.presentationHost?.dismiss(animated:true){self?.startQuiz(player:player,index:index,node:nil)}
-        },onClose:{[weak self] in self?.presentationHost?.dismiss(animated:true)}))
-        screen.modalPresentationStyle = .formSheet;screen.preferredContentSize=CGSize(width:720,height:470)
-        presenter.present(screen,animated:true)
-    }
-    /// Shows the question on the TV and the answer panel to the teacher. `node`: the quiz spot, nil when called up anywhere.
-    func startQuiz(player:String,index:Int,node:Int?){
-        guard let c=campaign,c.quizBank.indices.contains(index),let unit=c.engine.state.units[player] else{return}
-        quizToken += 1
-        let q=c.quizBank[index],start=Date()
-        let place=node.flatMap{n in c.engine.state.map.nodes.first{$0.id==n}?.name} ?? "课堂答题"
-        withAnimation(.easeOut(duration:0.2)){quiz=LiveQuiz(token:quizToken,index:index,question:q,player:player,playerName:unit.shortName,place:place,node:node,start:start)}
-        let panel=UIHostingController(rootView:MeadowQuizAnswerPanel(question:q,player:unit.shortName,start:start,onSubmit:{[weak self] picks,texts in
-            self?.quizPanel?.dismiss(animated:true);self?.submitQuiz(picks:picks,texts:texts)
-        },onLater:{[weak self] in
-            self?.quizPanel?.dismiss(animated:true);withAnimation{self?.quiz=nil}
-        }))
-        panel.modalPresentationStyle = .formSheet;panel.preferredContentSize=CGSize(width:760,height:q.type == .reading ? 760:600)
+    private var quizGainBase:GameState?
+    private var quizDraft:QuizAnswerDraft?
+    private var quizReward:QuizManualReward?
+    private var classModel:ClassQuizModel?
+    private var practiceModel:PracticeModel?
+    private func presentPanel(_ panel:UIViewController,size:CGSize){
+        panel.modalPresentationStyle = .formSheet;panel.preferredContentSize=size
         panel.isModalInPresentation=true
         quizPanel=panel
         let show={[weak self] in self?.presentationHost?.present(panel,animated:true);return}
         if let alert=presentationHost as? UIAlertController {alert.dismiss(animated:true){show()}} else {show()}
     }
-    private func submitQuiz(picks:[Int?],texts:[String?]){
-        guard let c=campaign,var live=quiz else{return}
-        let before=c.engine.state
+    private func closePanel(_ then:(()->Void)?=nil){
+        if let panel=quizPanel,panel.presentingViewController != nil {panel.dismiss(animated:true){then?()}} else {then?()}
+    }
+
+    /// The question the launcher would start.
+    func launcherCandidate(_ m:QuizLauncherModel)->Int? {
+        guard let c=campaign,let player=m.player else{return nil}
+        if let again=m.again,c.quizBank.indices.contains(again) {return again}
+        return c.personalQuizQuestion(for:player,kind:m.kind,skip:m.skip)
+    }
+    /// Q: a student's next question, two keys away (Q, ⏎). 1–7 switch student, X/K/T/Y start a kind at once.
+    func openQuiz(){
+        guard quiz == nil,quizPanel == nil,presentationHost != nil else{return}
+        let model=QuizLauncherModel();model.player=campaign?.selectedPlayerID
+        let start={[weak self,weak model] in
+            guard let self,let model,let player=model.player,let index=self.launcherCandidate(model) else{return}
+            self.closePanel{self.startQuiz(player:player,index:index,node:nil)}
+        }
+        let screen=KeyHostingController(rootView:QuizLauncherPanel(game:self,model:model,onStart:start,onClose:{[weak self] in self?.closePanel()}))
+        screen.onKey={[weak self,weak model] key in
+            guard let self,let model else{return false}
+            switch key {
+            case "⏎":start()
+            case "⎋":self.closePanel()
+            case " ":model.skip += 1;model.again=nil
+            case "z":model.again=self.campaign?.lastAskedQuestion()
+            default:
+                if let n=Int(key),let id=self.player(forSeat:n) {model.player=id;model.skip=0;model.again=nil;return true}
+                if let kind=QuizLauncherModel.kindKeys[key] {model.kind=kind;model.skip=0;model.again=nil;if self.launcherCandidate(model) != nil {start()} else {model.note="这位同学没有可出的\(kind.title)了。"};return true}
+                return false
+            }
+            return true
+        }
+        presentPanel(screen,size:CGSize(width:720,height:470))
+    }
+    /// One student's question: on the TV with a countdown, the answer panel for the teacher. `node`: the quiz spot,
+    /// nil when called up anywhere.
+    func startQuiz(player:String,index:Int,node:Int?){
+        guard let c=campaign,c.quizBank.indices.contains(index),let unit=c.engine.state.units[player] else{return}
+        quizToken += 1
+        let q=c.quizBank[index],start=Date()
+        let place=node.flatMap{n in c.engine.state.map.nodes.first{$0.id==n}?.name} ?? "课堂答题"
+        withAnimation(.easeOut(duration:0.2)){quiz=LiveQuiz(token:quizToken,index:index,question:q,mode:.personal,player:player,playerName:unit.shortName,place:place,node:node,start:start)}
+        let draft=QuizAnswerDraft(q),reward=QuizManualReward(q)
+        quizDraft=draft;quizReward=reward
+        let panel=KeyHostingController(rootView:MeadowQuizAnswerPanel(draft:draft,reward:reward,player:unit.shortName,start:start,onSubmit:{[weak self] in self?.submitQuiz()},onLater:{[weak self] in self?.cancelQuiz()}))
+        panel.onKey={[weak self,weak draft] key in
+            switch key {
+            case "⏎":self?.submitQuiz();return true
+            case "⎋":self?.cancelQuiz();return true
+            default:return draft?.key(key) ?? false
+            }
+        }
+        presentPanel(panel,size:CGSize(width:760,height:q.type == .reading ? 780:q.isShared ? 640:600))
+    }
+    private func cancelQuiz(){closePanel();withAnimation{quiz=nil}}
+    private func submitQuiz(){
+        guard let c=campaign,var live=quiz,live.mode == .personal,live.attempt==nil,let draft=quizDraft else{return}
+        closePanel()
+        let before=c.engine.state,r=draft.result
+        let manual=live.question.isShared ? quizReward?.amount(right:draft.allRight):nil
         do{
-            let attempt=try c.recordQuiz(actor:live.player,question:live.index,picks:picks,texts:texts,seconds:Date().timeIntervalSince(live.start),free:live.node==nil)
+            let attempt=try c.recordQuiz(actor:live.player,question:live.index,picks:r.picks,texts:r.texts,seconds:Date().timeIntervalSince(live.start),free:live.node==nil,manualCoins:manual)
             live.attempt=attempt;live.dropName=attempt.drop.flatMap{try? c.engine.catalog.item($0).name}
             quiz=live;quizGainBase=before
             renderer?.classroomRefresh();revision += 1
         }catch{withAnimation{quiz=nil};message=error.localizedDescription;revision += 1}
     }
-    private var quizGainBase:GameState?
-    /// The card finished its reveal (called by every copy: TV and preview; the first one closes it).
+
+    /// ⇧Q: a shared question to the whole class; the teacher picks who answered and sends rewards by hand.
+    func openClassQuiz(index:Int?=nil){
+        guard let c=campaign,quiz == nil,quizPanel == nil,presentationHost != nil else{return}
+        guard let i=index ?? c.sharedQuizQuestion() else{message=c.quizBank.isEmpty ? "这个行程还没有题库。":"公用题都出过了（可在答题面板里“再出一次”）。";revision += 1;return}
+        quizToken += 1
+        let q=c.quizBank[i],start=Date()
+        withAnimation(.easeOut(duration:0.2)){quiz=LiveQuiz(token:quizToken,index:i,question:q,mode:.classwide,player:"",playerName:"全班",place:"全班题",node:nil,start:start)}
+        let draft=QuizAnswerDraft(q),reward=QuizManualReward(q),model=ClassQuizModel()
+        quizDraft=draft;quizReward=reward;classModel=model
+        let other={[weak self,weak model] in
+            guard let self,let model,model.sent.isEmpty,let c=self.campaign else{return}
+            let next=c.sharedQuizQuestion(skip:1) ?? i
+            self.closePanel{self.quiz=nil;self.openClassQuiz(index:next)}
+        }
+        let panel=KeyHostingController(rootView:ClassQuizPanel(game:self,model:model,draft:draft,reward:reward,start:start,onSend:{[weak self] in self?.sendClassQuiz()},onEnd:{[weak self] in self?.endClassQuiz()},onOther:other))
+        panel.onKey={[weak self,weak model,weak draft] key in
+            guard let self,let model,let draft else{return false}
+            switch key {
+            case "⏎":self.sendClassQuiz()
+            case "⎋":self.endClassQuiz()
+            case " ":other()
+            default:
+                if let n=Int(key),n>0,let id=self.player(forSeat:n) {if model.players.contains(id){model.players.remove(id)}else{model.players.insert(id)};return true}
+                return draft.key(key)
+            }
+            return true
+        }
+        presentPanel(panel,size:CGSize(width:780,height:q.type == .reading ? 820:680))
+    }
+    private func sendClassQuiz(){
+        guard let c=campaign,let live=quiz,live.mode == .classwide,let draft=quizDraft,let model=classModel,let reward=quizReward else{return}
+        guard !model.players.isEmpty,draft.answered>0 else{model.note="先选回答的同学和他们说的答案。";return}
+        let r=draft.result,right=draft.allRight,coins=reward.amount(right:right)
+        let order=c.engine.state.players.map(\.id)
+        do{
+            for id in order where model.players.contains(id) {
+                let a=try c.recordQuiz(actor:id,question:live.index,picks:r.picks,texts:r.texts,seconds:Date().timeIntervalSince(live.start),free:true,manualCoins:coins,shared:true)
+                model.sent.append((a.playerName,right,coins))
+            }
+            model.players=[];model.note=nil;draft.reset()
+            renderer?.classroomRefresh();revision += 1
+        }catch{model.note=error.localizedDescription}
+    }
+    /// Ends the class question: the TV reveals the right answer and who got it.
+    private func endClassQuiz(){
+        guard var live=quiz,live.mode == .classwide,let model=classModel else{closePanel();return}
+        closePanel()
+        let q=live.question,parts=q.parts
+        let winners=model.sent.filter(\.right).map(\.name)
+        live.attempt=QuizAttempt(player:"",playerName:"全班",node:-1,question:live.index,picks:parts.map{$0.answer},texts:parts.map{_ in nil},correct:parts.map{_ in true},seconds:0,limit:q.timeLimit,at:Date().timeIntervalSince1970)
+        live.headline=winners.isEmpty ? (model.sent.isEmpty ? "正确答案" : "这题没人答对") : "答对：" + winners.joined(separator:"、")
+        quiz=live;classModel=nil
+    }
+
+    /// K: endless flash-card practice for the selected student.
+    func openPractice(){
+        guard let c=campaign,quiz == nil,quizPanel == nil,presentationHost != nil else{return}
+        let model=PracticeModel(player:c.selectedPlayerID)
+        practiceModel=model
+        let panel=KeyHostingController(rootView:PracticePanel(game:self,model:model,onClose:{[weak self] in self?.endPractice()}))
+        panel.onKey={[weak self] key in
+            guard let self else{return false}
+            switch key {
+            case "⎋":self.endPractice()
+            case "0":self.practiceAnswer(nil)
+            default:
+                if let n=Int(key),let id=self.player(forSeat:n) {self.switchPractice(to:id);return true}
+                guard key.count==1,let j=MeadowQuizCard.letters.firstIndex(of:key.uppercased()) else{return false}
+                self.practiceAnswer(j)
+            }
+            return true
+        }
+        nextPracticeCard(after:nil)
+        presentPanel(panel,size:CGSize(width:720,height:460))
+    }
+    private func nextPracticeCard(after last:Int?){
+        guard let c=campaign,let model=practiceModel else{return}
+        guard let i=c.practiceCard(for:model.player,after:last),let unit=c.engine.state.units[model.player] else{withAnimation{quiz=nil};return}
+        quizToken += 1;model.waiting=false
+        quiz=LiveQuiz(token:quizToken,index:i,question:c.quizBank[i],mode:.practice,player:model.player,playerName:unit.shortName,place:"闪卡练习",node:nil,start:Date())
+    }
+    func switchPractice(to id:String){
+        guard let model=practiceModel,!model.waiting else{return}
+        model.player=id;model.right=0;model.total=0
+        nextPracticeCard(after:nil)
+    }
+    func practiceAnswer(_ option:Int?){
+        guard let c=campaign,var live=quiz,live.mode == .practice,live.attempt==nil,let model=practiceModel,!model.waiting else{return}
+        do{
+            let a=try c.recordQuiz(actor:live.player,question:live.index,picks:[option],seconds:Date().timeIntervalSince(live.start),free:true,practice:true)
+            model.total += 1;if a.correct.allSatisfy({$0}){model.right += 1}
+            model.waiting=true
+            live.attempt=a;live.hold=1.3;quiz=live
+            revision += 1
+        }catch{message=error.localizedDescription;revision += 1}
+    }
+    private func endPractice(){
+        practiceModel=nil;closePanel();withAnimation{quiz=nil}
+    }
+
+    /// The card finished its reveal (called by every copy: TV and preview; the first one acts).
     func quizCardFinished(_ token:Int){
         guard let live=quiz,live.token==token,let attempt=live.attempt else{return}
+        if live.mode == .practice,practiceModel != nil {nextPracticeCard(after:live.index);return}
         withAnimation(.easeIn(duration:0.2)){quiz=nil}
-        if let base=quizGainBase,attempt.coins>0 || attempt.drop != nil {
+        if live.mode == .personal,let base=quizGainBase,attempt.coins>0 || attempt.drop != nil {
             renderer?.classroomShowGains(title:attempt.drop != nil ? "答题掉落":"答题奖励",subtitle:"\(attempt.playerName) · 答对 \(attempt.rightCount)/\(attempt.correct.count) · 用时 \(Int(attempt.seconds.rounded())) 秒",since:base)
         }
-        quizGainBase=nil
+        quizGainBase=nil;quizDraft=nil;quizReward=nil
     }
 
     /// The answer report of the current trip (pages to look at, PDF / picture export).

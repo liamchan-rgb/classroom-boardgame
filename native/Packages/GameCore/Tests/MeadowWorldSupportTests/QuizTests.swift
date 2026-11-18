@@ -219,19 +219,67 @@ final class QuizTests:XCTestCase {
     }
     func testFreeQuizAnywhereDoesNotTouchTheMapAndBanksAppend()throws {
         let s=try quizSession([])
-        XCTAssertNil(s.quizCandidate())
+        XCTAssertNil(s.personalQuizQuestion(for:"p1"))
         try s.appendQuizBank(try QuizBankParser.parse(Data(mixed.utf8)))
         XCTAssertEqual(s.quizBank.count,4)
-        let i=try XCTUnwrap(s.quizCandidate(kind:.flashcard));XCTAssertEqual(s.quizBank[i].type,.flashcard)
-        XCTAssertNotEqual(s.quizCandidate(kind:.flashcard,skip:1),i);XCTAssertNil(s.quizCandidate(kind:.flashcard,difficulty:3))
+        let i=try XCTUnwrap(s.personalQuizQuestion(for:"p1",kind:.flashcard));XCTAssertEqual(s.quizBank[i].type,.flashcard)
+        XCTAssertNotEqual(s.personalQuizQuestion(for:"p1",kind:.flashcard,skip:1),i)
         let nodes=s.engine.state.map.nodes,coins=s.engine.state.units["p1"]!.coins
         let q=s.quizBank[i]
         let a=try s.recordQuiz(actor:"p1",question:i,picks:[q.parts[0].answer],seconds:40,free:true)
         XCTAssertEqual(a.node,-1);XCTAssertEqual(s.engine.state.map.nodes,nodes);XCTAssertGreaterThan(s.engine.state.units["p1"]!.coins,coins)
-        // The same student can be asked again anywhere, and the bank survives a reload.
+        // A used shared question is not dealt again (to anyone), but can be asked again on purpose.
+        XCTAssertNotEqual(s.personalQuizQuestion(for:"p2",kind:.flashcard),i);XCTAssertEqual(s.lastAskedQuestion(),i)
         try s.recordQuiz(actor:"p1",question:i,picks:[nil],seconds:3,free:true)
         XCTAssertEqual(s.quizLog.count,2)
         let restored=try MeadowCampaignSession(save:.decoded(s.snapshot.encoded()))
         XCTAssertEqual(restored.quizBank.count,4);XCTAssertEqual(restored.quizLog,s.quizLog)
+    }
+    func testExclusiveFirstThenSharedManualRewardsAndPractice()throws {
+        let text="""
+        类型：闪卡
+        对象：小明
+        正面：elephant
+        背面：大象
+
+        类型：闪卡
+        对象：2
+        正面：tiger
+        背面：老虎
+
+        类型：闪卡
+        对象：全班
+        正面：cat
+        背面：猫
+
+        类型：闪卡
+        正面：dog
+        背面：狗
+        难度：2
+        """
+        let bank=try QuizBankParser.parse(Data(text.utf8))
+        XCTAssertEqual(bank.map(\.isShared),[false,false,true,true]);XCTAssertEqual(bank[0].audience,["小明"])
+        var c=MeadowMapConfiguration.suggested(total:10,seed:31827);c.combat=0;c.boss=0;c.reward=0;c.empty=9;c.extraRoads=0
+        let s=try MeadowCampaignSession.new(layout:MeadowMapGenerator.generate(c),studentNames:["小明","小红"],quizBank:bank)
+        // Own question first (by name for p1, by number for p2), then shared ones.
+        XCTAssertEqual(s.personalQuizQuestion(for:"p1"),0);XCTAssertEqual(s.personalQuizQuestion(for:"p2"),1)
+        try s.recordQuiz(actor:"p1",question:0,picks:[bank[0].parts[0].answer],seconds:5,free:true)
+        let next=try XCTUnwrap(s.personalQuizQuestion(for:"p1"));XCTAssertTrue(bank[next].isShared)
+        XCTAssertNotEqual(s.personalQuizQuestion(for:"p1"),1)  // never someone else's own question
+        // Shared question to the class: the teacher's coins, points for right, nothing from the drop table.
+        let shared=try XCTUnwrap(s.sharedQuizQuestion());XCTAssertTrue(bank[shared].isShared)
+        let before=s.engine.state.units["p2"]!
+        let right=try s.recordQuiz(actor:"p2",question:shared,picks:[bank[shared].parts[0].answer],seconds:999,free:true,manualCoins:25,shared:true)
+        XCTAssertEqual(right.coins,25);XCTAssertEqual(right.score,bank[shared].points);XCTAssertNil(right.drop);XCTAssertEqual(right.shared,true)
+        XCTAssertEqual(s.engine.state.units["p2"]!.coins,before.coins+25)
+        let wrong=try s.recordQuiz(actor:"p1",question:shared,picks:[nil],seconds:5,free:true,manualCoins:2,shared:true)
+        XCTAssertEqual(wrong.coins,2);XCTAssertEqual(wrong.score,0)
+        XCTAssertNotEqual(s.sharedQuizQuestion(),shared)
+        // Flash-card practice: endless, recorded, no reward; unseen cards first, never the card just shown.
+        let card=try XCTUnwrap(s.practiceCard(for:"p1"));XCTAssertNotEqual(card,1)
+        let coins=s.engine.state.units["p1"]!.coins
+        let p=try s.recordQuiz(actor:"p1",question:card,picks:[nil],seconds:2,free:true,practice:true)
+        XCTAssertEqual(p.coins,0);XCTAssertEqual(s.engine.state.units["p1"]!.coins,coins)
+        XCTAssertNotEqual(s.practiceCard(for:"p1",after:card),card)
     }
 }

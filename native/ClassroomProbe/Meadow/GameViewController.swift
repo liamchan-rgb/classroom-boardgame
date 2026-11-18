@@ -1180,9 +1180,11 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         let start=Date()
         let card=MeadowQuizCard.present(in:view,question:question,player:unit.shortName,place:node.name,start:start);classroomOverlayDirty=true
         var panel:UIViewController?
-        let host=UIHostingController(rootView:MeadowQuizAnswerPanel(question:question,player:unit.shortName,start:start,onSubmit:{[weak self] picks,texts in
+        let draft=QuizAnswerDraft(question)
+        let host=UIHostingController(rootView:MeadowQuizAnswerPanel(draft:draft,reward:QuizManualReward(question),player:unit.shortName,start:start,onSubmit:{[weak self] in
             panel?.dismiss(animated:true)
-            self?.finishQuiz(actor:actor,index:index,picks:picks,texts:texts,seconds:Date().timeIntervalSince(start),card:card)
+            let r=draft.result
+            self?.finishQuiz(actor:actor,index:index,picks:r.picks,texts:r.texts,seconds:Date().timeIntervalSince(start),card:card)
         },onLater:{[weak self] in
             panel?.dismiss(animated:true);card.removeFromSuperview();self?.classroomOverlayDirty=true
         }))

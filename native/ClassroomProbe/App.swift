@@ -183,6 +183,8 @@ final class TeacherHostController: UIViewController {
         case .toggleTeamScores:game.toggleTeamScores()
         case .openQuizReport:game.openQuizReport()
         case .openQuiz:game.openQuiz()
+        case .openClassQuiz:game.openClassQuiz()
+        case .openPractice:game.openPractice()
         }
     }
 

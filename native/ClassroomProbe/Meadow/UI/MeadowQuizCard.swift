@@ -15,10 +15,11 @@ final class MeadowQuizCard: UIView {
     static let letters = ["A", "B", "C", "D", "E", "F", "G", "H"]
     static let circled = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩", "⑪", "⑫"]
 
-    static func present(in host: UIView, question: QuizQuestion, player: String, place: String, start: Date) -> MeadowQuizCard {
+    private var mode: LiveQuiz.Mode = .personal
+    static func present(in host: UIView, question: QuizQuestion, player: String, place: String, start: Date, mode: LiveQuiz.Mode = .personal) -> MeadowQuizCard {
         host.subviews.compactMap { $0 as? MeadowQuizCard }.forEach { $0.removeFromSuperview() }
         let view = MeadowQuizCard(frame: host.bounds); view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        view.question = question; view.start = start; view.limit = question.timeLimit
+        view.question = question; view.start = start; view.limit = question.timeLimit; view.mode = mode
         view.build(player: player, place: place); host.addSubview(view)
         view.alpha = 0; view.card.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
         UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: 0.75, initialSpringVelocity: 0.6) { view.alpha = 1; view.card.transform = .identity }
@@ -35,7 +36,9 @@ final class MeadowQuizCard: UIView {
         MeadowPreviewPalette.stylePanel(card); card.backgroundColor = MeadowPreviewPalette.panel; card.layer.borderColor = UIColor.white.cgColor; card.layer.borderWidth = 1.5
         addSubview(card)
         let stars = Self.stars(q)
-        header.attributedText = MeadowGlassText.iconLine("person.crop.circle.fill", "\(player) 作答 · \(q.type.title)\(stars.isEmpty ? "" : " " + stars) · 满分 +\(q.reward) · \(place)", size: 18, tint: MeadowPreviewPalette.gold)
+        let prize = mode == .practice ? "练习" : q.isShared ? "老师发奖" : "满分 +\(q.reward)"
+        header.attributedText = MeadowGlassText.iconLine(mode == .classwide ? "person.3.fill" : mode == .practice ? "rectangle.on.rectangle.angled" : "person.crop.circle.fill",
+                                                         "\(player) 作答 · \(q.type.title)\(stars.isEmpty ? "" : " " + stars) · \(prize) · \(place)", size: 18, tint: MeadowPreviewPalette.gold)
         header.adjustsFontSizeToFitWidth = true; header.minimumScaleFactor = 0.6
         clock.font = .monospacedDigitSystemFont(ofSize: 26, weight: .heavy); clock.textAlignment = .center; clock.textColor = .white
         clock.layer.cornerRadius = 20; clock.clipsToBounds = true; clock.backgroundColor = MeadowPreviewPalette.primary
@@ -125,9 +128,9 @@ final class MeadowQuizCard: UIView {
     }
 
     /// Shows the answers and the reward line, then leaves.
-    func reveal(_ attempt: QuizAttempt, dropName: String? = nil, then done: @escaping () -> Void) {
+    func reveal(_ attempt: QuizAttempt, dropName: String? = nil, headline: String? = nil, hold customHold: Double? = nil, then done: @escaping () -> Void) {
         revealed = true; ticker?.invalidate()
-        clock.text = "\(attempt.rightCount)/\(attempt.correct.count)"
+        clock.text = mode == .classwide ? "答案" : "\(attempt.rightCount)/\(attempt.correct.count)"
         clock.backgroundColor = attempt.rightCount == attempt.correct.count ? .systemGreen : attempt.rightCount == 0 ? .systemRed : .systemOrange
         let q = question!
         switch q.type {
@@ -158,16 +161,18 @@ final class MeadowQuizCard: UIView {
             UIView.transition(with: questions, duration: 0.35, options: .transitionCrossDissolve) { self.questions.attributedText = self.readingText(attempt: attempt) }
         }
         let all = attempt.rightCount == attempt.correct.count
+        if mode == .classwide { clock.backgroundColor = MeadowPreviewPalette.primary }
         var head = attempt.overtime ? "超时 · 不发奖励" : all ? "全对！" : attempt.rightCount == 0 ? "这次没答对" : "答对 \(attempt.rightCount)/\(attempt.correct.count)"
         if attempt.coins > 0 { head += "  +\(attempt.coins) 金币" }
         if attempt.score > 0 { head += "  +\(attempt.score) 积分" }
         if let dropName { head += "  掉落：\(dropName)" + ((attempt.dropCount ?? 1) > 1 ? "×\(attempt.dropCount!)" : "") }
-        let icon = attempt.overtime ? "clock.badge.xmark" : all ? "checkmark.seal.fill" : attempt.rightCount == 0 ? "xmark.octagon.fill" : "circle.lefthalf.filled"
+        if let headline { head = headline }
+        let icon = mode == .classwide ? "checkmark.seal.fill" : attempt.overtime ? "clock.badge.xmark" : all ? "checkmark.seal.fill" : attempt.rightCount == 0 ? "xmark.octagon.fill" : "circle.lefthalf.filled"
         let tint: UIColor = attempt.overtime ? MeadowPreviewPalette.muted : all ? .systemGreen : attempt.rightCount == 0 ? .systemRed : .systemOrange
         result.attributedText = MeadowGlassText.iconLine(icon, head + (q.explanation.map { "  ·  " + $0 } ?? ""), size: 20, tint: tint)
         UIView.animate(withDuration: 0.3) { self.result.alpha = 1 }
         setNeedsLayout()
-        let hold: Double = q.type == .reading || q.type == .fill ? 5 : (q.explanation == nil ? 3 : 4.5)
+        let hold: Double = customHold ?? (mode == .classwide || q.type == .reading || q.type == .fill ? 5 : (q.explanation == nil ? 3 : 4.5))
         DispatchQueue.main.asyncAfter(deadline: .now() + hold) { [weak self] in
             guard let self else { return }
             UIView.animate(withDuration: 0.25, animations: { self.alpha = 0 }) { _ in self.removeFromSuperview(); done() }

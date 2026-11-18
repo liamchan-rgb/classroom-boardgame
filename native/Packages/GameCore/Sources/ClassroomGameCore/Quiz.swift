@@ -36,12 +36,21 @@ public struct QuizQuestion: Codable, Equatable {
     public var tags: [String]? = nil
     public var passage: String? = nil
     public var items: [QuizItem]? = nil
+    /// Who it is for: student names or numbers (专属题). nil, or "全班", = the shared bank (公用题).
+    public var audience: [String]? = nil
     public init(prompt: String, options: [String], answer: Int, coins: Int? = nil, explanation: String? = nil,
                 kind: QuizKind? = nil, difficulty: Int? = nil, seconds: Int? = nil, tags: [String]? = nil, passage: String? = nil, items: [QuizItem]? = nil) {
         self.prompt = prompt; self.options = options; self.answer = answer; self.coins = coins; self.explanation = explanation
         self.kind = kind; self.difficulty = difficulty; self.seconds = seconds; self.tags = tags; self.passage = passage; self.items = items
     }
     public static let defaultCoins = 10
+    /// In the shared bank (rewards are handed out by the teacher).
+    public var isShared: Bool { audience.map { $0.isEmpty || $0.contains { ["全班", "全体", "所有人", "all", "公用"].contains($0.lowercased()) } } ?? true }
+    /// Whether this exclusive question is for a student with that name (or short name) and number (p3 → 3).
+    public func isFor(names: [String], number: Int?) -> Bool {
+        guard !isShared, let audience else { return false }
+        return audience.contains { a in names.contains(a) || (number.map { String($0) == a } ?? false) }
+    }
     public var type: QuizKind { kind ?? .choice }
     /// What gets graded, in order.
     public var parts: [QuizItem] {
@@ -63,7 +72,8 @@ public struct QuizQuestion: Codable, Equatable {
               type != .choice || options.count <= 6,
               (0...500).contains(reward), (explanation?.count ?? 0) <= 600, (passage?.count ?? 0) <= 4000,
               difficulty.map({ (1...3).contains($0) }) ?? true, seconds.map({ (10...600).contains($0) }) ?? true,
-              (tags?.count ?? 0) <= 8, (tags ?? []).allSatisfy({ $0.count <= 30 }) else {
+              (tags?.count ?? 0) <= 8, (tags ?? []).allSatisfy({ $0.count <= 30 }),
+              (audience?.count ?? 0) <= 40, (audience ?? []).allSatisfy({ $0.count <= 40 }) else {
             throw GameError("题目格式无效：「\(prompt.prefix(20))」")
         }
     }
@@ -91,6 +101,10 @@ public struct QuizAttempt: Codable, Equatable {
     /// Item that dropped for a full, in-time answer.
     public var drop: String? = nil
     public var dropCount: Int? = nil
+    /// Asked to the whole class (the teacher picked who answered and handed out the reward).
+    public var shared: Bool? = nil
+    /// Flash-card practice: recorded for the report, no reward.
+    public var practice: Bool? = nil
     public var overtime: Bool { seconds > Double(limit) + 0.5 }
     public var rightCount: Int { correct.filter { $0 }.count }
     public init(player: String, playerName: String, node: Int, question: Int, picks: [Int?], texts: [String?], correct: [Bool], seconds: Double, limit: Int, at: Double) {
@@ -131,8 +145,10 @@ public struct QuizRecord: Codable, Equatable {
     public var dropTier: Int?
     /// Called up by the teacher anywhere (not at a quiz spot on the map): nothing about the map changes.
     public var free: Bool? = nil
-    public init(attempt: QuizAttempt, fullCoins: Int, points: Int, dropTier: Int?, free: Bool = false) {
-        self.attempt = attempt; self.fullCoins = fullCoins; self.points = points; self.dropTier = dropTier; self.free = free ? true : nil
+    /// Shared-bank questions: the coins the teacher chose to send (the reward or the participation prize); no drop.
+    public var manualCoins: Int? = nil
+    public init(attempt: QuizAttempt, fullCoins: Int, points: Int, dropTier: Int?, free: Bool = false, manualCoins: Int? = nil) {
+        self.attempt = attempt; self.fullCoins = fullCoins; self.points = points; self.dropTier = dropTier; self.free = free ? true : nil; self.manualCoins = manualCoins
     }
 }
 
@@ -168,13 +184,19 @@ extension Evaluation {
         let n = attempt.correct.count
         guard attempt.node == (free ? -1 : actor.nodeID), (1...12).contains(n), attempt.picks.count == n, attempt.texts.count == n,
               attempt.seconds.isFinite, attempt.seconds >= 0, (10...600).contains(attempt.limit), attempt.question >= 0,
-              (0...500).contains(record.fullCoins), (0...3).contains(record.points),
+              (0...500).contains(record.fullCoins), (0...3).contains(record.points), (record.manualCoins ?? 0) >= 0, (record.manualCoins ?? 0) <= 1000,
               record.dropTier.map({ QuizRewards.drops.indices.contains($0) }) ?? true,
               attempt.texts.allSatisfy({ ($0?.count ?? 0) <= 120 }), log.count < 5000 else { throw GameError("答题记录无效。") }
         let right = attempt.rightCount, intime = !attempt.overtime
-        attempt.coins = intime ? QuizRewards.coins(full: record.fullCoins, right: right, total: n, fast: record.dropTier != nil && attempt.seconds * 2 <= Double(attempt.limit)) : 0
-        attempt.score = intime && right == n ? record.points : 0
-        if intime, right == n, let tier = record.dropTier {
+        if attempt.practice == true {
+            attempt.coins = 0; attempt.score = 0
+        } else if let manual = record.manualCoins {
+            attempt.coins = manual; attempt.score = right == n ? record.points : 0
+        } else {
+            attempt.coins = intime ? QuizRewards.coins(full: record.fullCoins, right: right, total: n, fast: record.dropTier != nil && attempt.seconds * 2 <= Double(attempt.limit)) : 0
+            attempt.score = intime && right == n ? record.points : 0
+        }
+        if attempt.practice != true, record.manualCoins == nil, intime, right == n, let tier = record.dropTier {
             let table = QuizRewards.drops[tier]
             for prize in table { if let item = prize.item { _ = try catalog.item(item) } }
             var roll = try state.random.next(upperBound: table.reduce(0) { $0 + $1.weight }) - 1

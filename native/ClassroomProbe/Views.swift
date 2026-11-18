@@ -39,6 +39,8 @@ private struct TeacherBookConsole:View {
                 Spacer()
                 Button{notesFocused=false;game.openTimer()}label:{Label("计时",systemImage:"timer")}
                 Button{notesFocused=false;game.openQuiz()}label:{Label("答题",systemImage:"questionmark.bubble")}.disabled(game.campaign==nil || game.quiz != nil)
+                Button{notesFocused=false;game.openClassQuiz()}label:{Label("全班题",systemImage:"person.3.sequence")}.disabled(game.campaign==nil || game.quiz != nil)
+                Button{notesFocused=false;game.openPractice()}label:{Label("闪卡",systemImage:"rectangle.on.rectangle.angled")}.disabled(game.campaign==nil || game.quiz != nil)
                 ClassroomScoreboardButton(overlays:game.overlays){game.toggleScoreboard()}
                 Button{notesFocused=false;game.openShortcutEditor()}label:{Label("快捷键",systemImage:"keyboard")}
                 Button{notesFocused=false;game.openGM()}label:{Label("GM",systemImage:"wand.and.stars")}.disabled(game.busy || game.campaign==nil)
