@@ -404,8 +404,15 @@ final class MeadowTeacherCoordinator:ObservableObject {
 /// the same 1280×720 bounds; window size/Retina scale never enter map layout.
 struct MeadowRendererHost:UIViewControllerRepresentable {
     @ObservedObject var game:MeadowTeacherCoordinator
+    /// The teacher's own preview owns the game view only while no public screen is connected; the public
+    /// screen owns it only while it is connected. Without this, a host that is about to be removed (the
+    /// teacher preview when the TV / Mac public window connects, or the closing public window) could take
+    /// the view back in a last update and leave it in no window at all (both screens black).
+    var teacherPreview=false
     func makeUIViewController(context:Context)->MeadowRendererContainer {MeadowRendererContainer()}
-    func updateUIViewController(_ c:MeadowRendererContainer,context:Context){c.install(game.renderer)}
+    func updateUIViewController(_ c:MeadowRendererContainer,context:Context){
+        if teacherPreview != game.externalConnected {c.install(game.renderer)}
+    }
 }
 final class MeadowRendererContainer:UIViewController {
     private weak var installed:UIViewController?

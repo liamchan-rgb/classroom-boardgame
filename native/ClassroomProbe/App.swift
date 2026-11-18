@@ -18,6 +18,10 @@ struct ClassroomProbeApp: App {
                 }
         }
         #if targetEnvironment(macCatalyst)
+        // One teacher console only: no File ▸ New Window (a second console would fight over the game view).
+        .commands { CommandGroup(replacing: .newItem) {} }
+        #endif
+        #if targetEnvironment(macCatalyst)
         // Mac has no external-display scene accessory: the public output is a second
         // window the teacher drags onto the projector/TV screen and makes full screen.
         WindowGroup("课堂公开画面", id: MacPublicWindow.sceneID) { MacPublicWindow() }
@@ -68,11 +72,15 @@ final class TeacherHostController: UIViewController {
     private var registration: UISceneAccessoryRegistration?
     #endif
     private var heldKeys: Set<String> = []
+    /// The live teacher console. Mac can bring back an extra console window (window restoration); it closes itself.
+    private static weak var primary: TeacherHostController?
+    private var isPrimary: Bool { Self.primary === self }
     override var canBecomeFirstResponder: Bool { true }
     override func viewDidLoad() {
         super.viewDidLoad()
-        TeacherSession.shared.game.privatePresenter=self
-        ClassroomGlobalTools.handlePresses={[weak self] presses in MainActor.assumeIsolated{self?.globalPresses(presses) ?? false}}
+        if Self.primary?.view.window == nil { Self.primary = self }
+        if isPrimary { TeacherSession.shared.game.privatePresenter=self }
+        if isPrimary { ClassroomGlobalTools.handlePresses={[weak self] presses in MainActor.assumeIsolated{self?.globalPresses(presses) ?? false}} }
         let host = UIHostingController(rootView: TeacherConsole(session: .shared))
         addChild(host)
         host.view.translatesAutoresizingMaskIntoConstraints = false
@@ -97,7 +105,14 @@ final class TeacherHostController: UIViewController {
         #endif
     }
     override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated); becomeFirstResponder()
+        super.viewDidAppear(animated)
+        #if targetEnvironment(macCatalyst)
+        if !isPrimary, let scene = view.window?.windowScene {
+            UIApplication.shared.requestSceneSessionDestruction(scene.session, options: nil)
+            return
+        }
+        #endif
+        becomeFirstResponder()
         // A tap anywhere outside a text field ends typing (the shortcut keys work again right away).
         if let window=view.window {EndEditingTap.install(on:window)}
 
