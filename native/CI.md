@@ -60,9 +60,16 @@ scripts/local-build.sh test       # 工程/外观校验、tools单测、ProbeCor
 scripts/local-build.sh ipa        # 未签名Release归档 → artifacts/ClassroomStage2-v<版本>-<提交>-unsigned.ipa（SideStore侧载）
 scripts/local-build.sh sim        # Debug模拟器构建、安装、启动并截图 artifacts/simulator-launch.png
 SIM_DEVICE="iPad Pro 13-inch (M5)" scripts/local-build.sh sim
+scripts/local-build.sh mac        # Mac Catalyst版 → artifacts/ClassroomProbe.app并打开（不在默认三步里）
 ```
 
 - 前提：Xcode 27及以上（选择器同CI），以及一次性安装的Metal Toolchain：`xcodebuild -downloadComponent MetalToolchain`（约839MB；App含`.metal`着色器，缺失时脚本直接提示）。
 - 全部日志、IPA、SHA256与截图写入`artifacts/`（已忽略）；脚本不发布Release、不推送、不打标签。提交信息不含`[ipa]`时也不会触发云端打包。
 - 模拟器构建额外传`ONLY_ACTIVE_ARCH=YES`：工程未设该项，模拟器默认还会编x86_64并因本地包模块缺失失败；工程文件本身未改。
 - 首次本机实测（MacBook Air，Xcode 27.2，提交c113039）：test约3分钟（ProbeCore 13、GameCore 73项零失败），ipa约105秒（v0.32.4/build48，arm64），sim约3分钟并成功启动到教师主界面。仅启动截图，未做功能、电视或性能验收。
+
+## Mac版（Mac Catalyst，2026-11-18）
+
+- 工程由生成器开启`SUPPORTS_MACCATALYST`（`SUPPORTED_PLATFORMS`加`macosx`），Mac用独立的`ClassroomProbe/Info-Mac.plist`（只把`UIApplicationSupportsMultipleScenes`改为true），同一Bundle ID，`[sdk=macosx*]`条件设置本机ad-hoc签名（Sign to Run Locally）。iPad/模拟器的Info.plist、签名设置和IPA流程不变。
+- Mac没有iPadOS的外接显示场景（`registerSceneAccessory`在Catalyst不可用，`#if !targetEnvironment(macCatalyst)`隔开）。Mac上教师顶栏多一个“公开窗口”按钮：打开第二个窗口`MacPublicWindow`（同一`PublicSurface`、同一连接计数，不接受点击，与iPad的非交互外接场景一致），拖到投影/电视屏后全屏；再点“关闭公开”或关窗即断开。
+- 首次本机结果：Mac Release编译104秒、启动正常；iPad test/ipa/sim全流程复跑通过，模拟器界面无变化。Mac公开窗口的打开/关闭、跨屏全屏、教师端实时镜像与性能尚待用户在真实屏幕上验收。

@@ -17,8 +17,44 @@ struct ClassroomProbeApp: App {
                     } else {TeacherSession.shared.pause(.background,enabled:false)}
                 }
         }
+        #if targetEnvironment(macCatalyst)
+        // Mac has no external-display scene accessory: the public output is a second
+        // window the teacher drags onto the projector/TV screen and makes full screen.
+        WindowGroup("课堂公开画面", id: MacPublicWindow.sceneID) { MacPublicWindow() }
+        #endif
     }
 }
+
+#if targetEnvironment(macCatalyst)
+/// Mac counterpart of `PublicSceneDelegate`: same public surface, same connection bookkeeping,
+/// and, like the iPad's non-interactive external scene, it takes no clicks.
+struct MacPublicWindow: View {
+    static let sceneID = "classroom-public-output"
+    static let connectionID = "mac-public-window"
+    var body: some View {
+        PublicSurface(model: TeacherSession.shared.display, game: TeacherSession.shared.game)
+            .allowsHitTesting(false)
+            .background(Color.black)
+            .ignoresSafeArea()
+            .onAppear { TeacherSession.shared.setConnection(id: Self.connectionID, connected: true) }
+            .onDisappear { TeacherSession.shared.setConnection(id: Self.connectionID, connected: false) }
+    }
+}
+
+/// Teacher toolbar button that opens or closes the Mac public window.
+struct MacPublicWindowButton: View {
+    var connected: Bool
+    @Environment(\.openWindow) private var openWindow
+    @Environment(\.dismissWindow) private var dismissWindow
+    var body: some View {
+        Button {
+            if connected { dismissWindow(id: MacPublicWindow.sceneID) } else { openWindow(id: MacPublicWindow.sceneID) }
+        } label: {
+            Label(connected ? "关闭公开" : "公开窗口", systemImage: connected ? "rectangle.on.rectangle.slash" : "rectangle.on.rectangle")
+        }
+    }
+}
+#endif
 
 @MainActor
 struct TeacherHost: UIViewControllerRepresentable {
@@ -28,7 +64,9 @@ struct TeacherHost: UIViewControllerRepresentable {
 
 @MainActor
 final class TeacherHostController: UIViewController {
+    #if !targetEnvironment(macCatalyst)
     private var registration: UISceneAccessoryRegistration?
+    #endif
     private var heldKeys: Set<String> = []
     override var canBecomeFirstResponder: Bool { true }
     override func viewDidLoad() {
@@ -50,8 +88,13 @@ final class TeacherHostController: UIViewController {
                                                name: UIApplication.willResignActiveNotification, object: nil)
         let configuration = UISceneConfiguration()
         configuration.delegateClass = PublicSceneDelegate.self
+        #if targetEnvironment(macCatalyst)
+        _ = configuration
+        TeacherSession.shared.setRegistrationStatus("Mac：点“公开窗口”打开学生画面，拖到投影屏后全屏。")
+        #else
         registration = registerSceneAccessory(.externalNonInteractive(sceneConfiguration: configuration))
         TeacherSession.shared.setRegistrationStatus("已注册iPadOS27公开场景，等待电视连接。")
+        #endif
     }
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated); becomeFirstResponder()

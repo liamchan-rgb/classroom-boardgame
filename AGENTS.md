@@ -1,3 +1,7 @@
+## Mac版（Mac Catalyst）与本地mac构建（2026-11-18，基于v0.32.4/build48，未改版本号、未存档）
+
+用户要求转Mac原生软件，选Mac Catalyst。试编译仅`registerSceneAccessory`/`UISceneAccessoryRegistration`两处在Catalyst不可用，其余约2.2万行界面代码直接编过，用户试用Mac版“没问题”。本步：生成器开启Catalyst（Mac独立Info-Mac.plist允许多窗口、同Bundle ID、Mac本机ad-hoc签名），外接显示注册在Mac编译排除；Mac教师顶栏新增“公开窗口”，以第二窗口MacPublicWindow显示同一PublicSurface（不接受点击、计入连接），拖到投影屏全屏；`scripts/local-build.sh mac`生成并打开artifacts/ClassroomProbe.app。iPad端代码路径、Info.plist、签名与IPA流程不变，本机复跑test/ipa/sim通过。Mac公开窗口跨屏全屏、教师镜像与性能待用户实测。详见native/CI.md“Mac版”。
+
 ## 本地构建脚本（2026-11-18，不改App、未存档）
 
 用户因云端构建慢，改在本机Mac构建。新增`scripts/local-build.sh`（test/ipa/sim三步，对应visual-refactor-classroom-ipa.yml并加模拟器启动截图），说明见`native/CI.md`“本地一键构建”。本机仓库为该分支浅克隆（`~/Developer/classroom-boardgame`）。首次实测：c113039的核心测试零失败、v0.32.4/build48未签名IPA本地生成、iPad Pro 13模拟器启动到教师主界面；仅启动截图，未做功能/电视/性能验收。用户明确要求本步**先不存档**，只记文档；v0.20–v0.32.4的archives/索引同样尚缺，待用户决定是否补存。

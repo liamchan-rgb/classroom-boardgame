@@ -6,12 +6,14 @@
 #   scripts/local-build.sh test       # validators, tool unit tests, ProbeCore/GameCore swift tests
 #   scripts/local-build.sh ipa        # unsigned Release archive -> artifacts/*.ipa (for SideStore)
 #   scripts/local-build.sh sim        # Debug build, install and launch on an iPad simulator, screenshot
+#   scripts/local-build.sh mac        # Mac Catalyst Release app -> artifacts/ClassroomProbe.app, then open it
 #   scripts/local-build.sh test ipa   # any combination, run in the order given
 #
 # Environment:
 #   SIM_DEVICE="iPad Pro 13-inch (M5)"   simulator name or UDID (default: first available iPad)
 #
 # Logs and outputs go to artifacts/ (git-ignored). Nothing is published or pushed.
+# `mac` is not part of the default run; ask for it explicitly.
 set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -152,14 +154,32 @@ do_sim() {
   ok "Running in Simulator; screenshot: $root/artifacts/simulator-launch.png"
 }
 
+do_mac() {
+  select_xcode
+  require_metal
+  step "Building Mac Catalyst app"
+  resolve_packages
+  run_logged mac-build.log xcodebuild -project "$project" -scheme "$scheme" \
+    -configuration Release -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64' \
+    -derivedDataPath native/catalyst-build -clonedSourcePackagesDirPath "$packages_dir" build
+  local app=native/catalyst-build/Build/Products/Release-maccatalyst/ClassroomProbe.app
+  test -d "$app"
+  osascript -e 'tell application id "org.personal.classroom.stage0" to quit' 2>/dev/null || true
+  rm -rf artifacts/ClassroomProbe.app
+  ditto "$app" artifacts/ClassroomProbe.app
+  codesign --verify artifacts/ClassroomProbe.app
+  open artifacts/ClassroomProbe.app
+  ok "Mac app: $root/artifacts/ClassroomProbe.app (opened; use 公开窗口 for the student screen)"
+}
+
 steps=("$@")
 (( ${#steps[@]} )) || steps=(test ipa sim)
 for s in "${steps[@]}"; do
   case "$s" in
-    test|ipa|sim) "do_$s" ;;
+    test|ipa|sim|mac) "do_$s" ;;
     all) do_test; do_ipa; do_sim ;;
-    -h|--help) sed -n '2,15p' "$0"; exit 0 ;;
-    *) echo "Unknown step: $s (use test, ipa, sim or all)" >&2; exit 2 ;;
+    -h|--help) sed -n '2,17p' "$0"; exit 0 ;;
+    *) echo "Unknown step: $s (use test, ipa, sim, mac or all)" >&2; exit 2 ;;
   esac
 done
 printf '\n\033[1;32mDone in %ss.\033[0m Logs: %s/artifacts\n' "$SECONDS" "$root"

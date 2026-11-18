@@ -802,6 +802,12 @@
 			"path" = "Info.plist";
 			"sourceTree" = "<group>";
 		};
+		"4542926132E7FA3756767F02" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "text.plist.xml";
+			"path" = "Info-Mac.plist";
+			"sourceTree" = "<group>";
+		};
 		"6BFC76380CC79F82566884C6" = {
 			"isa" = "PBXFileReference";
 			"lastKnownFileType" = "file";
@@ -982,6 +988,7 @@
 				"6DD4E146027F79C47AD9F73B",
 				"7F15BAE5E8D1394B7AC021E5",
 				"06271BAF49532C879AA3C58B",
+				"4542926132E7FA3756767F02",
 				"6BFC76380CC79F82566884C6",
 				"2BF35B3FB72A3D4E876979D6",
 				"54AE073B4791810725C73209",
@@ -1206,9 +1213,13 @@
 				"CODE_SIGNING_ALLOWED" = "NO";
 				"CODE_SIGNING_REQUIRED" = "NO";
 				"TARGETED_DEVICE_FAMILY" = "2";
-				"SUPPORTED_PLATFORMS" = "iphoneos iphonesimulator";
-				"SUPPORTS_MACCATALYST" = "NO";
+				"SUPPORTED_PLATFORMS" = "iphoneos iphonesimulator macosx";
+				"SUPPORTS_MACCATALYST" = "YES";
 				"SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD" = "NO";
+				"DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER" = "NO";
+				"INFOPLIST_FILE[sdk=macosx*]" = "ClassroomProbe/Info-Mac.plist";
+				"CODE_SIGNING_ALLOWED[sdk=macosx*]" = "YES";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				"SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD" = "NO";
 				"SWIFT_EMIT_LOC_STRINGS" = "NO";
 				"LD_RUNPATH_SEARCH_PATHS" = (
@@ -1247,9 +1258,13 @@
 				"CODE_SIGNING_ALLOWED" = "NO";
 				"CODE_SIGNING_REQUIRED" = "NO";
 				"TARGETED_DEVICE_FAMILY" = "2";
-				"SUPPORTED_PLATFORMS" = "iphoneos iphonesimulator";
-				"SUPPORTS_MACCATALYST" = "NO";
+				"SUPPORTED_PLATFORMS" = "iphoneos iphonesimulator macosx";
+				"SUPPORTS_MACCATALYST" = "YES";
 				"SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD" = "NO";
+				"DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER" = "NO";
+				"INFOPLIST_FILE[sdk=macosx*]" = "ClassroomProbe/Info-Mac.plist";
+				"CODE_SIGNING_ALLOWED[sdk=macosx*]" = "YES";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				"SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD" = "NO";
 				"SWIFT_EMIT_LOC_STRINGS" = "NO";
 				"LD_RUNPATH_SEARCH_PATHS" = (

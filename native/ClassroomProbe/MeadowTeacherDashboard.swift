@@ -21,6 +21,9 @@ struct MeadowTeacherDashboard:View {
             HStack(spacing:8){
                 Image(systemName:"leaf.fill").font(.system(size:18,weight:.bold)).foregroundStyle(GameTheme.primary).accessibilityLabel("林间旅程 v0.31.1")
                 GlassChip(icon:game.externalConnected ? "tv.fill":"ipad.landscape",text:game.externalConnected ? "TV":"本机",tint:game.externalConnected ? .green:GameTheme.muted)
+                #if targetEnvironment(macCatalyst)
+                MacPublicWindowButton(connected:game.externalConnected)
+                #endif
                 if let c=game.campaign,!inBattle {
                     GlassChip(icon:"figure.walk.motion",text:"\(MeadowMovementRules.steps(c.movementRemaining))/\(MeadowMovementRules.steps(c.movementCapacity))")
                     GlassChip(icon:"bitcoinsign.circle.fill",text:"\(c.engine.state.units[c.selectedPlayerID]?.coins ?? 0)",tint:GameTheme.accent)

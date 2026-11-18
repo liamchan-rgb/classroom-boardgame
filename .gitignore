@@ -2,6 +2,7 @@
 **/.build/
 native/build/
 native/simulator-build/
+native/catalyst-build/
 artifacts/
 **/xcuserdata/
 **/*.xcuserstate

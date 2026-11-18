@@ -36,6 +36,8 @@ for name in ['App.swift', 'ClassroomGlass.swift', 'ClassroomTools.swift', 'Class
     sources.append(add("build:" + name, "PBXBuildFile", fileRef=ref))
 plist = add("info", "PBXFileReference", lastKnownFileType="text.plist.xml", path="Info.plist", sourceTree="<group>")
 files.append(plist)
+mac_plist = add("info-mac", "PBXFileReference", lastKnownFileType="text.plist.xml", path="Info-Mac.plist", sourceTree="<group>")
+files.append(mac_plist)
 resource_builds = []
 for name in ("sample.pptx", "ThirdPartyNotices.txt", "design-tokens.json"):
     ref = add("resource:" + name, "PBXFileReference", lastKnownFileType="file", path="Resources/" + name, sourceTree="<group>")
@@ -75,8 +77,13 @@ for name in ("Debug", "Release"):
     target_settings = dict(PRODUCT_NAME="$(TARGET_NAME)", PRODUCT_BUNDLE_IDENTIFIER="org.personal.classroom.stage0",
                            INFOPLIST_FILE="ClassroomProbe/Info.plist", GENERATE_INFOPLIST_FILE="NO",
                            CODE_SIGN_STYLE="Manual", CODE_SIGNING_ALLOWED="NO", CODE_SIGNING_REQUIRED="NO",
-                           TARGETED_DEVICE_FAMILY="2", SUPPORTED_PLATFORMS="iphoneos iphonesimulator",
-                           SUPPORTS_MACCATALYST="NO", SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD="NO",
+                           TARGETED_DEVICE_FAMILY="2", SUPPORTED_PLATFORMS="iphoneos iphonesimulator macosx",
+                           # Mac Catalyst: own Info.plist (multiple windows for the public output),
+                           # same bundle ID, ad-hoc "Sign to Run Locally". iPad settings are unchanged.
+                           SUPPORTS_MACCATALYST="YES", SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD="NO",
+                           DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER="NO",
+                           **{"INFOPLIST_FILE[sdk=macosx*]":"ClassroomProbe/Info-Mac.plist",
+                              "CODE_SIGNING_ALLOWED[sdk=macosx*]":"YES","CODE_SIGN_IDENTITY[sdk=macosx*]":"-"},
                            SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD="NO", SWIFT_EMIT_LOC_STRINGS="NO",
                            LD_RUNPATH_SEARCH_PATHS=["$(inherited)", "@executable_path/Frameworks"],
                            CURRENT_PROJECT_VERSION="48", MARKETING_VERSION="0.32.4", ASSETCATALOG_COMPILER_APPICON_NAME="AppIcon")
