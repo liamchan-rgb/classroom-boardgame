@@ -126,7 +126,7 @@ struct MacMirrorWarning: View {
                 failed = !MacDisplays.stopMirroring()
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { monitor.refresh() }
             } label: {
-                Label(failed ? "请在系统设置 › 显示器里改为扩展显示器" : "投影屏在镜像 · 改为单独显示", systemImage: "rectangle.on.rectangle.slash")
+                Label(failed ? "请在控制中心 › 屏幕镜像里选“用作扩展显示器”" : "投影屏在镜像 · 改为扩展显示器", systemImage: "rectangle.on.rectangle.slash")
             }
             .buttonStyle(GlassIconButtonStyle(tint: .orange, prominent: true))
             .help("镜像时投影屏只会复制 Mac 屏幕，公开画面无法单独显示。")

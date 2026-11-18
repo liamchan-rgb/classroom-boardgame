@@ -105,7 +105,7 @@ final class TeacherHostController: UIViewController {
         configuration.delegateClass = PublicSceneDelegate.self
         #if targetEnvironment(macCatalyst)
         _ = configuration
-        TeacherSession.shared.setRegistrationStatus("Mac：投影屏设为单独显示后点“公开窗口”，学生画面会自动放到投影屏并全屏。")
+        TeacherSession.shared.setRegistrationStatus("Mac：在屏幕镜像里选“用作扩展显示器”后点“公开窗口”，学生画面会自动放到投影屏并全屏。")
         #else
         registration = registerSceneAccessory(.externalNonInteractive(sceneConfiguration: configuration))
         TeacherSession.shared.setRegistrationStatus("已注册iPadOS27公开场景，等待电视连接。")
