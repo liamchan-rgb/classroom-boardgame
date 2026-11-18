@@ -39,7 +39,7 @@ files.append(plist)
 mac_plist = add("info-mac", "PBXFileReference", lastKnownFileType="text.plist.xml", path="Info-Mac.plist", sourceTree="<group>")
 files.append(mac_plist)
 resource_builds = []
-for name in ("sample.pptx", "ThirdPartyNotices.txt", "design-tokens.json"):
+for name in ("sample.pptx", "ThirdPartyNotices.txt", "design-tokens.json", "quiz-sample.txt"):
     ref = add("resource:" + name, "PBXFileReference", lastKnownFileType="file", path="Resources/" + name, sourceTree="<group>")
     files.append(ref)
     resource_builds.append(add("build:" + name, "PBXBuildFile", fileRef=ref))

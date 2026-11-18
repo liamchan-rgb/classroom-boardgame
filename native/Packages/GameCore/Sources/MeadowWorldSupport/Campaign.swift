@@ -54,6 +54,8 @@ public struct MeadowCampaignSave:Codable,Equatable {
     public var completion:MeadowCampaignCompletion?=nil
     /// Teacher-imported multiple-choice questions; when present, roadside-find events on the map become quiz events.
     public var quizBank:[QuizQuestion]?=nil
+    /// Teacher's assignment of exclusive-question portions: portion name → player id ("" = nobody).
+    public var quizPortions:[String:String]?=nil
     public var formatVersion=1
     public let layout:GeneratedMeadowMap
     public var archive:GameArchive
@@ -110,7 +112,11 @@ public struct MeadowCampaignSave:Codable,Equatable {
             }else{guard !archive.state.players.contains(where: \.isAlive) else{throw GameError("队伍未全员倒地。")}}
         }
         if let selectedPlayerID {guard archive.state.players.contains(where:{$0.id==selectedPlayerID}) else{throw GameError("操作成员无效。")}}
-        if let quizBank {guard quizBank.count<=500 else{throw GameError("题库最多500题。")};for q in quizBank{try q.validate()}}
+        if let quizBank {guard quizBank.count<=2000 else{throw GameError("题库最多2000题。")};for q in quizBank{try q.validate()}}
+        if let quizPortions {
+            let players=Set(archive.state.players.map(\.id))
+            guard quizPortions.count<=200,quizPortions.allSatisfy({$0.key.count<=20 && ($0.value.isEmpty || players.contains($0.value))}) else{throw GameError("专属题分配无效。")}
+        }
         try camera?.validate()
         if let t=travel {try validateTravel(t,parked:false)}
         if let parked=parkedTravels {
@@ -208,6 +214,15 @@ public final class MeadowCampaignSession {
     public var isMoving:Bool {travel.map{!$0.paused} ?? false}
     /// Adds questions to the trip's bank mid-trip (appended, so recorded answers keep pointing at their questions).
     /// Roadside finds become quiz spots from then on.
+    /// Gives an exclusive-question portion to a student (nil = nobody). Not a game operation: no history entry.
+    public func assignQuizPortion(_ portion:String,to player:String?)throws {
+        var next=snapshot
+        var map=next.quizPortions ?? [:]
+        map[portion]=player ?? ""
+        next.quizPortions=map
+        try next.validate()
+        try writer.write(next)
+    }
     public func appendQuizBank(_ list:[QuizQuestion])throws {
         guard !list.isEmpty else{return}
         var next=snapshot

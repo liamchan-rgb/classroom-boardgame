@@ -282,4 +282,52 @@ final class QuizTests:XCTestCase {
         XCTAssertEqual(p.coins,0);XCTAssertEqual(s.engine.state.units["p1"]!.coins,coins)
         XCTAssertNotEqual(s.practiceCard(for:"p1",after:card),card)
     }
+    func testPortionsDefaultToStudentNumbersAndTheTeacherReassigns()throws {
+        let text="""
+        类型：闪卡
+        份：1
+        正面：cat
+        背面：猫
+
+        类型：闪卡
+        份：第2份
+        正面：dog
+        背面：狗
+
+        类型：闪卡
+        份：２
+        正面：pig
+        背面：猪
+
+        类型：闪卡
+        份：9
+        正面：cow
+        背面：牛
+
+        类型：闪卡
+        正面：sun
+        背面：太阳
+        """
+        let bank=try QuizBankParser.parse(Data(text.utf8))
+        XCTAssertEqual(bank.map(\.portion),["1","2","2","9",nil]);XCTAssertEqual(bank.map(\.isShared),[false,false,false,false,true])
+        var c=MeadowMapConfiguration.suggested(total:10,seed:31827);c.combat=0;c.boss=0;c.reward=0;c.empty=9;c.extraRoads=0
+        let s=try MeadowCampaignSession.new(layout:MeadowMapGenerator.generate(c),studentNames:["小明","小红"],quizBank:bank)
+        XCTAssertEqual(s.quizPortions.map(\.name),["1","2","9"]);XCTAssertEqual(s.quizPortions.map(\.count),[1,2,1])
+        // Default: portion n → student n; a portion with no such student belongs to nobody (not dealt as shared).
+        XCTAssertEqual(s.portionOwner("1"),"p1");XCTAssertEqual(s.portionOwner("2"),"p2");XCTAssertNil(s.portionOwner("9"))
+        XCTAssertEqual(s.personalQuizQuestion(for:"p1"),0);XCTAssertEqual(s.personalQuizQuestion(for:"p2"),1)
+        // The teacher swaps: portion 2 to 小明, portion 1 to nobody; saved with the trip.
+        try s.assignQuizPortion("2",to:"p1");try s.assignQuizPortion("1",to:nil)
+        XCTAssertEqual(s.personalQuizQuestion(for:"p1"),1);XCTAssertEqual(s.personalQuizQuestion(for:"p2"),4)
+        let restored=try MeadowCampaignSession(save:.decoded(s.snapshot.encoded()))
+        XCTAssertEqual(restored.portionOwner("2"),"p1");XCTAssertNil(restored.portionOwner("1"))
+        XCTAssertThrowsError(try s.assignQuizPortion("2",to:"p99"))
+        // The bundled sample bank parses and has portions.
+    }
+    func testBundledSampleBankHasPortionsAndSharedQuestions()throws {
+        let url=URL(fileURLWithPath:#filePath).deletingLastPathComponent().appendingPathComponent("../../../../ClassroomProbe/Resources/quiz-sample.txt").standardized
+        let bank=try QuizBankParser.parse(Data(contentsOf:url))
+        XCTAssertTrue(bank.contains{$0.portion != nil});XCTAssertTrue(bank.contains{$0.isShared})
+        XCTAssertTrue(Set(bank.map(\.type)).isSuperset(of:[.choice,.flashcard,.fill,.reading]))
+    }
 }

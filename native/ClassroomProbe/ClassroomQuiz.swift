@@ -102,6 +102,12 @@ struct QuizLauncherPanel: View {
                 Label("答题", systemImage: "questionmark.bubble.fill").font(.title2.bold())
                 Text("题库 \(campaign?.quizBank.count ?? 0) 题 · 已作答 \(campaign?.quizLog.count ?? 0) 次").font(.callout).foregroundStyle(GameTheme.muted)
                 Spacer()
+                if let c = campaign, !c.quizPortions.isEmpty {
+                    Button { game.openQuizPortions() } label: { Label("专属题分配 (\(c.quizPortions.count)份)", systemImage: "person.2.badge.gearshape") }.buttonStyle(GlassIconButtonStyle())
+                }
+                if campaign?.quizBank.isEmpty == true {
+                    Button { loadSample() } label: { Label("载入示例题库", systemImage: "text.book.closed") }.buttonStyle(GlassIconButtonStyle(prominent: true))
+                }
                 Button { importing = true } label: { Label("导入题库", systemImage: "square.and.arrow.down") }.buttonStyle(GlassIconButtonStyle()).disabled(campaign == nil)
                 Button { onClose() } label: { Image(systemName: "xmark.circle.fill").font(.title2) }.buttonStyle(.plain).foregroundStyle(GameTheme.muted)
             }
@@ -118,7 +124,7 @@ struct QuizLauncherPanel: View {
                 if let i = candidate, let q = campaign?.quizBank[i] {
                     VStack(alignment: .leading, spacing: 6) {
                         HStack {
-                            Text((model.again != nil ? "再出一次 · " : "") + (q.isShared ? "公用题 · 老师发奖" : "专属题 · 满分 \(q.reward) 金币") + " · \(q.type.title) \(MeadowQuizCard.stars(q)) · 限时 \(q.timeLimit) 秒")
+                            Text((model.again != nil ? "再出一次 · " : "") + (q.isShared ? "公用题 · 老师发奖" : (q.portion.map { "第\($0)份 · " } ?? "") + "专属题 · 满分 \(q.reward) 金币") + " · \(q.type.title) \(MeadowQuizCard.stars(q)) · 限时 \(q.timeLimit) 秒")
                                 .font(.caption.bold()).foregroundStyle(q.isShared ? GameTheme.muted : GameTheme.primary)
                             Spacer()
                             Button { model.skip += 1; model.again = nil } label: { Label("换一题 (空格)", systemImage: "arrow.triangle.2.circlepath") }.buttonStyle(GlassIconButtonStyle())
@@ -150,6 +156,16 @@ struct QuizLauncherPanel: View {
                 game.revision += 1
             } catch { model.note = "导入失败：\(error.localizedDescription)" }
         }
+    }
+    /// The sample bank that ships with the app (six portions of word cards plus shared questions of every kind).
+    private func loadSample() {
+        do {
+            guard let url = Bundle.main.url(forResource: "quiz-sample", withExtension: "txt") else { model.note = "示例题库缺失。"; return }
+            let list = try QuizBankParser.parse(Data(contentsOf: url))
+            try campaign?.appendQuizBank(list)
+            model.note = "✓ 已载入示例题库 \(list.count) 题（含 \(campaign?.quizPortions.count ?? 0) 份专属题）"; model.skip = 0
+            game.revision += 1
+        } catch { model.note = "载入失败：\(error.localizedDescription)" }
     }
     private func kindChip(_ kind: QuizKind?, _ title: String) -> some View {
         let on = model.kind == kind
@@ -307,5 +323,49 @@ struct PracticePanel: View {
             }
             Text("键盘：A–H 记录学生说的背面并自动下一张，0 不会，1–7 换人，Esc 结束。只记录、不发奖励，错词进报告。").font(.caption).foregroundStyle(GameTheme.muted)
         }.padding(22).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(GlassBackdrop())
+    }
+}
+
+// MARK: - Exclusive portions (whose questions are whose)
+
+/// The bank's pre-cut portions of exclusive questions: one row per portion, tap a student to give it to them (tap
+/// again: nobody). Until set, portion n belongs to student n.
+struct QuizPortionPanel: View {
+    @ObservedObject var game: MeadowTeacherCoordinator
+    var onClose: () -> Void
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                Label("专属题分配", systemImage: "person.2.badge.gearshape").font(.title2.bold())
+                Spacer()
+                Button { onClose() } label: { Label("完成 (Esc)", systemImage: "checkmark") }.buttonStyle(GlassIconButtonStyle(prominent: true))
+            }
+            Text("题库里每一“份”是一组专属题。点同学把这一份给他，再点一次取消（这一份就不出给任何人）。没改过时，第 n 份默认给第 n 位同学。").font(.caption).foregroundStyle(GameTheme.muted)
+            if let c = game.campaign {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 10) {
+                        ForEach(c.quizPortions, id: \.name) { portion in
+                            let owner = c.portionOwner(portion.name)
+                            // Questions of this portion its owner has not answered yet.
+                            let answered = Set(c.quizLog.filter { $0.player == owner }.map(\.question))
+                            let left = c.quizBank.indices.filter { c.quizBank[$0].portion == portion.name && !answered.contains($0) }.count
+                            HStack(alignment: .center, spacing: 10) {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("第\(portion.name)份").font(.headline)
+                                    Text(owner == nil ? "\(portion.count) 题" : "剩 \(left)/\(portion.count) 题").font(.caption).foregroundStyle(GameTheme.muted)
+                                }.frame(width: 72, alignment: .leading)
+                                QuizPlayerChips(game: game, selected: Set([owner].compactMap { $0 })) { id in
+                                    try? c.assignQuizPortion(portion.name, to: owner == id ? nil : id)
+                                    game.revision += 1
+                                }
+                                if owner == nil { Text("未分配").font(.caption.bold()).foregroundStyle(.orange) }
+                            }
+                            .padding(10).background(GlassFill.field, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        }
+                    }
+                }
+            }
+        }
+        .padding(22).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(GlassBackdrop())
     }
 }

@@ -24,7 +24,7 @@ public enum QuizBankParser {
         let trimmed=text.trimmingCharacters(in:.whitespacesAndNewlines)
         var questions=trimmed.hasPrefix("{") || trimmed.hasPrefix("[") ? try json(Data(trimmed.utf8)):try plain(trimmed)
         guard !questions.isEmpty else{throw GameError("没有读到题目，请对照题库格式说明。")}
-        guard questions.count<=500 else{throw GameError("题库最多500题。")}
+        guard questions.count<=2000 else{throw GameError("题库最多2000题。")}
         fillFlashcardDistractors(&questions)
         for q in questions{try q.validate()}
         return questions
@@ -106,6 +106,12 @@ public enum QuizBankParser {
         if v.contains("选") || v.contains("判断") || v.contains("choice") {return .choice}
         return nil
     }
+    /// "第1份" / "1份" / "１" → "1"; letters stay ("A").
+    static func portionName(_ raw:String)->String? {
+        var v=raw.trimmingCharacters(in:.whitespaces).replacingOccurrences(of:"第",with:"").replacingOccurrences(of:"份",with:"").replacingOccurrences(of:"组",with:"")
+        v=String(v.map{c in c.isNumber ? Character(String(c.wholeNumberValue ?? 0)):c}).trimmingCharacters(in:.whitespaces)
+        return v.isEmpty ? nil:String(v.prefix(20))
+    }
     static func list(_ raw:String)->[String] {raw.split(whereSeparator:{",，、;；/|｜".contains($0)}).map{$0.trimmingCharacters(in:.whitespaces)}.filter{!$0.isEmpty}}
 
     // MARK: JSON
@@ -126,7 +132,7 @@ public enum QuizBankParser {
     }
     private struct JSONQuestion:Decodable {
         let type:String?;let prompt:String?;let options:[String]?;let answer:JSONAnswer?;let coins:Int?;let explanation:String?
-        let difficulty:JSONAnswer?;let seconds:Int?;let tags:[String]?;let audience:[String]?;let target:String?
+        let difficulty:JSONAnswer?;let seconds:Int?;let tags:[String]?;let audience:[String]?;let target:String?;let portion:JSONAnswer?
         let front:String?;let back:String?;let distractors:[String]?
         let passage:String?;let questions:[JSONItem]?
     }
@@ -157,6 +163,7 @@ public enum QuizBankParser {
             }
             q.coins=j.coins;q.explanation=j.explanation;q.seconds=j.seconds;q.tags=j.tags
             q.audience=j.audience ?? j.target.map{QuizBankParser.list($0)}
+            if let p=j.portion {switch p {case .index(let i):q.portion=String(i);case .letter(let l):q.portion=portionName(l)}}
             if let d=j.difficulty {
                 switch d {case .index(let i):q.difficulty=i;case .letter(let l):q.difficulty=difficulty(l)}
             }
@@ -208,7 +215,7 @@ public enum QuizBankParser {
     }
     private static func question(_ block:[String],number:Int)throws->QuizQuestion {
         var prompt=[String](),options=[(Int,String)](),answer:String?,coins:Int?,explanation:String?
-        var type:QuizKind?,level:Int?,limit:Int?,tags:[String]?,audience:[String]?,front:String?,back:String?,wrong:[String]=[]
+        var type:QuizKind?,level:Int?,limit:Int?,tags:[String]?,audience:[String]?,portion:String?,front:String?,back:String?,wrong:[String]=[]
         var passage:[String]?,subs:[(prompt:String,options:[(Int,String)],answer:String?)]=[]
         func fail(_ why:String)->GameError {GameError("第\(number)题：\(why)")}
         for line in block {
@@ -217,6 +224,7 @@ public enum QuizBankParser {
             else if let v=value(line,keys:["时间","限时","Time","time"]) {limit=seconds(v)}
             else if let v=value(line,keys:["标签","知识点","Tags","tags"]) {tags=list(v)}
             else if let v=value(line,keys:["对象","专属","给","For","for"]) {audience=list(v)}
+            else if let v=value(line,keys:["份","份数","分组","组","Portion","portion","Part","part"]) {portion=portionName(v)}
             else if let v=value(line,keys:["正面","Front","front"]) {front=v}
             else if let v=value(line,keys:["背面","Back","back"]) {back=v}
             else if let v=value(line,keys:["干扰","干扰项","Distractors","distractors"]) {wrong=list(v)}
@@ -257,7 +265,7 @@ public enum QuizBankParser {
             }
             q=QuizQuestion(prompt:first.isEmpty ? "阅读短文，回答问题":first,options:[],answer:0,kind:.reading,passage:passage.joined(separator:"\n"),items:items)
         }
-        q.coins=coins;q.explanation=explanation;q.difficulty=level;q.seconds=limit;q.tags=tags;q.audience=audience
+        q.coins=coins;q.explanation=explanation;q.difficulty=level;q.seconds=limit;q.tags=tags;q.audience=audience;q.portion=portion
         if resolved != .choice || type != nil {q.kind=resolved}
         return q
     }
@@ -265,6 +273,18 @@ public enum QuizBankParser {
 
 public extension MeadowCampaignSession {
     var quizBank:[QuizQuestion] {snapshot.quizBank ?? []}
+    /// The portions in the bank, in first-seen order, with how many questions each has.
+    var quizPortions:[(name:String,count:Int)] {
+        var order:[String]=[],counts:[String:Int]=[:]
+        for q in quizBank { if let p=q.portion { if counts[p]==nil {order.append(p)}; counts[p,default:0]+=1 } }
+        return order.map{($0,counts[$0]!)}
+    }
+    /// Whose portion it is: the teacher's choice, else portion "n" goes to student n (p3 for "3"); nil = nobody.
+    func portionOwner(_ portion:String)->String? {
+        if let set=snapshot.quizPortions?[portion] {return set.isEmpty ? nil:set}
+        let id="p"+portion
+        return engine.state.units[id]?.kind == .player ? id:nil
+    }
     var quizLog:[QuizAttempt] {engine.state.quizLog ?? []}
     /// Whether this node is a quiz event (roadside finds become quizzes when a bank was imported).
     func isQuizNode(_ node:Int)->Bool {!quizBank.isEmpty && siteKind(node:node) == .satchel}
@@ -299,6 +319,7 @@ public extension MeadowCampaignSession {
     }
     /// Whether `q` is one of this student's own questions (by name, short name or number: p3 → 3).
     func isExclusive(_ q:QuizQuestion,for player:String)->Bool {
+        if let p=q.portion {return portionOwner(p)==player}
         guard let u=engine.state.units[player] else{return false}
         return q.isFor(names:[u.name,u.shortName],number:Int(player.dropFirst()))
     }

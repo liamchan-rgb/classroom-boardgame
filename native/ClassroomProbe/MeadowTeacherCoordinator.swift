@@ -61,9 +61,22 @@ final class MeadowTeacherCoordinator:ObservableObject {
         if let alert=presentationHost as? UIAlertController {alert.dismiss(animated:true){show()}} else {show()}
     }
     private func closePanel(_ then:(()->Void)?=nil){
-        if let panel=quizPanel,panel.presentingViewController != nil {panel.dismiss(animated:true){then?()}} else {then?()}
+        // Forget the panel first: whatever opens next (the launcher again) must not think one is still up.
+        let panel=quizPanel;quizPanel=nil
+        if let panel,panel.presentingViewController != nil {panel.dismiss(animated:true){then?()}} else {then?()}
     }
 
+    /// Who gets which pre-cut portion of exclusive questions (opened from the quiz launcher, over it).
+    /// Replaces the launcher (no sheet on a sheet) and goes back to it when done.
+    func openQuizPortions(){
+        closePanel{[weak self] in
+            guard let self else{return}
+            let done={[weak self] in self?.closePanel{self?.openQuiz()};return}
+            let screen=KeyHostingController(rootView:QuizPortionPanel(game:self,onClose:done))
+            screen.onKey={key in if key=="⎋" || key=="⏎" {done();return true};return false}
+            self.presentPanel(screen,size:CGSize(width:760,height:560))
+        }
+    }
     /// The question the launcher would start.
     func launcherCandidate(_ m:QuizLauncherModel)->Int? {
         guard let c=campaign,let player=m.player else{return nil}

@@ -38,6 +38,9 @@ public struct QuizQuestion: Codable, Equatable {
     public var items: [QuizItem]? = nil
     /// Who it is for: student names or numbers (专属题). nil, or "全班", = the shared bank (公用题).
     public var audience: [String]? = nil
+    /// Which pre-cut portion of exclusive questions it belongs to ("1", "2", "A"…); the teacher decides in the app
+    /// whose portion is whose.
+    public var portion: String? = nil
     public init(prompt: String, options: [String], answer: Int, coins: Int? = nil, explanation: String? = nil,
                 kind: QuizKind? = nil, difficulty: Int? = nil, seconds: Int? = nil, tags: [String]? = nil, passage: String? = nil, items: [QuizItem]? = nil) {
         self.prompt = prompt; self.options = options; self.answer = answer; self.coins = coins; self.explanation = explanation
@@ -45,10 +48,11 @@ public struct QuizQuestion: Codable, Equatable {
     }
     public static let defaultCoins = 10
     /// In the shared bank (rewards are handed out by the teacher).
-    public var isShared: Bool { audience.map { $0.isEmpty || $0.contains { ["全班", "全体", "所有人", "all", "公用"].contains($0.lowercased()) } } ?? true }
+    public var isShared: Bool { portion == nil && isSharedAudience }
+    private var isSharedAudience: Bool { audience.map { $0.isEmpty || $0.contains { ["全班", "全体", "所有人", "all", "公用"].contains($0.lowercased()) } } ?? true }
     /// Whether this exclusive question is for a student with that name (or short name) and number (p3 → 3).
     public func isFor(names: [String], number: Int?) -> Bool {
-        guard !isShared, let audience else { return false }
+        guard portion == nil, !isShared, let audience else { return false }
         return audience.contains { a in names.contains(a) || (number.map { String($0) == a } ?? false) }
     }
     public var type: QuizKind { kind ?? .choice }
@@ -73,7 +77,7 @@ public struct QuizQuestion: Codable, Equatable {
               (0...500).contains(reward), (explanation?.count ?? 0) <= 600, (passage?.count ?? 0) <= 4000,
               difficulty.map({ (1...3).contains($0) }) ?? true, seconds.map({ (10...600).contains($0) }) ?? true,
               (tags?.count ?? 0) <= 8, (tags ?? []).allSatisfy({ $0.count <= 30 }),
-              (audience?.count ?? 0) <= 40, (audience ?? []).allSatisfy({ $0.count <= 40 }) else {
+              (audience?.count ?? 0) <= 40, (portion?.count ?? 0) <= 20, (audience ?? []).allSatisfy({ $0.count <= 40 }) else {
             throw GameError("题目格式无效：「\(prompt.prefix(20))」")
         }
     }
