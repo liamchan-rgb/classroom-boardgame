@@ -69,15 +69,23 @@ enum MacDisplays {
     /// Moves the public window to the second screen and makes it full screen there.
     /// The open public window's scene (to move it when a separate screen shows up later).
     static weak var publicScene: UIWindowScene?
-    static func placePublicWindow(_ scene: UIWindowScene, title: String) {
+    static func placePublicWindow(_ scene: UIWindowScene, title: String, attempt: Int = 0) {
         publicScene = scene
         let st = status()
-        trace("displays others=\(st.others) mirrored=\(st.mirrored) second=\(String(describing: st.second)) online=\(online != nil)")
-        guard let frame = st.second else { return }
-        scene.requestGeometryUpdate(.Mac(systemFrame: frame.insetBy(dx: 40, dy: 60))) { error in trace("geometry error \(error.localizedDescription)") }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { trace("scene frame after move \(scene.effectiveGeometry.systemFrame)") }
-        // Full screen happens on the screen the window is on, so give the move a moment first.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { toggleFullScreen(title: title, enter: true) }
+        trace("place attempt=\(attempt) others=\(st.others) mirrored=\(st.mirrored) second=\(String(describing: st.second))")
+        guard let screen = st.second else { return }
+        scene.requestGeometryUpdate(.Mac(systemFrame: screen.insetBy(dx: 40, dy: 60))) { error in trace("geometry error \(error.localizedDescription)") }
+        // The system sometimes ignores the move while the window is still being restored: check, retry, and only go
+        // full screen once the window really is on the second screen (full screen happens wherever the window is).
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            let now = scene.effectiveGeometry.systemFrame
+            trace("frame after move \(now)")
+            if screen.contains(CGPoint(x: now.midX, y: now.midY)) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { toggleFullScreen(title: title, enter: true) }
+            } else if attempt < 5 {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { placePublicWindow(scene, title: title, attempt: attempt + 1) }
+            } else { trace("gave up: window stays where it is (drag it to the projector)") }
+        }
     }
     /// The AppKit window behind a Catalyst scene, found by its title, asked to enter / leave full screen.
     static func toggleFullScreen(title: String, enter: Bool) {
