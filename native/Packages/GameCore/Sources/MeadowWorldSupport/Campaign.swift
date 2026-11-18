@@ -206,6 +206,15 @@ public final class MeadowCampaignSession {
         return !(t.leg==t.path.count-2 && t.stopDistance.map{t.distance>=$0-0.000001}==true)
     }
     public var isMoving:Bool {travel.map{!$0.paused} ?? false}
+    /// Adds questions to the trip's bank mid-trip (appended, so recorded answers keep pointing at their questions).
+    /// Roadside finds become quiz spots from then on.
+    public func appendQuizBank(_ list:[QuizQuestion])throws {
+        guard !list.isEmpty else{return}
+        var next=snapshot
+        next.quizBank=(next.quizBank ?? [])+list
+        try next.validate()
+        try writer.write(next)
+    }
     /// Paused road cursors of the teams that are not selected right now.
     public var parkedTravels:[String:MeadowCampaignTravel] {writer.snapshot.parkedTravels ?? [:]}
     /// The road cursor (active or parked) that currently holds this member.

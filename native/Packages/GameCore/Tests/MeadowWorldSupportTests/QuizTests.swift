@@ -193,4 +193,45 @@ final class QuizTests:XCTestCase {
         let bank=try QuizBankParser.parse(Data(contentsOf:url))
         XCTAssertTrue(Set(bank.map(\.type)).isSuperset(of:[.choice,.flashcard,.fill,.reading]))
     }
+    func testReportListsWrongWords()throws {
+        let bank=try QuizBankParser.parse(Data(mixed.utf8))
+        func a(_ p:String,_ q:Int,_ picks:[Int?],_ texts:[String?]?=nil)->QuizAttempt {
+            let parts=bank[q].parts
+            return QuizAttempt(player:p,playerName:p,node:-1,question:q,picks:picks,texts:texts ?? picks.map{_ in nil},
+                               correct:parts.indices.map{picks[$0]==parts[$0].answer},seconds:5,limit:60,at:1_800_000_000)
+        }
+        let apple=bank[0].parts[0],pear=apple.options.firstIndex(of:"梨")!
+        let fill=bank[2].parts[0],goed=fill.options.firstIndex(of:"goed")!
+        let log=[a("p1",0,[pear]),a("p1",2,[goed,nil],[nil,"see"]),a("p2",0,[apple.answer]),a("p2",2,[goed,0]),a("p1",3,[1,1])]
+        let r=QuizReport(log:log,bank:bank,order:["p1","p2"],names:["p1":"小明","p2":"小红"])
+        let p1=r.students[0]
+        XCTAssertEqual(p1.wrongWords.map(\.word),["apple","went","saw"])
+        XCTAssertEqual(p1.wrongWords[0].meaning,"苹果");XCTAssertEqual(p1.wrongWords[0].said,["梨"]);XCTAssertEqual(p1.wrongWords[2].said,["see"])
+        XCTAssertEqual(p1.wordsAsked,3)  // the reading questions are not word items (no 单词 tag)
+        XCTAssertEqual(r.words.first?.word,"went");XCTAssertEqual(r.words.first?.wrong,2);XCTAssertEqual(r.words.first?.asked,2)
+        XCTAssertEqual(r.words.first?.students,["小明","小红"]);XCTAssertEqual(r.words.first?.commonWrong,"goed")
+        XCTAssertEqual(Set(r.words.map(\.word)),["went","apple","saw"])
+        // A Chinese front: the English back is the word.
+        let zh=QuizQuestion(prompt:"苹果",options:[],answer:0,kind:.flashcard,items:[QuizItem(options:["apple","pear"],answer:0)])
+        XCTAssertEqual(QuizReport.word(zh,part:0),QuizReport.Word(word:"apple",meaning:"苹果"))
+        var tagged=QuizQuestion(prompt:"选出 big 的反义词",options:["small","tall"],answer:0);tagged.tags=["单词"]
+        XCTAssertEqual(QuizReport.word(tagged,part:0)?.word,"small");tagged.tags=nil;XCTAssertNil(QuizReport.word(tagged,part:0))
+    }
+    func testFreeQuizAnywhereDoesNotTouchTheMapAndBanksAppend()throws {
+        let s=try quizSession([])
+        XCTAssertNil(s.quizCandidate())
+        try s.appendQuizBank(try QuizBankParser.parse(Data(mixed.utf8)))
+        XCTAssertEqual(s.quizBank.count,4)
+        let i=try XCTUnwrap(s.quizCandidate(kind:.flashcard));XCTAssertEqual(s.quizBank[i].type,.flashcard)
+        XCTAssertNotEqual(s.quizCandidate(kind:.flashcard,skip:1),i);XCTAssertNil(s.quizCandidate(kind:.flashcard,difficulty:3))
+        let nodes=s.engine.state.map.nodes,coins=s.engine.state.units["p1"]!.coins
+        let q=s.quizBank[i]
+        let a=try s.recordQuiz(actor:"p1",question:i,picks:[q.parts[0].answer],seconds:40,free:true)
+        XCTAssertEqual(a.node,-1);XCTAssertEqual(s.engine.state.map.nodes,nodes);XCTAssertGreaterThan(s.engine.state.units["p1"]!.coins,coins)
+        // The same student can be asked again anywhere, and the bank survives a reload.
+        try s.recordQuiz(actor:"p1",question:i,picks:[nil],seconds:3,free:true)
+        XCTAssertEqual(s.quizLog.count,2)
+        let restored=try MeadowCampaignSession(save:.decoded(s.snapshot.encoded()))
+        XCTAssertEqual(restored.quizBank.count,4);XCTAssertEqual(restored.quizLog,s.quizLog)
+    }
 }

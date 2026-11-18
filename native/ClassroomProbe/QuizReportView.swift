@@ -45,7 +45,7 @@ enum QuizReportPage {
     static func plan(_ report: QuizReport) -> [QuizReportPage] {
         var pages: [QuizReportPage] = [.overview]
         for (i, s) in report.students.enumerated() {
-            let n = s.mistakes.count, firstCount = 5, more = 9
+            let n = s.mistakes.count, firstCount = s.wrongWords.isEmpty ? 5 : 3, more = 9
             pages.append(.student(i, mistakes: 0..<min(n, firstCount), first: true))
             var start = firstCount
             while start < n { pages.append(.student(i, mistakes: start..<min(n, start + more), first: false)); start += more }
@@ -188,7 +188,7 @@ struct QuizReportPageView: View {
         }
         card {
             section("最难的题目", icon: "flame.fill")
-            ForEach(Array(report.questions.prefix(6).enumerated()), id: \.offset) { i, q in
+            ForEach(Array(report.questions.prefix(report.words.isEmpty ? 6 : 4).enumerated()), id: \.offset) { i, q in
                 HStack(alignment: .top, spacing: 8) {
                     Text(percent(q.rate)).font(.system(size: 11, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                         .frame(width: 40, height: 22).background(RoundedRectangle(cornerRadius: 6).fill(Ink.rate(q.rate)))
@@ -200,9 +200,20 @@ struct QuizReportPageView: View {
                         }.font(.system(size: 8.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted).lineLimit(1)
                     }
                 }
-                if i < min(6, report.questions.count) - 1 { Divider().overlay(Ink.line) }
+                if i < min(report.words.isEmpty ? 6 : 4, report.questions.count) - 1 { Divider().overlay(Ink.line) }
             }
             if report.questions.isEmpty { Text("还没有作答记录").font(.system(size: 10)).foregroundStyle(Ink.muted) }
+        }
+        if !report.words.isEmpty {
+            card {
+                section("易错单词（\(report.words.count)）", icon: "textformat.abc")
+                FlowRow(spacing: 6) {
+                    ForEach(Array(report.words.prefix(20).enumerated()), id: \.offset) { _, w in
+                        wordChip(w.word, meaning: w.meaning, count: w.wrong, of: w.asked, said: w.commonWrong.map { "常说成 \($0)" })
+                    }
+                }
+                if report.words.count > 20 { Text("另有 \(report.words.count - 20) 个，见各人错词本").font(.system(size: 8.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted) }
+            }
         }
     }
 
@@ -242,6 +253,21 @@ struct QuizReportPageView: View {
                 card { section("按知识点", icon: "tag"); ForEach(s.byTag.prefix(6), id: \.name) { bar($0) } }
             }
         }
+        if first, !s.wrongWords.isEmpty {
+            card {
+                HStack {
+                    section("错词本（\(s.wrongWords.count)）", icon: "textformat.abc")
+                    Spacer()
+                    Text("单词题 \(s.wordsAsked) 个 · 答错 \(s.wrongWords.reduce(0) { $0 + $1.count }) 次").font(.system(size: 8.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted)
+                }
+                FlowRow(spacing: 6) {
+                    ForEach(Array(s.wrongWords.prefix(18).enumerated()), id: \.offset) { _, w in
+                        wordChip(w.word, meaning: w.meaning, count: w.count, of: nil, said: "说成 " + w.said.prefix(2).joined(separator: "/"))
+                    }
+                }
+                if s.wrongWords.count > 18 { Text("另有 \(s.wrongWords.count - 18) 个").font(.system(size: 8.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted) }
+            }
+        }
         card {
             section(first ? "需要再练的题（\(s.mistakes.count)）" : "需要再练的题（续）", icon: "arrow.triangle.2.circlepath")
             if s.mistakes.isEmpty { Label("全部答对，太棒了！", systemImage: "sparkles").font(.system(size: 11, weight: .bold, design: .rounded)).foregroundStyle(Ink.good) }
@@ -266,6 +292,20 @@ struct QuizReportPageView: View {
                 if i < range.upperBound - 1 { Divider().overlay(Ink.line) }
             }
         }
+    }
+    /// A word to practise: the word large, its meaning, how often it was missed, and what was said instead.
+    private func wordChip(_ word: String, meaning: String?, count: Int, of asked: Int?, said: String?) -> some View {
+        VStack(alignment: .leading, spacing: 1) {
+            HStack(alignment: .firstTextBaseline, spacing: 4) {
+                Text(word).font(.system(size: 12, weight: .heavy, design: .rounded)).foregroundStyle(Ink.ink)
+                if let meaning { Text(meaning).font(.system(size: 9, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted) }
+                Text(asked.map { "错\(count)/\($0)" } ?? (count > 1 ? "×\(count)" : "")).font(.system(size: 8, weight: .heavy, design: .rounded)).foregroundStyle(Ink.bad)
+            }
+            if let said { Text(said).font(.system(size: 7.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.bad.opacity(0.85)).lineLimit(1) }
+        }
+        .padding(.horizontal, 8).padding(.vertical, 5)
+        .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Ink.bad.opacity(0.07)))
+        .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).stroke(Ink.bad.opacity(0.25), lineWidth: 0.6))
     }
     private func chip(_ label: String, _ text: String, _ tint: Color, strike: Bool) -> some View {
         HStack(spacing: 3) {
@@ -330,6 +370,16 @@ struct QuizReportScreen: View {
     @State private var exporting: [URL] = []
     @State private var showExporter = false
     @State private var error: String?
+    @State private var copied = false
+    /// Each student's wrong words as plain text (for a word list or a message to parents).
+    private func copyWords() {
+        let lines = report.students.filter { !$0.wrongWords.isEmpty }.map { s in
+            s.name + "：" + s.wrongWords.map { w in w.word + (w.meaning.map { "（\($0)）" } ?? "") }.joined(separator: "、")
+        }
+        UIPasteboard.general.string = (["全班易错：" + report.words.map(\.word).joined(separator: "、")] + lines).joined(separator: "\n")
+        copied = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { copied = false }
+    }
     var body: some View {
         VStack(spacing: 12) {
             HStack(spacing: 10) {
@@ -338,6 +388,7 @@ struct QuizReportScreen: View {
                 Spacer()
                 Button { export(pdf: true) } label: { Label("导出 PDF", systemImage: "doc.richtext") }.buttonStyle(GlassIconButtonStyle(prominent: true)).disabled(report.attempts == 0)
                 Button { export(pdf: false) } label: { Label("导出图片", systemImage: "photo.on.rectangle") }.buttonStyle(GlassIconButtonStyle()).disabled(report.attempts == 0)
+                Button { copyWords() } label: { Label(copied ? "已复制" : "复制错词", systemImage: copied ? "checkmark" : "doc.on.doc") }.buttonStyle(GlassIconButtonStyle()).disabled(report.words.isEmpty)
                 Button { onClose() } label: { Image(systemName: "xmark.circle.fill").font(.title2) }.buttonStyle(.plain).foregroundStyle(GameTheme.muted)
             }
             if let error { Text(error).font(.caption).foregroundStyle(.red) }

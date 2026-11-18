@@ -294,17 +294,27 @@ public extension MeadowCampaignSession {
     }
     /// Records what the student said (the option per graded item, nil = did not know; `texts` for other answers)
     /// and pays the reward. Returns the stored attempt.
-    @discardableResult func recordQuiz(actor:String,question index:Int,picks:[Int?],texts:[String?]?=nil,seconds:Double,at:Date=Date(),id:String=UUID().uuidString)throws->QuizAttempt {
-        guard canManageInventory,travel==nil else{throw GameError("请抵达地点、结束战斗后答题。")}
-        guard let unit=engine.state.units[actor],quizBank.indices.contains(index) else{throw GameError("这里没有题目。")}
+    /// Records what the student said (the option per graded item, nil = did not know; `texts` for other answers)
+    /// and pays the reward. `free`: called up by the teacher anywhere, not at a quiz spot. Returns the stored attempt.
+    @discardableResult func recordQuiz(actor:String,question index:Int,picks:[Int?],texts:[String?]?=nil,seconds:Double,at:Date=Date(),free:Bool=false,id:String=UUID().uuidString)throws->QuizAttempt {
+        if !free {guard canManageInventory,travel==nil else{throw GameError("请抵达地点、结束战斗后答题。")}}
+        guard let unit=engine.state.units[actor],quizBank.indices.contains(index) else{throw GameError("没有这道题。")}
         let q=quizBank[index],parts=q.parts
         guard picks.count==parts.count else{throw GameError("答题记录与题目不符。")}
         let texts=texts ?? Array(repeating:nil,count:parts.count)
         let correct=parts.indices.map{picks[$0]==parts[$0].answer}
-        let attempt=QuizAttempt(player:actor,playerName:unit.shortName,node:unit.nodeID,question:index,picks:picks,texts:texts,correct:correct,
+        let attempt=QuizAttempt(player:actor,playerName:unit.shortName,node:free ? -1:unit.nodeID,question:index,picks:picks,texts:texts,correct:correct,
                                 seconds:max(0,seconds),limit:q.timeLimit,at:at.timeIntervalSince1970)
-        try engine.apply(.recordCampaignQuiz(QuizRecord(attempt:attempt,fullCoins:q.reward,points:q.points,dropTier:q.difficulty.map{$0-1})),id:id)
+        try engine.apply(.recordCampaignQuiz(QuizRecord(attempt:attempt,fullCoins:q.reward,points:q.points,dropTier:q.difficulty.map{$0-1},free:free)),id:id)
         return quizLog.last!
+    }
+    /// For a quiz called up anywhere: the next question in dealing order that fits the filter; `skip` steps past
+    /// that many (the teacher's "换一题"). nil when nothing in the bank fits.
+    func quizCandidate(kind:QuizKind?=nil,difficulty:Int?=nil,skip:Int=0)->Int? {
+        let bank=quizBank
+        guard let base=nextQuizIndex else{return nil}
+        let fits=(0..<bank.count).map{(base+$0)%bank.count}.filter{i in (kind==nil || bank[i].type==kind) && (difficulty==nil || bank[i].difficulty==difficulty)}
+        return fits.isEmpty ? nil:fits[skip%fits.count]
     }
     /// The class answered (choice = option index) or skipped (nil, no reward). Returns whether it was right.
     @discardableResult func answerQuiz(actor:String,choice:Int?,id:String=UUID().uuidString)throws->Bool {

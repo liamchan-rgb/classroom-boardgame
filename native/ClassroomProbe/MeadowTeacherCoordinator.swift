@@ -42,6 +42,61 @@ final class MeadowTeacherCoordinator:ObservableObject {
     func toggleScoreboard(){withAnimation(.spring(response:0.35,dampingFraction:0.8)){overlays.scoreboard.toggle()}}
     /// Players ↔ teams; also shows the board if it was hidden.
     func toggleTeamScores(){withAnimation(.spring(response:0.35,dampingFraction:0.8)){overlays.teamScores.toggle();overlays.scoreboard=true}}
+    // MARK: Quiz (anywhere)
+
+    /// The quiz on screen (TV overlays and teacher preview), nil when none.
+    @Published var quiz:LiveQuiz?
+    private var quizToken=0
+    private weak var quizPanel:UIViewController?
+    /// "答题" from anywhere (button or Q): pick a student and a question from the trip's bank.
+    func openQuiz(){
+        guard quiz == nil,let presenter=presentationHost else{return}
+        if presenter is UIHostingController<QuizLauncherPanel> {return}
+        let screen=UIHostingController(rootView:QuizLauncherPanel(game:self,onStart:{[weak self] player,index in
+            self?.presentationHost?.dismiss(animated:true){self?.startQuiz(player:player,index:index,node:nil)}
+        },onClose:{[weak self] in self?.presentationHost?.dismiss(animated:true)}))
+        screen.modalPresentationStyle = .formSheet;screen.preferredContentSize=CGSize(width:720,height:560)
+        presenter.present(screen,animated:true)
+    }
+    /// Shows the question on the TV and the answer panel to the teacher. `node`: the quiz spot, nil when called up anywhere.
+    func startQuiz(player:String,index:Int,node:Int?){
+        guard let c=campaign,c.quizBank.indices.contains(index),let unit=c.engine.state.units[player] else{return}
+        quizToken += 1
+        let q=c.quizBank[index],start=Date()
+        let place=node.flatMap{n in c.engine.state.map.nodes.first{$0.id==n}?.name} ?? "课堂答题"
+        withAnimation(.easeOut(duration:0.2)){quiz=LiveQuiz(token:quizToken,index:index,question:q,player:player,playerName:unit.shortName,place:place,node:node,start:start)}
+        let panel=UIHostingController(rootView:MeadowQuizAnswerPanel(question:q,player:unit.shortName,start:start,onSubmit:{[weak self] picks,texts in
+            self?.quizPanel?.dismiss(animated:true);self?.submitQuiz(picks:picks,texts:texts)
+        },onLater:{[weak self] in
+            self?.quizPanel?.dismiss(animated:true);withAnimation{self?.quiz=nil}
+        }))
+        panel.modalPresentationStyle = .formSheet;panel.preferredContentSize=CGSize(width:760,height:q.type == .reading ? 760:600)
+        panel.isModalInPresentation=true
+        quizPanel=panel
+        let show={[weak self] in self?.presentationHost?.present(panel,animated:true);return}
+        if let alert=presentationHost as? UIAlertController {alert.dismiss(animated:true){show()}} else {show()}
+    }
+    private func submitQuiz(picks:[Int?],texts:[String?]){
+        guard let c=campaign,var live=quiz else{return}
+        let before=c.engine.state
+        do{
+            let attempt=try c.recordQuiz(actor:live.player,question:live.index,picks:picks,texts:texts,seconds:Date().timeIntervalSince(live.start),free:live.node==nil)
+            live.attempt=attempt;live.dropName=attempt.drop.flatMap{try? c.engine.catalog.item($0).name}
+            quiz=live;quizGainBase=before
+            renderer?.classroomRefresh();revision += 1
+        }catch{withAnimation{quiz=nil};message=error.localizedDescription;revision += 1}
+    }
+    private var quizGainBase:GameState?
+    /// The card finished its reveal (called by every copy: TV and preview; the first one closes it).
+    func quizCardFinished(_ token:Int){
+        guard let live=quiz,live.token==token,let attempt=live.attempt else{return}
+        withAnimation(.easeIn(duration:0.2)){quiz=nil}
+        if let base=quizGainBase,attempt.coins>0 || attempt.drop != nil {
+            renderer?.classroomShowGains(title:attempt.drop != nil ? "答题掉落":"答题奖励",subtitle:"\(attempt.playerName) · 答对 \(attempt.rightCount)/\(attempt.correct.count) · 用时 \(Int(attempt.seconds.rounded())) 秒",since:base)
+        }
+        quizGainBase=nil
+    }
+
     /// The answer report of the current trip (pages to look at, PDF / picture export).
     func openQuizReport(){
         guard !modalOpen,let presenter=presentationHost,let campaign else{return}
@@ -156,6 +211,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
             if let old=renderer {old.willMove(toParent:nil);old.view.removeFromSuperview();old.removeFromParent()}
             let controller=GameViewController(campaign:session,classroomMode:true)
             controller.classroomPrivatePresenter=privatePresenter
+            controller.classroomQuizRequest={[weak self] actor,node,index in self?.startQuiz(player:actor,index:index,node:node)}
             controller.classroomMirrorEnabled=false
             controller.classroomFrameAvailable={ [weak self] in self?.publishMirrorFrame() }
             frameMirror.frame=nil

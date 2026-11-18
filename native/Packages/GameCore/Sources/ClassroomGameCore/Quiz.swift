@@ -75,7 +75,7 @@ public struct QuizAttempt: Codable, Equatable {
     /// Name at the time (the report keeps it even if renamed later).
     public var playerName: String
     public var node: Int
-    /// Index in the campaign's question bank.
+    /// Map node of the quiz spot; -1 when the teacher called the quiz up anywhere.
     public var question: Int
     /// Per graded item: the option the student said, nil = did not know / no answer.
     public var picks: [Int?]
@@ -129,8 +129,10 @@ public struct QuizRecord: Codable, Equatable {
     public var points: Int
     /// Drop table to roll (0…2) when everything was right in time; nil = none.
     public var dropTier: Int?
-    public init(attempt: QuizAttempt, fullCoins: Int, points: Int, dropTier: Int?) {
-        self.attempt = attempt; self.fullCoins = fullCoins; self.points = points; self.dropTier = dropTier
+    /// Called up by the teacher anywhere (not at a quiz spot on the map): nothing about the map changes.
+    public var free: Bool? = nil
+    public init(attempt: QuizAttempt, fullCoins: Int, points: Int, dropTier: Int?, free: Bool = false) {
+        self.attempt = attempt; self.fullCoins = fullCoins; self.points = points; self.dropTier = dropTier; self.free = free ? true : nil
     }
 }
 
@@ -151,12 +153,20 @@ extension Evaluation {
     /// teammate there has answered.
     mutating func recordCampaignQuiz(_ record: QuizRecord) throws {
         var attempt = record.attempt
-        var (actor, index, kind) = try siteActor(attempt.player)
-        guard kind == .satchel, state.map.nodes[index].siteResolved != true else { throw GameError("该事件已结束。") }
+        let free = record.free == true
+        var actor: GameUnit, index = -1
         let log = state.quizLog ?? []
-        guard !log.contains(where: { $0.player == actor.id && $0.node == actor.nodeID }) else { throw GameError("\(actor.shortName) 已在这里答过题。") }
+        if free {
+            guard let unit = state.units[attempt.player], unit.kind == .player else { throw GameError("答题成员无效。") }
+            actor = unit
+        } else {
+            let site = try siteActor(attempt.player)
+            actor = site.0; index = site.1
+            guard site.2 == .satchel, state.map.nodes[index].siteResolved != true else { throw GameError("该事件已结束。") }
+            guard !log.contains(where: { $0.player == actor.id && $0.node == actor.nodeID }) else { throw GameError("\(actor.shortName) 已在这里答过题。") }
+        }
         let n = attempt.correct.count
-        guard attempt.node == actor.nodeID, (1...12).contains(n), attempt.picks.count == n, attempt.texts.count == n,
+        guard attempt.node == (free ? -1 : actor.nodeID), (1...12).contains(n), attempt.picks.count == n, attempt.texts.count == n,
               attempt.seconds.isFinite, attempt.seconds >= 0, (10...600).contains(attempt.limit), attempt.question >= 0,
               (0...500).contains(record.fullCoins), (0...3).contains(record.points),
               record.dropTier.map({ QuizRewards.drops.indices.contains($0) }) ?? true,
@@ -180,9 +190,11 @@ extension Evaluation {
         attempt.playerName = actor.shortName
         state.units[actor.id] = actor
         state.quizLog = log + [attempt]
-        let answered = Set(state.quizLog!.filter { $0.node == actor.nodeID }.map(\.player))
-        let present = state.players.filter { $0.isAlive && $0.nodeID == actor.nodeID && $0.teamID == actor.teamID }.map(\.id)
-        if present.allSatisfy(answered.contains) { state.map.nodes[index].siteResolved = true }
-        events.append(GameEvent("campaignQuiz", actor: actor.id, amount: attempt.coins, detail: "\(actor.nodeID):\(right)/\(n)\(attempt.drop.map { ":" + $0 } ?? "")"))
+        if !free {
+            let answered = Set(state.quizLog!.filter { $0.node == actor.nodeID }.map(\.player))
+            let present = state.players.filter { $0.isAlive && $0.nodeID == actor.nodeID && $0.teamID == actor.teamID }.map(\.id)
+            if present.allSatisfy(answered.contains) { state.map.nodes[index].siteResolved = true }
+        }
+        events.append(GameEvent("campaignQuiz", actor: actor.id, amount: attempt.coins, detail: "\(free ? "free" : String(actor.nodeID)):\(right)/\(n)\(attempt.drop.map { ":" + $0 } ?? "")"))
     }
 }

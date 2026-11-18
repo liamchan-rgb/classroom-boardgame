@@ -98,6 +98,9 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     var classroomStatus:((String)->Void)?
     var classroomInventoryChanged:((String?)->Void)?
     var classroomReload:(()->Void)?
+    /// Classroom: quiz spots hand the question to the teacher console (shown over everything, like the timer).
+    var classroomQuizRequest:((String,Int,Int)->Void)?
+    func classroomShowGains(title:String,subtitle:String?,since before:GameState){showGains(title:title,subtitle:subtitle,since:before)}
     var classroomReady:Bool {ready}
     var classroomBusy:Bool {battlePreviewView?.classroomBusy ?? false}
     var classroomActions:[PartyAction] {battlePreviewView?.classroomActions ?? []}
@@ -1145,7 +1148,10 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
             if let old=presentedViewController as? UIAlertController {old.dismiss(animated:true){[weak self] in self?.present(shop,animated:true)}}
             else {present(shop,animated:true)}
         }else if kind == .satchel,campaign.isQuizNode(node.id) {
-            if let turn=campaign.quizTurn(actor:actor) {showQuiz(actor:actor,node:node,index:turn.index,question:turn.question);return}
+            if let turn=campaign.quizTurn(actor:actor) {
+                if let request=classroomQuizRequest {request(actor,node.id,turn.index)} else {showQuiz(actor:actor,node:node,index:turn.index,question:turn.question)}
+                return
+            }
             let waiting=campaign.quizWaiting(node:node.id,team:unit.teamID).map(\.shortName)
             showCampaignMessage(waiting.isEmpty ? "这里的题都答完了。":"\(unit.shortName) 已经答过，请选择 \(waiting.joined(separator:"、")) 答题。")
         }else {

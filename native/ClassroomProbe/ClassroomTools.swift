@@ -90,6 +90,7 @@ struct ClassroomTVOverlays:View {
                         else {ClassroomScoreboard(players:game.campaign?.engine.state.players ?? [],unit:unit)}
                     }.frame(maxWidth:.infinity,maxHeight:.infinity)
                 }
+                if game.quiz != nil {QuizOverlayHost(game:game)}
                 if timer.visible {ClassTimerBadge(timer:timer,unit:unit).padding(.top,16*unit)}
             }.frame(width:g.size.width,height:g.size.height)
         }.allowsHitTesting(false)
@@ -263,9 +264,9 @@ struct ClassTimerPanel:View {
 // MARK: - Keyboard shortcuts
 
 enum ClassroomShortcutAction:String,CaseIterable,Identifiable {
-    case select1,select2,select3,select4,select5,select6,select7,award,grantMovement,attack,endTurn,pauseResume,pageBack,pageForward,openTimer,timerStartPause,timerPlus10,toggleScoreboard,toggleTeamScores,openQuizReport
+    case select1,select2,select3,select4,select5,select6,select7,award,grantMovement,attack,endTurn,pauseResume,pageBack,pageForward,openTimer,timerStartPause,timerPlus10,toggleScoreboard,toggleTeamScores,openQuizReport,openQuiz
     /// Works everywhere, also over the pack / shop / sheets.
-    var global:Bool {[.openTimer,.timerStartPause,.timerPlus10,.toggleScoreboard,.toggleTeamScores].contains(self)}
+    var global:Bool {[.openTimer,.timerStartPause,.timerPlus10,.toggleScoreboard,.toggleTeamScores,.openQuiz].contains(self)}
     var id:String {rawValue}
     var title:String {
         switch self {
@@ -276,6 +277,7 @@ enum ClassroomShortcutAction:String,CaseIterable,Identifiable {
         case .toggleScoreboard:return "显示 / 隐藏记分板"
         case .toggleTeamScores:return "记分板：个人 / 队伍切换"
         case .openQuizReport:return "打开答题报告"
+        case .openQuiz:return "答题（选人出题）"
         }
     }
     var icon:String {
@@ -283,14 +285,14 @@ enum ClassroomShortcutAction:String,CaseIterable,Identifiable {
         case .select1,.select2,.select3,.select4,.select5,.select6,.select7:return "person.fill"
         case .award:return "bitcoinsign.circle";case .grantMovement:return "figure.walk";case .attack:return "burst";case .endTurn:return "forward.end";case .pauseResume:return "playpause"
         case .pageBack:return "chevron.left";case .pageForward:return "chevron.right";case .openTimer:return "timer";case .timerStartPause:return "playpause.circle"
-        case .timerPlus10:return "plus.circle";case .toggleScoreboard:return "list.number";case .toggleTeamScores:return "person.3";case .openQuizReport:return "chart.bar.doc.horizontal"
+        case .timerPlus10:return "plus.circle";case .toggleScoreboard:return "list.number";case .toggleTeamScores:return "person.3";case .openQuizReport:return "chart.bar.doc.horizontal";case .openQuiz:return "questionmark.bubble"
         }
     }
     var seat:Int? {["select1":1,"select2":2,"select3":3,"select4":4,"select5":5,"select6":6,"select7":7][rawValue]}
     var defaultKey:String {
         switch self {
         case .select1:return "1";case .select2:return "2";case .award:return "g";case .grantMovement:return "m";case .attack:return "a";case .endTurn:return "e"
-        case .pauseResume:return " ";case .pageBack:return "←";case .pageForward:return "→";case .openTimer:return "t";case .toggleScoreboard:return "s";case .toggleTeamScores:return "d";case .openQuizReport:return "r"
+        case .pauseResume:return " ";case .pageBack:return "←";case .pageForward:return "→";case .openTimer:return "t";case .toggleScoreboard:return "s";case .toggleTeamScores:return "d";case .openQuizReport:return "r";case .openQuiz:return "q"
         default:return ""
         }
     }
