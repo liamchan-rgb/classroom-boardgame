@@ -98,3 +98,47 @@ private final class MeadowLiveMirrorTarget:NSObject {
     init(_ view:MeadowLiveMirrorView){self.view=view}
     @objc func tick(){view?.tick()}
 }
+
+/// The inventory and shop open on the teacher's own window (they take input). The public screen shows a live,
+/// read-only copy of exactly that screen — same art, same tab, same selection — using the same render-server
+/// snapshot as the teacher's live mirror. Only these two screens are copied; other teacher panels stay private.
+struct MeadowPanelMirror:UIViewRepresentable {
+    let game:MeadowTeacherCoordinator
+    func makeUIView(context:Context)->MeadowPanelMirrorView {let view=MeadowPanelMirrorView();view.game=game;return view}
+    func updateUIView(_ view:MeadowPanelMirrorView,context:Context){view.game=game}
+    static func dismantleUIView(_ view:MeadowPanelMirrorView,coordinator:()){view.stop()}
+}
+final class MeadowPanelMirrorView:UIView {
+    weak var game:MeadowTeacherCoordinator?
+    private var link:CADisplayLink?
+    private var current:UIView?
+    override init(frame:CGRect){super.init(frame:frame);backgroundColor = .black;clipsToBounds=true;isUserInteractionEnabled=false;isHidden=true}
+    required init?(coder:NSCoder){fatalError("init(coder:) has not been implemented")}
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        if window == nil {stop();return}
+        guard link == nil else{return}
+        let link=CADisplayLink(target:MeadowPanelMirrorTarget(self),selector:#selector(MeadowPanelMirrorTarget.tick))
+        link.preferredFrameRateRange=CAFrameRateRange(minimum:20,maximum:30,preferred:30)
+        link.add(to:.main,forMode:.common);self.link=link
+    }
+    func stop(){link?.invalidate();link=nil;clear()}
+    private func clear(){current?.removeFromSuperview();current=nil;isHidden=true}
+    fileprivate func tick() {
+        guard let source=game?.publicPanelSource,source.window != nil,source.bounds.width>0,source.bounds.height>0,
+              let snapshot=source.snapshotView(afterScreenUpdates:false) else{clear();return}
+        // Same aspect as the teacher's screen, fitted into the public display.
+        let scale=min(bounds.width/source.bounds.width,bounds.height/source.bounds.height)
+        snapshot.isUserInteractionEnabled=false
+        snapshot.bounds=CGRect(origin:.zero,size:source.bounds.size)
+        snapshot.transform=CGAffineTransform(scaleX:scale,y:scale)
+        snapshot.center=CGPoint(x:bounds.midX,y:bounds.midY)
+        addSubview(snapshot)
+        current?.removeFromSuperview();current=snapshot;isHidden=false
+    }
+}
+private final class MeadowPanelMirrorTarget:NSObject {
+    weak var view:MeadowPanelMirrorView?
+    init(_ view:MeadowPanelMirrorView){self.view=view}
+    @objc func tick(){view?.tick()}
+}

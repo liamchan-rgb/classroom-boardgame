@@ -112,6 +112,15 @@ final class MeadowTeacherCoordinator:ObservableObject {
         guard let first=privatePresenter?.presentedViewController else{return false}
         return !localOutputPreview || first.presentedViewController != nil
     }
+    /// The teacher-window inventory or shop screen that the public display copies live (nil when neither is open).
+    var publicPanelSource:UIView? {
+        var next=privatePresenter?.presentedViewController
+        while let controller=next {
+            if controller is MeadowCampaignInventoryViewController || controller is MeadowShopViewController {return controller.view}
+            next=controller.presentedViewController
+        }
+        return nil
+    }
     private var presentationHost:UIViewController? {
         var top=privatePresenter
         while let next=top?.presentedViewController {top=next}

@@ -34,6 +34,8 @@ struct PublicSurface:View {
                 }.allowsHitTesting(false)
             }
         }.background(.black)
+        // Inventory / shop: the teacher's actual screen, copied live (covers the simplified panel below it).
+        .overlay{if !teacherPreview && game.surface != .book {MeadowPanelMirror(game:game).ignoresSafeArea()}}
         .overlay{ClassroomTVOverlays(timer:game.classTimer,overlays:game.overlays,game:game)}
     }
 }

@@ -1,6 +1,6 @@
 ## Mac版（Mac Catalyst）与本地mac构建（2026-11-18，基于v0.32.4/build48，未改版本号、未存档）
 
-用户要求转Mac原生软件，选Mac Catalyst。试编译仅`registerSceneAccessory`/`UISceneAccessoryRegistration`两处在Catalyst不可用，其余约2.2万行界面代码直接编过，用户试用Mac版“没问题”。本步：生成器开启Catalyst（Mac独立Info-Mac.plist允许多窗口、同Bundle ID、Mac本机ad-hoc签名），外接显示注册在Mac编译排除；Mac教师顶栏新增“公开窗口”，以第二窗口MacPublicWindow显示同一PublicSurface（不接受点击、计入连接），拖到投影屏全屏；`scripts/local-build.sh mac`生成并打开artifacts/ClassroomProbe.app。iPad端代码路径、Info.plist、签名与IPA流程不变，本机复跑test/ipa/sim通过。Mac公开窗口跨屏全屏、教师镜像与性能待用户实测。详见native/CI.md“Mac版”。
+用户要求转Mac原生软件，选Mac Catalyst。试编译仅`registerSceneAccessory`/`UISceneAccessoryRegistration`两处在Catalyst不可用，其余约2.2万行界面代码直接编过，用户试用Mac版“没问题”。本步：生成器开启Catalyst（Mac独立Info-Mac.plist允许多窗口、同Bundle ID、Mac本机ad-hoc签名），外接显示注册在Mac编译排除；Mac教师顶栏新增“公开窗口”，以第二窗口MacPublicWindow显示同一PublicSurface（不接受点击、计入连接），拖到投影屏全屏；`scripts/local-build.sh mac`生成并打开artifacts/ClassroomProbe.app。iPad端代码路径、Info.plist、签名与IPA流程不变，本机复跑test/ipa/sim通过。另按用户反馈：公开屏的背包/商店改为实时复制教师端正在打开的同一界面（MeadowPanelMirror，iPad电视与Mac公开窗口都生效），原先公开屏只有简化文字行囊、看不到商店。Mac公开窗口跨屏全屏、教师镜像与性能待用户实测。详见native/CI.md“Mac版”。
 
 ## 本地构建脚本（2026-11-18，不改App、未存档）
 
