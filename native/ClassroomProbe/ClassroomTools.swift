@@ -93,7 +93,7 @@ struct ClassroomTVOverlays:View {
                 if game.quiz != nil {QuizOverlayHost(game:game)}
                 if let challenge=game.challenge {ChallengeOverlay(model:challenge,unit:unit,showLevels:game.quiz == nil)}
                 if timer.visible {ClassTimerBadge(timer:timer,unit:unit).padding(.top,16*unit)}
-            }.frame(width:g.size.width,height:g.size.height)
+            }.frame(width:g.size.width,height:g.size.height,alignment:.top)
         }.allowsHitTesting(false)
     }
 }
