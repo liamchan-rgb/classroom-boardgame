@@ -186,6 +186,7 @@ final class TeacherHostController: UIViewController {
         case .openTimer:game.openTimer()
         case .timerStartPause:game.classTimer.toggle()
         case .timerPlus10:game.classTimer.add(10)
+        case .timerClose:game.classTimer.reset();game.classTimer.hide()
         case .toggleScoreboard:game.toggleScoreboard()
         case .toggleTeamScores:game.toggleTeamScores()
         case .openQuizReport:game.openQuizReport()

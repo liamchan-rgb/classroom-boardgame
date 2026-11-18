@@ -16,10 +16,11 @@ final class MeadowQuizCard: UIView {
     static let circled = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩", "⑪", "⑫"]
 
     private var mode: LiveQuiz.Mode = .personal
-    static func present(in host: UIView, question: QuizQuestion, player: String, place: String, start: Date, mode: LiveQuiz.Mode = .personal) -> MeadowQuizCard {
+    private var deadline: Date?
+    static func present(in host: UIView, question: QuizQuestion, player: String, place: String, start: Date, mode: LiveQuiz.Mode = .personal, deadline: Date? = nil) -> MeadowQuizCard {
         host.subviews.compactMap { $0 as? MeadowQuizCard }.forEach { $0.removeFromSuperview() }
         let view = MeadowQuizCard(frame: host.bounds); view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        view.question = question; view.start = start; view.limit = question.timeLimit; view.mode = mode
+        view.question = question; view.start = start; view.limit = question.timeLimit; view.mode = mode; view.deadline = deadline
         view.build(player: player, place: place); host.addSubview(view)
         view.alpha = 0; view.card.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
         UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: 0.75, initialSpringVelocity: 0.6) { view.alpha = 1; view.card.transform = .identity }
@@ -79,7 +80,7 @@ final class MeadowQuizCard: UIView {
     }
     private func tick() {
         guard !revealed else { return }
-        let left = Double(limit) - Date().timeIntervalSince(start)
+        let left = deadline.map { $0.timeIntervalSinceNow } ?? Double(limit) - Date().timeIntervalSince(start)
         if left <= 0 {
             clock.text = "时间到"; clock.backgroundColor = UIColor.systemRed.withAlphaComponent(Int(Date().timeIntervalSinceReferenceDate * 2) % 2 == 0 ? 0.9 : 0.6)
         } else {
@@ -151,7 +152,7 @@ final class MeadowQuizCard: UIView {
                 // Front small on top, the right back large below (and what was said instead).
                 let text = NSMutableAttributedString(string: q.prompt + "\n", attributes: [.font: MeadowPreviewPalette.font(30, .bold), .foregroundColor: MeadowPreviewPalette.muted])
                 text.append(NSAttributedString(string: part.options[part.answer], attributes: [.font: MeadowPreviewPalette.font(72, .heavy), .foregroundColor: right ? UIColor.systemGreen : MeadowPreviewPalette.ink]))
-                if !right { text.append(NSAttributedString(string: "\n说成了：\(said ?? "不会")", attributes: [.font: MeadowPreviewPalette.font(28, .semibold), .foregroundColor: UIColor.systemRed])) }
+                if !right { text.append(NSAttributedString(string: said.map { "\n说成了：\($0)" } ?? "\n✗ 答错", attributes: [.font: MeadowPreviewPalette.font(28, .semibold), .foregroundColor: UIColor.systemRed])) }
                 self.face.attributedText = text
                 self.faceBox.backgroundColor = right ? UIColor.systemGreen.withAlphaComponent(0.18) : MeadowPreviewPalette.glass(.medium)
             }

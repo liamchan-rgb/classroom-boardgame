@@ -101,7 +101,7 @@ public struct QuizReport {
             guard parts.count == a.correct.count else { return nil }
             let answers = parts.indices.map { i -> Answer in
                 let part = parts[i]
-                let said = a.picks[i].flatMap { part.options.indices.contains($0) ? part.options[$0] : nil } ?? a.texts[i] ?? "不会"
+                let said = a.picks[i].flatMap { part.options.indices.contains($0) ? part.options[$0] : nil } ?? a.texts[i] ?? (q.type == .flashcard ? "答错" : "不会")
                 let label: String
                 switch q.type {
                 case .choice: label = "答案"

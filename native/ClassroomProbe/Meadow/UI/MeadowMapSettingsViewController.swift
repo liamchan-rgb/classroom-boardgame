@@ -154,16 +154,9 @@ final class MeadowMapSettingsViewController: UIViewController {
             classRows.append(row);right.addArrangedSubview(row)
         }
         refreshPartySummary()
-        // Optional question bank: roadside-find events become quiz events (format: docs/question-bank-format.md).
-        var quizStyle=UIButton.Configuration.gray();quizStyle.image=UIImage(systemName:"questionmark.bubble.fill");quizStyle.imagePadding=8
-        quizStyle.title="导入题库";quizStyle.baseForegroundColor=MeadowPreviewPalette.primary;quizStyle.cornerStyle = .capsule
-        quizButton.configuration=quizStyle
-        quizButton.addAction(UIAction{[weak self] _ in self?.importQuizBank()},for:.touchUpInside)
-        quizClear.setImage(UIImage(systemName:"xmark.circle.fill"),for:.normal);quizClear.tintColor=MeadowPreviewPalette.muted
-        quizClear.addAction(UIAction{[weak self] _ in self?.quizBank=nil;self?.refreshQuizLabel()},for:.touchUpInside)
-        quizLabel.font = .systemFont(ofSize:15,weight:.semibold);quizLabel.textColor=MeadowPreviewPalette.muted;quizLabel.numberOfLines=2
-        let quizRow=UIStackView(arrangedSubviews:[quizButton,quizLabel,quizClear]);quizRow.spacing=10;quizRow.alignment = .center
-        right.addArrangedSubview(quizRow);refreshQuizLabel()
+        // The question bank lives in the top bar ("题库"); a new trip starts with it (roadside finds become quizzes).
+        quizLabel.font = .systemFont(ofSize:15,weight:.semibold);quizLabel.numberOfLines=2
+        right.addArrangedSubview(quizLabel);refreshQuizLabel()
         right.addArrangedSubview(startCampaignButton)
         right.addArrangedSubview(button("继续已保存行程",action:#selector(continueCampaign)))
         right.addArrangedSubview(button("历史结算",action:#selector(showCompletedCampaigns)))
@@ -187,23 +180,12 @@ final class MeadowMapSettingsViewController: UIViewController {
         ])
         changed()
     }
-    private let quizButton=UIButton(type:.system),quizLabel=UILabel(),quizClear=UIButton(type:.system)
-    private var quizBank:[QuizQuestion]?
+    private let quizLabel=UILabel()
+    /// The app's question bank (top bar "题库"), given to the new trip.
+    private var quizBank:[QuizQuestion]? {let q=QuizLibrary.shared.questions;return q.isEmpty ? nil:q}
     private func refreshQuizLabel(){
-        if let bank=quizBank,!bank.isEmpty {quizLabel.text="✓ \(bank.count) 题 · 路边事件改为答题";quizLabel.textColor=gold;quizClear.isHidden=false}
-        else {quizLabel.text="可选 · 不导入则保持原随机事件";quizLabel.textColor=MeadowPreviewPalette.muted;quizClear.isHidden=true}
-    }
-    private func importQuizBank(){
-        DocumentImportPresenter.shared.present(types:[.plainText,.utf8PlainText,.json,.text]){[weak self] url in
-            guard let self,let url else{return}
-            do{
-                let scoped=url.startAccessingSecurityScopedResource();defer{if scoped{url.stopAccessingSecurityScopedResource()}}
-                self.quizBank=try QuizBankParser.parse(Data(contentsOf:url));self.refreshQuizLabel()
-            }catch{
-                let alert=UIAlertController(title:"题库没有导入",message:error.localizedDescription,preferredStyle:.alert)
-                alert.addAction(UIAlertAction(title:"好",style:.default));self.present(alert,animated:true)
-            }
-        }
+        if let bank=quizBank {quizLabel.text="题库：\(bank.count) 题会带进新行程（在顶栏“题库”里管理）";quizLabel.textColor=gold}
+        else {quizLabel.text="题库：空（可在顶栏“题库”导入，不导入则保持原随机事件）";quizLabel.textColor=MeadowPreviewPalette.muted}
     }
     private func button(_ title:String,action:Selector) -> UIButton {
         let b=UIButton(type:.system);var c=UIButton.Configuration.filled();c.title=title

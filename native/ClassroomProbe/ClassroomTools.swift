@@ -91,6 +91,7 @@ struct ClassroomTVOverlays:View {
                     }.frame(maxWidth:.infinity,maxHeight:.infinity)
                 }
                 if game.quiz != nil {QuizOverlayHost(game:game)}
+                if let challenge=game.challenge {ChallengeOverlay(model:challenge,unit:unit,showLevels:game.quiz == nil)}
                 if timer.visible {ClassTimerBadge(timer:timer,unit:unit).padding(.top,16*unit)}
             }.frame(width:g.size.width,height:g.size.height)
         }.allowsHitTesting(false)
@@ -250,6 +251,7 @@ struct ClassTimerPanel:View {
                 Button{timer.add(10)}label:{Label("+10",systemImage:"plus")}
                 Button{timer.toggle();if timer.running{onClose()}}label:{Label(timer.running ? "暂停":"继续",systemImage:timer.running ? "pause.fill":"play.fill")}.buttonStyle(GlassIconButtonStyle(prominent:true))
                 Button{timer.reset()}label:{Label("重置",systemImage:"arrow.counterclockwise")}
+                Button{timer.reset();timer.hide();onClose()}label:{Label("关闭计时",systemImage:"xmark.circle")}
             }.buttonStyle(GlassIconButtonStyle())
             Label("默认 10 秒 · 输入数字按回车即开始，开始后窗口自动关闭", systemImage:"info.circle").font(.caption).foregroundStyle(GameTheme.muted)
         }.padding(22).background(GlassBackdrop())
@@ -264,9 +266,9 @@ struct ClassTimerPanel:View {
 // MARK: - Keyboard shortcuts
 
 enum ClassroomShortcutAction:String,CaseIterable,Identifiable {
-    case select1,select2,select3,select4,select5,select6,select7,award,grantMovement,attack,endTurn,pauseResume,pageBack,pageForward,openTimer,timerStartPause,timerPlus10,toggleScoreboard,toggleTeamScores,openQuizReport,openQuiz,openClassQuiz,openPractice
+    case select1,select2,select3,select4,select5,select6,select7,award,grantMovement,attack,endTurn,pauseResume,pageBack,pageForward,openTimer,timerStartPause,timerPlus10,toggleScoreboard,toggleTeamScores,openQuizReport,openQuiz,openClassQuiz,openPractice,timerClose
     /// Works everywhere, also over the pack / shop / sheets.
-    var global:Bool {[.openTimer,.timerStartPause,.timerPlus10,.toggleScoreboard,.toggleTeamScores,.openQuiz,.openClassQuiz,.openPractice].contains(self)}
+    var global:Bool {[.openTimer,.timerStartPause,.timerPlus10,.timerClose,.toggleScoreboard,.toggleTeamScores,.openQuiz,.openClassQuiz,.openPractice].contains(self)}
     var id:String {rawValue}
     var title:String {
         switch self {
@@ -280,6 +282,7 @@ enum ClassroomShortcutAction:String,CaseIterable,Identifiable {
         case .openQuiz:return "个人答题（回车即开题）"
         case .openClassQuiz:return "全班题（公用题，手动发奖）"
         case .openPractice:return "闪卡练习"
+        case .timerClose:return "关闭计时（停止并收起）"
         }
     }
     var icon:String {
@@ -287,14 +290,14 @@ enum ClassroomShortcutAction:String,CaseIterable,Identifiable {
         case .select1,.select2,.select3,.select4,.select5,.select6,.select7:return "person.fill"
         case .award:return "bitcoinsign.circle";case .grantMovement:return "figure.walk";case .attack:return "burst";case .endTurn:return "forward.end";case .pauseResume:return "playpause"
         case .pageBack:return "chevron.left";case .pageForward:return "chevron.right";case .openTimer:return "timer";case .timerStartPause:return "playpause.circle"
-        case .timerPlus10:return "plus.circle";case .toggleScoreboard:return "list.number";case .toggleTeamScores:return "person.3";case .openQuizReport:return "chart.bar.doc.horizontal";case .openQuiz:return "questionmark.bubble";case .openClassQuiz:return "person.3.sequence";case .openPractice:return "rectangle.on.rectangle.angled"
+        case .timerPlus10:return "plus.circle";case .toggleScoreboard:return "list.number";case .toggleTeamScores:return "person.3";case .openQuizReport:return "chart.bar.doc.horizontal";case .openQuiz:return "questionmark.bubble";case .openClassQuiz:return "person.3.sequence";case .openPractice:return "rectangle.on.rectangle.angled";case .timerClose:return "timer.circle"
         }
     }
     var seat:Int? {["select1":1,"select2":2,"select3":3,"select4":4,"select5":5,"select6":6,"select7":7][rawValue]}
     var defaultKey:String {
         switch self {
         case .select1:return "1";case .select2:return "2";case .award:return "g";case .grantMovement:return "m";case .attack:return "a";case .endTurn:return "e"
-        case .pauseResume:return " ";case .pageBack:return "←";case .pageForward:return "→";case .openTimer:return "t";case .toggleScoreboard:return "s";case .toggleTeamScores:return "d";case .openQuizReport:return "r";case .openQuiz:return "q";case .openClassQuiz:return "⇧q";case .openPractice:return "k"
+        case .pauseResume:return " ";case .pageBack:return "←";case .pageForward:return "→";case .openTimer:return "t";case .toggleScoreboard:return "s";case .toggleTeamScores:return "d";case .openQuizReport:return "r";case .openQuiz:return "q";case .openClassQuiz:return "⇧q";case .openPractice:return "k";case .timerClose:return "⇧t"
         default:return ""
         }
     }

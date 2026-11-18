@@ -25,7 +25,6 @@ public enum QuizBankParser {
         var questions=trimmed.hasPrefix("{") || trimmed.hasPrefix("[") ? try json(Data(trimmed.utf8)):try plain(trimmed)
         guard !questions.isEmpty else{throw GameError("没有读到题目，请对照题库格式说明。")}
         guard questions.count<=2000 else{throw GameError("题库最多2000题。")}
-        fillFlashcardDistractors(&questions)
         for q in questions{try q.validate()}
         return questions
     }
@@ -62,19 +61,9 @@ public enum QuizBankParser {
         guard !items.isEmpty else{throw GameError("填空题需要用 {{答案}} 标出空格：「\(raw.prefix(20))」")}
         return(prompt,items)
     }
+    /// A flash card is graded right / wrong by the teacher: its one option is the back (distractors are ignored).
     static func flashcard(front:String,back:String,distractors:[String])->QuizQuestion {
-        QuizQuestion(prompt:front,options:[],answer:0,kind:.flashcard,items:[item(nil,correct:back,wrong:distractors)])
-    }
-    /// Flash cards with fewer than three wrong answers borrow the backs of other cards in the bank, so the teacher
-    /// can tap what the student actually said.
-    static func fillFlashcardDistractors(_ list:inout [QuizQuestion]) {
-        let backs=list.compactMap{q in q.type == .flashcard ? q.items?.first.map{$0.options[$0.answer]}:nil}
-        for i in list.indices where list[i].type == .flashcard {
-            guard let card=list[i].items?.first,card.options.count<4 else{continue}
-            let correct=card.options[card.answer]
-            let borrowed=shuffled(backs.filter{$0 != correct && !card.options.contains($0)},seed:list[i].prompt).prefix(4-card.options.count)
-            list[i].items=[item(nil,correct:correct,wrong:card.options.filter{$0 != correct}+borrowed)]
-        }
+        QuizQuestion(prompt:front,options:[],answer:0,kind:.flashcard,items:[QuizItem(options:[back],answer:0)])
     }
     static func difficulty(_ raw:String)->Int? {
         let v=raw.trimmingCharacters(in:.whitespaces)
@@ -340,6 +329,19 @@ public extension MeadowCampaignSession {
         let fits=dealingOrder.filter{bank[$0].isShared && !used.contains($0) && (kind==nil || bank[$0].type==kind)}
         return fits.isEmpty ? nil:fits[skip%fits.count]
     }
+    /// Timed challenge: the student's next own question at this difficulty (unmarked difficulty counts as ★) that
+    /// they have not answered; nil when that level is used up.
+    func challengeQuestion(for player:String,difficulty:Int)->Int? {
+        let bank=quizBank,answered=Set(quizLog.filter{$0.player==player && $0.practice != true}.map(\.question))
+        return bank.indices.first{!bank[$0].isShared && isExclusive(bank[$0],for:player) && (bank[$0].difficulty ?? 1)==difficulty && !answered.contains($0)}
+    }
+    /// How many own questions are left per difficulty (index 0 = ★).
+    func challengeLeft(for player:String)->[Int] {
+        let bank=quizBank,answered=Set(quizLog.filter{$0.player==player && $0.practice != true}.map(\.question))
+        var left=[0,0,0]
+        for i in bank.indices where !bank[i].isShared && isExclusive(bank[i],for:player) && !answered.contains(i) {left[min(2,max(0,(bank[i].difficulty ?? 1)-1))]+=1}
+        return left
+    }
     /// The question most recently asked (再出一次), optionally only shared ones.
     func lastAskedQuestion(sharedOnly:Bool=false)->Int? {
         quizLog.last{$0.practice != true && (!sharedOnly || quizBank.indices.contains($0.question) && quizBank[$0.question].isShared)}?.question
@@ -370,7 +372,7 @@ public extension MeadowCampaignSession {
     /// and pays the reward. `free`: called up by the teacher anywhere, not at a quiz spot. Returns the stored attempt.
     /// `manualCoins`: the reward the teacher sends for a shared-bank question; `shared`: asked to the whole class;
     /// `practice`: flash-card practice (recorded, no reward).
-    @discardableResult func recordQuiz(actor:String,question index:Int,picks:[Int?],texts:[String?]?=nil,seconds:Double,at:Date=Date(),free:Bool=false,manualCoins:Int?=nil,shared:Bool=false,practice:Bool=false,id:String=UUID().uuidString)throws->QuizAttempt {
+    @discardableResult func recordQuiz(actor:String,question index:Int,picks:[Int?],texts:[String?]?=nil,seconds:Double,at:Date=Date(),free:Bool=false,manualCoins:Int?=nil,shared:Bool=false,practice:Bool=false,challenge:Bool=false,id:String=UUID().uuidString)throws->QuizAttempt {
         if !free {guard canManageInventory,travel==nil else{throw GameError("请抵达地点、结束战斗后答题。")}}
         guard let unit=engine.state.units[actor],quizBank.indices.contains(index) else{throw GameError("没有这道题。")}
         let q=quizBank[index],parts=q.parts
@@ -378,10 +380,10 @@ public extension MeadowCampaignSession {
         let texts=texts ?? Array(repeating:nil,count:parts.count)
         let correct=parts.indices.map{picks[$0]==parts[$0].answer}
         var attempt=QuizAttempt(player:actor,playerName:unit.shortName,node:free ? -1:unit.nodeID,question:index,picks:picks,texts:texts,correct:correct,
-                                seconds:min(600,max(0,seconds)),limit:q.timeLimit,at:at.timeIntervalSince1970)
+                                seconds:min(600,max(0,seconds)),limit:challenge ? 600:q.timeLimit,at:at.timeIntervalSince1970)
         if shared {attempt.shared=true}
         if practice {attempt.practice=true}
-        try engine.apply(.recordCampaignQuiz(QuizRecord(attempt:attempt,fullCoins:q.reward,points:q.points,dropTier:q.difficulty.map{$0-1},free:free,manualCoins:manualCoins)),id:id)
+        try engine.apply(.recordCampaignQuiz(QuizRecord(attempt:attempt,fullCoins:q.reward,points:q.points,dropTier:(challenge ? (q.difficulty ?? 1):q.difficulty).map{$0-1},free:free,manualCoins:manualCoins,noSpeedBonus:challenge)),id:id)
         return quizLog.last!
     }
     /// The class answered (choice = option index) or skipped (nil, no reward). Returns whether it was right.

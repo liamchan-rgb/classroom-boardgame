@@ -151,8 +151,11 @@ public struct QuizRecord: Codable, Equatable {
     public var free: Bool? = nil
     /// Shared-bank questions: the coins the teacher chose to send (the reward or the participation prize); no drop.
     public var manualCoins: Int? = nil
-    public init(attempt: QuizAttempt, fullCoins: Int, points: Int, dropTier: Int?, free: Bool = false, manualCoins: Int? = nil) {
+    /// Timed challenges have no per-question clock, so no speed bonus.
+    public var noSpeedBonus: Bool? = nil
+    public init(attempt: QuizAttempt, fullCoins: Int, points: Int, dropTier: Int?, free: Bool = false, manualCoins: Int? = nil, noSpeedBonus: Bool = false) {
         self.attempt = attempt; self.fullCoins = fullCoins; self.points = points; self.dropTier = dropTier; self.free = free ? true : nil; self.manualCoins = manualCoins
+        self.noSpeedBonus = noSpeedBonus ? true : nil
     }
 }
 
@@ -197,7 +200,7 @@ extension Evaluation {
         } else if let manual = record.manualCoins {
             attempt.coins = manual; attempt.score = right == n ? record.points : 0
         } else {
-            attempt.coins = intime ? QuizRewards.coins(full: record.fullCoins, right: right, total: n, fast: record.dropTier != nil && attempt.seconds * 2 <= Double(attempt.limit)) : 0
+            attempt.coins = intime ? QuizRewards.coins(full: record.fullCoins, right: right, total: n, fast: record.dropTier != nil && record.noSpeedBonus != true && attempt.seconds * 2 <= Double(attempt.limit)) : 0
             attempt.score = intime && right == n ? record.points : 0
         }
         if attempt.practice != true, record.manualCoins == nil, intime, right == n, let tier = record.dropTier {

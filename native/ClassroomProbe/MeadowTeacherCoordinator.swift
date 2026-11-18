@@ -67,6 +67,17 @@ final class MeadowTeacherCoordinator:ObservableObject {
     }
 
     /// Who gets which pre-cut portion of exclusive questions (opened from the quiz launcher, over it).
+    /// Top bar "题库". From the quiz launcher (`back`) it replaces it and returns to it when done.
+    func openQuizBank(back:Bool=false){
+        let show={[weak self] in
+            guard let self else{return}
+            let done={[weak self] in self?.closePanel{if back {self?.openQuiz()}};return}
+            let screen=KeyHostingController(rootView:QuizBankPanel(game:self,onPortions:{[weak self] in self?.openQuizPortions()},onClose:done))
+            screen.onKey={key in if key=="⎋" {done();return true};return false}
+            self.presentPanel(screen,size:CGSize(width:760,height:540))
+        }
+        if quizPanel != nil {closePanel(show)} else if presentationHost != nil {show()}
+    }
     /// Replaces the launcher (no sheet on a sheet) and goes back to it when done.
     func openQuizPortions(){
         closePanel{[weak self] in
@@ -77,19 +88,15 @@ final class MeadowTeacherCoordinator:ObservableObject {
             self.presentPanel(screen,size:CGSize(width:760,height:560))
         }
     }
-    /// The question the launcher would start.
-    func launcherCandidate(_ m:QuizLauncherModel)->Int? {
-        guard let c=campaign,let player=m.player else{return nil}
-        if let again=m.again,c.quizBank.indices.contains(again) {return again}
-        return c.personalQuizQuestion(for:player,kind:m.kind,skip:m.skip)
-    }
-    /// Q: a student's next question, two keys away (Q, ⏎). 1–7 switch student, X/K/T/Y start a kind at once.
+    /// Q: the timed challenge on a student's own questions (setup: who and how long).
     func openQuiz(){
-        guard quiz == nil,quizPanel == nil,presentationHost != nil else{return}
+        guard quiz == nil,challenge == nil,quizPanel == nil,presentationHost != nil else{return}
         let model=QuizLauncherModel();model.player=campaign?.selectedPlayerID
         let start={[weak self,weak model] in
-            guard let self,let model,let player=model.player,let index=self.launcherCandidate(model) else{return}
-            self.closePanel{self.startQuiz(player:player,index:index,node:nil)}
+            guard let self,let model,let player=model.player,let c=self.campaign else{return}
+            guard c.challengeLeft(for:player).reduce(0,+)>0 else{model.note="这位同学没有专属题。";return}
+            let seconds=model.seconds
+            self.closePanel{self.startChallenge(player:player,seconds:seconds)}
         }
         let screen=KeyHostingController(rootView:QuizLauncherPanel(game:self,model:model,onStart:start,onClose:{[weak self] in self?.closePanel()}))
         screen.onKey={[weak self,weak model] key in
@@ -97,17 +104,86 @@ final class MeadowTeacherCoordinator:ObservableObject {
             switch key {
             case "⏎":start()
             case "⎋":self.closePanel()
-            case " ":model.skip += 1;model.again=nil
-            case "z":model.again=self.campaign?.lastAskedQuestion()
+            case "+","=":model.seconds=min(1800,model.seconds+30)
+            case "-":model.seconds=max(30,model.seconds-30)
             default:
-                if let n=Int(key),let id=self.player(forSeat:n) {model.player=id;model.skip=0;model.again=nil;return true}
-                if let kind=QuizLauncherModel.kindKeys[key] {model.kind=kind;model.skip=0;model.again=nil;if self.launcherCandidate(model) != nil {start()} else {model.note="这位同学没有可出的\(kind.title)了。"};return true}
+                if let n=Int(key),let id=self.player(forSeat:n) {model.player=id;return true}
                 return false
             }
             return true
         }
-        presentPanel(screen,size:CGSize(width:720,height:470))
+        presentPanel(screen,size:CGSize(width:760,height:470))
     }
+
+    // MARK: Timed challenge
+    @Published var challenge:ChallengeModel?
+    private var challengeTimer:Timer?
+    func startChallenge(player:String,seconds:Int){
+        guard let c=campaign,let unit=c.engine.state.units[player] else{return}
+        let model=ChallengeModel(player:player,name:unit.shortName,seconds:seconds)
+        model.left=c.challengeLeft(for:player)
+        withAnimation{challenge=model}
+        showChallengePanel()
+        challengeTimer?.invalidate()
+        let t=Timer(timeInterval:0.25,repeats:true){[weak self] _ in MainActor.assumeIsolated{self?.challengeTick()}}
+        RunLoop.main.add(t,forMode:.common);challengeTimer=t
+    }
+    /// One panel for the whole challenge; its content follows the phase (picking a level / marking / result).
+    private func showChallengePanel(){
+        guard let model=challenge else{return}
+        let screen=KeyHostingController(rootView:ChallengePanel(game:self,model:model,onPick:{[weak self] d in self?.challengePick(d)},onSubmit:{[weak self] in self?.challengeSubmit()},onEnd:{[weak self] in self?.endChallenge()}))
+        screen.onKey={[weak self] key in
+            guard let self,let model=self.challenge else{return false}
+            switch (key,model.phase) {
+            case ("⎋",_):self.endChallenge();return true
+            case ("⏎",.question):self.challengeSubmit();return true
+            case (_,.picking):if let d=Int(key),(1...3).contains(d){self.challengePick(d);return true};return false
+            case (_,.question):return model.draft?.key(key) ?? false
+            default:return false
+            }
+        }
+        presentPanel(screen,size:CGSize(width:780,height:620))
+    }
+    private func challengePick(_ difficulty:Int){
+        guard let c=campaign,let model=challenge,model.phase == .picking,model.remaining>0 else{return}
+        guard let i=c.challengeQuestion(for:model.player,difficulty:difficulty) else{model.note="\(String(repeating:"★",count:difficulty)) 的题做完了，换一档。";return}
+        model.note=nil;model.phase = .question;model.questionStart=Date()
+        quizToken += 1
+        let q=c.quizBank[i]
+        quiz=LiveQuiz(token:quizToken,index:i,question:q,mode:.challenge,player:model.player,playerName:model.name,place:"专属挑战",node:nil,start:Date(),deadline:model.end)
+        model.draft=QuizAnswerDraft(q)
+    }
+    private func challengeSubmit(){
+        guard let c=campaign,let model=challenge,model.phase == .question,var live=quiz,live.attempt==nil,let draft=model.draft else{return}
+        let r=draft.result
+        do{
+            let a=try c.recordQuiz(actor:model.player,question:live.index,picks:r.picks,texts:r.texts,seconds:Date().timeIntervalSince(model.questionStart),free:true,challenge:true)
+            model.answered += 1;if a.rightCount==a.correct.count {model.right += 1}
+            model.coins += a.coins;model.score += a.score
+            model.left=c.challengeLeft(for:model.player)
+            live.attempt=a;live.hold=1.6;live.dropName=a.drop.flatMap{try? c.engine.catalog.item($0).name}
+            quiz=live
+            renderer?.classroomRefresh();revision += 1
+        }catch{model.note=error.localizedDescription}
+    }
+    private func challengeTick(){
+        guard let model=challenge,model.phase != .finished,model.remaining<=0 else{return}
+        finishChallenge()
+    }
+    /// Time is up (or the teacher ended it): a question in progress does not count; the result shows on the TV.
+    private func finishChallenge(){
+        guard let model=challenge,model.phase != .finished else{return}
+        challengeTimer?.invalidate();challengeTimer=nil
+        if quiz?.attempt == nil {withAnimation{quiz=nil}}
+        model.phase = .finished;model.draft=nil
+    }
+    private func endChallenge(){
+        guard let model=challenge else{closePanel();return}
+        if model.phase != .finished {finishChallenge();return}
+        closePanel()
+        withAnimation{challenge=nil;quiz=nil}
+    }
+
     /// One student's question: on the TV with a countdown, the answer panel for the teacher. `node`: the quiz spot,
     /// nil when called up anywhere.
     func startQuiz(player:String,index:Int,node:Int?){
@@ -209,11 +285,11 @@ final class MeadowTeacherCoordinator:ObservableObject {
             guard let self else{return false}
             switch key {
             case "⎋":self.endPractice()
-            case "0":self.practiceAnswer(nil)
+            case "c","0":self.practiceAnswer(nil)
+            case "d":if let q=self.quiz?.question,q.type == .flashcard {self.practiceAnswer(q.parts[0].answer)}
             default:
                 if let n=Int(key),let id=self.player(forSeat:n) {self.switchPractice(to:id);return true}
-                guard key.count==1,let j=MeadowQuizCard.letters.firstIndex(of:key.uppercased()) else{return false}
-                self.practiceAnswer(j)
+                return false
             }
             return true
         }
@@ -249,6 +325,13 @@ final class MeadowTeacherCoordinator:ObservableObject {
     func quizCardFinished(_ token:Int){
         guard let live=quiz,live.token==token,let attempt=live.attempt else{return}
         if live.mode == .practice,practiceModel != nil {nextPracticeCard(after:live.index);return}
+        if live.mode == .challenge {
+            withAnimation{quiz=nil}
+            if let model=challenge,model.phase == .question {
+                if model.remaining>0 {model.phase = .picking;model.draft=nil} else {finishChallenge()}
+            }
+            return
+        }
         withAnimation(.easeIn(duration:0.2)){quiz=nil}
         if live.mode == .personal,let base=quizGainBase,attempt.coins>0 || attempt.drop != nil {
             renderer?.classroomShowGains(title:attempt.drop != nil ? "答题掉落":"答题奖励",subtitle:"\(attempt.playerName) · 答对 \(attempt.rightCount)/\(attempt.correct.count) · 用时 \(Int(attempt.seconds.rounded())) 秒",since:base)

@@ -53,6 +53,13 @@ final class KeyHostingController<Content: View>: UIHostingController<Content> {
     /// A letter (option) or "0" (不会) for the first open item. Returns whether it was used.
     func key(_ token: String) -> Bool {
         if token == "⌫" { undo(); return true }
+        // Flash cards: the teacher only says right (D, 对) or wrong (C, 错).
+        if question.type == .flashcard {
+            guard let i = current ?? 0 as Int?, question.parts.indices.contains(i) else { return false }
+            if token == "d" { picks[i] = question.parts[i].answer; unknown[i] = false; return true }
+            if token == "c" || token == "0" { picks[i] = nil; unknown[i] = true; return true }
+            return false
+        }
         guard let i = current ?? (question.parts.count == 1 ? 0 : nil) else { return false }
         if token == "0" { pick(i, nil); return true }
         guard token.count == 1, let index = MeadowQuizCard.letters.firstIndex(of: token.uppercased()), question.parts[i].options.indices.contains(index) else { return false }
@@ -100,7 +107,30 @@ struct QuizAnswerRows: View {
         case .choice: Text(q.prompt).font(.title3.bold())
         }
     }
-    private func row(_ i: Int) -> some View {
+    /// Flash card: the back, and right / wrong.
+    private func flashRow(_ i: Int) -> some View {
+        let part = draft.question.parts[i]
+        let right = draft.picks[i] == part.answer && !draft.unknown[i], wrong = draft.unknown[i]
+        return VStack(alignment: .leading, spacing: 10) {
+            Text("背面：\(part.options[part.answer])").font(.title2.bold()).foregroundStyle(GameTheme.primary)
+            HStack(spacing: 12) {
+                Button { draft.pick(i, part.answer) } label: {
+                    Label("对 (D)", systemImage: "checkmark.circle.fill").font(.title3.bold()).frame(minWidth: 120).padding(.vertical, 10)
+                        .foregroundStyle(right ? Color.white : Color.green)
+                        .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(right ? Color.green : Color.green.opacity(0.12)))
+                }.buttonStyle(.plain)
+                Button { if !wrong { draft.pick(i, nil) } } label: {
+                    Label("错 (C)", systemImage: "xmark.circle.fill").font(.title3.bold()).frame(minWidth: 120).padding(.vertical, 10)
+                        .foregroundStyle(wrong ? Color.white : Color.red)
+                        .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(wrong ? Color.red : Color.red.opacity(0.12)))
+                }.buttonStyle(.plain)
+            }
+        }
+    }
+    @ViewBuilder private func row(_ i: Int) -> some View {
+        if draft.question.type == .flashcard { flashRow(i) } else { optionRow(i) }
+    }
+    private func optionRow(_ i: Int) -> some View {
         let q = draft.question, part = q.parts[i]
         let title: String = {
             switch q.type {
@@ -135,7 +165,7 @@ struct QuizAnswerRows: View {
                         .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(draft.unknown[i] ? Color.gray : Color.white.opacity(0.4)))
                 }.buttonStyle(.plain)
             }
-            if q.type == .fill || q.type == .flashcard {
+            if q.type == .fill {
                 ClassroomTextField(placeholder: "其他答案（学生说的不在选项里时输入）", text: Binding(get: { draft.texts[i] }, set: { v in draft.texts[i] = v; if !v.isEmpty { draft.picks[i] = nil; draft.unknown[i] = false } }), limit: 120)
                     .frame(height: 36).padding(.horizontal, 10).background(GlassFill.field, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
             }
@@ -201,7 +231,7 @@ struct MeadowQuizAnswerPanel: View {
                 Text("已录 \(draft.answered)/\(question.parts.count)").font(.callout.bold()).foregroundStyle(GameTheme.muted)
                 Button { onSubmit() } label: { Label("提交并揭晓 (⏎)", systemImage: "checkmark.seal.fill") }.buttonStyle(GlassIconButtonStyle(prominent: true))
             }
-            Text("键盘：A–H 选学生说的答案，0 不会，⌫ 撤回，回车提交。未录入的按答错记。").font(.caption).foregroundStyle(GameTheme.muted)
+            Text(question.type == .flashcard ? "键盘：D 对，C 错，⌫ 撤回，回车提交。" : "键盘：A–H 选学生说的答案，0 不会，⌫ 撤回，回车提交。未录入的按答错记。").font(.caption).foregroundStyle(GameTheme.muted)
         }.padding(22).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(GlassBackdrop())
     }
 }

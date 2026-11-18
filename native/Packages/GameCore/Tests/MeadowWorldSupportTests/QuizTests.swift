@@ -114,10 +114,10 @@ final class QuizTests:XCTestCase {
     func testMixedKindsParse()throws {
         let bank=try QuizBankParser.parse(Data(mixed.utf8))
         XCTAssertEqual(bank.map(\.type),[.flashcard,.flashcard,.fill,.reading])
-        // Flash cards: own distractors plus backs borrowed from other cards; the right answer is the back.
-        let apple=bank[0].parts[0];XCTAssertEqual(apple.options[apple.answer],"苹果");XCTAssertTrue(apple.options.contains("梨"))
+        // Flash cards: graded right / wrong, so the back is the only option (distractors are ignored).
+        let apple=bank[0].parts[0];XCTAssertEqual(apple.options,["苹果"]);XCTAssertEqual(apple.answer,0)
         XCTAssertEqual(bank[0].tags,["水果"]);XCTAssertEqual(bank[0].reward,15);XCTAssertEqual(bank[0].timeLimit,60)
-        let pear=bank[1].parts[0];XCTAssertEqual(Set(pear.options),["梨","犁","苹果"]);XCTAssertNil(bank[1].difficulty)
+        XCTAssertEqual(bank[1].parts[0].options,["梨"]);XCTAssertNil(bank[1].difficulty)
         XCTAssertEqual(bank[2].prompt,"Tom {{1}} to school and {{2}} a cat.");XCTAssertEqual(bank[2].parts.count,2)
         XCTAssertEqual(Set(bank[2].parts[0].options),["went","goed","go"]);XCTAssertEqual(bank[2].parts[0].options[bank[2].parts[0].answer],"went")
         XCTAssertEqual(bank[2].parts[1].options,["saw"]);XCTAssertEqual(bank[2].timeLimit,90);XCTAssertEqual(bank[2].difficulty,2)
@@ -200,13 +200,13 @@ final class QuizTests:XCTestCase {
             return QuizAttempt(player:p,playerName:p,node:-1,question:q,picks:picks,texts:texts ?? picks.map{_ in nil},
                                correct:parts.indices.map{picks[$0]==parts[$0].answer},seconds:5,limit:60,at:1_800_000_000)
         }
-        let apple=bank[0].parts[0],pear=apple.options.firstIndex(of:"梨")!
+        let apple=bank[0].parts[0]
         let fill=bank[2].parts[0],goed=fill.options.firstIndex(of:"goed")!
-        let log=[a("p1",0,[pear]),a("p1",2,[goed,nil],[nil,"see"]),a("p2",0,[apple.answer]),a("p2",2,[goed,0]),a("p1",3,[1,1])]
+        let log=[a("p1",0,[nil]),a("p1",2,[goed,nil],[nil,"see"]),a("p2",0,[apple.answer]),a("p2",2,[goed,0]),a("p1",3,[1,1])]
         let r=QuizReport(log:log,bank:bank,order:["p1","p2"],names:["p1":"小明","p2":"小红"])
         let p1=r.students[0]
         XCTAssertEqual(p1.wrongWords.map(\.word),["apple","went","saw"])
-        XCTAssertEqual(p1.wrongWords[0].meaning,"苹果");XCTAssertEqual(p1.wrongWords[0].said,["梨"]);XCTAssertEqual(p1.wrongWords[2].said,["see"])
+        XCTAssertEqual(p1.wrongWords[0].meaning,"苹果");XCTAssertEqual(p1.wrongWords[0].said,["答错"]);XCTAssertEqual(p1.wrongWords[2].said,["see"])
         XCTAssertEqual(p1.wordsAsked,3)  // the reading questions are not word items (no 单词 tag)
         XCTAssertEqual(r.words.first?.word,"went");XCTAssertEqual(r.words.first?.wrong,2);XCTAssertEqual(r.words.first?.asked,2)
         XCTAssertEqual(r.words.first?.students,["小明","小红"]);XCTAssertEqual(r.words.first?.commonWrong,"goed")
@@ -329,5 +329,55 @@ final class QuizTests:XCTestCase {
         let bank=try QuizBankParser.parse(Data(contentsOf:url))
         XCTAssertTrue(bank.contains{$0.portion != nil});XCTAssertTrue(bank.contains{$0.isShared})
         XCTAssertTrue(Set(bank.map(\.type)).isSuperset(of:[.choice,.flashcard,.fill,.reading]))
+    }
+    func testTimedChallengeDealsOwnQuestionsByChosenDifficulty()throws {
+        let text="""
+        类型：闪卡
+        份：1
+        正面：cat
+        背面：猫
+
+        类型：闪卡
+        份：1
+        难度：2
+        正面：tiger
+        背面：老虎
+
+        类型：闪卡
+        份：1
+        难度：3
+        正面：rhinoceros
+        背面：犀牛
+
+        类型：闪卡
+        份：2
+        难度：3
+        正面：whale
+        背面：鲸
+
+        类型：闪卡
+        难度：3
+        正面：sun
+        背面：太阳
+        """
+        let bank=try QuizBankParser.parse(Data(text.utf8))
+        var c=MeadowMapConfiguration.suggested(total:10,seed:31827);c.combat=0;c.boss=0;c.reward=0;c.empty=9;c.extraRoads=0
+        let s=try MeadowCampaignSession.new(layout:MeadowMapGenerator.generate(c),studentNames:["小明","小红"],quizBank:bank)
+        XCTAssertEqual(s.challengeLeft(for:"p1"),[1,1,1]);XCTAssertEqual(s.challengeLeft(for:"p2"),[0,0,1])
+        // Only the student's own portion, at the level they chose (unmarked = ★); shared ones never come up.
+        XCTAssertEqual(s.challengeQuestion(for:"p1",difficulty:1),0);XCTAssertEqual(s.challengeQuestion(for:"p1",difficulty:3),2)
+        XCTAssertNil(s.challengeQuestion(for:"p2",difficulty:1))
+        let coins=s.engine.state.units["p1"]!.coins
+        // A slow but right ★★★ answer: full difficulty reward, no speed bonus, not overtime.
+        let a=try s.recordQuiz(actor:"p1",question:2,picks:[0],seconds:200,free:true,challenge:true)
+        XCTAssertFalse(a.overtime);XCTAssertEqual(a.coins,QuizRewards.baseCoins[2]);XCTAssertEqual(a.score,3);XCTAssertNotNil(a.drop)
+        XCTAssertEqual(s.engine.state.units["p1"]!.coins,coins+a.coins)
+        XCTAssertNil(s.challengeQuestion(for:"p1",difficulty:3));XCTAssertEqual(s.challengeLeft(for:"p1"),[1,1,0])
+        // Fast answers in a challenge get no bonus either.
+        let b=try s.recordQuiz(actor:"p1",question:1,picks:[0],seconds:1,free:true,challenge:true)
+        XCTAssertEqual(b.coins,QuizRewards.baseCoins[1])
+        // A wrong flash card reads "答错" in the report.
+        try s.recordQuiz(actor:"p1",question:0,picks:[nil],seconds:3,free:true,challenge:true)
+        XCTAssertEqual(s.quizReport.students[0].wrongWords.first?.said,["答错"])
     }
 }
