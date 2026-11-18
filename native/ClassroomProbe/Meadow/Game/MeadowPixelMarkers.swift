@@ -119,8 +119,7 @@ extension SKNode {
             }
             return
         }
-        let shadow = SKShapeNode(ellipseOf: CGSize(width: 20, height: 6))
-        shadow.fillColor = SKColor(white: 0, alpha: 0.28); shadow.strokeColor = .clear; shadow.position = CGPoint(x: 0, y: -18); shadow.name = "pixel-shadow"; shadow.isHidden = hidden
+        let shadow = MeadowShapeSprite.ellipse(CGSize(width: 20, height: 6), fill: SKColor(white: 0, alpha: 0.28)); shadow.position = CGPoint(x: 0, y: -18); shadow.name = "pixel-shadow"; shadow.isHidden = hidden
         addChild(shadow)
         let icon = SKSpriteNode(texture: marker.texture, size: CGSize(width: 32, height: 32))
         icon.name = name; icon.userData = NSMutableDictionary(dictionary: ["marker": marker.rawValue])

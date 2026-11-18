@@ -32,7 +32,7 @@ final class GameScene: SKScene {
         guard let label=actorLabels[index].children.compactMap({ $0 as? SKLabelNode }).first,label.text != text else{return}
         label.text=text
         let width=max(23,label.frame.width+10)
-        (actorLabels[index] as SKNode as? SKShapeNode)?.path=CGPath(roundedRect:CGRect(x:-width/2,y:-7,width:width,height:14),cornerWidth:3,cornerHeight:3,transform:nil)
+        if let plate=actorLabels[index] as? SKSpriteNode {MeadowShapeSprite.setRoundedRect(plate,CGSize(width:width,height:14),radius:3,fill:Self.plateFill,stroke:Self.plateStroke,lineWidth:0.6)}
     }
     func refreshCampaign() {
         guard let campaign,world != nil else{return}
@@ -162,9 +162,15 @@ final class GameScene: SKScene {
     var onDiscovery: ((String) -> Void)?
     /// The walking party stopped on a node (the end of its route).
     var onArrival: ((Int) -> Void)?
-    private let selectionRing = SKShapeNode(ellipseOf: CGSize(width: 30, height: 12))
-    private let destinationRing = SKShapeNode(ellipseOf: CGSize(width: 25, height: 10))
-    private let campaignRoute = SKShapeNode()
+    private static let ringColor = SKColor(red: 1, green: 0.89, blue: 0.56, alpha: 0.9)
+    private static let routeColor = SKColor(red:1,green:0.85,blue:0.42,alpha:0.65)
+    private static let plateFill = SKColor(red: 0.18, green: 0.23, blue: 0.25, alpha: 0.9)
+    private static let plateStroke = SKColor(red: 0.78, green: 0.70, blue: 0.46, alpha: 0.25)
+    // Sprites drawn once (MeadowShapeSprite), not SKShapeNodes re-stroked on the CPU every frame.
+    private let selectionRing = MeadowShapeSprite.ellipse(CGSize(width: 30, height: 12), stroke: ringColor, lineWidth: 1.5)
+    private let destinationRing = MeadowShapeSprite.ellipse(CGSize(width: 25, height: 10), stroke: ringColor, lineWidth: 2)
+    private let campaignRoute = SKSpriteNode()
+    private var campaignRouteKey = ""
 
     private func refreshCampaignRoute() {
         guard world != nil else{return}
@@ -176,7 +182,10 @@ final class GameScene: SKScene {
             let point=LivingWorld.position(CGPoint(x:p.x,y:p.y))
             if index==0{path.move(to:point)}else{path.addLine(to:point)}
         }
-        campaignRoute.path=path;campaignRoute.isHidden=false
+        // The route is redrawn into its texture only when it changes.
+        let key=route.points.map{"\($0.x),\($0.y)"}.joined(separator:";")
+        if key != campaignRouteKey {campaignRouteKey=key;MeadowShapeSprite.set(campaignRoute,path:path,fill:nil,stroke:Self.routeColor,lineWidth:2)}
+        campaignRoute.isHidden=false
         destinationRing.position=LivingWorld.position(CGPoint(x:end.x,y:end.y));destinationRing.isHidden=false
     }
     func travelCampaign(to node:Int) {
@@ -240,17 +249,12 @@ final class GameScene: SKScene {
     }
 
     private func buildMarkers() {
-        let start = SKShapeNode(circleOfRadius: 10)
+        let start: SKSpriteNode = world.definition.startNodeID != nil ? MeadowShapeSprite.hitArea(radius: 10)
+            : MeadowShapeSprite.circle(10, fill: SKColor(red: 0.96, green: 0.85, blue: 0.52, alpha: 1), stroke: SKColor(red: 0.40, green: 0.24, blue: 0.11, alpha: 1), lineWidth: 2.5)
         start.position = LivingWorld.position(world.definition.landmarkBadgePoint(nodeID:world.definition.startNodeID) ?? world.definition.spawn?.point ?? CGPoint(x: 285, y: 442))
-        start.fillColor = SKColor(red: 0.96, green: 0.85, blue: 0.52, alpha: 1)
-        start.strokeColor = SKColor(red: 0.40, green: 0.24, blue: 0.11, alpha: 1)
-        start.lineWidth = 2.5
         start.name = world.definition.startNodeID.map { "landmark-\($0)" }
         start.zPosition = world.definition.startNodeID == nil ? 65:22500
-        if world.definition.startNodeID != nil {
-            start.fillColor = SKColor(white:0,alpha:0.001);start.strokeColor = .clear
-            start.setPixelMarker(.camp)
-        }
+        if world.definition.startNodeID != nil { start.setPixelMarker(.camp) }
         world.addChild(start)
         for (index, discovery) in world.definition.discoveries.enumerated() {
             let root = SKNode()
@@ -259,9 +263,7 @@ final class GameScene: SKScene {
             root.name = "discovery-\(index)"
             // Invisible hit disc (taps still land on the node) + the floating pixel icon; the label keeps the marker's
             // state as text but is not drawn.
-            let diamond = SKShapeNode(circleOfRadius: 15)
-            diamond.fillColor = SKColor(white: 0, alpha: 0.001)
-            diamond.strokeColor = .clear
+            let diamond = MeadowShapeSprite.hitArea(radius: 15)
             diamond.name = root.name
             root.addChild(diamond)
             let label = SKLabelNode(fontNamed: "Georgia-Bold")
@@ -275,28 +277,18 @@ final class GameScene: SKScene {
             root.setPixelMarker(MeadowPixelMarker(symbol:label.text ?? "?"))
             world.addChild(root)
             discoveryNodes.append(root)
-            let footprint = SKShapeNode(ellipseOf: CGSize(width: 18, height: 8))
+            let footprint = MeadowShapeSprite.ellipse(CGSize(width: 18, height: 8), stroke: SKColor(red: 0.87, green: 0.73, blue: 0.46, alpha: 0.55), lineWidth: 1)
             footprint.position = LivingWorld.position(CGPoint(x: discovery.x, y: discovery.y))
-            footprint.fillColor = .clear
-            footprint.strokeColor = SKColor(red: 0.87, green: 0.73, blue: 0.46, alpha: 0.55)
-            footprint.lineWidth = 1
             footprint.zPosition = 65
             world.addChild(footprint)
         }
-        selectionRing.fillColor = .clear
-        selectionRing.strokeColor = SKColor(red: 1, green: 0.89, blue: 0.56, alpha: 0.9)
-        selectionRing.lineWidth = 1.5
         selectionRing.zPosition = 66
         selectionRing.isHidden = true
         world.addChild(selectionRing)
-        destinationRing.strokeColor = selectionRing.strokeColor
-        destinationRing.fillColor = .clear
-        destinationRing.lineWidth = 2
         destinationRing.zPosition = 67
         destinationRing.isHidden = true
         world.addChild(destinationRing)
-        campaignRoute.strokeColor=SKColor(red:1,green:0.85,blue:0.42,alpha:0.65)
-        campaignRoute.lineWidth=2;campaignRoute.glowWidth=0;campaignRoute.zPosition=64
+        campaignRoute.zPosition=64
         campaignRoute.isHidden=true;world.addChild(campaignRoute)
     }
 
@@ -315,10 +307,7 @@ final class GameScene: SKScene {
             world.addChild(root)
             actorRoots.append(root)
             actors.append(sprite)
-            let plate = SKShapeNode(rectOf: CGSize(width: 23, height: 14), cornerRadius: 3)
-            plate.fillColor = .init(red: 0.18, green: 0.23, blue: 0.25, alpha: 0.9)
-            plate.strokeColor = SKColor(red: 0.78, green: 0.70, blue: 0.46, alpha: 0.25)
-            plate.lineWidth = 0.6
+            let plate = MeadowShapeSprite.roundedRect(CGSize(width: 23, height: 14), radius: 3, fill: Self.plateFill, stroke: Self.plateStroke, lineWidth: 0.6)
             plate.name = root.name
             let label = SKLabelNode(fontNamed: "PingFangSC-Semibold")
             label.text = "P\(index + 1)"
@@ -717,9 +706,7 @@ final class GameScene: SKScene {
         marker.children.compactMap { $0 as? SKLabelNode }.first?.text = "✓"
         marker.setPixelMarker(.done)
         for particle in 0..<24 {
-            let dot = SKShapeNode(circleOfRadius: 1.4)
-            dot.fillColor = SKColor(red: 1, green: 0.9, blue: 0.6, alpha: 1)
-            dot.strokeColor = .clear
+            let dot = MeadowShapeSprite.circle(1.4, fill: SKColor(red: 1, green: 0.9, blue: 0.6, alpha: 1))
             dot.position = marker.position
             dot.zPosition = 23100
             world.addChild(dot)
@@ -927,16 +914,16 @@ extension GameScene {
         let node=SKNode();node.zPosition=MeadowPostProcess.overlayDepth+2_000  // on-map UI (drawn after the grade, unblurred), above node plates
         let arrow=SKNode();arrow.name="arrow"
         let tip=CGMutablePath();tip.move(to:CGPoint(x:r+14,y:0));tip.addLine(to:CGPoint(x:r+2,y:9));tip.addLine(to:CGPoint(x:r+2,y:-9));tip.closeSubpath()
-        let head=SKShapeNode(path:tip);head.fillColor=SKColor(red:0.09,green:0.42,blue:0.53,alpha:1);head.strokeColor = .white;head.lineWidth=2
+        let head=MeadowShapeSprite.sprite(tip,fill:SKColor(red:0.09,green:0.42,blue:0.53,alpha:1),stroke:.white,lineWidth:2,cacheKey:"edge-arrow-\(r)")
         arrow.addChild(head);node.addChild(arrow)
-        let disc=SKShapeNode(circleOfRadius:r);disc.fillColor = .white;disc.strokeColor=SKColor(red:0.09,green:0.42,blue:0.53,alpha:1);disc.lineWidth=3
+        let disc=MeadowShapeSprite.circle(r,fill:.white,stroke:SKColor(red:0.09,green:0.42,blue:0.53,alpha:1),lineWidth:3)
         node.addChild(disc)
         let face=SKSpriteNode(color:.clear,size:CGSize(width:r*1.8,height:r*1.8));face.name="face"
         // Keep the face inside the disc.
-        let crop=SKCropNode();let mask=SKShapeNode(circleOfRadius:r-2);mask.fillColor = .white;crop.maskNode=mask;crop.addChild(face);node.addChild(crop)
+        let crop=SKCropNode();let mask=MeadowShapeSprite.circle(r-2,fill:.white);crop.maskNode=mask;crop.addChild(face);node.addChild(crop)
         let label=SKLabelNode(text:unit.shortName);label.fontName="PingFangSC-Semibold";label.fontSize=12;label.fontColor=SKColor(red:0.09,green:0.25,blue:0.31,alpha:1)
         label.position=CGPoint(x:0,y:-r-15);label.verticalAlignmentMode = .baseline
-        let tag=SKShapeNode(rectOf:CGSize(width:max(30,label.frame.width+10),height:17),cornerRadius:8.5);tag.fillColor=SKColor.white.withAlphaComponent(0.9);tag.strokeColor = .clear
+        let tag=MeadowShapeSprite.roundedRect(CGSize(width:max(30,label.frame.width+10),height:17),radius:8.5,fill:SKColor.white.withAlphaComponent(0.9))
         tag.name="tag";label.name="name"
         tag.position=CGPoint(x:0,y:-r-10);node.addChild(tag);node.addChild(label)
         addChild(node);edgeMarkers[id]=node;return node

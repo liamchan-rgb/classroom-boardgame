@@ -435,18 +435,25 @@ enum PixelHeroAtlas {
 // 顺序条只放脸：取人物正面待机那一帧，按不透明像素找到头顶，裁出头部方块。烘焙在后台串行队列里做（和其它烘焙共用，
 // JavaScriptCore 不能并发），做好前顺序条先用旧头像。
 extension PixelHeroAtlas {
-    private static let portraitCache = NSCache<NSString, UIImage>()
+    /// 头像很小：放在普通字典里（最多 64 个），不让系统在内存紧张时清掉——清掉后战斗画面会重新烘、烘好再整体刷新，
+    /// 反复循环很耗 CPU。烘不出来的外观记下来，不再反复尝试。
+    private static var portraitStore: [String: UIImage] = [:]
+    private static var portraitOrder: [String] = []
+    private static var portraitFailed = Set<String>()
     private static var portraitPending = Set<String>()
     /// 已经做好的头像；没有就排队去做（主线程调用），做好后 `ready` 在主线程回调。
     static func portrait(_ look: PixelHeroLook, ready: @escaping () -> Void = {}) -> UIImage? {
-        if let hit = portraitCache.object(forKey: look.key as NSString) { return hit }
-        guard !portraitPending.contains(look.key) else { return nil }
+        if let hit = portraitStore[look.key] { return hit }
+        guard !portraitPending.contains(look.key), !portraitFailed.contains(look.key) else { return nil }
         portraitPending.insert(look.key)
         workQueue.async {
             let face = cell(look: look, facing: 0, column: 0).flatMap(headCrop)
             DispatchQueue.main.async {
                 portraitPending.remove(look.key)
-                if let face { portraitCache.setObject(face, forKey: look.key as NSString); ready() }
+                guard let face else { portraitFailed.insert(look.key); return }
+                portraitStore[look.key] = face; portraitOrder.append(look.key)
+                if portraitOrder.count > 64 { portraitStore[portraitOrder.removeFirst()] = nil }
+                ready()
             }
         }
         return nil

@@ -255,6 +255,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
     }
     private var liveMirrors=0
     @Published var liveMirrorPreferred=MeadowLiveMirror.preferred {didSet{MeadowLiveMirror.preferred=liveMirrorPreferred}}
+    @Published var highFrameRate=MeadowFrameRate.high {didSet{MeadowFrameRate.high=highFrameRate;renderer?.classroomApplyFrameRate()}}
     func setLiveMirror(_ on:Bool){liveMirrors=max(0,liveMirrors+(on ? 1:-1));updateMirrorDemand()}
     private func updateMirrorDemand(){
         let enabled=liveMirrors==0 && ClassroomPreviewPolicy.enabled(external:externalConnected,visible:!previewObservers.isEmpty,foreground:UIApplication.shared.applicationState == .active,privateModal:modalOpen,surface:surface)

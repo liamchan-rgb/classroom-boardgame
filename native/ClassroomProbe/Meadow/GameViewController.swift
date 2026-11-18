@@ -102,6 +102,8 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     private var profileLooksBaked=Set<String>()
     /// Classroom: quiz spots hand the question to the teacher console (shown over everything, like the timer).
     var classroomQuizRequest:((String,Int,Int)->Void)?
+    /// "更多 › 地图 60 帧" changed.
+    func classroomApplyFrameRate(){if !battlePreviewActive {groundView?.preferredFramesPerSecond=MeadowFrameRate.map}}
     func classroomShowGains(title:String,subtitle:String?,since before:GameState){showGains(title:title,subtitle:subtitle,since:before)}
     var classroomReady:Bool {ready}
     var classroomBusy:Bool {battlePreviewView?.classroomBusy ?? false}
@@ -254,7 +256,7 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         }
         if !ProcessInfo.processInfo.arguments.contains("-gaitReview"), let device = MTLCreateSystemDefaultDevice() {
             let ground = MTKView(frame: view.bounds, device: device)
-            ground.preferredFramesPerSecond = 60
+            ground.preferredFramesPerSecond = MeadowFrameRate.map
             ground.autoResizeDrawable = !classroomMode
             ground.framebufferOnly = !classroomMode
             if classroomMode {ground.contentScaleFactor=1;ground.drawableSize=ClassroomCanvas.size}
@@ -941,7 +943,7 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         battlePreviewActive = active
         battlePreviewView?.isHidden = !active
         // The map is only a small drawer during battle: half its frame rate and no separate mirror readback there.
-        groundView?.preferredFramesPerSecond = active && classroomMode ? 30:60
+        groundView?.preferredFramesPerSecond = active && classroomMode ? 30:MeadowFrameRate.map
         groundRenderer?.classroomMirrorEnabled = classroomMirrorEnabled && !active
         if !active {classroomDeliveredMap = -1}
         if let campaign {

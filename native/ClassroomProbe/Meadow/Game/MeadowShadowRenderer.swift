@@ -326,7 +326,7 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
         overlayRenderer = overlay
         lastCamera = nil; lastRenderTime = -.infinity; lastHeroes = []; lastIncludesEnvironment = nil
         view.delegate = self
-        view.preferredFramesPerSecond = 60
+        view.preferredFramesPerSecond = MeadowFrameRate.map
         view.isPaused = false
     }
 
@@ -567,4 +567,22 @@ struct MeadowFrameState {
     let time: TimeInterval
     let heroes: [MeadowHeroCaster]
     var includeEnvironment: Bool = true
+}
+
+/// Map frame rate. Mac defaults to a steady 30 (a fanless Mac also encoding an AirPlay / Sidecar screen cannot hold
+/// 60, and an uneven 40–60 looks worse than a steady 30); iPad keeps 60. "更多 › 地图 60 帧" switches it.
+enum MeadowFrameRate {
+    static let key = "meadow.highFrameRate"
+    static var high: Bool {
+        get {
+            if let v = UserDefaults.standard.object(forKey: key) as? Bool { return v }
+            #if targetEnvironment(macCatalyst)
+            return false
+            #else
+            return true
+            #endif
+        }
+        set { UserDefaults.standard.set(newValue, forKey: key) }
+    }
+    static var map: Int { high ? 60 : 30 }
 }

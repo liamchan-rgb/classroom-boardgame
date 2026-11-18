@@ -69,7 +69,12 @@ final class MeadowLiveMirrorView:UIView {
         guard link == nil else{return}
         let link=CADisplayLink(target:MeadowLiveMirrorTarget(self),selector:#selector(MeadowLiveMirrorTarget.tick))
         // The TV runs the game at 60 Hz; the teacher's view refreshes at 30, which is smooth and halves the cost.
+        // On Mac the TV picture is a second window on the same machine; 20 Hz keeps the snapshot cost down.
+        #if targetEnvironment(macCatalyst)
+        link.preferredFrameRateRange=CAFrameRateRange(minimum:15,maximum:20,preferred:20)
+        #else
         link.preferredFrameRateRange=CAFrameRateRange(minimum:20,maximum:30,preferred:30)
+        #endif
         link.add(to:.main,forMode:.common);self.link=link
         if !registered {registered=true;game?.setLiveMirror(true)}
     }

@@ -46,7 +46,17 @@ enum MeadowItemIcon {
     }
 
     /// The image scaled to a square of `side` points (for button images). Animated icons stay animated.
+    /// Scaled icons are kept: menus are rebuilt on every battle refresh and an animated icon has 24 frames to redraw.
+    private static var scaledCache:[String:UIImage]=[:]
     static func image(_ id:String,item:ItemDefinition?=nil,side:CGFloat)->UIImage {
+        let key="\(id)|\(side)"
+        if let hit=scaledCache[key] {return hit}
+        let made=makeScaled(id,item:item,side:side)
+        if scaledCache.count>200 {scaledCache.removeAll()}
+        scaledCache[key]=made
+        return made
+    }
+    private static func makeScaled(_ id:String,item:ItemDefinition?,side:CGFloat)->UIImage {
         let source=image(id,item:item)
         func scaled(_ frame:UIImage)->UIImage {
             UIGraphicsImageRenderer(size:CGSize(width:side,height:side)).image { r in
