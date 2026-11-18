@@ -66,6 +66,21 @@ final class GameScene: SKScene {
     private func profileUnit(_ index:Int)->GameUnit? {
         guard let campaign,campaign.playerIDs.indices.contains(index),let unit=campaign.engine.state.units[campaign.playerIDs[index]],unit.appearance != nil else{return nil};return unit
     }
+    /// One background bake at a time triggers one refresh (map refreshes come many times a second; each used to add
+    /// its own callback, and hundreds of queued refreshes froze the main thread when the bake finished).
+    private var profileBakeQueued=false
+    /// Looks already baked once in the background: if the atlas cache dropped them again (220 MB, ~27 MB a look), load
+    /// directly instead of queueing another bake, so a full cache cannot loop forever.
+    private var profileBaked=Set<String>()
+    private func queueProfileBake(_ look:PixelHeroLook){
+        if profileBakeQueued {return}
+        profileBakeQueued=true
+        PixelHeroAtlas.prepare(map:[look]){[weak self] in
+            guard let self else{return}
+            self.profileBakeQueued=false;self.profileBaked.insert(look.key)
+            self.refreshProfileFrames()
+        }
+    }
     func refreshProfileFrames(){
         guard let campaign,world != nil else{return}
         var active=Set<String>()
@@ -77,8 +92,8 @@ final class GameScene: SKScene {
                 let key="preset\(index%3)-\(unit.equipment.weapon ?? "none")-\(unit.equipment.armor ?? "none")";active.insert(key)
                 if profileFrames[key]==nil{
                     // 还没烘好就先保持原来的样子，后台烘好再刷新（不在主线程现烘）
-                    if let look=HeroFrames.pixelLook(heroIndex:index%3,weaponID:unit.equipment.weapon,armorID:unit.equipment.armor),!PixelHeroAtlas.isMapReady(look){
-                        PixelHeroAtlas.prepare(map:[look]){[weak self] in self?.refreshProfileFrames()};continue
+                    if let look=HeroFrames.pixelLook(heroIndex:index%3,weaponID:unit.equipment.weapon,armorID:unit.equipment.armor),!PixelHeroAtlas.isMapReady(look),!profileBaked.contains(look.key){
+                        queueProfileBake(look);continue
                     }
                     profileFrames[key]=HeroFrames.load(index%3+1,weaponID:unit.equipment.weapon,armorID:unit.equipment.armor)
                 }
@@ -88,8 +103,8 @@ final class GameScene: SKScene {
             let ai=HeroFrames.appearanceIDs.firstIndex(of:look.body) ?? 0,armor=look.armor(worn:unit.equipment.armor)
             let key="\(look.visualKey)-\(unit.equipment.weapon ?? "none")-\(armor ?? "none")";active.insert(key)
             if profileFrames[key]==nil{
-                if let pixel=HeroFrames.pixelLook(heroIndex:0,appearanceIndex:ai,weaponID:unit.equipment.weapon,armorID:armor,hair:look.hair,face:look.face),!PixelHeroAtlas.isMapReady(pixel){
-                    PixelHeroAtlas.prepare(map:[pixel]){[weak self] in self?.refreshProfileFrames()};continue
+                if let pixel=HeroFrames.pixelLook(heroIndex:0,appearanceIndex:ai,weaponID:unit.equipment.weapon,armorID:armor,hair:look.hair,face:look.face),!PixelHeroAtlas.isMapReady(pixel),!profileBaked.contains(pixel.key){
+                    queueProfileBake(pixel);continue
                 }
                 profileFrames[key]=HeroFrames.load(1,appearanceIndex:ai,weaponID:unit.equipment.weapon,armorID:armor,hair:look.hair,face:look.face)
             }

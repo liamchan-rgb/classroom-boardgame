@@ -98,6 +98,8 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     var classroomStatus:((String)->Void)?
     var classroomInventoryChanged:((String?)->Void)?
     var classroomReload:(()->Void)?
+    private var profileLooksBaking=false
+    private var profileLooksBaked=Set<String>()
     /// Classroom: quiz spots hand the question to the teacher console (shown over everything, like the timer).
     var classroomQuizRequest:((String,Int,Int)->Void)?
     func classroomShowGains(title:String,subtitle:String?,since before:GameState){showGains(title:title,subtitle:subtitle,since:before)}
@@ -826,9 +828,15 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
             }
             // 战斗帧只在后台备好，不用等
             PixelHeroAtlas.prepare(battle:battleLooks)
-            if !mapLooks.allSatisfy(PixelHeroAtlas.isMapReady) {
+            // Bake once in the background; refreshes meanwhile wait for that one bake instead of queueing more, and
+            // looks baked before are used directly even if the atlas cache let them go (no endless re-baking).
+            if !mapLooks.allSatisfy({PixelHeroAtlas.isMapReady($0) || profileLooksBaked.contains($0.key)}) {
+                if profileLooksBaking {return}
+                profileLooksBaking=true
                 PixelHeroAtlas.prepare(map:mapLooks){[weak self] in
-                    do{try self?.prepareProfileVisuals()}catch{self?.showCampaignMessage(error.localizedDescription)}
+                    guard let self else{return}
+                    self.profileLooksBaking=false;self.profileLooksBaked.formUnion(mapLooks.map(\.key))
+                    do{try self.prepareProfileVisuals()}catch{self.showCampaignMessage(error.localizedDescription)}
                 }
                 return
             }

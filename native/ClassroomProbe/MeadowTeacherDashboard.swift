@@ -23,6 +23,7 @@ struct MeadowTeacherDashboard:View {
                 GlassChip(icon:game.externalConnected ? "tv.fill":"ipad.landscape",text:game.externalConnected ? "TV":"本机",tint:game.externalConnected ? .green:GameTheme.muted)
                 #if targetEnvironment(macCatalyst)
                 MacPublicWindowButton(connected:game.externalConnected)
+                MacMirrorWarning()
                 #endif
                 if let c=game.campaign,!inBattle {
                     GlassChip(icon:"figure.walk.motion",text:"\(MeadowMovementRules.steps(c.movementRemaining))/\(MeadowMovementRules.steps(c.movementCapacity))")

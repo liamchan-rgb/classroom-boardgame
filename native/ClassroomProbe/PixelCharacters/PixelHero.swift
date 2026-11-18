@@ -200,7 +200,12 @@ enum PixelHeroAtlas {
     }
 
     private static let atlasCache: NSCache<NSString, UIImage> = {
+        // A look is ~27 MB (two halves). Mac has the memory for a full class of 7 plus spares; iPad keeps the old cap.
+        #if targetEnvironment(macCatalyst)
+        let c = NSCache<NSString, UIImage>(); c.totalCostLimit = 480 * 1024 * 1024; return c
+        #else
         let c = NSCache<NSString, UIImage>(); c.totalCostLimit = 220 * 1024 * 1024; return c
+        #endif
     }()
 
     /// HeroFrames.image(named:) 的像素版：按名字烘焙（或读缓存）并排成图集
