@@ -200,6 +200,8 @@ public struct GameState: Codable, Equatable {
     public var difficulty: GameDifficulty? = nil
     /// Team pairs ("a|b", sorted) that already had their one campaign duel; the GM can clear it.
     public var pvpPairs: [String]? = nil
+    /// Every student answer at quiz events (the answer report reads it).
+    public var quizLog: [QuizAttempt]? = nil
     public init(gameID: String = UUID().uuidString, units: [String: GameUnit], teams: [GameTeam], map: GameMap, random: RandomState = RandomState()) {
         self.gameID = gameID; phase = .exploration; self.units = units; self.teams = teams; self.map = map
         battle = nil; lastOutcome = nil; pauseReasons = [.manual]; remainingSeconds = 30; self.random = random

@@ -1,3 +1,4 @@
+import SwiftUI
 import UIKit
 import SpriteKit
 import MetalKit
@@ -1143,8 +1144,10 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
             shop.onTrade={[weak self] _ in self?.scene.refreshCampaign();self?.refreshCampaignStatus()}
             if let old=presentedViewController as? UIAlertController {old.dismiss(animated:true){[weak self] in self?.present(shop,animated:true)}}
             else {present(shop,animated:true)}
-        }else if kind == .satchel,let question=campaign.quizQuestion(node:node.id) {
-            showQuiz(actor:actor,node:node,question:question)
+        }else if kind == .satchel,campaign.isQuizNode(node.id) {
+            if let turn=campaign.quizTurn(actor:actor) {showQuiz(actor:actor,node:node,index:turn.index,question:turn.question);return}
+            let waiting=campaign.quizWaiting(node:node.id,team:unit.teamID).map(\.shortName)
+            showCampaignMessage(waiting.isEmpty ? "这里的题都答完了。":"\(unit.shortName) 已经答过，请选择 \(waiting.joined(separator:"、")) 答题。")
         }else {
             let title=kind == .satchel ? "路边失物":"林间清泉"
             let config=CampaignSiteRules.configuration(node:node,seed:campaign.engine.state.map.seed)!
@@ -1164,26 +1167,37 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
             presentSiteScreen(alert)
         }
     }
-    /// Quiz event: the question goes up on the TV; the teacher taps the class's answer (or skips) on the iPad.
-    private func showQuiz(actor:String,node:MapNode,question:QuizQuestion) {
-        let card=MeadowQuizCard.present(in:view,question:question,place:node.name);classroomOverlayDirty=true
-        let letters=["A","B","C","D","E","F"]
-        let alert=UIAlertController(title:"答题 · 答对 +\(question.reward)",message:question.prompt,preferredStyle:.alert)
-        for (i,option) in question.options.enumerated() {
-            alert.addAction(UIAlertAction(title:letters[i]+". "+option,style:.default){[weak self] _ in self?.finishQuiz(actor:actor,choice:i,question:question,card:card)})
-        }
-        alert.addAction(UIAlertAction(title:"跳过（不计分）",style:.cancel){[weak self] _ in self?.finishQuiz(actor:actor,choice:nil,question:question,card:card)})
-        presentSiteScreen(alert)
+    /// Quiz event for one student: the question and a countdown go up on the TV; the teacher taps what the student
+    /// says on the private panel, then the answers are revealed and the reward drops.
+    private func showQuiz(actor:String,node:MapNode,index:Int,question:QuizQuestion) {
+        guard let campaign,let unit=campaign.engine.state.units[actor] else{return}
+        let start=Date()
+        let card=MeadowQuizCard.present(in:view,question:question,player:unit.shortName,place:node.name,start:start);classroomOverlayDirty=true
+        var panel:UIViewController?
+        let host=UIHostingController(rootView:MeadowQuizAnswerPanel(question:question,player:unit.shortName,start:start,onSubmit:{[weak self] picks,texts in
+            panel?.dismiss(animated:true)
+            self?.finishQuiz(actor:actor,index:index,picks:picks,texts:texts,seconds:Date().timeIntervalSince(start),card:card)
+        },onLater:{[weak self] in
+            panel?.dismiss(animated:true);card.removeFromSuperview();self?.classroomOverlayDirty=true
+        }))
+        panel=host
+        host.modalPresentationStyle = .formSheet;host.preferredContentSize=CGSize(width:760,height:question.type == .reading ? 760:600)
+        host.isModalInPresentation=true
+        if let old=presentedViewController as? UIAlertController {old.dismiss(animated:true){[weak self] in self?.present(host,animated:true)}}
+        else {present(host,animated:true)}
     }
-    private func finishQuiz(actor:String,choice:Int?,question:QuizQuestion,card:MeadowQuizCard) {
+    private func finishQuiz(actor:String,index:Int,picks:[Int?],texts:[String?],seconds:Double,card:MeadowQuizCard) {
         guard let campaign else{return}
         let before=campaign.engine.state
-        do{try campaign.answerQuiz(actor:actor,choice:choice)}
+        let attempt:QuizAttempt
+        do{attempt=try campaign.recordQuiz(actor:actor,question:index,picks:picks,texts:texts,seconds:seconds)}
         catch{card.removeFromSuperview();classroomOverlayDirty=true;showCampaignMessage(error.localizedDescription);return}
         scene.refreshCampaign();refreshCampaignStatus();classroomOverlayDirty=true
-        card.reveal(choice:choice,question:question){[weak self] in
+        card.reveal(attempt,dropName:attempt.drop.flatMap{try? campaign.engine.catalog.item($0).name}){[weak self] in
             self?.classroomOverlayDirty=true
-            if choice==question.answer {self?.showGains(title:"答对了",subtitle:nil,since:before)}
+            guard attempt.coins>0 || attempt.drop != nil else{return}
+            let line="答对 \(attempt.rightCount)/\(attempt.correct.count) · 用时 \(Int(attempt.seconds.rounded())) 秒"
+            self?.showGains(title:attempt.drop != nil ? "答题掉落":"答题奖励",subtitle:"\(attempt.playerName) · "+line,since:before)
         }
     }
     private func confirmSiteTrade(actor:String,item:ItemDefinition,buy:Bool) {

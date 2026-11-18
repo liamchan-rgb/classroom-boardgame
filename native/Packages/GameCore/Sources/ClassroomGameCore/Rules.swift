@@ -230,6 +230,8 @@ public enum GameCommand: Codable, Equatable {
     case campaignLottery(actor: String, tier: Int)
     /// A quiz event answered (right or wrong) by the class for this actor.
     case answerCampaignQuiz(actor: String, correct: Bool, coins: Int)
+    /// One student's recorded answer at a quiz event (graded by the campaign layer, paid here).
+    case recordCampaignQuiz(QuizRecord)
 }
 public struct DiceResult: Codable, Equatable {
     public var source: String

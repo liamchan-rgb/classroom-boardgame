@@ -37,7 +37,7 @@ public enum MeadowHistoryCategory:String,CaseIterable {case all,combat,travel,re
     public static func of(_ command:GameCommand)->Self {
         switch command {
         case .startCampaignDuel,.resetDuelLimits,.startBattle,.attack,.cast,.monsterStep,.endTurn,.joinMonster,.reorderQueue,.finishBattle,.rescue,.retreatAfterDefeat:return .combat
-        case .campaignMove,.move,.interactCampaignNode,.resolveCampaignSite,.answerCampaignQuiz,.refillCampaignMovement:return .travel
+        case .campaignMove,.move,.interactCampaignNode,.resolveCampaignSite,.answerCampaignQuiz,.recordCampaignQuiz,.refillCampaignMovement:return .travel
         case .tradeCampaignSite,.campaignLottery,.editPlayer,.grantPlayerResources,.grantPlayerSupplies,.givePlayerResource,.editResources,.useItem,.reward,.setHealth,.revive,.equip,.refillExploration:return .resources
         case .configureTeams,.mergeTeams,.transferTeamResource,.teacherTransferTeamResource,.addHost,.changeTeam:return .team
         case .applyPlayerProfile:return .appearance
@@ -58,6 +58,7 @@ public struct MeadowHistoryIndex:Identifiable,Equatable {
         case .cast(let actor,_,let target):ids.insert(actor);if case .unit(let id)=target{ids.insert(id)}
         case .useItem(let actor,_,let target):ids.formUnion([actor,target])
         case .endTurn(let actor,_):ids.insert(actor)
+        case .recordCampaignQuiz(let r):ids.insert(r.attempt.player)
         case .campaignMove(let actors,_),.move(let actors,_),.interactCampaignNode(let actors),.refillCampaignMovement(let actors,_,_),.grantPlayerResources(let actors,_,_),.grantPlayerSupplies(let actors,_,_),.reward(let actors,_):ids.formUnion(actors)
         case .applyPlayerProfile(let id,_,_),.editPlayer(let id,_),.editResources(let id,_),.equip(let id,_,_),.setHealth(let id,_,_),.revive(let id),.changeTeam(let id,_):ids.insert(id)
         case .startBattle,.finishBattle:ids.formUnion(entry.before.battle?.queue ?? []);ids.formUnion(entry.after.battle?.queue ?? [])
@@ -108,6 +109,7 @@ public struct MeadowHistoryIndex:Identifiable,Equatable {
         case .setDifficulty(let level):return "难度改为"+level.title
         case .retreatAfterDefeat:return "全队倒地，撤回地图"
         case .answerCampaignQuiz(_,let correct,_):return correct ? "答题正确":"答题未答对"
+        case .recordCampaignQuiz(let r):return "答题 · \(r.attempt.playerName) · \(r.attempt.rightCount)/\(r.attempt.correct.count)"
         case .campaignLottery(_,let tier):return "商店抽奖 · "+((try? CampaignLottery.tier(tier).title) ?? "")+"档"
         }
     }

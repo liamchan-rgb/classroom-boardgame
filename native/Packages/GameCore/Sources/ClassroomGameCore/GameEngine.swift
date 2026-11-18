@@ -232,6 +232,7 @@ struct Evaluation {
         case .setDifficulty(let level): try setDifficulty(level)
         case .campaignLottery(let actor, let tier): try campaignLottery(actor: actor, tier: tier)
         case .answerCampaignQuiz(let actor, let correct, let coins): try answerCampaignQuiz(actor: actor, correct: correct, coins: coins)
+        case .recordCampaignQuiz(let record): try recordCampaignQuiz(record)
         case .retreatAfterDefeat:
             guard let battle = state.battle, battle.kind == .pve, !state.players.contains(where: { $0.isAlive && battle.queue.contains($0.id) }) else { throw GameError("只有全队倒地时才能撤回地图。") }
             try finish(winner: "monsters", byScore: false)

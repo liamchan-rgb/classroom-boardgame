@@ -56,7 +56,12 @@ final class QuizTests:XCTestCase {
         let q=try XCTUnwrap(s.quizQuestion(node:target.id)),coins=s.engine.state.units["p1"]!.coins,score=s.engine.state.units["p1"]!.score
         XCTAssertTrue(try s.answerQuiz(actor:"p1",choice:q.answer))
         XCTAssertEqual(s.engine.state.units["p1"]!.coins,coins+q.reward);XCTAssertEqual(s.engine.state.units["p1"]!.score,score+1)
-        XCTAssertThrowsError(try s.answerQuiz(actor:"p2",choice:q.answer))
+        // Each student answers for themselves: the teammate gets the next question; then the event closes.
+        XCTAssertThrowsError(try s.answerQuiz(actor:"p1",choice:q.answer))
+        let next=try XCTUnwrap(s.quizTurn(actor:"p2"));XCTAssertNotEqual(next.question,q)
+        try s.answerQuiz(actor:"p2",choice:nil)
+        XCTAssertNil(s.quizTurn(actor:"p2"));XCTAssertFalse(s.siteAvailable(actor:"p1"))
+        XCTAssertEqual(s.quizLog.map(\.player),["p1","p2"]);XCTAssertEqual(s.quizLog[1].picks,[nil])
         let restored=try MeadowCampaignSession(save:.decoded(s.snapshot.encoded()))
         XCTAssertEqual(restored.quizBank,bank)
     }
@@ -67,10 +72,125 @@ final class QuizTests:XCTestCase {
         while s.travel != nil {if !s.isMoving{try s.refillMovement(usingCoins:false);try s.setPaused(false)};try s.advanceTravel(distance:100000)}
         let q=try XCTUnwrap(s.quizQuestion(node:target.id)),coins=s.engine.state.units["p1"]!.coins
         XCTAssertFalse(try s.answerQuiz(actor:"p1",choice:(q.answer+1)%q.options.count))
-        XCTAssertEqual(s.engine.state.units["p1"]!.coins,coins);XCTAssertFalse(s.siteAvailable(actor:"p1"))
+        XCTAssertEqual(s.engine.state.units["p1"]!.coins,coins);XCTAssertTrue(s.siteAvailable(actor:"p1"))
+        try s.answerQuiz(actor:"p2",choice:nil);XCTAssertFalse(s.siteAvailable(actor:"p1"))
         let plain=try quizSession([]);XCTAssertNil(plain.snapshot.quizBank)
         XCTAssertNil(plain.quizQuestion(node:target.id))
         var bad=s.snapshot;bad.quizBank=[QuizQuestion(prompt:"x",options:["a"],answer:0)]
         XCTAssertThrowsError(try bad.validate())
+    }
+
+    let mixed="""
+    类型：闪卡
+    难度：1
+    正面：apple
+    背面：苹果
+    标签：水果
+
+    类型：闪卡
+    正面：pear
+    背面：梨
+    干扰：犁
+
+    Tom {{went|goed|go}} to school and {{saw}} a cat.
+    难度：中等
+    时间：1:30
+    标签：过去式, 动词
+
+    类型：阅读
+    难度：★★★
+    文章：Tom has a red ball.
+    He plays with it every day.
+    问：What color is the ball?
+    A. red
+    B. blue
+    答案：A
+    问：When does he play?
+    A. every day
+    B. never
+    C. on Sunday
+    答案：A
+    """
+    func testMixedKindsParse()throws {
+        let bank=try QuizBankParser.parse(Data(mixed.utf8))
+        XCTAssertEqual(bank.map(\.type),[.flashcard,.flashcard,.fill,.reading])
+        // Flash cards: own distractors plus backs borrowed from other cards; the right answer is the back.
+        let apple=bank[0].parts[0];XCTAssertEqual(apple.options[apple.answer],"苹果");XCTAssertTrue(apple.options.contains("梨"))
+        XCTAssertEqual(bank[0].tags,["水果"]);XCTAssertEqual(bank[0].reward,15);XCTAssertEqual(bank[0].timeLimit,60)
+        let pear=bank[1].parts[0];XCTAssertEqual(Set(pear.options),["梨","犁","苹果"]);XCTAssertNil(bank[1].difficulty)
+        XCTAssertEqual(bank[2].prompt,"Tom {{1}} to school and {{2}} a cat.");XCTAssertEqual(bank[2].parts.count,2)
+        XCTAssertEqual(Set(bank[2].parts[0].options),["went","goed","go"]);XCTAssertEqual(bank[2].parts[0].options[bank[2].parts[0].answer],"went")
+        XCTAssertEqual(bank[2].parts[1].options,["saw"]);XCTAssertEqual(bank[2].timeLimit,90);XCTAssertEqual(bank[2].difficulty,2)
+        XCTAssertEqual(bank[2].tags,["过去式","动词"])
+        XCTAssertEqual(bank[3].passage,"Tom has a red ball.\nHe plays with it every day.");XCTAssertEqual(bank[3].parts.map(\.answer),[0,0])
+        XCTAssertEqual(bank[3].difficulty,3);XCTAssertEqual(bank[3].reward,60);XCTAssertEqual(bank[3].timeLimit,120)
+        // Same bank → same option order every time (the teacher's buttons never move).
+        XCTAssertEqual(try QuizBankParser.parse(Data(mixed.utf8)),bank)
+        let json=#"[{"type":"fill","prompt":"1+1={{2|3}}","difficulty":"难"},{"front":"cat","back":"猫","distractors":["狗"]},{"type":"reading","passage":"P","questions":[{"prompt":"q","options":["x","y"],"answer":"B"}],"seconds":45,"tags":["t"]}]"#
+        let j=try QuizBankParser.parse(Data(json.utf8))
+        XCTAssertEqual(j.map(\.type),[.fill,.flashcard,.reading]);XCTAssertEqual(j[0].difficulty,3);XCTAssertEqual(j[2].parts[0].answer,1);XCTAssertEqual(j[2].timeLimit,45)
+        XCTAssertThrowsError(try QuizBankParser.parse(Data("类型：阅读\n文章：x\n问：q\nA. a\n答案：A".utf8)))
+        XCTAssertThrowsError(try QuizBankParser.parse(Data("Tom {{ went".utf8)))
+    }
+    private func arrive(_ s:MeadowCampaignSession)throws->MapNode {
+        let target=s.engine.state.map.nodes.first{$0.kind == .empty && s.siteKind(node:$0.id) == .satchel}!
+        try s.beginTravel(to:target.id)
+        while s.travel != nil {if !s.isMoving{try s.refillMovement(usingCoins:false);try s.setPaused(false)};try s.advanceTravel(distance:100000)}
+        return target
+    }
+    func testRecordsPicksAndPaysByShareTimeAndDifficulty()throws {
+        let hard=QuizQuestion(prompt:"R",options:[],answer:0,kind:.reading,difficulty:3,passage:"P",
+                              items:[QuizItem(prompt:"a",options:["x","y"],answer:0),QuizItem(prompt:"b",options:["x","y"],answer:1)])
+        let s=try quizSession([hard]);let node=try arrive(s)
+        let before=s.engine.state.units["p1"]!
+        // Half right, slowly: half the coins, no points, no drop.
+        let a=try s.recordQuiz(actor:"p1",question:0,picks:[0,nil],texts:[nil,"不知道"],seconds:100)
+        XCTAssertEqual(a.correct,[true,false]);XCTAssertEqual(a.coins,30);XCTAssertEqual(a.score,0);XCTAssertNil(a.drop);XCTAssertEqual(a.node,node.id)
+        XCTAssertEqual(s.engine.state.units["p1"]!.coins,before.coins+30);XCTAssertEqual(s.quizLog[0].texts,[nil,"不知道"])
+        // All right in under half the time: full coins + half, 3 points, and a drop from the hard table.
+        let mate=s.engine.state.units["p2"]!
+        let b=try s.recordQuiz(actor:"p2",question:0,picks:[0,1],seconds:20)
+        XCTAssertEqual(b.coins,90);XCTAssertEqual(b.score,3);let drop=try XCTUnwrap(b.drop)
+        XCTAssertEqual(s.engine.state.units["p2"]!.inventory[drop],(mate.inventory[drop] ?? 0)+(b.dropCount ?? 0))
+        XCTAssertFalse(s.siteAvailable(actor:"p1"))
+        // Undo takes the record (and the drop) back.
+        let restored=try MeadowCampaignSession(save:.decoded(s.snapshot.encoded()))
+        XCTAssertEqual(restored.quizLog,s.quizLog)
+    }
+    func testOvertimePaysNothingButIsRecorded()throws {
+        let q=QuizQuestion(prompt:"c",options:[],answer:0,kind:.flashcard,difficulty:1,seconds:30,items:[QuizItem(options:["猫","狗"],answer:0)])
+        let s=try quizSession([q]);_=try arrive(s)
+        let coins=s.engine.state.units["p1"]!.coins
+        let a=try s.recordQuiz(actor:"p1",question:0,picks:[0],seconds:45)
+        XCTAssertTrue(a.overtime);XCTAssertEqual(a.coins,0);XCTAssertEqual(a.score,0);XCTAssertEqual(s.engine.state.units["p1"]!.coins,coins)
+        XCTAssertEqual(a.correct,[true])
+        XCTAssertThrowsError(try s.recordQuiz(actor:"p2",question:0,picks:[0,1],seconds:1))
+    }
+    func testReportCountsPartsTimesAndCommonWrongAnswers()throws {
+        let bank=try QuizBankParser.parse(Data(mixed.utf8))
+        func a(_ p:String,_ q:Int,_ picks:[Int?],_ texts:[String?]?=nil,_ sec:Double)->QuizAttempt {
+            let parts=bank[q].parts
+            return QuizAttempt(player:p,playerName:p.uppercased(),node:q,question:q,picks:picks,texts:texts ?? picks.map{_ in nil},
+                               correct:parts.indices.map{picks[$0]==parts[$0].answer},seconds:sec,limit:bank[q].timeLimit,at:1_800_000_000+sec)
+        }
+        let fill=bank[2].parts[0],goed=fill.options.firstIndex(of:"goed")!
+        let log=[a("p2",2,[goed,0],nil,40),a("p1",2,[fill.answer,nil],[nil,"see"],30),a("p1",3,[0,1],nil,100),a("p3",2,[goed,nil],nil,20)]
+        let r=QuizReport(log:log,bank:bank,order:["p1","p2","p3"],names:["p1":"小明"])
+        XCTAssertEqual(r.students.map(\.id),["p1","p2","p3"]);XCTAssertEqual(r.students[0].name,"小明");XCTAssertEqual(r.students[1].name,"P2")
+        XCTAssertEqual(r.students[0].right,2);XCTAssertEqual(r.students[0].total,4);XCTAssertEqual(r.students[0].averageSeconds,65)
+        XCTAssertEqual(r.students[0].lines[0].answers[1].said,"see");XCTAssertEqual(r.students[2].lines[0].answers[1].said,"不会")
+        XCTAssertEqual(r.students[0].byKind.map(\.name),["填空","阅读"]);XCTAssertEqual(r.students[0].byTag.map(\.name),["过去式","动词"])
+        XCTAssertEqual(r.students[0].mistakes.count,2)
+        // The fill-in: 6 blanks answered, 2 right; "goed" in blank 1 said twice is the common slip; hardest comes first.
+        let fillStat=try XCTUnwrap(r.questions.first{$0.index==2})
+        XCTAssertEqual(fillStat.attempts,3);XCTAssertEqual(fillStat.right,2);XCTAssertEqual(fillStat.total,6)
+        XCTAssertEqual(fillStat.commonWrong?.said,"第1空：goed");XCTAssertEqual(fillStat.commonWrong?.count,2)
+        XCTAssertEqual(r.questions.first?.index,2);XCTAssertEqual(r.attempts,4);XCTAssertEqual(r.total,8)
+        XCTAssertEqual(QuizReport.summary(bank[2]),"Tom （1） to school and （2） a cat.")
+    }
+    func testDocumentedSampleBankParses()throws {
+        let url=URL(fileURLWithPath:#filePath).deletingLastPathComponent().appendingPathComponent("../../../../../docs/question-bank-sample.txt").standardized
+        let bank=try QuizBankParser.parse(Data(contentsOf:url))
+        XCTAssertTrue(Set(bank.map(\.type)).isSuperset(of:[.choice,.flashcard,.fill,.reading]))
     }
 }

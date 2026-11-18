@@ -50,6 +50,7 @@ struct MeadowTeacherDashboard:View {
                         }
                     }label:{Label("难度",systemImage:"gauge.with.dots.needle.67percent")}.disabled(game.busy || game.campaign==nil || inBattle || game.campaign?.isCompleted==true)
                     Button{game.award()}label:{Label("+10 金币",systemImage:"bitcoinsign.circle")}.disabled(game.busy || game.campaign==nil)
+                    Button{game.openQuizReport()}label:{Label("答题报告",systemImage:"chart.bar.doc.horizontal")}.disabled(game.campaign==nil)
                     Button{game.openShortcutEditor()}label:{Label("快捷键",systemImage:"keyboard")}
                     Toggle(isOn:$game.liveMirrorPreferred){Label("教师画面用 GPU 实时显示",systemImage:"display.2")}
                     Button{game.openTeamConsole()}label:{Label("队伍",systemImage:"person.3")}.disabled(!game.ready || game.busy)

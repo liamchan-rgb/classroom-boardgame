@@ -28,3 +28,38 @@ D. 十年
 A. 对
 B. 错
 答案：A
+
+# ——以下是新题型示例——
+
+类型：闪卡
+难度：1
+正面：apple
+背面：苹果
+标签：水果
+
+类型：闪卡
+难度：1
+正面：banana
+背面：香蕉
+标签：水果
+
+Tom {{went|goed|go}} to school and {{saw|seed|see}} a cat.
+难度：2
+时间：90
+标签：过去式
+
+类型：阅读
+难度：3
+文章：Tom has a red ball.
+He plays with it in the park every day.
+His sister Amy likes to play too.
+问：What color is the ball?
+A. red
+B. blue
+C. green
+答案：A
+问：Where does Tom play?
+A. at school
+B. in the park
+答案：B
+标签：阅读理解

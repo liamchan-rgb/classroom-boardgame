@@ -42,6 +42,13 @@ final class MeadowTeacherCoordinator:ObservableObject {
     func toggleScoreboard(){withAnimation(.spring(response:0.35,dampingFraction:0.8)){overlays.scoreboard.toggle()}}
     /// Players ↔ teams; also shows the board if it was hidden.
     func toggleTeamScores(){withAnimation(.spring(response:0.35,dampingFraction:0.8)){overlays.teamScores.toggle();overlays.scoreboard=true}}
+    /// The answer report of the current trip (pages to look at, PDF / picture export).
+    func openQuizReport(){
+        guard !modalOpen,let presenter=presentationHost,let campaign else{return}
+        let screen=UIHostingController(rootView:QuizReportScreen(report:campaign.quizReport,title:"课堂答题报告",itemName:{id in (try? campaign.engine.catalog.item(id).name) ?? id},onClose:{[weak self] in self?.presentationHost?.dismiss(animated:true)}))
+        screen.modalPresentationStyle = .pageSheet;screen.preferredContentSize=CGSize(width:900,height:900)
+        presenter.present(screen,animated:true)
+    }
     func openShortcutEditor(){
         guard !modalOpen,let presenter=presentationHost else{return}
         let screen=UIHostingController(rootView:ClassroomShortcutEditor(onClose:{[weak self] in self?.presentationHost?.dismiss(animated:true)}))
