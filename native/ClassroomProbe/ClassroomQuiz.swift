@@ -113,7 +113,11 @@ struct QuizLauncherPanel: View {
             }
             if let note = model.note { Text(note).font(.caption).foregroundStyle(note.hasPrefix("✓") ? GameTheme.primary : .red) }
             if campaign == nil {
-                Label("先开始或继续一个行程：题库和作答记录都存在行程里。", systemImage: "info.circle").foregroundStyle(GameTheme.muted)
+                Label("题库和作答记录存在行程里：先打开行程（电视上的绘本不会被切走）。", systemImage: "info.circle").foregroundStyle(GameTheme.muted)
+                HStack {
+                    Button { game.restore() } label: { Label("继续上次行程", systemImage: "arrow.clockwise.circle") }.buttonStyle(GlassIconButtonStyle(prominent: true))
+                    Text(game.message).font(.caption).foregroundStyle(GameTheme.muted).lineLimit(2)
+                }
             } else {
                 QuizPlayerChips(game: game, selected: Set([model.player].compactMap { $0 })) { model.player = $0; model.skip = 0; model.again = nil }
                 HStack(spacing: 8) {
@@ -146,6 +150,7 @@ struct QuizLauncherPanel: View {
             }
         }
         .padding(22).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(GlassBackdrop())
+        .onChange(of: game.campaign == nil) { _, none in if !none, model.player == nil { model.player = game.campaign?.selectedPlayerID } }
         .fileImporter(isPresented: $importing, allowedContentTypes: [.plainText, .json, .text]) { result in
             do {
                 let url = try result.get()

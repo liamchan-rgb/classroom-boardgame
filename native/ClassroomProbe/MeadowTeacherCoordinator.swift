@@ -144,6 +144,8 @@ final class MeadowTeacherCoordinator:ObservableObject {
 
     /// ⇧Q: a shared question to the whole class; the teacher picks who answered and sends rewards by hand.
     func openClassQuiz(index:Int?=nil){
+        // No trip open yet: the launcher offers to continue the last one.
+        if campaign == nil {openQuiz();return}
         guard let c=campaign,quiz == nil,quizPanel == nil,presentationHost != nil else{return}
         guard let i=index ?? c.sharedQuizQuestion() else{message=c.quizBank.isEmpty ? "这个行程还没有题库。":"公用题都出过了（可在答题面板里“再出一次”）。";revision += 1;return}
         quizToken += 1
@@ -198,6 +200,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
 
     /// K: endless flash-card practice for the selected student.
     func openPractice(){
+        if campaign == nil {openQuiz();return}
         guard let c=campaign,quiz == nil,quizPanel == nil,presentationHost != nil else{return}
         let model=PracticeModel(player:c.selectedPlayerID)
         practiceModel=model
