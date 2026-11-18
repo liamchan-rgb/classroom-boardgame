@@ -140,4 +140,20 @@ final class ClassroomTeamTests:XCTestCase {
         XCTAssertEqual(c.engine.state.players.map(\.ap),before.archive.state.players.map(\.ap))
     }
 
+    func testTeamStandingsRankByAverageAndSkipHostAndEmptyTeams()throws {
+        let c=try campaign(5),b=ClassroomGameBackend();try b.install(c,role:.teacher)
+        try c.engine.apply(.configureTeams(names:["red":"红队","blue":"蓝队","gold":"金队"],members:["p1":"red","p2":"red","p3":"blue","p4":"blue","p5":"blue"]))
+        for (id,score) in [("p1",10),("p2",4),("p3",6),("p4",6),("p5",9)] {
+            let u=c.engine.state.units[id]!
+            try c.engine.apply(.editResources(unit:id,value:.init(health:u.health,shield:u.shield,ap:u.ap,coins:u.coins,score:score)))
+        }
+        try b.joinTeacher(name:"老师",classID:"adventurer",team:"red",role:.teacher)
+        let host=c.engine.state.units["p7"]!
+        try c.engine.apply(.editResources(unit:"p7",value:.init(health:host.health,shield:host.shield,ap:host.ap,coins:host.coins,score:100)))
+        let rows=GameRules.teamStandings(c.engine.state)
+        // 红队 (10+4)/2=7, 蓝队 (6+6+9)/3=7 → same average, blue has the higher total; 金队 has nobody and is left out.
+        XCTAssertEqual(rows.map(\.id),["blue","red"]);XCTAssertEqual(rows.map(\.rank),[1,1])
+        XCTAssertEqual(rows[0].averageScore,7,accuracy:1e-9);XCTAssertEqual(rows[1].memberIDs,["p1","p2"])
+        XCTAssertEqual(rows[1].totalScore,14)
+    }
 }

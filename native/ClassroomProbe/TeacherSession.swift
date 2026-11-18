@@ -5,7 +5,22 @@ import ClassroomProbeCore
 @MainActor
 final class PublicDisplayModel: ObservableObject {
     @Published var snapshot = ProbeState().publicSnapshot
-    @Published var image: UIImage?
+    /// The slide on screen, its build step (clicks played) and a token that changes with every new page shown.
+    @Published private(set) var page: DeckPage?
+    @Published var buildStep = 0
+    @Published private(set) var pageToken = 0
+    /// When the page arrived (its entry effects play only right after).
+    private(set) var entryStarted = Date.distantPast
+    /// Slide change effect for the page that just arrived, nil when it should simply cut.
+    private(set) var arrival: PageTransitionEffect?
+    func show(_ result: DeckRenderer.Result?, step: Int = 0, animated: Bool = false) {
+        arrival = animated ? result?.page.transition : nil
+        page = result?.page
+        buildStep = min(step, result?.page.clicks.count ?? 0)
+        entryStarted = Date()
+        pageToken &+= 1
+    }
+    var hasPage: Bool { page != nil }
 
 }
 
@@ -94,14 +109,19 @@ final class TeacherSession: ObservableObject {
         } else { mutate { $0.setPause(reason, enabled: false) } }
     }
 
+    /// Forward plays the next animation of the slide before moving on; back undoes it, then shows the previous
+    /// page fully built (as PowerPoint does).
     func turnPage(_ offset: Int) {
+        if offset > 0, let page = display.page, display.buildStep < page.clicks.count { display.buildStep += 1; return }
+        if offset < 0, display.page != nil, display.buildStep > 0 { display.buildStep -= 1; return }
         var candidate = state
         candidate.turnPage(by: offset)
+        guard candidate.pageIndex != state.pageIndex || display.page == nil else { return }
         do {
             let result = try render(deck: deck, index: candidate.pageIndex)
             try persist(state: candidate)
             state = candidate
-            display.image = result?.image
+            display.show(result, step: offset < 0 ? Int.max : 0, animated: offset > 0)
             publish()
             refreshReport(result?.warnings ?? [])
         } catch { message = error.localizedDescription }
@@ -160,7 +180,7 @@ final class TeacherSession: ObservableObject {
             message = "导入失败，当前资料保留：\(error.localizedDescription)"; importOutcome = "导入失败：\(error.localizedDescription)"; return
         }
         deck = parsed; pptxData = data; sourceName = name; editedNotes = [:]
-        state = candidate; display.image = first?.image; showNotes = false
+        state = candidate; display.show(first); showNotes = false
         publish(); refreshReport(first?.warnings ?? [])
         let skipped = parsed.slides.reduce(0) { $0 + ($1.warnings.isEmpty ? 0 : 1) }
         message = "已导入 \(parsed.slides.count) 页：\(name)"
@@ -200,7 +220,7 @@ final class TeacherSession: ObservableObject {
         let rendered = try render(deck: parsed, index: candidate.state.pageIndex)
         if saveAfterValidation { try write(candidate) }
         deck = parsed; pptxData = candidate.pptxData; sourceName = candidate.sourceName; editedNotes = candidate.editedNotes
-        state = candidate.state; display.image = rendered?.image; showNotes = false; isEditingNotes = false
+        state = candidate.state; display.show(rendered); showNotes = false; isEditingNotes = false
         lastTick = ProcessInfo.processInfo.systemUptime
         publish(); refreshReport(rendered?.warnings ?? [])
         message = "绘本已恢复"
@@ -230,7 +250,7 @@ final class TeacherSession: ObservableObject {
               (try? lite.state.validate()) != nil, lite.state.pageCount == state.pageCount else { return }
         let rendered = try? render(deck: deck, index: lite.state.pageIndex)
         state = lite.state; editedNotes = lite.editedNotes.filter { $0.key >= 0 && $0.key < lite.state.pageCount && $0.value.count <= 40_000 }
-        if let rendered { display.image = rendered.image }
+        if let rendered { display.show(rendered) }
         publish()
     }
     private func saveURL() throws -> URL {

@@ -60,6 +60,7 @@ private struct TeacherBookConsole:View {
                 Divider().frame(height:36)
                 Button{session.turnPage(-1)}label:{Label("上页",systemImage:"chevron.left")}
                 GlassChip(icon:"doc.plaintext",text:"\(session.state.pageCount==0 ? 0:session.state.pageIndex+1) / \(session.state.pageCount)")
+                DeckBuildChip(model:session.display)
                 Button{session.turnPage(1)}label:{Label("下页",systemImage:"chevron.right")}
                 Spacer(minLength:0)
             }.buttonStyle(GlassIconButtonStyle()).padding(.horizontal,10).padding(.vertical,6).glassPanel(radius:20,padding:0)
@@ -185,5 +186,15 @@ enum NotesMarkup {
         }
         flush()
         return out
+    }
+}
+
+/// Animations left on this slide: "下页" plays the next one before turning the page.
+private struct DeckBuildChip:View {
+    @ObservedObject var model:PublicDisplayModel
+    var body:some View {
+        if let page=model.page,!page.clicks.isEmpty {
+            GlassChip(icon:"sparkles",text:"动画 \(model.buildStep)/\(page.clicks.count)")
+        }
     }
 }

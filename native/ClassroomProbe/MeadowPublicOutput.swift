@@ -56,9 +56,9 @@ struct PublicBookPage:View {
         GeometryReader { geometry in
             ZStack(alignment:.bottom){
                 Group {
-                    if let image=model.image {Image(uiImage:image).resizable().scaledToFit()}
+                    if model.page != nil {DeckStage(model:model)}
                     else{Label("绘本准备中",systemImage:"book.closed").font(.title)}
-                }.frame(maxWidth:.infinity,maxHeight:.infinity)
+                }.frame(maxWidth:.infinity,maxHeight:.infinity).clipped()
                 if let layout=ClassroomBookStatusLayout.cards(in:geometry.size,players:players.count) {
                     VStack(spacing:layout.spacing){
                         ForEach(Array(rowSlices(layout.rows).enumerated()),id:\.offset){_,range in

@@ -180,6 +180,7 @@ final class TeacherHostController: UIViewController {
         case .timerStartPause:game.classTimer.toggle()
         case .timerPlus10:game.classTimer.add(10)
         case .toggleScoreboard:game.toggleScoreboard()
+        case .toggleTeamScores:game.toggleTeamScores()
         }
     }
 

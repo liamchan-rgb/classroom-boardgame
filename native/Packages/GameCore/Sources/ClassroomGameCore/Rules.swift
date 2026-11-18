@@ -7,6 +7,17 @@ public struct RankingRow: Codable, Equatable, Identifiable {
     public var rank: Int
 }
 
+public struct TeamStanding: Equatable, Identifiable {
+    public var id: String
+    public var name: String
+    public var memberIDs: [String]
+    public var totalScore: Int
+    public var averageScore: Double
+    public var totalCoins: Int
+    /// Shared by teams with the same average.
+    public var rank: Int
+}
+
 public enum GameRules {
     public static func attributes(_ unit: GameUnit, catalog: GameCatalog) throws -> Attributes {
         var value = unit.baseAttributes
@@ -66,6 +77,23 @@ public enum GameRules {
             let score = try state.players.filter { $0.teamID == team.id }.reduce(0) { try checkedAdd($0, $1.score) }
             return (team.id, team.name, score)
         })
+    }
+    /// Team scoreboard: each team with students in it, ranked by average student score (ties: higher total, then
+    /// more coins, then id). The teacher's own seat (host) is left out so it does not tip a team's average.
+    public static func teamStandings(_ state: GameState) -> [TeamStanding] {
+        let rows = state.teams.compactMap { team -> TeamStanding? in
+            let members = state.players.filter { $0.teamID == team.id && !$0.host }
+            guard !members.isEmpty else { return nil }
+            let total = members.reduce(0) { $0 + $1.score }, coins = members.reduce(0) { $0 + $1.coins }
+            return TeamStanding(id: team.id, name: team.name, memberIDs: members.map(\.id), totalScore: total,
+                                averageScore: Double(total) / Double(members.count), totalCoins: coins, rank: 0)
+        }.sorted { ($0.averageScore, $0.totalScore, $0.totalCoins, $1.id) > ($1.averageScore, $1.totalScore, $1.totalCoins, $0.id) }
+        var result: [TeamStanding] = [], rank = 0
+        for (index, var row) in rows.enumerated() {
+            if index == 0 || abs(rows[index - 1].averageScore - row.averageScore) > 1e-9 { rank = index + 1 }
+            row.rank = rank; result.append(row)
+        }
+        return result
     }
 }
 

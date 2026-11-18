@@ -40,6 +40,10 @@ public struct ParsedSlide {
     public var notes: String
     public var warnings: [String]
     public var plainText: String
+    /// `cNvPr id` of each element (same order as `elements`), which animations refer to.
+    public var elementIDs: [Int] = []
+    public var build = SlideBuild()
+    public var transition: PageTransitionEffect?
 }
 
 public struct ParsedDeck {
@@ -214,6 +218,7 @@ public enum PPTXReader {
             guard notes.count <= 40_000 else { throw ProbeError("第\(index + 1)页备注超过阶段0的40000字符限制。") }
             var warnings: [String] = []
             var elements: [SlideElement] = []
+            var elementIDs: [Int] = []
             // Placeholders (title, body, subtitle...) usually carry no position on the slide itself: it is inherited from
             // the slide layout, then the master. Resolve it there instead of dropping the text.
             var inherited: [XMLNode] = []
@@ -251,6 +256,7 @@ public enum PPTXReader {
                     warnings.append("有对象没有位置信息，已跳过。")
                     continue
                 }
+                let shapeID = Int(node.first("cNvPr")?.attributes["id"] ?? "") ?? -1
                 if let transform = node.first("xfrm"), transform.attributes["rot"] != nil {
                     warnings.append("旋转／翻转效果尚未支持。")
                 }
@@ -261,7 +267,7 @@ public enum PPTXReader {
                         continue
                     }
                     if node.first("srcRect") != nil { warnings.append("图片裁剪尚未支持。") }
-                    elements.append(.image(frame, try bytes(imageLink.target)))
+                    elements.append(.image(frame, try bytes(imageLink.target))); elementIDs.append(shapeID)
                 } else {
                     let fill = node.first("spPr")?.first("solidFill")?.first("srgbClr")?.attributes["val"]
                     if let body = node.first("txBody") {
@@ -282,22 +288,31 @@ public enum PPTXReader {
                             return SlideParagraph(runs: runs, alignment: alignment)
                         }
                         plainTexts.append(body.descendants("p").map { $0.paragraphText() }.joined(separator: "\n"))
-                        elements.append(.text(frame, paragraphs, fill: fill))
+                        elements.append(.text(frame, paragraphs, fill: fill)); elementIDs.append(shapeID)
                     } else if let fill {
                         let kind = node.first("prstGeom")?.attributes["prst"] ?? "rect"
                         if kind != "rect" && kind != "ellipse" { warnings.append("\(kind)形状暂以矩形显示。") }
-                        elements.append(.shape(frame, kind: kind, fill: fill))
+                        elements.append(.shape(frame, kind: kind, fill: fill)); elementIDs.append(shapeID)
                     } else { warnings.append("无法渲染的无文字形状。") }
                 }
             }
-            if slide.first("timing") != nil { warnings.append("动画被忽略；只支持静态页。") }
+            var build = PPTXAnimations.build(slide, warnings: &warnings)
+            // Effects on objects that are not drawn (groups, tables, charts) have nothing to move.
+            let known = Set(elementIDs)
+            let dropped = build.all.filter { !known.contains($0.target.shapeID) }.count
+            if dropped > 0 {
+                warnings.append("有\(dropped)个动画作用在不支持的对象上，已跳过。")
+                build.entry.removeAll { !known.contains($0.target.shapeID) }
+                build.clicks = build.clicks.map { $0.filter { known.contains($0.target.shapeID) } }.filter { !$0.isEmpty }
+            }
             warnings.append("阶段0基础渲染：母版、主题、字体替换和复杂排版需要视觉核对。")
             let background = slide.first("bg")?.first("srgbClr")?.attributes["val"] ?? "FFFFFF"
             // A page made only of unsupported objects still keeps its place (and its notes) as a plain page.
             if elements.isEmpty { warnings.append("第\(index + 1)页没有可显示的对象（可能是组合、表格或图表），显示为空白页。") }
             slides.append(ParsedSlide(partName: link.target, width: width, height: height, background: background,
                                       elements: elements, notes: notes, warnings: warnings,
-                                      plainText: plainTexts.joined(separator: "\n")))
+                                      plainText: plainTexts.joined(separator: "\n"),
+                                      elementIDs: elementIDs, build: build, transition: PPTXAnimations.transition(slide)))
             progress?(slides.count, ids.count)
         }
         return ParsedDeck(slides: slides)

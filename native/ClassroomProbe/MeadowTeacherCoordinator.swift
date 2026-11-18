@@ -40,6 +40,8 @@ final class MeadowTeacherCoordinator:ObservableObject {
         presenter.present(screen,animated:true)
     }
     func toggleScoreboard(){withAnimation(.spring(response:0.35,dampingFraction:0.8)){overlays.scoreboard.toggle()}}
+    /// Players ↔ teams; also shows the board if it was hidden.
+    func toggleTeamScores(){withAnimation(.spring(response:0.35,dampingFraction:0.8)){overlays.teamScores.toggle();overlays.scoreboard=true}}
     func openShortcutEditor(){
         guard !modalOpen,let presenter=presentationHost else{return}
         let screen=UIHostingController(rootView:ClassroomShortcutEditor(onClose:{[weak self] in self?.presentationHost?.dismiss(animated:true)}))

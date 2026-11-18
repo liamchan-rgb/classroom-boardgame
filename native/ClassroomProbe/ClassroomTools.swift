@@ -70,6 +70,8 @@ import MeadowWorldSupport
 /// Teacher-switched TV overlays besides the timer.
 @MainActor final class ClassOverlayModel:ObservableObject {
     @Published var scoreboard=false
+    /// Scoreboard by team (average score per student) instead of by player; remembered on this device.
+    @Published var teamScores=UserDefaults.standard.bool(forKey:"classroom.scoreboardTeams") {didSet{UserDefaults.standard.set(teamScores,forKey:"classroom.scoreboardTeams")}}
 }
 
 /// Everything the TV shows on top of game or book: the countdown and the scoreboard. Sized from the screen height
@@ -82,7 +84,12 @@ struct ClassroomTVOverlays:View {
         GeometryReader{g in
             let unit=g.size.height/720
             ZStack(alignment:.top){
-                if overlays.scoreboard {ClassroomScoreboard(players:game.campaign?.engine.state.players ?? [],unit:unit).frame(maxWidth:.infinity,maxHeight:.infinity)}
+                if overlays.scoreboard {
+                    Group{
+                        if overlays.teamScores {ClassroomTeamScoreboard(state:game.campaign?.engine.state,unit:unit)}
+                        else {ClassroomScoreboard(players:game.campaign?.engine.state.players ?? [],unit:unit)}
+                    }.frame(maxWidth:.infinity,maxHeight:.infinity)
+                }
                 if timer.visible {ClassTimerBadge(timer:timer,unit:unit).padding(.top,16*unit)}
             }.frame(width:g.size.width,height:g.size.height)
         }.allowsHitTesting(false)
@@ -154,6 +161,60 @@ private struct ClassroomScoreboard:View {
     }
 }
 
+/// Team view of the scoreboard: teams ranked by the average score of their students, with each team's total,
+/// head count and coins; the members' initials sit under the team name.
+private struct ClassroomTeamScoreboard:View {
+    let state:GameState?
+    let unit:CGFloat
+    static let tints:[Color]=[Color(red:0.90,green:0.36,blue:0.36),Color(red:0.36,green:0.56,blue:0.92),Color(red:0.32,green:0.70,blue:0.44),Color(red:0.88,green:0.68,blue:0.22),Color(red:0.66,green:0.44,blue:0.88),Color(red:0.94,green:0.56,blue:0.26)]
+    var body:some View {
+        let rows=state.map(GameRules.teamStandings) ?? []
+        let order=state?.teams.map(\.id) ?? []
+        VStack(spacing:12*unit){
+            HStack{
+                Label("队伍记分",systemImage:"person.3.fill").font(.system(size:30*unit,weight:.heavy,design:.rounded))
+                Spacer()
+                Label("平均积分",systemImage:"star.fill").frame(width:190*unit,alignment:.trailing)
+                Label("总积分",systemImage:"sum").frame(width:130*unit,alignment:.trailing)
+                Label("金币",systemImage:"bitcoinsign.circle.fill").frame(width:130*unit,alignment:.trailing)
+            }.font(.system(size:20*unit,weight:.bold,design:.rounded)).foregroundStyle(GameTheme.muted)
+            ForEach(rows){row in
+                let tint=Self.tints[(order.firstIndex(of:row.id) ?? 0)%Self.tints.count]
+                HStack(spacing:14*unit){
+                    Text("\(row.rank)").font(.system(size:26*unit,weight:.heavy,design:.rounded)).frame(width:34*unit)
+                        .foregroundStyle(row.rank==1 ? Color(red:0.74,green:0.52,blue:0.12):GameTheme.muted)
+                    RoundedRectangle(cornerRadius:5*unit).fill(tint).frame(width:10*unit,height:56*unit)
+                    VStack(alignment:.leading,spacing:4*unit){
+                        Text(row.name).font(.system(size:28*unit,weight:.heavy,design:.rounded)).lineLimit(1).minimumScaleFactor(0.6)
+                        HStack(spacing:4*unit){
+                            ForEach(row.memberIDs,id:\.self){id in
+                                Text(String((state?.units[id]?.shortName ?? id).prefix(1)).uppercased())
+                                    .font(.system(size:13*unit,weight:.heavy,design:.rounded)).foregroundStyle(.white)
+                                    .frame(width:24*unit,height:24*unit).background(tint.opacity(0.85),in:Circle())
+                            }
+                            Text("\(row.memberIDs.count) 人").font(.system(size:15*unit,weight:.bold,design:.rounded)).foregroundStyle(GameTheme.muted)
+                        }
+                    }
+                    Spacer(minLength:0)
+                    Text(row.averageScore.formatted(.number.precision(.fractionLength(0...1)))).font(.system(size:38*unit,weight:.heavy,design:.rounded))
+                        .frame(width:190*unit,alignment:.trailing).foregroundStyle(GameTheme.primary)
+                    Text("\(row.totalScore)").frame(width:130*unit,alignment:.trailing).foregroundStyle(GameTheme.ink)
+                    Text("\(row.totalCoins)").frame(width:130*unit,alignment:.trailing).foregroundStyle(Color(red:0.74,green:0.52,blue:0.12))
+                }
+                .font(.system(size:26*unit,weight:.heavy,design:.rounded)).monospacedDigit().foregroundStyle(GameTheme.ink)
+                .padding(.horizontal,16*unit).padding(.vertical,10*unit)
+                .background(RoundedRectangle(cornerRadius:16*unit,style:.continuous).fill(.white.opacity(row.rank==1 ? 0.7:0.42)))
+            }
+            if rows.isEmpty {Text(state==nil ? "还没有进行中的行程":"还没有队伍成员").font(.system(size:22*unit)).foregroundStyle(GameTheme.muted)}
+            Text("按队员平均积分排名（不含老师）").font(.system(size:16*unit,weight:.semibold,design:.rounded)).foregroundStyle(GameTheme.muted)
+        }
+        .padding(26*unit).frame(width:900*unit)
+        .background(RoundedRectangle(cornerRadius:28*unit,style:.continuous).fill(LinearGradient(colors:[Color(red:0.95,green:0.98,blue:0.98).opacity(0.94),Color(red:0.90,green:0.95,blue:0.96).opacity(0.90)],startPoint:.top,endPoint:.bottom)))
+        .overlay(RoundedRectangle(cornerRadius:28*unit,style:.continuous).stroke(.white,lineWidth:1.5*unit))
+        .transition(.scale(scale:0.92).combined(with:.opacity))
+    }
+}
+
 // MARK: - Timer panel (teacher)
 
 struct ClassTimerPanel:View {
@@ -202,9 +263,9 @@ struct ClassTimerPanel:View {
 // MARK: - Keyboard shortcuts
 
 enum ClassroomShortcutAction:String,CaseIterable,Identifiable {
-    case select1,select2,select3,select4,select5,select6,select7,award,grantMovement,attack,endTurn,pauseResume,pageBack,pageForward,openTimer,timerStartPause,timerPlus10,toggleScoreboard
+    case select1,select2,select3,select4,select5,select6,select7,award,grantMovement,attack,endTurn,pauseResume,pageBack,pageForward,openTimer,timerStartPause,timerPlus10,toggleScoreboard,toggleTeamScores
     /// Works everywhere, also over the pack / shop / sheets.
-    var global:Bool {[.openTimer,.timerStartPause,.timerPlus10,.toggleScoreboard].contains(self)}
+    var global:Bool {[.openTimer,.timerStartPause,.timerPlus10,.toggleScoreboard,.toggleTeamScores].contains(self)}
     var id:String {rawValue}
     var title:String {
         switch self {
@@ -213,6 +274,7 @@ enum ClassroomShortcutAction:String,CaseIterable,Identifiable {
         case .pauseResume:return "暂停 / 继续";case .pageBack:return "绘本上一页";case .pageForward:return "绘本下一页"
         case .openTimer:return "打开计时器";case .timerStartPause:return "计时开始 / 暂停";case .timerPlus10:return "计时 +10 秒"
         case .toggleScoreboard:return "显示 / 隐藏记分板"
+        case .toggleTeamScores:return "记分板：个人 / 队伍切换"
         }
     }
     var icon:String {
@@ -220,14 +282,14 @@ enum ClassroomShortcutAction:String,CaseIterable,Identifiable {
         case .select1,.select2,.select3,.select4,.select5,.select6,.select7:return "person.fill"
         case .award:return "bitcoinsign.circle";case .grantMovement:return "figure.walk";case .attack:return "burst";case .endTurn:return "forward.end";case .pauseResume:return "playpause"
         case .pageBack:return "chevron.left";case .pageForward:return "chevron.right";case .openTimer:return "timer";case .timerStartPause:return "playpause.circle"
-        case .timerPlus10:return "plus.circle";case .toggleScoreboard:return "list.number"
+        case .timerPlus10:return "plus.circle";case .toggleScoreboard:return "list.number";case .toggleTeamScores:return "person.3"
         }
     }
     var seat:Int? {["select1":1,"select2":2,"select3":3,"select4":4,"select5":5,"select6":6,"select7":7][rawValue]}
     var defaultKey:String {
         switch self {
         case .select1:return "1";case .select2:return "2";case .award:return "g";case .grantMovement:return "m";case .attack:return "a";case .endTurn:return "e"
-        case .pauseResume:return " ";case .pageBack:return "←";case .pageForward:return "→";case .openTimer:return "t";case .toggleScoreboard:return "s"
+        case .pauseResume:return " ";case .pageBack:return "←";case .pageForward:return "→";case .openTimer:return "t";case .toggleScoreboard:return "s";case .toggleTeamScores:return "d"
         default:return ""
         }
     }
@@ -326,7 +388,13 @@ struct ClassroomScoreboardButton:View {
     @ObservedObject var overlays:ClassOverlayModel
     var action:()->Void
     var body:some View {
-        Button{action()}label:{Label("记分",systemImage:overlays.scoreboard ? "list.number.rtl":"list.number")}
+        // Tap shows / hides; the menu (long press, or the arrow on Mac) picks players or teams.
+        Menu{
+            Button{if !overlays.scoreboard{action()};withAnimation{overlays.teamScores=false}}label:{Label("个人记分",systemImage:overlays.teamScores ? "person":"checkmark")}
+            Button{if !overlays.scoreboard{action()};withAnimation{overlays.teamScores=true}}label:{Label("队伍记分（平均积分）",systemImage:overlays.teamScores ? "checkmark":"person.3")}
+            if overlays.scoreboard {Button(role:.destructive){action()}label:{Label("隐藏记分板",systemImage:"eye.slash")}}
+        }label:{Label(overlays.teamScores ? "队分":"记分",systemImage:overlays.teamScores ? "person.3.fill":(overlays.scoreboard ? "list.number.rtl":"list.number"))}
+        primaryAction:{action()}
             .buttonStyle(GlassIconButtonStyle(tint:overlays.scoreboard ? .orange:GameTheme.primary,prominent:overlays.scoreboard))
     }
 }
