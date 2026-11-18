@@ -139,7 +139,7 @@ struct QuizLauncherPanel: View {
                 Text("Q 回车即开题 · 1–7 换人 · X 选择 K 闪卡 T 填空 Y 阅读（按下即开题）").font(.caption).foregroundStyle(GameTheme.muted)
             }
         }
-        .padding(22).background(GlassBackdrop())
+        .padding(22).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(GlassBackdrop())
         .fileImporter(isPresented: $importing, allowedContentTypes: [.plainText, .json, .text]) { result in
             do {
                 let url = try result.get()
@@ -247,7 +247,7 @@ struct ClassQuizPanel: View {
                     .disabled(model.players.isEmpty || draft.answered == 0)
             }
             Text("键盘：1–7 选人，A–H 选答案，0 不会，⌫ 撤回，回车发送并记录；发完可接着选下一组。").font(.caption).foregroundStyle(GameTheme.muted)
-        }.padding(22).background(GlassBackdrop())
+        }.padding(22).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(GlassBackdrop())
     }
     private var marks: [String: String] {
         var m: [String: String] = [:]
@@ -306,6 +306,6 @@ struct PracticePanel: View {
                 Label("题库里没有这位同学能练的闪卡。", systemImage: "tray").foregroundStyle(GameTheme.muted)
             }
             Text("键盘：A–H 记录学生说的背面并自动下一张，0 不会，1–7 换人，Esc 结束。只记录、不发奖励，错词进报告。").font(.caption).foregroundStyle(GameTheme.muted)
-        }.padding(22).background(GlassBackdrop())
+        }.padding(22).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(GlassBackdrop())
     }
 }

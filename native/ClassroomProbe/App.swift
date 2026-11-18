@@ -43,6 +43,7 @@ struct MacPublicWindow: View {
             .ignoresSafeArea()
             // Opened while a second (separate) screen is attached: it moves there and goes full screen by itself.
             .background(SceneProbe { scene in
+                _ = MacDisplayMonitor.shared
                 scene.title = Self.title
                 MacDisplays.placePublicWindow(scene, title: Self.title)
             })

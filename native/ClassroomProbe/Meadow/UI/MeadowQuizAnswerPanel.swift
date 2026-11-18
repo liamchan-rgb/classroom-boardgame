@@ -202,7 +202,7 @@ struct MeadowQuizAnswerPanel: View {
                 Button { onSubmit() } label: { Label("提交并揭晓 (⏎)", systemImage: "checkmark.seal.fill") }.buttonStyle(GlassIconButtonStyle(prominent: true))
             }
             Text("键盘：A–H 选学生说的答案，0 不会，⌫ 撤回，回车提交。未录入的按答错记。").font(.caption).foregroundStyle(GameTheme.muted)
-        }.padding(22).background(GlassBackdrop())
+        }.padding(22).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(GlassBackdrop())
     }
 }
 

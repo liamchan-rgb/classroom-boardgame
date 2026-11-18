@@ -7,6 +7,13 @@ import Darwin
 /// the Catalyst SDK). Used to warn when the projector only mirrors the Mac screen, to switch it to a separate
 /// display, and to put the public window on the second screen.
 enum MacDisplays {
+    /// Diagnostics for the public-window placement (temp folder, overwritten each launch).
+    static func trace(_ text: String) {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("public-window.log")
+        let line = "\(Date()) \(text)\n"
+        if let h = try? FileHandle(forWritingTo: url) { h.seekToEndOfFile(); h.write(Data(line.utf8)); try? h.close() }
+        else { try? Data(line.utf8).write(to: url) }
+    }
     private typealias OnlineList = @convention(c) (UInt32, UnsafeMutablePointer<UInt32>?, UnsafeMutablePointer<UInt32>?) -> Int32
     private typealias Flag = @convention(c) (UInt32) -> Int32
     private typealias Mirrors = @convention(c) (UInt32) -> UInt32
@@ -60,9 +67,15 @@ enum MacDisplays {
     }
 
     /// Moves the public window to the second screen and makes it full screen there.
+    /// The open public window's scene (to move it when a separate screen shows up later).
+    static weak var publicScene: UIWindowScene?
     static func placePublicWindow(_ scene: UIWindowScene, title: String) {
-        guard let frame = status().second else { return }
-        scene.requestGeometryUpdate(.Mac(systemFrame: frame.insetBy(dx: 40, dy: 60))) { _ in }
+        publicScene = scene
+        let st = status()
+        trace("displays others=\(st.others) mirrored=\(st.mirrored) second=\(String(describing: st.second)) online=\(online != nil)")
+        guard let frame = st.second else { return }
+        scene.requestGeometryUpdate(.Mac(systemFrame: frame.insetBy(dx: 40, dy: 60))) { error in trace("geometry error \(error.localizedDescription)") }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { trace("scene frame after move \(scene.effectiveGeometry.systemFrame)") }
         // Full screen happens on the screen the window is on, so give the move a moment first.
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { toggleFullScreen(title: title, enter: true) }
     }
@@ -71,7 +84,9 @@ enum MacDisplays {
         guard let appClass = NSClassFromString("NSApplication") as? NSObject.Type,
               let app = appClass.value(forKey: "sharedApplication") as? NSObject,
               let windows = app.value(forKey: "windows") as? [NSObject],
-              let window = windows.first(where: { ($0.value(forKey: "title") as? String)?.contains(title) == true }) else { return }
+              let window = windows.first(where: { ($0.value(forKey: "title") as? String)?.contains(title) == true }) else {
+            trace("no AppKit window titled \(title)"); return
+        }
         let mask = (window.value(forKey: "styleMask") as? UInt) ?? 0
         let isFull = mask & (1 << 14) != 0   // NSWindowStyleMaskFullScreen
         if isFull != enter { window.perform(NSSelectorFromString("toggleFullScreen:"), with: nil) }
@@ -85,7 +100,17 @@ enum MacDisplays {
     private var timer: Timer?
     private init() {
         timer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
-            MainActor.assumeIsolated { let s = MacDisplays.status(); if s != self?.status { self?.status = s } }
+            MainActor.assumeIsolated {
+                let s = MacDisplays.status()
+                guard s != self?.status else { return }
+                let appeared = self?.status.second == nil && s.second != nil
+                self?.status = s
+                // A separate screen turned up (projector connected, or mirroring switched off) while the public
+                // window is open: move it there.
+                if appeared, let scene = MacDisplays.publicScene, scene.activationState != .unattached {
+                    MacDisplays.placePublicWindow(scene, title: MacPublicWindow.title)
+                }
+            }
         }
     }
     func refresh() { status = MacDisplays.status() }
@@ -114,7 +139,7 @@ struct SceneProbe: UIViewRepresentable {
     var found: (UIWindowScene) -> Void
     final class Probe: UIView {
         var found: ((UIWindowScene) -> Void)?
-        override func didMoveToWindow() { super.didMoveToWindow(); if let scene = window?.windowScene { let f = found; found = nil; f?(scene) } }
+        override func didMoveToWindow() { super.didMoveToWindow(); MacDisplays.trace("probe window=\(window != nil) scene=\(window?.windowScene != nil)"); if let scene = window?.windowScene { let f = found; found = nil; f?(scene) } }
     }
     func makeUIView(context: Context) -> Probe { let p = Probe(); p.found = found; p.isUserInteractionEnabled = false; return p }
     func updateUIView(_ view: Probe, context: Context) {}
