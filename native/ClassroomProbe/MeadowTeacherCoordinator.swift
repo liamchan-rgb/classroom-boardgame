@@ -55,7 +55,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
         let screen=UIHostingController(rootView:QuizLauncherPanel(game:self,onStart:{[weak self] player,index in
             self?.presentationHost?.dismiss(animated:true){self?.startQuiz(player:player,index:index,node:nil)}
         },onClose:{[weak self] in self?.presentationHost?.dismiss(animated:true)}))
-        screen.modalPresentationStyle = .formSheet;screen.preferredContentSize=CGSize(width:720,height:560)
+        screen.modalPresentationStyle = .formSheet;screen.preferredContentSize=CGSize(width:720,height:470)
         presenter.present(screen,animated:true)
     }
     /// Shows the question on the TV and the answer panel to the teacher. `node`: the quiz spot, nil when called up anywhere.

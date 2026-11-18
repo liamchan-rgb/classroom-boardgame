@@ -145,7 +145,9 @@ final class MeadowQuizCard: UIView {
             let part = q.parts[0], right = attempt.correct[0]
             let said = attempt.picks[0].map { part.options[$0] } ?? attempt.texts[0]
             UIView.transition(with: faceBox, duration: 0.5, options: .transitionFlipFromRight) {
-                let text = NSMutableAttributedString(string: part.options[part.answer], attributes: [.font: MeadowPreviewPalette.font(72, .heavy), .foregroundColor: right ? UIColor.systemGreen : MeadowPreviewPalette.ink])
+                // Front small on top, the right back large below (and what was said instead).
+                let text = NSMutableAttributedString(string: q.prompt + "\n", attributes: [.font: MeadowPreviewPalette.font(30, .bold), .foregroundColor: MeadowPreviewPalette.muted])
+                text.append(NSAttributedString(string: part.options[part.answer], attributes: [.font: MeadowPreviewPalette.font(72, .heavy), .foregroundColor: right ? UIColor.systemGreen : MeadowPreviewPalette.ink]))
                 if !right { text.append(NSAttributedString(string: "\n说成了：\(said ?? "不会")", attributes: [.font: MeadowPreviewPalette.font(28, .semibold), .foregroundColor: UIColor.systemRed])) }
                 self.face.attributedText = text
                 self.faceBox.backgroundColor = right ? UIColor.systemGreen.withAlphaComponent(0.18) : MeadowPreviewPalette.glass(.medium)

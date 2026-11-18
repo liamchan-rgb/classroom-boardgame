@@ -206,7 +206,7 @@ struct QuizReportPageView: View {
         }
         if !report.words.isEmpty {
             card {
-                section("易错单词（\(report.words.count)）", icon: "textformat.abc")
+                section("易错单词（\(report.words.count)）", icon: "character.book.closed.fill")
                 FlowRow(spacing: 6) {
                     ForEach(Array(report.words.prefix(20).enumerated()), id: \.offset) { _, w in
                         wordChip(w.word, meaning: w.meaning, count: w.wrong, of: w.asked, said: w.commonWrong.map { "常说成 \($0)" })
@@ -256,7 +256,7 @@ struct QuizReportPageView: View {
         if first, !s.wrongWords.isEmpty {
             card {
                 HStack {
-                    section("错词本（\(s.wrongWords.count)）", icon: "textformat.abc")
+                    section("错词本（\(s.wrongWords.count)）", icon: "character.book.closed.fill")
                     Spacer()
                     Text("单词题 \(s.wordsAsked) 个 · 答错 \(s.wrongWords.reduce(0) { $0 + $1.count }) 次").font(.system(size: 8.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted)
                 }
