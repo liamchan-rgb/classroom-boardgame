@@ -168,8 +168,12 @@ do_mac() {
   rm -rf artifacts/ClassroomProbe.app
   ditto "$app" artifacts/ClassroomProbe.app
   codesign --verify artifacts/ClassroomProbe.app
-  open artifacts/ClassroomProbe.app
-  ok "Mac app: $root/artifacts/ClassroomProbe.app (opened; use 公开窗口 for the student screen)"
+  # MAC_OPEN=0: build only; MAC_OPEN=background: launch without taking focus.
+  case "${MAC_OPEN:-1}" in
+    0) ok "Mac app: $root/artifacts/ClassroomProbe.app (not opened)" ;;
+    background) open -g artifacts/ClassroomProbe.app; ok "Mac app: $root/artifacts/ClassroomProbe.app (opened in background)" ;;
+    *) open artifacts/ClassroomProbe.app; ok "Mac app: $root/artifacts/ClassroomProbe.app (opened; use 公开窗口 for the student screen)" ;;
+  esac
 }
 
 steps=("$@")

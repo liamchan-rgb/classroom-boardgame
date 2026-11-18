@@ -61,6 +61,7 @@ scripts/local-build.sh ipa        # 未签名Release归档 → artifacts/Classro
 scripts/local-build.sh sim        # Debug模拟器构建、安装、启动并截图 artifacts/simulator-launch.png
 SIM_DEVICE="iPad Pro 13-inch (M5)" scripts/local-build.sh sim
 scripts/local-build.sh mac        # Mac Catalyst版 → artifacts/ClassroomProbe.app并打开（不在默认三步里）
+MAC_OPEN=background scripts/local-build.sh mac   # 后台打开不抢焦点；MAC_OPEN=0只编译不打开
 ```
 
 - 前提：Xcode 27及以上（选择器同CI），以及一次性安装的Metal Toolchain：`xcodebuild -downloadComponent MetalToolchain`（约839MB；App含`.metal`着色器，缺失时脚本直接提示）。
@@ -75,3 +76,4 @@ scripts/local-build.sh mac        # Mac Catalyst版 → artifacts/ClassroomProbe
 - 首次本机结果：Mac Release编译104秒、启动正常；iPad test/ipa/sim全流程复跑通过，模拟器界面无变化。Mac公开窗口的打开/关闭、跨屏全屏、教师端实时镜像与性能尚待用户在真实屏幕上验收。
 - 背包/商店（2026-11-18）：这两个界面只在教师窗口打开（需要操作）。公开屏（Mac公开窗口与iPad外接电视相同）改为实时复制教师端正在打开的`MeadowCampaignInventoryViewController`/`MeadowShopViewController`画面（`MeadowPanelMirror`，渲染服务器`snapshotView(afterScreenUpdates:false)`，30Hz，按教师画面比例居中），内容、标签页与选中项与本地一致；原先公开屏只有简化文字版行囊、看不到商店。其他教师面板（GM、档案等）不复制。待用户在Mac公开窗口与iPad电视上实测。
 - 本机实测与修复（2026-11-18，computer use操控Mac版）：打开公开窗口→顶栏变绿色“TV”；继续行程走路、一场战斗（掷骰、胜利结算卡、收下回地图）、行囊切成员与选物品、商店切“抽奖”并抽一次，两窗口画面一致；“关闭公开”与关窗都能断开、顶栏变回“本机”。修了三处：①有游戏时关掉再打开公开窗口两边全黑——教师预览里将被移除的`MeadowRendererContainer`在最后一次更新时把游戏画面抢回去随即被拆掉，画面不在任何窗口（iPad游戏中插上电视同样会触发）；现`MeadowRendererHost`按`teacherPreview`分工：教师预览只在未连接公开屏时持有，公开屏只在已连接时持有。②关闭行囊时旧的简化文字行囊闪一下——已删去`PublicInventoryPanel`（镜像已取代）。③Mac重启时窗口恢复可能多出第二个教师控制台（`文件›新建窗口`同理），两者争抢画面；现只保留一个教师控制台，多出的窗口自行关闭（`TeacherHostController.primary`），并去掉SwiftUI的新建项（系统的“新建窗口”菜单仍在，点了不会多出教师窗口）。跨屏全屏与投影性能仍待用户在真实投影屏上验收。
+- 随机外观与地图屏外标记（2026-11-18，Mac版实测，iPad同步改动未另跑模拟器）：①创建角色加“随机外观”：教师“形象”人物自定义页一键随机体型/发型/五官（衣装跟随护甲，每次与当前不同）；新地图设置每位学生一行多“随机外观”按钮，按钮显示所选人物头像、再点“换一个”，与已选同学不重复（`PlayerAppearance.random`，GameCore新增测试）。②地图屏外成员标记：原先头像圈是白的——头像精灵在圆形裁切节点里，用`childNode(withName:"face")`找不到，贴图从未设上；且标记挂在场景上走了HD-2D模糊/调色，看起来发白发虚。现按`.//face`查找；`MeadowPostProcess.overlayNodes`把场景上z≥overlayDepth的屏幕UI也当地图UI，在调色之后不模糊地画（同时修正`isolate`误把这些保留节点隐藏），标记z改为overlayDepth+2000；名字牌放在箭头相反一侧，底边不再被裁。③教师地图支持鼠标滚轮/双指滚动缩放（`MeadowTeacherMapInput`，Mac没有触控板也能缩放）。④`scripts/local-build.sh mac`可加`MAC_OPEN=background`后台打开、`MAC_OPEN=0`只编译。

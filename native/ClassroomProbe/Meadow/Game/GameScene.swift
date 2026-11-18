@@ -872,7 +872,8 @@ extension GameScene {
     fileprivate static let markerRadius:CGFloat=24
     func updateEdgeMarkers() {
         guard let campaign,gaitTest==nil,battlePreviewCamera==nil,world != nil else {edgeMarkers.values.forEach{$0.isHidden=true};return}
-        let inset=Self.markerRadius+14
+        // Room for the arrow and the name tag (both reach about r+19 from the centre).
+        let inset=Self.markerRadius+22
         let safe=CGRect(x:inset,y:inset,width:max(1,size.width-inset*2),height:max(1,size.height-inset*2))
         let center=CGPoint(x:size.width/2,y:size.height/2)
         for (index,id) in campaign.playerIDs.enumerated() where index<actorRoots.count {
@@ -887,14 +888,18 @@ extension GameScene {
             let k=min(sx,sy,1)
             marker.position=CGPoint(x:center.x+dx*k,y:center.y+dy*k)
             marker.childNode(withName:"arrow")?.zRotation=atan2(dy,dx)
-            if let face=marker.childNode(withName:"face") as? SKSpriteNode,face.texture==nil,
-               let image=PixelHeroAtlas.portrait(PixelHeroLook.battle(unit:unit,slot:index)) {face.texture=SKTexture(image:image);face.texture?.filteringMode = .nearest}
+            // The name tag sits on the side away from the arrow, so a marker on the bottom edge keeps its name on screen.
+            let tagY:CGFloat=dy<0 ? Self.markerRadius+10:-Self.markerRadius-10
+            marker.childNode(withName:"tag")?.position.y=tagY;marker.childNode(withName:"name")?.position.y=tagY-5
+            // The face sits inside the round crop node, so search below the marker, not just its direct children.
+            if let face=marker.childNode(withName:".//face") as? SKSpriteNode,face.texture==nil,
+               let image=PixelHeroAtlas.portrait(PixelHeroLook.battle(unit:unit,slot:index)) {face.texture=SKTexture(image:image);face.texture?.filteringMode = .nearest;face.color = .white}
         }
         for (id,marker) in edgeMarkers where !campaign.playerIDs.contains(id) {marker.removeFromParent();edgeMarkers[id]=nil}
     }
     private func makeEdgeMarker(id:String,unit:GameUnit,slot:Int)->SKNode {
         let r=Self.markerRadius
-        let node=SKNode();node.zPosition=900_000
+        let node=SKNode();node.zPosition=MeadowPostProcess.overlayDepth+2_000  // on-map UI (drawn after the grade, unblurred), above node plates
         let arrow=SKNode();arrow.name="arrow"
         let tip=CGMutablePath();tip.move(to:CGPoint(x:r+14,y:0));tip.addLine(to:CGPoint(x:r+2,y:9));tip.addLine(to:CGPoint(x:r+2,y:-9));tip.closeSubpath()
         let head=SKShapeNode(path:tip);head.fillColor=SKColor(red:0.09,green:0.42,blue:0.53,alpha:1);head.strokeColor = .white;head.lineWidth=2
@@ -907,6 +912,7 @@ extension GameScene {
         let label=SKLabelNode(text:unit.shortName);label.fontName="PingFangSC-Semibold";label.fontSize=12;label.fontColor=SKColor(red:0.09,green:0.25,blue:0.31,alpha:1)
         label.position=CGPoint(x:0,y:-r-15);label.verticalAlignmentMode = .baseline
         let tag=SKShapeNode(rectOf:CGSize(width:max(30,label.frame.width+10),height:17),cornerRadius:8.5);tag.fillColor=SKColor.white.withAlphaComponent(0.9);tag.strokeColor = .clear
+        tag.name="tag";label.name="name"
         tag.position=CGPoint(x:0,y:-r-10);node.addChild(tag);node.addChild(label)
         addChild(node);edgeMarkers[id]=node;return node
     }

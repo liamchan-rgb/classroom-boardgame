@@ -226,8 +226,11 @@ final class MeadowPostProcess {
     }
 
     /// Visible on-map UI nodes, in the world but above everything else.
-    static func overlayNodes(in world: SKNode) -> [SKNode] {
-        world.children.filter { !$0.isHidden && $0.zPosition >= overlayDepth }
+    /// On-map UI: world children at or above `overlayDepth`, plus screen-space UI hung directly on the scene
+    /// at that depth (e.g. off-screen traveller markers), which must not be blurred or graded either.
+    static func overlayNodes(in world: SKNode, scene: SKScene? = nil) -> [SKNode] {
+        let onScene = scene?.children.filter { $0 !== world } ?? []
+        return (world.children + onScene).filter { !$0.isHidden && $0.zPosition >= overlayDepth }
     }
 
     /// Hide `nodes`; returns a closure that restores exactly what it changed.
@@ -241,7 +244,7 @@ final class MeadowPostProcess {
     static func isolate(_ overlays: [SKNode], world: SKNode, scene: SKScene) -> () -> Void {
         let keep = Set(overlays.map { ObjectIdentifier($0) })
         let others = world.children.filter { !keep.contains(ObjectIdentifier($0)) }
-            + scene.children.filter { $0 !== world }
+            + scene.children.filter { $0 !== world && !keep.contains(ObjectIdentifier($0)) }
         return hide(others)
     }
 }

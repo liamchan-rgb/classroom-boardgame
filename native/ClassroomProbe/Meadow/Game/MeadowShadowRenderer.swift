@@ -446,7 +446,7 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
             let world = try post.worldTarget(width: output.width, height: output.height)
             let worldPass = MTLRenderPassDescriptor(); worldPass.colorAttachments[0].texture = world
             try encodeBackdrop(command: command, target: worldPass)
-            let overlays = MeadowPostProcess.overlayNodes(in: frame.world)
+            let overlays = MeadowPostProcess.overlayNodes(in: frame.world, scene: scene)
             let restoreOverlays = MeadowPostProcess.hide(overlays)
             foreground.render(withViewport: viewport, commandBuffer: command, renderPassDescriptor: worldPass)
             restoreOverlays()

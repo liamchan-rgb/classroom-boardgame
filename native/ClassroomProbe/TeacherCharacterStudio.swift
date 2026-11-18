@@ -44,6 +44,8 @@ struct TeacherCharacterStudio:View {
                 ScrollView {
                     VStack(alignment:.leading,spacing:18){
                         identity
+                        Button{randomLook()}label:{Label("随机外观",systemImage:"dice.fill")}
+                            .buttonStyle(GlassIconButtonStyle(tint:GameTheme.accent,prominent:true)).accessibilityHint("随机换体型、发型和五官，衣装跟随护甲")
                         choice("外观","figure.stand",options:[("forester","林间"),("wayfarer","行旅")],selection:$body_){id in look(body:id)}
                         choice("发型","scissors",options:[("original","原有")]+zip(PlayerAppearance.hairOptions,Self.hairNames).map{($0,$1)},selection:$hair){id in look(hair:id)}
                         choice("五官","face.smiling",options:[("original","原有")]+zip(PlayerAppearance.faceOptions,Self.faceNames).map{($0,$1)},selection:$face,zoomOnFace:true){id in look(face:id)}
@@ -210,6 +212,11 @@ struct TeacherCharacterStudio:View {
         return result
     }
 
+    /// Random body, hair and face; the outfit follows worn armor. Each press gives a different look.
+    private func randomLook(){
+        let next=PlayerAppearance.random(excluding:[appearance])
+        withAnimation(.spring(response:0.3,dampingFraction:0.7)){body_=next.body;hair=next.hair ?? "original";face=next.face ?? "original";outfit="follow"}
+    }
     private func readPlayer(){
         guard let u=game.campaign?.engine.state.units[player] else{return}
         name=u.name

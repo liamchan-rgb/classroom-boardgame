@@ -16,6 +16,16 @@ final class CustomAppearanceTests:XCTestCase {
             XCTAssertNoThrow(try PlayerAppearance(outfit:"starlightArmor",hair:hair,face:face).validate())
         }}
     }
+    func testRandomLooksAreValidFollowArmorAndAvoidUsedOnes()throws {
+        var seen=Set<String>()
+        for _ in 0..<200 {
+            let a=PlayerAppearance.random();try a.validate();XCTAssertNil(a.outfit);XCTAssertNotNil(a.hair);XCTAssertNotNil(a.face);seen.insert(a.visualKey)
+        }
+        XCTAssertGreaterThan(seen.count,10)
+        let first=PlayerAppearance.random()
+        var used=[first]
+        for _ in 0..<5 {let next=PlayerAppearance.random(excluding:used);XCTAssertFalse(used.contains(next));used.append(next)}
+    }
     func testUnknownHeadIDsRejected()throws {
         XCTAssertThrowsError(try PlayerAppearance(hair:"missing").validate());XCTAssertThrowsError(try PlayerAppearance(face:"missing").validate())
         XCTAssertNoThrow(try PlayerAppearance(hair:PlayerAppearance.hairOptions[0]).validate());XCTAssertNoThrow(try PlayerAppearance(face:PlayerAppearance.faceOptions[0]).validate())

@@ -124,10 +124,33 @@ final class MeadowMapSettingsViewController: UIViewController {
                     profiles.setTitle("已选："+entry.value.name,for:.normal)
                 }
             })
+            // Random look for this student (body, hair, face; outfit follows armor), different from the others already picked.
+            let dice=UIButton(type:.system);dice.setTitle("随机外观",for:.normal);dice.setImage(UIImage(systemName:"dice.fill"),for:.normal)
+            dice.accessibilityLabel="P\(i+1)随机外观"
+            dice.addAction(UIAction{[weak self] _ in
+                guard let self else{return}
+                let key="p\(i+1)",others=self.profileLooks.filter{$0.key != key}.map(\.value)
+                let look=PlayerAppearance.random(excluding:others+(self.profileLooks[key].map{[$0]} ?? []))
+                self.profileLooks[key]=look
+                dice.setTitle(" 换一个",for:.normal)
+                profiles.setTitle("读取人物档案",for:.normal)
+                // Show the picked face on the button (the portrait bakes in the background on first use).
+                let pixel=PixelHeroLook(body:look.body,hair:look.hair,face:look.face)
+                func show(_ image:UIImage){
+                    guard self.profileLooks[key]==look else{return}
+                    let size=CGSize(width:30,height:30)
+                    let face=UIGraphicsImageRenderer(size:size).image{_ in UIBezierPath(ovalIn:CGRect(origin:.zero,size:size)).addClip();image.draw(in:CGRect(origin:.zero,size:size))}
+                    dice.setImage(face.withRenderingMode(.alwaysOriginal),for:.normal)
+                }
+                if let ready=PixelHeroAtlas.portrait(pixel,ready:{if let image=PixelHeroAtlas.portrait(pixel){show(image)}}) {show(ready)}
+            },for:.primaryActionTriggered)
+            dice.setContentCompressionResistancePriority(.required,for:.horizontal)
+            profiles.setContentCompressionResistancePriority(.defaultLow,for:.horizontal)
+            let looks=UIStackView(arrangedSubviews:[profiles,dice]);looks.axis = .horizontal;looks.spacing=16;looks.alignment = .center
             let team=teamPickers[i];team.selectedSegmentIndex=0;team.selectedSegmentTintColor=MeadowPreviewPalette.primary
             team.setTitleTextAttributes([.foregroundColor:MeadowPreviewPalette.ink,.font:UIFont.boldSystemFont(ofSize:15)],for:.normal)
             team.setTitleTextAttributes([.foregroundColor:UIColor.white],for:.selected);team.accessibilityLabel="P\(i+1)队伍"
-            let row=UIStackView(arrangedSubviews:[label,name,profiles,selector,team,summary]);row.axis = .vertical;row.spacing=6
+            let row=UIStackView(arrangedSubviews:[label,name,looks,selector,team,summary]);row.axis = .vertical;row.spacing=6
             classRows.append(row);right.addArrangedSubview(row)
         }
         refreshPartySummary()

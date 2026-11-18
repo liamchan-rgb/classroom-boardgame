@@ -20,15 +20,17 @@ final class MeadowMapInputView:UIView,UIGestureRecognizerDelegate {
     var onPan:((CGPoint)->Void)?
     var onZoom:((CGFloat,CGPoint)->Void)?
     private var gestureStarts=[ObjectIdentifier:CGPoint]()
-    private let tap=UITapGestureRecognizer(),pan=UIPanGestureRecognizer(),pinch=UIPinchGestureRecognizer()
+    private let tap=UITapGestureRecognizer(),pan=UIPanGestureRecognizer(),pinch=UIPinchGestureRecognizer(),wheel=UIPanGestureRecognizer()
     override init(frame:CGRect){
         super.init(frame:frame);isOpaque=false;backgroundColor = .clear;isMultipleTouchEnabled=true
         tap.addTarget(self,action:#selector(tapped));pan.addTarget(self,action:#selector(panned));pinch.addTarget(self,action:#selector(pinched))
         pan.minimumNumberOfTouches=1;pan.maximumNumberOfTouches=2
         for gesture in [tap,pan,pinch] as [UIGestureRecognizer] {gesture.delegate=self;addGestureRecognizer(gesture)}
         tap.require(toFail:pan);tap.require(toFail:pinch)
+        // Mouse wheel / two-finger scroll zooms (Mac and iPad with a mouse); touches still pan with `pan`.
+        wheel.allowedScrollTypesMask = .all;wheel.maximumNumberOfTouches=0;wheel.addTarget(self,action:#selector(scrolled));wheel.delegate=self;addGestureRecognizer(wheel)
         addGestureRecognizer(UIHoverGestureRecognizer(target:self,action:#selector(hovered(_:))))
-        accessibilityLabel="地图：拖动平移，双指缩放，点击道路移动"
+        accessibilityLabel="地图：拖动平移，双指或滚轮缩放，点击道路移动"
     }
     required init?(coder:NSCoder){fatalError("init(coder:) has not been implemented")}
     private func point(_ gesture:UIGestureRecognizer)->CGPoint? {ClassroomCanvas.point(gesture.location(in:self),in:bounds.size)}
@@ -53,6 +55,11 @@ final class MeadowMapInputView:UIView,UIGestureRecognizerDelegate {
             if let delta=ClassroomCanvas.translation(pan.translation(in:self),in:bounds.size){onPan?(delta)}
             pan.setTranslation(.zero,in:self)
         }
+    }
+    @objc private func scrolled(){
+        guard wheel.state == .began || wheel.state == .changed,let p=point(wheel) else{return}
+        let dy=wheel.translation(in:self).y;wheel.setTranslation(.zero,in:self)
+        if dy != 0 {onZoom?(exp(dy*0.004),p)}
     }
     @objc private func pinched(){
         if pinch.state == .began || pinch.state == .changed || pinch.state == .ended,let p=point(pinch){onZoom?(pinch.scale,p);pinch.scale=1}
