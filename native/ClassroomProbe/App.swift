@@ -144,6 +144,17 @@ final class TeacherHostController: UIViewController {
                 session.game.grantCaptureCancel()
             }
         }
+        // A question panel docked beside the preview gets its keys (Esc, ⏎, 1–7, D/C…) even when the keyboard focus
+        // is somewhere else in the window, e.g. back on the notes after the word-card popup closed.
+        if let onKey=session.game.dockContent?.onKey {
+            var docked=false
+            for press in presses {
+                guard let key=press.key,key.modifierFlags.intersection([.command,.control,.alternate]).isEmpty,
+                      let token=ClassroomShortcuts.panelToken(key),onKey(token) else{continue}
+                docked=true
+            }
+            if docked {return}
+        }
         var handled=false
         for press in presses {
             guard let key=press.key,key.modifierFlags.intersection([.command,.control,.alternate]).isEmpty,
@@ -233,6 +244,9 @@ extension UIResponder {
     static var classroomTyping:Bool {
         found=nil
         UIApplication.shared.sendAction(#selector(classroomReportFirstResponder(_:)),to:nil,from:nil,for:nil)
+        // Read-only text (the notes after double-clicking a word) holds the focus but takes no typing: the
+        // shortcuts and the docked question panel's keys must still work.
+        if let text=found as? UITextView {return text.isEditable}
         return found is UITextInput
     }
 }
