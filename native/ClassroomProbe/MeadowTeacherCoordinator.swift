@@ -61,7 +61,9 @@ final class MeadowTeacherCoordinator:ObservableObject {
     /// What the dock shows; each place that shows it builds its own hosting controller from it (one controller
     /// moved between places went blank).
     @Published var dockContent:DockContent?
-    private weak var dockPanel:UIViewController?
+    /// Kept strongly: the dock only holds a copy of its view, so nothing else keeps the panel (and closing it
+    /// must still find it).
+    private var dockPanel:UIViewController?
     private func presentPanel(_ panel:UIViewController,size:CGSize,dock:Bool=false){
         if dock,let content=(panel as? DockablePanel)?.dockContent() {
             quizPanel=panel;dockPanel=panel
@@ -127,6 +129,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
         challengeTimer?.invalidate();challengeTimer=nil
         practiceModel=nil;classModel=nil;quizDraft=nil;quizReward=nil;quizGainBase=nil
         closePanel()
+        dockPanel=nil;dockContent=nil
         withAnimation(.easeIn(duration:0.15)){quiz=nil;challenge=nil}
         renderer?.classroomRefresh();revision += 1
     }
