@@ -439,6 +439,17 @@ struct ClassQuizPanel: View {
     @Published var classwide = false
     @Published var players = Set<String>()
     @Published var note: String?
+    enum Order: String { case sequential, shuffled }
+    /// In bank order or shuffled; remembered on this device.
+    @Published var order: Order = Order(rawValue: UserDefaults.standard.string(forKey: "classroom.flashOrder") ?? "") ?? .sequential {
+        didSet { UserDefaults.standard.set(order.rawValue, forKey: "classroom.flashOrder") }
+    }
+    /// The cards (bank indices) in the order they come, and where we are.
+    @Published var deck: [Int] = []
+    @Published var cursor = 0
+    /// This round's marks per card (bank index → right), for the card list.
+    @Published var results: [Int: Bool] = [:]
+    @Published var showList = false
     init(player: String, classwide: Bool = false) { self.player = player; self.classwide = classwide }
 }
 
@@ -467,6 +478,35 @@ struct PracticePanel: View {
                 QuizPlayerChips(game: game, selected: [model.player]) { id in game.switchPractice(to: id) }
             }
             if let note = model.note { Text(note).font(.caption.bold()).foregroundStyle(.orange) }
+            HStack(spacing: 10) {
+                Picker("", selection: Binding(get: { model.order }, set: { game.setPracticeOrder($0) })) {
+                    Text("顺序").tag(PracticeModel.Order.sequential); Text("乱序").tag(PracticeModel.Order.shuffled)
+                }.pickerStyle(.segmented).frame(width: 130)
+                Button { game.stepPractice(-1) } label: { Image(systemName: "chevron.left") }.buttonStyle(GlassIconButtonStyle()).disabled(model.waiting || model.deck.isEmpty)
+                Text(model.deck.isEmpty ? "0/0" : "第 \(model.cursor + 1)/\(model.deck.count) 张").font(.callout.bold()).monospacedDigit()
+                Button { game.stepPractice(1) } label: { Image(systemName: "chevron.right") }.buttonStyle(GlassIconButtonStyle()).disabled(model.waiting || model.deck.isEmpty)
+                Spacer()
+                Button { model.showList.toggle() } label: { Label(model.showList ? "收起列表" : "选卡", systemImage: "list.bullet.rectangle") }.buttonStyle(GlassIconButtonStyle(prominent: model.showList))
+            }
+            if model.showList, let c = game.campaign {
+                // Every card of the deck: tap one to show it now (✓ / ✗ = marked this round).
+                ScrollView {
+                    FlowRow(spacing: 6) {
+                        ForEach(Array(model.deck.enumerated()), id: \.offset) { pos, index in
+                            let current = pos == model.cursor, mark = model.results[index]
+                            Button { game.pickPracticeCard(pos) } label: {
+                                HStack(spacing: 4) {
+                                    Text("\(pos + 1)").font(.caption2.bold()).foregroundStyle(current ? Color.white.opacity(0.8) : GameTheme.muted)
+                                    Text(c.quizBank.indices.contains(index) ? c.quizBank[index].prompt : "?").font(.callout.weight(.semibold)).lineLimit(1)
+                                    if let mark { Image(systemName: mark ? "checkmark" : "xmark").font(.caption.bold()).foregroundStyle(current ? .white : (mark ? Color.green : Color.red)) }
+                                }.padding(.horizontal, 9).padding(.vertical, 5)
+                                .foregroundStyle(current ? Color.white : GameTheme.ink)
+                                .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(current ? GameTheme.primary : Color.white.opacity(0.55)))
+                            }.buttonStyle(.plain).disabled(model.waiting)
+                        }
+                    }
+                }.frame(maxHeight: 200)
+            }
             if let live = game.quiz, live.mode == .practice {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("正面：\(live.question.prompt)").font(.title2.bold())
@@ -487,8 +527,8 @@ struct PracticePanel: View {
                 Label(model.classwide ? "当前课程没有闪卡。" : "题库里没有这位同学能练的闪卡。", systemImage: "tray").foregroundStyle(GameTheme.muted)
             }
             Text(model.classwide
-                 ? "键盘：1–7 选回答的同学，D 对、C 错：记录、揭晓背面并自动下一张；空格跳过这张；A 切回个人，Esc 结束。只记录、不发奖励，错词进报告。"
-                 : "键盘：D 对、C 错，记录后自动下一张；1–7 换人，A 切到全班，Esc 结束。只记录、不发奖励，错词进报告。").font(.caption).foregroundStyle(GameTheme.muted)
+                 ? "键盘：1–7 选回答的同学，D 对、C 错：记录、揭晓背面并自动下一张；空格跳过这张；←/→ 上一张/下一张，O 顺序/乱序，A 切回个人，Esc 结束。只记录、不发奖励，错词进报告。"
+                 : "键盘：D 对、C 错，记录后自动下一张；←/→ 上一张/下一张，O 顺序/乱序；1–7 换人，A 切到全班，Esc 结束。只记录、不发奖励，错词进报告。").font(.caption).foregroundStyle(GameTheme.muted)
         }.padding(22).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(GlassBackdrop())
     }
 }

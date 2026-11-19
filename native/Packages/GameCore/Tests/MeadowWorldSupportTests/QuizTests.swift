@@ -320,6 +320,8 @@ final class QuizTests:XCTestCase {
         let second=try XCTUnwrap(s.classFlashCard(after:first));XCTAssertEqual(second,3-first)
         XCTAssertEqual(s.engine.state.players.map(\.coins),coins) // practice: recorded, no reward
         XCTAssertEqual(s.quizLog.count,2)
+        // Decks in bank order: the class gets the shared cards, a student also their own portion.
+        XCTAssertEqual(s.classFlashDeck,[1,2]);XCTAssertEqual(s.practiceDeck(for:"p1"),[0,1,2]);XCTAssertEqual(s.practiceDeck(for:"p2"),[1,2])
     }
     func testPortionsDefaultToStudentNumbersAndTheTeacherReassigns()throws {
         let text="""

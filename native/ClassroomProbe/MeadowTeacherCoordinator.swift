@@ -343,7 +343,10 @@ final class MeadowTeacherCoordinator:ObservableObject {
             case "c","0":self.practiceAnswer(nil)
             case "d":if let q=self.quiz?.question,q.type == .flashcard {self.practiceAnswer(q.parts[0].answer)}
             case "a":self.setPracticeClasswide(!(self.practiceModel?.classwide ?? false))
-            case " ":if self.practiceModel?.classwide == true {self.skipClassCard()} else {return false}
+            case "o":self.setPracticeOrder(self.practiceModel?.order == .shuffled ? .sequential:.shuffled)
+            case "→":self.stepPractice(1)
+            case "←":self.stepPractice(-1)
+            case " ":if self.practiceModel?.classwide == true {self.skipClassCard()} else {self.stepPractice(1)}
             default:
                 if let n=Int(key),let id=self.player(forSeat:n) {
                     if self.practiceModel?.classwide == true {self.togglePracticePlayer(id)} else {self.switchPractice(to:id)}
@@ -353,25 +356,61 @@ final class MeadowTeacherCoordinator:ObservableObject {
             }
             return true
         }
-        nextPracticeCard(after:nil)
+        rebuildDeck()
         presentPanel(panel,size:CGSize(width:720,height:460),dock:true)
     }
-    private func nextPracticeCard(after last:Int?){
+    /// The deck for the current student / the class, in bank order or shuffled; shows its first card.
+    private func rebuildDeck(keeping current:Int?=nil){
         guard let c=campaign,let model=practiceModel else{return}
-        if model.classwide {
-            guard let i=c.classFlashCard(after:last) else{withAnimation{quiz=nil};return}
-            quizToken += 1;model.waiting=false;model.players=[];model.note=nil
-            quiz=LiveQuiz(token:quizToken,index:i,question:c.quizBank[i],mode:.practice,player:"",playerName:"全班",place:"全班闪卡",node:nil,start:Date())
-            return
-        }
-        guard let i=c.practiceCard(for:model.player,after:last),let unit=c.engine.state.units[model.player] else{withAnimation{quiz=nil};return}
+        var deck=model.classwide ? c.classFlashDeck:c.practiceDeck(for:model.player)
+        if model.order == .shuffled {deck.shuffle()}
+        model.deck=deck
+        model.cursor=current.flatMap{deck.firstIndex(of:$0)} ?? 0
+        if current == nil {showPracticeCard()}
+    }
+    /// Shows the card at the deck position (the teacher's pick, or the next one).
+    private func showPracticeCard(){
+        guard let c=campaign,let model=practiceModel else{return}
+        guard !model.deck.isEmpty else{withAnimation{quiz=nil};return}
+        model.cursor=(model.cursor%model.deck.count+model.deck.count)%model.deck.count
+        let i=model.deck[model.cursor]
         quizToken += 1;model.waiting=false
-        quiz=LiveQuiz(token:quizToken,index:i,question:c.quizBank[i],mode:.practice,player:model.player,playerName:unit.shortName,place:"闪卡练习",node:nil,start:Date())
+        if model.classwide {
+            model.players=[];model.note=nil
+            quiz=LiveQuiz(token:quizToken,index:i,question:c.quizBank[i],mode:.practice,player:"",playerName:"全班",place:"全班闪卡",node:nil,start:Date())
+        } else if let unit=c.engine.state.units[model.player] {
+            quiz=LiveQuiz(token:quizToken,index:i,question:c.quizBank[i],mode:.practice,player:model.player,playerName:unit.shortName,place:"闪卡练习",node:nil,start:Date())
+        }
+    }
+    /// After a card is marked: the next one (a shuffled deck is shuffled again at the end of each round).
+    private func advancePractice(){
+        guard let model=practiceModel,!model.deck.isEmpty else{return}
+        if model.cursor+1>=model.deck.count {
+            model.cursor=0
+            if model.order == .shuffled {let last=model.deck.last;model.deck.shuffle();if model.deck.count>1,model.deck.first==last {model.deck.swapAt(0,model.deck.count-1)}}
+        } else {model.cursor += 1}
+        showPracticeCard()
+    }
+    /// ← / → (and the arrow buttons): move through the deck without marking.
+    func stepPractice(_ by:Int){
+        guard let model=practiceModel,!model.waiting,!model.deck.isEmpty else{return}
+        model.cursor += by;showPracticeCard()
+    }
+    /// The teacher picked a card from the list.
+    func pickPracticeCard(_ position:Int){
+        guard let model=practiceModel,!model.waiting,model.deck.indices.contains(position) else{return}
+        model.cursor=position;showPracticeCard()
+    }
+    func setPracticeOrder(_ order:PracticeModel.Order){
+        guard let model=practiceModel,model.order != order else{return}
+        model.order=order
+        // The card on screen stays; the rest of the deck follows the new order from here.
+        rebuildDeck(keeping:quiz?.mode == .practice ? quiz?.index:nil)
     }
     func setPracticeClasswide(_ on:Bool){
         guard let model=practiceModel,!model.waiting,model.classwide != on else{return}
-        model.classwide=on;model.right=0;model.total=0;model.players=[];model.note=nil
-        nextPracticeCard(after:nil)
+        model.classwide=on;model.right=0;model.total=0;model.players=[];model.note=nil;model.results=[:]
+        rebuildDeck()
     }
     func togglePracticePlayer(_ id:String){
         guard let model=practiceModel,model.classwide,!model.waiting else{return}
@@ -391,8 +430,8 @@ final class MeadowTeacherCoordinator:ObservableObject {
     }
     func switchPractice(to id:String){
         guard let model=practiceModel,!model.waiting else{return}
-        model.player=id;model.right=0;model.total=0
-        nextPracticeCard(after:nil)
+        model.player=id;model.right=0;model.total=0;model.results=[:]
+        rebuildDeck()
     }
     func practiceAnswer(_ option:Int?){
         guard let c=campaign,var live=quiz,live.mode == .practice,live.attempt==nil,let model=practiceModel,!model.waiting else{return}
@@ -406,6 +445,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
                     names.append(a.playerName)
                 }
                 model.total += names.count;if right {model.right += names.count}
+                model.results[live.index]=right
                 model.waiting=true
                 live.attempt=classReveal(live.question,index:live.index)
                 live.headline=(right ? "答对：" : "答错：")+names.joined(separator:"、")
@@ -417,6 +457,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
         do{
             let a=try c.recordQuiz(actor:live.player,question:live.index,picks:[option],seconds:Date().timeIntervalSince(live.start),free:true,practice:true)
             model.total += 1;if a.correct.allSatisfy({$0}){model.right += 1}
+            model.results[live.index]=a.correct.allSatisfy{$0}
             model.waiting=true
             live.attempt=a;live.hold=1.3;quiz=live
             revision += 1
@@ -429,7 +470,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
     /// The card finished its reveal (called by every copy: TV and preview; the first one acts).
     func quizCardFinished(_ token:Int){
         guard let live=quiz,live.token==token,let attempt=live.attempt else{return}
-        if live.mode == .practice,practiceModel != nil {nextPracticeCard(after:live.index);return}
+        if live.mode == .practice,practiceModel != nil {advancePractice();return}
         if live.mode == .challenge {
             withAnimation{quiz=nil}
             if let model=challenge,model.phase == .question {

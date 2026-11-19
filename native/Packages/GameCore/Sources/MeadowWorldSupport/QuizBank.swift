@@ -380,6 +380,18 @@ public extension MeadowCampaignSession {
         }
         return ordered.first{$0 != last} ?? ordered.first
     }
+    /// A student's flash-card deck in bank order: their own cards and the shared ones of the current course.
+    func practiceDeck(for player:String)->[Int] {
+        let bank=quizBank
+        return bank.indices.filter{inCourse(bank[$0]) && bank[$0].type == .flashcard && (bank[$0].isShared || isExclusive(bank[$0],for:player))}
+    }
+    /// The whole-class deck in bank order: the course's shared flash cards (all of its flash cards when it has none).
+    var classFlashDeck:[Int] {
+        let bank=quizBank
+        let all=bank.indices.filter{inCourse(bank[$0]) && bank[$0].type == .flashcard}
+        let shared=all.filter{bank[$0].isShared}
+        return shared.isEmpty ? all:shared
+    }
     /// Flash cards for the whole class, endless: the shared flash cards of the course (all of its flash cards when
     /// it has no shared ones), least recently shown to the class first; never the card just shown.
     func classFlashCard(after last:Int?=nil)->Int? {
