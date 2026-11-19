@@ -47,9 +47,11 @@ enum QuizReportPage {
     case student(Int, mistakes: Range<Int>, first: Bool)
     /// A student's whole flash-card deck with each card's status.
     case words(Int, range: Range<Int>, first: Bool)
-    /// Every answer a student gave, in order (at the end of the report).
-    case history(Int, range: Range<Int>, first: Bool)
-    static let wordsPerPage = 48, linesPerPage = 12
+    /// Every answer a student gave, in order (at the end of the report), one line each; two columns when there are many.
+    case history(Int, range: Range<Int>, first: Bool, columns: Int)
+    /// The class page's list of every flash card of the course.
+    case cards(range: Range<Int>, first: Bool)
+    static let wordsPerPage = 48, rowsPerColumn = 34, cardsPerPage = 48
 
     /// Class page, then each student (their report, then their word list); a long list continues on extra pages.
     /// At the end, each student's answers one by one.
@@ -59,6 +61,7 @@ enum QuizReportPage {
             var start = 0
             while start < n { pages.append(make(start..<min(n, start + size), start == 0)); start += size }
         }
+        chunks(report.cards.count, cardsPerPage) { .cards(range: $0, first: $1) }
         for (i, s) in report.students.enumerated() {
             let n = s.review.count, firstCount = (s.wrongWords.isEmpty ? 5 : 3) - (s.correctedWords.isEmpty && s.corrected.isEmpty ? 0 : 1), more = 9
             pages.append(.student(i, mistakes: 0..<min(n, firstCount), first: true))
@@ -66,7 +69,11 @@ enum QuizReportPage {
             while start < n { pages.append(.student(i, mistakes: start..<min(n, start + more), first: false)); start += more }
             chunks(s.vocabulary.count, wordsPerPage) { .words(i, range: $0, first: $1) }
         }
-        for (i, s) in report.students.enumerated() { chunks(s.lines.count, linesPerPage) { .history(i, range: $0, first: $1) } }
+        // Up to 68 answers: one column (≤ 2 pages); more: two columns, so up to 136 still fit in two pages.
+        for (i, s) in report.students.enumerated() {
+            let columns = s.lines.count <= 2 * rowsPerColumn ? 1 : 2
+            chunks(s.lines.count, rowsPerColumn * columns) { .history(i, range: $0, first: $1, columns: columns) }
+        }
         return pages
     }
 }
@@ -87,7 +94,8 @@ struct QuizReportPageView: View {
             case .overview: overview
             case .student(let i, let range, let first): student(report.students[i], index: i, mistakes: range, first: first)
             case .words(let i, let range, let first): words(report.students[i], index: i, range: range, first: first)
-            case .history(let i, let range, let first): history(report.students[i], index: i, range: range, first: first)
+            case .history(let i, let range, let first, let columns): history(report.students[i], index: i, range: range, first: first, columns: columns)
+            case .cards(let range, let first): classCards(range: range, first: first)
             }
             Spacer(minLength: 0)
             HStack {
@@ -177,10 +185,7 @@ struct QuizReportPageView: View {
                     tile("\(report.attempts)", "作答次数", icon: "pencil.and.list.clipboard", tint: Ink.ink)
                     tile("\(report.right)/\(report.total)", "答对小题", icon: "checkmark.circle", tint: Ink.rate(report.rate))
                 }
-                HStack(spacing: 10) {
-                    tile(seconds(report.averageSeconds), "平均用时", icon: "timer", tint: Ink.teal)
-                    tile("\(report.students.reduce(0) { $0 + $1.score })", "获得积分", icon: "star.circle", tint: Ink.teal)
-                }
+                tile(seconds(report.averageSeconds), "平均用时", icon: "timer", tint: Ink.teal)
             }
         }
         card {
@@ -227,13 +232,13 @@ struct QuizReportPageView: View {
         }
         if !report.words.isEmpty {
             card {
-                section("易错单词（\(report.words.count)）", icon: "character.book.closed.fill")
+                section("易错题（\(report.words.count)）", icon: "character.book.closed.fill")
                 FlowRow(spacing: 6) {
                     ForEach(Array(report.words.prefix(20).enumerated()), id: \.offset) { _, w in
                         wordChip(w.word, meaning: w.meaning, count: w.wrong, of: w.asked, said: w.commonWrong.flatMap { $0 == "答错" ? nil : "常说成 \($0)" })
                     }
                 }
-                if report.words.count > 20 { Text("另有 \(report.words.count - 20) 个，见各人错词本").font(.system(size: 8.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted) }
+                if report.words.count > 20 { Text("另有 \(report.words.count - 20) 个，见各人错题记录").font(.system(size: 8.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted) }
             }
         }
     }
@@ -250,7 +255,6 @@ struct QuizReportPageView: View {
                         tile("\(s.right)/\(s.total)", "答对小题", icon: "checkmark.circle", tint: Ink.rate(s.rate))
                         tile(seconds(s.averageSeconds), s.overtime > 0 ? "平均用时 · 超时\(s.overtime)次" : "平均用时", icon: "timer", tint: Ink.teal)
                     }
-                    tile("+\(s.score)", "获得积分", icon: "star.circle", tint: Ink.teal)
                 }
             }
             HStack(alignment: .top, spacing: 10) {
@@ -264,9 +268,9 @@ struct QuizReportPageView: View {
         if first, !s.wrongWords.isEmpty {
             card {
                 HStack {
-                    section("错词本（\(s.wrongWords.count)）", icon: "character.book.closed.fill")
+                    section("错题记录（\(s.wrongWords.count)）", icon: "character.book.closed.fill")
                     Spacer()
-                    Text("单词题 \(s.wordsAsked) 个 · 答错 \(s.wrongWords.reduce(0) { $0 + $1.count }) 次").font(.system(size: 8.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted)
+                    Text("考察 \(s.wordsAsked) 次 · 答错 \(s.wrongWords.reduce(0) { $0 + $1.count }) 次").font(.system(size: 8.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted)
                 }
                 FlowRow(spacing: 6) {
                     ForEach(Array(s.wrongWords.prefix(18).enumerated()), id: \.offset) { _, w in
@@ -352,7 +356,7 @@ struct QuizReportPageView: View {
     @ViewBuilder private func words(_ s: QuizReport.Student, index: Int, range: Range<Int>, first: Bool) -> some View {
         let v = s.vocabulary
         let count = { (st: QuizReport.VocabItem.Status) in v.filter { $0.status == st }.count }
-        banner(s.name + " · 单词表" + (first ? "" : "（续）"), "闪卡共 \(v.count) 张（公用 + 专属）· 答对 \(count(.right)) · 已改正 \(count(.corrected)) · 答错 \(count(.wrong)) · 未考 \(count(.untested))",
+        banner(s.name + " · 闪卡掌握表" + (first ? "" : "（续）"), "闪卡共 \(v.count) 张（公用 + 专属）· 答对 \(count(.right)) · 已改正 \(count(.corrected)) · 答错 \(count(.wrong)) · 未单独考察 \(count(.untested))",
                icon: "character.book.closed.fill", avatar: (quizInitial(s.name), Ink.avatars[index % Ink.avatars.count]))
         card {
             let items = Array(v[range])
@@ -366,7 +370,7 @@ struct QuizReportPageView: View {
             }
         }
         HStack(spacing: 12) {
-            legend("checkmark", "答对", Ink.good); legend("arrow.uturn.backward", "已改正", Ink.teal); legend("xmark", "答错", Ink.bad); legend("circle.dashed", "未考", Ink.muted)
+            legend("checkmark", "答对", Ink.good); legend("arrow.uturn.backward", "已改正", Ink.teal); legend("xmark", "答错", Ink.bad); legend("circle.dashed", "未单独考察", Ink.muted)
         }.font(.system(size: 8.5, weight: .semibold, design: .rounded))
     }
     private func vocabChip(_ w: QuizReport.VocabItem) -> some View {
@@ -389,39 +393,77 @@ struct QuizReportPageView: View {
         HStack(spacing: 3) { Image(systemName: icon).foregroundStyle(tint); Text(text).foregroundStyle(Ink.muted) }
     }
 
-    @ViewBuilder private func history(_ s: QuizReport.Student, index: Int, range: Range<Int>, first: Bool) -> some View {
+    @ViewBuilder private func history(_ s: QuizReport.Student, index: Int, range: Range<Int>, first: Bool, columns: Int) -> some View {
         banner(s.name + " · 作答记录" + (first ? "" : "（续）"), "共 \(s.lines.count) 次作答 · 第 \(range.lowerBound + 1)–\(range.upperBound) 条，按时间先后",
                icon: "list.bullet.clipboard", avatar: (quizInitial(s.name), Ink.avatars[index % Ink.avatars.count]))
         card {
-            ForEach(Array(range), id: \.self) { k in
-                let line = s.lines[k], a = line.attempt
-                let right = a.rightCount == a.correct.count
-                HStack(alignment: .top, spacing: 8) {
-                    Text("\(k + 1)").font(.system(size: 8, weight: .heavy, design: .rounded)).foregroundStyle(Ink.muted).frame(width: 16, alignment: .trailing)
-                    Image(systemName: right ? "checkmark.circle.fill" : "xmark.circle.fill").font(.system(size: 11)).foregroundStyle(right ? Ink.good : Ink.bad)
-                    VStack(alignment: .leading, spacing: 3) {
-                        HStack(spacing: 6) {
-                            Text(line.summary).font(.system(size: 9.5, weight: .bold, design: .rounded)).foregroundStyle(Ink.ink).lineLimit(1)
-                            Spacer(minLength: 4)
-                            Text(historyTag(a) + " · " + timeText(a.at)).font(.system(size: 7.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted)
-                        }
-                        HStack(spacing: 5) {
-                            ForEach(Array(line.answers.prefix(4).enumerated()), id: \.offset) { _, ans in
-                                if ans.right { chip(line.answers.count > 1 ? ans.label : "答", ans.said, Ink.good, strike: false) }
-                                else {
-                                    let none = QuizReport.nonAnswers.contains(ans.said)
-                                    chip(line.answers.count > 1 ? ans.label : (none ? "结果" : "说的"), ans.said, Ink.bad, strike: !none)
-                                    Text("→ " + ans.expected).font(.system(size: 8.5, weight: .bold, design: .rounded)).foregroundStyle(Ink.good).lineLimit(1)
-                                }
-                            }
-                            Spacer(minLength: 0)
-                            if a.score > 0 { Text("+\(a.score) 积分").font(.system(size: 8, weight: .bold, design: .rounded)).foregroundStyle(Ink.teal) }
-                        }
-                    }
+            let per = QuizReportPage.rowsPerColumn
+            HStack(alignment: .top, spacing: 12) {
+                ForEach(0..<columns, id: \.self) { c in
+                    let lo = range.lowerBound + c * per, hi = min(range.upperBound, lo + per)
+                    VStack(alignment: .leading, spacing: 0) {
+                        if lo < hi { ForEach(lo..<hi, id: \.self) { k in historyRow(s.lines[k], number: k + 1, wide: columns == 1) } }
+                    }.frame(maxWidth: .infinity, alignment: .topLeading)
                 }
-                if k < range.upperBound - 1 { Divider().overlay(Ink.line) }
             }
         }
+    }
+    /// One answer on one line: number, ✓/✗, the question, what was said (→ the right answer), kind and time.
+    private func historyRow(_ line: QuizReport.Line, number: Int, wide: Bool) -> some View {
+        let a = line.attempt, right = a.rightCount == a.correct.count
+        let wrong = line.answers.first { !$0.right }
+        return HStack(spacing: 4) {
+            Text("\(number)").font(.system(size: 7, weight: .heavy, design: .rounded)).foregroundStyle(Ink.muted).frame(width: 14, alignment: .trailing)
+            Image(systemName: right ? "checkmark.circle.fill" : "xmark.circle.fill").font(.system(size: 8)).foregroundStyle(right ? Ink.good : Ink.bad)
+            Text(line.summary).font(.system(size: 8, weight: .bold, design: .rounded)).foregroundStyle(Ink.ink).lineLimit(1).layoutPriority(0)
+            Spacer(minLength: 3)
+            Group {
+                if let wrong {
+                    let none = QuizReport.nonAnswers.contains(wrong.said)
+                    Text(wrong.said).strikethrough(!none, color: Ink.bad.opacity(0.6)).foregroundStyle(Ink.bad)
+                    Text("→ " + wrong.expected).foregroundStyle(Ink.good)
+                } else {
+                    Text(line.answers.map(\.said).joined(separator: " / ")).foregroundStyle(Ink.good)
+                }
+            }.font(.system(size: 7.5, weight: .heavy, design: .rounded)).lineLimit(1).layoutPriority(1)
+            Text((wide ? historyTag(a) + " · " : "") + timeText(a.at)).font(.system(size: 6.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted).lineLimit(1).fixedSize()
+        }
+        .frame(height: 17)
+        .overlay(alignment: .bottom) { Rectangle().fill(Ink.line).frame(height: 0.5) }
+    }
+
+    // MARK: Class flash-card list
+
+    @ViewBuilder private func classCards(range: Range<Int>, first: Bool) -> some View {
+        let cards = report.cards, asked = cards.filter { $0.asked > 0 }.count
+        banner("闪卡总表" + (first ? "" : "（续）"), "本课闪卡 \(cards.count) 张（公用 + 全部专属）· 已考察 \(asked) · 未单独考察 \(cards.count - asked)", icon: "rectangle.stack.fill")
+        card {
+            let items = Array(cards[range])
+            VStack(alignment: .leading, spacing: 6) {
+                ForEach(Array(stride(from: 0, to: items.count, by: 3)), id: \.self) { row in
+                    HStack(spacing: 6) {
+                        ForEach(row..<min(row + 3, items.count), id: \.self) { k in cardChip(items[k]) }
+                        if items.count - row < 3 { ForEach(0..<(3 - (items.count - row)), id: \.self) { _ in Color.clear.frame(maxWidth: .infinity, maxHeight: 1) } }
+                    }
+                }
+            }
+        }
+        Text("每张卡：全班答对次数 / 作答次数；红字为答错过的同学。").font(.system(size: 8.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted)
+    }
+    private func cardChip(_ c: QuizReport.CardStat) -> some View {
+        let rate = c.asked == 0 ? 0 : Double(c.right) / Double(c.asked)
+        let tint = c.asked == 0 ? Ink.muted : Ink.rate(rate)
+        return VStack(alignment: .leading, spacing: 1) {
+            HStack(spacing: 4) {
+                Text(c.word).font(.system(size: 9.5, weight: .heavy, design: .rounded)).foregroundStyle(Ink.ink).lineLimit(1).minimumScaleFactor(0.6)
+                Spacer(minLength: 2)
+                Text(c.asked == 0 ? "未单独考察" : "\(c.right)/\(c.asked)").font(.system(size: 7.5, weight: .heavy, design: .rounded)).foregroundStyle(tint)
+            }
+            if let m = c.meaning { Text(m).font(.system(size: 7.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted).lineLimit(1) }
+            if !c.missedBy.isEmpty { Text(c.missedBy.joined(separator: "、")).font(.system(size: 7, weight: .bold, design: .rounded)).foregroundStyle(Ink.bad).lineLimit(1) }
+        }
+        .padding(.horizontal, 7).padding(.vertical, 4).frame(maxWidth: .infinity, minHeight: 34, alignment: .topLeading)
+        .background(RoundedRectangle(cornerRadius: 7).fill(tint.opacity(c.asked == 0 ? 0.06 : 0.1)))
     }
     private func historyTag(_ a: QuizAttempt) -> String {
         if a.skipped == true { return "未作答" }
@@ -489,8 +531,9 @@ struct QuizReportPageView: View {
             switch p {
             case .overview: return "全班"
             case .student(let i, _, let first): return report.students[i].name + (first ? "" : "-续")
-            case .words(let i, _, let first): return report.students[i].name + "-单词表" + (first ? "" : "-续")
-            case .history(let i, _, let first): return report.students[i].name + "-作答记录" + (first ? "" : "-续")
+            case .words(let i, _, let first): return report.students[i].name + "-闪卡掌握表" + (first ? "" : "-续")
+            case .history(let i, _, let first, _): return report.students[i].name + "-作答记录" + (first ? "" : "-续")
+            case .cards(_, let first): return "闪卡总表" + (first ? "" : "-续")
             }
         }
     }

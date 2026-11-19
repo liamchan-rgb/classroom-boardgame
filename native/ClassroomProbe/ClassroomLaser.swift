@@ -164,6 +164,11 @@ final class LaserPanelCatcher: UIView {
         let pan = UIPanGestureRecognizer(target: self, action: #selector(drag(_:))); pan.maximumNumberOfTouches = 1
         addGestureRecognizer(pan)
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tap(_:))))
+        // The same dot on the teacher's panel (the public screen draws it over its copy of the panel).
+        let dot = UIHostingController(rootView: LaserLayer(laser: laser)).view!
+        dot.backgroundColor = .clear; dot.isUserInteractionEnabled = false
+        dot.frame = bounds; dot.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        addSubview(dot)
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     private var panelSize: CGSize { superview?.bounds.size ?? bounds.size }

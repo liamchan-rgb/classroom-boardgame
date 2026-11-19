@@ -48,6 +48,14 @@ public struct QuizReport {
         public var status: Status
         public var tries: Int
     }
+    /// One flash card of the course across the class: how often it was asked and answered right, who missed it.
+    public struct CardStat: Equatable {
+        public var word: String
+        public var meaning: String?
+        public var asked: Int
+        public var right: Int
+        public var missedBy: [String]
+    }
     /// Said instead of an answer: never listed as "常说成 …".
     public static let nonAnswers: Set<String> = ["不会", "未作答", "答错"]
     public struct Tally: Equatable {
@@ -115,6 +123,8 @@ public struct QuizReport {
     public var words: [WordStat] = []
     /// Hardest first.
     public var questions: [QuestionStat]
+    /// Every flash card of the course, in bank order (asked or not).
+    public var cards: [CardStat] = []
     public var attempts: Int { students.reduce(0) { $0 + $1.lines.count } }
     public var right: Int { students.reduce(0) { $0 + $1.right } }
     public var total: Int { students.reduce(0) { $0 + $1.total } }
@@ -127,7 +137,7 @@ public struct QuizReport {
 
     /// `order`: player ids in seat order (others follow by id); `names`: current names, else the name at answer time.
     /// `decks`: per player, the bank indices of their flash cards (listed in the report even when never asked).
-    public init(log: [QuizAttempt], bank: [QuizQuestion], order: [String] = [], names: [String: String] = [:], decks: [String: [Int]] = [:]) {
+    public init(log: [QuizAttempt], bank: [QuizQuestion], order: [String] = [], names: [String: String] = [:], decks: [String: [Int]] = [:], cards: [Int] = []) {
         func line(_ a: QuizAttempt) -> Line? {
             guard bank.indices.contains(a.question) else { return nil }
             let q = bank[a.question], parts = q.parts
@@ -213,6 +223,17 @@ public struct QuizReport {
         words = wordOrder.compactMap { wordStats[$0] }.filter { $0.wrong > 0 }.enumerated()
             .sorted { $0.element.wrong == $1.element.wrong ? $0.offset < $1.offset : $0.element.wrong > $1.element.wrong }.map(\.element)
         questions = stats.values.sorted { $0.rate == $1.rate ? $0.index < $1.index : $0.rate < $1.rate }
+        self.cards = cards.compactMap { qi in
+            guard bank.indices.contains(qi), let w = Self.word(bank[qi], part: 0) else { return nil }
+            let tries = lines.filter { $0.attempt.question == qi }
+            let right = tries.filter { $0.attempt.rightCount == $0.attempt.correct.count }.count
+            var missed: [String] = []
+            for t in tries where t.attempt.rightCount < t.attempt.correct.count {
+                let n = names[t.attempt.player] ?? t.attempt.playerName
+                if !missed.contains(n) { missed.append(n) }
+            }
+            return CardStat(word: w.word, meaning: w.meaning, asked: tries.count, right: right, missedBy: missed)
+        }
     }
 
     /// The word an answer tests: a flash card (the side in Latin letters is the word, the other its meaning), a blank
@@ -246,6 +267,7 @@ public extension MeadowCampaignSession {
     var quizReport: QuizReport {
         let players = engine.state.players
         return QuizReport(log: quizLog, bank: quizBank, order: players.map(\.id), names: Dictionary(uniqueKeysWithValues: players.map { ($0.id, $0.shortName) }),
-                          decks: Dictionary(uniqueKeysWithValues: players.filter { !$0.host }.map { ($0.id, practiceDeck(for: $0.id)) }))
+                          decks: Dictionary(uniqueKeysWithValues: players.filter { !$0.host }.map { ($0.id, practiceDeck(for: $0.id)) }),
+                          cards: courseIndices.filter { quizBank[$0].type == .flashcard })
     }
 }

@@ -31,8 +31,9 @@ struct PublicSurface:View {
                 }.allowsHitTesting(false)
             }
         }.background(.black)
-        // Inventory / shop: the teacher's actual screen, copied live.
-        .overlay{if !teacherPreview && game.surface != .book {MeadowPanelMirror(game:game).ignoresSafeArea()}}
+        // Inventory / shop / prize wheel: the teacher's actual screen, copied live (it only shows while one is open,
+        // so it stays on over the picture book too: the wheel is opened from the book tab as well).
+        .overlay{if !teacherPreview {MeadowPanelMirror(game:game).ignoresSafeArea()}}
         .overlay{ClassroomTVOverlays(timer:game.classTimer,overlays:game.overlays,game:game)}
     }
 }

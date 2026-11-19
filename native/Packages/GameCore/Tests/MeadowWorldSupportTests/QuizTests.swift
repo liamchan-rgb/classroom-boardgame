@@ -258,6 +258,10 @@ final class QuizTests:XCTestCase {
         XCTAssertEqual(p1.vocabulary.map(\.word),["apple","pear","cat"])
         XCTAssertEqual(p1.vocabulary.map(\.status),[.corrected,.untested,.untested])
         XCTAssertEqual(p2.vocabulary.map(\.word),["cat"])  // 小红 has no portion 2 here, only the shared card
+        // The class list: every flash card of the course, asked or not.
+        XCTAssertEqual(r.cards.map(\.word),["apple","pear","cat"])
+        XCTAssertEqual(r.cards[0].asked,2);XCTAssertEqual(r.cards[0].right,1);XCTAssertEqual(r.cards[0].missedBy,["小明"])
+        XCTAssertEqual(r.cards[1].asked,0)
     }
     func testReportListsWrongWords()throws {
         let bank=try QuizBankParser.parse(Data(mixed.utf8))
