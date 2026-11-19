@@ -36,6 +36,8 @@ final class KeyHostingController<Content: View>: UIHostingController<Content> {
     @Published var picks: [Int?]
     @Published var unknown: [Bool]
     @Published var texts: [String]
+    /// Called (on the next turn) once every item has an answer picked: the challenge submits straight away.
+    var onComplete: (() -> Void)?
     init(_ question: QuizQuestion) {
         self.question = question
         let n = question.parts.count
@@ -48,11 +50,21 @@ final class KeyHostingController<Content: View>: UIHostingController<Content> {
         KeyHostingController<EmptyView>.endEditing()
         if let option { picks[i] = picks[i] == option && !unknown[i] ? nil : option; unknown[i] = false; texts[i] = "" }
         else { unknown[i].toggle(); if unknown[i] { picks[i] = nil; texts[i] = "" } }
+        checkComplete()
+    }
+    private func checkComplete() {
+        guard let onComplete, answered == question.parts.count else { return }
+        DispatchQueue.main.async { onComplete() }
     }
     func undo() { if let i = question.parts.indices.last(where: done) { picks[i] = nil; unknown[i] = false; texts[i] = "" } }
     /// A letter (option) or "0" (不会) for the first open item. Returns whether it was used.
     func key(_ token: String) -> Bool {
         if token == "⌫" { undo(); return true }
+        let used = apply(token)
+        if used { checkComplete() }
+        return used
+    }
+    private func apply(_ token: String) -> Bool {
         // Flash cards: the teacher only says right (D, 对) or wrong (C, 错).
         if question.type == .flashcard {
             guard let i = current ?? 0 as Int?, question.parts.indices.contains(i) else { return false }

@@ -39,6 +39,9 @@ final class MeadowTeacherCoordinator:ObservableObject {
         screen.modalPresentationStyle = .formSheet;screen.preferredContentSize=CGSize(width:720,height:420)
         presenter.present(screen,animated:true)
     }
+    /// Laser pointer over the teacher's preview, shown on the TV (L).
+    let laser=LaserPointer()
+    func toggleLaser(){laser.on.toggle();message=laser.on ? "激光笔：在预览画面上移动指针（再按 L 关闭）":"激光笔已关闭";revision += 1}
     func toggleScoreboard(){withAnimation(.spring(response:0.35,dampingFraction:0.8)){overlays.scoreboard.toggle()}}
     /// Players ↔ teams; also shows the board if it was hidden.
     func toggleTeamScores(){withAnimation(.spring(response:0.35,dampingFraction:0.8)){overlays.teamScores.toggle();overlays.scoreboard=true}}
@@ -163,7 +166,10 @@ final class MeadowTeacherCoordinator:ObservableObject {
         quizToken += 1
         let q=c.quizBank[i]
         quiz=LiveQuiz(token:quizToken,index:i,question:q,mode:.challenge,player:model.player,playerName:model.name,place:"专属挑战",node:nil,start:Date(),deadline:model.end)
-        model.draft=QuizAnswerDraft(q)
+        let draft=QuizAnswerDraft(q)
+        // The answer is picked: reveal and pay straight away (no separate submit).
+        draft.onComplete={[weak self] in self?.challengeSubmit()}
+        model.draft=draft
     }
     private func challengeSubmit(){
         guard let c=campaign,let model=challenge,model.phase == .question,var live=quiz,live.attempt==nil,let draft=model.draft else{return}
@@ -271,8 +277,10 @@ final class MeadowTeacherCoordinator:ObservableObject {
                 let a=try c.recordQuiz(actor:id,question:live.index,picks:r.picks,texts:r.texts,seconds:Date().timeIntervalSince(live.start),free:true,manualCoins:coins,shared:true)
                 model.sent.append((a.playerName,right,coins))
             }
-            model.players=[];model.note=nil;draft.reset()
+            model.players=[];model.note=nil
             renderer?.classroomRefresh();revision += 1
+            // Sent: the TV reveals the answer as the coins go out.
+            endClassQuiz()
         }catch{model.note=error.localizedDescription}
     }
     /// Ends the class question: the TV reveals the right answer and who got it.
@@ -286,11 +294,11 @@ final class MeadowTeacherCoordinator:ObservableObject {
         quiz=live;classModel=nil
     }
 
-    /// K: endless flash-card practice for the selected student.
-    func openPractice(){
+    /// K: endless flash-card practice for the selected student (⇧K / A in the panel: the whole class).
+    func openPractice(classwide:Bool=false){
         if campaign == nil {openQuiz();return}
         guard let c=campaign,quiz == nil,quizPanel == nil,presentationHost != nil else{return}
-        let model=PracticeModel(player:c.selectedPlayerID)
+        let model=PracticeModel(player:c.selectedPlayerID,classwide:classwide)
         practiceModel=model
         let panel=KeyHostingController(rootView:PracticePanel(game:self,model:model,onClose:{[weak self] in self?.endPractice()}))
         panel.onKey={[weak self] key in
@@ -299,8 +307,13 @@ final class MeadowTeacherCoordinator:ObservableObject {
             case "⎋":self.endPractice()
             case "c","0":self.practiceAnswer(nil)
             case "d":if let q=self.quiz?.question,q.type == .flashcard {self.practiceAnswer(q.parts[0].answer)}
+            case "a":self.setPracticeClasswide(!(self.practiceModel?.classwide ?? false))
+            case " ":if self.practiceModel?.classwide == true {self.skipClassCard()} else {return false}
             default:
-                if let n=Int(key),let id=self.player(forSeat:n) {self.switchPractice(to:id);return true}
+                if let n=Int(key),let id=self.player(forSeat:n) {
+                    if self.practiceModel?.classwide == true {self.togglePracticePlayer(id)} else {self.switchPractice(to:id)}
+                    return true
+                }
                 return false
             }
             return true
@@ -310,9 +323,36 @@ final class MeadowTeacherCoordinator:ObservableObject {
     }
     private func nextPracticeCard(after last:Int?){
         guard let c=campaign,let model=practiceModel else{return}
+        if model.classwide {
+            guard let i=c.classFlashCard(after:last) else{withAnimation{quiz=nil};return}
+            quizToken += 1;model.waiting=false;model.players=[];model.note=nil
+            quiz=LiveQuiz(token:quizToken,index:i,question:c.quizBank[i],mode:.practice,player:"",playerName:"全班",place:"全班闪卡",node:nil,start:Date())
+            return
+        }
         guard let i=c.practiceCard(for:model.player,after:last),let unit=c.engine.state.units[model.player] else{withAnimation{quiz=nil};return}
         quizToken += 1;model.waiting=false
         quiz=LiveQuiz(token:quizToken,index:i,question:c.quizBank[i],mode:.practice,player:model.player,playerName:unit.shortName,place:"闪卡练习",node:nil,start:Date())
+    }
+    func setPracticeClasswide(_ on:Bool){
+        guard let model=practiceModel,!model.waiting,model.classwide != on else{return}
+        model.classwide=on;model.right=0;model.total=0;model.players=[];model.note=nil
+        nextPracticeCard(after:nil)
+    }
+    func togglePracticePlayer(_ id:String){
+        guard let model=practiceModel,model.classwide,!model.waiting else{return}
+        if model.players.contains(id){model.players.remove(id)}else{model.players.insert(id)}
+        model.note=nil
+    }
+    /// Whole class: nobody to record, show the back and go on.
+    private func skipClassCard(){
+        guard var live=quiz,live.mode == .practice,live.attempt==nil,let model=practiceModel,model.classwide,!model.waiting else{return}
+        model.waiting=true
+        live.attempt=classReveal(live.question,index:live.index);live.headline="背面";live.hold=1.3;quiz=live
+    }
+    /// A stand-in attempt that shows the right answers (class reveals).
+    private func classReveal(_ q:QuizQuestion,index:Int)->QuizAttempt {
+        let parts=q.parts
+        return QuizAttempt(player:"",playerName:"全班",node:-1,question:index,picks:parts.map{$0.answer},texts:parts.map{_ in nil},correct:parts.map{_ in true},seconds:0,limit:q.timeLimit,at:Date().timeIntervalSince1970)
     }
     func switchPractice(to id:String){
         guard let model=practiceModel,!model.waiting else{return}
@@ -321,6 +361,24 @@ final class MeadowTeacherCoordinator:ObservableObject {
     }
     func practiceAnswer(_ option:Int?){
         guard let c=campaign,var live=quiz,live.mode == .practice,live.attempt==nil,let model=practiceModel,!model.waiting else{return}
+        if model.classwide {
+            guard !model.players.isEmpty else{model.note="先按 1–7 选回答的同学。";return}
+            let right=option != nil
+            do{
+                var names:[String]=[]
+                for id in c.engine.state.players.map(\.id) where model.players.contains(id) {
+                    let a=try c.recordQuiz(actor:id,question:live.index,picks:[option],seconds:Date().timeIntervalSince(live.start),free:true,shared:true,practice:true)
+                    names.append(a.playerName)
+                }
+                model.total += names.count;if right {model.right += names.count}
+                model.waiting=true
+                live.attempt=classReveal(live.question,index:live.index)
+                live.headline=(right ? "答对：" : "答错：")+names.joined(separator:"、")
+                live.hold=1.6;quiz=live
+                revision += 1
+            }catch{model.note=error.localizedDescription}
+            return
+        }
         do{
             let a=try c.recordQuiz(actor:live.player,question:live.index,picks:[option],seconds:Date().timeIntervalSince(live.start),free:true,practice:true)
             model.total += 1;if a.correct.allSatisfy({$0}){model.right += 1}

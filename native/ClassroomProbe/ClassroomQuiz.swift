@@ -223,7 +223,8 @@ struct ChallengePanel: View {
                     ScrollView { QuizAnswerRows(draft: draft) }
                     HStack {
                         Spacer()
-                        Button { onSubmit() } label: { Label("提交 (⏎)", systemImage: "checkmark.seal.fill") }.buttonStyle(GlassIconButtonStyle(prominent: true))
+                        Text("选好答案即揭晓并发奖").font(.caption).foregroundStyle(GameTheme.muted)
+                        Button { onSubmit() } label: { Label("提交 (⏎)", systemImage: "checkmark.seal.fill") }.buttonStyle(GlassIconButtonStyle())
                     }
                 }
             case .finished:
@@ -232,7 +233,7 @@ struct ChallengePanel: View {
                     Text("答对 \(model.right)/\(model.answered) 题 · 获得 \(model.coins) 金币、\(model.score) 积分").font(.title3)
                 }
             }
-            Text("键盘：1/2/3 选难度；作答时 D 对 C 错（闪卡）或 A–H 选项、0 不会，回车提交；Esc 结束。时间到时正在答的这题不计。").font(.caption).foregroundStyle(GameTheme.muted)
+            Text("键盘：1/2/3 选难度；作答时 D 对 C 错（闪卡）或 A–H 选项、0 不会，选好即揭晓答案并发奖（填了“其他答案”时按回车）；Esc 结束。时间到时正在答的这题不计。").font(.caption).foregroundStyle(GameTheme.muted)
         }
         .padding(22).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(GlassBackdrop())
     }
@@ -322,8 +323,8 @@ struct QuizPlayerChips: View {
 // MARK: - Class question (shared bank, the teacher hands out rewards)
 
 /// One shared question to the whole class. Pick who answered (1–7, several at once), what they said (A–H; 0 不会),
-/// ⏎ sends: right → the reward and a "答对" record, wrong → the participation prize and "答错". The panel stays for
-/// the next group; Esc ends it and reveals the answer on the TV.
+/// ⏎ sends: right → the reward and a "答对" record, wrong → the participation prize and "答错"; the TV reveals the
+/// answer at the same moment. Esc reveals without sending.
 @MainActor final class ClassQuizModel: ObservableObject {
     @Published var players = Set<String>()
     @Published var sent: [(name: String, right: Bool, coins: Int)] = []
@@ -371,15 +372,15 @@ struct ClassQuizPanel: View {
             }
             if let note = model.note { Text(note).font(.caption).foregroundStyle(.red) }
             HStack {
-                Button { onEnd() } label: { Label("结束并揭晓 (Esc)", systemImage: "eye") }.buttonStyle(GlassIconButtonStyle())
+                Button { onEnd() } label: { Label("只揭晓 (Esc)", systemImage: "eye") }.buttonStyle(GlassIconButtonStyle())
                 Spacer()
                 let right = draft.allRight
                 Text(model.players.isEmpty ? "先选人" : "\(model.players.count) 人 · \(right ? "答对 +\(reward.amount(right: true))" : "答错 · 参与奖 +\(reward.amount(right: false))")")
                     .font(.callout.bold()).foregroundStyle(right ? Color.green : GameTheme.muted)
-                Button { onSend() } label: { Label("发送 (⏎)", systemImage: "paperplane.fill") }.buttonStyle(GlassIconButtonStyle(prominent: true))
+                Button { onSend() } label: { Label("揭晓并发奖 (⏎)", systemImage: "paperplane.fill") }.buttonStyle(GlassIconButtonStyle(prominent: true))
                     .disabled(model.players.isEmpty || draft.answered == 0)
             }
-            Text("键盘：1–7 选人，A–H 选答案，0 不会，⌫ 撤回，回车发送并记录；发完可接着选下一组。").font(.caption).foregroundStyle(GameTheme.muted)
+            Text("键盘：1–7 选人，A–H 选答案，0 不会，⌫ 撤回，回车揭晓答案、同时发奖并记录；Esc 只揭晓不发奖。").font(.caption).foregroundStyle(GameTheme.muted)
         }.padding(22).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(GlassBackdrop())
     }
     private var marks: [String: String] {
@@ -396,11 +397,16 @@ struct ClassQuizPanel: View {
     @Published var right = 0
     @Published var total = 0
     @Published var waiting = false
-    init(player: String) { self.player = player }
+    /// The whole class answers the same card; the teacher picks who answered, then D / C.
+    @Published var classwide = false
+    @Published var players = Set<String>()
+    @Published var note: String?
+    init(player: String, classwide: Bool = false) { self.player = player; self.classwide = classwide }
 }
 
-/// K from anywhere: flash cards for one student, one after another. A–H records what they said and moves on; 0 不会;
-/// 1–7 switches student; Esc ends. Recorded for the report (错词), no reward.
+/// K from anywhere: flash cards for one student, one after another. D right / C wrong records it and moves on;
+/// 1–7 switches student; Esc ends. Recorded for the report (错词), no reward. A switches to the whole class: one card
+/// for everybody, 1–7 picks who answered (several at once), D / C records it for them, reveals and moves on.
 struct PracticePanel: View {
     @ObservedObject var game: MeadowTeacherCoordinator
     @ObservedObject var model: PracticeModel
@@ -409,11 +415,20 @@ struct PracticePanel: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Label("闪卡练习", systemImage: "rectangle.on.rectangle.angled").font(.title2.bold())
+                Picker("", selection: Binding(get: { model.classwide }, set: { game.setPracticeClasswide($0) })) {
+                    Text("个人").tag(false); Text("全班 (A)").tag(true)
+                }.pickerStyle(.segmented).frame(width: 170)
                 Text("本轮 \(model.right)/\(model.total)").font(.callout.bold()).foregroundStyle(GameTheme.muted)
                 Spacer()
                 Button { onClose() } label: { Label("结束 (Esc)", systemImage: "xmark.circle") }.buttonStyle(GlassIconButtonStyle())
             }
-            QuizPlayerChips(game: game, selected: [model.player]) { id in game.switchPractice(to: id) }
+            if model.classwide {
+                Text("谁回答了（1–7，可多选）").font(.headline)
+                QuizPlayerChips(game: game, selected: model.players) { id in game.togglePracticePlayer(id) }
+            } else {
+                QuizPlayerChips(game: game, selected: [model.player]) { id in game.switchPractice(to: id) }
+            }
+            if let note = model.note { Text(note).font(.caption.bold()).foregroundStyle(.orange) }
             if let live = game.quiz, live.mode == .practice {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("正面：\(live.question.prompt)").font(.title2.bold())
@@ -431,9 +446,11 @@ struct PracticePanel: View {
                     }
                 }
             } else {
-                Label("题库里没有这位同学能练的闪卡。", systemImage: "tray").foregroundStyle(GameTheme.muted)
+                Label(model.classwide ? "当前课程没有闪卡。" : "题库里没有这位同学能练的闪卡。", systemImage: "tray").foregroundStyle(GameTheme.muted)
             }
-            Text("键盘：D 对、C 错，记录后自动下一张；1–7 换人，Esc 结束。只记录、不发奖励，错词进报告。").font(.caption).foregroundStyle(GameTheme.muted)
+            Text(model.classwide
+                 ? "键盘：1–7 选回答的同学，D 对、C 错：记录、揭晓背面并自动下一张；空格跳过这张；A 切回个人，Esc 结束。只记录、不发奖励，错词进报告。"
+                 : "键盘：D 对、C 错，记录后自动下一张；1–7 换人，A 切到全班，Esc 结束。只记录、不发奖励，错词进报告。").font(.caption).foregroundStyle(GameTheme.muted)
         }.padding(22).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(GlassBackdrop())
     }
 }

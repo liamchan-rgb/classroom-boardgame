@@ -268,11 +268,18 @@ public extension MeadowCampaignSession {
         for q in quizBank where inCourse(q) { if let p=q.portion { if counts[p]==nil {order.append(p)}; counts[p,default:0]+=1 } }
         return order.map{($0,counts[$0]!)}
     }
-    /// Whose portion it is: the teacher's choice, else portion "n" goes to student n (p3 for "3"); nil = nobody.
+    /// Whose portion it is: the teacher's choice, else portion "n" goes to student n (p3 for "3"). With fewer
+    /// students than portions, the extra portions go round the class (3 students: portion 4 → the 1st, 5 → the 2nd).
+    /// nil = nobody.
     func portionOwner(_ portion:String)->String? {
         if let set=snapshot.quizPortions?[portion] {return set.isEmpty ? nil:set}
         let id="p"+portion
-        return engine.state.units[id]?.kind == .player ? id:nil
+        if engine.state.units[id]?.kind == .player {return id}
+        let students=engine.state.players.filter{!$0.host}
+        guard let n=Int(portion),n>0,!students.isEmpty else{return nil}
+        // Only spread portions past the last student number; a gap in the middle (student 3 left) stays empty.
+        guard n>Int(students.last!.id.dropFirst()) ?? 0 else{return nil}
+        return students[(n-1)%students.count].id
     }
     var quizLog:[QuizAttempt] {engine.state.quizLog ?? []}
     /// Whether a question belongs to the current course.
@@ -371,6 +378,19 @@ public extension MeadowCampaignSession {
             func rank(_ i:Int)->Int {lastSeen[i]==nil ? 0:(lastRight[i]==false ? 1:2)}
             return rank(a)==rank(b) ? (lastSeen[a] ?? -1,a)<(lastSeen[b] ?? -1,b):rank(a)<rank(b)
         }
+        return ordered.first{$0 != last} ?? ordered.first
+    }
+    /// Flash cards for the whole class, endless: the shared flash cards of the course (all of its flash cards when
+    /// it has no shared ones), least recently shown to the class first; never the card just shown.
+    func classFlashCard(after last:Int?=nil)->Int? {
+        let bank=quizBank
+        let all=bank.indices.filter{inCourse(bank[$0]) && bank[$0].type == .flashcard}
+        let shared=all.filter{bank[$0].isShared}
+        let cards=shared.isEmpty ? all:shared
+        guard !cards.isEmpty else{return nil}
+        var lastSeen:[Int:Int]=[:]
+        for (k,a) in quizLog.enumerated() where a.shared == true && a.practice == true {lastSeen[a.question]=k}
+        let ordered=cards.sorted{(lastSeen[$0] ?? -1,$0)<(lastSeen[$1] ?? -1,$1)}
         return ordered.first{$0 != last} ?? ordered.first
     }
     /// Teammates at this quiz node who still have to answer.

@@ -38,6 +38,7 @@ struct MeadowTeacherDashboard:View {
                 Button{game.openQuiz()}label:{Label("答题",systemImage:"questionmark.bubble")}.disabled(game.quiz != nil)
                 Button{game.openClassQuiz()}label:{Label("全班题",systemImage:"person.3.sequence")}.disabled(game.quiz != nil)
                 Button{game.openPractice()}label:{Label("闪卡",systemImage:"rectangle.on.rectangle.angled")}.disabled(game.quiz != nil)
+                LaserButton(laser:game.laser){game.toggleLaser()}
                 ClassroomScoreboardButton(overlays:game.overlays){game.toggleScoreboard()}
                 Button{game.openCharacterStudio()}label:{Label("形象",systemImage:"person.crop.circle.badge.plus")}.disabled(game.busy)
                 Button{game.openPixelCharacterLab()}label:{Label("像素人物",systemImage:"square.grid.3x3.square")}.disabled(game.busy)
@@ -179,6 +180,7 @@ private struct TeacherGamePreview:View {
                     tap:{game.canvasTap($0,selectingNode:selectingNode)},
                     pan:game.canvasPan,zoom:{game.canvasZoom($0,anchor:$1)},hover:game.canvasHover)
             }
+            .overlay{LaserCapture(laser:game.laser)}
             .onAppear{game.previewVisibility(previewID,visible:true)}
             .onDisappear{game.previewVisibility(previewID,visible:false);game.canvasHover(nil)}
     }

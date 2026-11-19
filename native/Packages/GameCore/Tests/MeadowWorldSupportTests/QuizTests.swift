@@ -282,6 +282,45 @@ final class QuizTests:XCTestCase {
         XCTAssertEqual(p.coins,0);XCTAssertEqual(s.engine.state.units["p1"]!.coins,coins)
         XCTAssertNotEqual(s.practiceCard(for:"p1",after:card),card)
     }
+    func testExtraPortionsGoRoundASmallClass()throws {
+        let text=(1...6).map{"类型：闪卡\n份：\($0)\n难度：1\n正面：w\($0)\n背面：词\($0)"}.joined(separator:"\n\n")
+        let bank=try QuizBankParser.parse(Data(text.utf8))
+        var c=MeadowMapConfiguration.suggested(total:10,seed:31827);c.combat=0;c.boss=0;c.reward=0;c.empty=9;c.extraRoads=0
+        let s=try MeadowCampaignSession.new(layout:MeadowMapGenerator.generate(c),studentClasses:Array(repeating:"ranger",count:4),studentNames:["甲","乙","丙","丁"],quizBank:bank)
+        // 4 students, 6 portions: 5 → the 1st, 6 → the 2nd.
+        XCTAssertEqual((1...6).map{s.portionOwner(String($0))},["p1","p2","p3","p4","p1","p2"])
+        XCTAssertEqual(s.challengeLeft(for:"p1"),[2,0,0]);XCTAssertEqual(s.challengeLeft(for:"p3"),[1,0,0])
+        // The teacher can still give an extra portion to someone else.
+        try s.assignQuizPortion("6",to:"p4")
+        XCTAssertEqual(s.challengeLeft(for:"p2"),[1,0,0]);XCTAssertEqual(s.challengeLeft(for:"p4"),[2,0,0])
+    }
+    func testClassFlashCardsPreferSharedAndRotate()throws {
+        let text="""
+        类型：闪卡
+        份：1
+        正面：own
+        背面：自己的
+
+        类型：闪卡
+        正面：cat
+        背面：猫
+
+        类型：闪卡
+        正面：dog
+        背面：狗
+        """
+        let bank=try QuizBankParser.parse(Data(text.utf8))
+        var c=MeadowMapConfiguration.suggested(total:10,seed:31827);c.combat=0;c.boss=0;c.reward=0;c.empty=9;c.extraRoads=0
+        let s=try MeadowCampaignSession.new(layout:MeadowMapGenerator.generate(c),studentNames:["小明","小红"],quizBank:bank)
+        // Only the shared cards go to the class; the least recently shown first, never the same twice in a row.
+        let coins=s.engine.state.players.map(\.coins)
+        let first=try XCTUnwrap(s.classFlashCard());XCTAssertTrue([1,2].contains(first))
+        try s.recordQuiz(actor:"p1",question:first,picks:[0],seconds:2,free:true,shared:true,practice:true)
+        try s.recordQuiz(actor:"p2",question:first,picks:[nil],seconds:2,free:true,shared:true,practice:true)
+        let second=try XCTUnwrap(s.classFlashCard(after:first));XCTAssertEqual(second,3-first)
+        XCTAssertEqual(s.engine.state.players.map(\.coins),coins) // practice: recorded, no reward
+        XCTAssertEqual(s.quizLog.count,2)
+    }
     func testPortionsDefaultToStudentNumbersAndTheTeacherReassigns()throws {
         let text="""
         类型：闪卡
@@ -313,8 +352,8 @@ final class QuizTests:XCTestCase {
         var c=MeadowMapConfiguration.suggested(total:10,seed:31827);c.combat=0;c.boss=0;c.reward=0;c.empty=9;c.extraRoads=0
         let s=try MeadowCampaignSession.new(layout:MeadowMapGenerator.generate(c),studentNames:["小明","小红"],quizBank:bank)
         XCTAssertEqual(s.quizPortions.map(\.name),["1","2","9"]);XCTAssertEqual(s.quizPortions.map(\.count),[1,2,1])
-        // Default: portion n → student n; a portion with no such student belongs to nobody (not dealt as shared).
-        XCTAssertEqual(s.portionOwner("1"),"p1");XCTAssertEqual(s.portionOwner("2"),"p2");XCTAssertNil(s.portionOwner("9"))
+        // Default: portion n → student n; extra portions go round the class (2 students: portion 9 → the 1st).
+        XCTAssertEqual(s.portionOwner("1"),"p1");XCTAssertEqual(s.portionOwner("2"),"p2");XCTAssertEqual(s.portionOwner("9"),"p1")
         XCTAssertEqual(s.personalQuizQuestion(for:"p1"),0);XCTAssertEqual(s.personalQuizQuestion(for:"p2"),1)
         // The teacher swaps: portion 2 to 小明, portion 1 to nobody; saved with the trip.
         try s.assignQuizPortion("2",to:"p1");try s.assignQuizPortion("1",to:nil)

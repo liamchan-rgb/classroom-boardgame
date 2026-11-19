@@ -42,6 +42,7 @@ private struct TeacherBookConsole:View {
                 Button{notesFocused=false;game.openQuiz()}label:{Label("答题",systemImage:"questionmark.bubble")}.disabled(game.quiz != nil)
                 Button{notesFocused=false;game.openClassQuiz()}label:{Label("全班题",systemImage:"person.3.sequence")}.disabled(game.quiz != nil)
                 Button{notesFocused=false;game.openPractice()}label:{Label("闪卡",systemImage:"rectangle.on.rectangle.angled")}.disabled(game.quiz != nil)
+                LaserButton(laser:game.laser){notesFocused=false;game.toggleLaser()}
                 ClassroomScoreboardButton(overlays:game.overlays){game.toggleScoreboard()}
                 Button{notesFocused=false;game.openShortcutEditor()}label:{Label("快捷键",systemImage:"keyboard")}
                 Button{notesFocused=false;game.openGM()}label:{Label("GM",systemImage:"wand.and.stars")}.disabled(game.busy || game.campaign==nil)
@@ -73,6 +74,7 @@ private struct TeacherBookConsole:View {
                 PublicBookPage(model:session.display,players:game.backend.bookPlayers,draggable:true).frame(maxWidth:.infinity,maxHeight:.infinity)
                     // The teacher's preview shows the same countdown / scoreboard as the TV.
                     .overlay{ClassroomTVOverlays(timer:game.classTimer,overlays:game.overlays,game:game)}
+                    .overlay{LaserCapture(laser:game.laser)}
                     .clipShape(RoundedRectangle(cornerRadius:18,style:.continuous)).overlay(RoundedRectangle(cornerRadius:18,style:.continuous).stroke(.white.opacity(0.5),lineWidth:1))
                 VStack(alignment:.leading,spacing:8){
                     Toggle(isOn:$session.showNotes){Label("备注",systemImage:"note.text")}.font(.headline)
