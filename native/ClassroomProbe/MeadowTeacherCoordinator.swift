@@ -55,6 +55,8 @@ final class MeadowTeacherCoordinator:ObservableObject {
     private var quizDraft:QuizAnswerDraft?
     private var quizReward:QuizManualReward?
     private var classModel:ClassQuizModel?
+    /// The flash card just made from the notes and put to the class (front, course): Esc on it raises its difficulty.
+    var noteCardAsked:(front:String,course:String)?
     private var practiceModel:PracticeModel?
     /// The answer panel of the question on screen, docked beside the teacher's preview (not a sheet over it), so
     /// the preview, the map and the laser pointer stay usable while a question is up.
@@ -287,12 +289,14 @@ final class MeadowTeacherCoordinator:ObservableObject {
             let next=c.sharedQuizQuestion(skip:1) ?? i
             self.closePanel{self.quiz=nil;self.openClassQuiz(index:next)}
         }
-        let panel=KeyHostingController(rootView:ClassQuizPanel(game:self,model:model,draft:draft,reward:reward,start:start,onSend:{[weak self] in self?.sendClassQuiz()},onEnd:{[weak self] in self?.endClassQuiz()},onOther:other))
+        // Only the question this note card was asked with counts; any other question clears it.
+        if let asked=noteCardAsked,!(q.type == .flashcard && q.prompt.lowercased()==asked.front.lowercased()) {noteCardAsked=nil}
+        let panel=KeyHostingController(rootView:ClassQuizPanel(game:self,model:model,draft:draft,reward:reward,start:start,onSend:{[weak self] in self?.sendClassQuiz()},onEnd:{[weak self] in self?.endClassQuiz(nobodyAnswered:true)},onOther:other))
         panel.onKey={[weak self,weak model,weak draft] key in
             guard let self,let model,let draft else{return false}
             switch key {
             case "⏎":self.sendClassQuiz()
-            case "⎋":self.endClassQuiz()
+            case "⎋":self.endClassQuiz(nobodyAnswered:true)
             case " ":other()
             default:
                 if let n=Int(key),n>0,let id=self.player(forSeat:n) {if model.players.contains(id){model.players.remove(id)}else{model.players.insert(id)};return true}
@@ -341,9 +345,21 @@ final class MeadowTeacherCoordinator:ObservableObject {
         host.present(alert,animated:true)
     }
     /// Ends the class question: the TV reveals the right answer and who got it.
-    private func endClassQuiz(){
+    /// `nobodyAnswered`: Esc / 只揭晓 with nothing sent. On a card just made from the notes that means it was too
+    /// hard for now: it goes up one star (at most ★★★) in its course.
+    private func endClassQuiz(nobodyAnswered:Bool=false){
+        let asked=noteCardAsked;noteCardAsked=nil
         guard var live=quiz,live.mode == .classwide,let model=classModel else{closePanel();return}
         closePanel()
+        if nobodyAnswered,model.sent.isEmpty,let asked,live.question.type == .flashcard,live.question.prompt.lowercased()==asked.front.lowercased(),
+           var card=QuizLibrary.shared.card(front:asked.front,in:asked.course) {
+            let old=card.difficulty ?? 1
+            if old<3 {
+                card.difficulty=old+1
+                QuizLibrary.shared.addCard(card,to:asked.course);applyQuizCourse()
+                message="没人答上来：\(card.prompt) 难度升为"+String(repeating:"★",count:old+1)
+            }else{message="没人答上来：\(card.prompt) 已是最高难度★★★"}
+        }
         let q=live.question,parts=q.parts
         let winners=model.sent.filter(\.right).map(\.name)
         live.attempt=QuizAttempt(player:"",playerName:"全班",node:-1,question:live.index,picks:parts.map{$0.answer},texts:parts.map{_ in nil},correct:parts.map{_ in true},seconds:0,limit:q.timeLimit,at:Date().timeIntervalSince1970)

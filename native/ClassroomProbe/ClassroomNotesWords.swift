@@ -145,6 +145,8 @@ struct WordCandidate: Hashable {
     @Published var back = ""
     @Published private(set) var senses: [ClassroomDictionary.Sense] = []
     @Published private(set) var mine: String?
+    /// ★ 1–3, picked by the teacher. Starts from the card already in the course, else a guess (word ★, phrase ★★).
+    @Published var difficulty = 1
     let course: String
     init(pick: NotesWordPick, dictionary: ClassroomDictionary?) {
         self.pick = pick
@@ -170,11 +172,12 @@ struct WordCandidate: Hashable {
         senses = ClassroomDictionary.ranked(entry?.senses ?? [], preferring: choice.phrase ? nil : pick.lexicalClass)
         mine = NotesDictionary.shared.myMeaning(choice.front)
         back = mine ?? senses.first?.meanings.first ?? ""
+        difficulty = QuizLibrary.shared.card(front: choice.front, in: course)?.difficulty ?? (choice.phrase ? 2 : 1)
     }
     var card: QuizQuestion? {
         let f = front.trimmingCharacters(in: .whitespaces), b = back.trimmingCharacters(in: .whitespaces)
         guard !f.isEmpty, !b.isEmpty else { return nil }
-        var q = QuizQuestion(prompt: String(f.prefix(120)), options: [], answer: 0, kind: .flashcard, difficulty: 1, tags: [f.contains(" ") ? "短语" : "单词"], items: [QuizItem(options: [String(b.prefix(200))], answer: 0)])
+        var q = QuizQuestion(prompt: String(f.prefix(120)), options: [], answer: 0, kind: .flashcard, difficulty: min(3, max(1, difficulty)), tags: [f.contains(" ") ? "短语" : "单词"], items: [QuizItem(options: [String(b.prefix(200))], answer: 0)])
         q.course = course
         return q
     }
@@ -209,6 +212,21 @@ struct WordCardPopup: View {
             }
             HStack { Text("正面").font(.caption.bold()).foregroundStyle(GameTheme.muted).frame(width: 34, alignment: .leading); TextField("单词或短语", text: $model.front).textFieldStyle(.roundedBorder) }
             HStack { Text("背面").font(.caption.bold()).foregroundStyle(GameTheme.muted).frame(width: 34, alignment: .leading); TextField("中文意思（点下面的词义，或直接输入）", text: $model.back).textFieldStyle(.roundedBorder) }
+            // Difficulty is the teacher's call (the app cannot tell what this class knows). Esc on the question
+            // (nobody got it) raises it one star.
+            HStack(spacing: 6) {
+                Text("难度").font(.caption.bold()).foregroundStyle(GameTheme.muted).frame(width: 34, alignment: .leading)
+                ForEach(1...3, id: \.self) { n in
+                    let on = n == model.difficulty
+                    Button { model.difficulty = n } label: {
+                        Text(String(repeating: "★", count: n)).font(.callout.weight(.bold)).padding(.horizontal, 12).padding(.vertical, 5)
+                            .foregroundStyle(on ? Color.white : GameTheme.accent)
+                            .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(on ? GameTheme.accent : Color.white.opacity(0.6)))
+                    }.buttonStyle(.plain).accessibilityLabel("难度\(n)")
+                }
+                Spacer()
+                Text("没人答上来按 Esc：+1★").font(.caption2).foregroundStyle(GameTheme.muted)
+            }
             ScrollView {
                 VStack(alignment: .leading, spacing: 8) {
                     if let mine = model.mine { senseRow("我的词表", [mine]) }
@@ -283,6 +301,7 @@ extension MeadowTeacherCoordinator {
         guard let c = campaign else { message += "（还没有打开行程，未出题）"; revision += 1; return }
         guard quiz == nil, challenge == nil else { message += "（正在答题，稍后在全班题里出）"; revision += 1; return }
         guard let index = c.quizBank.lastIndex(where: { $0 == card }) else { revision += 1; return }
+        noteCardAsked = (card.prompt, course)
         openClassQuiz(index: index)
     }
 }
