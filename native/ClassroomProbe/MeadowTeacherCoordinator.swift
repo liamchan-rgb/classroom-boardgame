@@ -312,11 +312,33 @@ final class MeadowTeacherCoordinator:ObservableObject {
                 let a=try c.recordQuiz(actor:id,question:live.index,picks:r.picks,texts:r.texts,seconds:Date().timeIntervalSince(live.start),free:true,manualCoins:coins,shared:true)
                 model.sent.append((a.playerName,right,coins))
             }
+            let answered=model.players
             model.players=[];model.note=nil
             renderer?.classroomRefresh();revision += 1
             // Sent: the TV reveals the answer as the coins go out.
             endClassQuiz()
+            askRecordSkipped(question:live.index,answered:answered,practice:false)
         }catch{model.note=error.localizedDescription}
+    }
+    /// After a shared question: the students who were not picked can have it put in their mistakes (recorded as
+    /// 不会 / 答错, no reward), so the report shows it for them too.
+    private func askRecordSkipped(question index:Int,answered:Set<String>,practice:Bool){
+        guard let c=campaign,let host=presentationHost else{return}
+        let others=c.engine.state.players.filter{!answered.contains($0.id) && !$0.host}
+        guard !others.isEmpty else{return}
+        let names=others.map(\.shortName).joined(separator:"、")
+        let alert=UIAlertController(title:"没选到的同学",message:"\(names) 没有作答。把这道题记到他们的错题里吗？",preferredStyle:.alert)
+        alert.addAction(UIAlertAction(title:"不记",style:.cancel))
+        alert.addAction(UIAlertAction(title:"记入错题",style:.default){[weak self] _ in
+            guard let self,let c=self.campaign,c.quizBank.indices.contains(index) else{return}
+            let blanks=Array(repeating:Optional<Int>.none,count:c.quizBank[index].parts.count)
+            do{
+                for u in others {try c.recordQuiz(actor:u.id,question:index,picks:blanks,seconds:0,free:true,manualCoins:practice ? nil:0,shared:true,practice:practice)}
+                self.message="已记入 \(names) 的错题";self.revision += 1
+            }catch{self.message=error.localizedDescription;self.revision += 1}
+        })
+        alert.preferredAction=alert.actions.last
+        host.present(alert,animated:true)
     }
     /// Ends the class question: the TV reveals the right answer and who got it.
     private func endClassQuiz(){
@@ -446,6 +468,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
                 }
                 model.total += names.count;if right {model.right += names.count}
                 model.results[live.index]=right
+                askRecordSkipped(question:live.index,answered:model.players,practice:true)
                 model.waiting=true
                 live.attempt=classReveal(live.question,index:live.index)
                 live.headline=(right ? "答对：" : "答错：")+names.joined(separator:"、")
@@ -577,7 +600,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
         }
         return nil
     }
-    private var presentationHost:UIViewController? {
+    var presentationHost:UIViewController? {
         var top=privatePresenter
         while let next=top?.presentedViewController {top=next}
         return top

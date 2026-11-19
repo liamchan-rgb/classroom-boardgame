@@ -95,7 +95,9 @@ private struct TeacherBookConsole:View {
                                 .scrollContentBackground(.hidden).padding(6).background(.white.opacity(0.35),in:RoundedRectangle(cornerRadius:12,style:.continuous))
                             Text("**加粗**  __下划线__").font(.caption2).foregroundStyle(.secondary)
                         } else {
-                            ScrollView{Text(NotesMarkup.attributed(session.currentNote)).font(.system(size:17)).frame(maxWidth:.infinity,alignment:.leading).textSelection(.enabled)}
+                            // Double-click an English word (or a word of a phrase) → flash card for the class.
+                            NotesWordText(raw:session.currentNote){pick,rect,view in game.openWordCard(pick,rect:rect,in:view)}
+                                .onAppear{NotesDictionary.shared.prewarm()}
                                 .padding(8).background(.white.opacity(0.35),in:RoundedRectangle(cornerRadius:12,style:.continuous))
                         }
                     }else{Label("仅本机可见",systemImage:"eye.slash").font(.caption).foregroundStyle(.secondary);Spacer()}

@@ -50,7 +50,7 @@ enum QuizReportPage {
     static func plan(_ report: QuizReport) -> [QuizReportPage] {
         var pages: [QuizReportPage] = [.overview]
         for (i, s) in report.students.enumerated() {
-            let n = s.review.count, firstCount = s.wrongWords.isEmpty ? 5 : 3, more = 9
+            let n = s.review.count, firstCount = (s.wrongWords.isEmpty ? 5 : 3) - (s.correctedWords.isEmpty && s.corrected.isEmpty ? 0 : 1), more = 9
             pages.append(.student(i, mistakes: 0..<min(n, firstCount), first: true))
             var start = firstCount
             while start < n { pages.append(.student(i, mistakes: start..<min(n, start + more), first: false)); start += more }
@@ -266,7 +266,7 @@ struct QuizReportPageView: View {
         if !s.review.isEmpty || s.mistakes.isEmpty {
         card {
             section(first ? "错题回顾（\(s.review.count)）" : "错题回顾（续）", icon: "arrow.triangle.2.circlepath")
-            if s.mistakes.isEmpty { Label("全部答对，太棒了！", systemImage: "sparkles").font(.system(size: 11, weight: .bold, design: .rounded)).foregroundStyle(Ink.good) }
+            if s.mistakes.isEmpty { Label(s.corrected.isEmpty ? "全部答对，太棒了！" : "错题都已改正，太棒了！", systemImage: "sparkles").font(.system(size: 11, weight: .bold, design: .rounded)).foregroundStyle(Ink.good) }
             ForEach(Array(range), id: \.self) { i in
                 let line = s.review[i]
                 VStack(alignment: .leading, spacing: 4) {
@@ -288,6 +288,34 @@ struct QuizReportPageView: View {
                 if i < range.upperBound - 1 { Divider().overlay(Ink.line) }
             }
         }
+        }
+        // 已改正: missed before, answered right since (words, and other questions with what was said first).
+        if first, !s.correctedWords.isEmpty || !s.corrected.isEmpty {
+            let fixedQuestions = s.corrected.filter { $0.question.type != .flashcard }
+            card {
+                section("已改正（\(s.correctedWords.count + fixedQuestions.count)）", icon: "checkmark.seal.fill")
+                if !s.correctedWords.isEmpty {
+                    FlowRow(spacing: 6) {
+                        ForEach(Array(s.correctedWords.prefix(18).enumerated()), id: \.offset) { _, w in
+                            HStack(spacing: 4) {
+                                Image(systemName: "checkmark").font(.system(size: 8, weight: .heavy)).foregroundStyle(Ink.good)
+                                Text(w.word).font(.system(size: 11, weight: .heavy, design: .rounded)).foregroundStyle(Ink.ink)
+                                if let m = w.meaning { Text(m).font(.system(size: 8.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted) }
+                            }.padding(.horizontal, 8).padding(.vertical, 4)
+                            .background(RoundedRectangle(cornerRadius: 7).fill(Ink.good.opacity(0.1)))
+                        }
+                    }
+                }
+                ForEach(Array(fixedQuestions.prefix(4).enumerated()), id: \.offset) { _, line in
+                    HStack(spacing: 6) {
+                        Text(line.summary).font(.system(size: 9.5, weight: .bold, design: .rounded)).foregroundStyle(Ink.ink).lineLimit(1)
+                        Spacer(minLength: 6)
+                        if let wrong = line.answers.first(where: { !$0.right }) { chip("之前", wrong.said, Ink.bad, strike: true) }
+                        Image(systemName: "arrow.right").font(.system(size: 7, weight: .bold)).foregroundStyle(Ink.muted)
+                        Text("已答对").font(.system(size: 9, weight: .heavy, design: .rounded)).foregroundStyle(Ink.good)
+                    }
+                }
+            }
         }
     }
     /// A word to practise: the word large, its meaning, how often it was missed, and what was said instead.

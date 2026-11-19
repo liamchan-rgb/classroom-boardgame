@@ -617,6 +617,16 @@ struct QuizPortionPanel: View {
         questions += tagged; save(); active = course
     }
     func select(_ course: String?) { active = course }
+    /// Adds one card to a course in place (a flash card with the same front there is replaced); the course becomes
+    /// current only when none is.
+    func addCard(_ card: QuizQuestion, to course: String) {
+        var card = card; card.course = course
+        if let i = questions.firstIndex(where: { $0.course == course && $0.type == .flashcard && $0.prompt.lowercased() == card.prompt.lowercased() }) { questions[i] = card }
+        else if let last = questions.lastIndex(where: { $0.course == course }) { questions.insert(card, at: last + 1) }
+        else { questions.append(card) }
+        save()
+        if active == nil { active = course }
+    }
     func remove(course: String) {
         questions.removeAll { $0.course == course }; save()
         if active == course { active = courses.first }

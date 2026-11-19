@@ -193,6 +193,29 @@ final class QuizTests:XCTestCase {
         let bank=try QuizBankParser.parse(Data(contentsOf:url))
         XCTAssertTrue(Set(bank.map(\.type)).isSuperset(of:[.choice,.flashcard,.fill,.reading]))
     }
+    func testAnsweringRightLaterMovesMistakesToCorrected()throws {
+        let bank=try QuizBankParser.parse(Data(mixed.utf8))
+        func a(_ p:String,_ q:Int,_ picks:[Int?])->QuizAttempt {
+            let parts=bank[q].parts
+            return QuizAttempt(player:p,playerName:p,node:-1,question:q,picks:picks,texts:picks.map{_ in nil},
+                               correct:parts.indices.map{picks[$0]==parts[$0].answer},seconds:5,limit:60,at:1_800_000_000)
+        }
+        let apple=bank[0].parts[0],fill=bank[2].parts
+        let goed=fill[0].options.firstIndex(of:"goed")!
+        let allRight=fill.map{Optional($0.answer)}
+        // apple wrong then right (corrected); the fill question wrong twice then right (corrected, shown once);
+        // the reading question wrong, still wrong.
+        let log=[a("p1",0,[nil]),a("p1",2,[goed,nil]),a("p1",2,[goed,fill[1].answer]),a("p1",3,[1,1]),a("p1",0,[apple.answer]),a("p1",2,allRight)]
+        let s=QuizReport(log:log,bank:bank,order:["p1"]).students[0]
+        XCTAssertEqual(s.mistakes.map(\.attempt.question),[3])
+        XCTAssertEqual(s.corrected.map(\.attempt.question),[0,2])
+        XCTAssertEqual(s.corrected[1].answers[0].said,"goed")  // the first wrong answer is shown
+        XCTAssertTrue(s.wrongWords.isEmpty)
+        XCTAssertEqual(Set(s.correctedWords.map(\.word)),["apple","went","saw"])
+        // Missed again after correcting: back to the mistakes.
+        let again=QuizReport(log:log+[a("p1",0,[nil])],bank:bank,order:["p1"]).students[0]
+        XCTAssertEqual(again.wrongWords.map(\.word),["apple"]);XCTAssertEqual(again.mistakes.map(\.attempt.question),[0,3])
+    }
     func testReportListsWrongWords()throws {
         let bank=try QuizBankParser.parse(Data(mixed.utf8))
         func a(_ p:String,_ q:Int,_ picks:[Int?],_ texts:[String?]?=nil)->QuizAttempt {

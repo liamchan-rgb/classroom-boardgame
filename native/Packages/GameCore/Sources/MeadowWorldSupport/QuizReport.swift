@@ -61,11 +61,31 @@ public struct QuizReport {
         public var byKind: [Tally] = []
         public var byDifficulty: [Tally] = []
         public var byTag: [Tally] = []
-        /// Words missed, most often first (then in the order met).
+        /// Words still missed (their latest answer was wrong), most often first (then in the order met).
         public var wrongWords: [WordMiss] = []
+        /// Words missed earlier and answered right since (已改正).
+        public var correctedWords: [WordMiss] = []
         public var wordsAsked: Int = 0
-        /// Questions with at least one wrong part.
-        public var mistakes: [Line] { lines.filter { $0.attempt.rightCount < $0.attempt.correct.count } }
+        /// Questions still wrong: one line per question (its latest wrong answer), when the latest answer to it
+        /// was not all right.
+        public var mistakes: [Line] {
+            var latest: [Int: Line] = [:], order: [Int] = []
+            for l in lines { if latest[l.attempt.question] == nil { order.append(l.attempt.question) }; latest[l.attempt.question] = l }
+            return order.compactMap { q in
+                guard let last = latest[q], last.attempt.rightCount < last.attempt.correct.count else { return nil }
+                return last
+            }
+        }
+        /// Questions answered wrong earlier and all right later (已改正): the earlier wrong line, to show what was said.
+        public var corrected: [Line] {
+            var firstWrong: [Int: Line] = [:], order: [Int] = [], latestRight: [Int: Bool] = [:]
+            for l in lines {
+                let right = l.attempt.rightCount == l.attempt.correct.count
+                if !right && firstWrong[l.attempt.question] == nil { firstWrong[l.attempt.question] = l; order.append(l.attempt.question) }
+                latestRight[l.attempt.question] = right
+            }
+            return order.compactMap { latestRight[$0] == true ? firstWrong[$0] : nil }
+        }
     }
     public struct QuestionStat {
         public var index: Int
@@ -132,15 +152,19 @@ public struct QuizReport {
             s.byKind = tallies(own) { [$0.question.type.title] }
             s.byDifficulty = tallies(own) { [$0.question.difficulty.map { String(repeating: "★", count: $0) } ?? "未分级"] }.sorted { $0.name < $1.name }
             s.byTag = tallies(own) { $0.question.tags ?? [] }
-            var misses: [WordMiss] = []
+            var misses: [WordMiss] = [], fixed = Set<String>()
             for l in own { for (i, w) in l.words.enumerated() {
                 guard let w else { continue }
                 s.wordsAsked += 1
-                guard !l.answers[i].right else { continue }
+                // A right answer after misses: the word counts as corrected (until it is missed again).
+                guard !l.answers[i].right else { if misses.contains(where: { $0.word == w.word }) { fixed.insert(w.word) }; continue }
+                fixed.remove(w.word)
                 if let k = misses.firstIndex(where: { $0.word == w.word }) { misses[k].count += 1; if !misses[k].said.contains(l.answers[i].said) { misses[k].said.append(l.answers[i].said) } }
                 else { misses.append(WordMiss(word: w.word, meaning: w.meaning, said: [l.answers[i].said], count: 1)) }
             } }
-            s.wrongWords = misses.enumerated().sorted { $0.element.count == $1.element.count ? $0.offset < $1.offset : $0.element.count > $1.element.count }.map(\.element)
+            let ranked = misses.enumerated().sorted { $0.element.count == $1.element.count ? $0.offset < $1.offset : $0.element.count > $1.element.count }.map(\.element)
+            s.wrongWords = ranked.filter { !fixed.contains($0.word) }
+            s.correctedWords = misses.filter { fixed.contains($0.word) }
             return s
         }
         var stats: [Int: QuestionStat] = [:], wrongs: [Int: [String: Int]] = [:]
