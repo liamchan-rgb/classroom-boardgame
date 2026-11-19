@@ -33,6 +33,12 @@ final class MeadowMapSettingsViewController: UIViewController {
     private var classRows:[UIStackView]=[]
     private var studentNames:[UITextField]=[]
     private var profileLooks:[String:PlayerAppearance]=[:]
+    private var profileButtons:[UIButton]=[]
+    private var diceButtons:[UIButton]=[]
+    /// 班级: a saved roster fills the student rows in one pick.
+    private let rosterButton=UIButton(type:.system)
+    private var rosterName:String?
+    static let rosterStore=ClassRosterStore(url:FileManager.default.urls(for:.applicationSupportDirectory,in:.userDomainMask)[0].appendingPathComponent("ClassroomMeadow/classes-v1.json"))
     private var classControls:[UISegmentedControl] {[campaignClass,companionClass]+extraClasses}
     private var result: GeneratedMeadowMap?
     private var revision = 0
@@ -88,18 +94,19 @@ final class MeadowMapSettingsViewController: UIViewController {
         startCampaignButton.addTarget(self,action:#selector(startCampaign),for:.touchUpInside)
         studentCount.minimumValue=1;studentCount.maximumValue=6;studentCount.value=2
         studentCount.addTarget(self,action:#selector(refreshPartySummary),for:.valueChanged)
+        // 班级: pick a saved class to fill names, looks, jobs and teams; save the rows below as a class.
+        var rosterConfig=UIButton.Configuration.tinted();rosterConfig.image=UIImage(systemName:"person.3.sequence.fill");rosterConfig.imagePadding=8
+        rosterConfig.baseForegroundColor=MeadowPreviewPalette.primary;rosterButton.configuration=rosterConfig
+        rosterButton.showsMenuAsPrimaryAction=true;rosterButton.accessibilityLabel="班级"
+        rosterButton.menu=UIMenu(children:[UIDeferredMenuElement.uncached{[weak self] done in done(self?.rosterMenuItems() ?? [])}])
+        rosterButton.heightAnchor.constraint(greaterThanOrEqualToConstant:44).isActive=true
+        refreshRosterButton();right.addArrangedSubview(rosterButton)
         let countRow=UIStackView(arrangedSubviews:[studentCountLabel,studentCount]);countRow.distribution = .equalSpacing
         studentCountLabel.textColor=gold;right.addArrangedSubview(countRow)
         teamCount.selectedSegmentIndex=0;teamCount.selectedSegmentTintColor=MeadowPreviewPalette.primary
         teamCount.setTitleTextAttributes([.foregroundColor:MeadowPreviewPalette.ink,.font:UIFont.boldSystemFont(ofSize:16)],for:.normal)
         teamCount.setTitleTextAttributes([.foregroundColor:UIColor.white],for:.selected)
-        teamCount.addAction(UIAction{[weak self] _ in
-            guard let self else{return}
-            // The camps are part of the map: a new team count needs a new road preview.
-            self.revision += 1;self.result=nil;self.startCampaignButton.isEnabled=false
-            self.status.text="队伍数已改为 \(self.teamCount.selectedSegmentIndex+1)，请重新生成道路预览（每队一个起点营地）。"
-            self.refreshPartySummary()
-        },for:.valueChanged)
+        teamCount.addAction(UIAction{[weak self] _ in self?.teamCountChanged()},for:.valueChanged)
         let teamLabel=UILabel();teamLabel.text="队伍（各自起点，相遇可PVP一次）";teamLabel.font = .boldSystemFont(ofSize:17);teamLabel.textColor=gold
         let teamRow=UIStackView(arrangedSubviews:[teamLabel,teamCount]);teamRow.axis = .vertical;teamRow.spacing=6
         right.addArrangedSubview(teamRow)
@@ -121,9 +128,10 @@ final class MeadowMapSettingsViewController: UIViewController {
                 let entry:MeadowSaveSlot<MeadowPlayerProfile>=found
                 return UIAction(title:"人物槽\(slot) · \(entry.value.name)"){[weak self] _ in
                     guard let self else{return};name.text=entry.value.name;self.profileLooks["p\(i+1)"]=entry.value.appearance
-                    profiles.setTitle("已选："+entry.value.name,for:.normal)
+                    profiles.setTitle("已选："+entry.value.name,for:.normal);self.showFace(i)
                 }
             })
+            profileButtons.append(profiles)
             // Random look for this student (body, hair, face; outfit follows armor), different from the others already picked.
             let dice=UIButton(type:.system);dice.setTitle("随机外观",for:.normal);dice.setImage(UIImage(systemName:"dice.fill"),for:.normal)
             dice.accessibilityLabel="P\(i+1)随机外观"
@@ -132,18 +140,10 @@ final class MeadowMapSettingsViewController: UIViewController {
                 let key="p\(i+1)",others=self.profileLooks.filter{$0.key != key}.map(\.value)
                 let look=PlayerAppearance.random(excluding:others+(self.profileLooks[key].map{[$0]} ?? []))
                 self.profileLooks[key]=look
-                dice.setTitle(" 换一个",for:.normal)
                 profiles.setTitle("读取人物档案",for:.normal)
-                // Show the picked face on the button (the portrait bakes in the background on first use).
-                let pixel=PixelHeroLook(body:look.body,hair:look.hair,face:look.face)
-                func show(_ image:UIImage){
-                    guard self.profileLooks[key]==look else{return}
-                    let size=CGSize(width:30,height:30)
-                    let face=UIGraphicsImageRenderer(size:size).image{_ in UIBezierPath(ovalIn:CGRect(origin:.zero,size:size)).addClip();image.draw(in:CGRect(origin:.zero,size:size))}
-                    dice.setImage(face.withRenderingMode(.alwaysOriginal),for:.normal)
-                }
-                if let ready=PixelHeroAtlas.portrait(pixel,ready:{if let image=PixelHeroAtlas.portrait(pixel){show(image)}}) {show(ready)}
+                self.showFace(i)
             },for:.primaryActionTriggered)
+            diceButtons.append(dice)
             dice.setContentCompressionResistancePriority(.required,for:.horizontal)
             profiles.setContentCompressionResistancePriority(.defaultLow,for:.horizontal)
             let looks=UIStackView(arrangedSubviews:[profiles,dice]);looks.axis = .horizontal;looks.spacing=16;looks.alignment = .center
@@ -268,6 +268,99 @@ final class MeadowMapSettingsViewController: UIViewController {
             }
         }
     }
+    // MARK: 班级
+
+    /// The camps are part of the map: a new team count needs a new road preview.
+    private func teamCountChanged() {
+        revision += 1;result=nil;startCampaignButton.isEnabled=false
+        status.text="队伍数已改为 \(teamCount.selectedSegmentIndex+1)，请重新生成道路预览（每队一个起点营地）。"
+        refreshPartySummary()
+    }
+    /// Row i's look shown as a round face on its dice button (the portrait bakes in the background on first use).
+    private func showFace(_ i:Int) {
+        guard diceButtons.indices.contains(i) else{return}
+        let dice=diceButtons[i],key="p\(i+1)"
+        guard let look=profileLooks[key] else{
+            dice.setTitle("随机外观",for:.normal);dice.setImage(UIImage(systemName:"dice.fill"),for:.normal);return
+        }
+        dice.setTitle(" 换一个",for:.normal)
+        let pixel=PixelHeroLook(body:look.body,hair:look.hair,face:look.face)
+        func show(_ image:UIImage){
+            guard self.profileLooks[key]==look else{return}
+            let size=CGSize(width:30,height:30)
+            let face=UIGraphicsImageRenderer(size:size).image{_ in UIBezierPath(ovalIn:CGRect(origin:.zero,size:size)).addClip();image.draw(in:CGRect(origin:.zero,size:size))}
+            dice.setImage(face.withRenderingMode(.alwaysOriginal),for:.normal)
+        }
+        if let ready=PixelHeroAtlas.portrait(pixel,ready:{if let image=PixelHeroAtlas.portrait(pixel){show(image)}}) {show(ready)}
+    }
+    private func refreshRosterButton() {
+        rosterButton.configuration?.title=rosterName.map{"班级：\($0)"} ?? "选择班级 / 创建班级"
+    }
+    private func rosterMenuItems()->[UIMenuElement] {
+        let saved=(try? Self.rosterStore.all()) ?? []
+        var items:[UIMenuElement]=saved.map{roster in
+            UIAction(title:roster.name,subtitle:"\(roster.students.count)人 · "+roster.students.map{$0.name.isEmpty ? "未命名":$0.name}.joined(separator:"、"),
+                     image:UIImage(systemName:"person.3.fill"),state:roster.name==rosterName ? .on:.off){[weak self] _ in self?.apply(roster)}
+        }
+        let create=UIAction(title:saved.isEmpty ? "用下面的学生创建班级…":"把下面的学生存为班级…",image:UIImage(systemName:"plus.circle")){[weak self] _ in self?.askToSaveRoster()}
+        items.append(UIMenu(options:.displayInline,children:[create]))
+        if !saved.isEmpty {
+            items.append(UIMenu(title:"删除班级",image:UIImage(systemName:"trash"),options:.destructive,children:saved.map{roster in
+                UIAction(title:roster.name,attributes:.destructive){[weak self] _ in self?.confirmDelete(roster.name)}
+            }))
+        }
+        return items
+    }
+    /// Fill the rows from a class: count, names, looks, jobs and teams (a different team count invalidates the road preview).
+    private func apply(_ roster:ClassRoster) {
+        let count=min(ClassRoster.maximumStudents,roster.students.count)
+        studentCount.value=Double(count)
+        if teamCount.selectedSegmentIndex != roster.teamCount-1 {teamCount.selectedSegmentIndex=roster.teamCount-1;teamCountChanged()}
+        let ids=MeadowPartyConfiguration.classIDs
+        for (i,student) in roster.students.prefix(count).enumerated() {
+            studentNames[i].text=student.name
+            profileLooks["p\(i+1)"]=student.appearance
+            classControls[i].selectedSegmentIndex=ids.firstIndex(of:student.classID) ?? 1
+            teamPickers[i].selectedSegmentIndex=student.team;teamPickers[i].tag=1
+            profileButtons[i].setTitle("读取人物档案",for:.normal)
+            showFace(i)
+        }
+        rosterName=roster.name;refreshRosterButton();refreshPartySummary()
+        if result != nil {status.text="已载入班级“\(roster.name)”\(count)人，可以开始新行程。"}
+    }
+    private func currentRoster(named name:String)->ClassRoster {
+        let ids=MeadowPartyConfiguration.classIDs,teams=teamCount.selectedSegmentIndex+1
+        return ClassRoster(name:name,students:(0..<Int(studentCount.value)).map{i in
+            ClassRoster.Student(name:studentNames[i].text ?? "",appearance:profileLooks["p\(i+1)"],
+                                classID:ids[max(0,classControls[i].selectedSegmentIndex)],team:teams<2 ? 0:max(0,teamPickers[i].selectedSegmentIndex))
+        })
+    }
+    private func askToSaveRoster() {
+        view.endEditing(true)
+        let alert=UIAlertController(title:"保存为班级",message:"保存下面\(Int(studentCount.value))名学生的姓名、外观、职业和队伍。以后新地图选这个班级即可一键排好。同名班级会被替换。",preferredStyle:.alert)
+        alert.addTextField{[rosterName] field in field.placeholder="班级名称，例如：三年级二班";field.text=rosterName}
+        alert.addAction(UIAlertAction(title:"取消",style:.cancel))
+        alert.addAction(UIAlertAction(title:"保存",style:.default){[weak self,weak alert] _ in
+            guard let self else{return}
+            do{
+                let saved=try Self.rosterStore.save(self.currentRoster(named:alert?.textFields?.first?.text ?? ""))
+                self.rosterName=saved.name;self.refreshRosterButton()
+                self.status.text="已保存班级“\(saved.name)”（\(saved.students.count)人）。"
+            }catch{self.status.text="班级未保存："+error.localizedDescription}
+        })
+        present(alert,animated:true)
+    }
+    private func confirmDelete(_ name:String) {
+        let alert=UIAlertController(title:"删除班级“\(name)”？",message:"只删除这个班级名单，不影响任何行程和人物档案。",preferredStyle:.alert)
+        alert.addAction(UIAlertAction(title:"取消",style:.cancel))
+        alert.addAction(UIAlertAction(title:"删除",style:.destructive){[weak self] _ in
+            guard let self else{return}
+            do{try Self.rosterStore.delete(name);if self.rosterName==name{self.rosterName=nil;self.refreshRosterButton()};self.status.text="已删除班级“\(name)”。"}
+            catch{self.status.text="删除失败："+error.localizedDescription}
+        })
+        present(alert,animated:true)
+    }
+
     static func campaignStore()->MeadowCampaignStore {
         let base=FileManager.default.urls(for:.applicationSupportDirectory,in:.userDomainMask)[0]
         return MeadowCampaignStore(url:base.appendingPathComponent("ClassroomMeadow/campaign-v1.json"))
