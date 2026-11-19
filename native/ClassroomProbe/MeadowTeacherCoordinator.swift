@@ -490,7 +490,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
     /// The answer report of the current trip (pages to look at, PDF / picture export).
     func openQuizReport(){
         guard !modalOpen,let presenter=presentationHost,let campaign else{return}
-        let screen=UIHostingController(rootView:QuizReportScreen(report:campaign.quizReport,title:"课堂答题报告",itemName:{id in (try? campaign.engine.catalog.item(id).name) ?? id},onClose:{[weak self] in self?.presentationHost?.dismiss(animated:true)}))
+        let screen=UIHostingController(rootView:QuizReportScreen(report:campaign.quizReport,title:"课堂答题报告",course:QuizLibrary.shared.active,itemName:{id in (try? campaign.engine.catalog.item(id).name) ?? id},onClose:{[weak self] in self?.presentationHost?.dismiss(animated:true)}))
         screen.modalPresentationStyle = .pageSheet;screen.preferredContentSize=CGSize(width:900,height:900)
         presenter.present(screen,animated:true)
     }

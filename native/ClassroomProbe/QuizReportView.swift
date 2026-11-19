@@ -36,6 +36,11 @@ private let pageSize = CGSize(width: 595, height: 842)
 
 // MARK: - Pages
 
+extension QuizReport.Student {
+    /// 错题回顾: wrong answers except flash cards (those words are already in the 错词本).
+    var review: [QuizReport.Line] { mistakes.filter { $0.question.type != .flashcard } }
+}
+
 /// What one printed page shows.
 enum QuizReportPage {
     case overview
@@ -45,7 +50,7 @@ enum QuizReportPage {
     static func plan(_ report: QuizReport) -> [QuizReportPage] {
         var pages: [QuizReportPage] = [.overview]
         for (i, s) in report.students.enumerated() {
-            let n = s.mistakes.count, firstCount = s.wrongWords.isEmpty ? 5 : 3, more = 9
+            let n = s.review.count, firstCount = s.wrongWords.isEmpty ? 5 : 3, more = 9
             pages.append(.student(i, mistakes: 0..<min(n, firstCount), first: true))
             var start = firstCount
             while start < n { pages.append(.student(i, mistakes: start..<min(n, start + more), first: false)); start += more }
@@ -60,7 +65,10 @@ struct QuizReportPageView: View {
     let title: String
     let number: Int
     let count: Int
+    /// The lesson (course) the report is for: in the subtitle and the footer.
+    var course: String? = nil
     var itemName: (String) -> String = { $0 }
+    private var lesson: String { course ?? "课堂" }
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             switch page {
@@ -69,7 +77,7 @@ struct QuizReportPageView: View {
             }
             Spacer(minLength: 0)
             HStack {
-                Text("林间行旅 · 课堂答题报告").font(.system(size: 8, weight: .semibold, design: .rounded))
+                Text("\(lesson) · 课堂答题报告").font(.system(size: 8, weight: .semibold, design: .rounded))
                 Spacer()
                 Text("\(number) / \(count)").font(.system(size: 8, weight: .bold, design: .rounded)).monospacedDigit()
             }.foregroundStyle(Ink.muted)
@@ -147,7 +155,7 @@ struct QuizReportPageView: View {
     // MARK: Class page
 
     @ViewBuilder private var overview: some View {
-        banner(title, "\(dateRange()) · \(report.students.count) 位同学 · \(report.attempts) 次作答", icon: "chart.bar.doc.horizontal")
+        banner(title, "\(course.map { $0 + " · " } ?? "")\(dateRange()) · \(report.students.count) 位同学 · \(report.attempts) 次作答", icon: "chart.bar.doc.horizontal")
         HStack(spacing: 10) {
             ring(report.rate, size: 86).padding(.horizontal, 6)
             VStack(spacing: 10) {
@@ -157,7 +165,7 @@ struct QuizReportPageView: View {
                 }
                 HStack(spacing: 10) {
                     tile(seconds(report.averageSeconds), "平均用时", icon: "timer", tint: Ink.teal)
-                    tile("\(report.coins)", "发出金币 · 掉落 \(report.drops)", icon: "bitcoinsign.circle", tint: Ink.gold)
+                    tile("\(report.students.reduce(0) { $0 + $1.score })", "获得积分", icon: "star.circle", tint: Ink.teal)
                 }
             }
         }
@@ -165,7 +173,7 @@ struct QuizReportPageView: View {
             section("每位同学", icon: "person.3.fill")
             HStack {
                 Text("同学").frame(maxWidth: .infinity, alignment: .leading)
-                Text("题数").frame(width: 34); Text("正确率").frame(width: 150, alignment: .leading); Text("平均用时").frame(width: 56); Text("金币").frame(width: 40); Text("积分").frame(width: 32)
+                Text("题数").frame(width: 34); Text("正确率").frame(width: 150, alignment: .leading); Text("平均用时").frame(width: 56); Text("积分").frame(width: 40)
             }.font(.system(size: 8.5, weight: .bold, design: .rounded)).foregroundStyle(Ink.muted)
             ForEach(Array(report.students.enumerated()), id: \.offset) { i, s in
                 HStack {
@@ -180,8 +188,7 @@ struct QuizReportPageView: View {
                         Text(percent(s.rate)).font(.system(size: 9.5, weight: .heavy, design: .rounded)).foregroundStyle(Ink.rate(s.rate)).frame(width: 32, alignment: .trailing)
                     }.frame(width: 150)
                     Text(seconds(s.averageSeconds)).frame(width: 56)
-                    Text("\(s.coins)").foregroundStyle(Ink.gold).frame(width: 40)
-                    Text("\(s.score)").foregroundStyle(Ink.teal).frame(width: 32)
+                    Text("\(s.score)").foregroundStyle(Ink.teal).frame(width: 40)
                 }.font(.system(size: 10, weight: .semibold, design: .rounded)).monospacedDigit().foregroundStyle(Ink.ink)
                 if i < report.students.count - 1 { Divider().overlay(Ink.line) }
             }
@@ -229,25 +236,12 @@ struct QuizReportPageView: View {
                         tile("\(s.right)/\(s.total)", "答对小题", icon: "checkmark.circle", tint: Ink.rate(s.rate))
                         tile(seconds(s.averageSeconds), s.overtime > 0 ? "平均用时 · 超时\(s.overtime)次" : "平均用时", icon: "timer", tint: Ink.teal)
                     }
-                    HStack(spacing: 10) {
-                        tile("+\(s.coins)", "获得金币", icon: "bitcoinsign.circle", tint: Ink.gold)
-                        tile("+\(s.score)", "获得积分", icon: "star.circle", tint: Ink.teal)
-                    }
+                    tile("+\(s.score)", "获得积分", icon: "star.circle", tint: Ink.teal)
                 }
             }
             HStack(alignment: .top, spacing: 10) {
                 card { section("按题型", icon: "square.grid.2x2"); ForEach(s.byKind, id: \.name) { bar($0) } }
                 card { section("按难度", icon: "star.leadinghalf.filled"); ForEach(s.byDifficulty, id: \.name) { bar($0) } }
-            }
-            if !s.drops.isEmpty {
-                HStack(spacing: 6) {
-                    Label("答题掉落", systemImage: "gift.fill").font(.system(size: 10, weight: .heavy, design: .rounded)).foregroundStyle(Ink.gold)
-                    ForEach(Array(s.drops.enumerated()), id: \.offset) { _, d in
-                        Text(itemName(d)).font(.system(size: 9.5, weight: .bold, design: .rounded)).foregroundStyle(Ink.ink)
-                            .padding(.horizontal, 8).padding(.vertical, 3).background(Capsule().fill(Ink.gold.opacity(0.15)))
-                    }
-                    Spacer()
-                }
             }
             if !s.byTag.isEmpty {
                 card { section("按知识点", icon: "tag"); ForEach(s.byTag.prefix(6), id: \.name) { bar($0) } }
@@ -268,11 +262,13 @@ struct QuizReportPageView: View {
                 if s.wrongWords.count > 18 { Text("另有 \(s.wrongWords.count - 18) 个").font(.system(size: 8.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted) }
             }
         }
+        // 错题回顾 (no flash cards); a student whose only slips were flash cards has them in the 错词本 above.
+        if !s.review.isEmpty || s.mistakes.isEmpty {
         card {
-            section(first ? "需要再练的题（\(s.mistakes.count)）" : "需要再练的题（续）", icon: "arrow.triangle.2.circlepath")
+            section(first ? "错题回顾（\(s.review.count)）" : "错题回顾（续）", icon: "arrow.triangle.2.circlepath")
             if s.mistakes.isEmpty { Label("全部答对，太棒了！", systemImage: "sparkles").font(.system(size: 11, weight: .bold, design: .rounded)).foregroundStyle(Ink.good) }
             ForEach(Array(range), id: \.self) { i in
-                let line = s.mistakes[i]
+                let line = s.review[i]
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(alignment: .top) {
                         Text(line.summary).font(.system(size: 10, weight: .bold, design: .rounded)).foregroundStyle(Ink.ink).lineLimit(2)
@@ -283,7 +279,7 @@ struct QuizReportPageView: View {
                     ForEach(Array(line.answers.enumerated()).filter { !$0.element.right }.prefix(4), id: \.offset) { _, a in
                         HStack(spacing: 6) {
                             if line.answers.count > 1 { Text(a.label).font(.system(size: 8.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted).lineLimit(1).frame(maxWidth: 150, alignment: .leading) }
-                            chip(a.said == "答错" ? "结果" : "说的", a.said, Ink.bad, strike: a.said != "答错")
+                            chip("说的", a.said, Ink.bad, strike: true)
                             Image(systemName: "arrow.right").font(.system(size: 7, weight: .bold)).foregroundStyle(Ink.muted)
                             chip("正确", a.expected, Ink.good, strike: false)
                         }
@@ -291,6 +287,7 @@ struct QuizReportPageView: View {
                 }
                 if i < range.upperBound - 1 { Divider().overlay(Ink.line) }
             }
+        }
         }
     }
     /// A word to practise: the word large, its meaning, how often it was missed, and what was said instead.
@@ -319,9 +316,9 @@ struct QuizReportPageView: View {
 // MARK: - Rendering and export
 
 @MainActor enum QuizReportExport {
-    static func pages(_ report: QuizReport, title: String, itemName: @escaping (String) -> String = { $0 }) -> [AnyView] {
+    static func pages(_ report: QuizReport, title: String, course: String? = nil, itemName: @escaping (String) -> String = { $0 }) -> [AnyView] {
         let plan = QuizReportPage.plan(report)
-        return plan.enumerated().map { i, p in AnyView(QuizReportPageView(report: report, page: p, title: title, number: i + 1, count: plan.count, itemName: itemName)) }
+        return plan.enumerated().map { i, p in AnyView(QuizReportPageView(report: report, page: p, title: title, number: i + 1, count: plan.count, course: course, itemName: itemName)) }
     }
     static func images(_ views: [AnyView], scale: CGFloat = 2) -> [UIImage] {
         views.compactMap { v in let r = ImageRenderer(content: v); r.scale = scale; return r.uiImage }
@@ -333,8 +330,13 @@ struct QuizReportPageView: View {
     }
     static func stamp() -> String { let f = DateFormatter(); f.dateFormat = "yyyy-MM-dd"; return f.string(from: Date()) }
     /// One vector PDF, a page per view.
-    static func pdf(_ views: [AnyView]) throws -> URL {
-        let url = try folder().appendingPathComponent("答题报告-\(stamp()).pdf")
+    /// "答题报告-<课程>-2026-11-19": the lesson in the file name, made safe for a file name.
+    static func baseName(_ course: String?) -> String {
+        let safe = course.map { String($0.map { "/\\:*?\"<>|".contains($0) ? "-" : $0 }.prefix(60)) }
+        return "答题报告-" + (safe.map { $0 + "-" } ?? "") + stamp()
+    }
+    static func pdf(_ views: [AnyView], course: String? = nil) throws -> URL {
+        let url = try folder().appendingPathComponent(baseName(course) + ".pdf")
         var box = CGRect(origin: .zero, size: pageSize)
         guard let context = CGContext(url as CFURL, mediaBox: &box, nil) else { throw CocoaError(.fileWriteUnknown) }
         for v in views {
@@ -345,10 +347,10 @@ struct QuizReportPageView: View {
         context.closePDF()
         return url
     }
-    static func pngs(_ images: [UIImage], names: [String]) throws -> [URL] {
+    static func pngs(_ images: [UIImage], names: [String], course: String? = nil) throws -> [URL] {
         let dir = try folder()
         return try images.enumerated().map { i, image in
-            let url = dir.appendingPathComponent(String(format: "答题报告-%02d-%@.png", i + 1, names[i]))
+            let url = dir.appendingPathComponent(baseName(course) + String(format: "-%02d-", i + 1) + names[i] + ".png")
             guard let data = image.pngData() else { throw CocoaError(.fileWriteUnknown) }
             try data.write(to: url); return url
         }
@@ -364,6 +366,7 @@ struct QuizReportPageView: View {
 struct QuizReportScreen: View {
     let report: QuizReport
     let title: String
+    var course: String? = nil
     var itemName: (String) -> String = { $0 }
     var onClose: () -> Void
     @State private var images: [UIImage] = []
@@ -409,13 +412,13 @@ struct QuizReportScreen: View {
             }
         }
         .padding(20).background(GlassBackdrop())
-        .onAppear { images = QuizReportExport.images(QuizReportExport.pages(report, title: title, itemName: itemName)) }
+        .onAppear { images = QuizReportExport.images(QuizReportExport.pages(report, title: title, course: course, itemName: itemName)) }
         .sheet(isPresented: $showExporter) { ExportPicker(urls: exporting) { showExporter = false } }
     }
     private func export(pdf: Bool) {
         do {
-            exporting = pdf ? [try QuizReportExport.pdf(QuizReportExport.pages(report, title: title, itemName: itemName))]
-                            : try QuizReportExport.pngs(images, names: QuizReportExport.pageNames(report))
+            exporting = pdf ? [try QuizReportExport.pdf(QuizReportExport.pages(report, title: title, course: course, itemName: itemName), course: course)]
+                            : try QuizReportExport.pngs(images, names: QuizReportExport.pageNames(report), course: course)
             error = nil; showExporter = true
         } catch { self.error = "导出失败：\(error.localizedDescription)" }
     }
