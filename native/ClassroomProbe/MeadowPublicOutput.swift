@@ -67,10 +67,13 @@ struct PublicBookPage:View {
                             }
                         }
                     }.padding(.bottom,layout.spacing*1.6)
-                    .offset(x:position.offset.width*geometry.size.width,y:position.offset.height*geometry.size.height)
+                    // The touch area is set before the offset so it moves with the cards (after it, it stayed at
+                    // the cards' first place and a moved group could not be picked up again).
                     .contentShape(Rectangle())
+                    .offset(x:position.offset.width*geometry.size.width,y:position.offset.height*geometry.size.height)
                     .allowsHitTesting(draggable)
-                    .gesture(DragGesture(minimumDistance:4).onChanged{g in
+                    // Global coordinates: the cards move under the pointer while dragging.
+                    .gesture(DragGesture(minimumDistance:4,coordinateSpace:.global).onChanged{g in
                         let start=dragStart ?? position.offset;if dragStart==nil{dragStart=start}
                         // Keep the cards on the page (at most the full height up, a little sideways each way).
                         position.offset=CGSize(width:min(0.45,max(-0.45,start.width+g.translation.width/geometry.size.width)),
@@ -158,8 +161,16 @@ private struct BookPlayerCard:View {
         }
         .scaleEffect(dropTarget && targets.hover==unit.id ? 1.06:1)
         .animation(.spring(response:0.2,dampingFraction:0.7),value:targets.hover)
-        .onGeometryChange(for:CGRect.self){$0.frame(in:.global)} action:{frame in
-            if dropTarget {targets.frames[unit.id]=frame}
+        // Where this card is, for grant icons dropped on it. Registered again every time the card appears (switching
+        // 游戏 → 绘本 removes it, and an unmoved card would otherwise never report its place again).
+        .background{
+            if dropTarget {
+                GeometryReader{g in
+                    Color.clear
+                        .onAppear{targets.frames[unit.id]=g.frame(in:.global)}
+                        .onChange(of:g.frame(in:.global)){_,frame in targets.frames[unit.id]=frame}
+                }
+            }
         }
         .onDisappear{if dropTarget {targets.frames[unit.id]=nil}}
         .overlay{BookGainBurst(gain:gain,size:size).frame(width:size.width,height:size.height).allowsHitTesting(false)}

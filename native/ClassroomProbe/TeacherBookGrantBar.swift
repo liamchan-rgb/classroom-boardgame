@@ -58,7 +58,15 @@ struct TeacherBookGrantBar:View {
         HStack(spacing:8){
             // A popover (not a menu) so several people / a whole group can be ticked before it is closed.
             Button{prepare();picking=true}label:{Label("\(selected.count)",systemImage:"person.2.fill")}
+                #if targetEnvironment(macCatalyst)
+                // A popover here shows up empty on the Mac (as the word card did): a sheet there instead.
+                .sheet(isPresented:$picking){
+                    recipientPicker.padding(.top,8).frame(maxWidth:.infinity,maxHeight:.infinity,alignment:.top).background(GlassBackdrop())
+                        .presentationDetents([.medium])
+                }
+                #else
                 .popover(isPresented:$picking,arrowEdge:.bottom){recipientPicker}
+                #endif
             // Drag the icon onto a player's card in the preview to give that player the amount in the box.
             HStack(spacing:4){
                 GrantDragHandle(systemImage:"figure.walk",tint:GameTheme.primary,amount:draft.steps){id in dropGrant(id,steps:true)}
