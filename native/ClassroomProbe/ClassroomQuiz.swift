@@ -75,14 +75,25 @@ private struct QuizCardRepresentable: UIViewRepresentable {
 
 // MARK: - Docked answer panel
 
+/// What the docked answer panel shows: the panel's view and its key handler.
+struct DockContent {
+    let id = UUID()
+    let view: AnyView
+    let onKey: ((String) -> Bool)?
+}
+protocol DockablePanel { func dockContent() -> DockContent }
+extension KeyHostingController: DockablePanel {
+    func dockContent() -> DockContent { DockContent(view: AnyView(rootView), onKey: onKey) }
+}
+
 /// Beside the teacher's preview (game or picture book tab): the panel of the question on screen. Only the tab in
-/// front shows it (one controller can only sit in one place).
+/// front shows it; each place builds its own controller from the same content (the models inside are shared).
 struct QuizDock: View {
     @ObservedObject var game: MeadowTeacherCoordinator
     var book: Bool
     var body: some View {
-        if let panel = game.dockPanel, game.bookTabActive == book {
-            DockedPanel(panel: panel).frame(width: 480).layoutPriority(1)
+        if let content = game.dockContent, game.bookTabActive == book {
+            DockedPanel(content: content).id(content.id).frame(width: 480).layoutPriority(1)
                 .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                 .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(.white.opacity(0.5), lineWidth: 1))
                 .transition(.move(edge: .trailing).combined(with: .opacity))
@@ -91,20 +102,13 @@ struct QuizDock: View {
 }
 
 private struct DockedPanel: UIViewControllerRepresentable {
-    let panel: UIViewController
-    final class Holder: UIViewController {
-        func hold(_ child: UIViewController) {
-            guard child.parent !== self else { return }
-            children.forEach { $0.willMove(toParent: nil); $0.view.removeFromSuperview(); $0.removeFromParent() }
-            if child.parent != nil { child.willMove(toParent: nil); child.view.removeFromSuperview(); child.removeFromParent() }
-            addChild(child); child.view.frame = view.bounds; child.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-            view.addSubview(child.view); child.didMove(toParent: self)
-            // The panel takes the keys (letters, ⏎, Esc) as soon as it shows.
-            DispatchQueue.main.async { child.becomeFirstResponder() }
-        }
+    let content: DockContent
+    func makeUIViewController(context: Context) -> KeyHostingController<AnyView> {
+        let c = KeyHostingController(rootView: content.view); c.onKey = content.onKey
+        c.view.backgroundColor = .clear
+        return c
     }
-    func makeUIViewController(context: Context) -> Holder { let h = Holder(); h.view.backgroundColor = .clear; h.hold(panel); return h }
-    func updateUIViewController(_ holder: Holder, context: Context) { holder.hold(panel) }
+    func updateUIViewController(_ c: KeyHostingController<AnyView>, context: Context) { c.onKey = content.onKey }
 }
 
 // MARK: - Launcher (personal)

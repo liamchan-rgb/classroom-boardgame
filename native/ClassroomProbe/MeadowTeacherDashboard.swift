@@ -35,9 +35,14 @@ struct MeadowTeacherDashboard:View {
                 Spacer(minLength:0)
                 Button{game.openTimer()}label:{Label("计时",systemImage:"timer")}
                 QuizCourseMenu(game:game)
-                Button{game.openQuiz()}label:{Label("答题",systemImage:"questionmark.bubble")}.disabled(game.quiz != nil)
-                Button{game.openClassQuiz()}label:{Label("全班题",systemImage:"person.3.sequence")}.disabled(game.quiz != nil)
-                Button{game.openPractice()}label:{Label("闪卡",systemImage:"rectangle.on.rectangle.angled")}.disabled(game.quiz != nil)
+                if game.quizActive {
+                    // While a question / challenge / practice is on: one click ends it.
+                    Button{game.abortQuiz()}label:{Label("结束答题",systemImage:"xmark.octagon.fill")}.foregroundStyle(.red)
+                } else {
+                    Button{game.openQuiz()}label:{Label("答题",systemImage:"questionmark.bubble")}
+                    Button{game.openClassQuiz()}label:{Label("全班题",systemImage:"person.3.sequence")}
+                    Button{game.openPractice()}label:{Label("闪卡",systemImage:"rectangle.on.rectangle.angled")}
+                }
                 LaserButton(laser:game.laser){game.toggleLaser()}
                 ClassroomScoreboardButton(overlays:game.overlays){game.toggleScoreboard()}
                 Button{game.openCharacterStudio()}label:{Label("形象",systemImage:"person.crop.circle.badge.plus")}.disabled(game.busy)

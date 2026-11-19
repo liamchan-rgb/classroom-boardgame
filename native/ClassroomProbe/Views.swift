@@ -39,9 +39,14 @@ private struct TeacherBookConsole:View {
                 Spacer()
                 Button{notesFocused=false;game.openTimer()}label:{Label("计时",systemImage:"timer")}
                 QuizCourseMenu(game:game)
-                Button{notesFocused=false;game.openQuiz()}label:{Label("答题",systemImage:"questionmark.bubble")}.disabled(game.quiz != nil)
-                Button{notesFocused=false;game.openClassQuiz()}label:{Label("全班题",systemImage:"person.3.sequence")}.disabled(game.quiz != nil)
-                Button{notesFocused=false;game.openPractice()}label:{Label("闪卡",systemImage:"rectangle.on.rectangle.angled")}.disabled(game.quiz != nil)
+                if game.quizActive {
+                    // While a question / challenge / practice is on: one click ends it.
+                    Button{notesFocused=false;game.abortQuiz()}label:{Label("结束答题",systemImage:"xmark.octagon.fill")}.foregroundStyle(.red)
+                } else {
+                    Button{notesFocused=false;game.openQuiz()}label:{Label("答题",systemImage:"questionmark.bubble")}
+                    Button{notesFocused=false;game.openClassQuiz()}label:{Label("全班题",systemImage:"person.3.sequence")}
+                    Button{notesFocused=false;game.openPractice()}label:{Label("闪卡",systemImage:"rectangle.on.rectangle.angled")}
+                }
                 LaserButton(laser:game.laser){notesFocused=false;game.toggleLaser()}
                 ClassroomScoreboardButton(overlays:game.overlays){game.toggleScoreboard()}
                 Button{notesFocused=false;game.openShortcutEditor()}label:{Label("快捷键",systemImage:"keyboard")}

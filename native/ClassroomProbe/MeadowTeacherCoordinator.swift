@@ -58,11 +58,14 @@ final class MeadowTeacherCoordinator:ObservableObject {
     private var practiceModel:PracticeModel?
     /// The answer panel of the question on screen, docked beside the teacher's preview (not a sheet over it), so
     /// the preview, the map and the laser pointer stay usable while a question is up.
-    @Published var dockPanel:UIViewController?
+    /// What the dock shows; each place that shows it builds its own hosting controller from it (one controller
+    /// moved between places went blank).
+    @Published var dockContent:DockContent?
+    private weak var dockPanel:UIViewController?
     private func presentPanel(_ panel:UIViewController,size:CGSize,dock:Bool=false){
-        if dock {
-            quizPanel=panel
-            withAnimation(.easeOut(duration:0.2)){dockPanel=panel}
+        if dock,let content=(panel as? DockablePanel)?.dockContent() {
+            quizPanel=panel;dockPanel=panel
+            withAnimation(.easeOut(duration:0.2)){dockContent=content}
             return
         }
         panel.modalPresentationStyle = .formSheet;panel.preferredContentSize=size
@@ -75,7 +78,8 @@ final class MeadowTeacherCoordinator:ObservableObject {
         // Forget the panel first: whatever opens next (the launcher again) must not think one is still up.
         let panel=quizPanel;quizPanel=nil
         if let panel,panel===dockPanel {
-            withAnimation(.easeIn(duration:0.15)){dockPanel=nil}
+            dockPanel=nil
+            withAnimation(.easeIn(duration:0.15)){dockContent=nil}
             DispatchQueue.main.async{then?()}
             return
         }
@@ -115,6 +119,16 @@ final class MeadowTeacherCoordinator:ObservableObject {
             screen.onKey={key in if key=="⎋" || key=="⏎" {done();return true};return false}
             self.presentPanel(screen,size:CGSize(width:760,height:560))
         }
+    }
+    /// Anything quiz-related on screen (a question, a challenge, practice or its panel).
+    var quizActive:Bool {quiz != nil || challenge != nil || dockContent != nil}
+    /// Top bar "结束答题": ends whatever is going on at once (nothing more is recorded; what was already sent stays).
+    func abortQuiz(){
+        challengeTimer?.invalidate();challengeTimer=nil
+        practiceModel=nil;classModel=nil;quizDraft=nil;quizReward=nil;quizGainBase=nil
+        closePanel()
+        withAnimation(.easeIn(duration:0.15)){quiz=nil;challenge=nil}
+        renderer?.classroomRefresh();revision += 1
     }
     /// Q: the timed challenge on a student's own questions (setup: who and how long).
     func openQuiz(){
@@ -207,6 +221,11 @@ final class MeadowTeacherCoordinator:ObservableObject {
         challengeTimer?.invalidate();challengeTimer=nil
         if quiz?.attempt == nil {withAnimation{quiz=nil}}
         model.phase = .finished;model.draft=nil
+        // The result stays 2 seconds on the TV, then everything closes by itself.
+        DispatchQueue.main.asyncAfter(deadline:.now()+2){[weak self,weak model] in
+            guard let self,let model,self.challenge === model,model.phase == .finished else{return}
+            self.endChallenge()
+        }
     }
     private func endChallenge(){
         guard let model=challenge else{closePanel();return}
@@ -411,7 +430,9 @@ final class MeadowTeacherCoordinator:ObservableObject {
         if live.mode == .challenge {
             withAnimation{quiz=nil}
             if let model=challenge,model.phase == .question {
-                if model.remaining>0 {model.phase = .picking;model.draft=nil} else {finishChallenge()}
+                // Time up, or nothing left at any level: the challenge is over (no waiting for the clock).
+                let left=campaign?.challengeLeft(for:model.player).reduce(0,+) ?? 0
+                if model.remaining>0 && left>0 {model.phase = .picking;model.draft=nil} else {finishChallenge()}
             }
             return
         }
