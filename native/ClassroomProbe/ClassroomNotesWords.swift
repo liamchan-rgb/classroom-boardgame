@@ -225,7 +225,7 @@ struct WordCardPopup: View {
                 Button { onAsk() } label: { Label("出题 (⏎)", systemImage: "person.3.sequence") }.buttonStyle(GlassIconButtonStyle(prominent: true)).disabled(model.card == nil)
             }
         }
-        .padding(16).frame(width: 440).background(GlassBackdrop()).foregroundStyle(GameTheme.ink)
+        .padding(18).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(GlassBackdrop()).foregroundStyle(GameTheme.ink)
     }
     private func senseRow(_ pos: String, _ meanings: [String]) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 6) {
@@ -250,7 +250,7 @@ extension QuizLibrary {
 }
 
 extension MeadowTeacherCoordinator {
-    /// Double-click in the notes: the word card as a popover at the word.
+    /// Double-click in the notes: the word card.
     func openWordCard(_ pick: NotesWordPick, rect: CGRect, in view: UIView) {
         guard let host = presentationHost else { return }
         NotesDictionary.shared.prewarm()
@@ -265,11 +265,9 @@ extension MeadowTeacherCoordinator {
         screen.onKey = { (key: String) -> Bool in
             switch key { case "⏎": finish(true); return true; case "⎋": dismiss(); return true; default: return false }
         }
-        screen.modalPresentationStyle = .popover
-        screen.preferredContentSize = CGSize(width: 440, height: 470)
-        screen.popoverPresentationController?.sourceView = view
-        screen.popoverPresentationController?.sourceRect = rect
-        screen.popoverPresentationController?.permittedArrowDirections = [.left, .right, .up, .down]
+        // A sheet like the other panels (a popover at the word rendered empty on the Mac).
+        screen.modalPresentationStyle = .formSheet
+        screen.preferredContentSize = CGSize(width: 460, height: 500)
         host.present(screen, animated: true)
     }
     /// Puts the card in the current course (the same front replaces its old card), and with `ask` shows it to the
