@@ -96,6 +96,13 @@ final class CustomWheelViewController: UIViewController {
         super.init(nibName: nil, bundle: nil); modalPresentationStyle = .fullScreen
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    // Like the shop: the console's shortcuts (laser L, timer, scoreboard…) keep working over the wheel.
+    override var canBecomeFirstResponder: Bool { true }
+    override func viewDidAppear(_ animated: Bool) { super.viewDidAppear(animated); becomeFirstResponder() }
+    override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
+        if ClassroomGlobalTools.handlePresses?(presses) == true { return }
+        super.pressesBegan(presses, with: event)
+    }
     private var people: [GameUnit] { session.engine.state.players.filter { $0.isAlive } }
 
     override func viewDidLoad() {

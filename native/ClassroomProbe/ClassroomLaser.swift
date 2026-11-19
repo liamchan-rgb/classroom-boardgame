@@ -69,9 +69,12 @@ import MeadowClassroomSupport
 /// The dot, drawn in the TV overlays (TV, public window and the teacher's preview alike).
 struct LaserLayer: View {
     @ObservedObject var laser: LaserPointer
+    /// Drawn inside a pack / shop / wheel panel (the public screen gets it through its live copy of the panel), not
+    /// over the game or book; the overlay copy is the other way round, so the dot is never drawn twice.
+    var onPanel = false
     var body: some View {
         GeometryReader { g in
-            if laser.on, laser.point != nil || laser.pulse != nil {
+            if laser.on, (laser.panelAspect != nil) == onPanel, laser.point != nil || laser.pulse != nil {
                 // On a copied panel: where the public screen draws that copy (fitted, centred); else the canvas.
                 let r = laser.panelAspect.map { LaserPointer.fit($0, in: g.size) } ?? ClassroomCanvas.fitted(in: g.size), unit = ClassroomCanvas.fitted(in: g.size).height / 720
                 TimelineView(.animation(minimumInterval: 1 / 60, paused: laser.idle)) { context in
@@ -165,7 +168,7 @@ final class LaserPanelCatcher: UIView {
         addGestureRecognizer(pan)
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tap(_:))))
         // The same dot on the teacher's panel (the public screen draws it over its copy of the panel).
-        let dot = UIHostingController(rootView: LaserLayer(laser: laser)).view!
+        let dot = UIHostingController(rootView: LaserLayer(laser: laser, onPanel: true)).view!
         dot.backgroundColor = .clear; dot.isUserInteractionEnabled = false
         dot.frame = bounds; dot.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         addSubview(dot)
