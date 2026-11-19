@@ -196,7 +196,7 @@ struct QuizReportPageView: View {
                         Text(q.summary).font(.system(size: 10, weight: .bold, design: .rounded)).foregroundStyle(Ink.ink).lineLimit(2)
                         HStack(spacing: 6) {
                             Text("\(q.question.type.title)\(q.question.difficulty.map { " " + String(repeating: "★", count: $0) } ?? "") · \(q.attempts) 人作答")
-                            if let w = q.commonWrong { Text("常见错答：\(w.said)（\(w.count)次）").foregroundStyle(Ink.bad) }
+                            if let w = q.commonWrong, w.said != "答错" { Text("常见错答：\(w.said)（\(w.count)次）").foregroundStyle(Ink.bad) }
                         }.font(.system(size: 8.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted).lineLimit(1)
                     }
                 }
@@ -209,7 +209,7 @@ struct QuizReportPageView: View {
                 section("易错单词（\(report.words.count)）", icon: "character.book.closed.fill")
                 FlowRow(spacing: 6) {
                     ForEach(Array(report.words.prefix(20).enumerated()), id: \.offset) { _, w in
-                        wordChip(w.word, meaning: w.meaning, count: w.wrong, of: w.asked, said: w.commonWrong.map { "常说成 \($0)" })
+                        wordChip(w.word, meaning: w.meaning, count: w.wrong, of: w.asked, said: w.commonWrong.flatMap { $0 == "答错" ? nil : "常说成 \($0)" })
                     }
                 }
                 if report.words.count > 20 { Text("另有 \(report.words.count - 20) 个，见各人错词本").font(.system(size: 8.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted) }
@@ -262,7 +262,7 @@ struct QuizReportPageView: View {
                 }
                 FlowRow(spacing: 6) {
                     ForEach(Array(s.wrongWords.prefix(18).enumerated()), id: \.offset) { _, w in
-                        wordChip(w.word, meaning: w.meaning, count: w.count, of: nil, said: "说成 " + w.said.prefix(2).joined(separator: "/"))
+                        wordChip(w.word, meaning: w.meaning, count: w.count, of: nil, said: { let said = w.said.filter { $0 != "答错" }.prefix(2); return said.isEmpty ? nil : "说成 " + said.joined(separator: "/") }())
                     }
                 }
                 if s.wrongWords.count > 18 { Text("另有 \(s.wrongWords.count - 18) 个").font(.system(size: 8.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted) }
@@ -283,7 +283,7 @@ struct QuizReportPageView: View {
                     ForEach(Array(line.answers.enumerated()).filter { !$0.element.right }.prefix(4), id: \.offset) { _, a in
                         HStack(spacing: 6) {
                             if line.answers.count > 1 { Text(a.label).font(.system(size: 8.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted).lineLimit(1).frame(maxWidth: 150, alignment: .leading) }
-                            chip("说的", a.said, Ink.bad, strike: true)
+                            chip(a.said == "答错" ? "结果" : "说的", a.said, Ink.bad, strike: a.said != "答错")
                             Image(systemName: "arrow.right").font(.system(size: 7, weight: .bold)).foregroundStyle(Ink.muted)
                             chip("正确", a.expected, Ink.good, strike: false)
                         }

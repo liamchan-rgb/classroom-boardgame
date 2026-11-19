@@ -463,7 +463,7 @@ struct PracticePanel: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Label("闪卡练习", systemImage: "rectangle.on.rectangle.angled").font(.title2.bold())
+                Label("闪卡", systemImage: "rectangle.on.rectangle.angled").font(.title2.bold()).fixedSize()
                 Picker("", selection: Binding(get: { model.classwide }, set: { game.setPracticeClasswide($0) })) {
                     Text("个人").tag(false); Text("全班 (A)").tag(true)
                 }.pickerStyle(.segmented).frame(width: 170)
