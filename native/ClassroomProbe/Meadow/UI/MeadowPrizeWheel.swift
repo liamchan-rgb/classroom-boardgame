@@ -56,19 +56,19 @@ final class MeadowPrizeWheelView: UIView {
         super.init(frame: frame)
         isOpaque = false
         glow.shadowOpacity = 0.55; glow.shadowRadius = 26; glow.shadowOffset = .zero
-        glow.shadowColor = UIColor(red: 1, green: 0.8, blue: 0.35, alpha: 1).cgColor
+        glow.shadowColor = UIColor(red: 0.45, green: 0.55, blue: 1, alpha: 1).cgColor
         layer.addSublayer(glow)
         addSubview(face)
         rim.fillColor = UIColor.clear.cgColor
-        rim.strokeColor = UIColor(red: 0.86, green: 0.64, blue: 0.22, alpha: 1).cgColor
+        rim.strokeColor = UIColor(red: 0.16, green: 0.19, blue: 0.42, alpha: 1).cgColor
         rimInner.fillColor = UIColor.clear.cgColor
-        rimInner.strokeColor = UIColor(red: 0.55, green: 0.36, blue: 0.10, alpha: 1).cgColor
+        rimInner.strokeColor = UIColor.white.cgColor
         [rim, rimInner].forEach(layer.addSublayer)
         winWedge.fillColor = UIColor.white.withAlphaComponent(0.0).cgColor
         winWedge.strokeColor = UIColor.white.cgColor
         winWedge.opacity = 0
         face.layer.addSublayer(winWedge)
-        hub.colors = [UIColor(red: 1, green: 0.93, blue: 0.62, alpha: 1).cgColor, UIColor(red: 0.84, green: 0.56, blue: 0.14, alpha: 1).cgColor]
+        hub.colors = [UIColor(red: 0.42, green: 0.48, blue: 0.98, alpha: 1).cgColor, UIColor(red: 0.16, green: 0.19, blue: 0.42, alpha: 1).cgColor]
         hub.type = .radial; hub.startPoint = CGPoint(x: 0.35, y: 0.3); hub.endPoint = CGPoint(x: 1, y: 1)
         hub.borderColor = UIColor.white.withAlphaComponent(0.9).cgColor; hub.borderWidth = 3
         hub.shadowColor = UIColor.black.cgColor; hub.shadowOpacity = 0.35; hub.shadowRadius = 6; hub.shadowOffset = CGSize(width: 0, height: 3)
@@ -76,8 +76,8 @@ final class MeadowPrizeWheelView: UIView {
         hubStar.contentsScale = UIScreen.main.scale
         hub.addSublayer(hubStar)
         layer.addSublayer(hub)
-        pointer.fillColor = UIColor(red: 0.98, green: 0.80, blue: 0.30, alpha: 1).cgColor
-        pointer.strokeColor = UIColor(red: 0.55, green: 0.34, blue: 0.08, alpha: 1).cgColor; pointer.lineWidth = 2.5
+        pointer.fillColor = UIColor(red: 1, green: 0.30, blue: 0.40, alpha: 1).cgColor
+        pointer.strokeColor = UIColor.white.cgColor; pointer.lineWidth = 3
         pointer.shadowColor = UIColor.black.cgColor; pointer.shadowOpacity = 0.45; pointer.shadowRadius = 5; pointer.shadowOffset = CGSize(width: 0, height: 3)
         layer.addSublayer(pointer)
         layer.addSublayer(effects)
@@ -103,8 +103,8 @@ final class MeadowPrizeWheelView: UIView {
         if bulbs.count != count {
             bulbs.forEach { $0.removeFromSuperlayer() }
             bulbs = (0..<count).map { _ in
-                let b = CALayer(); b.backgroundColor = UIColor(red: 1, green: 0.97, blue: 0.8, alpha: 1).cgColor
-                b.shadowColor = UIColor(red: 1, green: 0.85, blue: 0.4, alpha: 1).cgColor; b.shadowOpacity = 0.9; b.shadowRadius = 4; b.shadowOffset = .zero
+                let b = CALayer(); b.backgroundColor = UIColor.white.cgColor
+                b.shadowColor = UIColor(red: 0.75, green: 0.85, blue: 1, alpha: 1).cgColor; b.shadowOpacity = 0.9; b.shadowRadius = 4; b.shadowOffset = .zero
                 layer.insertSublayer(b, above: rim); return b
             }
         }
@@ -350,14 +350,25 @@ final class WheelFaceView: UIView {
     var slices: [WheelSlice] = []
     override init(frame: CGRect) { super.init(frame: frame); isOpaque = false; contentMode = .redraw }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
-    private static func colors(_ s: WheelSlice, index: Int) -> (UIColor, UIColor) {
-        if s.coins { return (UIColor(red: 1, green: 0.88, blue: 0.55, alpha: 1), UIColor(red: 0.86, green: 0.58, blue: 0.16, alpha: 1)) }
-        switch s.rarity {
-        case .common: return index % 2 == 0 ? (UIColor(red: 0.55, green: 0.82, blue: 0.80, alpha: 1), UIColor(red: 0.18, green: 0.50, blue: 0.56, alpha: 1))
-                                            : (UIColor(red: 0.70, green: 0.88, blue: 0.84, alpha: 1), UIColor(red: 0.28, green: 0.60, blue: 0.62, alpha: 1))
-        case .rare: return (UIColor(red: 0.62, green: 0.82, blue: 1, alpha: 1), UIColor(red: 0.16, green: 0.42, blue: 0.86, alpha: 1))
-        case .epic: return (UIColor(red: 0.85, green: 0.70, blue: 1, alpha: 1), UIColor(red: 0.46, green: 0.24, blue: 0.80, alpha: 1))
-        case .legendary: return (UIColor(red: 1, green: 0.90, blue: 0.55, alpha: 1), UIColor(red: 0.92, green: 0.45, blue: 0.10, alpha: 1))
+    /// Bright candy colours, one per slice in turn (neighbours never share one); rarity shows as the rim band.
+    private static let palette: [UIColor] = [
+        UIColor(red: 1.00, green: 0.42, blue: 0.45, alpha: 1), UIColor(red: 1.00, green: 0.63, blue: 0.22, alpha: 1),
+        UIColor(red: 0.98, green: 0.80, blue: 0.16, alpha: 1), UIColor(red: 0.20, green: 0.80, blue: 0.56, alpha: 1),
+        UIColor(red: 0.20, green: 0.66, blue: 1.00, alpha: 1), UIColor(red: 0.50, green: 0.44, blue: 0.98, alpha: 1),
+        UIColor(red: 0.96, green: 0.40, blue: 0.74, alpha: 1),
+    ]
+    private static func color(_ index: Int, count: Int) -> UIColor {
+        var k = index % palette.count
+        // The last slice next to the first: never the same colour.
+        if index == count - 1, count > 1, k == 0 { k = (count - 2) % palette.count == 1 ? 2 : 1 }
+        return palette[k]
+    }
+    private static func band(_ r: MeadowItemRarity) -> UIColor? {
+        switch r {
+        case .common: return nil
+        case .rare: return UIColor(red: 0.25, green: 0.62, blue: 1, alpha: 1)
+        case .epic: return UIColor(red: 0.66, green: 0.38, blue: 1, alpha: 1)
+        case .legendary: return UIColor(red: 1, green: 0.78, blue: 0.18, alpha: 1)
         }
     }
     override func draw(_ rect: CGRect) {
@@ -370,48 +381,58 @@ final class WheelFaceView: UIView {
             let start = -CGFloat.pi / 2 + spans[i].start, end = start + sector
             let wedge = UIBezierPath(); wedge.move(to: c); wedge.addArc(withCenter: c, radius: r, startAngle: start, endAngle: end, clockwise: true); wedge.close()
             ctx.saveGState(); wedge.addClip()
-            let (light, deep) = Self.colors(s, index: i)
-            let g = CGGradient(colorsSpace: nil, colors: [light.cgColor, deep.cgColor] as CFArray, locations: [0.15, 1])!
+            let base = Self.color(i, count: slices.count)
+            let light = base.mixed(with: .white, 0.35)
+            let g = CGGradient(colorsSpace: nil, colors: [light.cgColor, base.cgColor] as CFArray, locations: [0.2, 0.9])!
             ctx.drawRadialGradient(g, startCenter: c, startRadius: 0, endCenter: c, endRadius: r, options: [])
-            // A soft highlight along the slice's leading edge.
-            if s.rarity >= .epic {
-                UIColor.white.withAlphaComponent(0.12).setFill()
-                let shine = UIBezierPath(); shine.move(to: c); shine.addArc(withCenter: c, radius: r, startAngle: start, endAngle: start + sector * 0.35, clockwise: true); shine.close(); shine.fill()
+            // Rarity: a glowing band along the rim (rare blue, epic purple, legendary gold).
+            if let band = Self.band(s.rarity) {
+                let ring = UIBezierPath(arcCenter: c, radius: r * 0.93, startAngle: start, endAngle: end, clockwise: true)
+                ring.lineWidth = r * 0.1; band.setStroke(); ring.stroke()
+                UIColor.white.withAlphaComponent(0.55).setStroke()
+                let edge = UIBezierPath(arcCenter: c, radius: r * 0.875, startAngle: start, endAngle: end, clockwise: true); edge.lineWidth = 1.2; edge.stroke()
             }
             ctx.restoreGState()
-            UIColor.white.withAlphaComponent(0.85).setStroke(); wedge.lineWidth = 1.5; wedge.stroke()
-            // Picture (or words) near the rim, upright along the slice.
-            // Too thin for a picture or words (a long shot): the coloured sliver says enough.
-            guard sector * r >= 22 else { continue }
-            let mid = start + sector / 2
+            UIColor.white.setStroke(); wedge.lineWidth = 2; wedge.stroke()
+            // Picture or words near the rim, upright along the slice; when they do not fit, a "-".
+            let mid = start + sector / 2, chord = r * sector
             ctx.saveGState(); ctx.translateBy(x: c.x + cos(mid) * r * 0.68, y: c.y + sin(mid) * r * 0.68); ctx.rotate(by: mid + .pi / 2)
-            let side = min(r * 0.3, r * sector * 0.62)
-            if let icon = s.icon {
+            let side = min(r * 0.3, chord * 0.62)
+            if chord < 22 {
+                text("-", at: .zero, size: max(10, min(16, chord * 0.8)), color: .white)
+            } else if let icon = s.icon {
                 icon.draw(in: CGRect(x: -side / 2, y: -side / 2, width: side, height: side))
-                if let badge = s.badge { text(badge, at: CGPoint(x: 0, y: side / 2 + side * 0.18), size: max(9, side * 0.3), color: .white) }
+                if let badge = s.badge { fitted(badge, at: CGPoint(x: 0, y: side / 2 + side * 0.18), size: max(9, side * 0.3), width: chord * 0.85) }
             } else if let badge = s.badge {
-                text(badge, at: CGPoint(x: 0, y: -side * 0.05), size: max(10, side * 0.42), color: s.coins ? UIColor(red: 0.45, green: 0.25, blue: 0.02, alpha: 1) : .white)
-                text(s.title, at: CGPoint(x: 0, y: side * 0.42), size: max(8, side * 0.22), color: s.coins ? UIColor(red: 0.45, green: 0.25, blue: 0.02, alpha: 1) : .white)
+                fitted(badge, at: CGPoint(x: 0, y: -side * 0.05), size: max(10, side * 0.42), width: chord * 0.85)
+                fitted(s.title, at: CGPoint(x: 0, y: side * 0.42), size: max(8, side * 0.22), width: chord * 0.85)
             } else {
                 // Words only (a prize outside the game): a few characters per line along the slice.
-                wrapped(s.title, width: max(40, r * sector * 0.75), size: max(9, min(side * 0.3, 20)))
+                wrapped(s.title, width: max(40, chord * 0.75), size: max(9, min(side * 0.3, 20)), room: r * 0.5)
             }
             ctx.restoreGState()
         }
-        // Inner rings.
-        UIColor.white.withAlphaComponent(0.5).setStroke()
-        let inner = UIBezierPath(arcCenter: c, radius: r * 0.27, startAngle: 0, endAngle: 2 * .pi, clockwise: true); inner.lineWidth = 2; inner.stroke()
+        // Inner ring.
+        UIColor.white.withAlphaComponent(0.7).setStroke()
+        let inner = UIBezierPath(arcCenter: c, radius: r * 0.27, startAngle: 0, endAngle: 2 * .pi, clockwise: true); inner.lineWidth = 2.5; inner.stroke()
+    }
+    /// One line of words, or "-" when it is wider than the slice.
+    private func fitted(_ s: String, at p: CGPoint, size: CGFloat, width: CGFloat) {
+        let w = NSAttributedString(string: s, attributes: [.font: MeadowPreviewPalette.font(size, .heavy)]).size().width
+        text(w <= width ? s : "-", at: p, size: size, color: .white)
     }
     private func text(_ s: String, at p: CGPoint, size: CGFloat, color: UIColor) {
         let shadow = NSShadow(); shadow.shadowColor = UIColor.black.withAlphaComponent(0.35); shadow.shadowBlurRadius = 2; shadow.shadowOffset = CGSize(width: 0, height: 1)
         let a = NSAttributedString(string: s, attributes: [.font: MeadowPreviewPalette.font(size, .heavy), .foregroundColor: color, .shadow: shadow])
         let b = a.size(); a.draw(at: CGPoint(x: p.x - b.width / 2, y: p.y - b.height / 2))
     }
-    private func wrapped(_ s: String, width: CGFloat, size: CGFloat) {
+    private func wrapped(_ s: String, width: CGFloat, size: CGFloat, room: CGFloat) {
         let style = NSMutableParagraphStyle(); style.alignment = .center; style.lineBreakMode = .byCharWrapping
         let shadow = NSShadow(); shadow.shadowColor = UIColor.black.withAlphaComponent(0.4); shadow.shadowBlurRadius = 2; shadow.shadowOffset = CGSize(width: 0, height: 1)
         let a = NSAttributedString(string: s, attributes: [.font: MeadowPreviewPalette.font(size, .heavy), .foregroundColor: UIColor.white, .paragraphStyle: style, .shadow: shadow])
-        let box = a.boundingRect(with: CGSize(width: width, height: size * 4), options: [.usesLineFragmentOrigin], context: nil)
+        let box = a.boundingRect(with: CGSize(width: width, height: .greatestFiniteMagnitude), options: [.usesLineFragmentOrigin], context: nil)
+        // More lines than the slice holds: a "-" rather than cut-off words.
+        guard box.height <= min(size * 4.6, room) else { text("-", at: .zero, size: size * 1.4, color: .white); return }
         a.draw(with: CGRect(x: -width / 2, y: -box.height / 2, width: width, height: min(box.height, size * 4)), options: [.usesLineFragmentOrigin, .truncatesLastVisibleLine], context: nil)
     }
 }
@@ -452,4 +473,12 @@ final class WheelPrizeCard: UIView {
         UIView.animate(withDuration: 0.55, delay: 0.1, usingSpringWithDamping: 0.55, initialSpringVelocity: 0.9, options: []) { self.alpha = 1; self.transform = .identity }
     }
     func hide() { UIView.animate(withDuration: 0.2) { self.alpha = 0 } }
+}
+
+private extension UIColor {
+    func mixed(with other: UIColor, _ t: CGFloat) -> UIColor {
+        var a = (CGFloat(0), CGFloat(0), CGFloat(0), CGFloat(0)), b = a
+        getRed(&a.0, green: &a.1, blue: &a.2, alpha: &a.3); other.getRed(&b.0, green: &b.1, blue: &b.2, alpha: &b.3)
+        return UIColor(red: a.0 + (b.0 - a.0) * t, green: a.1 + (b.1 - a.1) * t, blue: a.2 + (b.2 - a.2) * t, alpha: 1)
+    }
 }

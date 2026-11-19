@@ -43,33 +43,113 @@ enum ChipFit {
         (s as NSString).size(withAttributes: [.font: UIFont.systemFont(ofSize: size, weight: weight)]).width * 1.08
     }
     /// How many of `widths` (in order) fit in `rows` lines `line` wide, and how many lines they take.
+    /// A chip wider than the line wraps its text over as many lines as it needs (nothing is cut).
     static func fit(_ widths: [CGFloat], line: CGFloat, spacing: CGFloat, rows: Int) -> (count: Int, rows: Int) {
         guard !widths.isEmpty, rows > 0 else { return (0, 0) }
-        var row = 1, x: CGFloat = 0, n = 0
+        var done = 0, x: CGFloat = 0, n = 0
         for w in widths {
-            let need = x == 0 ? w : x + spacing + w
-            if need <= line || x == 0 { x = x == 0 ? w : need }
-            else { row += 1; if row > rows { return (n, rows) }; x = w }
+            if w > line {
+                let total = done + (x > 0 ? 1 : 0) + Int((w / line).rounded(.up))
+                if total > rows { break }
+                done = total; x = 0
+            } else if x == 0 {
+                if done + 1 > rows { break }
+                x = w
+            } else if x + spacing + w <= line {
+                x += spacing + w
+            } else {
+                if done + 2 > rows { break }
+                done += 1; x = w
+            }
             n += 1
         }
-        return (n, row)
+        return (n, done + (x > 0 ? 1 : 0))
+    }
+    /// Height of `s` wrapped to `width` (the rounded design runs a little wider than the system font).
+    static func height(_ s: String, _ size: CGFloat, _ weight: UIFont.Weight, width: CGFloat) -> CGFloat {
+        let r = (s as NSString).boundingRect(with: CGSize(width: width / 1.08, height: .greatestFiniteMagnitude), options: [.usesLineFragmentOrigin],
+                                             attributes: [.font: UIFont.systemFont(ofSize: size, weight: weight)], context: nil)
+        return ceil(r.height * 1.1)
     }
     static let line: CGFloat = 510
-    static func wrongChip(_ w: QuizReport.WordMiss) -> CGFloat {
-        min(240, text(w.word, 9, .heavy) + (w.meaning.map { text($0, 7.5, .semibold) + 3 } ?? 0) + (w.count > 1 ? text("×\(w.count)", 7.5, .heavy) + 3 : 0)) + 12
-    }
-    static func plainChip(_ t: String) -> CGFloat { min(240, text(t, 9, .heavy)) + 12 }
-    static func vocabChip(_ w: QuizReport.VocabItem, small: Bool) -> CGFloat { min(small ? 120 : 150, text(w.word, small ? 7 : 8, .bold) + 10) + 8 }
+    static func plainChip(_ t: String) -> CGFloat { text(t, 9, .heavy) + 12 }
+    static func vocabChip(_ w: QuizReport.VocabItem, small: Bool) -> CGFloat { text(w.word, small ? 7 : 8, .bold) + 18 }
     static func classChip(_ w: QuizReport.WordStat) -> CGFloat {
-        min(250, text(w.word, 12, .heavy) + (w.meaning.map { text($0, 9, .semibold) + 4 } ?? 0) + text("错\(w.wrong)/\(w.asked)", 8, .heavy) + 4) + 16
+        text(w.word, 12, .heavy) + (w.meaning.map { text($0, 9, .semibold) + 4 } ?? 0) + text("错\(w.wrong)/\(w.asked)", 8, .heavy) + 20
+    }
+
+    // The class flash-card list: number, front, back; rows as tall as their text.
+    static let cardFront: CGFloat = 300, cardBack: CGFloat = 170
+    static func cardRow(_ c: QuizReport.CardStat) -> CGFloat {
+        max(height(c.word, 9.5, .bold, width: cardFront), height(c.meaning ?? "", 9, .medium, width: cardBack)) + 7
+    }
+    /// The class flash-card list split into pages by the rows' real heights.
+    static func cardPages(_ cards: [QuizReport.CardStat]) -> [Range<Int>] {
+        let budget: CGFloat = 786 - 20 - 94 - 30 - 24 - 20
+        var pages: [Range<Int>] = [], start = 0, used: CGFloat = 0
+        for (i, c) in cards.enumerated() {
+            let h = cardRow(c)
+            if used + h > budget, i > start { pages.append(start..<i); start = i; used = 0 }
+            used += h
+        }
+        if start < cards.count { pages.append(start..<cards.count) }
+        return pages
+    }
+
+    // A student's 错题记录: every question still wrong, in full.
+    static func mistakeAnswer(_ line: QuizReport.Line, tries: Int) -> AttributedString {
+        let wrong = line.answers.filter { !$0.right }
+        var said = AttributedString(wrong.first?.said ?? "")
+        said.foregroundColor = Ink.bad
+        if let w = wrong.first, !QuizReport.nonAnswers.contains(w.said) { said.strikethroughStyle = .single }
+        var right = AttributedString("  →  " + wrong.map(\.expected).joined(separator: " / "))
+        right.foregroundColor = Ink.good
+        var tag = AttributedString("  · " + line.question.type.title + (tries > 1 ? " · 错\(tries)次" : ""))
+        tag.foregroundColor = Ink.muted
+        return said + right + tag
+    }
+    static func mistakeHeight(_ line: QuizReport.Line, tries: Int) -> CGFloat {
+        height(line.summary, 9, .bold, width: Self.line - 18) + height(String(mistakeAnswer(line, tries: tries).characters), 8, .heavy, width: Self.line - 18) + 8
     }
 }
 
 // MARK: - Pages
 
+/// Chips in lines; a chip longer than a line wraps its text instead of being cut.
+struct WrapFlow: Layout {
+    var spacing: CGFloat = 4
+    private func sizes(_ subviews: Subviews, width: CGFloat) -> [CGSize] {
+        subviews.map { s in
+            let ideal = s.sizeThatFits(.unspecified)
+            return ideal.width <= width ? ideal : s.sizeThatFits(ProposedViewSize(width: width, height: nil))
+        }
+    }
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let width = proposal.width ?? ChipFit.line
+        var x: CGFloat = 0, y: CGFloat = 0, line: CGFloat = 0
+        for size in sizes(subviews, width: width) {
+            if x > 0, x + size.width > width { x = 0; y += line + spacing; line = 0 }
+            x += size.width + spacing; line = max(line, size.height)
+        }
+        return CGSize(width: width, height: y + line)
+    }
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        var x = bounds.minX, y = bounds.minY, line: CGFloat = 0
+        for (s, size) in zip(subviews, sizes(subviews, width: bounds.width)) {
+            if x > bounds.minX, x + size.width > bounds.maxX { x = bounds.minX; y += line + spacing; line = 0 }
+            s.place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(size))
+            x += size.width + spacing; line = max(line, size.height)
+        }
+    }
+}
+
 extension QuizReport.Student {
-    /// 错题回顾: wrong answers except flash cards (those words are already in the 错词本).
-    var review: [QuizReport.Line] { mistakes.filter { $0.question.type != .flashcard } }
+    /// How many times each question was answered wrong.
+    var wrongTries: [Int: Int] {
+        var n: [Int: Int] = [:]
+        for l in lines where l.attempt.rightCount < l.attempt.correct.count { n[l.attempt.question, default: 0] += 1 }
+        return n
+    }
 }
 
 /// What one printed page shows.
@@ -81,13 +161,11 @@ enum QuizReportPage {
     case studentHistory(Int)
     /// The class page's list of every flash card of the course.
     case cards(range: Range<Int>, first: Bool)
-    static let cardsPerPage = 48
 
     /// Class page and the class flash-card list, then each student in at most two pages.
     static func plan(_ report: QuizReport) -> [QuizReportPage] {
         var pages: [QuizReportPage] = [.overview]
-        var start = 0
-        while start < report.cards.count { pages.append(.cards(range: start..<min(report.cards.count, start + cardsPerPage), first: start == 0)); start += cardsPerPage }
+        for (k, r) in ChipFit.cardPages(report.cards).enumerated() { pages.append(.cards(range: r, first: k == 0)) }
         for (i, s) in report.students.enumerated() {
             pages.append(.student(i))
             if !s.lines.isEmpty || !s.vocabulary.isEmpty { pages.append(.studentHistory(i)) }
@@ -259,7 +337,7 @@ struct QuizReportPageView: View {
             card {
                 section("易错题（\(report.words.count)）", icon: "character.book.closed.fill")
                 let shown = ChipFit.fit(report.words.map(ChipFit.classChip), line: ChipFit.line, spacing: 6, rows: classWordRows).count
-                FlowRow(spacing: 6) {
+                WrapFlow(spacing: 6) {
                     ForEach(Array(report.words.prefix(shown).enumerated()), id: \.offset) { _, w in
                         wordChip(w.word, meaning: w.meaning, count: w.wrong, of: w.asked, said: w.commonWrong.flatMap { $0 == "答错" ? nil : "常说成 \($0)" })
                     }
@@ -272,9 +350,17 @@ struct QuizReportPageView: View {
     // MARK: Student page
 
     @ViewBuilder private func student(_ s: QuizReport.Student, index: Int) -> some View {
-        // Lines each part may take, so page 1 never overflows (the card list is on page 2).
-        let reviewRows = 6
-        let wrongChips = ChipFit.fit(s.wrongWords.map(ChipFit.wrongChip), line: ChipFit.line, spacing: 4, rows: 3).count
+        // Page 1 is measured so it never overflows: what is left after the figures goes to the 错题记录, in full.
+        let fixed = s.correctedWords.map(\.word) + s.corrected.filter { $0.question.type != .flashcard }.map(\.summary)
+        let fixedFit = ChipFit.fit(fixed.map(ChipFit.plainChip), line: ChipFit.line, spacing: 4, rows: 3)
+        let bars = [s.byKind.count, s.byDifficulty.count, s.byTag.count].map { min(4, $0) }.max() ?? 0
+        let used: CGFloat = 94 + 78 + (40 + CGFloat(bars) * 16 + 14) + (fixed.isEmpty ? 0 : 40 + CGFloat(fixedFit.rows) * 17 + (fixedFit.count < fixed.count ? 12 : 0) + 14) + 40 + 16
+        let tries = s.wrongTries, mistakes = s.mistakes
+        let shown: Int = {
+            var left = 786 - 20 - used, n = 0
+            for m in mistakes { let h = ChipFit.mistakeHeight(m, tries: tries[m.attempt.question] ?? 1); if h > left { break }; left -= h; n += 1 }
+            return n
+        }()
         banner(s.name + " 的答题报告", "\(dateRange()) · 作答 \(s.lines.count) 次" + (s.lines.isEmpty ? "" : "（逐条记录见下页）"),
                icon: "person", avatar: (quizInitial(s.name), Ink.avatars[index % Ink.avatars.count]))
         HStack(spacing: 10) {
@@ -287,48 +373,31 @@ struct QuizReportPageView: View {
             card { section("按难度", icon: "star.leadinghalf.filled"); ForEach(s.byDifficulty.prefix(4), id: \.name) { miniBar($0) } }
             if !s.byTag.isEmpty { card { section("按知识点", icon: "tag"); ForEach(s.byTag.prefix(4), id: \.name) { miniBar($0) } } }
         }
-        if !s.wrongWords.isEmpty {
-            card {
-                HStack {
-                    section("错题记录（\(s.wrongWords.count)）", icon: "character.book.closed.fill")
-                    Spacer()
-                    Text("考察 \(s.wordsAsked) 次 · 答错 \(s.wrongWords.reduce(0) { $0 + $1.count }) 次").font(.system(size: 8, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted)
-                }
-                FlowRow(spacing: 4) {
-                    ForEach(Array(s.wrongWords.prefix(wrongChips).enumerated()), id: \.offset) { _, w in
-                        miniChip(w.word, note: w.meaning, extra: w.count > 1 ? "×\(w.count)" : nil, tint: Ink.bad)
-                    }
-                }
-                if s.wrongWords.count > wrongChips { moreLine("另有 \(s.wrongWords.count - wrongChips) 个，见下页闪卡掌握表与作答记录") }
-            }
-        }
-        if !s.correctedWords.isEmpty || !s.corrected.isEmpty {
-            let fixed = s.correctedWords.map(\.word) + s.corrected.filter { $0.question.type != .flashcard }.map(\.summary)
-            let shown = ChipFit.fit(fixed.map(ChipFit.plainChip), line: ChipFit.line, spacing: 4, rows: 2).count
+        if !fixed.isEmpty {
             card {
                 section("已改正（\(fixed.count)）", icon: "checkmark.seal.fill")
-                FlowRow(spacing: 4) { ForEach(Array(fixed.prefix(shown).enumerated()), id: \.offset) { _, t in miniChip(t, note: nil, extra: nil, tint: Ink.good) } }
-                if fixed.count > shown { moreLine("另有 \(fixed.count - shown) 个") }
+                WrapFlow(spacing: 4) { ForEach(Array(fixed.prefix(fixedFit.count).enumerated()), id: \.offset) { _, t in miniChip(t, note: nil, extra: nil, tint: Ink.good) } }
+                if fixed.count > fixedFit.count { moreLine("另有 \(fixed.count - fixedFit.count) 个") }
             }
         }
         card {
-            section("错题回顾（\(s.review.count)）", icon: "arrow.triangle.2.circlepath")
-            if s.mistakes.isEmpty { Label(s.corrected.isEmpty ? "全部答对，太棒了！" : "错题都已改正，太棒了！", systemImage: "sparkles").font(.system(size: 10, weight: .bold, design: .rounded)).foregroundStyle(Ink.good) }
-            else if s.review.isEmpty { Text("只错了闪卡，见错题记录。").font(.system(size: 8.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted) }
-            ForEach(Array(s.review.prefix(reviewRows).enumerated()), id: \.offset) { _, line in
-                let wrong = line.answers.filter { !$0.right }
-                HStack(spacing: 6) {
-                    Text(line.summary).font(.system(size: 8.5, weight: .bold, design: .rounded)).foregroundStyle(Ink.ink).lineLimit(1).truncationMode(.tail)
-                    Spacer(minLength: 6)
-                    Group {
-                        let first = wrong.first
-                        let none = first.map { QuizReport.nonAnswers.contains($0.said) } ?? true
-                        Text(first?.said ?? "").strikethrough(!none, color: Ink.bad.opacity(0.6)).foregroundStyle(Ink.bad)
-                        Text("→ " + (first?.expected ?? "") + (wrong.count > 1 ? " 等\(wrong.count)处" : "")).foregroundStyle(Ink.good)
-                    }.font(.system(size: 8, weight: .heavy, design: .rounded)).lineLimit(1).truncationMode(.tail).frame(maxWidth: 150, alignment: .trailing)
-                }.frame(height: 14)
+            HStack {
+                section("错题记录（\(mistakes.count)）", icon: "character.book.closed.fill")
+                Spacer()
+                if !mistakes.isEmpty { Text("红字为所答，绿字为正确答案").font(.system(size: 8, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted) }
             }
-            if s.review.count > reviewRows { moreLine("另有 \(s.review.count - reviewRows) 题，见下页作答记录（✗）") }
+            if mistakes.isEmpty { Label(s.corrected.isEmpty ? "全部答对，太棒了！" : "错题都已改正，太棒了！", systemImage: "sparkles").font(.system(size: 10, weight: .bold, design: .rounded)).foregroundStyle(Ink.good) }
+            ForEach(Array(mistakes.prefix(shown).enumerated()), id: \.offset) { k, line in
+                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                    Text("\(k + 1)").font(.system(size: 8, weight: .heavy, design: .rounded)).foregroundStyle(Ink.bad).frame(width: 14, alignment: .trailing)
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(line.summary).font(.system(size: 9, weight: .bold, design: .rounded)).foregroundStyle(Ink.ink)
+                        Text(ChipFit.mistakeAnswer(line, tries: tries[line.attempt.question] ?? 1)).font(.system(size: 8, weight: .heavy, design: .rounded))
+                    }.fixedSize(horizontal: false, vertical: true)
+                    Spacer(minLength: 0)
+                }.padding(.vertical, 2)
+            }
+            if mistakes.count > shown { moreLine("另有 \(mistakes.count - shown) 题，见下页作答记录（✗）") }
         }
     }
     /// The card list (page 2, above the answers): all of the student's cards, as many lines as it needs up to 14.
@@ -344,7 +413,7 @@ struct QuizReportPageView: View {
                     legend("xmark", "答错 \(count(.wrong))", Ink.bad); legend("circle.dashed", "未单独考察 \(count(.untested))", Ink.muted)
                 }.font(.system(size: 7.5, weight: .semibold, design: .rounded))
             }
-            FlowRow(spacing: 3) { ForEach(Array(v.prefix(shown).enumerated()), id: \.offset) { _, w in vocabMini(w, small: v.count > 60) } }
+            WrapFlow(spacing: 3) { ForEach(Array(v.prefix(shown).enumerated()), id: \.offset) { _, w in vocabMini(w, small: v.count > 60) } }
             if v.count > shown { moreLine("另有 \(v.count - shown) 张，见课堂报告的闪卡总表") }
         }
     }
@@ -352,13 +421,12 @@ struct QuizReportPageView: View {
     private func wordChip(_ word: String, meaning: String?, count: Int, of asked: Int?, said: String?) -> some View {
         VStack(alignment: .leading, spacing: 1) {
             HStack(alignment: .firstTextBaseline, spacing: 4) {
-                Text(word).font(.system(size: 12, weight: .heavy, design: .rounded)).foregroundStyle(Ink.ink).lineLimit(1)
-                if let meaning { Text(meaning).font(.system(size: 9, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted).lineLimit(1) }
+                Text(word).font(.system(size: 12, weight: .heavy, design: .rounded)).foregroundStyle(Ink.ink)
+                if let meaning { Text(meaning).font(.system(size: 9, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted) }
                 Text(asked.map { "错\(count)/\($0)" } ?? (count > 1 ? "×\(count)" : "")).font(.system(size: 8, weight: .heavy, design: .rounded)).foregroundStyle(Ink.bad)
             }
-            if let said { Text(said).font(.system(size: 7.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.bad.opacity(0.85)).lineLimit(1) }
+            if let said { Text(said).font(.system(size: 7.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.bad.opacity(0.85)) }
         }
-        .frame(maxWidth: 250, alignment: .leading).fixedSize(horizontal: false, vertical: true)
         .padding(.horizontal, 8).padding(.vertical, 5)
         .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Ink.bad.opacity(0.07)))
         .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).stroke(Ink.bad.opacity(0.25), lineWidth: 0.6))
@@ -373,11 +441,10 @@ struct QuizReportPageView: View {
     /// A one-line chip; long sentences are cut, never wrapped.
     private func miniChip(_ text: String, note: String?, extra: String?, tint: Color) -> some View {
         HStack(spacing: 3) {
-            Text(text).font(.system(size: 9, weight: .heavy, design: .rounded)).foregroundStyle(Ink.ink).lineLimit(1).truncationMode(.tail)
-            if let note { Text(note).font(.system(size: 7.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted).lineLimit(1) }
+            Text(text).font(.system(size: 9, weight: .heavy, design: .rounded)).foregroundStyle(Ink.ink)
+            if let note { Text(note).font(.system(size: 7.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted) }
             if let extra { Text(extra).font(.system(size: 7.5, weight: .heavy, design: .rounded)).foregroundStyle(tint) }
         }
-        .frame(maxWidth: 240, alignment: .leading).fixedSize(horizontal: false, vertical: true)
         .padding(.horizontal, 6).padding(.vertical, 2.5)
         .background(RoundedRectangle(cornerRadius: 6).fill(tint.opacity(0.09)))
     }
@@ -387,9 +454,8 @@ struct QuizReportPageView: View {
         }()
         return HStack(spacing: 2) {
             Image(systemName: icon).font(.system(size: small ? 5.5 : 6.5, weight: .heavy)).foregroundStyle(tint)
-            Text(w.word).font(.system(size: small ? 7 : 8, weight: .bold, design: .rounded)).foregroundStyle(Ink.ink).lineLimit(1).truncationMode(.tail)
+            Text(w.word).font(.system(size: small ? 7 : 8, weight: .bold, design: .rounded)).foregroundStyle(Ink.ink)
         }
-        .frame(maxWidth: small ? 120 : 150, alignment: .leading).fixedSize(horizontal: false, vertical: true)
         .padding(.horizontal, 4).padding(.vertical, 1.5)
         .background(RoundedRectangle(cornerRadius: 4).fill(tint.opacity(w.status == .untested ? 0.06 : 0.11)))
     }
@@ -458,35 +524,28 @@ struct QuizReportPageView: View {
     // MARK: Class flash-card list
 
     @ViewBuilder private func classCards(range: Range<Int>, first: Bool) -> some View {
-        let cards = report.cards, asked = cards.filter { $0.asked > 0 }.count
-        banner("闪卡总表" + (first ? "" : "（续）"), "本课闪卡 \(cards.count) 张（公用 + 全部专属）· 已考察 \(asked) · 未单独考察 \(cards.count - asked)", icon: "rectangle.stack.fill")
+        banner("闪卡总表" + (first ? "" : "（续）"), "本课闪卡 \(report.cards.count) 张（公用 + 全部专属）", icon: "rectangle.stack.fill")
         card {
-            let items = Array(cards[range])
-            VStack(alignment: .leading, spacing: 6) {
-                ForEach(Array(stride(from: 0, to: items.count, by: 3)), id: \.self) { row in
-                    HStack(spacing: 6) {
-                        ForEach(row..<min(row + 3, items.count), id: \.self) { k in cardChip(items[k]) }
-                        if items.count - row < 3 { ForEach(0..<(3 - (items.count - row)), id: \.self) { _ in Color.clear.frame(maxWidth: .infinity, maxHeight: 1) } }
+            HStack(spacing: 8) {
+                Text("#").frame(width: 22, alignment: .trailing)
+                Text("正面").frame(width: ChipFit.cardFront, alignment: .leading)
+                Text("背面").frame(maxWidth: .infinity, alignment: .leading)
+            }.font(.system(size: 8.5, weight: .bold, design: .rounded)).foregroundStyle(Ink.muted)
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(Array(range), id: \.self) { k in
+                    let c = report.cards[k]
+                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                        Text("\(k + 1)").font(.system(size: 8, weight: .heavy, design: .rounded)).foregroundStyle(Ink.muted).monospacedDigit().frame(width: 22, alignment: .trailing)
+                        Text(c.word).font(.system(size: 9.5, weight: .bold, design: .rounded)).foregroundStyle(Ink.ink)
+                            .frame(width: ChipFit.cardFront, alignment: .leading).fixedSize(horizontal: false, vertical: true)
+                        Text(c.meaning ?? "").font(.system(size: 9, weight: .medium, design: .rounded)).foregroundStyle(Ink.ink.opacity(0.8))
+                            .frame(maxWidth: .infinity, alignment: .leading).fixedSize(horizontal: false, vertical: true)
                     }
+                    .padding(.vertical, 3)
+                    .overlay(alignment: .bottom) { Rectangle().fill(Ink.line).frame(height: 0.5) }
                 }
             }
         }
-        Text("每张卡：全班答对次数 / 作答次数；红字为答错过的同学。").font(.system(size: 8.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted)
-    }
-    private func cardChip(_ c: QuizReport.CardStat) -> some View {
-        let rate = c.asked == 0 ? 0 : Double(c.right) / Double(c.asked)
-        let tint = c.asked == 0 ? Ink.muted : Ink.rate(rate)
-        return VStack(alignment: .leading, spacing: 1) {
-            HStack(spacing: 4) {
-                Text(c.word).font(.system(size: 9.5, weight: .heavy, design: .rounded)).foregroundStyle(Ink.ink).lineLimit(1).truncationMode(.tail)
-                Spacer(minLength: 2)
-                Text(c.asked == 0 ? "未单独考察" : "\(c.right)/\(c.asked)").font(.system(size: 7.5, weight: .heavy, design: .rounded)).foregroundStyle(tint)
-            }
-            if let m = c.meaning { Text(m).font(.system(size: 7.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted).lineLimit(1) }
-            if !c.missedBy.isEmpty { Text(c.missedBy.joined(separator: "、")).font(.system(size: 7, weight: .bold, design: .rounded)).foregroundStyle(Ink.bad).lineLimit(1) }
-        }
-        .padding(.horizontal, 7).padding(.vertical, 4).frame(maxWidth: .infinity, minHeight: 34, alignment: .topLeading)
-        .background(RoundedRectangle(cornerRadius: 7).fill(tint.opacity(c.asked == 0 ? 0.06 : 0.1)))
     }
     private func historyTag(_ a: QuizAttempt) -> String {
         if a.skipped == true { return "未作答" }
