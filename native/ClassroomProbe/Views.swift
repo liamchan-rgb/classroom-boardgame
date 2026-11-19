@@ -12,6 +12,8 @@ struct TeacherConsole:View {
         }.preferredColorScheme(.light)
         .overlay(alignment:.top){ClassroomGrantCaptureBanner(game:session.game).padding(.top,8)}
         // Opening the game tab while the book is on the TV brings the game back to the TV as well.
+        // A deck opened from the game tab's 课件 list shows on the book tab.
+        .onChange(of:session.bookTabRequest){_,_ in tab=1}
         .onChange(of:tab){_,value in
             session.game.bookTabActive = value==1
             if value==0,session.game.surface == .book {session.concealNotes();session.game.project(.exploration)}
@@ -31,24 +33,16 @@ private struct TeacherBookConsole:View {
     @FocusState private var notesFocused:Bool
     /// Notes show formatted (bold / underline from the PPT); the pencil switches to the raw text with its ** / __ marks.
     @State private var editingNotes=false
+    @State private var decks=false
     var body:some View {
         VStack(alignment:.leading,spacing:10){
             HStack(spacing:8){
                 Label("绘本",systemImage:"book.pages.fill").font(.system(size:20,weight:.bold,design:.rounded))
                 GlassChip(icon:"tv",text:session.registrationStatus.contains("连接") ? "TV":"—",tint:GameTheme.muted).lineLimit(1)
                 Spacer()
-                Button{notesFocused=false;game.openTimer()}label:{Label("计时",systemImage:"timer")}
-                QuizCourseMenu(game:game)
-                if game.quizActive {
-                    // While a question / challenge / practice is on: one click ends it.
-                    Button{notesFocused=false;game.abortQuiz()}label:{Label("结束答题",systemImage:"xmark.octagon.fill")}.foregroundStyle(.red)
-                } else {
-                    Button{notesFocused=false;game.openQuiz()}label:{Label("答题",systemImage:"questionmark.bubble")}
-                    Button{notesFocused=false;game.openClassQuiz()}label:{Label("全班题",systemImage:"person.3.sequence")}
-                    Button{notesFocused=false;game.openPractice()}label:{Label("闪卡",systemImage:"rectangle.on.rectangle.angled")}
-                }
-                LaserButton(laser:game.laser){notesFocused=false;game.toggleLaser()}
-                ClassroomScoreboardButton(overlays:game.overlays){game.toggleScoreboard()}
+                ClassroomToolbarTools(game:game,prepare:{notesFocused=false})
+                ToolbarGap()
+                Button{notesFocused=false;decks=true}label:{Label("课件",systemImage:"rectangle.stack")}
                 Button{notesFocused=false;game.openShortcutEditor()}label:{Label("快捷键",systemImage:"keyboard")}
                 Button{notesFocused=false;game.openGM()}label:{Label("GM",systemImage:"wand.and.stars")}.disabled(game.busy || game.campaign==nil)
                 Button{notesFocused=false;game.openArchives()}label:{Label("存档",systemImage:"archivebox")}.disabled(game.busy)
@@ -63,7 +57,13 @@ private struct TeacherBookConsole:View {
                     Button{exportingURL=session.exportedURL()}label:{Label("导出备份",systemImage:"square.and.arrow.up")}
                     Button{importingBackup=true;openImporter()}label:{Label("导入备份",systemImage:"tray.and.arrow.down")}
                 }label:{Label("文件",systemImage:"folder")}
-            }.buttonStyle(GlassIconButtonStyle()).menuStyle(.button).padding(.horizontal,10).padding(.vertical,6).glassPanel(radius:20,padding:0)
+            }.buttonStyle(ToolbarIconStyle()).menuStyle(.button).padding(.horizontal,10).padding(.vertical,6).glassPanel(radius:20,padding:0)
+            // The deck list sits on the toolbar (not beside the other sheets: two sheets on one view conflict).
+            .sheet(isPresented:$decks){
+                DeckLibraryPanel(session:session,onImport:{decks=false;DispatchQueue.main.asyncAfter(deadline:.now()+0.5){importingBackup=false;openImporter()}},onClose:{decks=false})
+                    .presentationDetents([.large])
+            }
+            .onChange(of:session.importRequest){_,_ in importingBackup=false;openImporter()}
             HStack(spacing:8){
                 Button{notesFocused=false;game.project(.book)}label:{Label("投放",systemImage:"tv.and.mediabox")}.buttonStyle(GlassIconButtonStyle(prominent:true)).disabled(game.busy)
                 Button{notesFocused=false;session.concealNotes();game.project(.exploration);showGame()}label:{Label("游戏",systemImage:"gamecontroller.fill")}

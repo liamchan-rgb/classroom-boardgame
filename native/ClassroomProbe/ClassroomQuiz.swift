@@ -661,7 +661,6 @@ struct QuizCourseMenu: View {
         } label: {
             Label(library.active ?? "题库", systemImage: "text.book.closed").lineLimit(1)
         } primaryAction: { game.openQuizBank() }
-        .frame(maxWidth: 220)
     }
 }
 

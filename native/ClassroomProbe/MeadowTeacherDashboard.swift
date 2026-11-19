@@ -9,10 +9,18 @@ struct MeadowTeacherDashboard:View {
     @ObservedObject var game:MeadowTeacherCoordinator
     @State private var selectingNode=false
     @State private var fullPreview=false
+    @State private var decks=false
     var body:some View {
         workspace(fullScreen:false).padding(8).background(GlassBackdrop())
             .fullScreenCover(isPresented:$fullPreview){workspace(fullScreen:true).padding(8).background(GlassBackdrop())}
             .onChange(of:fullPreview){_,value in game.localOutputPreview=value}
+            // 课件 from the game tab: opening a deck (or importing one) goes on in the book tab.
+            .sheet(isPresented:$decks){
+                DeckLibraryPanel(session:TeacherSession.shared,onImport:{
+                    decks=false
+                    DispatchQueue.main.asyncAfter(deadline:.now()+0.5){TeacherSession.shared.bookTabRequest += 1;TeacherSession.shared.importRequest += 1}
+                },onClose:{decks=false})
+            }
     }
     private var inBattle:Bool {game.campaign?.engine.state.battle != nil}
     private var targetName:String {game.campaign?.engine.state.units[game.selectedTarget]?.name ?? "选择目标"}
@@ -33,18 +41,9 @@ struct MeadowTeacherDashboard:View {
                     GlassChip(icon:difficultyIcon(c.difficulty),text:c.difficulty.title,tint:difficultyTint(c.difficulty))
                 }
                 Spacer(minLength:0)
-                Button{game.openTimer()}label:{Label("计时",systemImage:"timer")}
-                QuizCourseMenu(game:game)
-                if game.quizActive {
-                    // While a question / challenge / practice is on: one click ends it.
-                    Button{game.abortQuiz()}label:{Label("结束答题",systemImage:"xmark.octagon.fill")}.foregroundStyle(.red)
-                } else {
-                    Button{game.openQuiz()}label:{Label("答题",systemImage:"questionmark.bubble")}
-                    Button{game.openClassQuiz()}label:{Label("全班题",systemImage:"person.3.sequence")}
-                    Button{game.openPractice()}label:{Label("闪卡",systemImage:"rectangle.on.rectangle.angled")}
-                }
-                LaserButton(laser:game.laser){game.toggleLaser()}
-                ClassroomScoreboardButton(overlays:game.overlays){game.toggleScoreboard()}
+                ClassroomToolbarTools(game:game)
+                ToolbarGap()
+                Button{decks=true}label:{Label("课件",systemImage:"rectangle.stack")}
                 Button{game.openCharacterStudio()}label:{Label("形象",systemImage:"person.crop.circle.badge.plus")}.disabled(game.busy)
                 Button{game.openPixelCharacterLab()}label:{Label("像素人物",systemImage:"square.grid.3x3.square")}.disabled(game.busy)
                 Button{game.openGM()}label:{Label("GM",systemImage:"wand.and.stars")}.disabled(!game.ready || game.busy || game.campaign==nil)
@@ -73,7 +72,7 @@ struct MeadowTeacherDashboard:View {
                     Button{if let id=game.selectedNode{game.operation(.editNode(id))}}label:{Label("编辑地点",systemImage:"pencil")}.disabled(game.selectedNode==nil || game.campaign?.isMoving==true || inBattle)
                     Button{if let id=game.selectedNode{game.project(.encounter(id))}}label:{Label("怪物预览",systemImage:"eye")}.disabled(game.selectedNode==nil || inBattle)
                 }label:{Label("更多",systemImage:"ellipsis.circle")}
-            }.buttonStyle(GlassIconButtonStyle()).menuStyle(.button).padding(.horizontal,10).padding(.vertical,6).glassPanel(radius:20,padding:0)
+            }.buttonStyle(ToolbarIconStyle()).menuStyle(.button).padding(.horizontal,10).padding(.vertical,6).glassPanel(radius:20,padding:0)
             if game.campaign != nil {
                 HStack(spacing:8){
                     if inBattle {

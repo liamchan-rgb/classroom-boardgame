@@ -121,6 +121,26 @@ struct GlassIconButtonStyle:ButtonStyle {
             .animation(.spring(response:0.25,dampingFraction:0.7),value:configuration.isPressed)
     }
 }
+/// Top-bar buttons and menus: one fixed size, so the row lines up whatever the caption.
+struct ToolbarIconStyle:ButtonStyle {
+    @Environment(\.isEnabled) private var enabled
+    var tint:Color=GameTheme.primary
+    func makeBody(configuration:Configuration)->some View {
+        configuration.label
+            .labelStyle(GlassLabelStyle())
+            .frame(width:58,height:48)
+            .foregroundStyle(tint)
+            .background(RoundedRectangle(cornerRadius:14,style:.continuous).fill(GlassFill.button))
+            .overlay(RoundedRectangle(cornerRadius:14,style:.continuous).stroke(.white.opacity(0.6),lineWidth:1))
+            .scaleEffect(configuration.isPressed ? 0.95:1)
+            .opacity(enabled ? 1:0.4)
+            .animation(.spring(response:0.25,dampingFraction:0.7),value:configuration.isPressed)
+    }
+}
+/// A thin divider between groups of top-bar buttons.
+struct ToolbarGap:View {
+    var body:some View {Capsule().fill(GameTheme.muted.opacity(0.25)).frame(width:1.5,height:30).padding(.horizontal,4)}
+}
 /// Icon above a small caption.
 struct GlassLabelStyle:LabelStyle {
     func makeBody(configuration:Configuration)->some View {

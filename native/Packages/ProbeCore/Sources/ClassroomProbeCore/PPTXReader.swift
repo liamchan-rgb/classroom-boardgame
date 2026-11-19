@@ -149,6 +149,16 @@ public enum PPTXReader {
         var external: Bool
     }
     /// `progress(done, total)` is called after each slide is read (from the calling thread).
+    /// The cover picture PowerPoint stores in the file (docProps/thumbnail.*), for the deck list; nil if absent.
+    public static func thumbnail(_ source: Data) -> Data? {
+        guard let archive = try? Archive(data: source, accessMode: .read) else { return nil }
+        for name in ["docProps/thumbnail.jpeg", "docProps/thumbnail.jpg", "docProps/thumbnail.png"] {
+            guard let entry = archive[name], entry.type == .file, entry.uncompressedSize <= 4_000_000 else { continue }
+            var result = Data()
+            if (try? archive.extract(entry, consumer: { result.append($0) })) != nil, !result.isEmpty { return result }
+        }
+        return nil
+    }
     public static func read(_ source: Data, progress: ((Int, Int) -> Void)? = nil) throws -> ParsedDeck {
         guard source.count <= PPTXLimits.fileBytes else { throw ProbeError("PPTX超过\(PPTXLimits.fileLabel)，请压缩图片后再导入。") }
         let archive = try Archive(data: source, accessMode: .read)

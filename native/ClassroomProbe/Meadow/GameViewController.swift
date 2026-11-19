@@ -522,7 +522,9 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         guard !loadStarted else { return }
         if !checkedSavedReport {
             checkedSavedReport = true
-            if MeadowGPUDiagnostics.shared.recordedBuild == Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String,
+            // Classroom: always load (a saved first-frame timeout, e.g. from a window left behind others, must not
+            // keep the map on the report page; 重新诊断 reloads and tries again).
+            if !classroomMode, MeadowGPUDiagnostics.shared.recordedBuild == Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String,
                let saved = MeadowGPUDiagnostics.shared.savedFailureOrInterruption {
                 loadingView.showSavedReport(saved)
                 return

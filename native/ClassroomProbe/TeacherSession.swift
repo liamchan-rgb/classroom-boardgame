@@ -53,6 +53,11 @@ final class TeacherSession: ObservableObject {
             do { try restore(Data(contentsOf: url), saveAfterValidation: false); applyLiteSave() }
             catch { message = "本地恢复失败，原文件保留：\(error.localizedDescription)" }
         }
+        // The deck in use before the deck list existed joins the list.
+        if let data = pptxData, let name = sourceName, DeckLibrary.shared.record(named: name) == nil {
+            let cover = deck?.slides.first.flatMap { try? DeckRenderer.render($0).page.thumbnail() }
+            DeckLibrary.shared.remember(data: data, name: name, pages: state.pageCount, page: state.pageIndex, notes: editedNotes, cover: cover)
+        }
         publish()
         timer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { [weak self] _ in
             Task { @MainActor in self?.tick() }
@@ -63,6 +68,18 @@ final class TeacherSession: ObservableObject {
         if let edited = editedNotes[state.pageIndex] { return edited }
         guard let deck, deck.slides.indices.contains(state.pageIndex) else { return "" }
         return deck.slides[state.pageIndex].notes
+    }
+    /// The deck on screen (its imported file name), for the deck list.
+    var currentDeckName: String? { sourceName }
+    /// Asks the root view to show the picture-book tab (a deck was opened from the game tab).
+    @Published var bookTabRequest = 0
+    /// Asks the book tab to open the PPTX file picker (from the game tab's 课件 list).
+    @Published var importRequest = 0
+    /// Opens a kept deck on the page it was left on, with its edited notes.
+    func openDeck(_ record: DeckRecord) {
+        DeckLibrary.shared.update(name: sourceName, page: state.pageIndex, notes: editedNotes)
+        loadPPTX(DeckLibrary.shared.url(record), name: record.name, resume: record)
+        bookTabRequest += 1
     }
     var selectedName: String { state.players.first(where: { $0.id == state.selectedPlayerID })?.name ?? "" }
 
@@ -121,6 +138,7 @@ final class TeacherSession: ObservableObject {
             let result = try render(deck: deck, index: candidate.pageIndex)
             try persist(state: candidate)
             state = candidate
+            DeckLibrary.shared.update(name: sourceName, page: candidate.pageIndex, notes: editedNotes)
             display.show(result, step: offset < 0 ? Int.max : 0, animated: offset > 0)
             publish()
             refreshReport(result?.warnings ?? [])
@@ -135,10 +153,11 @@ final class TeacherSession: ObservableObject {
     }
     /// Reads, checks and renders the first page in the background with a progress bar; the current book stays in use
     /// until the new one is fully ready. Large photo decks take a few seconds.
-    func loadPPTX(_ url: URL) {
+    func loadPPTX(_ url: URL, name shownName: String? = nil, resume: DeckRecord? = nil) {
         guard importProgress == nil else { message = "正在导入上一个文件，请稍候。"; return }
         importProgress = ("读取文件", 0.02)
-        let name = url.lastPathComponent
+        let name = shownName ?? url.lastPathComponent
+        let page = resume.map { max(0, $0.lastPage) } ?? 0
         let report: @Sendable (String, Double) -> Void = { stage, fraction in
             Task { @MainActor in if TeacherSession.shared.importProgress != nil { TeacherSession.shared.importProgress = (stage, fraction) } }
         }
@@ -154,9 +173,11 @@ final class TeacherSession: ObservableObject {
                     report("解析第 \(done)/\(total) 页", 0.08 + 0.72 * Double(done) / Double(max(1, total)))
                 }
                 report("生成第一页", 0.85)
-                let first = try parsed.slides.first.map { try DeckRenderer.render($0) }
+                let at = parsed.slides.indices.contains(page) ? page : 0
+                let first = try parsed.slides.indices.contains(at) ? DeckRenderer.render(parsed.slides[at]) : nil
+                let cover = (at == 0 ? first : try? parsed.slides.first.map { try DeckRenderer.render($0) })?.page.thumbnail()
                 report("保存绘本", 0.93)
-                await MainActor.run { TeacherSession.shared.adoptImported(parsed, data: data, name: name, first: first) }
+                await MainActor.run { TeacherSession.shared.adoptImported(parsed, data: data, name: name, first: first, page: at, notes: resume?.notes ?? [:], cover: cover, reopened: resume != nil) }
             } catch {
                 let reason = error.localizedDescription
                 await MainActor.run {
@@ -168,23 +189,25 @@ final class TeacherSession: ObservableObject {
             }
         }
     }
-    private func adoptImported(_ parsed: ParsedDeck, data: Data, name: String, first: DeckRenderer.Result?) {
+    private func adoptImported(_ parsed: ParsedDeck, data: Data, name: String, first: DeckRenderer.Result?, page: Int = 0, notes: [Int: String] = [:], cover: Data? = nil, reopened: Bool = false) {
         defer { importProgress = nil }
         var candidate = state
-        candidate.pageIndex = 0
+        candidate.pageIndex = page
         candidate.pageCount = parsed.slides.count
         candidate.pauseReasons.insert(.manual)
         do {
-            try write(ProbeBackup(state: candidate, pptxData: data, sourceName: name, editedNotes: [:]))
+            try write(ProbeBackup(state: candidate, pptxData: data, sourceName: name, editedNotes: notes))
         } catch {
             message = "导入失败，当前资料保留：\(error.localizedDescription)"; importOutcome = "导入失败：\(error.localizedDescription)"; return
         }
-        deck = parsed; pptxData = data; sourceName = name; editedNotes = [:]
+        deck = parsed; pptxData = data; sourceName = name; editedNotes = notes
         state = candidate; display.show(first); showNotes = false
         publish(); refreshReport(first?.warnings ?? [])
+        DeckLibrary.shared.remember(data: data, name: name, pages: parsed.slides.count, page: page, notes: notes, cover: cover)
         let skipped = parsed.slides.reduce(0) { $0 + ($1.warnings.isEmpty ? 0 : 1) }
-        message = "已导入 \(parsed.slides.count) 页：\(name)"
-        importOutcome = "已导入 \(parsed.slides.count) 页" + (skipped > 0 ? "，其中 \(skipped) 页有未支持的对象，可在「导入报告」查看。" : "。")
+        message = page > 0 || !notes.isEmpty ? "已调出 \(name)：第 \(page + 1)/\(parsed.slides.count) 页" : "已导入 \(parsed.slides.count) 页：\(name)"
+        // A deck called up again from 课件 needs no import notice.
+        if !reopened { importOutcome = "已导入 \(parsed.slides.count) 页" + (skipped > 0 ? "，其中 \(skipped) 页有未支持的对象，可在「导入报告」查看。" : "。") }
     }
 
     func save() {
