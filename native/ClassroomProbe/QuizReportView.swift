@@ -34,6 +34,37 @@ private func seconds(_ s: Double) -> String { s >= 60 ? String(format: "%d分%02
 /// A4 portrait in points.
 private let pageSize = CGSize(width: 595, height: 842)
 
+// MARK: - Fitting chips on a page
+
+/// Measures chips the way the page draws them, so a section only shows as many as fit its lines (the page never
+/// overflows, however long the sentences or however many the answers).
+enum ChipFit {
+    static func text(_ s: String, _ size: CGFloat, _ weight: UIFont.Weight) -> CGFloat {
+        (s as NSString).size(withAttributes: [.font: UIFont.systemFont(ofSize: size, weight: weight)]).width * 1.08
+    }
+    /// How many of `widths` (in order) fit in `rows` lines `line` wide, and how many lines they take.
+    static func fit(_ widths: [CGFloat], line: CGFloat, spacing: CGFloat, rows: Int) -> (count: Int, rows: Int) {
+        guard !widths.isEmpty, rows > 0 else { return (0, 0) }
+        var row = 1, x: CGFloat = 0, n = 0
+        for w in widths {
+            let need = x == 0 ? w : x + spacing + w
+            if need <= line || x == 0 { x = x == 0 ? w : need }
+            else { row += 1; if row > rows { return (n, rows) }; x = w }
+            n += 1
+        }
+        return (n, row)
+    }
+    static let line: CGFloat = 510
+    static func wrongChip(_ w: QuizReport.WordMiss) -> CGFloat {
+        min(240, text(w.word, 9, .heavy) + (w.meaning.map { text($0, 7.5, .semibold) + 3 } ?? 0) + (w.count > 1 ? text("×\(w.count)", 7.5, .heavy) + 3 : 0)) + 12
+    }
+    static func plainChip(_ t: String) -> CGFloat { min(240, text(t, 9, .heavy)) + 12 }
+    static func vocabChip(_ w: QuizReport.VocabItem, small: Bool) -> CGFloat { min(small ? 120 : 150, text(w.word, small ? 7 : 8, .bold) + 10) + 8 }
+    static func classChip(_ w: QuizReport.WordStat) -> CGFloat {
+        min(250, text(w.word, 12, .heavy) + (w.meaning.map { text($0, 9, .semibold) + 4 } ?? 0) + text("错\(w.wrong)/\(w.asked)", 8, .heavy) + 4) + 16
+    }
+}
+
 // MARK: - Pages
 
 extension QuizReport.Student {
@@ -59,7 +90,7 @@ enum QuizReportPage {
         while start < report.cards.count { pages.append(.cards(range: start..<min(report.cards.count, start + cardsPerPage), first: start == 0)); start += cardsPerPage }
         for (i, s) in report.students.enumerated() {
             pages.append(.student(i))
-            if !s.lines.isEmpty { pages.append(.studentHistory(i)) }
+            if !s.lines.isEmpty || !s.vocabulary.isEmpty { pages.append(.studentHistory(i)) }
         }
         return pages
     }
@@ -162,6 +193,14 @@ struct QuizReportPageView: View {
 
     // MARK: Class page
 
+    /// Class page budget (points): what the banner, figures, the students' table and the hardest questions take,
+    /// and how many lines of 易错题 chips are left.
+    private var hardestRows: Int { report.words.isEmpty ? 6 : (report.students.count > 4 ? 3 : 4) }
+    private var classWordRows: Int {
+        let used: CGFloat = 80 + 128 + (44 + CGFloat(report.students.count) * 27) + (36 + CGFloat(min(hardestRows, report.questions.count)) * 34) + 4 * 14 + 40
+        // One line in hand: the table and questions measured a little taller than estimated in the stress test.
+        return max(1, Int((786 - 20 - used) / 38) - 2)
+    }
     @ViewBuilder private var overview: some View {
         banner(title, "\(course.map { $0 + " · " } ?? "")\(dateRange()) · \(report.students.count) 位同学 · \(report.attempts) 次作答", icon: "chart.bar.doc.horizontal")
         HStack(spacing: 10) {
@@ -200,7 +239,7 @@ struct QuizReportPageView: View {
         }
         card {
             section("最难的题目", icon: "flame.fill")
-            ForEach(Array(report.questions.prefix(report.words.isEmpty ? 6 : 4).enumerated()), id: \.offset) { i, q in
+            ForEach(Array(report.questions.prefix(hardestRows).enumerated()), id: \.offset) { i, q in
                 HStack(alignment: .top, spacing: 8) {
                     Text(percent(q.rate)).font(.system(size: 11, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                         .frame(width: 40, height: 22).background(RoundedRectangle(cornerRadius: 6).fill(Ink.rate(q.rate)))
@@ -212,19 +251,20 @@ struct QuizReportPageView: View {
                         }.font(.system(size: 8.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted).lineLimit(1)
                     }
                 }
-                if i < min(report.words.isEmpty ? 6 : 4, report.questions.count) - 1 { Divider().overlay(Ink.line) }
+                if i < min(hardestRows, report.questions.count) - 1 { Divider().overlay(Ink.line) }
             }
             if report.questions.isEmpty { Text("还没有作答记录").font(.system(size: 10)).foregroundStyle(Ink.muted) }
         }
         if !report.words.isEmpty {
             card {
                 section("易错题（\(report.words.count)）", icon: "character.book.closed.fill")
+                let shown = ChipFit.fit(report.words.map(ChipFit.classChip), line: ChipFit.line, spacing: 6, rows: classWordRows).count
                 FlowRow(spacing: 6) {
-                    ForEach(Array(report.words.prefix(20).enumerated()), id: \.offset) { _, w in
+                    ForEach(Array(report.words.prefix(shown).enumerated()), id: \.offset) { _, w in
                         wordChip(w.word, meaning: w.meaning, count: w.wrong, of: w.asked, said: w.commonWrong.flatMap { $0 == "答错" ? nil : "常说成 \($0)" })
                     }
                 }
-                if report.words.count > 20 { Text("另有 \(report.words.count - 20) 个，见各人错题记录").font(.system(size: 8.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted) }
+                if report.words.count > shown { Text("另有 \(report.words.count - shown) 个，见各人错题记录").font(.system(size: 8.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted) }
             }
         }
     }
@@ -232,11 +272,9 @@ struct QuizReportPageView: View {
     // MARK: Student page
 
     @ViewBuilder private func student(_ s: QuizReport.Student, index: Int) -> some View {
-        let v = s.vocabulary
-        let count = { (st: QuizReport.VocabItem.Status) in v.filter { $0.status == st }.count }
-        // Room on the page: a long card list leaves fewer lines for the rest.
-        let tight = v.count > 50
-        let reviewRows = tight ? 4 : 6, wrongChips = tight ? 12 : 18
+        // Lines each part may take, so page 1 never overflows (the card list is on page 2).
+        let reviewRows = 6
+        let wrongChips = ChipFit.fit(s.wrongWords.map(ChipFit.wrongChip), line: ChipFit.line, spacing: 4, rows: 3).count
         banner(s.name + " 的答题报告", "\(dateRange()) · 作答 \(s.lines.count) 次" + (s.lines.isEmpty ? "" : "（逐条记录见下页）"),
                icon: "person", avatar: (quizInitial(s.name), Ink.avatars[index % Ink.avatars.count]))
         HStack(spacing: 10) {
@@ -261,15 +299,16 @@ struct QuizReportPageView: View {
                         miniChip(w.word, note: w.meaning, extra: w.count > 1 ? "×\(w.count)" : nil, tint: Ink.bad)
                     }
                 }
-                if s.wrongWords.count > wrongChips { moreLine("另有 \(s.wrongWords.count - wrongChips) 个，见下方闪卡掌握表与作答记录") }
+                if s.wrongWords.count > wrongChips { moreLine("另有 \(s.wrongWords.count - wrongChips) 个，见下页闪卡掌握表与作答记录") }
             }
         }
         if !s.correctedWords.isEmpty || !s.corrected.isEmpty {
             let fixed = s.correctedWords.map(\.word) + s.corrected.filter { $0.question.type != .flashcard }.map(\.summary)
+            let shown = ChipFit.fit(fixed.map(ChipFit.plainChip), line: ChipFit.line, spacing: 4, rows: 2).count
             card {
                 section("已改正（\(fixed.count)）", icon: "checkmark.seal.fill")
-                FlowRow(spacing: 4) { ForEach(Array(fixed.prefix(12).enumerated()), id: \.offset) { _, t in miniChip(t, note: nil, extra: nil, tint: Ink.good) } }
-                if fixed.count > 12 { moreLine("另有 \(fixed.count - 12) 个") }
+                FlowRow(spacing: 4) { ForEach(Array(fixed.prefix(shown).enumerated()), id: \.offset) { _, t in miniChip(t, note: nil, extra: nil, tint: Ink.good) } }
+                if fixed.count > shown { moreLine("另有 \(fixed.count - shown) 个") }
             }
         }
         card {
@@ -291,18 +330,22 @@ struct QuizReportPageView: View {
             }
             if s.review.count > reviewRows { moreLine("另有 \(s.review.count - reviewRows) 题，见下页作答记录（✗）") }
         }
-        if !v.isEmpty {
-            card {
-                HStack {
-                    section("闪卡掌握表（\(v.count)）", icon: "rectangle.stack.fill")
-                    Spacer()
-                    HStack(spacing: 8) {
-                        legend("checkmark", "答对 \(count(.right))", Ink.good); legend("arrow.uturn.backward", "已改正 \(count(.corrected))", Ink.teal)
-                        legend("xmark", "答错 \(count(.wrong))", Ink.bad); legend("circle.dashed", "未单独考察 \(count(.untested))", Ink.muted)
-                    }.font(.system(size: 7.5, weight: .semibold, design: .rounded))
-                }
-                FlowRow(spacing: 3) { ForEach(Array(v.enumerated()), id: \.offset) { _, w in vocabMini(w, small: v.count > 60) } }
+    }
+    /// The card list (page 2, above the answers): all of the student's cards, as many lines as it needs up to 14.
+    @ViewBuilder private func vocabulary(_ s: QuizReport.Student, shown: Int) -> some View {
+        let v = s.vocabulary
+        let count = { (st: QuizReport.VocabItem.Status) in v.filter { $0.status == st }.count }
+        card {
+            HStack {
+                section("闪卡掌握表（\(v.count)）", icon: "rectangle.stack.fill")
+                Spacer()
+                HStack(spacing: 8) {
+                    legend("checkmark", "答对 \(count(.right))", Ink.good); legend("arrow.uturn.backward", "已改正 \(count(.corrected))", Ink.teal)
+                    legend("xmark", "答错 \(count(.wrong))", Ink.bad); legend("circle.dashed", "未单独考察 \(count(.untested))", Ink.muted)
+                }.font(.system(size: 7.5, weight: .semibold, design: .rounded))
             }
+            FlowRow(spacing: 3) { ForEach(Array(v.prefix(shown).enumerated()), id: \.offset) { _, w in vocabMini(w, small: v.count > 60) } }
+            if v.count > shown { moreLine("另有 \(v.count - shown) 张，见课堂报告的闪卡总表") }
         }
     }
     /// A word to practise (class page): the word, its meaning, how often it was missed, and what was said instead.
@@ -361,7 +404,11 @@ struct QuizReportPageView: View {
     @ViewBuilder private func history(_ s: QuizReport.Student, index: Int) -> some View {
         let n = s.lines.count, columns = n <= 42 ? 1 : 2
         let rows = Int((Double(n) / Double(columns)).rounded(.up))
-        let rowHeight = min(16, max(7, 690 / CGFloat(max(1, rows))))
+        // The card list first: its lines (at most 14) are measured, the answers share what is left of the page.
+        let small = s.vocabulary.count > 60
+        let fit = ChipFit.fit(s.vocabulary.map { ChipFit.vocabChip($0, small: small) }, line: ChipFit.line, spacing: 3, rows: 14)
+        let vocabHeight: CGFloat = s.vocabulary.isEmpty ? 0 : 44 + CGFloat(fit.rows) * (small ? 14 : 16) + (fit.count < s.vocabulary.count ? 12 : 0) + 14
+        let rowHeight = min(16, max(6, (786 - 20 - 40 - vocabHeight - 30) / CGFloat(max(1, rows))))
         HStack(spacing: 10) {
             Text(quizInitial(s.name)).font(.system(size: 13, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                 .frame(width: 26, height: 26).background(Circle().fill(Ink.avatars[index % Ink.avatars.count]))
@@ -369,6 +416,8 @@ struct QuizReportPageView: View {
             Text("共 \(n) 次，按时间先后 · ✓ 答对  ✗ 答错（红字为所答，绿字为正确答案）").font(.system(size: 8, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted)
             Spacer()
         }
+        if !s.vocabulary.isEmpty { vocabulary(s, shown: fit.count) }
+        if n > 0 {
         card {
             HStack(alignment: .top, spacing: 12) {
                 ForEach(0..<columns, id: \.self) { c in
@@ -378,6 +427,7 @@ struct QuizReportPageView: View {
                     }.frame(maxWidth: .infinity, alignment: .topLeading)
                 }
             }
+        }
         }
     }
     /// One answer on one line: number, ✓/✗, the question, what was said (→ the right answer), kind and time.
@@ -428,7 +478,7 @@ struct QuizReportPageView: View {
         let tint = c.asked == 0 ? Ink.muted : Ink.rate(rate)
         return VStack(alignment: .leading, spacing: 1) {
             HStack(spacing: 4) {
-                Text(c.word).font(.system(size: 9.5, weight: .heavy, design: .rounded)).foregroundStyle(Ink.ink).lineLimit(1).minimumScaleFactor(0.6)
+                Text(c.word).font(.system(size: 9.5, weight: .heavy, design: .rounded)).foregroundStyle(Ink.ink).lineLimit(1).truncationMode(.tail)
                 Spacer(minLength: 2)
                 Text(c.asked == 0 ? "未单独考察" : "\(c.right)/\(c.asked)").font(.system(size: 7.5, weight: .heavy, design: .rounded)).foregroundStyle(tint)
             }
