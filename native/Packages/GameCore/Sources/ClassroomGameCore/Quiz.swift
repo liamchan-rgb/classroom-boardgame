@@ -111,6 +111,8 @@ public struct QuizAttempt: Codable, Equatable {
     public var shared: Bool? = nil
     /// Flash-card practice: recorded for the report, no reward.
     public var practice: Bool? = nil
+    /// Not picked when the class answered; the teacher put it in the student's mistakes (no answer was given).
+    public var skipped: Bool? = nil
     public var overtime: Bool { seconds > Double(limit) + 0.5 }
     public var rightCount: Int { correct.filter { $0 }.count }
     public init(player: String, playerName: String, node: Int, question: Int, picks: [Int?], texts: [String?], correct: [Bool], seconds: Double, limit: Int, at: Double) {

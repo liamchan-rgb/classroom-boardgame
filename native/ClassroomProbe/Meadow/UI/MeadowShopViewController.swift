@@ -44,8 +44,8 @@ final class MeadowShopViewController:UIViewController {
     /// The buyer's own place: a shop site keeps its ratios, anywhere else trades at base price.
     private var node:MapNode? {let at=unit?.nodeID ?? nodeID;return session.engine.state.map.nodes.first{$0.id==at}}
     private var unit:GameUnit? {session.engine.state.units[actor]}
-    /// The peddler travels with the party: every living member of the buyer's team can trade, wherever they stand.
-    private var people:[GameUnit] {let team=session.engine.state.units[actor]?.teamID;return session.engine.state.players.filter{$0.isAlive && $0.teamID==team}}
+    /// Every living member, whatever their team (as in the pack): switch buyer here without leaving the shop.
+    private var people:[GameUnit] {session.engine.state.players.filter{$0.isAlive}}
     private func price(_ item:ItemDefinition,buy:Bool)->Int {
         guard let node else{return buy ? item.purchasePrice ?? 0:item.sellPrice}
         return (try? CampaignSiteRules.tradePrice(item:item,buy:buy,node:node,seed:session.engine.state.map.seed)) ?? (buy ? item.purchasePrice ?? 0:item.sellPrice)
@@ -71,7 +71,7 @@ final class MeadowShopViewController:UIViewController {
             for state in [UIControl.State.normal,.selected] {control.setTitleTextAttributes([.font:MeadowPreviewPalette.font(16),.foregroundColor:MeadowPreviewPalette.ink],for:state)}
             control.selectedSegmentTintColor=MeadowPreviewPalette.primary
         }
-        for (i,p) in people.enumerated() { buyers.insertSegment(withTitle:p.name,at:i,animated:false) }
+        for (i,p) in people.enumerated() { buyers.insertSegment(withTitle:p.shortName,at:i,animated:false) }
         buyers.addAction(UIAction{[weak self] _ in guard let self else{return};let list=self.people;if list.indices.contains(self.buyers.selectedSegmentIndex){self.actor=list[self.buyers.selectedSegmentIndex].id};self.selected=nil;self.reload()},for:.valueChanged)
         mode.selectedSegmentIndex=0
         mode.addAction(UIAction{[weak self] _ in guard let self else{return};self.selling=self.mode.selectedSegmentIndex==1;self.selected=nil;self.reload()},for:.valueChanged)

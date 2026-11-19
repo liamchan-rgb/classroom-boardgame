@@ -186,5 +186,7 @@ struct ClassroomToolbarTools: View {
         ClassroomScoreboardButton(overlays: game.overlays) { game.toggleScoreboard() }
         // The class answer report of the open trip: look at it, export PDF / pictures (also R).
         Button { prepare(); game.openQuizReport() } label: { Label("报告", systemImage: "chart.bar.doc.horizontal") }.disabled(game.campaign == nil)
+        // The teacher's own prize wheel (game rewards or classroom ones, with their odds), shown on the public screen.
+        Button { prepare(); game.openCustomWheel() } label: { Label("转盘", systemImage: "chart.pie.fill") }.disabled(game.campaign == nil || game.campaign?.engine.state.battle != nil)
     }
 }

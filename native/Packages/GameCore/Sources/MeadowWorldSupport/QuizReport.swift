@@ -40,6 +40,16 @@ public struct QuizReport {
         public var students: [String]
         public var commonWrong: String?
     }
+    /// One flash card in a student's deck (shared cards and all of their own), whether asked or not.
+    public struct VocabItem: Equatable {
+        public enum Status: Equatable { case right, wrong, corrected, untested }
+        public var word: String
+        public var meaning: String?
+        public var status: Status
+        public var tries: Int
+    }
+    /// Said instead of an answer: never listed as "常说成 …".
+    public static let nonAnswers: Set<String> = ["不会", "未作答", "答错"]
     public struct Tally: Equatable {
         public var name: String
         public var right: Int
@@ -66,6 +76,8 @@ public struct QuizReport {
         /// Words missed earlier and answered right since (已改正).
         public var correctedWords: [WordMiss] = []
         public var wordsAsked: Int = 0
+        /// Every flash card of the student's deck (shared + their portions), in bank order, with its status.
+        public var vocabulary: [VocabItem] = []
         /// Questions still wrong: one line per question (its latest wrong answer), when the latest answer to it
         /// was not all right.
         public var mistakes: [Line] {
@@ -114,14 +126,15 @@ public struct QuizReport {
     public var last: Date? { students.flatMap(\.lines).map { Date(timeIntervalSince1970: $0.attempt.at) }.max() }
 
     /// `order`: player ids in seat order (others follow by id); `names`: current names, else the name at answer time.
-    public init(log: [QuizAttempt], bank: [QuizQuestion], order: [String] = [], names: [String: String] = [:]) {
+    /// `decks`: per player, the bank indices of their flash cards (listed in the report even when never asked).
+    public init(log: [QuizAttempt], bank: [QuizQuestion], order: [String] = [], names: [String: String] = [:], decks: [String: [Int]] = [:]) {
         func line(_ a: QuizAttempt) -> Line? {
             guard bank.indices.contains(a.question) else { return nil }
             let q = bank[a.question], parts = q.parts
             guard parts.count == a.correct.count else { return nil }
             let answers = parts.indices.map { i -> Answer in
                 let part = parts[i]
-                let said = a.picks[i].flatMap { part.options.indices.contains($0) ? part.options[$0] : nil } ?? a.texts[i] ?? (q.type == .flashcard ? "答错" : "不会")
+                let said = a.skipped == true ? "未作答" : a.picks[i].flatMap { part.options.indices.contains($0) ? part.options[$0] : nil } ?? a.texts[i] ?? (q.type == .flashcard ? "答错" : "不会")
                 let label: String
                 switch q.type {
                 case .choice: label = "答案"
@@ -134,7 +147,7 @@ public struct QuizReport {
             return Line(attempt: a, question: q, summary: Self.summary(q), answers: answers, words: parts.indices.map { Self.word(q, part: $0) })
         }
         let lines = log.compactMap(line)
-        let ids = Array(Set(lines.map(\.attempt.player))).sorted { a, b in
+        let ids = Array(Set(lines.map(\.attempt.player)).union(decks.filter { !$0.value.isEmpty }.keys)).sorted { a, b in
             let ia = order.firstIndex(of: a) ?? Int.max, ib = order.firstIndex(of: b) ?? Int.max
             return ia == ib ? a < b : ia < ib
         }
@@ -159,12 +172,22 @@ public struct QuizReport {
                 // A right answer after misses: the word counts as corrected (until it is missed again).
                 guard !l.answers[i].right else { if misses.contains(where: { $0.word == w.word }) { fixed.insert(w.word) }; continue }
                 fixed.remove(w.word)
-                if let k = misses.firstIndex(where: { $0.word == w.word }) { misses[k].count += 1; if !misses[k].said.contains(l.answers[i].said) { misses[k].said.append(l.answers[i].said) } }
-                else { misses.append(WordMiss(word: w.word, meaning: w.meaning, said: [l.answers[i].said], count: 1)) }
+                let said = Self.nonAnswers.contains(l.answers[i].said) ? [] : [l.answers[i].said]
+                if let k = misses.firstIndex(where: { $0.word == w.word }) { misses[k].count += 1; for x in said where !misses[k].said.contains(x) { misses[k].said.append(x) } }
+                else { misses.append(WordMiss(word: w.word, meaning: w.meaning, said: said, count: 1)) }
             } }
             let ranked = misses.enumerated().sorted { $0.element.count == $1.element.count ? $0.offset < $1.offset : $0.element.count > $1.element.count }.map(\.element)
             s.wrongWords = ranked.filter { !fixed.contains($0.word) }
             s.correctedWords = misses.filter { fixed.contains($0.word) }
+            // The whole deck: each card's latest answer (wrong before and right now = corrected), or not asked yet.
+            s.vocabulary = (decks[id] ?? []).compactMap { qi in
+                guard bank.indices.contains(qi), let w = Self.word(bank[qi], part: 0) else { return nil }
+                let tries = own.filter { $0.attempt.question == qi }
+                guard let last = tries.last else { return VocabItem(word: w.word, meaning: w.meaning, status: .untested, tries: 0) }
+                let right = last.attempt.rightCount == last.attempt.correct.count
+                let everWrong = tries.contains { $0.attempt.rightCount < $0.attempt.correct.count }
+                return VocabItem(word: w.word, meaning: w.meaning, status: right ? (everWrong ? .corrected : .right) : .wrong, tries: tries.count)
+            }
             return s
         }
         var stats: [Int: QuestionStat] = [:], wrongs: [Int: [String: Int]] = [:]
@@ -172,7 +195,7 @@ public struct QuizReport {
             let i = l.attempt.question
             if stats[i] == nil { stats[i] = QuestionStat(index: i, question: l.question, summary: l.summary, attempts: 0, right: 0, total: 0) }
             stats[i]!.attempts += 1; stats[i]!.right += l.attempt.rightCount; stats[i]!.total += l.attempt.correct.count
-            for a in l.answers where !a.right { wrongs[i, default: [:]][(l.answers.count > 1 ? a.label + "：" : "") + a.said, default: 0] += 1 }
+            for a in l.answers where !a.right && !Self.nonAnswers.contains(a.said) { wrongs[i, default: [:]][(l.answers.count > 1 ? a.label + "：" : "") + a.said, default: 0] += 1 }
         }
         for (i, w) in wrongs { if let top = w.max(by: { $0.value == $1.value ? $0.key > $1.key : $0.value < $1.value }) { stats[i]!.commonWrong = (top.key, top.value) } }
         var wordStats: [String: WordStat] = [:], wordOrder: [String] = [], said: [String: [String: Int]] = [:]
@@ -184,7 +207,7 @@ public struct QuizReport {
             wordStats[w.word]!.wrong += 1
             let name = names[l.attempt.player] ?? l.attempt.playerName
             if !wordStats[w.word]!.students.contains(name) { wordStats[w.word]!.students.append(name) }
-            said[w.word, default: [:]][l.answers[i].said, default: 0] += 1
+            if !Self.nonAnswers.contains(l.answers[i].said) { said[w.word, default: [:]][l.answers[i].said, default: 0] += 1 }
         } }
         for (word, counts) in said { wordStats[word]!.commonWrong = counts.max { $0.value == $1.value ? $0.key > $1.key : $0.value < $1.value }?.key }
         words = wordOrder.compactMap { wordStats[$0] }.filter { $0.wrong > 0 }.enumerated()
@@ -222,6 +245,7 @@ public struct QuizReport {
 public extension MeadowCampaignSession {
     var quizReport: QuizReport {
         let players = engine.state.players
-        return QuizReport(log: quizLog, bank: quizBank, order: players.map(\.id), names: Dictionary(uniqueKeysWithValues: players.map { ($0.id, $0.shortName) }))
+        return QuizReport(log: quizLog, bank: quizBank, order: players.map(\.id), names: Dictionary(uniqueKeysWithValues: players.map { ($0.id, $0.shortName) }),
+                          decks: Dictionary(uniqueKeysWithValues: players.filter { !$0.host }.map { ($0.id, practiceDeck(for: $0.id)) }))
     }
 }

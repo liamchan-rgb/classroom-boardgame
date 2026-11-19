@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import MeadowClassroomSupport
 
 /// The teacher's laser pointer: L (or the top-bar button) turns it on; moving the pointer over the teacher's
@@ -12,6 +13,9 @@ import MeadowClassroomSupport
     @Published private(set) var pulse: (p: CGPoint, t: TimeInterval)?
     /// Nothing moving: the drawing stops ticking.
     @Published private(set) var idle = true
+    /// Pointing at a teacher panel the public screen copies (pack, shop): positions are fractions of that panel,
+    /// whose shape this is; nil = the 16:9 game / book canvas.
+    @Published private(set) var panelAspect: CGSize?
     private var hovering = false
     private var lastMove: TimeInterval = 0
     private var settle: DispatchWorkItem?
@@ -19,9 +23,10 @@ import MeadowClassroomSupport
     static let pulseLife: TimeInterval = 0.6
 
     /// `location` in a view of `size`; points outside the canvas are clamped to its edge.
-    func move(_ location: CGPoint, in size: CGSize, hover: Bool = false) {
+    func move(_ location: CGPoint, in size: CGSize, hover: Bool = false, panel: Bool = false) {
         guard on else { return }
-        let r = ClassroomCanvas.fitted(in: size)
+        if panel { if panelAspect != size { panelAspect = size; trail = [] } } else if panelAspect != nil { panelAspect = nil; trail = [] }
+        let r = panel ? CGRect(origin: .zero, size: size) : ClassroomCanvas.fitted(in: size)
         guard r.width > 0 else { return }
         let p = CGPoint(x: min(1, max(0, (location.x - r.minX) / r.width)), y: min(1, max(0, (location.y - r.minY) / r.height)))
         let now = Date.timeIntervalSinceReferenceDate
@@ -67,7 +72,8 @@ struct LaserLayer: View {
     var body: some View {
         GeometryReader { g in
             if laser.on, laser.point != nil || laser.pulse != nil {
-                let r = ClassroomCanvas.fitted(in: g.size), unit = r.height / 720
+                // On a copied panel: where the public screen draws that copy (fitted, centred); else the canvas.
+                let r = laser.panelAspect.map { LaserPointer.fit($0, in: g.size) } ?? ClassroomCanvas.fitted(in: g.size), unit = ClassroomCanvas.fitted(in: g.size).height / 720
                 TimelineView(.animation(minimumInterval: 1 / 60, paused: laser.idle)) { context in
                     let now = context.date.timeIntervalSinceReferenceDate
                     let at = { (p: CGPoint) in CGPoint(x: r.minX + p.x * r.width, y: r.minY + p.y * r.height) }
@@ -132,5 +138,51 @@ struct LaserButton: View {
     var body: some View {
         Button { action() } label: { Label(laser.on ? "激光笔 开" : "激光笔", systemImage: laser.on ? "smallcircle.filled.circle.fill" : "smallcircle.filled.circle") }
             .foregroundStyle(laser.on ? Color.red : GameTheme.ink)
+    }
+}
+
+extension LaserPointer {
+    static func fit(_ aspect: CGSize, in host: CGSize) -> CGRect {
+        guard aspect.width > 0, aspect.height > 0 else { return .zero }
+        let k = min(host.width / aspect.width, host.height / aspect.height)
+        let w = aspect.width * k, h = aspect.height * k
+        return CGRect(x: (host.width - w) / 2, y: (host.height - h) / 2, width: w, height: h)
+    }
+}
+
+/// Laid over the pack / shop while the laser is on: the pointer there marks the copy on the public screen
+/// (hover on Mac, a finger on iPad; a click makes the ring). Taps do not reach the panel while it is there.
+final class LaserPanelCatcher: UIView {
+    weak var laser: LaserPointer?
+    private var start: CGPoint?
+    init(laser: LaserPointer) {
+        self.laser = laser
+        super.init(frame: .zero)
+        backgroundColor = .clear
+        autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        addGestureRecognizer(UIHoverGestureRecognizer(target: self, action: #selector(hover(_:))))
+        let pan = UIPanGestureRecognizer(target: self, action: #selector(drag(_:))); pan.maximumNumberOfTouches = 1
+        addGestureRecognizer(pan)
+        addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tap(_:))))
+    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    private var panelSize: CGSize { superview?.bounds.size ?? bounds.size }
+    @objc private func hover(_ g: UIHoverGestureRecognizer) {
+        MainActor.assumeIsolated {
+            switch g.state {
+            case .began, .changed: laser?.move(g.location(in: self), in: panelSize, hover: true, panel: true)
+            case .ended, .cancelled: laser?.leave()
+            default: break
+            }
+        }
+    }
+    @objc private func drag(_ g: UIPanGestureRecognizer) {
+        MainActor.assumeIsolated {
+            laser?.move(g.location(in: self), in: panelSize, panel: true)
+            if g.state == .ended || g.state == .cancelled { laser?.release() }
+        }
+    }
+    @objc private func tap(_ g: UITapGestureRecognizer) {
+        MainActor.assumeIsolated { laser?.move(g.location(in: self), in: panelSize, panel: true); laser?.click(); laser?.release() }
     }
 }

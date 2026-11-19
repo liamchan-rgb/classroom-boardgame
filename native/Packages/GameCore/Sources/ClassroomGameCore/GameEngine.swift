@@ -231,6 +231,7 @@ struct Evaluation {
         case .resetNodeReward(let id): try resetNodeReward(id)
         case .setDifficulty(let level): try setDifficulty(level)
         case .campaignLottery(let actor, let tier): try campaignLottery(actor: actor, tier: tier)
+        case .customWheel(let actor, let wheel): try customWheel(actor: actor, wheel: wheel)
         case .answerCampaignQuiz(let actor, let correct, let coins): try answerCampaignQuiz(actor: actor, correct: correct, coins: coins)
         case .recordCampaignQuiz(let record): try recordCampaignQuiz(record)
         case .retreatAfterDefeat:

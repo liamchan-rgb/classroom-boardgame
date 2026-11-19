@@ -228,6 +228,8 @@ public enum GameCommand: Codable, Equatable {
     case retreatAfterDefeat
     /// One spin of the shop prize wheel (tier 0…2).
     case campaignLottery(actor: String, tier: Int)
+    /// One spin of a teacher-made wheel: its prizes and weights travel with the command, so it replays as spun.
+    case customWheel(actor: String, wheel: CustomWheel)
     /// A quiz event answered (right or wrong) by the class for this actor.
     case answerCampaignQuiz(actor: String, correct: Bool, coins: Int)
     /// One student's recorded answer at a quiz event (graded by the campaign layer, paid here).

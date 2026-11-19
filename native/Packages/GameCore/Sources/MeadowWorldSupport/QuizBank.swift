@@ -416,7 +416,7 @@ public extension MeadowCampaignSession {
     /// and pays the reward. `free`: called up by the teacher anywhere, not at a quiz spot. Returns the stored attempt.
     /// `manualCoins`: the reward the teacher sends for a shared-bank question; `shared`: asked to the whole class;
     /// `practice`: flash-card practice (recorded, no reward).
-    @discardableResult func recordQuiz(actor:String,question index:Int,picks:[Int?],texts:[String?]?=nil,seconds:Double,at:Date=Date(),free:Bool=false,manualCoins:Int?=nil,shared:Bool=false,practice:Bool=false,challenge:Bool=false,id:String=UUID().uuidString)throws->QuizAttempt {
+    @discardableResult func recordQuiz(actor:String,question index:Int,picks:[Int?],texts:[String?]?=nil,seconds:Double,at:Date=Date(),free:Bool=false,manualCoins:Int?=nil,shared:Bool=false,practice:Bool=false,challenge:Bool=false,skipped:Bool=false,id:String=UUID().uuidString)throws->QuizAttempt {
         if !free {guard canManageInventory,travel==nil else{throw GameError("请抵达地点、结束战斗后答题。")}}
         guard let unit=engine.state.units[actor],quizBank.indices.contains(index) else{throw GameError("没有这道题。")}
         let q=quizBank[index],parts=q.parts
@@ -427,6 +427,7 @@ public extension MeadowCampaignSession {
                                 seconds:min(600,max(0,seconds)),limit:challenge ? 600:q.timeLimit,at:at.timeIntervalSince1970)
         if shared {attempt.shared=true}
         if practice {attempt.practice=true}
+        if skipped {attempt.skipped=true}
         try engine.apply(.recordCampaignQuiz(QuizRecord(attempt:attempt,fullCoins:q.reward,points:q.points,dropTier:(challenge ? (q.difficulty ?? 1):q.difficulty).map{$0-1},free:free,manualCoins:manualCoins,noSpeedBonus:challenge)),id:id)
         return quizLog.last!
     }

@@ -24,6 +24,10 @@ public extension MeadowCampaignSession {
         return try engine.apply(.tradeCampaignSite(actor:actor,item:item,buy:buy),id:id)
     }
     /// One spin of the shop's prize wheel; the receipt's "lottery" event carries the winning slot (amount).
+    /// One spin of a teacher-made wheel (anywhere outside a fight); the drawn slot is the receipt event's amount.
+    @discardableResult func spinCustomWheel(actor:String,wheel:CustomWheel,id:String=UUID().uuidString)throws->OperationReceipt {
+        try engine.apply(.customWheel(actor:actor,wheel:wheel),id:id)
+    }
     @discardableResult func spinLottery(actor:String,tier:Int,id:String=UUID().uuidString)throws->OperationReceipt {
         guard canManageInventory else{throw GameError("请先暂停移动、结束战斗后抽奖。")}
         return try engine.apply(.campaignLottery(actor:actor,tier:tier),id:id)

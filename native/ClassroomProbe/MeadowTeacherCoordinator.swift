@@ -41,7 +41,19 @@ final class MeadowTeacherCoordinator:ObservableObject {
     }
     /// Laser pointer over the teacher's preview, shown on the TV (L).
     let laser=LaserPointer()
-    func toggleLaser(){laser.on.toggle();message=laser.on ? "激光笔：在预览画面上移动指针（再按 L 关闭）":"激光笔已关闭";revision += 1}
+    func toggleLaser(){laser.on.toggle();syncPanelLaser();message=laser.on ? "激光笔：在预览画面、行囊或商店上移动指针（再按 L 关闭）":"激光笔已关闭";revision += 1}
+    /// Keeps the laser catcher on the open pack / shop while the laser is on (and only then).
+    func syncPanelLaser(){
+        let source=publicPanelSource
+        if laser.on,let source,!source.subviews.contains(where:{$0 is LaserPanelCatcher}) {
+            let catcher=LaserPanelCatcher(laser:laser);catcher.frame=source.bounds;source.addSubview(catcher)
+        }
+        var next=privatePresenter?.presentedViewController
+        while let controller=next {
+            if controller.view !== source || !laser.on {controller.view.subviews.filter{$0 is LaserPanelCatcher}.forEach{$0.removeFromSuperview()}}
+            next=controller.presentedViewController
+        }
+    }
     func toggleScoreboard(){withAnimation(.spring(response:0.35,dampingFraction:0.8)){overlays.scoreboard.toggle()}}
     /// Players ↔ teams; also shows the board if it was hidden.
     func toggleTeamScores(){withAnimation(.spring(response:0.35,dampingFraction:0.8)){overlays.teamScores.toggle();overlays.scoreboard=true}}
@@ -337,7 +349,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
             guard let self,let c=self.campaign,c.quizBank.indices.contains(index) else{return}
             let blanks=Array(repeating:Optional<Int>.none,count:c.quizBank[index].parts.count)
             do{
-                for u in others {try c.recordQuiz(actor:u.id,question:index,picks:blanks,seconds:0,free:true,manualCoins:practice ? nil:0,shared:true,practice:practice)}
+                for u in others {try c.recordQuiz(actor:u.id,question:index,picks:blanks,seconds:0,free:true,manualCoins:practice ? nil:0,shared:true,practice:practice,skipped:true)}
                 self.message="已记入 \(names) 的错题";self.revision += 1
             }catch{self.message=error.localizedDescription;self.revision += 1}
         })
@@ -610,7 +622,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
     var publicPanelSource:UIView? {
         var next=privatePresenter?.presentedViewController
         while let controller=next {
-            if controller is MeadowCampaignInventoryViewController || controller is MeadowShopViewController
+            if controller is MeadowCampaignInventoryViewController || controller is MeadowShopViewController || controller is CustomWheelViewController
                 || controller is UIHostingController<TeacherCharacterStudio> {return controller.view}
             next=controller.presentedViewController
         }
@@ -625,6 +637,8 @@ final class MeadowTeacherCoordinator:ObservableObject {
         mirrorTimer=Timer.scheduledTimer(withTimeInterval:1/ClassroomPreviewPolicy.framesPerSecond,repeats:true){[weak self] _ in
             Task{@MainActor in
                 self?.publishMirrorFrame()
+                // A pack / shop opened while the laser is on gets the catcher too.
+                if self?.laser.on == true {self?.syncPanelLaser()}
             }
         }
         timer=Timer.scheduledTimer(withTimeInterval:0.15,repeats:true){[weak self] _ in Task{@MainActor in self?.tick()}}

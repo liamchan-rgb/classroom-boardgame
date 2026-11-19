@@ -57,7 +57,19 @@ struct TeacherBookGrantBar:View {
     var body:some View {
         HStack(spacing:8){
             // A popover (not a menu) so several people / a whole group can be ticked before it is closed.
-            Button{prepare();picking=true}label:{Label("\(selected.count)",systemImage:"person.2.fill")}
+            // One dot per player in seat order (the numbers the keys use); lit = will receive.
+            Button{prepare();picking=true}label:{
+                Label{
+                    HStack(spacing:3){
+                        ForEach(players.sorted{game.seatNumber($0.id)<game.seatNumber($1.id)},id:\.id){u in
+                            let on=draft.recipients.contains(u.id)
+                            Circle().fill(on ? GameTheme.primary:GameTheme.muted.opacity(0.28)).frame(width:6,height:6)
+                                .overlay(Circle().stroke(GameTheme.primary.opacity(on ? 0:0.35),lineWidth:0.8))
+                        }
+                    }.frame(height:11)
+                }icon:{Image(systemName:"person.2.fill")}
+            }
+            .accessibilityLabel("发放对象：已选 \(selected.count) 人")
                 #if targetEnvironment(macCatalyst)
                 // A popover here shows up empty on the Mac (as the word card did): a sheet there instead.
                 .sheet(isPresented:$picking){

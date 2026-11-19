@@ -216,6 +216,49 @@ final class QuizTests:XCTestCase {
         let again=QuizReport(log:log+[a("p1",0,[nil])],bank:bank,order:["p1"]).students[0]
         XCTAssertEqual(again.wrongWords.map(\.word),["apple"]);XCTAssertEqual(again.mistakes.map(\.attempt.question),[0,3])
     }
+    func testSkippedStudentsAndWholeDecksInTheReport()throws {
+        let text="""
+        类型：闪卡
+        份：1
+        正面：apple
+        背面：苹果
+
+        类型：闪卡
+        份：1
+        正面：pear
+        背面：梨
+
+        类型：闪卡
+        正面：cat
+        背面：猫
+
+        类型：选择
+        难度：1
+        标签：单词
+        Shoes go on your ___.
+        A. hands
+        B. feet
+        答案：B
+        """
+        let bank=try QuizBankParser.parse(Data(text.utf8))
+        var c=MeadowMapConfiguration.suggested(total:10,seed:31827);c.combat=0;c.boss=0;c.reward=0;c.empty=9;c.extraRoads=0
+        let s=try MeadowCampaignSession.new(layout:MeadowMapGenerator.generate(c),studentNames:["小明","小红"],quizBank:bank)
+        // 小明 answers the class question; 小红 was not picked and is put in the mistakes.
+        try s.recordQuiz(actor:"p1",question:3,picks:[1],seconds:5,free:true,manualCoins:15,shared:true)
+        try s.recordQuiz(actor:"p2",question:3,picks:[nil],seconds:0,free:true,manualCoins:0,shared:true,skipped:true)
+        try s.recordQuiz(actor:"p1",question:0,picks:[nil],seconds:3,free:true,practice:true)
+        try s.recordQuiz(actor:"p1",question:0,picks:[0],seconds:3,free:true,practice:true)
+        let r=s.quizReport
+        let p2=try XCTUnwrap(r.students.first{$0.id=="p2"})
+        XCTAssertEqual(p2.mistakes.first?.answers.first?.said,"未作答")
+        XCTAssertEqual(p2.wrongWords.first?.word,"feet");XCTAssertEqual(p2.wrongWords.first?.said,[])  // never "说成 未作答"
+        XCTAssertNil(r.words.first{$0.word=="feet"}?.commonWrong)
+        // Decks: 小明 has portion 1 (apple, pear) and the shared card (cat), asked or not.
+        let p1=try XCTUnwrap(r.students.first{$0.id=="p1"})
+        XCTAssertEqual(p1.vocabulary.map(\.word),["apple","pear","cat"])
+        XCTAssertEqual(p1.vocabulary.map(\.status),[.corrected,.untested,.untested])
+        XCTAssertEqual(p2.vocabulary.map(\.word),["cat"])  // 小红 has no portion 2 here, only the shared card
+    }
     func testReportListsWrongWords()throws {
         let bank=try QuizBankParser.parse(Data(mixed.utf8))
         func a(_ p:String,_ q:Int,_ picks:[Int?],_ texts:[String?]?=nil)->QuizAttempt {
@@ -229,7 +272,7 @@ final class QuizTests:XCTestCase {
         let r=QuizReport(log:log,bank:bank,order:["p1","p2"],names:["p1":"小明","p2":"小红"])
         let p1=r.students[0]
         XCTAssertEqual(p1.wrongWords.map(\.word),["apple","went","saw"])
-        XCTAssertEqual(p1.wrongWords[0].meaning,"苹果");XCTAssertEqual(p1.wrongWords[0].said,["答错"]);XCTAssertEqual(p1.wrongWords[2].said,["see"])
+        XCTAssertEqual(p1.wrongWords[0].meaning,"苹果");XCTAssertEqual(p1.wrongWords[0].said,[])  // "答错" is not a wrong answer to quote;XCTAssertEqual(p1.wrongWords[2].said,["see"])
         XCTAssertEqual(p1.wordsAsked,3)  // the reading questions are not word items (no 单词 tag)
         XCTAssertEqual(r.words.first?.word,"went");XCTAssertEqual(r.words.first?.wrong,2);XCTAssertEqual(r.words.first?.asked,2)
         XCTAssertEqual(r.words.first?.students,["小明","小红"]);XCTAssertEqual(r.words.first?.commonWrong,"goed")
@@ -442,7 +485,7 @@ final class QuizTests:XCTestCase {
         XCTAssertEqual(b.coins,QuizRewards.baseCoins[1])
         // A wrong flash card reads "答错" in the report.
         try s.recordQuiz(actor:"p1",question:0,picks:[nil],seconds:3,free:true,challenge:true)
-        XCTAssertEqual(s.quizReport.students[0].wrongWords.first?.said,["答错"])
+        XCTAssertEqual(s.quizReport.students[0].wrongWords.first?.said,[])
     }
     func testCoursesKeepQuestionsApartAndAnswersStay()throws {
         func course(_ name:String,_ words:[(String,String)])->[QuizQuestion] {

@@ -38,7 +38,7 @@ public enum MeadowHistoryCategory:String,CaseIterable {case all,combat,travel,re
         switch command {
         case .startCampaignDuel,.resetDuelLimits,.startBattle,.attack,.cast,.monsterStep,.endTurn,.joinMonster,.reorderQueue,.finishBattle,.rescue,.retreatAfterDefeat:return .combat
         case .campaignMove,.move,.interactCampaignNode,.resolveCampaignSite,.answerCampaignQuiz,.recordCampaignQuiz,.refillCampaignMovement:return .travel
-        case .tradeCampaignSite,.campaignLottery,.editPlayer,.grantPlayerResources,.grantPlayerSupplies,.givePlayerResource,.editResources,.useItem,.reward,.setHealth,.revive,.equip,.refillExploration:return .resources
+        case .tradeCampaignSite,.campaignLottery,.customWheel,.editPlayer,.grantPlayerResources,.grantPlayerSupplies,.givePlayerResource,.editResources,.useItem,.reward,.setHealth,.revive,.equip,.refillExploration:return .resources
         case .configureTeams,.mergeTeams,.transferTeamResource,.teacherTransferTeamResource,.addHost,.changeTeam:return .team
         case .applyPlayerProfile:return .appearance
         case .configureCampaignSite,.configureNodeEncounter,.configureNodeReward,.resetNodeReward,.setDifficulty:return .configuration
@@ -111,6 +111,7 @@ public struct MeadowHistoryIndex:Identifiable,Equatable {
         case .answerCampaignQuiz(_,let correct,_):return correct ? "答题正确":"答题未答对"
         case .recordCampaignQuiz(let r):return "答题 · \(r.attempt.playerName) · \(r.attempt.rightCount)/\(r.attempt.correct.count)"
         case .campaignLottery(_,let tier):return "商店抽奖 · "+((try? CampaignLottery.tier(tier).title) ?? "")+"档"
+        case .customWheel(_,let wheel):return "转盘 · "+wheel.name
         }
     }
 }
