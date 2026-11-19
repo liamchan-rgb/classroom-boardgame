@@ -41,6 +41,16 @@ struct TeacherBookGrantBar:View {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),to:nil,from:nil,for:nil)
         game.grantBookPlayers(selected,movement:movement,coins:coins)
     }
+    /// A box's amount dropped on one player's card: only that player gets it (ticked recipients are left alone).
+    private func dropGrant(_ id:String,steps:Bool) {
+        prepare()
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),to:nil,from:nil,for:nil)
+        // Read the box after the field has committed what it still holds.
+        DispatchQueue.main.async {
+            let amount=BookGrantDraft.amount(steps ? draft.steps:draft.coins)
+            game.grantBookPlayers([id],movement:steps ? amount:0,coins:steps ? 0:amount)
+        }
+    }
     private var players:[GameUnit] {game.campaign?.engine.state.players ?? []}
     private var teams:[GameTeam] {game.campaign?.engine.state.teams.filter{t in players.contains{$0.teamID==t.id}} ?? []}
     private var selected:[String] {players.map(\.id).filter{draft.recipients.contains($0)}}
@@ -49,10 +59,15 @@ struct TeacherBookGrantBar:View {
             // A popover (not a menu) so several people / a whole group can be ticked before it is closed.
             Button{prepare();picking=true}label:{Label("\(selected.count)",systemImage:"person.2.fill")}
                 .popover(isPresented:$picking,arrowEdge:.bottom){recipientPicker}
-            HStack(spacing:4){Image(systemName:"figure.walk").foregroundStyle(GameTheme.primary);ClassroomTextField(placeholder:"0",text:$draft.steps,limit:3,keyboard:.numberPad).frame(width:40,height:36)}
-                .padding(.horizontal,10).background(GlassFill.field,in:Capsule())
-            HStack(spacing:4){Image(systemName:"bitcoinsign.circle.fill").foregroundStyle(GameTheme.accent);ClassroomTextField(placeholder:"0",text:$draft.coins,limit:5,keyboard:.numberPad).frame(width:54,height:36)}
-                .padding(.horizontal,10).background(GlassFill.field,in:Capsule())
+            // Drag the icon onto a player's card in the preview to give that player the amount in the box.
+            HStack(spacing:4){
+                GrantDragHandle(systemImage:"figure.walk",tint:GameTheme.primary,amount:draft.steps){id in dropGrant(id,steps:true)}
+                ClassroomTextField(placeholder:"0",text:$draft.steps,limit:3,keyboard:.numberPad).frame(width:40,height:36)
+            }.padding(.horizontal,10).background(GlassFill.field,in:Capsule()).zIndex(1)
+            HStack(spacing:4){
+                GrantDragHandle(systemImage:"bitcoinsign.circle.fill",tint:GameTheme.accent,amount:draft.coins){id in dropGrant(id,steps:false)}
+                ClassroomTextField(placeholder:"0",text:$draft.coins,limit:5,keyboard:.numberPad).frame(width:54,height:36)
+            }.padding(.horizontal,10).background(GlassFill.field,in:Capsule()).zIndex(1)
             Button{prepare();game.grantFromDraft()}label:{Label("发放 G",systemImage:"gift.fill")}
                 .buttonStyle(GlassIconButtonStyle(tint:GameTheme.accent,prominent:true)).disabled(selected.isEmpty || game.busy)
             Button{grant(movement:1,coins:0)}label:{Label("移动+1",systemImage:"figure.walk")}.disabled(selected.isEmpty || game.busy)
@@ -116,5 +131,52 @@ struct TeacherBookGrantBar:View {
     private func chip(_ title:String,systemImage:String,on:Bool,action:@escaping ()->Void)->some View {
         Button(action:action){Label(title,systemImage:systemImage).font(.subheadline.bold()).padding(.horizontal,12).frame(height:36)
             .background(on ? GameTheme.primary:Color.white.opacity(0.6),in:Capsule()).foregroundStyle(on ? Color.white:GameTheme.ink)}.buttonStyle(.plain)
+    }
+}
+
+/// Where the players' cards sit in the teacher's book preview, so a grant icon dragged from the bar knows
+/// which card it was let go over.
+@MainActor final class BookDropTargets:ObservableObject {
+    static let shared=BookDropTargets()
+    var frames:[String:CGRect]=[:]
+    /// The card under the dragged icon (highlighted).
+    @Published var hover:String?
+    func target(at point:CGPoint)->String? {frames.first{$0.value.contains(point)}?.key}
+}
+
+/// The step / coin icon of a grant box. Drag it onto a player's card: that player gets the box's amount.
+struct GrantDragHandle:View {
+    let systemImage:String
+    let tint:Color
+    let amount:String
+    let onDrop:(String)->Void
+    @ObservedObject private var targets=BookDropTargets.shared
+    @State private var drag:CGSize?
+    var body:some View {
+        Image(systemName:systemImage).foregroundStyle(tint)
+            .frame(width:22,height:36).contentShape(Rectangle())
+            .overlay{
+                if let drag {
+                    // The amount follows the pointer so it is clear what lands on the card.
+                    Label(String(BookGrantDraft.amount(amount)),systemImage:systemImage)
+                        .font(.system(size:20,weight:.heavy,design:.rounded)).monospacedDigit()
+                        .padding(.horizontal,14).frame(height:40)
+                        .background(tint,in:Capsule()).foregroundStyle(.white)
+                        .shadow(color:.black.opacity(0.3),radius:6,y:3)
+                        .fixedSize().offset(drag).allowsHitTesting(false)
+                }
+            }
+            .gesture(DragGesture(minimumDistance:3,coordinateSpace:.global)
+                .onChanged{g in
+                    drag=g.translation
+                    let id=targets.target(at:g.location)
+                    if id != targets.hover {targets.hover=id}
+                }
+                .onEnded{g in
+                    if let id=targets.target(at:g.location) {onDrop(id)}
+                    drag=nil;targets.hover=nil
+                })
+            .help("拖到玩家卡片上发放")
+            .accessibilityHint("拖到玩家卡片上发放")
     }
 }

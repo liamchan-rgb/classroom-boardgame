@@ -39,6 +39,10 @@ private struct TeacherBookConsole:View {
             HStack(spacing:8){
                 Label("绘本",systemImage:"book.pages.fill").font(.system(size:20,weight:.bold,design:.rounded))
                 GlassChip(icon:"tv",text:session.registrationStatus.contains("连接") ? "TV":"—",tint:GameTheme.muted).lineLimit(1)
+                #if targetEnvironment(macCatalyst)
+                MacPublicWindowButton(connected:game.externalConnected)
+                MacMirrorWarning()
+                #endif
                 Spacer()
                 ClassroomToolbarTools(game:game,prepare:{notesFocused=false})
                 ToolbarGap()
@@ -65,16 +69,16 @@ private struct TeacherBookConsole:View {
             }
             .onChange(of:session.importRequest){_,_ in importingBackup=false;openImporter()}
             HStack(spacing:8){
-                Button{notesFocused=false;game.project(.book)}label:{Label("投放",systemImage:"tv.and.mediabox")}.buttonStyle(GlassIconButtonStyle(prominent:true)).disabled(game.busy)
-                Button{notesFocused=false;session.concealNotes();game.project(.exploration);showGame()}label:{Label("游戏",systemImage:"gamecontroller.fill")}
-                Divider().frame(height:36)
+                // No 投放 / 游戏 buttons here: opening this tab already puts the book on the TV, and the 游戏 tab
+                // brings the game back (both did exactly what the tabs do).
                 Button{session.turnPage(-1)}label:{Label("上页",systemImage:"chevron.left")}
                 GlassChip(icon:"doc.plaintext",text:"\(session.state.pageCount==0 ? 0:session.state.pageIndex+1) / \(session.state.pageCount)")
                 DeckBuildChip(model:session.display)
                 Button{session.turnPage(1)}label:{Label("下页",systemImage:"chevron.right")}
                 Spacer(minLength:0)
             }.buttonStyle(GlassIconButtonStyle()).padding(.horizontal,10).padding(.vertical,6).glassPanel(radius:20,padding:0)
-            TeacherBookGrantBar(game:game,draft:game.grantDraft,prepare:{notesFocused=false})
+            // Above the preview so the amount dragged from it is drawn over the page.
+            TeacherBookGrantBar(game:game,draft:game.grantDraft,prepare:{notesFocused=false}).zIndex(1)
             HStack(alignment:.top,spacing:12){
                 PublicBookPage(model:session.display,players:game.backend.bookPlayers,draggable:true).frame(minWidth:0,maxWidth:.infinity,maxHeight:.infinity)
                     // The teacher's preview shows the same countdown / scoreboard as the TV.
@@ -124,6 +128,8 @@ private struct TeacherBookConsole:View {
             Button("好"){session.importOutcome=nil}
             Button("导入报告"){session.importOutcome=nil;report=true}
         }message:{Text(session.importOutcome ?? "")}
+        // Book tab opened while the game was busy: put the book on the TV once it is free (this used to need 投放).
+        .onChange(of:game.busy){_,busy in if !busy,game.bookTabActive,game.surface != .book {game.project(.book)}}
         .onChange(of:notesFocused){_,active in session.notesFocus(active)}
         .onChange(of:session.showNotes){_,value in if !value{notesFocused=false}}
         .sheet(isPresented:$report){NavigationStack{ScrollView{Text(session.importReport).padding()}.navigationTitle("PPTX导入报告").toolbar{Button("完成"){report=false}}}}

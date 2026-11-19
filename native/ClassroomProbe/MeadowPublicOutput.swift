@@ -63,7 +63,7 @@ struct PublicBookPage:View {
                     VStack(spacing:layout.spacing){
                         ForEach(Array(rowSlices(layout.rows).enumerated()),id:\.offset){_,range in
                             HStack(spacing:layout.spacing){
-                                ForEach(range,id:\.self){i in BookPlayerCard(unit:players[i],index:i,size:layout.card)}
+                                ForEach(range,id:\.self){i in BookPlayerCard(unit:players[i],index:i,size:layout.card,dropTarget:draggable)}
                             }
                         }
                     }.padding(.bottom,layout.spacing*1.6)
@@ -95,6 +95,9 @@ private struct BookPlayerCard:View {
     let unit:ClassroomBookPlayerStatus
     let index:Int
     let size:CGSize
+    /// The teacher's preview: the card takes grant icons dragged from the grant bar (the TV's cards do not).
+    var dropTarget=false
+    @ObservedObject private var targets=BookDropTargets.shared
     private static let tints:[Color]=[Color(red:0.36,green:0.72,blue:0.52),Color(red:0.42,green:0.62,blue:0.95),Color(red:0.95,green:0.62,blue:0.36),Color(red:0.78,green:0.52,blue:0.92),Color(red:0.95,green:0.80,blue:0.38),Color(red:0.40,green:0.80,blue:0.85),Color(red:0.92,green:0.50,blue:0.55)]
     private func number(_ value:Int)->String {value.formatted(.number.notation(.compactName).locale(Locale(identifier:"zh_CN")))}
     private var ratio:Double {Double(max(0,unit.health))/Double(max(1,unit.maximumHealth))}
@@ -147,6 +150,18 @@ private struct BookPlayerCard:View {
         }
         .overlay(RoundedRectangle(cornerRadius:h*0.2,style:.continuous).stroke(LinearGradient(colors:[.white.opacity(0.45),.white.opacity(0.1)],startPoint:.top,endPoint:.bottom),lineWidth:1))
         .opacity(alive ? 1:0.6).saturation(alive ? 1:0.2)
+        .overlay{
+            if dropTarget,targets.hover==unit.id {
+                RoundedRectangle(cornerRadius:h*0.2,style:.continuous).stroke(Color(red:1.0,green:0.84,blue:0.36),lineWidth:3)
+                    .shadow(color:Color(red:1.0,green:0.84,blue:0.36).opacity(0.8),radius:8)
+            }
+        }
+        .scaleEffect(dropTarget && targets.hover==unit.id ? 1.06:1)
+        .animation(.spring(response:0.2,dampingFraction:0.7),value:targets.hover)
+        .onGeometryChange(for:CGRect.self){$0.frame(in:.global)} action:{frame in
+            if dropTarget {targets.frames[unit.id]=frame}
+        }
+        .onDisappear{if dropTarget {targets.frames[unit.id]=nil}}
         .overlay{BookGainBurst(gain:gain,size:size).frame(width:size.width,height:size.height).allowsHitTesting(false)}
         .onChange(of:unit.coins){old,new in
             guard new>old else{heldCoins=nil;return}
