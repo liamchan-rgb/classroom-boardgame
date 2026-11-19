@@ -110,6 +110,17 @@ final class MeadowQuizCard: UIView {
             n += 1; rest = rest[close.upperBound...]
         }
         out.append(NSAttributedString(string: String(rest), attributes: base))
+        // Before the reveal: each blank's choices (the same letters the teacher picks by), one line per blank.
+        if attempt == nil {
+            for (i, part) in question.parts.enumerated() where part.options.count > 1 {
+                let line = NSMutableAttributedString(string: "\n" + (i == 0 ? "\n" : "") + "\(Self.circled[min(i, 11)])  ", attributes: [.font: MeadowPreviewPalette.font(26, .heavy), .foregroundColor: MeadowPreviewPalette.primary])
+                for (j, o) in part.options.enumerated() {
+                    line.append(NSAttributedString(string: "\(Self.letters[j]) ", attributes: [.font: MeadowPreviewPalette.font(22, .heavy), .foregroundColor: MeadowPreviewPalette.primary]))
+                    line.append(NSAttributedString(string: o + (j < part.options.count - 1 ? "      " : ""), attributes: [.font: MeadowPreviewPalette.font(26, .semibold), .foregroundColor: MeadowPreviewPalette.ink]))
+                }
+                out.append(line)
+            }
+        }
         return out
     }
     private func readingText(attempt: QuizAttempt?) -> NSAttributedString {
@@ -191,7 +202,7 @@ final class MeadowQuizCard: UIView {
             let columns = optionViews.count <= 2 ? optionViews.count : 2, rows = (optionViews.count + columns - 1) / max(1, columns)
             body = promptH + 22 + CGFloat(rows) * 70 + CGFloat(max(0, rows - 1)) * 14
         case .flashcard: body = 260
-        case .fill: body = min(360, ceil(prompt.sizeThatFits(CGSize(width: inner, height: 400)).height) + 20)
+        case .fill: body = min(bounds.height - 220, ceil(prompt.sizeThatFits(CGSize(width: inner, height: 700)).height) + 20)
         case .reading:
             let half = (min(1160, bounds.width - 60) - 56) * 0.5 - 16
             let need = max(passage.sizeThatFits(CGSize(width: half, height: .greatestFiniteMagnitude)).height, questions.sizeThatFits(CGSize(width: half, height: .greatestFiniteMagnitude)).height)

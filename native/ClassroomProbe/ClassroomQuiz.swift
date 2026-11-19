@@ -73,6 +73,40 @@ private struct QuizCardRepresentable: UIViewRepresentable {
     }
 }
 
+// MARK: - Docked answer panel
+
+/// Beside the teacher's preview (game or picture book tab): the panel of the question on screen. Only the tab in
+/// front shows it (one controller can only sit in one place).
+struct QuizDock: View {
+    @ObservedObject var game: MeadowTeacherCoordinator
+    var book: Bool
+    var body: some View {
+        if let panel = game.dockPanel, game.bookTabActive == book {
+            DockedPanel(panel: panel).frame(width: 480)
+                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(.white.opacity(0.5), lineWidth: 1))
+                .transition(.move(edge: .trailing).combined(with: .opacity))
+        }
+    }
+}
+
+private struct DockedPanel: UIViewControllerRepresentable {
+    let panel: UIViewController
+    final class Holder: UIViewController {
+        func hold(_ child: UIViewController) {
+            guard child.parent !== self else { return }
+            children.forEach { $0.willMove(toParent: nil); $0.view.removeFromSuperview(); $0.removeFromParent() }
+            if child.parent != nil { child.willMove(toParent: nil); child.view.removeFromSuperview(); child.removeFromParent() }
+            addChild(child); child.view.frame = view.bounds; child.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            view.addSubview(child.view); child.didMove(toParent: self)
+            // The panel takes the keys (letters, ⏎, Esc) as soon as it shows.
+            DispatchQueue.main.async { child.becomeFirstResponder() }
+        }
+    }
+    func makeUIViewController(context: Context) -> Holder { let h = Holder(); h.view.backgroundColor = .clear; h.hold(panel); return h }
+    func updateUIViewController(_ holder: Holder, context: Context) { holder.hold(panel) }
+}
+
 // MARK: - Launcher (personal)
 
 /// The challenge setup: who, and for how long. Keys: 1–7 student, ⏎ start, +/- half a minute, Esc close.

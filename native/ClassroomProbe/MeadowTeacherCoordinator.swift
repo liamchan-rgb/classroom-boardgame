@@ -29,7 +29,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
     @Published var grantCapture:ClassroomGrantCapture?
     var lastGrantKey:(kind:ClassroomGrantKind,at:Date)?
     /// The teacher has the picture-book tab open (G then grants the book bar's amounts).
-    var bookTabActive=false
+    @Published var bookTabActive=false
     /// Timer panel (teacher window); the countdown itself shows on the TV. Opens over anything (pack, shop, sheets).
     func openTimer(){
         guard let presenter=presentationHost else{return}
@@ -56,7 +56,15 @@ final class MeadowTeacherCoordinator:ObservableObject {
     private var quizReward:QuizManualReward?
     private var classModel:ClassQuizModel?
     private var practiceModel:PracticeModel?
-    private func presentPanel(_ panel:UIViewController,size:CGSize){
+    /// The answer panel of the question on screen, docked beside the teacher's preview (not a sheet over it), so
+    /// the preview, the map and the laser pointer stay usable while a question is up.
+    @Published var dockPanel:UIViewController?
+    private func presentPanel(_ panel:UIViewController,size:CGSize,dock:Bool=false){
+        if dock {
+            quizPanel=panel
+            withAnimation(.easeOut(duration:0.2)){dockPanel=panel}
+            return
+        }
         panel.modalPresentationStyle = .formSheet;panel.preferredContentSize=size
         panel.isModalInPresentation=true
         quizPanel=panel
@@ -66,6 +74,11 @@ final class MeadowTeacherCoordinator:ObservableObject {
     private func closePanel(_ then:(()->Void)?=nil){
         // Forget the panel first: whatever opens next (the launcher again) must not think one is still up.
         let panel=quizPanel;quizPanel=nil
+        if let panel,panel===dockPanel {
+            withAnimation(.easeIn(duration:0.15)){dockPanel=nil}
+            DispatchQueue.main.async{then?()}
+            return
+        }
         if let panel,panel.presentingViewController != nil {panel.dismiss(animated:true){then?()}} else {then?()}
     }
 
@@ -157,7 +170,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
             default:return false
             }
         }
-        presentPanel(screen,size:CGSize(width:780,height:620))
+        presentPanel(screen,size:CGSize(width:780,height:620),dock:true)
     }
     private func challengePick(_ difficulty:Int){
         guard let c=campaign,let model=challenge,model.phase == .picking,model.remaining>0 else{return}
@@ -220,7 +233,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
             default:return draft?.key(key) ?? false
             }
         }
-        presentPanel(panel,size:CGSize(width:760,height:q.type == .reading ? 780:q.isShared ? 640:600))
+        presentPanel(panel,size:CGSize(width:760,height:q.type == .reading ? 780:q.isShared ? 640:600),dock:true)
     }
     private func cancelQuiz(){closePanel();withAnimation{quiz=nil}}
     private func submitQuiz(){
@@ -265,7 +278,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
             }
             return true
         }
-        presentPanel(panel,size:CGSize(width:780,height:q.type == .reading ? 820:680))
+        presentPanel(panel,size:CGSize(width:780,height:q.type == .reading ? 820:680),dock:true)
     }
     private func sendClassQuiz(){
         guard let c=campaign,let live=quiz,live.mode == .classwide,let draft=quizDraft,let model=classModel,let reward=quizReward else{return}
@@ -319,7 +332,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
             return true
         }
         nextPracticeCard(after:nil)
-        presentPanel(panel,size:CGSize(width:720,height:460))
+        presentPanel(panel,size:CGSize(width:720,height:460),dock:true)
     }
     private func nextPracticeCard(after last:Int?){
         guard let c=campaign,let model=practiceModel else{return}

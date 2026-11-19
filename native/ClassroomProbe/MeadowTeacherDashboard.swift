@@ -106,6 +106,7 @@ struct MeadowTeacherDashboard:View {
                     }
                 }.buttonStyle(GlassIconButtonStyle()).menuStyle(.button).padding(.horizontal,10).padding(.vertical,6).glassPanel(radius:20,padding:0)
             }
+            HStack(spacing:8){
             ZStack {
                 if game.renderer != nil && (fullScreen || !fullPreview) {
                     TeacherGamePreview(game:game,selectingNode:selectingNode)
@@ -132,6 +133,9 @@ struct MeadowTeacherDashboard:View {
                 }
             }.frame(maxWidth:.infinity,maxHeight:.infinity).background(.black).clipShape(RoundedRectangle(cornerRadius:18,style:.continuous))
             .overlay(RoundedRectangle(cornerRadius:18,style:.continuous).stroke(.white.opacity(0.5),lineWidth:1))
+            // The question's answer panel, beside the preview (the full-screen copy shows it when it is up).
+            if fullScreen == fullPreview {QuizDock(game:game,book:false)}
+            }
             HStack(spacing:8){
                 Image(systemName:selectingNode && !inBattle ? "mappin.and.ellipse":(inBattle ? "hand.point.up.left.fill":"info.circle")).foregroundStyle(GameTheme.primary)
                 Text(selectingNode && !inBattle ? "点建筑选取地点":"\(game.message)").lineLimit(1).truncationMode(.tail)

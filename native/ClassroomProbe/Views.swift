@@ -76,6 +76,7 @@ private struct TeacherBookConsole:View {
                     .overlay{ClassroomTVOverlays(timer:game.classTimer,overlays:game.overlays,game:game)}
                     .overlay{LaserCapture(laser:game.laser)}
                     .clipShape(RoundedRectangle(cornerRadius:18,style:.continuous)).overlay(RoundedRectangle(cornerRadius:18,style:.continuous).stroke(.white.opacity(0.5),lineWidth:1))
+                QuizDock(game:game,book:true)
                 VStack(alignment:.leading,spacing:8){
                     Toggle(isOn:$session.showNotes){Label("备注",systemImage:"note.text")}.font(.headline)
                     if session.showNotes {
