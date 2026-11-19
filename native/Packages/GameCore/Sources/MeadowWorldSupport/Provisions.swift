@@ -41,13 +41,15 @@ public enum MeadowProvisioning {
         let first=caches.first.map{route($0.id)} ?? tour
         let initial=caches.isEmpty ? budget:min(budget,Int(ceil(max(0,first-capacity)/capacity))*refillPrice+refillPrice)
         var coins=[String:Int]()
-        for (i,p) in party.enumerated(){coins[p.id]=initial/party.count+(i<initial%party.count ? 1:0)}
+        // Everyone starts with the same purse (the share is rounded up), so no student begins a coin ahead.
+        let share=(initial+party.count-1)/party.count
+        for p in party {coins[p.id]=share}
         let encounters=MeadowEncounterPlanner.plan(layout)
         let totalHP=try encounters.flatMap(\.templates).map{try catalog.monster($0).attributes.maximumHealth}.reduce(0,+)
         let pressure=max(1,min(3,Int(ceil(Double(totalHP)/Double(max(1,caches.count)*party.count*48)))))
         // NodeReward is paid to EACH living recipient by the existing engine.
         // Divide the party budget before distributing it, to avoid doubling it.
-        let perMember=caches.isEmpty ? 0:Int(ceil(Double(budget-initial)/Double(party.count)))
+        let perMember=caches.isEmpty ? 0:Int(ceil(Double(max(0,budget-share*party.count))/Double(party.count)))
         let bosses=encounters.filter{$0.band=="boss"}
         var bossSupplies=[Int:Int]()
         for boss in bosses {

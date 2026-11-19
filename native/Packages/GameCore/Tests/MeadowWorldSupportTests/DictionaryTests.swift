@@ -19,6 +19,18 @@ final class DictionaryTests: XCTestCase {
         XCTAssertEqual(ranked.first?.pos, "v."); XCTAssertTrue(ranked.first?.meanings.contains("预订") ?? false)
         XCTAssertEqual(d.entry("Went")?.word, "go")  // looked up by base form
     }
+    func testUnfitMeaningsAreNeverOffered() throws {
+        let d = Self.shared
+        // Only the clean meaning is left: "Silly Willy" must not show the slang one.
+        let willy = try XCTUnwrap(d.entry("willy")).senses.flatMap(\.meanings)
+        XCTAssertFalse(willy.contains { ClassroomDictionary.isUnfit($0) })
+        XCTAssertTrue(willy.contains { $0.contains("柳树") })
+        XCTAssertTrue(try XCTUnwrap(d.entry("seed")).senses.flatMap(\.meanings).contains("种子"))
+        XCTAssertFalse(try XCTUnwrap(d.entry("seed")).senses.flatMap(\.meanings).contains { ClassroomDictionary.isUnfit($0) })
+        XCTAssertTrue(d.entry("penis")?.senses.isEmpty ?? true)
+        // A phrase with only unfit meanings is not suggested.
+        XCTAssertFalse(d.phrases(in: ["a", "blow", "job"], at: 2).contains { $0.phrase == "blow job" })
+    }
     func testPhrasesAroundAWord() {
         let d = Self.shared
         let s1 = ["She", "looked", "after", "her", "little", "brother"]

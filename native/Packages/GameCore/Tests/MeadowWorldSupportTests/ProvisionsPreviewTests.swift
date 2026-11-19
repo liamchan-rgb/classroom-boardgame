@@ -18,6 +18,14 @@ final class ProvisionsPreviewTests:XCTestCase {
             XCTAssertEqual(s.engine.state.random,RandomState(seed:seed ^ 0x43414d504149474e))
         }}
     }
+    func testEveryStudentStartsWithTheSameCoins()throws {
+        for count in 1...6 {for seed:UInt64 in [0,31827,UInt64.max] {
+            let layout=try MeadowMapGenerator.generate(.suggested(total:10,seed:seed))
+            let s=try MeadowCampaignSession.new(layout:layout,studentClasses:Array(repeating:"ranger",count:count))
+            let coins=Set(s.engine.state.players.filter{!$0.host}.map(\.coins))
+            XCTAssertEqual(coins.count,1,"\(count) students, seed \(seed): \(coins)")
+        }}
+    }
     func testFirstSupplyReachableWithPaidRefillsAndRewardIsIssuedExactlyOnce()throws {
         let layout=try MeadowMapGenerator.generate(.suggested(total:30,seed:UInt64.max)),s=try MeadowCampaignSession.new(layout:layout)
         let start=s.engine.state.units["p1"]!.nodeID

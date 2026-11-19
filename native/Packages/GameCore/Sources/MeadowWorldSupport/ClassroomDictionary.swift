@@ -70,10 +70,17 @@ public final class ClassroomDictionary {
                 pos = String(text[r]).trimmingCharacters(in: .whitespaces); text = String(text[r.upperBound...])
             }
             let meanings = text.components(separatedBy: CharacterSet(charactersIn: ",，;；"))
-                .map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+                .map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty && !isUnfit($0) }
             return meanings.isEmpty ? nil : Sense(pos: pos, meanings: meanings)
         }
     }
+    /// Sexual / vulgar meanings are never offered in a children's classroom: the meaning is dropped (the word keeps
+    /// its other meanings: cock → 公鸡, seed → 种子), and a word or phrase with nothing else left is not offered at all.
+    static let unfitTerms = ["阴茎", "阳物", "阳具", "阴道", "阴户", "阴部", "阴蒂", "阴毛", "阴囊", "生殖器", "性器", "睾丸", "精液", "射精",
+                             "勃起", "性交", "交媾", "交合", "做爱", "性行为", "性欲", "手淫", "自慰", "卖淫", "妓女", "娼妓", "嫖", "淫",
+                             "色情", "春药", "鸡巴", "屌", "肏", "操你", "他妈", "妈的", "婊子", "狗娘养", "贱人", "荡妇", "鸡奸", "奶子",
+                             "屄", "私处", "下体", "口交", "肛交", "乱伦", "强奸", "性高潮"]
+    static func isUnfit(_ meaning: String) -> Bool { unfitTerms.contains { meaning.contains($0) } }
 
     /// Phrases in the dictionary that include token `index` of the sentence, longest first. Tokens match as written
     /// or by base form (looked → look); up to two words may sit inside a phrase before its last word (pick it up).
@@ -87,7 +94,10 @@ public final class ClassroomDictionary {
             for first in forms[start] {
                 for phrase in phrasesByFirst[first] ?? [] {
                     if let used = match(phrase, forms: forms, from: start), used.contains(index) {
-                        let m = PhraseMatch(phrase: raw[phrase.joined(separator: " ")]?.word ?? phrase.joined(separator: " "), tokens: used)
+                        let r = raw[phrase.joined(separator: " ")]
+                        // A phrase whose only meanings are unfit for class is not suggested.
+                        if let r, Self.senses(r.senses).isEmpty { continue }
+                        let m = PhraseMatch(phrase: r?.word ?? phrase.joined(separator: " "), tokens: used)
                         if !found.contains(m) { found.append(m) }
                     }
                 }
