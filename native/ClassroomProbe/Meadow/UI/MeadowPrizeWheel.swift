@@ -396,6 +396,11 @@ final class WheelFaceView: UIView {
             UIColor.white.setStroke(); wedge.lineWidth = 2; wedge.stroke()
             // Picture or words near the rim, upright along the slice; when they do not fit, a "-".
             let mid = start + sector / 2, chord = r * sector
+            if s.icon == nil, s.badge == nil, chord >= 22 {
+                // Words only (a prize outside the game): written along the slice, reading outward.
+                radial(s.title, c: c, r: r, mid: mid, sector: sector, ctx: ctx)
+                continue
+            }
             ctx.saveGState(); ctx.translateBy(x: c.x + cos(mid) * r * 0.68, y: c.y + sin(mid) * r * 0.68); ctx.rotate(by: mid + .pi / 2)
             let side = min(r * 0.3, chord * 0.62)
             if chord < 22 {
@@ -406,15 +411,40 @@ final class WheelFaceView: UIView {
             } else if let badge = s.badge {
                 fitted(badge, at: CGPoint(x: 0, y: -side * 0.05), size: max(10, side * 0.42), width: chord * 0.85)
                 fitted(s.title, at: CGPoint(x: 0, y: side * 0.42), size: max(8, side * 0.22), width: chord * 0.85)
-            } else {
-                // Words only (a prize outside the game): a few characters per line along the slice.
-                wrapped(s.title, width: max(40, chord * 0.75), size: max(9, min(side * 0.3, 20)), room: r * 0.5)
             }
             ctx.restoreGState()
         }
         // Inner ring.
         UIColor.white.withAlphaComponent(0.7).setStroke()
         let inner = UIBezierPath(arcCenter: c, radius: r * 0.27, startAngle: 0, endAngle: 2 * .pi, clockwise: true); inner.lineWidth = 2.5; inner.stroke()
+    }
+    /// Words along the slice from the hub ring to the rim, as big as the slice's width allows (one line, or two when
+    /// that fits); "-" when even the smallest size does not fit.
+    private func radial(_ s: String, c: CGPoint, r: CGFloat, mid: CGFloat, sector: CGFloat, ctx: CGContext) {
+        let inner = r * 0.3, outer = r * 0.94, length = outer - inner
+        // Room across the slice where the words run (narrowest at their inner end, a little out from the hub).
+        let across = 2 * (inner + length * 0.2) * sin(min(sector, .pi) / 2) * 0.9
+        let font = { (size: CGFloat) in MeadowPreviewPalette.font(size, .heavy) }
+        var size = min(22, across * 0.8), lines = [s]
+        func width(_ t: String, _ z: CGFloat) -> CGFloat { NSAttributedString(string: t, attributes: [.font: font(z)]).size().width }
+        while size >= 9, width(s, size) > length * 0.92 { size -= 1 }
+        if size < 9 || width(s, size) > length * 0.92 {
+            // Two lines, if the slice is wide enough for them.
+            let half = s.count / 2, a = String(s.prefix(half + s.count % 2)), b = String(s.suffix(half))
+            size = min(18, across * 0.42)
+            while size >= 9, max(width(a, size), width(b, size)) > length * 0.92 { size -= 1 }
+            lines = size >= 9 ? [a, b] : ["-"]
+            if lines == ["-"] { size = min(16, max(10, across * 0.8)) }
+        }
+        ctx.saveGState()
+        ctx.translateBy(x: c.x + cos(mid) * (inner + length / 2), y: c.y + sin(mid) * (inner + length / 2))
+        // Left half: turned round so it never reads upside down.
+        ctx.rotate(by: cos(mid) < 0 ? mid + .pi : mid)
+        let gap = size * 1.15
+        for (k, line) in lines.enumerated() {
+            text(line, at: CGPoint(x: 0, y: (CGFloat(k) - CGFloat(lines.count - 1) / 2) * gap), size: size, color: .white)
+        }
+        ctx.restoreGState()
     }
     /// One line of words, or "-" when it is wider than the slice.
     private func fitted(_ s: String, at p: CGPoint, size: CGFloat, width: CGFloat) {
@@ -425,15 +455,6 @@ final class WheelFaceView: UIView {
         let shadow = NSShadow(); shadow.shadowColor = UIColor.black.withAlphaComponent(0.35); shadow.shadowBlurRadius = 2; shadow.shadowOffset = CGSize(width: 0, height: 1)
         let a = NSAttributedString(string: s, attributes: [.font: MeadowPreviewPalette.font(size, .heavy), .foregroundColor: color, .shadow: shadow])
         let b = a.size(); a.draw(at: CGPoint(x: p.x - b.width / 2, y: p.y - b.height / 2))
-    }
-    private func wrapped(_ s: String, width: CGFloat, size: CGFloat, room: CGFloat) {
-        let style = NSMutableParagraphStyle(); style.alignment = .center; style.lineBreakMode = .byCharWrapping
-        let shadow = NSShadow(); shadow.shadowColor = UIColor.black.withAlphaComponent(0.4); shadow.shadowBlurRadius = 2; shadow.shadowOffset = CGSize(width: 0, height: 1)
-        let a = NSAttributedString(string: s, attributes: [.font: MeadowPreviewPalette.font(size, .heavy), .foregroundColor: UIColor.white, .paragraphStyle: style, .shadow: shadow])
-        let box = a.boundingRect(with: CGSize(width: width, height: .greatestFiniteMagnitude), options: [.usesLineFragmentOrigin], context: nil)
-        // More lines than the slice holds: a "-" rather than cut-off words.
-        guard box.height <= min(size * 4.6, room) else { text("-", at: .zero, size: size * 1.4, color: .white); return }
-        a.draw(with: CGRect(x: -width / 2, y: -box.height / 2, width: width, height: min(box.height, size * 4)), options: [.usesLineFragmentOrigin, .truncatesLastVisibleLine], context: nil)
     }
 }
 

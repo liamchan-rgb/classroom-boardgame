@@ -69,7 +69,7 @@ enum ChipFit {
     static func height(_ s: String, _ size: CGFloat, _ weight: UIFont.Weight, width: CGFloat) -> CGFloat {
         let r = (s as NSString).boundingRect(with: CGSize(width: width / 1.08, height: .greatestFiniteMagnitude), options: [.usesLineFragmentOrigin],
                                              attributes: [.font: UIFont.systemFont(ofSize: size, weight: weight)], context: nil)
-        return ceil(r.height * 1.1)
+        return ceil(r.height * 1.02)
     }
     static let line: CGFloat = 510
     static func plainChip(_ t: String) -> CGFloat { text(t, 9, .heavy) + 12 }
@@ -85,7 +85,7 @@ enum ChipFit {
     }
     /// The class flash-card list split into pages by the rows' real heights.
     static func cardPages(_ cards: [QuizReport.CardStat]) -> [Range<Int>] {
-        let budget: CGFloat = 786 - 20 - 94 - 30 - 24 - 20
+        let budget: CGFloat = 786 - 20 - 94 - 30 - 24
         var pages: [Range<Int>] = [], start = 0, used: CGFloat = 0
         for (i, c) in cards.enumerated() {
             let h = cardRow(c)
@@ -104,7 +104,7 @@ enum ChipFit {
         if let w = wrong.first, !QuizReport.nonAnswers.contains(w.said) { said.strikethroughStyle = .single }
         var right = AttributedString("  →  " + wrong.map(\.expected).joined(separator: " / "))
         right.foregroundColor = Ink.good
-        var tag = AttributedString("  · " + line.question.type.title + (tries > 1 ? " · 错\(tries)次" : ""))
+        var tag = AttributedString(tries > 1 ? "  · 错\(tries)次" : "")
         tag.foregroundColor = Ink.muted
         return said + right + tag
     }
@@ -435,7 +435,7 @@ struct QuizReportPageView: View {
         HStack(spacing: 4) {
             Text(t.name).font(.system(size: 8, weight: .semibold, design: .rounded)).foregroundStyle(Ink.ink).lineLimit(1).frame(width: 46, alignment: .leading)
             GeometryReader { g in ZStack(alignment: .leading) { Capsule().fill(Ink.line); if t.right > 0 { Capsule().fill(Ink.rate(t.rate)).frame(width: max(4, g.size.width * t.rate)) } } }.frame(height: 5)
-            Text("\(t.right)/\(t.total)").font(.system(size: 7.5, weight: .bold, design: .rounded)).foregroundStyle(Ink.muted).monospacedDigit().frame(width: 30, alignment: .trailing)
+            Text("\(t.right)/\(t.total)").font(.system(size: 7.5, weight: .bold, design: .rounded)).foregroundStyle(Ink.muted).monospacedDigit().fixedSize()
         }.frame(height: 12)
     }
     /// A one-line chip; long sentences are cut, never wrapped.
