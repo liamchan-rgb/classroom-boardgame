@@ -1,0 +1,601 @@
+# 《爱丽丝漫游奇境记》第二章 The Pool of Tears · 题库
+# 来源：生词划黄版—爱丽丝漫游奇境记.doc 第二章正文与第二章生词表
+# 专属题：6 份单词闪卡（每份 ★/★★/★★★ 各 2 张，用于限时挑战）；默认第 n 份给第 n 位同学，可在“题库 › 专属题分配”里改。
+# 公用题：其余生词闪卡、课文原句填空、阅读理解选择题、两篇短文阅读。
+
+# 第 1 份
+类型：闪卡
+份：1
+难度：1
+正面：key
+背面：钥匙
+标签：单词, 第二章
+
+类型：闪卡
+份：1
+难度：1
+正面：parrot
+背面：鹦鹉
+标签：单词, 第二章
+
+类型：闪卡
+份：1
+难度：2
+正面：ceiling
+背面：天花板
+标签：单词, 第二章
+
+类型：闪卡
+份：1
+难度：2
+正面：hates
+背面：讨厌
+标签：单词, 第二章
+
+类型：闪卡
+份：1
+难度：3
+正面：unfortunately
+背面：不幸地
+标签：单词, 第二章
+
+类型：闪卡
+份：1
+难度：3
+正面：at last
+背面：最后、终于
+标签：单词, 第二章
+
+# 第 2 份
+类型：闪卡
+份：2
+难度：1
+正面：pool
+背面：池塘
+标签：单词, 第二章
+
+类型：闪卡
+份：2
+难度：1
+正面：eagle
+背面：鹰
+标签：单词, 第二章
+
+类型：闪卡
+份：2
+难度：2
+正面：silly
+背面：傻的、愚蠢的
+标签：单词, 第二章
+
+类型：闪卡
+份：2
+难度：2
+正面：follows
+背面：跟随
+标签：单词, 第二章
+
+类型：闪卡
+份：2
+难度：3
+正面：elegant
+背面：优雅、高贵的
+标签：单词, 第二章
+
+类型：闪卡
+份：2
+难度：3
+正面：just then
+背面：就在那时
+标签：单词, 第二章
+
+# 第 3 份
+类型：闪卡
+份：3
+难度：1
+正面：fan
+背面：扇子
+标签：单词, 第二章
+
+类型：闪卡
+份：3
+难度：1
+正面：alone
+背面：单独地
+标签：单词, 第二章
+
+类型：闪卡
+份：3
+难度：2
+正面：frightened
+背面：害怕的
+标签：单词, 第二章
+
+类型：闪卡
+份：3
+难度：2
+正面：catches
+背面：抓
+标签：单词, 第二章
+
+类型：闪卡
+份：3
+难度：3
+正面：correctly
+背面：正确地
+标签：单词, 第二章
+
+类型：闪卡
+份：3
+难度：3
+正面：picks up
+背面：捡起来
+标签：单词, 第二章
+
+# 第 4 份
+类型：闪卡
+份：4
+难度：1
+正面：gloves
+背面：手套
+标签：单词, 第二章
+
+类型：闪卡
+份：4
+难度：1
+正面：French
+背面：法国的
+标签：单词, 第二章
+
+类型：闪卡
+份：4
+难度：2
+正面：confused
+背面：困惑的
+标签：单词, 第二章
+
+类型：闪卡
+份：4
+难度：2
+正面：suddenly
+背面：突然
+标签：单词, 第二章
+
+类型：闪卡
+份：4
+难度：3
+正面：goes on
+背面：继续做某事
+标签：单词, 第二章
+
+类型：闪卡
+份：4
+难度：3
+正面：asks for help
+背面：请求帮助
+标签：单词, 第二章
+
+# 第 5 份
+类型：闪卡
+份：5
+难度：1
+正面：tears
+背面：眼泪
+标签：单词, 第二章
+
+类型：闪卡
+份：5
+难度：1
+正面：answer
+背面：回答
+标签：单词, 第二章
+
+类型：闪卡
+份：5
+难度：2
+正面：locked
+背面：锁上了的
+标签：单词, 第二章
+
+类型：闪卡
+份：5
+难度：2
+正面：perhaps
+背面：或许
+标签：单词, 第二章
+
+类型：闪卡
+份：5
+难度：3
+正面：in a timid voice
+背面：用胆怯的声音
+标签：单词, 第二章
+
+类型：闪卡
+份：5
+难度：3
+正面：grammar book
+背面：语法书
+标签：单词, 第二章
+
+# 第 6 份
+类型：闪卡
+份：6
+难度：1
+正面：angry
+背面：生气的
+标签：单词, 第二章
+
+类型：闪卡
+份：6
+难度：1
+正面：late
+背面：迟到的
+标签：单词, 第二章
+
+类型：闪卡
+份：6
+难度：2
+正面：wonders
+背面：好奇、想知道
+标签：单词, 第二章
+
+类型：闪卡
+份：6
+难度：2
+正面：company
+背面：陪伴、伙伴
+标签：单词, 第二章
+
+类型：闪卡
+份：6
+难度：3
+正面：is very tired of
+背面：厌倦做某事
+标签：单词, 第二章
+
+类型：闪卡
+份：6
+难度：3
+正面：a short time later
+背面：不久之后
+标签：单词, 第二章
+
+# 公用题 · 生词闪卡
+类型：闪卡
+难度：2
+正面：dodo
+背面：渡渡鸟（已灭绝的大鸟）
+标签：单词, 第二章
+
+类型：闪卡
+难度：1
+正面：other hand
+背面：另一只手
+标签：单词, 第二章
+
+类型：闪卡
+难度：1
+正面：wearing
+背面：穿着、戴着
+标签：单词, 第二章
+
+类型：闪卡
+难度：1
+正面：drops
+背面：掉落、扔下
+标签：单词, 第二章
+
+类型：闪卡
+难度：1
+正面：growing
+背面：生长、变大
+标签：单词, 第二章
+
+类型：闪卡
+难度：1
+正面：cries
+背面：哭、大叫
+标签：单词, 第二章
+
+类型：闪卡
+难度：2
+正面：forgetting
+背面：忘记
+标签：单词, 第二章
+
+类型：闪卡
+难度：2
+正面：hitting
+背面：碰撞、撞击
+标签：单词, 第二章
+
+类型：闪卡
+难度：1
+正面：feels
+背面：感到
+标签：单词, 第二章
+
+类型：闪卡
+难度：3
+正面：starts to fan herself
+背面：开始给自己扇风
+标签：单词, 第二章
+
+类型：闪卡
+难度：3
+正面：too small to take it
+背面：太小了拿不到它
+标签：单词, 第二章
+
+类型：闪卡
+难度：3
+正面：be good at catching
+背面：擅长抓
+标签：单词, 第二章
+
+类型：闪卡
+难度：3
+正面：won't ... any more
+背面：再也不会……
+标签：单词, 第二章
+
+类型：闪卡
+难度：1
+正面：starts
+背面：开始
+标签：单词, 第二章
+
+# 公用题 · 课文原句填空
+类型：填空
+难度：2
+Her head is {{hitting|hits|hit}} the ceiling.
+标签：单词, 语法, 第二章
+解析：现在进行时：is + 动词-ing
+
+类型：填空
+难度：1
+She sits down and {{starts|start|starting}} to cry again.
+标签：单词, 语法, 第二章
+解析：主语 she，动词加 -s
+
+类型：填空
+难度：2
+He is so frightened that he {{drops|drop|dropping}} his fan and his gloves.
+标签：单词, 语法, 第二章
+解析：so ... that ... 如此……以至于……
+
+类型：填空
+难度：1
+Alice is {{wearing|wear|wears}} the Rabbit's glove.
+标签：单词, 语法, 第二章
+解析：现在进行时：is + wearing
+
+类型：填空
+难度：1
+'I'm {{growing|grow|grew}} small again,' she thinks.
+标签：单词, 语法, 第二章
+解析：I'm = I am，后接 -ing
+
+类型：填空
+难度：1
+She {{feels|feel|feeling}} more confused.
+标签：单词, 语法, 第二章
+解析：主语 she，动词加 -s
+
+类型：填空
+难度：2
+The key is on the table and Alice is {{too|so|very}} small to take it.
+标签：单词, 语法, 第二章
+解析：too ... to ... 太……而不能……
+
+类型：填空
+难度：2
+He is very good at {{catching|catch|catches}} mice.
+标签：单词, 语法, 第二章
+解析：be good at + 动词-ing
+
+类型：填空
+难度：2
+We {{won't|don't|didn't}} talk about her any more.
+标签：单词, 语法, 第二章
+解析：won't ... any more 再也不会
+
+类型：填空
+难度：2
+Alice is very tired {{of|in|for}} swimming in the pool.
+标签：单词, 语法, 第二章
+解析：be tired of 厌倦
+
+类型：填空
+难度：3
+Alice asks the Rabbit {{for|to|of}} help in a {{timid|time|tired}} voice.
+标签：单词, 语法, 第二章
+解析：ask for help 请求帮助；timid 胆怯的
+
+类型：填空
+难度：3
+'Curiouser and curiouser!' {{cries|cry|crying}} Alice, who is {{forgetting|forget|forgot}} how to speak English {{correctly|correct|correction}}.
+标签：单词, 语法, 第二章
+解析：cries 大叫；is forgetting；副词 correctly 修饰 speak
+
+# 公用题 · 阅读理解选择题
+类型：选择
+难度：1
+Why can't Alice go into the garden at first?
+A. She is too big.
+B. The door has no key.
+C. The Rabbit stops her.
+答案：A
+标签：阅读理解, 第二章
+解析：She is too big.
+
+类型：选择
+难度：1
+What makes the big pool?
+A. The rain.
+B. Alice's tears.
+C. The sea.
+答案：B
+标签：阅读理解, 第二章
+解析：Her tears are so big that they make a big pool.
+
+类型：选择
+难度：1
+What does the White Rabbit have in his hands?
+A. A key and a book.
+B. White gloves and a fan.
+C. A watch and a hat.
+答案：B
+标签：阅读理解, 第二章
+解析：He has white gloves in one hand and a fan in his other hand.
+
+类型：选择
+难度：2
+Who will be angry because the Rabbit is late?
+A. The Queen.
+B. Alice.
+C. The Duchess.
+答案：C
+标签：阅读理解, 第二章
+解析：'Oh! The Duchess, the Duchess! She'll be angry because I'm late.'
+
+类型：选择
+难度：2
+Why does the Rabbit run away?
+A. He is frightened of Alice.
+B. He is very hungry.
+C. He wants to find the key.
+答案：A
+标签：阅读理解, 第二章
+解析：He is so frightened that he drops his fan and his gloves.
+
+类型：选择
+难度：2
+How does Alice know she is growing small again?
+A. She can see the key.
+B. She is wearing the Rabbit's glove.
+C. She falls into the sea.
+答案：B
+标签：阅读理解, 第二章
+解析：She looks at her hands: she is wearing the Rabbit's glove.
+
+类型：选择
+难度：1
+Alice thinks the Mouse may be a ___ mouse.
+A. English
+B. German
+C. French
+答案：C
+标签：阅读理解, 第二章
+解析：'Is it a French mouse?' Alice wonders.
+
+类型：选择
+难度：2
+Why does the Mouse jump out of the water?
+A. The water is cold.
+B. Alice talks about cats.
+C. He sees a dog.
+答案：B
+标签：阅读理解, 第二章
+解析：'Ou est ma chatte?' means 'Where is my cat?'
+
+类型：选择
+难度：2
+Who is Dinah?
+A. Alice's cat.
+B. Alice's sister.
+C. A dog on a farm.
+答案：A
+标签：阅读理解, 第二章
+解析：She catches all the mice.
+
+类型：选择
+难度：2
+Which animal is NOT in the pool at the end?
+A. a duck
+B. a dodo
+C. an eagle
+D. a dog
+答案：D
+标签：阅读理解, 第二章
+解析：There are a duck, a dodo, a parrot and a small eagle.
+
+类型：选择
+难度：3
+'Alice has some company at last!' What does it mean?
+A. Alice is alone again.
+B. Alice has friends with her now.
+C. Alice opens a company.
+答案：B
+标签：阅读理解, 第二章
+解析：company 在这里是“陪伴、伙伴”。
+
+类型：选择
+难度：2
+下面哪个是 elegant 的意思？
+A. 优雅、高贵的
+B. 生气的
+C. 害怕的
+答案：A
+标签：单词, 第二章
+
+# 公用题 · 短文阅读
+类型：阅读
+难度：3
+文章：A short time later she hears something. There is someone running towards her.
+It is the White Rabbit. He looks very elegant. He has white gloves in one hand and a fan in his other hand.
+'Oh! The Duchess, the Duchess! She'll be angry because I'm late,' the Rabbit is saying to himself.
+Alice asks the Rabbit for help in a timid voice: 'If you please, sir...'
+The White Rabbit jumps. When he sees Alice, he is so frightened that he drops his fan and his gloves.
+问：How does the White Rabbit look?
+A. elegant
+B. silly
+C. angry
+答案：A
+问：Why is the Rabbit worried?
+A. He is lost.
+B. He is late for the Duchess.
+C. He can't find his key.
+答案：B
+问：How does Alice speak to the Rabbit?
+A. in a loud voice
+B. in an angry voice
+C. in a timid voice
+答案：C
+问：What does the Rabbit drop?
+A. his fan and his gloves
+B. the key
+C. his hat
+答案：A
+标签：阅读理解, 第二章
+
+类型：阅读
+难度：3
+文章：'Don't like cats ... Of course I don't like cats! I'm a mouse!' answers the Mouse.
+'Of course not, but I think you'll like Dinah. She is very good. She catches all the mice! Oh, sorry, sorry. We won't talk about her any more,' says Alice.
+'No, we won't!' says the Mouse, 'my family hates cats!'
+Alice wants to talk about something else. She asks the Mouse: 'Do you like dogs?'
+The Mouse doesn't answer so Alice goes on: 'There's a nice dog near our house. He lives on a farm and is very good at catching m... oh, sorry!'
+The Mouse is very angry. He goes out of the water. Alice follows him.
+问：What does the Mouse's family hate?
+A. dogs
+B. cats
+C. water
+答案：B
+问：Where does the nice dog live?
+A. on a farm
+B. in the pool
+C. in a big house in the city
+答案：A
+问：How does the Mouse feel at the end?
+A. happy
+B. tired
+C. angry
+答案：C
+问：What does Alice do when the Mouse goes out of the water?
+A. She follows him.
+B. She cries again.
+C. She looks for the key.
+答案：A
+标签：阅读理解, 第二章
