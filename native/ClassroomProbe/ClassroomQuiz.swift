@@ -82,7 +82,7 @@ struct QuizDock: View {
     var book: Bool
     var body: some View {
         if let panel = game.dockPanel, game.bookTabActive == book {
-            DockedPanel(panel: panel).frame(width: 480)
+            DockedPanel(panel: panel).frame(width: 480).layoutPriority(1)
                 .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                 .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(.white.opacity(0.5), lineWidth: 1))
                 .transition(.move(edge: .trailing).combined(with: .opacity))

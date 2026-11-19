@@ -110,16 +110,17 @@ final class MeadowQuizCard: UIView {
             n += 1; rest = rest[close.upperBound...]
         }
         out.append(NSAttributedString(string: String(rest), attributes: base))
-        // Before the reveal: each blank's choices (the same letters the teacher picks by), one line per blank.
-        if attempt == nil {
-            for (i, part) in question.parts.enumerated() where part.options.count > 1 {
-                let line = NSMutableAttributedString(string: "\n" + (i == 0 ? "\n" : "") + "\(Self.circled[min(i, 11)])  ", attributes: [.font: MeadowPreviewPalette.font(26, .heavy), .foregroundColor: MeadowPreviewPalette.primary])
-                for (j, o) in part.options.enumerated() {
-                    line.append(NSAttributedString(string: "\(Self.letters[j]) ", attributes: [.font: MeadowPreviewPalette.font(22, .heavy), .foregroundColor: MeadowPreviewPalette.primary]))
-                    line.append(NSAttributedString(string: o + (j < part.options.count - 1 ? "      " : ""), attributes: [.font: MeadowPreviewPalette.font(26, .semibold), .foregroundColor: MeadowPreviewPalette.ink]))
-                }
-                out.append(line)
+        // Each blank's choices (the same letters the teacher picks by), one line per blank; after the reveal the
+        // right one is green with a tick (the lines stay, so the card keeps its height).
+        for (i, part) in question.parts.enumerated() where part.options.count > 1 {
+            let line = NSMutableAttributedString(string: "\n" + (i == 0 ? "\n" : "") + "\(Self.circled[min(i, 11)])  ", attributes: [.font: MeadowPreviewPalette.font(26, .heavy), .foregroundColor: MeadowPreviewPalette.primary])
+            for (j, o) in part.options.enumerated() {
+                let right = attempt != nil && j == part.answer
+                let dim = attempt != nil && !right
+                line.append(NSAttributedString(string: right ? "✓ " : "\(Self.letters[j]) ", attributes: [.font: MeadowPreviewPalette.font(22, .heavy), .foregroundColor: right ? UIColor.systemGreen : MeadowPreviewPalette.primary.withAlphaComponent(dim ? 0.45 : 1)]))
+                line.append(NSAttributedString(string: o + (j < part.options.count - 1 ? "      " : ""), attributes: [.font: MeadowPreviewPalette.font(26, right ? .heavy : .semibold), .foregroundColor: right ? UIColor.systemGreen : MeadowPreviewPalette.ink.withAlphaComponent(dim ? 0.45 : 1)]))
             }
+            out.append(line)
         }
         return out
     }

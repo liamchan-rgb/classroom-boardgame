@@ -131,7 +131,8 @@ struct MeadowTeacherDashboard:View {
                 }else if !inBattle,game.surface != .exploration {
                     VStack{HStack{Spacer();Button{game.project(.exploration)}label:{Label("地图",systemImage:"map")}.buttonStyle(GlassIconButtonStyle(tint:.white)).padding(12)};Spacer()}
                 }
-            }.frame(maxWidth:.infinity,maxHeight:.infinity).background(.black).clipShape(RoundedRectangle(cornerRadius:18,style:.continuous))
+            // minWidth 0: the preview gives up width to the docked answer panel.
+            }.frame(minWidth:0,maxWidth:.infinity,minHeight:0,maxHeight:.infinity).background(.black).clipShape(RoundedRectangle(cornerRadius:18,style:.continuous))
             .overlay(RoundedRectangle(cornerRadius:18,style:.continuous).stroke(.white.opacity(0.5),lineWidth:1))
             // The question's answer panel, beside the preview (the full-screen copy shows it when it is up).
             if fullScreen == fullPreview {QuizDock(game:game,book:false)}
