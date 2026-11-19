@@ -99,7 +99,7 @@ struct QuizLauncherPanel: View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
                 Label("专属题挑战", systemImage: "timer").font(.title2.bold())
-                Text("题库 \(campaign?.quizBank.count ?? 0) 题").font(.callout).foregroundStyle(GameTheme.muted)
+                Text("课程：\(QuizLibrary.shared.active ?? "未选") · \(campaign?.courseIndices.count ?? 0) 题").font(.callout).foregroundStyle(GameTheme.muted)
                 Spacer()
                 if let c = campaign, !c.quizPortions.isEmpty {
                     Button { game.openQuizPortions() } label: { Label("专属题分配 (\(c.quizPortions.count)份)", systemImage: "person.2.badge.gearshape") }.buttonStyle(GlassIconButtonStyle())
@@ -484,39 +484,92 @@ struct QuizPortionPanel: View {
 
 // MARK: - Question bank (app level, top bar)
 
-/// The teacher's question bank, kept by the app (not by one trip): new trips start with it, and what is imported
-/// while a trip is open is added to that trip too. Stored as JSON next to the trip saves.
+/// The teacher's question bank, kept by the app and split into courses (one per imported file, named after it).
+/// The teacher picks the current course by hand; the open trip deals only from it. Trips (a fresh map every
+/// lesson) only keep the questions they used and the answers, for rewards and the report.
 @MainActor final class QuizLibrary: ObservableObject {
     static let shared = QuizLibrary()
     @Published private(set) var questions: [QuizQuestion] = []
+    @Published private(set) var active: String? = UserDefaults.standard.string(forKey: "classroom.quizCourse") {
+        didSet { UserDefaults.standard.set(active, forKey: "classroom.quizCourse") }
+    }
+    static let unsorted = "未分类"
     private var url: URL {
         FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("ClassroomMeadow/quiz-bank.json")
     }
     private init() {
-        if let data = try? Data(contentsOf: url), let list = try? JSONDecoder().decode([QuizQuestion].self, from: data) { questions = list }
+        if let data = try? Data(contentsOf: url), let list = try? JSONDecoder().decode([QuizQuestion].self, from: data) {
+            // Questions imported before courses existed go to "未分类".
+            questions = list.map { q in var q = q; if q.course == nil { q.course = Self.unsorted }; return q }
+        }
+        if let active, !courses.contains(active) { self.active = courses.first }
+        if active == nil { active = courses.first }
     }
     private func save() {
         try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
         try? JSONEncoder().encode(questions).write(to: url, options: .atomic)
     }
-    func add(_ list: [QuizQuestion]) { questions += list; save() }
-    func replace(_ list: [QuizQuestion]) { questions = list; save() }
-    func clear() { questions = []; save() }
+    /// Course names in the order they were first imported.
+    var courses: [String] {
+        var seen = Set<String>(); return questions.compactMap { q in q.course.flatMap { seen.insert($0).inserted ? $0 : nil } }
+    }
+    func questions(of course: String) -> [QuizQuestion] { questions.filter { $0.course == course } }
+    var activeQuestions: [QuizQuestion] { active.map(questions(of:)) ?? [] }
+    /// Adds a course (a file with the same name replaces that course) and makes it the current one.
+    func add(course: String, _ list: [QuizQuestion]) {
+        let tagged = list.map { q in var q = q; q.course = course; return q }
+        questions.removeAll { $0.course == course }
+        questions += tagged; save(); active = course
+    }
+    func select(_ course: String?) { active = course }
+    func remove(course: String) {
+        questions.removeAll { $0.course == course }; save()
+        if active == course { active = courses.first }
+    }
+    func rename(_ course: String, to name: String) {
+        let name = String(name.trimmingCharacters(in: .whitespaces).prefix(120))
+        guard !name.isEmpty, name != course, !courses.contains(name) else { return }
+        questions = questions.map { q in var q = q; if q.course == course { q.course = name }; return q }; save()
+        if active == course { active = name }
+    }
     static func sample() throws -> [QuizQuestion] {
         guard let url = Bundle.main.url(forResource: "quiz-sample", withExtension: "txt") else { throw GameError("示例题库缺失。") }
         return try QuizBankParser.parse(Data(contentsOf: url))
     }
+    /// The course name for an imported file: its name without the extension.
+    static func courseName(_ url: URL) -> String { String(url.deletingPathExtension().lastPathComponent.prefix(120)) }
 }
 
-/// Top bar "题库": import (add / replace), the bundled sample, what the open trip has, and who gets which portion.
+/// Top bar course switch: the current course's name; the menu lists every course.
+struct QuizCourseMenu: View {
+    @ObservedObject var game: MeadowTeacherCoordinator
+    @ObservedObject var library = QuizLibrary.shared
+    var body: some View {
+        Menu {
+            ForEach(library.courses, id: \.self) { c in
+                Button { game.selectQuizCourse(c) } label: {
+                    Label("\(c)（\(library.questions(of: c).count) 题）", systemImage: library.active == c ? "checkmark" : "book.closed")
+                }
+            }
+            Divider()
+            Button { game.openQuizBank() } label: { Label("题库管理…", systemImage: "text.book.closed") }
+        } label: {
+            Label(library.active ?? "题库", systemImage: "text.book.closed").lineLimit(1)
+        } primaryAction: { game.openQuizBank() }
+        .frame(maxWidth: 220)
+    }
+}
+
+/// "题库": the courses (import a file = a course named after it), which one is current, rename / delete.
 struct QuizBankPanel: View {
     @ObservedObject var game: MeadowTeacherCoordinator
     @ObservedObject var library = QuizLibrary.shared
     var onPortions: () -> Void
     var onClose: () -> Void
     @State private var importing = false
-    @State private var replacing = false
     @State private var note: String?
+    @State private var renaming: String?
+    @State private var newName = ""
 
     private func summary(_ list: [QuizQuestion]) -> String {
         let kinds = QuizKind.allCases.compactMap { k -> String? in let n = list.filter { $0.type == k }.count; return n > 0 ? "\(k.title) \(n)" : nil }
@@ -524,62 +577,69 @@ struct QuizBankPanel: View {
         return kinds.joined(separator: " · ") + (portions > 0 ? " · 专属 \(portions) 份" : "")
     }
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Label("题库", systemImage: "text.book.closed.fill").font(.title2.bold())
                 Spacer()
-                Button { onClose() } label: { Label("完成 (Esc)", systemImage: "checkmark") }.buttonStyle(GlassIconButtonStyle(prominent: true))
+                Button { importing = true } label: { Label("导入课程", systemImage: "square.and.arrow.down") }.buttonStyle(GlassIconButtonStyle(prominent: true))
+                Button { loadSample() } label: { Label("示例题库", systemImage: "text.book.closed") }.buttonStyle(GlassIconButtonStyle())
+                Button { onClose() } label: { Label("完成 (Esc)", systemImage: "checkmark") }.buttonStyle(GlassIconButtonStyle())
             }
+            Text("每导入一个文件就是一门课（用文件名命名，同名再导入会更新这门课）。点一门课把它设为当前课程：答题、全班题、闪卡和地图答题点只出这门课的题。").font(.caption).foregroundStyle(GameTheme.muted)
             if let note { Text(note).font(.callout.bold()).foregroundStyle(note.hasPrefix("✓") ? GameTheme.primary : .red) }
-            VStack(alignment: .leading, spacing: 8) {
-                Text("App 题库 · \(library.questions.count) 题").font(.headline)
-                if !library.questions.isEmpty { Text(summary(library.questions)).font(.caption).foregroundStyle(GameTheme.muted) }
-                Text("新开的行程会自动带上这些题；行程开着时导入的题也会加进当前行程。").font(.caption).foregroundStyle(GameTheme.muted)
-                HStack(spacing: 8) {
-                    Button { replacing = false; importing = true } label: { Label("导入（追加）", systemImage: "square.and.arrow.down") }
-                    Button { replacing = true; importing = true } label: { Label("导入（替换）", systemImage: "arrow.triangle.2.circlepath") }
-                    Button { loadSample() } label: { Label("载入示例题库", systemImage: "text.book.closed") }
-                    Button(role: .destructive) { library.clear(); note = "✓ 已清空 App 题库（当前行程里已有的题保留）" } label: { Label("清空", systemImage: "trash") }.disabled(library.questions.isEmpty)
-                }.buttonStyle(GlassIconButtonStyle())
-            }.padding(12).frame(maxWidth: .infinity, alignment: .leading).background(GlassFill.field, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-            VStack(alignment: .leading, spacing: 8) {
-                if let c = game.campaign {
-                    Text("当前行程 · \(c.quizBank.count) 题 · 已作答 \(c.quizLog.count) 次").font(.headline)
-                    if !c.quizBank.isEmpty { Text(summary(c.quizBank)).font(.caption).foregroundStyle(GameTheme.muted) }
-                    HStack(spacing: 8) {
-                        if c.quizBank.isEmpty && !library.questions.isEmpty {
-                            Button { addToTrip(library.questions) } label: { Label("把 App 题库加进这个行程", systemImage: "plus.circle") }.buttonStyle(GlassIconButtonStyle(prominent: true))
-                        }
-                        if !c.quizPortions.isEmpty {
-                            Button { onPortions() } label: { Label("专属题分配 (\(c.quizPortions.count)份)", systemImage: "person.2.badge.gearshape") }.buttonStyle(GlassIconButtonStyle())
-                        }
-                    }
-                } else {
-                    Text("当前没有打开的行程").font(.headline)
-                    Button { game.restore() } label: { Label("继续上次行程", systemImage: "arrow.clockwise.circle") }.buttonStyle(GlassIconButtonStyle())
+            ScrollView {
+                VStack(spacing: 8) {
+                    if library.courses.isEmpty { Label("还没有课程，点“导入课程”或“示例题库”。", systemImage: "tray").foregroundStyle(GameTheme.muted).frame(maxWidth: .infinity, alignment: .leading) }
+                    ForEach(library.courses, id: \.self) { c in courseRow(c) }
                 }
-            }.padding(12).frame(maxWidth: .infinity, alignment: .leading).background(GlassFill.field, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-            Text("格式：每题空一行；`份：1` 为第 1 份专属题（在“专属题分配”里指定给谁），不写“份”的是公用题。详见 docs/question-bank-format.md。").font(.caption).foregroundStyle(GameTheme.muted)
+            }
+            if let c = game.campaign, !c.quizPortions.isEmpty {
+                Button { onPortions() } label: { Label("当前课程的专属题分配 (\(c.quizPortions.count)份)", systemImage: "person.2.badge.gearshape") }.buttonStyle(GlassIconButtonStyle())
+            }
+            Text("格式：每题空一行；`份：1` 为第 1 份专属题，不写“份”的是公用题。详见 docs/question-bank-format.md。").font(.caption).foregroundStyle(GameTheme.muted)
         }
         .padding(22).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(GlassBackdrop())
-        .fileImporter(isPresented: $importing, allowedContentTypes: [.plainText, .json, .text]) { result in
+        .fileImporter(isPresented: $importing, allowedContentTypes: [.plainText, .json, .text], allowsMultipleSelection: true) { result in
             do {
-                let url = try result.get()
-                let scoped = url.startAccessingSecurityScopedResource(); defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-                let list = try QuizBankParser.parse(Data(contentsOf: url))
-                if replacing { library.replace(list) } else { library.add(list) }
-                addToTrip(list, prefix: replacing ? "✓ App 题库已替换为 \(list.count) 题" : "✓ 已导入 \(list.count) 题")
+                var names: [String] = []
+                for url in try result.get() {
+                    let scoped = url.startAccessingSecurityScopedResource(); defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+                    let list = try QuizBankParser.parse(Data(contentsOf: url))
+                    let name = QuizLibrary.courseName(url)
+                    library.add(course: name, list); names.append("\(name)（\(list.count) 题）")
+                }
+                game.applyQuizCourse()
+                note = "✓ 已导入：" + names.joined(separator: "、") + "，当前课程：\(library.active ?? "")"
             } catch { note = "导入失败：\(error.localizedDescription)" }
         }
     }
-    private func loadSample() {
-        do { let list = try QuizLibrary.sample(); library.add(list); addToTrip(list, prefix: "✓ 已载入示例题库 \(list.count) 题") }
-        catch { note = "载入失败：\(error.localizedDescription)" }
+    @ViewBuilder private func courseRow(_ c: String) -> some View {
+        let on = library.active == c, list = library.questions(of: c)
+        HStack(spacing: 10) {
+            Button { game.selectQuizCourse(c) } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: on ? "checkmark.circle.fill" : "circle").font(.title3).foregroundStyle(on ? GameTheme.primary : GameTheme.muted)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(c).font(.headline).foregroundStyle(GameTheme.ink).lineLimit(1)
+                        Text("\(list.count) 题 · " + summary(list)).font(.caption).foregroundStyle(GameTheme.muted).lineLimit(1)
+                    }
+                    Spacer()
+                    if on { Text("当前课程").font(.caption.bold()).foregroundStyle(.white).padding(.horizontal, 8).padding(.vertical, 3).background(Capsule().fill(GameTheme.primary)) }
+                }.contentShape(Rectangle())
+            }.buttonStyle(.plain)
+            if renaming == c {
+                ClassroomTextField(placeholder: c, text: $newName, limit: 60, onSubmit: { library.rename(c, to: newName); renaming = nil; game.applyQuizCourse() }).frame(width: 160, height: 30)
+                    .padding(.horizontal, 8).background(GlassFill.field, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                Button { library.rename(c, to: newName); renaming = nil; game.applyQuizCourse() } label: { Image(systemName: "checkmark") }.buttonStyle(GlassIconButtonStyle())
+            } else {
+                Button { newName = c; renaming = c } label: { Label("改名", systemImage: "pencil") }.buttonStyle(GlassIconButtonStyle())
+            }
+            Button(role: .destructive) { library.remove(course: c); game.applyQuizCourse(); note = "✓ 已删除“\(c)”（已作答的记录保留在行程里）" } label: { Label("删除", systemImage: "trash") }.buttonStyle(GlassIconButtonStyle())
+        }
+        .padding(10).background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.white.opacity(on ? 0.7 : 0.4)))
     }
-    /// Adds to the open trip (appended: answers already recorded keep pointing at their questions).
-    private func addToTrip(_ list: [QuizQuestion], prefix: String = "✓ 已加进当前行程") {
-        guard let c = game.campaign else { note = prefix + "（没有打开的行程，新行程会自动带上）"; return }
-        do { try c.appendQuizBank(list); note = prefix + "，已加进当前行程"; game.revision += 1 }
-        catch { note = prefix + "，但加进当前行程失败：\(error.localizedDescription)" }
+    private func loadSample() {
+        do { let list = try QuizLibrary.sample(); library.add(course: "示例题库", list); game.applyQuizCourse(); note = "✓ 已载入示例题库（\(list.count) 题），并设为当前课程" }
+        catch { note = "载入失败：\(error.localizedDescription)" }
     }
 }

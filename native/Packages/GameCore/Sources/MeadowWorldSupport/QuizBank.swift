@@ -265,7 +265,7 @@ public extension MeadowCampaignSession {
     /// The portions in the bank, in first-seen order, with how many questions each has.
     var quizPortions:[(name:String,count:Int)] {
         var order:[String]=[],counts:[String:Int]=[:]
-        for q in quizBank { if let p=q.portion { if counts[p]==nil {order.append(p)}; counts[p,default:0]+=1 } }
+        for q in quizBank where inCourse(q) { if let p=q.portion { if counts[p]==nil {order.append(p)}; counts[p,default:0]+=1 } }
         return order.map{($0,counts[$0]!)}
     }
     /// Whose portion it is: the teacher's choice, else portion "n" goes to student n (p3 for "3"); nil = nobody.
@@ -275,8 +275,20 @@ public extension MeadowCampaignSession {
         return engine.state.units[id]?.kind == .player ? id:nil
     }
     var quizLog:[QuizAttempt] {engine.state.quizLog ?? []}
+    /// Whether a question belongs to the current course.
+    func inCourse(_ q:QuizQuestion)->Bool {quizCourseQuestions.map{$0.contains(q)} ?? true}
+    /// Bank indices of the current course.
+    var courseIndices:[Int] {quizBank.indices.filter{inCourse(quizBank[$0])}}
+    /// Switch to a course: its questions are added to the trip's bank if they are not there yet (appended, so
+    /// earlier answers keep pointing at their questions), and questions are dealt from it from now on.
+    func useQuizCourse(_ name:String?,questions:[QuizQuestion])throws {
+        let have=quizBank
+        let missing=questions.filter{q in !have.contains(q)}
+        if !missing.isEmpty {try appendQuizBank(missing)}
+        quizCourse=name;quizCourseQuestions=name==nil ? nil:questions
+    }
     /// Whether this node is a quiz event (roadside finds become quizzes when a bank was imported).
-    func isQuizNode(_ node:Int)->Bool {!quizBank.isEmpty && siteKind(node:node) == .satchel}
+    func isQuizNode(_ node:Int)->Bool {!courseIndices.isEmpty && siteKind(node:node) == .satchel}
     /// Questions are dealt in bank order (from a start set by the map seed): each answer takes the next one.
     var nextQuizIndex:Int? {
         let bank=quizBank
@@ -304,7 +316,7 @@ public extension MeadowCampaignSession {
         let n=quizBank.count
         guard n>0 else{return []}
         let base=Int(engine.state.map.seed % UInt64(n))
-        return (0..<n).map{(base+$0)%n}
+        return (0..<n).map{(base+$0)%n}.filter{inCourse(quizBank[$0])}
     }
     /// Whether `q` is one of this student's own questions (by name, short name or number: p3 → 3).
     func isExclusive(_ q:QuizQuestion,for player:String)->Bool {
@@ -318,7 +330,7 @@ public extension MeadowCampaignSession {
     /// has had yet. `kind` narrows it; `skip` steps past that many (换一题). nil when nothing is left.
     func personalQuizQuestion(for player:String,kind:QuizKind?=nil,skip:Int=0)->Int? {
         let bank=quizBank,answered=Set(quizLog.filter{$0.player==player && $0.practice != true}.map(\.question)),used=usedQuizQuestions
-        let own=bank.indices.filter{isExclusive(bank[$0],for:player) && !answered.contains($0)}
+        let own=bank.indices.filter{inCourse(bank[$0]) && isExclusive(bank[$0],for:player) && !answered.contains($0)}
         let shared=dealingOrder.filter{bank[$0].isShared && !used.contains($0)}
         let fits=(own+shared).filter{kind==nil || bank[$0].type==kind}
         return fits.isEmpty ? nil:fits[skip%fits.count]
@@ -333,13 +345,13 @@ public extension MeadowCampaignSession {
     /// they have not answered; nil when that level is used up.
     func challengeQuestion(for player:String,difficulty:Int)->Int? {
         let bank=quizBank,answered=Set(quizLog.filter{$0.player==player && $0.practice != true}.map(\.question))
-        return bank.indices.first{!bank[$0].isShared && isExclusive(bank[$0],for:player) && (bank[$0].difficulty ?? 1)==difficulty && !answered.contains($0)}
+        return bank.indices.first{inCourse(bank[$0]) && !bank[$0].isShared && isExclusive(bank[$0],for:player) && (bank[$0].difficulty ?? 1)==difficulty && !answered.contains($0)}
     }
     /// How many own questions are left per difficulty (index 0 = ★).
     func challengeLeft(for player:String)->[Int] {
         let bank=quizBank,answered=Set(quizLog.filter{$0.player==player && $0.practice != true}.map(\.question))
         var left=[0,0,0]
-        for i in bank.indices where !bank[i].isShared && isExclusive(bank[i],for:player) && !answered.contains(i) {left[min(2,max(0,(bank[i].difficulty ?? 1)-1))]+=1}
+        for i in bank.indices where inCourse(bank[i]) && !bank[i].isShared && isExclusive(bank[i],for:player) && !answered.contains(i) {left[min(2,max(0,(bank[i].difficulty ?? 1)-1))]+=1}
         return left
     }
     /// The question most recently asked (再出一次), optionally only shared ones.
@@ -350,7 +362,7 @@ public extension MeadowCampaignSession {
     /// wrong (oldest first), then the rest; never the card just shown. Their own cards and shared ones.
     func practiceCard(for player:String,after last:Int?=nil)->Int? {
         let bank=quizBank
-        let cards=bank.indices.filter{bank[$0].type == .flashcard && (bank[$0].isShared || isExclusive(bank[$0],for:player))}
+        let cards=bank.indices.filter{inCourse(bank[$0]) && bank[$0].type == .flashcard && (bank[$0].isShared || isExclusive(bank[$0],for:player))}
         guard !cards.isEmpty else{return nil}
         let mine=quizLog.filter{$0.player==player}
         var lastSeen:[Int:Int]=[:],lastRight:[Int:Bool]=[:]

@@ -34,7 +34,7 @@ struct MeadowTeacherDashboard:View {
                 }
                 Spacer(minLength:0)
                 Button{game.openTimer()}label:{Label("计时",systemImage:"timer")}
-                Button{game.openQuizBank()}label:{Label("题库",systemImage:"text.book.closed")}
+                QuizCourseMenu(game:game)
                 Button{game.openQuiz()}label:{Label("答题",systemImage:"questionmark.bubble")}.disabled(game.quiz != nil)
                 Button{game.openClassQuiz()}label:{Label("全班题",systemImage:"person.3.sequence")}.disabled(game.quiz != nil)
                 Button{game.openPractice()}label:{Label("闪卡",systemImage:"rectangle.on.rectangle.angled")}.disabled(game.quiz != nil)

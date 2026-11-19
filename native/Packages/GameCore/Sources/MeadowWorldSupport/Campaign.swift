@@ -204,6 +204,11 @@ private final class CampaignWriter {
 /// rules, AP, reveal, loot and encounters commit only at actual node arrival.
 public final class MeadowCampaignSession {
     public let engine:GameEngine
+    /// The course questions are dealt from (set by the app; nil = every question in the trip's bank). Not saved:
+    /// the teacher's current course lives in the app, the trip only keeps the questions and the answers.
+    public var quizCourse:String?
+    /// The current course's questions as the app has them now (a re-imported file replaces older versions).
+    public var quizCourseQuestions:[QuizQuestion]?
     private let writer:CampaignWriter
     public var snapshot:MeadowCampaignSave {var s=writer.snapshot;s.archive=engine.archive;if let amount=s.movement?.remaining{s.movement?.remaining=min(amount,movementCapacity)};return s}
     public var travel:MeadowCampaignTravel? {writer.snapshot.travel}

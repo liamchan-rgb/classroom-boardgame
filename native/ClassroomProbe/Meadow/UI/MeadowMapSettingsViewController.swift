@@ -182,9 +182,9 @@ final class MeadowMapSettingsViewController: UIViewController {
     }
     private let quizLabel=UILabel()
     /// The app's question bank (top bar "题库"), given to the new trip.
-    private var quizBank:[QuizQuestion]? {let q=QuizLibrary.shared.questions;return q.isEmpty ? nil:q}
+    private var quizBank:[QuizQuestion]? {let q=QuizLibrary.shared.activeQuestions;return q.isEmpty ? nil:q}
     private func refreshQuizLabel(){
-        if let bank=quizBank {quizLabel.text="题库：\(bank.count) 题会带进新行程（在顶栏“题库”里管理）";quizLabel.textColor=gold}
+        if let bank=quizBank {quizLabel.text="当前课程“\(QuizLibrary.shared.active ?? "")”\(bank.count) 题（在顶栏切换课程）";quizLabel.textColor=gold}
         else {quizLabel.text="题库：空（可在顶栏“题库”导入，不导入则保持原随机事件）";quizLabel.textColor=MeadowPreviewPalette.muted}
     }
     private func button(_ title:String,action:Selector) -> UIButton {

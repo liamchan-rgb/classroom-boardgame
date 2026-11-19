@@ -67,6 +67,18 @@ final class MeadowTeacherCoordinator:ObservableObject {
     }
 
     /// Who gets which pre-cut portion of exclusive questions (opened from the quiz launcher, over it).
+    /// The open trip deals from the current course (its questions are added to the trip if needed).
+    func applyQuizCourse(){
+        guard let c=campaign else{return}
+        let library=QuizLibrary.shared
+        do{try c.useQuizCourse(library.active,questions:library.activeQuestions)}
+        catch{message="题库没能用到当前行程："+error.localizedDescription}
+        revision += 1
+    }
+    func selectQuizCourse(_ name:String){
+        QuizLibrary.shared.select(name);applyQuizCourse()
+        message="当前课程：\(name)";revision += 1
+    }
     /// Top bar "题库". From the quiz launcher (`back`) it replaces it and returns to it when done.
     func openQuizBank(back:Bool=false){
         let show={[weak self] in
@@ -455,6 +467,8 @@ final class MeadowTeacherCoordinator:ObservableObject {
             let controller=GameViewController(campaign:session,classroomMode:true)
             controller.classroomPrivatePresenter=privatePresenter
             controller.classroomQuizRequest={[weak self] actor,node,index in self?.startQuiz(player:actor,index:index,node:node)}
+            // Every trip (a new map each lesson) deals from the teacher's current course.
+            try? session.useQuizCourse(QuizLibrary.shared.active,questions:QuizLibrary.shared.activeQuestions)
             controller.classroomMirrorEnabled=false
             controller.classroomFrameAvailable={ [weak self] in self?.publishMirrorFrame() }
             frameMirror.frame=nil

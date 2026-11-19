@@ -380,4 +380,37 @@ final class QuizTests:XCTestCase {
         try s.recordQuiz(actor:"p1",question:0,picks:[nil],seconds:3,free:true,challenge:true)
         XCTAssertEqual(s.quizReport.students[0].wrongWords.first?.said,["答错"])
     }
+    func testCoursesKeepQuestionsApartAndAnswersStay()throws {
+        func course(_ name:String,_ words:[(String,String)])->[QuizQuestion] {
+            words.enumerated().map{i,w in var q=QuizBankParser.flashcard(front:w.0,back:w.1,distractors:[]);q.portion="1";q.difficulty=1+i%3;q.course=name;return q}
+        }
+        let ch1=course("第一章",[("rabbit","兔子"),("hole","洞"),("key","钥匙")])
+        let ch2=course("第二章",[("pool","池塘"),("tears","眼泪"),("fan","扇子")])
+        let s=try quizSession([])
+        XCTAssertNil(s.personalQuizQuestion(for:"p1"))
+        try s.useQuizCourse("第一章",questions:ch1)
+        XCTAssertEqual(s.challengeLeft(for:"p1"),[1,1,1]);XCTAssertEqual(s.quizBank.count,3)
+        let a=try XCTUnwrap(s.challengeQuestion(for:"p1",difficulty:1));XCTAssertEqual(s.quizBank[a].course,"第一章")
+        try s.recordQuiz(actor:"p1",question:a,picks:[0],seconds:3,free:true,challenge:true)
+        // Switch: chapter 2 is added, only its questions are dealt; chapter 1's answer stays recorded.
+        try s.useQuizCourse("第二章",questions:ch2)
+        XCTAssertEqual(s.quizBank.count,6);XCTAssertEqual(s.challengeLeft(for:"p1"),[1,1,1])
+        XCTAssertEqual(s.quizBank[try XCTUnwrap(s.challengeQuestion(for:"p1",difficulty:1))].course,"第二章")
+        XCTAssertTrue((s.practiceCard(for:"p1")).map{s.quizBank[$0].course=="第二章"} ?? false)
+        XCTAssertEqual(s.quizLog.count,1);XCTAssertEqual(s.quizReport.students.first?.lines.first?.question.course,"第一章")
+        // Back to chapter 1: nothing added twice, the answered question is not dealt again.
+        try s.useQuizCourse("第一章",questions:ch1)
+        XCTAssertEqual(s.quizBank.count,6);XCTAssertEqual(s.challengeLeft(for:"p1"),[0,1,1])
+        // No course chosen: everything in the trip.
+        try s.useQuizCourse(nil,questions:[]);XCTAssertEqual(s.challengeLeft(for:"p1"),[1,2,2])
+    }
+    func testReimportedCourseReplacesItsOldVersion()throws {
+        var old=QuizBankParser.flashcard(front:"cat",back:"狗",distractors:[]);old.portion="1";old.course="第一章"
+        var fixed=QuizBankParser.flashcard(front:"cat",back:"猫",distractors:[]);fixed.portion="1";fixed.course="第一章"
+        let s=try quizSession([])
+        try s.useQuizCourse("第一章",questions:[old]);XCTAssertEqual(s.challengeLeft(for:"p1"),[1,0,0])
+        try s.useQuizCourse("第一章",questions:[fixed])
+        XCTAssertEqual(s.quizBank.count,2);XCTAssertEqual(s.challengeLeft(for:"p1"),[1,0,0])
+        XCTAssertEqual(s.quizBank[try XCTUnwrap(s.challengeQuestion(for:"p1",difficulty:1))].parts[0].options,["猫"])
+    }
 }

@@ -38,7 +38,7 @@ private struct TeacherBookConsole:View {
                 GlassChip(icon:"tv",text:session.registrationStatus.contains("连接") ? "TV":"—",tint:GameTheme.muted).lineLimit(1)
                 Spacer()
                 Button{notesFocused=false;game.openTimer()}label:{Label("计时",systemImage:"timer")}
-                Button{notesFocused=false;game.openQuizBank()}label:{Label("题库",systemImage:"text.book.closed")}
+                QuizCourseMenu(game:game)
                 Button{notesFocused=false;game.openQuiz()}label:{Label("答题",systemImage:"questionmark.bubble")}.disabled(game.quiz != nil)
                 Button{notesFocused=false;game.openClassQuiz()}label:{Label("全班题",systemImage:"person.3.sequence")}.disabled(game.quiz != nil)
                 Button{notesFocused=false;game.openPractice()}label:{Label("闪卡",systemImage:"rectangle.on.rectangle.angled")}.disabled(game.quiz != nil)

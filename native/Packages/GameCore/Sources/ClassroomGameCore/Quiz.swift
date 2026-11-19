@@ -41,6 +41,8 @@ public struct QuizQuestion: Codable, Equatable {
     /// Which pre-cut portion of exclusive questions it belongs to ("1", "2", "A"…); the teacher decides in the app
     /// whose portion is whose.
     public var portion: String? = nil
+    /// The course (lesson) it belongs to: the name of the file it was imported from.
+    public var course: String? = nil
     public init(prompt: String, options: [String], answer: Int, coins: Int? = nil, explanation: String? = nil,
                 kind: QuizKind? = nil, difficulty: Int? = nil, seconds: Int? = nil, tags: [String]? = nil, passage: String? = nil, items: [QuizItem]? = nil) {
         self.prompt = prompt; self.options = options; self.answer = answer; self.coins = coins; self.explanation = explanation
@@ -77,7 +79,7 @@ public struct QuizQuestion: Codable, Equatable {
               (0...500).contains(reward), (explanation?.count ?? 0) <= 600, (passage?.count ?? 0) <= 4000,
               difficulty.map({ (1...3).contains($0) }) ?? true, seconds.map({ (10...600).contains($0) }) ?? true,
               (tags?.count ?? 0) <= 8, (tags ?? []).allSatisfy({ $0.count <= 30 }),
-              (audience?.count ?? 0) <= 40, (portion?.count ?? 0) <= 20, (audience ?? []).allSatisfy({ $0.count <= 40 }) else {
+              (audience?.count ?? 0) <= 40, (portion?.count ?? 0) <= 20, (course?.count ?? 0) <= 120, (audience ?? []).allSatisfy({ $0.count <= 40 }) else {
             throw GameError("题目格式无效：「\(prompt.prefix(20))」")
         }
     }
