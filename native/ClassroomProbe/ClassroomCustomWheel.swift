@@ -65,11 +65,11 @@ extension CustomWheel {
             if let id = p.item {
                 let item = try? catalog?.item(id)
                 return WheelSlice(title: p.title, icon: MeadowItemIcon.image(id, item: item, side: 96), badge: p.count > 1 ? "×\(p.count)" : nil,
-                                  rarity: WheelSlice.rarity(chance: chance, item: MeadowItemRarity.of(id, item: item)))
+                                  rarity: WheelSlice.rarity(chance: chance, item: MeadowItemRarity.of(id, item: item)), weight: Double(max(0, p.weight)))
             }
-            if p.coins > 0 { return WheelSlice(title: p.title, icon: nil, badge: "\(p.coins)", rarity: WheelSlice.rarity(chance: chance), coins: true) }
-            if p.score > 0 { return WheelSlice(title: p.title, icon: nil, badge: "+\(p.score)", rarity: WheelSlice.rarity(chance: chance), coins: true) }
-            return WheelSlice(title: p.title, icon: nil, badge: nil, rarity: WheelSlice.rarity(chance: chance))
+            if p.coins > 0 { return WheelSlice(title: p.title, icon: nil, badge: "\(p.coins)", rarity: WheelSlice.rarity(chance: chance), coins: true, weight: Double(max(0, p.weight))) }
+            if p.score > 0 { return WheelSlice(title: p.title, icon: nil, badge: "+\(p.score)", rarity: WheelSlice.rarity(chance: chance), coins: true, weight: Double(max(0, p.weight))) }
+            return WheelSlice(title: p.title, icon: nil, badge: nil, rarity: WheelSlice.rarity(chance: chance), weight: Double(max(0, p.weight)))
         }
     }
 }
@@ -80,8 +80,8 @@ final class CustomWheelViewController: UIViewController {
     private let session: MeadowCampaignSession
     private var actor: String
     var onChange: (() -> Void)?
-    private let header = UIView(), side = UIView(), stage = UIView()
-    private let titleLabel = UILabel(), coinsLabel = UILabel(), result = UILabel(), odds = UILabel()
+    private let header = UIView(), stage = UIView()
+    private let titleLabel = UILabel(), coinsLabel = UILabel(), result = UILabel()
     private let members = UISegmentedControl()
     private let wheelButton = UIButton(type: .system)
     private let edit = MeadowPreviewPalette.iconButton("slider.horizontal.3", "编辑")
@@ -108,10 +108,10 @@ final class CustomWheelViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor(red: 0.80, green: 0.88, blue: 0.88, alpha: 1); MeadowGlassBackdrop.install(in: view)
-        [header, side].forEach { MeadowPreviewPalette.stylePanel($0, liveBlur: true); view.addSubview($0) }
+        // No odds list: the slices' sizes show how likely each prize is.
+        [header].forEach { MeadowPreviewPalette.stylePanel($0, liveBlur: true); view.addSubview($0) }
         view.addSubview(stage)
         [titleLabel, wheelButton, members, coinsLabel, edit, close].forEach(header.addSubview)
-        [odds].forEach(side.addSubview)
         [wheel, spin, result, card].forEach(stage.addSubview)
         titleLabel.attributedText = MeadowGlassText.iconLine("chart.pie.fill", "转盘", size: 26)
         wheelButton.titleLabel?.font = MeadowPreviewPalette.font(18, .heavy); wheelButton.tintColor = MeadowPreviewPalette.ink
@@ -125,7 +125,6 @@ final class CustomWheelViewController: UIViewController {
         close.addAction(UIAction { [weak self] _ in self?.dismiss(animated: true) }, for: .touchUpInside)
         spin.addAction(UIAction { [weak self] _ in self?.go() }, for: .touchUpInside)
         result.font = MeadowPreviewPalette.font(20, .heavy); result.textColor = MeadowPreviewPalette.ink; result.textAlignment = .center; result.numberOfLines = 2
-        odds.numberOfLines = 0
         loadWheel()
     }
     private func loadWheel() {
@@ -138,19 +137,6 @@ final class CustomWheelViewController: UIViewController {
             UIAction(title: "新建转盘…", image: UIImage(systemName: "plus")) { [weak self] _ in self?.openEditor(new: true) },
             UIAction(title: "编辑当前转盘…", image: UIImage(systemName: "slider.horizontal.3")) { [weak self] _ in self?.openEditor(new: false) },
         ])])
-        // The odds, as the class sees them.
-        let text = NSMutableAttributedString(attributedString: MeadowGlassText.iconLine("percent", "奖项与概率", size: 18))
-        text.append(NSAttributedString(string: "\n"))
-        let slices = w.slices(catalog: session.engine.catalog)
-        for (i, p) in w.prizes.enumerated() {
-            let pct = w.chance(i) * 100
-            let color = slices[i].coins ? UIColor(red: 0.80, green: 0.55, blue: 0.12, alpha: 1) : (slices[i].rarity == .common ? MeadowPreviewPalette.primary : slices[i].rarity.color)
-            text.append(NSAttributedString(string: "\n● ", attributes: [.font: MeadowPreviewPalette.font(16, .heavy), .foregroundColor: color]))
-            text.append(NSAttributedString(string: p.title, attributes: [.font: MeadowPreviewPalette.font(16, .semibold), .foregroundColor: MeadowPreviewPalette.ink]))
-            text.append(NSAttributedString(string: "  " + (pct < 1 && pct > 0 ? String(format: "%.1f%%", pct) : "\(Int(pct.rounded()))%"), attributes: [.font: MeadowPreviewPalette.font(15, .bold), .foregroundColor: MeadowPreviewPalette.muted]))
-            if p.offGame { text.append(NSAttributedString(string: "  课堂奖励", attributes: [.font: MeadowPreviewPalette.font(12, .bold), .foregroundColor: MeadowPreviewPalette.muted])) }
-        }
-        odds.attributedText = text
         refresh()
         view.setNeedsLayout()
     }
@@ -204,11 +190,8 @@ final class CustomWheelViewController: UIViewController {
         coinsLabel.frame = CGRect(x: hw - 420, y: 14, width: 206, height: 36)
         let mx = wheelButton.frame.maxX + 14
         members.frame = CGRect(x: mx, y: 14, width: max(120, coinsLabel.frame.minX - mx - 12), height: 36)
-        let top = header.frame.maxY + 12, sideW = min(300, w * 0.26)
-        side.frame = CGRect(x: w - inset.right - 16 - sideW, y: top, width: sideW, height: h - top - inset.bottom - 16)
-        odds.frame = side.bounds.insetBy(dx: 16, dy: 14)
-        odds.sizeToFit(); odds.frame.size.width = side.bounds.width - 32
-        stage.frame = CGRect(x: inset.left + 16, y: top, width: side.frame.minX - inset.left - 28, height: h - top - inset.bottom - 16)
+        let top = header.frame.maxY + 12
+        stage.frame = CGRect(x: inset.left + 16, y: top, width: w - inset.left - inset.right - 32, height: h - top - inset.bottom - 16)
         let sw = stage.bounds.width, sh = stage.bounds.height
         let size = max(160, min(sw - 20, sh - 120))
         wheel.frame = CGRect(x: (sw - size) / 2, y: 0, width: size, height: size)

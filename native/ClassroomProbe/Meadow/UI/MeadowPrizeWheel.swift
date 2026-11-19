@@ -11,6 +11,19 @@ struct WheelSlice {
     var rarity: MeadowItemRarity
     /// Coins / score: drawn in amber.
     var coins: Bool = false
+    /// How likely it is: the slice's share of the wheel (the odds are seen, not written).
+    var weight: Double = 1
+
+    /// Each slice's start and width (radians, clockwise from the top), in proportion to the weights.
+    static func angles(_ slices: [WheelSlice]) -> [(start: CGFloat, width: CGFloat)] {
+        let total = slices.reduce(0) { $0 + max(0, $1.weight) }
+        var at: CGFloat = 0
+        return slices.map { s in
+            let w = total > 0 ? CGFloat(max(0, s.weight) / total) * 2 * .pi : 2 * .pi / CGFloat(max(1, slices.count))
+            defer { at += w }
+            return (at, w)
+        }
+    }
 
     /// A teacher-made prize: its item's rarity, or how unlikely it is (≤5 % legendary, ≤12 % epic, ≤25 % rare).
     static func rarity(chance: Double, item: MeadowItemRarity? = nil) -> MeadowItemRarity {
@@ -124,11 +137,11 @@ final class MeadowPrizeWheelView: UIView {
     func spin(to slot: Int, duration: Double = 4.4, done: @escaping () -> Void) {
         guard !spinning, !slices.isEmpty else { return }
         spinning = true; clearWin()
-        let n = CGFloat(slices.count), sector = 2 * .pi / n
-        let jitter = CGFloat.random(in: -0.34...0.34) * sector
+        let a = WheelSlice.angles(slices)[slot]
+        let jitter = CGFloat.random(in: -0.34...0.34) * a.width
         let current = angle.truncatingRemainder(dividingBy: 2 * .pi)
-        // Slice i is centred at (i + 0.5) * sector clockwise from the top: rotate it back to the top, plus turns.
-        var target = -(CGFloat(slot) + 0.5) * sector + jitter
+        // The slice's middle is at start + width / 2 clockwise from the top: rotate it back to the top, plus turns.
+        var target = -(a.start + a.width / 2) + jitter
         while target < current { target += 2 * .pi }
         target += 2 * .pi * 7
         let anim = CABasicAnimation(keyPath: "transform.rotation.z")
@@ -151,9 +164,8 @@ final class MeadowPrizeWheelView: UIView {
     /// While spinning: the pointer flicks each time a slice edge passes under it.
     fileprivate func tick() {
         guard let rot = face.layer.presentation()?.value(forKeyPath: "transform.rotation.z") as? CGFloat, !slices.isEmpty else { return }
-        let sector = 2 * .pi / CGFloat(slices.count)
         var a = (-rot).truncatingRemainder(dividingBy: 2 * .pi); if a < 0 { a += 2 * .pi }
-        let slice = Int(a / sector)
+        let slice = WheelSlice.angles(slices).lastIndex { $0.start <= a } ?? 0
         if slice != lastTickSlice {
             lastTickSlice = slice
             let kick = CAKeyframeAnimation(keyPath: "transform.rotation.z")
@@ -186,10 +198,10 @@ final class MeadowPrizeWheelView: UIView {
     func celebrate(_ slot: Int) {
         guard slices.indices.contains(slot) else { return }
         let rarity = slices[slot].rarity, r = radius, c = centre
-        let n = CGFloat(slices.count), sector = 2 * .pi / n
+        let span = WheelSlice.angles(slices)[slot]
         // The wedge in face coordinates (it turns with the face).
-        let fc = CGPoint(x: r, y: r), start = -CGFloat.pi / 2 + CGFloat(slot) * sector
-        let wedge = UIBezierPath(); wedge.move(to: fc); wedge.addArc(withCenter: fc, radius: r - 1, startAngle: start, endAngle: start + sector, clockwise: true); wedge.close()
+        let fc = CGPoint(x: r, y: r), start = -CGFloat.pi / 2 + span.start
+        let wedge = UIBezierPath(); wedge.move(to: fc); wedge.addArc(withCenter: fc, radius: r - 1, startAngle: start, endAngle: start + span.width, clockwise: true); wedge.close()
         winWedge.path = wedge.cgPath; winWedge.lineWidth = 4
         winWedge.fillColor = rarity.color.withAlphaComponent(0.35).cgColor; winWedge.strokeColor = UIColor.white.cgColor
         winWedge.shadowColor = rarity.color.cgColor; winWedge.shadowOpacity = 1; winWedge.shadowRadius = 12; winWedge.shadowOffset = .zero
@@ -351,9 +363,11 @@ final class WheelFaceView: UIView {
     override func draw(_ rect: CGRect) {
         guard let ctx = UIGraphicsGetCurrentContext(), !slices.isEmpty else { return }
         let c = CGPoint(x: bounds.midX, y: bounds.midY), r = min(bounds.width, bounds.height) / 2
-        let n = slices.count, sector = 2 * CGFloat.pi / CGFloat(n)
+        let spans = WheelSlice.angles(slices)
         for (i, s) in slices.enumerated() {
-            let start = -CGFloat.pi / 2 + CGFloat(i) * sector, end = start + sector
+            let sector = spans[i].width
+            guard sector > 0.001 else { continue }
+            let start = -CGFloat.pi / 2 + spans[i].start, end = start + sector
             let wedge = UIBezierPath(); wedge.move(to: c); wedge.addArc(withCenter: c, radius: r, startAngle: start, endAngle: end, clockwise: true); wedge.close()
             ctx.saveGState(); wedge.addClip()
             let (light, deep) = Self.colors(s, index: i)
@@ -367,6 +381,8 @@ final class WheelFaceView: UIView {
             ctx.restoreGState()
             UIColor.white.withAlphaComponent(0.85).setStroke(); wedge.lineWidth = 1.5; wedge.stroke()
             // Picture (or words) near the rim, upright along the slice.
+            // Too thin for a picture or words (a long shot): the coloured sliver says enough.
+            guard sector * r >= 22 else { continue }
             let mid = start + sector / 2
             ctx.saveGState(); ctx.translateBy(x: c.x + cos(mid) * r * 0.68, y: c.y + sin(mid) * r * 0.68); ctx.rotate(by: mid + .pi / 2)
             let side = min(r * 0.3, r * sector * 0.62)

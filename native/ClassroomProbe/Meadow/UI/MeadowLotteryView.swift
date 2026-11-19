@@ -34,9 +34,9 @@ final class MeadowLotteryView: UIView {
             if let id = p.item {
                 let item = try? catalog?.item(id)
                 return WheelSlice(title: item?.name ?? id, icon: MeadowItemIcon.image(id, item: item, side: 96), badge: p.count > 1 ? "×\(p.count)" : nil,
-                                  rarity: MeadowItemRarity.of(id, item: item))
+                                  rarity: MeadowItemRarity.of(id, item: item), weight: Double(p.weight))
             }
-            return WheelSlice(title: "金币", icon: nil, badge: "\(p.coins)", rarity: p.coins >= 120 ? .rare : .common, coins: true)
+            return WheelSlice(title: "金币", icon: nil, badge: "\(p.coins)", rarity: p.coins >= 120 ? .rare : .common, coins: true, weight: Double(p.weight))
         }
     }
     private func selectTier() {
@@ -44,8 +44,8 @@ final class MeadowLotteryView: UIView {
         tier = max(0, tiers.selectedSegmentIndex)
         let t = CampaignLottery.tiers[tier]
         wheel.slices = Self.slices(t, catalog: catalog); card.hide()
-        let sets = t.prizes.filter { p in p.item.flatMap { try? catalog?.item($0).setID } != nil }.map(\.weight).reduce(0, +)
-        note.text = "每次 \(t.cost) 金币 · 套装部件概率约 \(Int((Double(sets) / Double(t.totalWeight) * 100).rounded()))%"
+        // The odds show as slice sizes; no numbers.
+        note.text = "每次 \(t.cost) 金币 · 格子越大越容易抽中"
     }
     private func go() {
         guard !wheel.spinning, let slot = onSpin?(tier) else { return }
