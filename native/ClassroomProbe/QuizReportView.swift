@@ -49,7 +49,7 @@ enum QuizReportPage {
     case words(Int, range: Range<Int>, first: Bool)
     /// Every answer a student gave, in order (at the end of the report).
     case history(Int, range: Range<Int>, first: Bool)
-    static let wordsPerPage = 48, linesPerPage = 15
+    static let wordsPerPage = 48, linesPerPage = 12
 
     /// Class page, then each student (their report, then their word list); a long list continues on extra pages.
     /// At the end, each student's answers one by one.

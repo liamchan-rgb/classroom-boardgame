@@ -191,9 +191,10 @@ final class CustomWheelViewController: UIViewController {
         let hw = header.bounds.width
         titleLabel.frame = CGRect(x: 18, y: 14, width: 110, height: 36)
         wheelButton.frame = CGRect(x: 128, y: 13, width: 230, height: 38)
-        close.frame = CGRect(x: hw - 58, y: 8, width: 48, height: 48)
-        edit.frame = CGRect(x: hw - 112, y: 8, width: 48, height: 48)
-        coinsLabel.frame = CGRect(x: hw - 330, y: 14, width: 210, height: 36)
+        // Icon-and-word buttons: room for both.
+        close.frame = CGRect(x: hw - 104, y: 10, width: 92, height: 44)
+        edit.frame = CGRect(x: hw - 204, y: 10, width: 92, height: 44)
+        coinsLabel.frame = CGRect(x: hw - 420, y: 14, width: 206, height: 36)
         let mx = wheelButton.frame.maxX + 14
         members.frame = CGRect(x: mx, y: 14, width: max(120, coinsLabel.frame.minX - mx - 12), height: 36)
         let top = header.frame.maxY + 12, sideW = min(300, w * 0.26)

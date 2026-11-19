@@ -63,7 +63,7 @@ struct TeacherBookGrantBar:View {
                     HStack(spacing:3){
                         ForEach(players.sorted{game.seatNumber($0.id)<game.seatNumber($1.id)},id:\.id){u in
                             let on=draft.recipients.contains(u.id)
-                            Circle().fill(on ? GameTheme.primary:GameTheme.muted.opacity(0.28)).frame(width:6,height:6)
+                            Circle().fill(on ? GameTheme.primary:GameTheme.muted.opacity(0.22)).frame(width:7.5,height:7.5)
                                 .overlay(Circle().stroke(GameTheme.primary.opacity(on ? 0:0.35),lineWidth:0.8))
                         }
                     }.frame(height:11)
