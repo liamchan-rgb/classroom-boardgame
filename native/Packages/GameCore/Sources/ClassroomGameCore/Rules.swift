@@ -234,6 +234,10 @@ public enum GameCommand: Codable, Equatable {
     case answerCampaignQuiz(actor: String, correct: Bool, coins: Int)
     /// One student's recorded answer at a quiz event (graded by the campaign layer, paid here).
     case recordCampaignQuiz(QuizRecord)
+    /// The teacher corrected a recorded answer (what was said and whether it was right); rewards already paid stay.
+    case editQuizRecord(index: Int, picks: [Int?], correct: [Bool])
+    /// The teacher took out an answer recorded by mistake; rewards already paid stay.
+    case removeQuizRecord(index: Int)
 }
 public struct DiceResult: Codable, Equatable {
     public var source: String

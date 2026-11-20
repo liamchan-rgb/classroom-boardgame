@@ -356,6 +356,20 @@ public extension MeadowCampaignSession {
             (kind==nil || bank[i].type==kind) && {if case .difficulty(let d)=draw {return (bank[i].difficulty ?? 1)==d};return true}()
         }
     }
+    /// The teacher corrects record `index` to right (the right answers) or wrong (nothing said); the report follows.
+    /// Rewards already paid for it stay as they were.
+    func setQuizRecord(at index:Int,right:Bool)throws {
+        let log=quizLog
+        guard log.indices.contains(index),quizBank.indices.contains(log[index].question) else{throw GameError("没有这条作答记录。")}
+        let parts=quizBank[log[index].question].parts
+        guard parts.count==log[index].correct.count else{throw GameError("这条记录和题目对不上。")}
+        try engine.apply(.editQuizRecord(index:index,picks:right ? parts.map{$0.answer}:parts.map{_ in nil},correct:parts.map{_ in right}))
+    }
+    /// Takes out an answer recorded by mistake (the report no longer shows it; rewards already paid stay).
+    func removeQuizRecord(at index:Int)throws {
+        guard quizLog.indices.contains(index) else{throw GameError("没有这条作答记录。")}
+        try engine.apply(.removeQuizRecord(index:index))
+    }
     /// Questions of the course never answered yet (by the student; nil = by anyone), flash-card practice included.
     func unaskedQuestions(for player:String?)->Set<Int> {
         let asked=Set(quizLog.filter{player == nil || $0.player==player}.map(\.question))

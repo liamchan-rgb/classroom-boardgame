@@ -644,6 +644,10 @@ struct QuizReportScreen: View {
     var course: String? = nil
     var itemName: (String) -> String = { $0 }
     var onClose: () -> Void
+    /// 修改作答: the records can be corrected here; the report is rebuilt from them afterwards.
+    var records: QuizRecordEditing? = nil
+    var refresh: (() -> QuizReport)? = nil
+    @State private var recordsModel: QuizRecordsModel?
     @State private var images: [UIImage] = []
     @State private var exporting: [URL] = []
     @State private var showExporter = false
@@ -651,8 +655,15 @@ struct QuizReportScreen: View {
     @State private var copied = false
     /// 学生报告 (one page per student, for families) or 完整报告 (the class pages and each student's two pages).
     @AppStorage("classroom.reportStudent") private var studentVersion = true
-    private var views: [AnyView] {
-        studentVersion ? QuizReportExport.studentPages(report, course: course) : QuizReportExport.pages(report, title: title, course: course, itemName: itemName)
+    private var views: [AnyView] { pages(report) }
+    private func pages(_ r: QuizReport) -> [AnyView] {
+        studentVersion ? QuizReportExport.studentPages(r, course: course) : QuizReportExport.pages(r, title: title, course: course, itemName: itemName)
+    }
+    /// Rebuilds the report from the (corrected) records; uses the new report directly, not the not-yet-updated state.
+    private func rebuild() {
+        guard let refresh else { return }
+        let fresh = refresh()
+        report = fresh; images = QuizReportExport.images(pages(fresh))
     }
     private var kind: String { studentVersion ? "学习报告" : "答题报告" }
     /// Each student's wrong words as plain text (for a word list or a message to parents).
@@ -675,6 +686,9 @@ struct QuizReportScreen: View {
                 Button { export(pdf: true) } label: { Label("导出 PDF", systemImage: "doc.richtext") }.buttonStyle(GlassIconButtonStyle(prominent: true)).disabled(report.attempts == 0)
                 Button { export(pdf: false) } label: { Label("导出图片", systemImage: "photo.on.rectangle") }.buttonStyle(GlassIconButtonStyle()).disabled(report.attempts == 0)
                 Button { copyWords() } label: { Label(copied ? "已复制" : "复制错词", systemImage: copied ? "checkmark" : "doc.on.doc") }.buttonStyle(GlassIconButtonStyle()).disabled(report.words.isEmpty)
+                if let records {
+                    Button { recordsModel = QuizRecordsModel(records) } label: { Label("修改作答", systemImage: "pencil.and.list.clipboard") }.buttonStyle(GlassIconButtonStyle())
+                }
                 Button { onClose() } label: { Image(systemName: "xmark.circle.fill").font(.title2) }.buttonStyle(.plain).foregroundStyle(GameTheme.muted)
             }
             if let error { Text(error).font(.caption).foregroundStyle(.red) }
@@ -698,6 +712,12 @@ struct QuizReportScreen: View {
         .onAppear { images = QuizReportExport.images(views) }
         .onChange(of: studentVersion) { _, _ in images = QuizReportExport.images(views) }
         .sheet(isPresented: $showExporter) { ExportPicker(urls: exporting) { showExporter = false } }
+        .sheet(item: Binding(get: { recordsModel.map(QuizRecordsBox.init) }, set: { if $0 == nil { recordsModel = nil } }), onDismiss: {
+            // The report shows the corrected records (also rebuilt on 完成, in case this isn't called).
+            rebuild()
+        }) { box in
+            QuizRecordsPanel(model: box.model) { let changed = box.model.changed; recordsModel = nil; if changed { rebuild() } }
+        }
 
     }
     private func export(pdf: Bool) {

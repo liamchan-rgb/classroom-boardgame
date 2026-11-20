@@ -234,6 +234,8 @@ struct Evaluation {
         case .customWheel(let actor, let wheel): try customWheel(actor: actor, wheel: wheel)
         case .answerCampaignQuiz(let actor, let correct, let coins): try answerCampaignQuiz(actor: actor, correct: correct, coins: coins)
         case .recordCampaignQuiz(let record): try recordCampaignQuiz(record)
+        case .editQuizRecord(let index, let picks, let correct): try editQuizRecord(index: index, picks: picks, correct: correct)
+        case .removeQuizRecord(let index): try removeQuizRecord(index: index)
         case .retreatAfterDefeat:
             guard let battle = state.battle, battle.kind == .pve, !state.players.contains(where: { $0.isAlive && battle.queue.contains($0.id) }) else { throw GameError("只有全队倒地时才能撤回地图。") }
             try finish(winner: "monsters", byScore: false)

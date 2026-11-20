@@ -531,6 +531,30 @@ final class QuizTests:XCTestCase {
         try s.recordQuiz(actor:"p1",question:1,picks:[0],seconds:2,free:true,practice:true)
         XCTAssertEqual(s.mistakenQuestions(for:"p1"),[])
     }
+    func testTeacherCorrectsAndRemovesAnswerRecords()throws {
+        let bank=[QuizBankParser.flashcard(front:"cat",back:"猫",distractors:[]),QuizQuestion(prompt:"2+2?",options:["3","4"],answer:1)]
+        let s=try quizSession(bank)
+        try s.recordQuiz(actor:"p1",question:0,picks:[nil],seconds:2,free:true,shared:true)  // recorded wrong by mistake
+        try s.recordQuiz(actor:"p1",question:1,picks:[1],seconds:2,free:true,shared:true)
+        try s.recordQuiz(actor:"p2",question:1,picks:[1],seconds:2,free:true,shared:true)  // p2 never answered this
+        let coins=s.engine.state.units["p1"]!.coins
+        XCTAssertEqual(s.quizReport.students.first{$0.id=="p1"}?.wrongWords.map(\.word),["cat"])
+        // Corrected to right: the report follows; rewards stay as they were.
+        try s.setQuizRecord(at:0,right:true)
+        XCTAssertEqual(s.quizLog[0].correct,[true]);XCTAssertEqual(s.quizLog[0].picks,[0])
+        XCTAssertEqual(s.quizReport.students.first{$0.id=="p1"}?.wrongWords,[])
+        XCTAssertEqual(s.engine.state.units["p1"]!.coins,coins)
+        // And back to wrong.
+        try s.setQuizRecord(at:1,right:false)
+        XCTAssertEqual(s.quizLog[1].picks,[nil]);XCTAssertEqual(s.quizReport.students.first{$0.id=="p1"}?.mistakes.count,1)
+        // A record that should not be there: out of the report.
+        try s.removeQuizRecord(at:2)
+        XCTAssertEqual(s.quizLog.count,2);XCTAssertNil(s.quizReport.students.first{$0.id=="p2" && !$0.lines.isEmpty})
+        XCTAssertThrowsError(try s.removeQuizRecord(at:5))
+        // Saved and reopened the same.
+        let restored=try MeadowCampaignSession(save:.decoded(s.snapshot.encoded()))
+        XCTAssertEqual(restored.quizLog,s.quizLog)
+    }
     func testOneMovementStepPerQuestionPerTeam()throws {
         let s=try quizSession([QuizBankParser.flashcard(front:"cat",back:"猫",distractors:[]),QuizBankParser.flashcard(front:"dog",back:"狗",distractors:[])])
         _=try arrive(s)  // walking uses up part of the bar

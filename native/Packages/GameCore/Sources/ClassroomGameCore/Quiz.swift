@@ -222,6 +222,24 @@ extension Evaluation {
         events.append(GameEvent("campaignQuiz", actor: id, amount: coins, detail: "\(actor.nodeID):\(correct ? "correct" : "wrong")"))
     }
 
+    /// The teacher corrects record `index`: the same number of parts, new picks and results (texts typed for it go;
+    /// a record that was "not answered" becomes an answer).
+    mutating func editQuizRecord(index: Int, picks: [Int?], correct: [Bool]) throws {
+        var log = state.quizLog ?? []
+        guard log.indices.contains(index), picks.count == log[index].correct.count, correct.count == picks.count else { throw GameError("作答记录无效。") }
+        log[index].picks = picks; log[index].correct = correct
+        log[index].texts = picks.map { _ in nil }; log[index].skipped = nil
+        state.quizLog = log
+        events.append(GameEvent("quizRecordEdited", actor: log[index].player, amount: correct.filter { $0 }.count, detail: "\(index)"))
+    }
+    mutating func removeQuizRecord(index: Int) throws {
+        var log = state.quizLog ?? []
+        guard log.indices.contains(index) else { throw GameError("作答记录无效。") }
+        let removed = log.remove(at: index)
+        state.quizLog = log
+        events.append(GameEvent("quizRecordRemoved", actor: removed.player, detail: "\(index)"))
+    }
+
     /// One student's answer at a quiz event. Each player present answers once; the event closes when every living
     /// teammate there has answered.
     mutating func recordCampaignQuiz(_ record: QuizRecord) throws {
