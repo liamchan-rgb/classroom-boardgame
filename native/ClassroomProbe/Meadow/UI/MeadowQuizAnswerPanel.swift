@@ -196,13 +196,17 @@ struct QuizAnswerRows: View {
 struct QuizRewardFields: View {
     @ObservedObject var reward: QuizManualReward
     var body: some View {
-        HStack(spacing: 10) {
-            Image(systemName: "bitcoinsign.circle.fill").foregroundStyle(Color(red: 0.74, green: 0.52, blue: 0.12))
-            Text("答对 " + reward.question.rewardLine).font(.callout.bold())
-            Spacer(minLength: 4)
-            Text("答错参与奖").font(.callout.bold())
-            ClassroomTextField(placeholder: "0", text: $reward.participation, limit: 4, keyboard: .numberPad).frame(width: 56, height: 32)
-                .padding(.horizontal, 8).background(GlassFill.field, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 8) {
+                Image(systemName: "bitcoinsign.circle.fill").foregroundStyle(Color(red: 0.74, green: 0.52, blue: 0.12))
+                Text("答对 " + reward.question.rewardLine).font(.callout.bold()).lineLimit(1).minimumScaleFactor(0.8)
+            }
+            HStack(spacing: 8) {
+                Text("答错参与奖").font(.callout.bold())
+                ClassroomTextField(placeholder: "0", text: $reward.participation, limit: 4, keyboard: .numberPad).frame(width: 56, height: 30)
+                    .padding(.horizontal, 8).background(GlassFill.field, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                Text("金币").font(.callout).foregroundStyle(GameTheme.muted)
+            }
         }
     }
 }
