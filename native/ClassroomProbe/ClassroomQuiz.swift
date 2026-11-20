@@ -139,23 +139,30 @@ struct QuizDrawBar: View {
     @ObservedObject var game: MeadowTeacherCoordinator
     @ObservedObject var settings = QuizDrawSettings.shared
     var body: some View {
-        HStack(spacing: 6) {
-            ForEach(QuizDrawSettings.Mode.allCases, id: \.self) { m in
-                chip(m.title, icon: m.icon, on: settings.mode == m) { settings.mode = m }
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 6) {
+                ForEach(QuizDrawSettings.Mode.allCases, id: \.self) { m in
+                    chip(m.title, icon: m.icon, on: settings.mode == m) { settings.mode = m }
+                }
             }
             if settings.mode == .difficulty {
-                Rectangle().fill(GameTheme.muted.opacity(0.3)).frame(width: 1, height: 22).padding(.horizontal, 2)
-                ForEach(1...3, id: \.self) { d in
-                    chip(String(repeating: "★", count: d) + " \(game.campaign?.quizPool(.difficulty(d)).count ?? 0)", icon: nil, on: settings.difficulty == d) { settings.difficulty = d }
+                HStack(spacing: 6) {
+                    ForEach(1...3, id: \.self) { d in
+                        chip(String(repeating: "★", count: d) + " \(game.campaign?.quizPool(.difficulty(d)).count ?? 0) 题", icon: nil, on: settings.difficulty == d) { settings.difficulty = d }
+                    }
                 }
             }
         }
+    }
+    /// "从全部题里随机" / "从 ★★ 里随机".
+    static func source(_ settings: QuizDrawSettings) -> String {
+        settings.mode == .difficulty ? "从 " + String(repeating: "★", count: settings.difficulty) + " 里随机" : "从全部题里随机"
     }
     private func chip(_ title: String, icon: String?, on: Bool, tap: @escaping () -> Void) -> some View {
         Button { KeyHostingController<EmptyView>.endEditing(); tap() } label: {
             HStack(spacing: 4) {
                 if let icon { Image(systemName: icon).font(.caption.bold()) }
-                Text(title).font(.callout.weight(.semibold)).lineLimit(1)
+                Text(title).font(.callout.weight(.semibold)).lineLimit(1).fixedSize()
             }
             .padding(.horizontal, 10).padding(.vertical, 6)
             .foregroundStyle(on ? Color.white : GameTheme.ink)
@@ -181,14 +188,14 @@ struct QuizPicker: View {
                         let on = tab == t
                         Button { tab = t; open = nil } label: {
                             Text((t == 0 ? "全部" : String(repeating: "★", count: t)) + " \(c.quizPool(t == 0 ? .random : .difficulty(t)).count)")
-                                .font(.callout.bold()).padding(.horizontal, 12).padding(.vertical, 6)
+                                .font(.callout.bold()).lineLimit(1).fixedSize().padding(.horizontal, 10).padding(.vertical, 6)
                                 .foregroundStyle(on ? Color.white : GameTheme.ink)
                                 .background(Capsule().fill(on ? GameTheme.primary : Color.white.opacity(0.55)))
                         }.buttonStyle(.plain)
                     }
-                    Spacer()
-                    Text("点题目出题 · 👁 预览").font(.caption).foregroundStyle(GameTheme.muted)
+                    Spacer(minLength: 0)
                 }
+                Text("点题目即出这一题，点 👁 先预览整题").font(.caption).foregroundStyle(GameTheme.muted)
                 let pool = c.quizPool(tab == 0 ? .random : .difficulty(tab))
                 if pool.isEmpty { Label("这一档没有题。", systemImage: "tray").foregroundStyle(GameTheme.muted) }
                 ScrollView {
@@ -204,7 +211,7 @@ struct QuizPicker: View {
             HStack(spacing: 8) {
                 Button { KeyHostingController<EmptyView>.endEditing(); onPick(i) } label: {
                     HStack(spacing: 8) {
-                        Text(String(repeating: "★", count: max(1, min(3, q.difficulty ?? 1)))).font(.caption.bold()).foregroundStyle(Color(red: 0.85, green: 0.6, blue: 0.12)).frame(width: 34, alignment: .leading)
+                        Text(String(repeating: "★", count: max(1, min(3, q.difficulty ?? 1)))).font(.caption.bold()).lineLimit(1).fixedSize().foregroundStyle(Color(red: 0.85, green: 0.6, blue: 0.12)).frame(width: 36, alignment: .leading)
                         Text(q.type.title).font(.caption.bold()).foregroundStyle(GameTheme.primary)
                             .padding(.horizontal, 6).padding(.vertical, 2).background(Capsule().fill(GameTheme.primary.opacity(0.12)))
                         Text(q.type == .flashcard ? q.prompt : QuizReport.summary(q)).font(.callout).foregroundStyle(GameTheme.ink).lineLimit(2).multilineTextAlignment(.leading)
@@ -386,7 +393,7 @@ struct ChallengePanel: View {
                     QuizPicker(game: game, player: model.player, onPick: onAsk)
                 } else {
                     HStack {
-                        Text("按“\(settings.mode.title)\(settings.mode == .difficulty ? " " + String(repeating: "★", count: settings.difficulty) : "")”出下一题").font(.headline)
+                        Text(QuizDrawBar.source(settings) + "出下一题").font(.headline)
                         Spacer()
                         Button { onNext() } label: { Label("出下一题 (⏎)", systemImage: "arrow.right.circle.fill") }.buttonStyle(GlassIconButtonStyle(prominent: true))
                     }
@@ -564,7 +571,7 @@ struct ClassQuizPickPanel: View {
                 QuizPicker(game: game, onPick: onPick)
             } else {
                 HStack {
-                    Text("按“\(settings.mode.title)\(settings.mode == .difficulty ? " " + String(repeating: "★", count: settings.difficulty) : "")”抽一题（全班没出过的优先）").font(.headline)
+                    Text(QuizDrawBar.source(settings) + "抽一题（全班没出过的优先）").font(.headline)
                     Spacer()
                     Button { onDraw() } label: { Label("抽一题 (⏎)", systemImage: "shuffle") }.buttonStyle(GlassIconButtonStyle(prominent: true))
                 }

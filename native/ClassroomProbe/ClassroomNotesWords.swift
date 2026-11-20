@@ -291,16 +291,17 @@ extension MeadowTeacherCoordinator {
         host.present(screen, animated: true)
     }
     /// The current course's flash card for the double-clicked word, if the trip has it: the word as written, its
-    /// base form (looked → look), then a phrase around it (look after), matched on the card's front without case.
+    /// base form (looked → look), then a phrase around it (look after), matched on the card's English side without case.
     func existingNoteCard(_ pick: NotesWordPick) -> Int? {
         guard let c = campaign, !quizActive else { return nil }
         let d = NotesDictionary.shared.ready()
         var fronts = [pick.word]
         if let base = d?.base(of: pick.word) { fronts.append(base) }
         fronts += d?.phrases(in: pick.tokens, at: pick.index).map(\.phrase) ?? []
-        let cards = c.classFlashDeck
+        // A card's English side may be its front or its back (鼻子 → nose).
+        let cards = c.classFlashDeck.map { i in (i, (QuizReport.word(c.quizBank[i], part: 0)?.word ?? c.quizBank[i].prompt).lowercased()) }
         for f in fronts.map({ $0.lowercased() }) {
-            if let i = cards.first(where: { c.quizBank[$0].prompt.lowercased() == f }) { return i }
+            if let hit = cards.first(where: { $0.1 == f }) { return hit.0 }
         }
         return nil
     }
