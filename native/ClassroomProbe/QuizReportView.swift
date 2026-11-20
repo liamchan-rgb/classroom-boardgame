@@ -644,10 +644,6 @@ struct QuizReportScreen: View {
     var course: String? = nil
     var itemName: (String) -> String = { $0 }
     var onClose: () -> Void
-    /// 编辑题目 from the report: what saving a corrected question does, and the report rebuilt afterwards.
-    var saveQuestion: ((QuizQuestion, QuizQuestion) -> String?)? = nil
-    var refresh: (() -> QuizReport)? = nil
-    @State private var editing: BankEditorModel?
     @State private var images: [UIImage] = []
     @State private var exporting: [URL] = []
     @State private var showExporter = false
@@ -679,9 +675,6 @@ struct QuizReportScreen: View {
                 Button { export(pdf: true) } label: { Label("导出 PDF", systemImage: "doc.richtext") }.buttonStyle(GlassIconButtonStyle(prominent: true)).disabled(report.attempts == 0)
                 Button { export(pdf: false) } label: { Label("导出图片", systemImage: "photo.on.rectangle") }.buttonStyle(GlassIconButtonStyle()).disabled(report.attempts == 0)
                 Button { copyWords() } label: { Label(copied ? "已复制" : "复制错词", systemImage: copied ? "checkmark" : "doc.on.doc") }.buttonStyle(GlassIconButtonStyle()).disabled(report.words.isEmpty)
-                if let saveQuestion {
-                    Button { editing = BankEditorModel(course: course, save: saveQuestion) } label: { Label("编辑题目", systemImage: "square.and.pencil") }.buttonStyle(GlassIconButtonStyle())
-                }
                 Button { onClose() } label: { Image(systemName: "xmark.circle.fill").font(.title2) }.buttonStyle(.plain).foregroundStyle(GameTheme.muted)
             }
             if let error { Text(error).font(.caption).foregroundStyle(.red) }
@@ -705,12 +698,7 @@ struct QuizReportScreen: View {
         .onAppear { images = QuizReportExport.images(views) }
         .onChange(of: studentVersion) { _, _ in images = QuizReportExport.images(views) }
         .sheet(isPresented: $showExporter) { ExportPicker(urls: exporting) { showExporter = false } }
-        .sheet(item: Binding(get: { editing.map(EditorBox.init) }, set: { if $0 == nil { editing = nil } }), onDismiss: {
-            // Edited questions show in the report straight away.
-            if let refresh { report = refresh(); images = QuizReportExport.images(views) }
-        }) { box in
-            QuizBankEditor(model: box.model) { editing = nil }.frame(minWidth: 900, minHeight: 680)
-        }
+
     }
     private func export(pdf: Bool) {
         do {
@@ -1046,8 +1034,3 @@ struct StudentReportPage: View {
     }
 }
 
-/// Wraps the editor's model for `.sheet(item:)`.
-private struct EditorBox: Identifiable {
-    let model: BankEditorModel
-    var id: ObjectIdentifier { ObjectIdentifier(model) }
-}

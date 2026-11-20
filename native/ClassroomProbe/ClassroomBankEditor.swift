@@ -60,9 +60,11 @@ struct QuestionDraft: Equatable {
     @Published var note: String?
     /// What saving does (the coordinator: course + the open trip in place); returns a problem, if any.
     let save: (QuizQuestion, QuizQuestion) -> String?
-    init(course: String?, save: @escaping (QuizQuestion, QuizQuestion) -> String?) {
+    /// What deleting does (the coordinator: out of the course, and the open trip stops dealing it).
+    let remove: (QuizQuestion) -> Void
+    init(course: String?, save: @escaping (QuizQuestion, QuizQuestion) -> String?, remove: @escaping (QuizQuestion) -> Void) {
         self.course = course ?? QuizLibrary.shared.active ?? QuizLibrary.shared.courses.first ?? ""
-        self.save = save
+        self.save = save; self.remove = remove
     }
     var questions: [QuizQuestion] { QuizLibrary.shared.questions(of: course) }
     var shown: [(offset: Int, element: QuizQuestion)] {
@@ -85,7 +87,10 @@ struct QuestionDraft: Equatable {
     }
     func delete() {
         guard let k = selected, questions.indices.contains(k) else { return }
-        QuizLibrary.shared.remove(questions[k]); selected = nil; draft = nil
+        let q = questions[k]
+        // The form goes first, then the question (the form never reads a question that is gone).
+        draft = nil; selected = nil
+        remove(q)
         note = "✓ 已删除（已作答的记录仍在报告里）"
     }
     func addCard() {
@@ -101,6 +106,7 @@ struct QuizBankEditor: View {
     @ObservedObject var model: BankEditorModel
     @ObservedObject var library = QuizLibrary.shared
     var onClose: () -> Void
+    @State private var confirmDelete = false
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 10) {
@@ -154,29 +160,30 @@ struct QuizBankEditor: View {
     }
 
     @ViewBuilder private var editor: some View {
-        if model.draft == nil {
-            Label("在左边点一道题来编辑。", systemImage: "hand.point.left").foregroundStyle(GameTheme.muted).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 30)
-        } else {
-            let draft = Binding(get: { model.draft! }, set: { model.draft = $0 })
+        if let current = model.draft {
+            // Reads fall back to the question shown here, so a field updating while the question is deleted or
+            // switched never finds nothing.
+            let draft = Binding(get: { model.draft ?? current }, set: { model.draft = $0 })
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
                     HStack {
-                        Text("第 \((model.selected ?? 0) + 1) 题 · \(model.draft!.kind.title)").font(.headline)
+                        Text("第 \((model.selected ?? 0) + 1) 题 · \(current.kind.title)").font(.headline)
                         Spacer()
                         stars(draft.difficulty)
                     }
-                    switch model.draft!.kind {
+                    switch current.kind {
                     case .flashcard: flashcard(draft)
                     case .choice:
                         textEditor("题干", text: draft.prompt, height: 60)
                         partEditor(draft, 0, title: "选项（点圆圈设正确答案）")
                     case .fill:
                         textEditor("句子（{{1}}、{{2}} 是空的位置，不要删）", text: draft.prompt, height: 60)
-                        ForEach(model.draft!.parts.indices, id: \.self) { i in partEditor(draft, i, title: "第 \(i + 1) 空的候选词") }
+                        ForEach(current.parts.indices, id: \.self) { i in partEditor(draft, i, title: "第 \(i + 1) 空的候选词") }
                     case .reading:
                         textEditor("文章", text: draft.passage, height: 110)
-                        ForEach(model.draft!.parts.indices, id: \.self) { i in
-                            field("第 \(i + 1) 小题", text: Binding(get: { model.draft!.parts[i].prompt }, set: { model.draft!.parts[i].prompt = $0 }))
+                        ForEach(current.parts.indices, id: \.self) { i in
+                            field("第 \(i + 1) 小题", text: Binding(get: { let d = model.draft ?? current; return d.parts.indices.contains(i) ? d.parts[i].prompt : "" },
+                                                                   set: { v in if model.draft?.parts.indices.contains(i) == true { model.draft!.parts[i].prompt = v } }))
                             partEditor(draft, i, title: "选项")
                         }
                     }
@@ -184,13 +191,19 @@ struct QuizBankEditor: View {
                     field("解析（可选）", text: draft.explanation)
                     if let note = model.note { Text(note).font(.callout.bold()).foregroundStyle(note.hasPrefix("✓") ? GameTheme.primary : .orange) }
                     HStack {
-                        Button(role: .destructive) { model.delete() } label: { Label("删除这题", systemImage: "trash") }.buttonStyle(GlassIconButtonStyle())
+                        Button(role: .destructive) { confirmDelete = true } label: { Label("删除这题", systemImage: "trash") }.buttonStyle(GlassIconButtonStyle())
+                            .confirmationDialog("删除这道题？", isPresented: $confirmDelete, titleVisibility: .visible) {
+                                Button("删除", role: .destructive) { model.delete() }
+                                Button("取消", role: .cancel) {}
+                            } message: { Text("从这门课里删掉；已作答的记录仍保留在报告里。") }
                         Spacer()
                         Button { if let k = model.selected { model.pick(k) } } label: { Label("还原", systemImage: "arrow.uturn.backward") }.buttonStyle(GlassIconButtonStyle())
                         Button { KeyHostingController<EmptyView>.endEditing(); model.commit() } label: { Label("保存", systemImage: "checkmark") }.buttonStyle(GlassIconButtonStyle(prominent: true))
                     }
                 }.padding(.trailing, 6)
             }
+        } else {
+            Label("在左边点一道题来编辑。", systemImage: "hand.point.left").foregroundStyle(GameTheme.muted).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 30)
         }
     }
 
@@ -224,13 +237,15 @@ struct QuizBankEditor: View {
     private func partEditor(_ draft: Binding<QuestionDraft>, _ i: Int, title: String) -> some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(title).font(.caption.bold()).foregroundStyle(GameTheme.muted)
-            ForEach(draft.wrappedValue.parts[i].options.indices, id: \.self) { o in
+            ForEach(draft.wrappedValue.parts.indices.contains(i) ? Array(draft.wrappedValue.parts[i].options.indices) : [], id: \.self) { o in
                 HStack(spacing: 6) {
-                    Button { draft.wrappedValue.parts[i].answer = o } label: {
-                        Image(systemName: draft.wrappedValue.parts[i].answer == o ? "checkmark.circle.fill" : "circle").foregroundStyle(draft.wrappedValue.parts[i].answer == o ? Color.green : GameTheme.muted)
+                    let right = draft.wrappedValue.parts.indices.contains(i) && draft.wrappedValue.parts[i].answer == o
+                    Button { if draft.wrappedValue.parts.indices.contains(i) { draft.wrappedValue.parts[i].answer = o } } label: {
+                        Image(systemName: right ? "checkmark.circle.fill" : "circle").foregroundStyle(right ? Color.green : GameTheme.muted)
                     }.buttonStyle(.plain)
                     Text(MeadowQuizCard.letters.indices.contains(o) ? MeadowQuizCard.letters[o] : "").font(.caption.bold()).frame(width: 14)
-                    ClassroomTextField(placeholder: "选项", text: Binding(get: { draft.wrappedValue.parts[i].options[o] }, set: { draft.wrappedValue.parts[i].options[o] = $0 }), limit: 200)
+                    ClassroomTextField(placeholder: "选项", text: Binding(get: { let d = draft.wrappedValue; return d.parts.indices.contains(i) && d.parts[i].options.indices.contains(o) ? d.parts[i].options[o] : "" },
+                                                                         set: { v in if draft.wrappedValue.parts.indices.contains(i), draft.wrappedValue.parts[i].options.indices.contains(o) { draft.wrappedValue.parts[i].options[o] = v } }), limit: 200)
                         .frame(height: 28).padding(.horizontal, 8).background(GlassFill.field, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
                 }
             }
@@ -265,9 +280,16 @@ struct QuizBankEditor: View {
 }
 
 extension MeadowTeacherCoordinator {
+    /// A question out of its course; the open trip stops dealing it (answers already given stay in the report).
+    func removeQuestion(_ q: QuizQuestion) {
+        QuizLibrary.shared.remove(q)
+        applyQuizCourse()
+        message = "已从课程删掉一道题"
+    }
     /// 编辑题目 (from 题库 it replaces the bank panel and goes back to it when done).
     func openBankEditor(course: String? = nil, back: Bool = false) {
-        let model = BankEditorModel(course: course) { [weak self] old, new in self?.replaceQuestion(old, with: new) }
+        let model = BankEditorModel(course: course, save: { [weak self] old, new in self?.replaceQuestion(old, with: new) },
+                                    remove: { [weak self] q in self?.removeQuestion(q) })
         let show = { [weak self] in
             guard let self else { return }
             let done = { [weak self] in self?.closePanel { if back { self?.openQuizBank() } }; return }
