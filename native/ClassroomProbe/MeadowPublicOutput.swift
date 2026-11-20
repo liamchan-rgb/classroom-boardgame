@@ -102,6 +102,14 @@ private struct BookPlayerCard:View {
     /// The teacher's preview: the card takes grant icons dragged from the grant bar (the TV's cards do not).
     var dropTarget=false
     @ObservedObject private var targets=BookDropTargets.shared
+    /// The badge in the team's colour (红队 party, 蓝队 team-2, 绿队 team-3, then gold, purple, orange).
+    static func teamTint(_ team:String?)->Color {
+        let colors:[Color]=[Color(red:0.92,green:0.38,blue:0.38),Color(red:0.36,green:0.56,blue:0.95),Color(red:0.30,green:0.72,blue:0.45),
+                            Color(red:0.95,green:0.76,blue:0.25),Color(red:0.70,green:0.48,blue:0.92),Color(red:0.96,green:0.58,blue:0.26)]
+        guard let team,team != "party" else{return colors[0]}
+        if team.hasPrefix("team-"),let n=Int(team.dropFirst(5)),n>=2 {return colors[(n-1)%colors.count]}
+        return colors[team.unicodeScalars.reduce(0){$0+Int($1.value)}%colors.count]
+    }
     private static let tints:[Color]=[Color(red:0.36,green:0.72,blue:0.52),Color(red:0.42,green:0.62,blue:0.95),Color(red:0.95,green:0.62,blue:0.36),Color(red:0.78,green:0.52,blue:0.92),Color(red:0.95,green:0.80,blue:0.38),Color(red:0.40,green:0.80,blue:0.85),Color(red:0.92,green:0.50,blue:0.55)]
     private func number(_ value:Int)->String {value.formatted(.number.notation(.compactName).locale(Locale(identifier:"zh_CN")))}
     private var ratio:Double {Double(max(0,unit.health))/Double(max(1,unit.maximumHealth))}
@@ -115,7 +123,7 @@ private struct BookPlayerCard:View {
     @State private var apPop=false
     private var barColor:Color {ratio>0.5 ? Color(red:0.40,green:0.86,blue:0.52):ratio>0.25 ? Color(red:0.98,green:0.80,blue:0.35):Color(red:0.96,green:0.42,blue:0.40)}
     var body:some View {
-        let h=size.height,tint=Self.tints[index%Self.tints.count],alive=unit.health>0
+        let h=size.height,tint=Self.teamTint(unit.team),alive=unit.health>0
         let short=unit.name.components(separatedBy:" · ").first ?? unit.name
         VStack(alignment:.leading,spacing:h*0.07){
             HStack(spacing:h*0.1){
@@ -137,6 +145,9 @@ private struct BookPlayerCard:View {
                 Image(systemName:"figure.walk").foregroundStyle(Color(red:0.45,green:0.85,blue:0.95))
                 Text("\(number(heldMovement ?? unit.movement))/\(number(unit.maximumMovement))").monospacedDigit()
                     .scaleEffect(apPop ? 1.4:1,anchor:.leading).foregroundStyle(apPop ? Color(red:0.62,green:0.92,blue:1.0):.white)
+                Spacer(minLength:0)
+                Image(systemName:"star.fill").foregroundStyle(Color(red:0.98,green:0.86,blue:0.45))
+                Text(number(unit.score)).monospacedDigit()
                 Spacer(minLength:0)
                 Image(systemName:"bitcoinsign.circle.fill").foregroundStyle(Color(red:0.98,green:0.80,blue:0.40))
                 Text(number(heldCoins ?? unit.coins)).monospacedDigit()

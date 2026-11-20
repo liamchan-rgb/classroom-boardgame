@@ -183,26 +183,37 @@ struct QuizPicker: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             if let c = game.campaign {
+                let unasked = c.unaskedQuestions(for: player), mistaken = c.mistakenQuestions(for: player)
+                // Tabs 0 全部, 1–3 by difficulty, 4 未考察, 5 有错.
+                let poolFor: (Int) -> [Int] = { t in
+                    t == 4 ? c.quizPool(.random).filter { unasked.contains($0) } : t == 5 ? c.quizPool(.random).filter { mistaken.contains($0) } : c.quizPool(t == 0 ? .random : .difficulty(t))
+                }
                 HStack(spacing: 6) {
-                    ForEach(0...3, id: \.self) { t in
-                        let on = tab == t
-                        Button { tab = t; open = nil } label: {
-                            Text((t == 0 ? "全部" : String(repeating: "★", count: t)) + " \(c.quizPool(t == 0 ? .random : .difficulty(t)).count)")
-                                .font(.callout.bold()).lineLimit(1).fixedSize().padding(.horizontal, 10).padding(.vertical, 6)
-                                .foregroundStyle(on ? Color.white : GameTheme.ink)
-                                .background(Capsule().fill(on ? GameTheme.primary : Color.white.opacity(0.55)))
-                        }.buttonStyle(.plain)
-                    }
+                    ForEach([0, 1, 2, 3], id: \.self) { t in tabButton(t, poolFor(t).count) }
                     Spacer(minLength: 0)
                 }
-                Text("点题目即出这一题，点 👁 先预览整题").font(.caption).foregroundStyle(GameTheme.muted)
-                let pool = c.quizPool(tab == 0 ? .random : .difficulty(tab))
-                if pool.isEmpty { Label("这一档没有题。", systemImage: "tray").foregroundStyle(GameTheme.muted) }
+                HStack(spacing: 6) {
+                    ForEach([4, 5], id: \.self) { t in tabButton(t, poolFor(t).count) }
+                    Spacer(minLength: 0)
+                }
+                Text("点题目即出这一题，点 👁 先预览整题；随机出题时先出未考察和有错的题").font(.caption).foregroundStyle(GameTheme.muted)
+                let pool = poolFor(tab)
+                if pool.isEmpty { Label("这一类没有题。", systemImage: "tray").foregroundStyle(GameTheme.muted) }
                 ScrollView {
                     LazyVStack(spacing: 6) { ForEach(pool, id: \.self) { i in row(c, i) } }
                 }
             }
         }
+    }
+    private func tabButton(_ t: Int, _ n: Int) -> some View {
+        let on = tab == t
+        let title = t == 0 ? "全部" : t == 4 ? "未考察" : t == 5 ? "有错" : String(repeating: "★", count: t)
+        let tint = t == 5 ? Color.red : GameTheme.primary
+        return Button { tab = t; open = nil } label: {
+            Text("\(title) \(n)").font(.callout.bold()).lineLimit(1).fixedSize().padding(.horizontal, 10).padding(.vertical, 6)
+                .foregroundStyle(on ? Color.white : (t == 5 && n > 0 ? Color.red : GameTheme.ink))
+                .background(Capsule().fill(on ? tint : Color.white.opacity(0.55)))
+        }.buttonStyle(.plain)
     }
     @ViewBuilder private func row(_ c: MeadowCampaignSession, _ i: Int) -> some View {
         let q = c.quizBank[i]
@@ -839,6 +850,10 @@ struct PracticePanel: View {
         save()
         if active == nil { active = course }
     }
+    /// One question out of its course (answers already given stay in the trips).
+    func remove(_ question: QuizQuestion) {
+        if let i = questions.firstIndex(of: question) { questions.remove(at: i); save() }
+    }
     func remove(course: String) {
         questions.removeAll { $0.course == course }; save()
         if active == course { active = courses.first }
@@ -869,6 +884,7 @@ struct QuizCourseMenu: View {
                 }
             }
             Divider()
+            Button { game.openBankEditor() } label: { Label("编辑题目…", systemImage: "square.and.pencil") }
             Button { game.openQuizBank() } label: { Label("题库管理…", systemImage: "text.book.closed") }
         } label: {
             Label(library.active ?? "题库", systemImage: "text.book.closed").lineLimit(1)
@@ -945,7 +961,8 @@ struct QuizBankPanel: View {
                     .padding(.horizontal, 8).background(GlassFill.field, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
                 Button { library.rename(c, to: newName); renaming = nil; game.applyQuizCourse() } label: { Image(systemName: "checkmark") }.buttonStyle(GlassIconButtonStyle())
             } else {
-                Button { newName = c; renaming = c } label: { Label("改名", systemImage: "pencil") }.buttonStyle(GlassIconButtonStyle())
+                Button { game.openBankEditor(course: c, back: true) } label: { Label("编辑题目", systemImage: "square.and.pencil") }.buttonStyle(GlassIconButtonStyle())
+                Button { newName = c; renaming = c } label: { Label("改名", systemImage: "character.cursor.ibeam") }.buttonStyle(GlassIconButtonStyle())
             }
             Button(role: .destructive) { library.remove(course: c); game.applyQuizCourse(); note = "✓ 已删除“\(c)”（已作答的记录保留在行程里）" } label: { Label("删除", systemImage: "trash") }.buttonStyle(GlassIconButtonStyle())
         }

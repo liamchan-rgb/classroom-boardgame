@@ -98,7 +98,7 @@ public enum QuizBankParser {
         return(prompt,items)
     }
     /// A flash card is graded right / wrong by the teacher: its one option is the back (distractors are ignored).
-    static func flashcard(front:String,back:String,distractors:[String])->QuizQuestion {
+    public static func flashcard(front:String,back:String,distractors:[String])->QuizQuestion {
         QuizQuestion(prompt:front,options:[],answer:0,kind:.flashcard,items:[QuizItem(options:[back],answer:0)])
     }
     static func difficulty(_ raw:String)->Int? {
@@ -356,14 +356,26 @@ public extension MeadowCampaignSession {
             (kind==nil || bank[i].type==kind) && {if case .difficulty(let d)=draw {return (bank[i].difficulty ?? 1)==d};return true}()
         }
     }
-    /// The next question, at random from the whole course or from one difficulty. Questions the student (`player`;
-    /// nil = the class: anyone) has not had come first; once all were had, any of them may come again. `excluding`:
-    /// not these (the question on screen, for 换一题) unless nothing else is left.
+    /// Questions of the course never answered yet (by the student; nil = by anyone), flash-card practice included.
+    func unaskedQuestions(for player:String?)->Set<Int> {
+        let asked=Set(quizLog.filter{player == nil || $0.player==player}.map(\.question))
+        return Set(courseIndices.filter{!asked.contains($0)})
+    }
+    /// Questions still wrong: the student's last answer to it (nil = any student's last answer) was not all right.
+    func mistakenQuestions(for player:String?)->Set<Int> {
+        var last:[String:QuizAttempt]=[:]
+        for a in quizLog where player == nil || a.player==player {last[a.player+"#\(a.question)"]=a}
+        let course=Set(courseIndices)
+        return Set(last.values.filter{$0.correct.isEmpty || !$0.correct.allSatisfy{$0}}.map(\.question)).intersection(course)
+    }
+    /// The next question, at random from the whole course or from one difficulty. Questions not asked yet and
+    /// questions still wrong come first (for the student; nil = the class); then any of them. `excluding`: not these
+    /// (the question on screen, for 换一题) unless nothing else is left.
     func drawQuestion<G:RandomNumberGenerator>(_ draw:QuizDraw,for player:String?,kind:QuizKind?=nil,excluding:Set<Int>=[],using random:inout G)->Int? {
         let pool=quizPool(draw,kind:kind)
         guard !pool.isEmpty else{return nil}
-        let had=player.map{p in Set(quizLog.filter{$0.player==p && $0.practice != true}.map(\.question))} ?? usedQuizQuestions
-        let fresh=pool.filter{!had.contains($0) && !excluding.contains($0)}
+        let first=unaskedQuestions(for:player).union(mistakenQuestions(for:player))
+        let fresh=pool.filter{first.contains($0) && !excluding.contains($0)}
         let any=pool.filter{!excluding.contains($0)}
         return (fresh.isEmpty ? (any.isEmpty ? pool:any):fresh).randomElement(using:&random)
     }
@@ -397,11 +409,16 @@ public extension MeadowCampaignSession {
         if practice {attempt.practice=true}
         if skipped {attempt.skipped=true}
         // A fully right answer (in time, for a student's own timed question) pays by difficulty: coins, points and one
-        // movement step for the student's team; otherwise only the class's participation prize, if any.
+        // movement step for the student's team (once per question per team); otherwise only the class's
+        // participation prize, if any.
         let timed = !(shared || practice || challenge || skipped)
         let right = !skipped && !correct.isEmpty && correct.allSatisfy{$0} && !(timed && attempt.overtime)
         let coins=right ? q.reward:max(0,participation)
-        try applyQuizRecord(QuizRecord(attempt:attempt,fullCoins:q.reward,points:right ? q.points:0,dropTier:nil,free:free,manualCoins:coins,noSpeedBonus:true),steps:right ? QuizRewards.steps:0,id:id)
+        // One movement step per question per team: once a teammate has answered this question right, more right
+        // answers from the same team still pay coins and points but no further step.
+        let stepTaken=quizLog.contains{a in a.question==index && a.skipped != true && !a.correct.isEmpty && a.correct.allSatisfy{$0}
+            && (engine.state.units[a.player]?.teamID ?? "party")==(unit.teamID ?? "party")}
+        try applyQuizRecord(QuizRecord(attempt:attempt,fullCoins:q.reward,points:right ? q.points:0,dropTier:nil,free:free,manualCoins:coins,noSpeedBonus:true),steps:right && !stepTaken ? QuizRewards.steps:0,id:id)
         return quizLog.last!
     }
     /// The class answered (choice = option index) or skipped (nil, no reward). Returns whether it was right.

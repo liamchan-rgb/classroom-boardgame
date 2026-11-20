@@ -30,7 +30,9 @@ final class ClassroomGMTests:XCTestCase {
         let before=c.snapshot,rows=b.bookPlayers
         XCTAssertEqual(rows.count,7)
         let data=try JSONEncoder().encode(rows),json=try XCTUnwrap(JSONSerialization.jsonObject(with:data) as? [[String:Any]])
-        for row in json {XCTAssertEqual(Set(row.keys),Set(["id","name","health","maximumHealth","ap","maximumAP","coins","movement","maximumMovement"]))}
+        // Public fields only (points and the team colour are public too: the scoreboard shows them).
+        let required:Set<String>=["id","name","health","maximumHealth","ap","maximumAP","coins","movement","maximumMovement","score"]
+        for row in json {XCTAssertTrue(required.isSubset(of:Set(row.keys)));XCTAssertTrue(Set(row.keys).isSubset(of:required.union(["team"])))}
         XCTAssertEqual(c.snapshot,before)
     }
     func testBookGrantUpdatesSelectedPlayersWithIndividualCapsAndNoMovementDebit()throws {

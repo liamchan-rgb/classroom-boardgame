@@ -514,6 +514,41 @@ final class QuizTests:XCTestCase {
         }
         XCTAssertEqual(again[0].explanation,"苹果 是水果")
     }
+    func testUnaskedAndMistakenQuestionsComeFirst()throws {
+        let bank=(1...4).map{QuizBankParser.flashcard(front:"w\($0)",back:"词\($0)",distractors:[])}
+        let s=try quizSession(bank)
+        XCTAssertEqual(s.unaskedQuestions(for:"p1"),[0,1,2,3])
+        try s.recordQuiz(actor:"p1",question:0,picks:[0],seconds:2,free:true,practice:true)
+        try s.recordQuiz(actor:"p1",question:1,picks:[nil],seconds:2,free:true,practice:true)
+        try s.recordQuiz(actor:"p2",question:2,picks:[0],seconds:2,free:true,shared:true)
+        XCTAssertEqual(s.unaskedQuestions(for:"p1"),[2,3]);XCTAssertEqual(s.mistakenQuestions(for:"p1"),[1])
+        XCTAssertEqual(s.unaskedQuestions(for:nil),[3]);XCTAssertEqual(s.mistakenQuestions(for:nil),[1])
+        // 小明: never the one he already got right while others are left.
+        for _ in 0..<20 {XCTAssertNotEqual(s.drawQuestion(.random,for:"p1"),0)}
+        // The class: only the unasked one and the one still wrong.
+        for _ in 0..<20 {XCTAssertTrue([1,3].contains(s.drawQuestion(.random,for:nil)!))}
+        // Right later: no longer a mistake.
+        try s.recordQuiz(actor:"p1",question:1,picks:[0],seconds:2,free:true,practice:true)
+        XCTAssertEqual(s.mistakenQuestions(for:"p1"),[])
+    }
+    func testOneMovementStepPerQuestionPerTeam()throws {
+        let s=try quizSession([QuizBankParser.flashcard(front:"cat",back:"猫",distractors:[]),QuizBankParser.flashcard(front:"dog",back:"狗",distractors:[])])
+        _=try arrive(s)  // walking uses up part of the bar
+        let team=s.engine.state.units["p1"]!.teamID
+        XCTAssertEqual(s.engine.state.units["p2"]!.teamID,team)
+        let step=MeadowMovementRules.distancePerStep,cap=s.movement(team:team).capacity
+        let start=s.movement(team:team).remaining
+        XCTAssertLessThan(start,cap-2*step)
+        try s.recordQuiz(actor:"p1",question:0,picks:[0],seconds:2,free:true,shared:true)
+        XCTAssertEqual(s.movement(team:team).remaining,start+step,accuracy:0.001)
+        // A teammate right on the same question: coins and points, no second step.
+        try s.recordQuiz(actor:"p2",question:0,picks:[0],seconds:2,free:true,shared:true)
+        XCTAssertEqual(s.movement(team:team).remaining,start+step,accuracy:0.001)
+        XCTAssertEqual(s.quizLog.last?.coins,10);XCTAssertEqual(s.quizLog.last?.score,1)
+        // Another question: a step again.
+        try s.recordQuiz(actor:"p2",question:1,picks:[0],seconds:2,free:true,shared:true)
+        XCTAssertEqual(s.movement(team:team).remaining,start+2*step,accuracy:0.001)
+    }
     func testCorrectedFlashCardKeepsItsAnswers()throws {
         var card=QuizBankParser.flashcard(front:"nose",back:"突出部分",distractors:[]);card.difficulty=1;card.course="第一章"
         let s=try quizSession([])
@@ -533,6 +568,13 @@ final class QuizTests:XCTestCase {
         try restored.useQuizCourse("第一章",questions:[fixed]);XCTAssertEqual(restored.quizBank.count,1)
         // Not another kind of question.
         XCTAssertThrowsError(try s.replaceQuizQuestion(at:0,with:QuizQuestion(prompt:"nose?",options:["a","b"],answer:0)))
+        // A choice question's right option may change in place (same number of options).
+        let choice=QuizQuestion(prompt:"2+2?",options:["3","4"],answer:0)
+        try s.appendQuizBank([choice])
+        var fixedChoice=choice;fixedChoice.answer=1
+        XCTAssertNoThrow(try s.replaceQuizQuestion(at:1,with:fixedChoice))
+        var more=choice;more.options=["3","4","5"]
+        XCTAssertThrowsError(try s.replaceQuizQuestion(at:1,with:more))
     }
     func testCoursesKeepQuestionsApartAndAnswersStay()throws {
         func course(_ name:String,_ words:[(String,String)])->[QuizQuestion] {

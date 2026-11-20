@@ -177,7 +177,7 @@ struct ClassroomToolbarTools: View {
         if game.quizActive {
             Button { prepare(); game.abortQuiz() } label: { Label("结束答题", systemImage: "xmark.octagon.fill") }.buttonStyle(ToolbarIconStyle(tint: .red))
         } else {
-            Button { prepare(); game.openQuiz() } label: { Label("答题", systemImage: "questionmark.bubble") }
+            Button { prepare(); game.openQuiz() } label: { Label("指定答题", systemImage: "questionmark.bubble") }
         }
         Button { prepare(); game.openClassQuiz() } label: { Label("全班题", systemImage: "person.3.sequence") }.disabled(game.quizActive)
         Button { prepare(); game.openPractice() } label: { Label("闪卡", systemImage: "rectangle.on.rectangle.angled") }.disabled(game.quizActive)

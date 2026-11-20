@@ -273,7 +273,7 @@ extension MeadowTeacherCoordinator {
         guard let host = presentationHost else { return }
         NotesDictionary.shared.prewarm()
         // Already a flash card of the current course: call it up for the class straight away.
-        if let index = existingNoteCard(pick) { openClassQuiz(index: index); return }
+        if let index = existingNoteCard(pick) { noteCardIndex = index; openClassQuiz(index: index, englishFront: true); return }
         let model = WordCardModel(pick: pick, dictionary: NotesDictionary.shared.ready())
         // New word: the meaning the sentence calls for (part of speech in the sentence; the teacher's own
         // correction from before comes first), ★, asked to the class at once. A wrong meaning is fixed later in
@@ -328,7 +328,7 @@ extension MeadowTeacherCoordinator {
         guard let c = campaign else { message += "（还没有打开行程，未出题）"; revision += 1; return }
         guard quiz == nil, challenge == nil else { message += "（正在答题，稍后在全班题里出）"; revision += 1; return }
         guard let index = c.quizBank.lastIndex(where: { $0 == card }) else { revision += 1; return }
-        noteCardAsked = (card.prompt, course)
+        noteCardIndex = index
         openClassQuiz(index: index)
     }
 }

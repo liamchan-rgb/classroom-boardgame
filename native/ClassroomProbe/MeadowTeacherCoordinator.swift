@@ -68,7 +68,8 @@ final class MeadowTeacherCoordinator:ObservableObject {
     private var quizReward:QuizManualReward?
     private var classModel:ClassQuizModel?
     /// The flash card just made from the notes and put to the class (front, course): Esc on it raises its difficulty.
-    var noteCardAsked:(front:String,course:String)?
+    /// The trip-bank question last called up from the notes (double-click): if nobody gets it right it goes up a star.
+    var noteCardIndex:Int?
     private var practiceModel:PracticeModel?
     /// The answer panel of the question on screen, docked beside the teacher's preview (not a sheet over it), so
     /// the preview, the map and the laser pointer stay usable while a question is up.
@@ -310,7 +311,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
 
     /// ⇧Q: a question to the whole class (drawn the teacher's way, or picked from the list); the teacher picks who
     /// answered and sends rewards by hand.
-    func openClassQuiz(index:Int?=nil,excluding:Set<Int>=[]){
+    func openClassQuiz(index:Int?=nil,excluding:Set<Int>=[],englishFront:Bool=false){
         // No trip open yet: the launcher offers to continue the last one.
         if campaign == nil {openQuiz();return}
         guard let c=campaign,quiz == nil,quizPanel == nil,presentationHost != nil else{return}
@@ -320,7 +321,13 @@ final class MeadowTeacherCoordinator:ObservableObject {
             message="这一档没有题，换个出题方式或难度。";revision += 1;openClassPicker();return
         }
         quizToken += 1
-        let shown=presented(i),q=shown.question,start=Date()
+        let shown=presented(i),start=Date()
+        var q=shown.question
+        // From the notes a flash card always shows its English side (a 鼻子 → nose card asks nose → 鼻子); the answer
+        // is still recorded on the same card.
+        if englishFront,q.type == .flashcard,q.prompt.range(of:"[A-Za-z]",options:.regularExpression)==nil,let w=QuizReport.word(q,part:0),let meaning=w.meaning {
+            q.prompt=w.word;q.items=[QuizItem(options:[meaning],answer:0)]
+        }
         withAnimation(.easeOut(duration:0.2)){quiz=LiveQuiz(token:quizToken,index:i,question:q,mode:.classwide,player:"",playerName:"全班",place:"全班题",node:nil,start:start,shuffle:shown.shuffle)}
         let draft=QuizAnswerDraft(q),reward=QuizManualReward(q),model=ClassQuizModel()
         quizDraft=draft;quizReward=reward;classModel=model
@@ -330,7 +337,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
             self.closePanel{self.quiz=nil;self.openClassQuiz(excluding:[i])}
         }
         // Only the question this note card was asked with counts; any other question clears it.
-        if let asked=noteCardAsked,!(q.type == .flashcard && q.prompt.lowercased()==asked.front.lowercased()) {noteCardAsked=nil}
+        if let n=noteCardIndex,n != i {noteCardIndex=nil}
         let panel=KeyHostingController(rootView:ClassQuizPanel(game:self,model:model,draft:draft,reward:reward,start:start,onSend:{[weak self] in self?.sendClassQuiz()},onEnd:{[weak self] in self?.endClassQuiz(nobodyAnswered:true)},onOther:other))
         panel.onKey={[weak self,weak model,weak draft] key in
             guard let self,let model,let draft else{return false}
@@ -405,17 +412,18 @@ final class MeadowTeacherCoordinator:ObservableObject {
     /// `nobodyAnswered`: Esc / 只揭晓 with nothing sent. On a card just made from the notes that means it was too
     /// hard for now: it goes up one star (at most ★★★) in its course.
     private func endClassQuiz(nobodyAnswered:Bool=false){
-        let asked=noteCardAsked;noteCardAsked=nil
+        let fromNotes=noteCardIndex;noteCardIndex=nil
         guard var live=quiz,live.mode == .classwide,let model=classModel else{closePanel();return}
         closePanel()
-        if nobodyAnswered,model.sent.isEmpty,let asked,live.question.type == .flashcard,live.question.prompt.lowercased()==asked.front.lowercased(),
-           var card=QuizLibrary.shared.card(front:asked.front,in:asked.course) {
-            let old=card.difficulty ?? 1
-            if old<3 {
-                card.difficulty=old+1
-                QuizLibrary.shared.addCard(card,to:asked.course);applyQuizCourse()
-                message="没人答上来：\(card.prompt) 难度升为"+String(repeating:"★",count:old+1)
-            }else{message="没人答上来：\(card.prompt) 已是最高难度★★★"}
+        // A card from the notes that nobody got right (nobody answered, or every answer sent was wrong) is harder
+        // than thought: one star up, at most ★★ (★★★ is for sentence questions). Answers already given stay with it.
+        if fromNotes==live.index,!model.sent.contains(where:\.right),let c=campaign,c.quizBank.indices.contains(live.index),c.quizBank[live.index].type == .flashcard {
+            let card=c.quizBank[live.index],level=card.level
+            if level<2 {
+                var harder=card;harder.difficulty=level+1
+                replaceQuestion(card,with:harder)
+                message="没人答对：\(live.question.prompt) 难度升为"+String(repeating:"★",count:level+1)
+            }else{message="没人答对：\(live.question.prompt) 已是单词卡最高难度★★"}
         }
         let q=live.question,parts=q.parts
         let winners=model.sent.filter(\.right).map(\.name)
@@ -581,9 +589,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
         var new=old
         new.prompt=front;item.options[item.answer]=back;new.items=[item];new.difficulty=draft.difficulty
         if new != old {
-            do{try c.replaceQuizQuestion(at:draft.index,with:new)}catch{draft.note=error.localizedDescription;return}
-            QuizLibrary.shared.replace(old,with:new)
-            applyQuizCourse()
+            if let problem=replaceQuestion(old,with:new) {draft.note=problem;return}
             if draft.englishFront {NotesDictionary.shared.remember(front,back)} else {NotesDictionary.shared.remember(back,front)}
             message="已修改闪卡：\(front) → \(back)（作答记录保留）"
         }
@@ -591,6 +597,20 @@ final class MeadowTeacherCoordinator:ObservableObject {
         // The card on screen shows the corrected sides.
         if var live=quiz,live.mode == .practice,live.index==draft.index,live.attempt==nil {quizToken += 1;live.token=quizToken;live.question=new;quiz=live}
         revision += 1
+    }
+    /// The teacher corrected a question: it changes in its course and, when the open trip has it, in place in the
+    /// trip so the answers already given stay with it. Returns a problem to show, if any (the course still changes;
+    /// a question whose options changed in number starts afresh in the trip, its old answers stay on the old one).
+    @discardableResult func replaceQuestion(_ old:QuizQuestion,with new:QuizQuestion)->String? {
+        do{try new.validate()}catch{return error.localizedDescription}
+        var note:String?
+        if let c=campaign,let i=c.quizBank.firstIndex(of:old) {
+            do{try c.replaceQuizQuestion(at:i,with:new)}catch{note="选项数变了：这节课已作答的记录留在旧题上。"}
+        }
+        QuizLibrary.shared.replace(old,with:new)
+        applyQuizCourse()
+        revision += 1
+        return note
     }
     private func endPractice(){
         practiceModel=nil;closePanel();withAnimation{quiz=nil}
@@ -618,7 +638,8 @@ final class MeadowTeacherCoordinator:ObservableObject {
     /// The answer report of the current trip (pages to look at, PDF / picture export).
     func openQuizReport(){
         guard !modalOpen,let presenter=presentationHost,let campaign else{return}
-        let screen=UIHostingController(rootView:QuizReportScreen(report:campaign.quizReport,title:"课堂答题报告",course:QuizLibrary.shared.active,itemName:{id in (try? campaign.engine.catalog.item(id).name) ?? id},onClose:{[weak self] in self?.presentationHost?.dismiss(animated:true)}))
+        let screen=UIHostingController(rootView:QuizReportScreen(report:campaign.quizReport,title:"课堂答题报告",course:QuizLibrary.shared.active,itemName:{id in (try? campaign.engine.catalog.item(id).name) ?? id},onClose:{[weak self] in self?.presentationHost?.dismiss(animated:true)},
+                                                                 saveQuestion:{[weak self] old,new in self?.replaceQuestion(old,with:new)},refresh:{[weak self] in self?.campaign?.quizReport ?? campaign.quizReport}))
         screen.modalPresentationStyle = .pageSheet;screen.preferredContentSize=CGSize(width:900,height:900)
         presenter.present(screen,animated:true)
     }

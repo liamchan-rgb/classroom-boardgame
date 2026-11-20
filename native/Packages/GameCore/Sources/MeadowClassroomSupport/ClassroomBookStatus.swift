@@ -11,10 +11,13 @@ public struct ClassroomBookPlayerStatus:Codable,Equatable,Identifiable {
     public let health:Int,maximumHealth:Int,ap:Int,maximumAP:Int,coins:Int
     /// The player's team movement bar in steps (what the picture-book bar grants).
     public var movement=0,maximumMovement=0
+    /// Points, and the team (its colour on the card).
+    public var score=0
+    public var team:String?=nil
     public init(unit:GameUnit,catalog:GameCatalog,movement:(remaining:Double,capacity:Double)?=nil)throws {
         let stats=try GameRules.attributes(unit,catalog:catalog)
         id=unit.id;name=unit.name;health=unit.health;maximumHealth=stats.maximumHealth
-        ap=unit.ap;maximumAP=stats.maximumAP;coins=unit.coins
+        ap=unit.ap;maximumAP=stats.maximumAP;coins=unit.coins;score=unit.score;team=unit.teamID
         if let movement {self.movement=MeadowMovementRules.steps(movement.remaining);maximumMovement=MeadowMovementRules.steps(movement.capacity)}
     }
 }

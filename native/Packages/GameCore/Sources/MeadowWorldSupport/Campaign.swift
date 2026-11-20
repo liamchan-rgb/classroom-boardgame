@@ -233,8 +233,10 @@ public final class MeadowCampaignSession {
         var next=snapshot
         guard var bank=next.quizBank,bank.indices.contains(index) else{throw GameError("没有这道题。")}
         let old=bank[index]
+        // Recorded picks are option numbers: the kind, the parts and how many options each has must stay (the right
+        // option may change; answers already recorded keep the result they had).
         guard question.type==old.type,question.parts.count==old.parts.count,
-              zip(question.parts,old.parts).allSatisfy({$0.options.count==$1.options.count && $0.answer==$1.answer}) else{throw GameError("只能修改题目内容，不能改题型或选项数。")}
+              zip(question.parts,old.parts).allSatisfy({$0.options.count==$1.options.count}) else{throw GameError("只能修改题目内容，不能改题型、小题数或选项数。")}
         try question.validate()
         for k in bank.indices where bank[k]==old {bank[k]=question}
         next.quizBank=bank
