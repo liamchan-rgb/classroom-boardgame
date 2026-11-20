@@ -897,6 +897,7 @@ struct QuizBankPanel: View {
                 Label("题库", systemImage: "text.book.closed.fill").font(.title2.bold())
                 Spacer()
                 Button { importing = true } label: { Label("导入课程", systemImage: "square.and.arrow.down") }.buttonStyle(GlassIconButtonStyle(prominent: true))
+                Button { game.openQuizPrompts() } label: { Label("出题提示词", systemImage: "wand.and.stars") }.buttonStyle(GlassIconButtonStyle())
                 Button { loadSample() } label: { Label("示例题库", systemImage: "text.book.closed") }.buttonStyle(GlassIconButtonStyle())
                 Button { onClose() } label: { Label("完成 (Esc)", systemImage: "checkmark") }.buttonStyle(GlassIconButtonStyle())
             }

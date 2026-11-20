@@ -78,7 +78,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
     /// Kept strongly: the dock only holds a copy of its view, so nothing else keeps the panel (and closing it
     /// must still find it).
     private var dockPanel:UIViewController?
-    private func presentPanel(_ panel:UIViewController,size:CGSize,dock:Bool=false){
+    func presentPanel(_ panel:UIViewController,size:CGSize,dock:Bool=false){
         if dock,let content=(panel as? DockablePanel)?.dockContent() {
             quizPanel=panel;dockPanel=panel
             withAnimation(.easeOut(duration:0.2)){dockContent=content}
@@ -90,7 +90,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
         let show={[weak self] in self?.presentationHost?.present(panel,animated:true);return}
         if let alert=presentationHost as? UIAlertController {alert.dismiss(animated:true){show()}} else {show()}
     }
-    private func closePanel(_ then:(()->Void)?=nil){
+    func closePanel(_ then:(()->Void)?=nil){
         // Forget the panel first: whatever opens next (the launcher again) must not think one is still up.
         let panel=quizPanel;quizPanel=nil
         if let panel,panel===dockPanel {

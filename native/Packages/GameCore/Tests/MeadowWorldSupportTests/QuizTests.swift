@@ -489,6 +489,31 @@ final class QuizTests:XCTestCase {
         XCTAssertTrue(QuizReport.Words("Tom looked after the dogs.").contains("dog"))
         XCTAssertFalse(QuizReport.Words("Tom looked after the dogs.").contains("cat"))
     }
+    func testAppPromptRulesMatchTheDocumentedPrompt()throws {
+        let here=URL(fileURLWithPath:#filePath).deletingLastPathComponent()
+        let doc=try String(contentsOf:here.appendingPathComponent("../../../../../docs/question-bank-llm-prompt.md").standardized,encoding:.utf8)
+        let app=try String(contentsOf:here.appendingPathComponent("../../../../ClassroomProbe/Resources/quiz-prompt-rules.txt").standardized,encoding:.utf8)
+        let start=try XCTUnwrap(doc.range(of:"### 难度与题型（必须遵守）")),end=try XCTUnwrap(doc.range(of:"\n---\n\n## 使用提示"))
+        // The app's editor builds its prompts on the same rules as the document (copy them over when either changes).
+        XCTAssertEqual(String(doc[start.lowerBound..<end.lowerBound]).trimmingCharacters(in:.whitespacesAndNewlines),app.trimmingCharacters(in:.whitespacesAndNewlines))
+    }
+    func testBankTurnsBackIntoTextThatImportsTheSame()throws {
+        let url=URL(fileURLWithPath:#filePath).deletingLastPathComponent().appendingPathComponent("../../../../ClassroomProbe/Resources/quiz-sample.txt").standardized
+        var bank=try QuizBankParser.parse(Data(contentsOf:url))
+        bank[0].explanation="苹果\n是水果";bank[0].seconds=45
+        let text=QuizBankParser.text(bank,course:"示例")
+        XCTAssertTrue(text.hasPrefix("# 课程：示例\n\n"))
+        let again=try QuizBankParser.parse(Data(text.utf8))
+        XCTAssertEqual(again.count,bank.count)
+        for (a,b) in zip(again,bank) {
+            XCTAssertEqual(a.type,b.type);XCTAssertEqual(a.prompt,b.prompt);XCTAssertEqual(a.difficulty,b.difficulty);XCTAssertEqual(a.tags,b.tags)
+            XCTAssertEqual(a.passage,b.passage);XCTAssertEqual(a.seconds,b.seconds)
+            // The same right answers among the same options (fill-in options come back in their own order).
+            XCTAssertEqual(a.parts.map{$0.options[$0.answer]},b.parts.map{$0.options[$0.answer]})
+            XCTAssertEqual(a.parts.map{Set($0.options)},b.parts.map{Set($0.options)})
+        }
+        XCTAssertEqual(again[0].explanation,"苹果 是水果")
+    }
     func testCorrectedFlashCardKeepsItsAnswers()throws {
         var card=QuizBankParser.flashcard(front:"nose",back:"突出部分",distractors:[]);card.difficulty=1;card.course="第一章"
         let s=try quizSession([])

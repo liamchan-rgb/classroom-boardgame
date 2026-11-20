@@ -386,7 +386,7 @@ struct QuizReportPageView: View {
                 Spacer()
                 if !mistakes.isEmpty { Text("红字为所答，绿字为正确答案").font(.system(size: 8, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted) }
             }
-            if mistakes.isEmpty { Label(s.corrected.isEmpty ? "全部答对，太棒了！" : "错题都已改正，太棒了！", systemImage: "sparkles").font(.system(size: 10, weight: .bold, design: .rounded)).foregroundStyle(Ink.good) }
+            if mistakes.isEmpty { Label(s.corrected.isEmpty ? "全部答对" : "错题都已改正", systemImage: "sparkles").font(.system(size: 10, weight: .bold, design: .rounded)).foregroundStyle(Ink.good) }
             ForEach(Array(mistakes.prefix(shown).enumerated()), id: \.offset) { k, line in
                 HStack(alignment: .firstTextBaseline, spacing: 4) {
                     Text("\(k + 1)").font(.system(size: 8, weight: .heavy, design: .rounded)).foregroundStyle(Ink.bad).frame(width: 14, alignment: .trailing)
@@ -790,7 +790,6 @@ struct StudentSheet {
         if m1 == m2 && d1 == d2 { return "\(m1)月\(d1)日" }
         return m1 == m2 ? "\(m1)月\(d1)–\(d2)日" : "\(m1)月\(d1)日–\(m2)月\(d2)日"
     }
-    var praise: String { rate >= 0.9 ? "非常棒！" : rate >= 0.75 ? "掌握得不错。" : rate >= 0.6 ? "继续加油。" : "还需要多练习。" }
 }
 
 /// One student's page: plain words for a family, nothing about the game.
@@ -916,7 +915,7 @@ struct StudentReportPage: View {
     private var summaryText: AttributedString {
         func plain(_ s: String) -> AttributedString { AttributedString(s) }
         func bold(_ s: String) -> AttributedString { var a = AttributedString(s); a.font = .system(size: 11.5, weight: .heavy, design: .rounded); a.foregroundColor = Ink.teal; return a }
-        var t = plain("本课答对 ") + bold("\(sheet.right)/\(sheet.total)") + plain(" 题（\(Int((sheet.rate * 100).rounded()))%），\(sheet.praise)")
+        var t = plain("本课答对 ") + bold("\(sheet.right)/\(sheet.total)") + plain(" 题（\(Int((sheet.rate * 100).rounded()))%）。")
         t += plain("本节课 ") + bold("\(sheet.words)") + plain(" 个高频词中，已掌握 ") + bold("\(sheet.mastered.count + sheet.improved.count)") + plain(" 个")
         if !sheet.improved.isEmpty { t += plain("（其中 \(sheet.improved.count) 个是先错后对）") }
         if sheet.todo.isEmpty { t += plain("，没有需要再练的词。") }

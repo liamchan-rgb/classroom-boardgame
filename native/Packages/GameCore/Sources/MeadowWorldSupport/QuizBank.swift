@@ -17,6 +17,42 @@ import ClassroomGameCore
 /// or JSON: {"questions":[{"prompt":"…","options":["…","…"],"answer":"B","coins":15,"explanation":"…"}]}
 /// ("answer" may be a letter or a 0-based number; a bare array of questions also works).
 public enum QuizBankParser {
+    /// A bank back in the plain-text format it is imported from (docs/question-bank-format.md), so it can be handed to
+    /// a language model to fix and imported again. Questions in the same order; blank lines only between questions.
+    public static func text(_ list:[QuizQuestion],course:String?=nil)->String {
+        let letters=Array("ABCDEFGH").map(String.init)
+        func lines(_ t:String)->[String] {t.split(separator:"\n",omittingEmptySubsequences:true).map{String($0).trimmingCharacters(in:.whitespaces)}.filter{!$0.isEmpty}}
+        func options(_ p:QuizItem)->[String] {p.options.enumerated().map{"\(letters[min($0.offset,letters.count-1)]). \($0.element)"}}
+        var blocks:[String]=[]
+        for q in list {
+            var b:[String]=[]
+            switch q.type {
+            case .choice:
+                b=["类型：选择","难度：\(q.level)"]+lines(q.prompt)+options(q.parts[0])+["答案：\(letters[min(q.answer,letters.count-1)])"]
+            case .flashcard:
+                let p=q.parts.first
+                b=["类型：闪卡","难度：\(q.level)","正面：\(q.prompt)","背面：\(p.map{$0.options[$0.answer]} ?? "")"]
+            case .fill:
+                var t=q.prompt
+                for (k,p) in q.parts.enumerated() {
+                    let right=p.options[p.answer],others=p.options.enumerated().filter{$0.offset != p.answer}.map(\.element)
+                    t=t.replacingOccurrences(of:"{{\(k+1)}}",with:"{{"+([right]+others).joined(separator:"|")+"}}")
+                }
+                b=["类型：填空","难度：\(q.level)",t.replacingOccurrences(of:"\n",with:" ")]
+            case .reading:
+                b=["类型：阅读","难度：\(q.level)"]
+                if q.prompt != "阅读短文，回答问题" {b+=lines(q.prompt).map{"题目："+$0}}
+                let passage=lines(q.passage ?? "")
+                b.append("文章："+(passage.first ?? ""));b+=passage.dropFirst()
+                for p in q.parts {b.append("问：\(p.prompt ?? "")");b+=options(p);b.append("答案：\(letters[min(p.answer,letters.count-1)])")}
+            }
+            if let s=q.seconds {b.append("时间：\(s)")}
+            if let t=q.tags,!t.isEmpty {b.append("标签："+t.joined(separator:", "))}
+            if let e=q.explanation,!e.isEmpty {b.append("解析："+e.replacingOccurrences(of:"\n",with:" "))}
+            blocks.append(b.joined(separator:"\n"))
+        }
+        return (course.map{["# 课程：\($0)"]} ?? []).joined()+(course == nil ? "":"\n\n")+blocks.joined(separator:"\n\n")+"\n"
+    }
     public static func parse(_ data:Data)throws->[QuizQuestion] {
         guard data.count<=2*1024*1024 else{throw GameError("题库文件超过2 MB。")}
         var text=String(decoding:data,as:UTF8.self)
