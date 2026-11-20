@@ -723,9 +723,9 @@ private struct ExportPicker: UIViewControllerRepresentable {
 // MARK: - Student report (one page per student, for families)
 
 /// What one student's page shows: how they did, this lesson's ★/★★ words grouped by how they went, and the
-/// sentences (★★★ questions) to practise.
+/// challenge sentences (★★★ questions) they did not get right.
 struct StudentSheet {
-    struct Sentence { var english: String; var chinese: String?; var said: String? }
+    struct Sentence { var english: String; var chinese: String?; var said: String?; var kind: String }
     let name: String
     let index: Int
     let dates: String
@@ -760,7 +760,7 @@ struct StudentSheet {
                 guard let w = QuizReport.word(q, part: 0) else { continue }
                 // A lesson word is already in the word groups; a sentence card goes to the sentences.
                 if words.contains(where: { $0.word.lowercased() == w.word.lowercased() }) { continue }
-                sentences.append(Sentence(english: w.word, chinese: w.meaning, said: nil))
+                sentences.append(Sentence(english: w.word, chinese: w.meaning, said: nil, kind: "句子闪卡"))
                 continue
             }
             let wrong = line.answers.indices.filter { !line.answers[$0].right }
@@ -775,7 +775,7 @@ struct StudentSheet {
             }
             let said = wrong.first.map { line.answers[$0].said }
             sentences.append(Sentence(english: line.summary, chinese: "正确：" + wrong.map { line.answers[$0].expected }.joined(separator: "、"),
-                                      said: said.flatMap { QuizReport.nonAnswers.contains($0) ? nil : $0 }))
+                                      said: said.flatMap { QuizReport.nonAnswers.contains($0) ? nil : $0 }, kind: q.type.title))
         }
         todo = words.filter { $0.status == .wrong }
         improved = words.filter { $0.status == .corrected }
@@ -853,10 +853,9 @@ struct StudentReportPage: View {
                 box {
                     HStack(alignment: .firstTextBaseline, spacing: 6) {
                         Image(systemName: "text.quote").foregroundStyle(Ink.bad)
-                        Text("要再练的句子").font(.system(size: 13, weight: .heavy, design: .rounded))
+                        Text("挑战失败的句子").font(.system(size: 13, weight: .heavy, design: .rounded))
                         count(sheet.sentences.count, Ink.bad)
                         Spacer()
-                        Text("英文 · 意思").font(.system(size: 8, weight: .medium, design: .rounded)).foregroundStyle(Ink.muted)
                     }
                     ForEach(Array(sheet.sentences.prefix(sentencesShown).enumerated()), id: \.offset) { k, s in
                         HStack(alignment: .firstTextBaseline, spacing: 6) {
@@ -866,6 +865,9 @@ struct StudentReportPage: View {
                                 if let zh = s.chinese { Text(zh).font(.system(size: 9, weight: .medium, design: .rounded)).foregroundStyle(Ink.muted) }
                                 if let said = s.said { Text("孩子说成：\(said)").font(.system(size: 8.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.bad) }
                             }.fixedSize(horizontal: false, vertical: true)
+                            Spacer(minLength: 6)
+                            Text(s.kind).font(.system(size: 8, weight: .bold, design: .rounded)).foregroundStyle(Ink.teal)
+                                .padding(.horizontal, 7).padding(.vertical, 2).background(Capsule().fill(Ink.teal.opacity(0.1)))
                         }
                     }
                     if sheet.sentences.count > sentencesShown {
@@ -922,7 +924,7 @@ struct StudentReportPage: View {
             t += plain("，还要练 ") + bold("\(sheet.todo.count)") + plain(" 个：")
             t += plain(sheet.todo.prefix(4).map { $0.word + ($0.meaning.map { "（\($0)）" } ?? "") }.joined(separator: "、") + (sheet.todo.count > 4 ? "等" : "") + "。")
         }
-        if !sheet.sentences.isEmpty { t += plain("另有 \(sheet.sentences.count) 个句子要再练。") }
+        if !sheet.sentences.isEmpty { t += plain("另有 \(sheet.sentences.count) 个挑战句子没有答对。") }
         return t
     }
     private func count(_ n: Int, _ tint: Color) -> some View {
