@@ -136,7 +136,7 @@ struct QuizBankEditor: View {
                         Button { KeyHostingController<EmptyView>.endEditing(); model.pick(k) } label: {
                             HStack(spacing: 6) {
                                 Text("\(k + 1)").font(.caption2.bold()).foregroundStyle(on ? .white.opacity(0.8) : GameTheme.muted).frame(width: 24, alignment: .trailing)
-                                Text(String(repeating: "★", count: q.level)).font(.caption2.bold()).foregroundStyle(on ? .white : Color(red: 0.85, green: 0.6, blue: 0.12)).frame(width: 30, alignment: .leading)
+                                Text(String(repeating: "★", count: q.level)).font(.caption2.bold()).lineLimit(1).fixedSize().foregroundStyle(on ? .white : Color(red: 0.85, green: 0.6, blue: 0.12)).frame(width: 34, alignment: .leading)
                                 Text(q.type.title).font(.caption2.bold()).foregroundStyle(on ? .white : GameTheme.primary)
                                 Text(q.type == .flashcard ? q.prompt + " → " + (q.parts.first.map { $0.options[$0.answer] } ?? "") : QuizReport.summary(q))
                                     .font(.caption).lineLimit(1).foregroundStyle(on ? .white : GameTheme.ink)
