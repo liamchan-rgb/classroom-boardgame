@@ -253,11 +253,11 @@ final class QuizTests:XCTestCase {
         XCTAssertEqual(p2.mistakes.first?.answers.first?.said,"未作答")
         XCTAssertEqual(p2.wrongWords.first?.word,"feet");XCTAssertEqual(p2.wrongWords.first?.said,[])  // never "说成 未作答"
         XCTAssertNil(r.words.first{$0.word=="feet"}?.commonWrong)
-        // Decks: 小明 has portion 1 (apple, pear) and the shared card (cat), asked or not.
+        // One bank: every student's list is every flash card of the course, asked or not (old 份 lines are ignored).
         let p1=try XCTUnwrap(r.students.first{$0.id=="p1"})
         XCTAssertEqual(p1.vocabulary.map(\.word),["apple","pear","cat"])
         XCTAssertEqual(p1.vocabulary.map(\.status),[.corrected,.untested,.untested])
-        XCTAssertEqual(p2.vocabulary.map(\.word),["cat"])  // 小红 has no portion 2 here, only the shared card
+        XCTAssertEqual(p2.vocabulary.map(\.word),["apple","pear","cat"])
         // The class list: every flash card of the course, asked or not.
         XCTAssertEqual(r.cards.map(\.word),["apple","pear","cat"])
         XCTAssertEqual(r.cards[0].asked,2);XCTAssertEqual(r.cards[0].right,1);XCTAssertEqual(r.cards[0].missedBy,["小明"])
@@ -289,23 +289,27 @@ final class QuizTests:XCTestCase {
     }
     func testFreeQuizAnywhereDoesNotTouchTheMapAndBanksAppend()throws {
         let s=try quizSession([])
-        XCTAssertNil(s.personalQuizQuestion(for:"p1"))
+        XCTAssertNil(s.drawQuestion(.random,for:"p1"))
         try s.appendQuizBank(try QuizBankParser.parse(Data(mixed.utf8)))
         XCTAssertEqual(s.quizBank.count,4)
-        let i=try XCTUnwrap(s.personalQuizQuestion(for:"p1",kind:.flashcard));XCTAssertEqual(s.quizBank[i].type,.flashcard)
-        XCTAssertNotEqual(s.personalQuizQuestion(for:"p1",kind:.flashcard,skip:1),i)
+        let i=try XCTUnwrap(s.drawQuestion(.random,for:"p1",kind:.flashcard));XCTAssertEqual(s.quizBank[i].type,.flashcard)
         let nodes=s.engine.state.map.nodes,coins=s.engine.state.units["p1"]!.coins
         let q=s.quizBank[i]
         let a=try s.recordQuiz(actor:"p1",question:i,picks:[q.parts[0].answer],seconds:40,free:true)
         XCTAssertEqual(a.node,-1);XCTAssertEqual(s.engine.state.map.nodes,nodes);XCTAssertGreaterThan(s.engine.state.units["p1"]!.coins,coins)
-        // A used shared question is not dealt again (to anyone), but can be asked again on purpose.
-        XCTAssertNotEqual(s.personalQuizQuestion(for:"p2",kind:.flashcard),i);XCTAssertEqual(s.lastAskedQuestion(),i)
+        XCTAssertTrue(s.quizAskedBefore(i))
         try s.recordQuiz(actor:"p1",question:i,picks:[nil],seconds:3,free:true)
         XCTAssertEqual(s.quizLog.count,2)
         let restored=try MeadowCampaignSession(save:.decoded(s.snapshot.encoded()))
         XCTAssertEqual(restored.quizBank.count,4);XCTAssertEqual(restored.quizLog,s.quizLog)
     }
-    func testExclusiveFirstThenSharedManualRewardsAndPractice()throws {
+    /// A generator with a fixed sequence, so random draws are repeatable in tests.
+    private struct Seeded:RandomNumberGenerator {
+        var state:UInt64
+        mutating func next()->UInt64 {state=state &* 6364136223846793005 &+ 1442695040888963407;return state}
+    }
+    func testOneBankDrawsAtRandomWithFreshQuestionsFirst()throws {
+        // Old 对象/份 lines still parse but no longer split the bank.
         let text="""
         类型：闪卡
         对象：小明
@@ -313,215 +317,152 @@ final class QuizTests:XCTestCase {
         背面：大象
 
         类型：闪卡
-        对象：2
-        正面：tiger
-        背面：老虎
-
-        类型：闪卡
-        对象：全班
-        正面：cat
-        背面：猫
-
-        类型：闪卡
-        正面：dog
-        背面：狗
-        难度：2
-        """
-        let bank=try QuizBankParser.parse(Data(text.utf8))
-        XCTAssertEqual(bank.map(\.isShared),[false,false,true,true]);XCTAssertEqual(bank[0].audience,["小明"])
-        var c=MeadowMapConfiguration.suggested(total:10,seed:31827);c.combat=0;c.boss=0;c.reward=0;c.empty=9;c.extraRoads=0
-        let s=try MeadowCampaignSession.new(layout:MeadowMapGenerator.generate(c),studentNames:["小明","小红"],quizBank:bank)
-        // Own question first (by name for p1, by number for p2), then shared ones.
-        XCTAssertEqual(s.personalQuizQuestion(for:"p1"),0);XCTAssertEqual(s.personalQuizQuestion(for:"p2"),1)
-        try s.recordQuiz(actor:"p1",question:0,picks:[bank[0].parts[0].answer],seconds:5,free:true)
-        let next=try XCTUnwrap(s.personalQuizQuestion(for:"p1"));XCTAssertTrue(bank[next].isShared)
-        XCTAssertNotEqual(s.personalQuizQuestion(for:"p1"),1)  // never someone else's own question
-        // Shared question to the class: the teacher's coins, points for right, nothing from the drop table.
-        let shared=try XCTUnwrap(s.sharedQuizQuestion());XCTAssertTrue(bank[shared].isShared)
-        let before=s.engine.state.units["p2"]!
-        let right=try s.recordQuiz(actor:"p2",question:shared,picks:[bank[shared].parts[0].answer],seconds:999,free:true,manualCoins:25,shared:true)
-        XCTAssertEqual(right.coins,25);XCTAssertEqual(right.score,bank[shared].points);XCTAssertNil(right.drop);XCTAssertEqual(right.shared,true)
-        XCTAssertEqual(s.engine.state.units["p2"]!.coins,before.coins+25)
-        let wrong=try s.recordQuiz(actor:"p1",question:shared,picks:[nil],seconds:5,free:true,manualCoins:2,shared:true)
-        XCTAssertEqual(wrong.coins,2);XCTAssertEqual(wrong.score,0)
-        XCTAssertNotEqual(s.sharedQuizQuestion(),shared)
-        // Flash-card practice: endless, recorded, no reward; unseen cards first, never the card just shown.
-        let card=try XCTUnwrap(s.practiceCard(for:"p1"));XCTAssertNotEqual(card,1)
-        let coins=s.engine.state.units["p1"]!.coins
-        let p=try s.recordQuiz(actor:"p1",question:card,picks:[nil],seconds:2,free:true,practice:true)
-        XCTAssertEqual(p.coins,0);XCTAssertEqual(s.engine.state.units["p1"]!.coins,coins)
-        XCTAssertNotEqual(s.practiceCard(for:"p1",after:card),card)
-    }
-    func testExtraPortionsGoRoundASmallClass()throws {
-        let text=(1...6).map{"类型：闪卡\n份：\($0)\n难度：1\n正面：w\($0)\n背面：词\($0)"}.joined(separator:"\n\n")
-        let bank=try QuizBankParser.parse(Data(text.utf8))
-        var c=MeadowMapConfiguration.suggested(total:10,seed:31827);c.combat=0;c.boss=0;c.reward=0;c.empty=9;c.extraRoads=0
-        let s=try MeadowCampaignSession.new(layout:MeadowMapGenerator.generate(c),studentClasses:Array(repeating:"ranger",count:4),studentNames:["甲","乙","丙","丁"],quizBank:bank)
-        // 4 students, 6 portions: 5 → the 1st, 6 → the 2nd.
-        XCTAssertEqual((1...6).map{s.portionOwner(String($0))},["p1","p2","p3","p4","p1","p2"])
-        XCTAssertEqual(s.challengeLeft(for:"p1"),[2,0,0]);XCTAssertEqual(s.challengeLeft(for:"p3"),[1,0,0])
-        // The teacher can still give an extra portion to someone else.
-        try s.assignQuizPortion("6",to:"p4")
-        XCTAssertEqual(s.challengeLeft(for:"p2"),[1,0,0]);XCTAssertEqual(s.challengeLeft(for:"p4"),[2,0,0])
-    }
-    func testClassFlashCardsPreferSharedAndRotate()throws {
-        let text="""
-        类型：闪卡
-        份：1
-        正面：own
-        背面：自己的
-
-        类型：闪卡
-        正面：cat
-        背面：猫
-
-        类型：闪卡
-        正面：dog
-        背面：狗
-        """
-        let bank=try QuizBankParser.parse(Data(text.utf8))
-        var c=MeadowMapConfiguration.suggested(total:10,seed:31827);c.combat=0;c.boss=0;c.reward=0;c.empty=9;c.extraRoads=0
-        let s=try MeadowCampaignSession.new(layout:MeadowMapGenerator.generate(c),studentNames:["小明","小红"],quizBank:bank)
-        // Only the shared cards go to the class; the least recently shown first, never the same twice in a row.
-        let coins=s.engine.state.players.map(\.coins)
-        let first=try XCTUnwrap(s.classFlashCard());XCTAssertTrue([1,2].contains(first))
-        try s.recordQuiz(actor:"p1",question:first,picks:[0],seconds:2,free:true,shared:true,practice:true)
-        try s.recordQuiz(actor:"p2",question:first,picks:[nil],seconds:2,free:true,shared:true,practice:true)
-        let second=try XCTUnwrap(s.classFlashCard(after:first));XCTAssertEqual(second,3-first)
-        XCTAssertEqual(s.engine.state.players.map(\.coins),coins) // practice: recorded, no reward
-        XCTAssertEqual(s.quizLog.count,2)
-        // Decks in bank order: the class gets the shared cards, a student also their own portion.
-        XCTAssertEqual(s.classFlashDeck,[1,2]);XCTAssertEqual(s.practiceDeck(for:"p1"),[0,1,2]);XCTAssertEqual(s.practiceDeck(for:"p2"),[1,2])
-    }
-    func testPortionsDefaultToStudentNumbersAndTheTeacherReassigns()throws {
-        let text="""
-        类型：闪卡
-        份：1
-        正面：cat
-        背面：猫
-
-        类型：闪卡
-        份：第2份
-        正面：dog
-        背面：狗
-
-        类型：闪卡
-        份：２
-        正面：pig
-        背面：猪
-
-        类型：闪卡
-        份：9
-        正面：cow
-        背面：牛
-
-        类型：闪卡
-        正面：sun
-        背面：太阳
-        """
-        let bank=try QuizBankParser.parse(Data(text.utf8))
-        XCTAssertEqual(bank.map(\.portion),["1","2","2","9",nil]);XCTAssertEqual(bank.map(\.isShared),[false,false,false,false,true])
-        var c=MeadowMapConfiguration.suggested(total:10,seed:31827);c.combat=0;c.boss=0;c.reward=0;c.empty=9;c.extraRoads=0
-        let s=try MeadowCampaignSession.new(layout:MeadowMapGenerator.generate(c),studentNames:["小明","小红"],quizBank:bank)
-        XCTAssertEqual(s.quizPortions.map(\.name),["1","2","9"]);XCTAssertEqual(s.quizPortions.map(\.count),[1,2,1])
-        // Default: portion n → student n; extra portions go round the class (2 students: portion 9 → the 1st).
-        XCTAssertEqual(s.portionOwner("1"),"p1");XCTAssertEqual(s.portionOwner("2"),"p2");XCTAssertEqual(s.portionOwner("9"),"p1")
-        XCTAssertEqual(s.personalQuizQuestion(for:"p1"),0);XCTAssertEqual(s.personalQuizQuestion(for:"p2"),1)
-        // The teacher swaps: portion 2 to 小明, portion 1 to nobody; saved with the trip.
-        try s.assignQuizPortion("2",to:"p1");try s.assignQuizPortion("1",to:nil)
-        XCTAssertEqual(s.personalQuizQuestion(for:"p1"),1);XCTAssertEqual(s.personalQuizQuestion(for:"p2"),4)
-        let restored=try MeadowCampaignSession(save:.decoded(s.snapshot.encoded()))
-        XCTAssertEqual(restored.portionOwner("2"),"p1");XCTAssertNil(restored.portionOwner("1"))
-        XCTAssertThrowsError(try s.assignQuizPortion("2",to:"p99"))
-        // The bundled sample bank parses and has portions.
-    }
-    func testBundledSampleBankHasPortionsAndSharedQuestions()throws {
-        let url=URL(fileURLWithPath:#filePath).deletingLastPathComponent().appendingPathComponent("../../../../ClassroomProbe/Resources/quiz-sample.txt").standardized
-        let bank=try QuizBankParser.parse(Data(contentsOf:url))
-        XCTAssertTrue(bank.contains{$0.portion != nil});XCTAssertTrue(bank.contains{$0.isShared})
-        XCTAssertTrue(Set(bank.map(\.type)).isSuperset(of:[.choice,.flashcard,.fill,.reading]))
-    }
-    func testTimedChallengeDealsOwnQuestionsByChosenDifficulty()throws {
-        let text="""
-        类型：闪卡
-        份：1
-        正面：cat
-        背面：猫
-
-        类型：闪卡
-        份：1
+        份：2
         难度：2
         正面：tiger
         背面：老虎
 
         类型：闪卡
-        份：1
         难度：3
         正面：rhinoceros
         背面：犀牛
 
-        类型：闪卡
-        份：2
-        难度：3
-        正面：whale
-        背面：鲸
-
-        类型：闪卡
-        难度：3
-        正面：sun
-        背面：太阳
+        类型：选择
+        难度：2
+        Which is a fruit?
+        A. apple
+        B. chair
+        答案：A
         """
         let bank=try QuizBankParser.parse(Data(text.utf8))
         var c=MeadowMapConfiguration.suggested(total:10,seed:31827);c.combat=0;c.boss=0;c.reward=0;c.empty=9;c.extraRoads=0
         let s=try MeadowCampaignSession.new(layout:MeadowMapGenerator.generate(c),studentNames:["小明","小红"],quizBank:bank)
-        XCTAssertEqual(s.challengeLeft(for:"p1"),[1,1,1]);XCTAssertEqual(s.challengeLeft(for:"p2"),[0,0,1])
-        // Only the student's own portion, at the level they chose (unmarked = ★); shared ones never come up.
-        XCTAssertEqual(s.challengeQuestion(for:"p1",difficulty:1),0);XCTAssertEqual(s.challengeQuestion(for:"p1",difficulty:3),2)
-        XCTAssertNil(s.challengeQuestion(for:"p2",difficulty:1))
+        XCTAssertEqual(s.quizPool(.random),[0,1,2,3]);XCTAssertEqual(s.quizPool(.difficulty(1)),[0]);XCTAssertEqual(s.quizPool(.difficulty(2)),[1,3])
+        XCTAssertEqual(s.quizPool(.difficulty(2),kind:.choice),[3])
+        var g=Seeded(state:7)
+        // Every question comes up for each student before any repeats.
+        var seen=Set<Int>()
+        for _ in 0..<4 {
+            let i=try XCTUnwrap(s.drawQuestion(.random,for:"p2",using:&g));XCTAssertFalse(seen.contains(i));seen.insert(i)
+            try s.recordQuiz(actor:"p2",question:i,picks:Array(repeating:0,count:bank[i].parts.count),seconds:5,free:true,challenge:true)
+        }
+        XCTAssertEqual(seen,[0,1,2,3])
+        // All had: any may come again (and is known as asked before); 小明 still gets fresh ones; the class (nil) none fresh.
+        XCTAssertNotNil(s.drawQuestion(.random,for:"p2",using:&g));XCTAssertTrue(s.quizAskedBefore(0))
+        XCTAssertNotNil(s.drawQuestion(.difficulty(3),for:"p1",using:&g))
+        // 换一题: not the one on screen, unless it is the only one.
+        for _ in 0..<10 {XCTAssertEqual(s.drawQuestion(.difficulty(2),for:"p1",excluding:[1],using:&g),3)}
+        XCTAssertEqual(s.drawQuestion(.difficulty(1),for:"p1",excluding:[0],using:&g),0)
+        XCTAssertNil(s.drawQuestion(.difficulty(3),for:"p1",kind:.choice,using:&g))
+        // Flash cards: one deck for every student and the class.
+        XCTAssertEqual(s.classFlashDeck,[0,1,2]);XCTAssertEqual(s.practiceDeck(for:"p1"),[0,1,2]);XCTAssertEqual(s.practiceDeck(for:"p2"),[0,1,2])
+        // The class list in the report: by difficulty.
+        XCTAssertEqual(s.quizReport.cards.map(\.word),["elephant","tiger","rhinoceros"]);XCTAssertEqual(s.quizReport.cards.map(\.difficulty),[1,2,3])
+    }
+    func testRepeatedQuestionsShuffleOptionsAndRecordTheRealAnswer()throws {
+        let text="""
+        类型：选择
+        Which is a fruit?
+        A. apple
+        B. chair
+        C. desk
+        D. door
+        答案：A
+
+        类型：填空
+        Tom {{went|goed|go}} home and {{saw|seed}} a cat.
+        """
+        let bank=try QuizBankParser.parse(Data(text.utf8)),s=try quizSession(bank)
+        var g=Seeded(state:3)
+        for _ in 0..<20 {
+            let sh=bank[0].shuffledOptions(using:&g)
+            XCTAssertNotEqual(sh.question.options,bank[0].options);XCTAssertEqual(Set(sh.question.options),Set(bank[0].options))
+            XCTAssertEqual(sh.question.options[sh.question.answer],"apple")
+            XCTAssertEqual(sh.original([sh.question.answer]),[0])
+        }
+        let fill=bank[1].shuffledOptions(using:&g)
+        XCTAssertEqual(fill.question.parts.map{$0.options[$0.answer]},["went","saw"])
+        XCTAssertEqual(fill.question.prompt,bank[1].prompt)
+        // The student said the right words on the shuffled card: recorded right, in the bank's option order.
+        let picks=fill.original(fill.question.parts.map{$0.answer})
+        XCTAssertEqual(picks,bank[1].parts.map{$0.answer})
+        let a=try s.recordQuiz(actor:"p1",question:1,picks:picks,seconds:5,free:true)
+        XCTAssertEqual(a.correct,[true,true])
+        // Flash cards are left as they are.
+        let card=QuizBankParser.flashcard(front:"cat",back:"猫",distractors:[])
+        XCTAssertEqual(card.shuffledOptions(using:&g).question,card)
+    }
+    func testBundledSampleBankHasEveryKindAndNoPortions()throws {
+        let url=URL(fileURLWithPath:#filePath).deletingLastPathComponent().appendingPathComponent("../../../../ClassroomProbe/Resources/quiz-sample.txt").standardized
+        let bank=try QuizBankParser.parse(Data(contentsOf:url))
+        XCTAssertFalse(bank.contains{$0.portion != nil || $0.audience != nil})
+        XCTAssertTrue(Set(bank.map(\.type)).isSuperset(of:[.choice,.flashcard,.fill,.reading]))
+        XCTAssertEqual(Set(bank.compactMap(\.difficulty)),[1,2,3])
+    }
+    func testChallengeAnswersPayByDifficultyWithoutSpeedBonus()throws {
+        let text="""
+        类型：闪卡
+        正面：cat
+        背面：猫
+
+        类型：闪卡
+        难度：2
+        正面：tiger
+        背面：老虎
+
+        类型：闪卡
+        难度：3
+        正面：rhinoceros
+        背面：犀牛
+        """
+        let bank=try QuizBankParser.parse(Data(text.utf8)),s=try quizSession(bank)
         let coins=s.engine.state.units["p1"]!.coins
         // A slow but right ★★★ answer: full difficulty reward, no speed bonus, not overtime.
         let a=try s.recordQuiz(actor:"p1",question:2,picks:[0],seconds:200,free:true,challenge:true)
         XCTAssertFalse(a.overtime);XCTAssertEqual(a.coins,QuizRewards.baseCoins[2]);XCTAssertEqual(a.score,3);XCTAssertNotNil(a.drop)
         XCTAssertEqual(s.engine.state.units["p1"]!.coins,coins+a.coins)
-        XCTAssertNil(s.challengeQuestion(for:"p1",difficulty:3));XCTAssertEqual(s.challengeLeft(for:"p1"),[1,1,0])
         // Fast answers in a challenge get no bonus either.
         let b=try s.recordQuiz(actor:"p1",question:1,picks:[0],seconds:1,free:true,challenge:true)
         XCTAssertEqual(b.coins,QuizRewards.baseCoins[1])
         // A wrong flash card reads "答错" in the report.
         try s.recordQuiz(actor:"p1",question:0,picks:[nil],seconds:3,free:true,challenge:true)
         XCTAssertEqual(s.quizReport.students[0].wrongWords.first?.said,[])
+        // Shared to the class: the teacher's coins, points for right, nothing from the drop table.
+        let shared=try s.recordQuiz(actor:"p1",question:1,picks:[0],seconds:999,free:true,manualCoins:25,shared:true)
+        XCTAssertEqual(shared.coins,25);XCTAssertNil(shared.drop)
     }
     func testCoursesKeepQuestionsApartAndAnswersStay()throws {
         func course(_ name:String,_ words:[(String,String)])->[QuizQuestion] {
-            words.enumerated().map{i,w in var q=QuizBankParser.flashcard(front:w.0,back:w.1,distractors:[]);q.portion="1";q.difficulty=1+i%3;q.course=name;return q}
+            words.enumerated().map{i,w in var q=QuizBankParser.flashcard(front:w.0,back:w.1,distractors:[]);q.difficulty=1+i%3;q.course=name;return q}
         }
         let ch1=course("第一章",[("rabbit","兔子"),("hole","洞"),("key","钥匙")])
         let ch2=course("第二章",[("pool","池塘"),("tears","眼泪"),("fan","扇子")])
         let s=try quizSession([])
-        XCTAssertNil(s.personalQuizQuestion(for:"p1"))
+        XCTAssertNil(s.drawQuestion(.random,for:"p1"))
         try s.useQuizCourse("第一章",questions:ch1)
-        XCTAssertEqual(s.challengeLeft(for:"p1"),[1,1,1]);XCTAssertEqual(s.quizBank.count,3)
-        let a=try XCTUnwrap(s.challengeQuestion(for:"p1",difficulty:1));XCTAssertEqual(s.quizBank[a].course,"第一章")
+        XCTAssertEqual(s.quizPool(.random).count,3);XCTAssertEqual(s.quizBank.count,3)
+        let a=try XCTUnwrap(s.drawQuestion(.difficulty(1),for:"p1"));XCTAssertEqual(s.quizBank[a].course,"第一章")
         try s.recordQuiz(actor:"p1",question:a,picks:[0],seconds:3,free:true,challenge:true)
         // Switch: chapter 2 is added, only its questions are dealt; chapter 1's answer stays recorded.
         try s.useQuizCourse("第二章",questions:ch2)
-        XCTAssertEqual(s.quizBank.count,6);XCTAssertEqual(s.challengeLeft(for:"p1"),[1,1,1])
-        XCTAssertEqual(s.quizBank[try XCTUnwrap(s.challengeQuestion(for:"p1",difficulty:1))].course,"第二章")
-        XCTAssertTrue((s.practiceCard(for:"p1")).map{s.quizBank[$0].course=="第二章"} ?? false)
+        XCTAssertEqual(s.quizBank.count,6);XCTAssertEqual(s.quizPool(.random),[3,4,5])
+        XCTAssertEqual(s.quizBank[try XCTUnwrap(s.drawQuestion(.difficulty(1),for:"p1"))].course,"第二章")
+        XCTAssertEqual(s.classFlashDeck,[3,4,5])
         XCTAssertEqual(s.quizLog.count,1);XCTAssertEqual(s.quizReport.students.first?.lines.first?.question.course,"第一章")
-        // Back to chapter 1: nothing added twice, the answered question is not dealt again.
+        // Back to chapter 1: nothing added twice; the answered question comes after the fresh ones.
         try s.useQuizCourse("第一章",questions:ch1)
-        XCTAssertEqual(s.quizBank.count,6);XCTAssertEqual(s.challengeLeft(for:"p1"),[0,1,1])
+        XCTAssertEqual(s.quizBank.count,6)
+        for _ in 0..<10 {XCTAssertNotEqual(s.drawQuestion(.random,for:"p1"),a)}
         // No course chosen: everything in the trip.
-        try s.useQuizCourse(nil,questions:[]);XCTAssertEqual(s.challengeLeft(for:"p1"),[1,2,2])
+        try s.useQuizCourse(nil,questions:[]);XCTAssertEqual(s.quizPool(.random).count,6)
     }
     func testReimportedCourseReplacesItsOldVersion()throws {
-        var old=QuizBankParser.flashcard(front:"cat",back:"狗",distractors:[]);old.portion="1";old.course="第一章"
-        var fixed=QuizBankParser.flashcard(front:"cat",back:"猫",distractors:[]);fixed.portion="1";fixed.course="第一章"
+        var old=QuizBankParser.flashcard(front:"cat",back:"狗",distractors:[]);old.course="第一章"
+        var fixed=QuizBankParser.flashcard(front:"cat",back:"猫",distractors:[]);fixed.course="第一章"
         let s=try quizSession([])
-        try s.useQuizCourse("第一章",questions:[old]);XCTAssertEqual(s.challengeLeft(for:"p1"),[1,0,0])
+        try s.useQuizCourse("第一章",questions:[old]);XCTAssertEqual(s.quizPool(.random).count,1)
         try s.useQuizCourse("第一章",questions:[fixed])
-        XCTAssertEqual(s.quizBank.count,2);XCTAssertEqual(s.challengeLeft(for:"p1"),[1,0,0])
-        XCTAssertEqual(s.quizBank[try XCTUnwrap(s.challengeQuestion(for:"p1",difficulty:1))].parts[0].options,["猫"])
+        XCTAssertEqual(s.quizBank.count,2);XCTAssertEqual(s.quizPool(.random).count,1)
+        XCTAssertEqual(s.quizBank[try XCTUnwrap(s.drawQuestion(.random,for:"p1"))].parts[0].options,["猫"])
     }
 }

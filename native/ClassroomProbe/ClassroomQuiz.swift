@@ -26,6 +26,8 @@ struct LiveQuiz: Equatable {
     var hold: Double?
     /// Challenge: the card's clock counts down to the end of the challenge instead of the question's own limit.
     var deadline: Date?
+    /// The question came up again with its options in another order: picks are mapped back for the record.
+    var shuffle: QuizShuffle? = nil
 }
 
 /// Hosts the UIKit quiz card inside the SwiftUI overlays on a 720-point-high canvas, so the card looks the same on
@@ -60,7 +62,7 @@ private struct QuizCardRepresentable: UIViewRepresentable {
             box.card?.removeFromSuperview()
             box.layoutIfNeeded()
             let who = quiz.mode == .classwide ? "全班" : quiz.playerName
-            let card = MeadowQuizCard.present(in: box, question: quiz.question, player: who, place: quiz.mode == .practice ? "闪卡练习" : quiz.mode == .challenge ? "专属挑战" : quiz.place, start: quiz.start, mode: quiz.mode, deadline: quiz.deadline)
+            let card = MeadowQuizCard.present(in: box, question: quiz.question, player: who, place: quiz.mode == .practice ? "闪卡练习" : quiz.mode == .challenge ? "个人挑战" : quiz.place, start: quiz.start, mode: quiz.mode, deadline: quiz.deadline)
             card.layer.zPosition = 0
             box.card = card; box.token = quiz.token; box.revealed = false
             box.setNeedsLayout()
@@ -111,9 +113,155 @@ private struct DockedPanel: UIViewControllerRepresentable {
     func updateUIViewController(_ c: KeyHostingController<AnyView>, context: Context) { c.onKey = content.onKey }
 }
 
-// MARK: - Launcher (personal)
+// MARK: - How questions are drawn
 
-/// The challenge setup: who, and for how long. Keys: 1–7 student, ⏎ start, +/- half a minute, Esc close.
+/// The teacher's way of choosing the next question (individual challenge and class questions alike), kept on this
+/// device: at random from the whole course, at random from one difficulty, or picked by hand from the list.
+@MainActor final class QuizDrawSettings: ObservableObject {
+    enum Mode: String, CaseIterable {
+        case random, difficulty, manual
+        var title: String { switch self { case .random: return "全随机"; case .difficulty: return "按难度随机"; case .manual: return "老师点选" } }
+        var icon: String { switch self { case .random: return "shuffle"; case .difficulty: return "star.leadinghalf.filled"; case .manual: return "hand.point.up.left.fill" } }
+    }
+    static let shared = QuizDrawSettings()
+    @Published var mode: Mode = Mode(rawValue: UserDefaults.standard.string(forKey: "classroom.quizDraw") ?? "") ?? .random {
+        didSet { UserDefaults.standard.set(mode.rawValue, forKey: "classroom.quizDraw") }
+    }
+    @Published var difficulty: Int = min(3, max(1, UserDefaults.standard.integer(forKey: "classroom.quizDrawLevel"))) {
+        didSet { UserDefaults.standard.set(difficulty, forKey: "classroom.quizDrawLevel") }
+    }
+    /// nil = the teacher picks by hand.
+    var draw: QuizDraw? { switch mode { case .random: return .random; case .difficulty: return .difficulty(difficulty); case .manual: return nil } }
+}
+
+/// 出题方式: 全随机 / 按难度随机 (★ ★★ ★★★, with how many questions each has) / 老师点选.
+struct QuizDrawBar: View {
+    @ObservedObject var game: MeadowTeacherCoordinator
+    @ObservedObject var settings = QuizDrawSettings.shared
+    var body: some View {
+        HStack(spacing: 6) {
+            ForEach(QuizDrawSettings.Mode.allCases, id: \.self) { m in
+                chip(m.title, icon: m.icon, on: settings.mode == m) { settings.mode = m }
+            }
+            if settings.mode == .difficulty {
+                Rectangle().fill(GameTheme.muted.opacity(0.3)).frame(width: 1, height: 22).padding(.horizontal, 2)
+                ForEach(1...3, id: \.self) { d in
+                    chip(String(repeating: "★", count: d) + " \(game.campaign?.quizPool(.difficulty(d)).count ?? 0)", icon: nil, on: settings.difficulty == d) { settings.difficulty = d }
+                }
+            }
+        }
+    }
+    private func chip(_ title: String, icon: String?, on: Bool, tap: @escaping () -> Void) -> some View {
+        Button { KeyHostingController<EmptyView>.endEditing(); tap() } label: {
+            HStack(spacing: 4) {
+                if let icon { Image(systemName: icon).font(.caption.bold()) }
+                Text(title).font(.callout.weight(.semibold)).lineLimit(1)
+            }
+            .padding(.horizontal, 10).padding(.vertical, 6)
+            .foregroundStyle(on ? Color.white : GameTheme.ink)
+            .background(RoundedRectangle(cornerRadius: 9, style: .continuous).fill(on ? GameTheme.primary : Color.white.opacity(0.55)))
+        }.buttonStyle(.plain)
+    }
+}
+
+/// 老师点选: the course's questions under difficulty tabs (or all of them). Tap a row to ask it; the eye shows the
+/// whole question (options, the right answer) first.
+struct QuizPicker: View {
+    @ObservedObject var game: MeadowTeacherCoordinator
+    /// Whose answers mark the rows (nil = anyone in the class).
+    var player: String? = nil
+    var onPick: (Int) -> Void
+    @State private var tab = 0
+    @State private var open: Int?
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if let c = game.campaign {
+                HStack(spacing: 6) {
+                    ForEach(0...3, id: \.self) { t in
+                        let on = tab == t
+                        Button { tab = t; open = nil } label: {
+                            Text((t == 0 ? "全部" : String(repeating: "★", count: t)) + " \(c.quizPool(t == 0 ? .random : .difficulty(t)).count)")
+                                .font(.callout.bold()).padding(.horizontal, 12).padding(.vertical, 6)
+                                .foregroundStyle(on ? Color.white : GameTheme.ink)
+                                .background(Capsule().fill(on ? GameTheme.primary : Color.white.opacity(0.55)))
+                        }.buttonStyle(.plain)
+                    }
+                    Spacer()
+                    Text("点题目出题 · 👁 预览").font(.caption).foregroundStyle(GameTheme.muted)
+                }
+                let pool = c.quizPool(tab == 0 ? .random : .difficulty(tab))
+                if pool.isEmpty { Label("这一档没有题。", systemImage: "tray").foregroundStyle(GameTheme.muted) }
+                ScrollView {
+                    LazyVStack(spacing: 6) { ForEach(pool, id: \.self) { i in row(c, i) } }
+                }
+            }
+        }
+    }
+    @ViewBuilder private func row(_ c: MeadowCampaignSession, _ i: Int) -> some View {
+        let q = c.quizBank[i]
+        let asked = c.quizLog.filter { $0.question == i && $0.practice != true && (player == nil || $0.player == player) }.count
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 8) {
+                Button { KeyHostingController<EmptyView>.endEditing(); onPick(i) } label: {
+                    HStack(spacing: 8) {
+                        Text(String(repeating: "★", count: max(1, min(3, q.difficulty ?? 1)))).font(.caption.bold()).foregroundStyle(Color(red: 0.85, green: 0.6, blue: 0.12)).frame(width: 34, alignment: .leading)
+                        Text(q.type.title).font(.caption.bold()).foregroundStyle(GameTheme.primary)
+                            .padding(.horizontal, 6).padding(.vertical, 2).background(Capsule().fill(GameTheme.primary.opacity(0.12)))
+                        Text(q.type == .flashcard ? q.prompt : QuizReport.summary(q)).font(.callout).foregroundStyle(GameTheme.ink).lineLimit(2).multilineTextAlignment(.leading)
+                        Spacer(minLength: 4)
+                        if asked > 0 { Text(player == nil ? "已出 \(asked)" : "已答 \(asked)").font(.caption2.bold()).foregroundStyle(GameTheme.muted) }
+                    }.contentShape(Rectangle())
+                }.buttonStyle(.plain)
+                Button { open = open == i ? nil : i } label: { Image(systemName: open == i ? "eye.fill" : "eye") }.buttonStyle(GlassIconButtonStyle())
+            }
+            if open == i { QuizPreview(question: q).padding(.leading, 42) }
+        }
+        .padding(8).background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(Color.white.opacity(open == i ? 0.75 : 0.45)))
+    }
+}
+
+/// A whole question as the teacher sees it before asking: options with the right one marked.
+struct QuizPreview: View {
+    let question: QuizQuestion
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            switch question.type {
+            case .flashcard:
+                Text("正面：\(question.prompt)").font(.callout.bold())
+                Text("背面：\(question.parts.first.map { $0.options[$0.answer] } ?? "")").font(.callout).foregroundStyle(Color.green)
+            case .reading:
+                Text(question.passage ?? question.prompt).font(.caption).foregroundStyle(GameTheme.ink).lineLimit(8)
+                ForEach(Array(question.parts.enumerated()), id: \.offset) { k, p in options(p, label: "\(k + 1). \(p.prompt ?? "")") }
+            case .fill:
+                Text(QuizReport.summary(question)).font(.callout.bold())
+                ForEach(Array(question.parts.enumerated()), id: \.offset) { k, p in options(p, label: "（\(k + 1)）") }
+            case .choice:
+                Text(question.prompt).font(.callout.bold())
+                options(question.parts[0], label: nil)
+            }
+            if let e = question.explanation { Text("解析：\(e)").font(.caption).foregroundStyle(GameTheme.muted) }
+        }.frame(maxWidth: .infinity, alignment: .leading)
+    }
+    private func options(_ p: QuizItem, label: String?) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            if let label { Text(label).font(.caption.bold()) }
+            FlowRow(spacing: 6) {
+                ForEach(Array(p.options.enumerated()), id: \.offset) { o, text in
+                    Text("\(MeadowQuizCard.letters.indices.contains(o) ? MeadowQuizCard.letters[o] : "") \(text)\(o == p.answer ? " ✓" : "")")
+                        .font(.caption.weight(o == p.answer ? .bold : .regular))
+                        .foregroundStyle(o == p.answer ? Color.green : GameTheme.ink)
+                        .padding(.horizontal, 6).padding(.vertical, 2)
+                        .background(Capsule().fill((o == p.answer ? Color.green : Color.white).opacity(o == p.answer ? 0.14 : 0.5)))
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Launcher (individual challenge)
+
+/// The challenge setup: who, how questions are drawn, and for how long. Keys: 1–7 student, ⏎ start, +/- half a
+/// minute, Esc close.
 @MainActor final class QuizLauncherModel: ObservableObject {
     @Published var player: String?
     @Published var seconds: Int = max(30, UserDefaults.standard.integer(forKey: "classroom.challengeSeconds") == 0 ? 120 : UserDefaults.standard.integer(forKey: "classroom.challengeSeconds")) {
@@ -122,8 +270,7 @@ private struct DockedPanel: UIViewControllerRepresentable {
     @Published var note: String?
 }
 
-/// Q: the timed challenge on a student's own questions. Pick the student and the time; during it the student
-/// chooses each question's difficulty, the teacher calls it up and marks the answer — as many as fit in the time.
+/// Q: a timed challenge for one student on the course's questions, drawn the teacher's way.
 struct QuizLauncherPanel: View {
     @ObservedObject var game: MeadowTeacherCoordinator
     @ObservedObject var model: QuizLauncherModel
@@ -136,12 +283,9 @@ struct QuizLauncherPanel: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
-                Label("专属题挑战", systemImage: "timer").font(.title2.bold())
+                Label("个人挑战", systemImage: "timer").font(.title2.bold())
                 Text("课程：\(QuizLibrary.shared.active ?? "未选") · \(campaign?.courseIndices.count ?? 0) 题").font(.callout).foregroundStyle(GameTheme.muted)
                 Spacer()
-                if let c = campaign, !c.quizPortions.isEmpty {
-                    Button { game.openQuizPortions() } label: { Label("专属题分配 (\(c.quizPortions.count)份)", systemImage: "person.2.badge.gearshape") }.buttonStyle(GlassIconButtonStyle())
-                }
                 Button { game.openQuizBank(back: true) } label: { Label("题库", systemImage: "text.book.closed") }.buttonStyle(GlassIconButtonStyle(prominent: campaign?.quizBank.isEmpty == true))
                 Button { onClose() } label: { Label("关闭", systemImage: "xmark") }.buttonStyle(GlassIconButtonStyle())
             }
@@ -155,16 +299,8 @@ struct QuizLauncherPanel: View {
             } else {
                 Text("谁来挑战").font(.headline)
                 QuizPlayerChips(game: game, selected: Set([model.player].compactMap { $0 })) { model.player = $0 }
-                if let c = campaign, let p = model.player {
-                    let left = c.challengeLeft(for: p)
-                    HStack(spacing: 10) {
-                        ForEach(0..<3, id: \.self) { d in
-                            Text("\(String(repeating: "★", count: d + 1)) 剩 \(left[d]) 题").font(.callout.bold()).foregroundStyle(left[d] > 0 ? GameTheme.ink : GameTheme.muted)
-                                .padding(.horizontal, 10).padding(.vertical, 5).background(Capsule().fill(Color.white.opacity(0.5)))
-                        }
-                        if left.reduce(0, +) == 0 { Text("这位同学没有专属题（检查题库的“份”和专属题分配）").font(.caption).foregroundStyle(.orange) }
-                    }
-                }
+                Text("出题方式").font(.headline)
+                QuizDrawBar(game: game)
                 Text("挑战时间").font(.headline)
                 HStack(spacing: 8) {
                     ForEach(Self.presets, id: \.self) { sec in
@@ -181,9 +317,9 @@ struct QuizLauncherPanel: View {
                     Spacer()
                     Button { onStart() } label: { Label("开始挑战 (⏎)", systemImage: "play.fill") }
                         .buttonStyle(GlassIconButtonStyle(prominent: true))
-                        .disabled(model.player == nil || (model.player.map { campaign?.challengeLeft(for: $0).reduce(0, +) ?? 0 } ?? 0) == 0)
+                        .disabled(model.player == nil || campaign?.courseIndices.isEmpty != false)
                 }
-                Text("开始后电视倒计时；学生每题自己选难度（1 ★ / 2 ★★ / 3 ★★★），你调出他那份里对应难度的题，他作答你录入，时间到即停，能做多少算多少。按难度自动发奖励。键盘：1–7 换人，+/− 调时间，回车开始。").font(.caption).foregroundStyle(GameTheme.muted)
+                Text("开始后电视倒计时。全随机、按难度随机：答完自动抽下一题（这位同学没答过的优先，都答过才会重复；重复的选择题、填空题会打乱选项）；老师点选：每题从题单里点。学生口头作答你录入，选好即揭晓并按难度发奖，时间到即停。键盘：1–7 换人，+/− 调时间，回车开始。").font(.caption).foregroundStyle(GameTheme.muted)
             }
         }
         .padding(22).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(GlassBackdrop())
@@ -194,6 +330,7 @@ struct QuizLauncherPanel: View {
 // MARK: - Timed challenge
 
 @MainActor final class ChallengeModel: ObservableObject {
+    /// picking: between questions, the teacher chooses (老师点选, or a draw that found nothing).
     enum Phase: Equatable { case picking, question, finished }
     let player: String
     let name: String
@@ -204,7 +341,6 @@ struct QuizLauncherPanel: View {
     @Published var answered = 0
     @Published var coins = 0
     @Published var score = 0
-    @Published var left = [0, 0, 0]
     @Published var note: String?
     /// The answer being marked (question phase).
     @Published var draft: QuizAnswerDraft?
@@ -215,20 +351,23 @@ struct QuizLauncherPanel: View {
     var remaining: Double { max(0, end.timeIntervalSinceNow) }
 }
 
-/// Teacher side of a challenge: pick the level the student asks for (1/2/3), then mark the answer (⏎ submits);
-/// Esc ends early.
+/// Teacher side of a challenge: the question's answer (picked = revealed and paid), then the next question the
+/// chosen way; Esc ends early.
 struct ChallengePanel: View {
     @ObservedObject var game: MeadowTeacherCoordinator
     @ObservedObject var model: ChallengeModel
-    var onPick: (Int) -> Void
+    @ObservedObject var settings = QuizDrawSettings.shared
+    var onAsk: (Int) -> Void
+    var onNext: () -> Void
+    var onSkip: () -> Void
     var onSubmit: () -> Void
     var onEnd: () -> Void
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 12) {
                 Image(systemName: "timer").font(.title2).foregroundStyle(GameTheme.primary)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("\(model.name) · 专属题挑战").font(.title3.bold())
+                    Text("\(model.name) · 个人挑战").font(.title3.bold())
                     Text("答对 \(model.right)/\(model.answered) · +\(model.coins) 金币 · +\(model.score) 积分").font(.caption).foregroundStyle(GameTheme.muted)
                 }
                 Spacer()
@@ -239,27 +378,24 @@ struct ChallengePanel: View {
                 }
                 Button { onEnd() } label: { Label(model.phase == .finished ? "关闭 (Esc)" : "结束 (Esc)", systemImage: "stop.circle") }.buttonStyle(GlassIconButtonStyle())
             }
+            if model.phase != .finished { QuizDrawBar(game: game) }
             if let note = model.note { Text(note).font(.callout.bold()).foregroundStyle(.orange) }
             switch model.phase {
             case .picking:
-                Text("学生选难度").font(.headline)
-                HStack(spacing: 12) {
-                    ForEach(1...3, id: \.self) { d in
-                        Button { onPick(d) } label: {
-                            VStack(spacing: 4) {
-                                Text(String(repeating: "★", count: d)).font(.title.bold())
-                                Text(["简单", "中等", "困难"][d - 1] + " (\(d))").font(.headline)
-                                Text("+\(QuizRewards.baseCoins[d - 1]) 金币 · 剩 \(model.left[d - 1]) 题").font(.caption)
-                            }.frame(maxWidth: .infinity).padding(.vertical, 14)
-                            .foregroundStyle(model.left[d - 1] > 0 ? GameTheme.ink : GameTheme.muted)
-                            .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Color.white.opacity(model.left[d - 1] > 0 ? 0.6 : 0.25)))
-                        }.buttonStyle(.plain).disabled(model.left[d - 1] == 0)
+                if settings.mode == .manual {
+                    QuizPicker(game: game, player: model.player, onPick: onAsk)
+                } else {
+                    HStack {
+                        Text("按“\(settings.mode.title)\(settings.mode == .difficulty ? " " + String(repeating: "★", count: settings.difficulty) : "")”出下一题").font(.headline)
+                        Spacer()
+                        Button { onNext() } label: { Label("出下一题 (⏎)", systemImage: "arrow.right.circle.fill") }.buttonStyle(GlassIconButtonStyle(prominent: true))
                     }
                 }
             case .question:
                 if let draft = model.draft {
                     ScrollView { QuizAnswerRows(draft: draft) }
                     HStack {
+                        Button { onSkip() } label: { Label(settings.mode == .manual ? "重新选题 (空格)" : "换一题 (空格)", systemImage: "arrow.triangle.2.circlepath") }.buttonStyle(GlassIconButtonStyle())
                         Spacer()
                         Text("选好答案即揭晓并发奖").font(.caption).foregroundStyle(GameTheme.muted)
                         Button { onSubmit() } label: { Label("提交 (⏎)", systemImage: "checkmark.seal.fill") }.buttonStyle(GlassIconButtonStyle())
@@ -271,18 +407,16 @@ struct ChallengePanel: View {
                     Text("答对 \(model.right)/\(model.answered) 题 · 获得 \(model.coins) 金币、\(model.score) 积分").font(.title3)
                 }
             }
-            Text("键盘：1/2/3 选难度；作答时 D 对 C 错（闪卡）或 A–H 选项、0 不会，选好即揭晓答案并发奖（填了“其他答案”时按回车）；Esc 结束。时间到时正在答的这题不计。").font(.caption).foregroundStyle(GameTheme.muted)
+            Text("键盘：作答时 D 对 C 错（闪卡）或 A–H 选项、0 不会，选好即揭晓并发奖（填了“其他答案”时按回车）；空格换一题；等下一题时回车出题、1/2/3 按该难度出、R 全随机出；Esc 结束。时间到时正在答的这题不计。").font(.caption).foregroundStyle(GameTheme.muted)
         }
         .padding(22).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(GlassBackdrop())
     }
 }
 
-/// On the TV during a challenge: a banner with the time left and the score, and while the student chooses, the
-/// three levels; at the end, the result.
+/// On the TV during a challenge: a banner with the time left and the score; at the end, the result.
 struct ChallengeOverlay: View {
     @ObservedObject var model: ChallengeModel
     let unit: CGFloat
-    var showLevels: Bool
     var body: some View {
         VStack(spacing: 18 * unit) {
             TimelineView(.periodic(from: .now, by: 0.25)) { _ in
@@ -299,26 +433,6 @@ struct ChallengeOverlay: View {
                 .overlay(Capsule().stroke(.white.opacity(0.4), lineWidth: 1.5 * unit))
             }
             .padding(.top, 14 * unit)
-            if model.phase == .picking && showLevels {
-                VStack(spacing: 16 * unit) {
-                    Text("\(model.name)，选一道题的难度").font(.system(size: 34 * unit, weight: .heavy, design: .rounded)).foregroundStyle(GameTheme.ink)
-                    HStack(spacing: 18 * unit) {
-                        ForEach(1...3, id: \.self) { d in
-                            VStack(spacing: 6 * unit) {
-                                Text(String(repeating: "★", count: d)).font(.system(size: 40 * unit, weight: .heavy)).foregroundStyle(Color(red: 0.85, green: 0.62, blue: 0.12))
-                                Text(["简单", "中等", "困难"][d - 1]).font(.system(size: 26 * unit, weight: .bold, design: .rounded))
-                                Text("+\(QuizRewards.baseCoins[d - 1]) 金币").font(.system(size: 18 * unit, weight: .semibold, design: .rounded)).foregroundStyle(GameTheme.muted)
-                            }
-                            .frame(width: 200 * unit, height: 170 * unit)
-                            .foregroundStyle(GameTheme.ink).opacity(model.left[d - 1] > 0 ? 1 : 0.35)
-                            .background(RoundedRectangle(cornerRadius: 22 * unit, style: .continuous).fill(Color.white.opacity(0.85)))
-                        }
-                    }
-                }
-                .padding(30 * unit)
-                .background(RoundedRectangle(cornerRadius: 28 * unit, style: .continuous).fill(LinearGradient(colors: [Color(red: 0.95, green: 0.98, blue: 0.98).opacity(0.94), Color(red: 0.90, green: 0.95, blue: 0.96).opacity(0.9)], startPoint: .top, endPoint: .bottom)))
-                .padding(.top, 60 * unit)
-            }
             if model.phase == .finished {
                 VStack(spacing: 10 * unit) {
                     Text("挑战结束").font(.system(size: 40 * unit, weight: .heavy, design: .rounded))
@@ -358,9 +472,9 @@ struct QuizPlayerChips: View {
     }
 }
 
-// MARK: - Class question (shared bank, the teacher hands out rewards)
+// MARK: - Class question (the teacher hands out rewards)
 
-/// One shared question to the whole class. Pick who answered (1–7, several at once), what they said (A–H; 0 不会),
+/// One question to the whole class. Pick who answered (1–7, several at once), what they said (A–H; 0 不会),
 /// ⏎ sends: right → the reward and a "答对" record, wrong → the participation prize and "答错"; the TV reveals the
 /// answer at the same moment. Esc reveals without sending.
 @MainActor final class ClassQuizModel: ObservableObject {
@@ -387,11 +501,12 @@ struct ClassQuizPanel: View {
                     Text("\(draft.question.type.title) \(MeadowQuizCard.stars(draft.question)) · 老师发奖").font(.caption).foregroundStyle(GameTheme.muted)
                 }
                 Spacer()
-                if model.sent.isEmpty { Button { onOther() } label: { Label("换一题 (空格)", systemImage: "arrow.triangle.2.circlepath") }.buttonStyle(GlassIconButtonStyle()) }
+                if model.sent.isEmpty { Button { onOther() } label: { Label(QuizDrawSettings.shared.mode == .manual ? "重新选题 (空格)" : "换一题 (空格)", systemImage: "arrow.triangle.2.circlepath") }.buttonStyle(GlassIconButtonStyle()) }
                 TimelineView(.periodic(from: .now, by: 1)) { context in
                     Text("\(Int(context.date.timeIntervalSince(start)))s").font(.system(size: 18, weight: .heavy, design: .rounded)).monospacedDigit().foregroundStyle(GameTheme.muted)
                 }
             }
+            if model.sent.isEmpty { QuizDrawBar(game: game) }
             Text("谁回答了（1–7，可多选）").font(.headline)
             QuizPlayerChips(game: game, selected: model.players, marks: marks) { id in
                 if model.players.contains(id) { model.players.remove(id) } else { model.players.insert(id) }
@@ -425,6 +540,37 @@ struct ClassQuizPanel: View {
         var m: [String: String] = [:]
         for s in model.sent { if let id = game.campaign?.engine.state.players.first(where: { $0.shortName == s.name })?.id { m[id] = s.right ? "✓" : "✗" } }
         return m
+    }
+}
+
+/// ⇧Q with 老师点选 (or 重新选题): choose the class question from the list; with a random way, draw one.
+struct ClassQuizPickPanel: View {
+    @ObservedObject var game: MeadowTeacherCoordinator
+    @ObservedObject var settings = QuizDrawSettings.shared
+    var onPick: (Int) -> Void
+    var onDraw: () -> Void
+    var onClose: () -> Void
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 10) {
+                Image(systemName: "person.3.fill").font(.title2).foregroundStyle(GameTheme.primary)
+                Text("全班题 · 选题").font(.title3.bold())
+                Text("课程：\(QuizLibrary.shared.active ?? "未选")").font(.caption).foregroundStyle(GameTheme.muted)
+                Spacer()
+                Button { onClose() } label: { Label("关闭 (Esc)", systemImage: "xmark") }.buttonStyle(GlassIconButtonStyle())
+            }
+            QuizDrawBar(game: game)
+            if settings.mode == .manual {
+                QuizPicker(game: game, onPick: onPick)
+            } else {
+                HStack {
+                    Text("按“\(settings.mode.title)\(settings.mode == .difficulty ? " " + String(repeating: "★", count: settings.difficulty) : "")”抽一题（全班没出过的优先）").font(.headline)
+                    Spacer()
+                    Button { onDraw() } label: { Label("抽一题 (⏎)", systemImage: "shuffle") }.buttonStyle(GlassIconButtonStyle(prominent: true))
+                }
+                Spacer()
+            }
+        }.padding(22).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(GlassBackdrop())
     }
 }
 
@@ -533,52 +679,6 @@ struct PracticePanel: View {
     }
 }
 
-// MARK: - Exclusive portions (whose questions are whose)
-
-/// The bank's pre-cut portions of exclusive questions: one row per portion, tap a student to give it to them (tap
-/// again: nobody). Until set, portion n belongs to student n.
-struct QuizPortionPanel: View {
-    @ObservedObject var game: MeadowTeacherCoordinator
-    var onClose: () -> Void
-    var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                Label("专属题分配", systemImage: "person.2.badge.gearshape").font(.title2.bold())
-                Spacer()
-                Button { onClose() } label: { Label("完成 (Esc)", systemImage: "checkmark") }.buttonStyle(GlassIconButtonStyle(prominent: true))
-            }
-            Text("题库里每一“份”是一组专属题。点同学把这一份给他，再点一次取消（这一份就不出给任何人）。没改过时，第 n 份默认给第 n 位同学。").font(.caption).foregroundStyle(GameTheme.muted)
-            if let c = game.campaign {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 10) {
-                        ForEach(c.quizPortions, id: \.name) { portion in
-                            let owner = c.portionOwner(portion.name)
-                            // Questions of this portion its owner has not answered yet.
-                            let answered = Set(c.quizLog.filter { $0.player == owner }.map(\.question))
-                            let left = c.quizBank.indices.filter { c.quizBank[$0].portion == portion.name && !answered.contains($0) }.count
-                            HStack(alignment: .center, spacing: 10) {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text("第\(portion.name)份").font(.headline)
-                                    Text(owner == nil ? "\(portion.count) 题" : "剩 \(left)/\(portion.count) 题").font(.caption).foregroundStyle(GameTheme.muted)
-                                }.frame(width: 72, alignment: .leading)
-                                QuizPlayerChips(game: game, selected: Set([owner].compactMap { $0 })) { id in
-                                    try? c.assignQuizPortion(portion.name, to: owner == id ? nil : id)
-                                    game.revision += 1
-                                }
-                                if owner == nil { Text("未分配").font(.caption.bold()).foregroundStyle(.orange) }
-                            }
-                            .padding(10).background(GlassFill.field, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                        }
-                    }
-                }
-            }
-        }
-        .padding(22).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(GlassBackdrop())
-    }
-}
-
-// MARK: - Question bank (app level, top bar)
-
 /// The teacher's question bank, kept by the app and split into courses (one per imported file, named after it).
 /// The teacher picks the current course by hand; the open trip deals only from it. Trips (a fresh map every
 /// lesson) only keep the questions they used and the answers, for rewards and the report.
@@ -672,7 +772,6 @@ struct QuizCourseMenu: View {
 struct QuizBankPanel: View {
     @ObservedObject var game: MeadowTeacherCoordinator
     @ObservedObject var library = QuizLibrary.shared
-    var onPortions: () -> Void
     var onClose: () -> Void
     @State private var importing = false
     @State private var note: String?
@@ -681,8 +780,8 @@ struct QuizBankPanel: View {
 
     private func summary(_ list: [QuizQuestion]) -> String {
         let kinds = QuizKind.allCases.compactMap { k -> String? in let n = list.filter { $0.type == k }.count; return n > 0 ? "\(k.title) \(n)" : nil }
-        let portions = Set(list.compactMap(\.portion)).count
-        return kinds.joined(separator: " · ") + (portions > 0 ? " · 专属 \(portions) 份" : "")
+        let levels = (1...3).compactMap { d -> String? in let n = list.filter { ($0.difficulty ?? 1) == d }.count; return n > 0 ? String(repeating: "★", count: d) + " \(n)" : nil }
+        return (kinds + levels).joined(separator: " · ")
     }
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -701,10 +800,7 @@ struct QuizBankPanel: View {
                     ForEach(library.courses, id: \.self) { c in courseRow(c) }
                 }
             }
-            if let c = game.campaign, !c.quizPortions.isEmpty {
-                Button { onPortions() } label: { Label("当前课程的专属题分配 (\(c.quizPortions.count)份)", systemImage: "person.2.badge.gearshape") }.buttonStyle(GlassIconButtonStyle())
-            }
-            Text("格式：每题空一行；`份：1` 为第 1 份专属题，不写“份”的是公用题。详见 docs/question-bank-format.md。").font(.caption).foregroundStyle(GameTheme.muted)
+            Text("格式：每题空一行，写明类型与难度；全部题目是一套题库，个人挑战与全班题都从这里出。详见 docs/question-bank-format.md。").font(.caption).foregroundStyle(GameTheme.muted)
         }
         .padding(22).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(GlassBackdrop())
         .fileImporter(isPresented: $importing, allowedContentTypes: [.plainText, .json, .text], allowsMultipleSelection: true) { result in

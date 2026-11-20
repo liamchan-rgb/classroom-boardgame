@@ -40,7 +40,7 @@ public struct QuizReport {
         public var students: [String]
         public var commonWrong: String?
     }
-    /// One flash card in a student's deck (shared cards and all of their own), whether asked or not.
+    /// One flash card of the course, whether the student was asked it or not.
     public struct VocabItem: Equatable {
         public enum Status: Equatable { case right, wrong, corrected, untested }
         public var word: String
@@ -50,6 +50,7 @@ public struct QuizReport {
     }
     /// One flash card of the course across the class: how often it was asked and answered right, who missed it.
     public struct CardStat: Equatable {
+        public var difficulty: Int = 1
         public var word: String
         public var meaning: String?
         public var asked: Int
@@ -84,7 +85,7 @@ public struct QuizReport {
         /// Words missed earlier and answered right since (已改正).
         public var correctedWords: [WordMiss] = []
         public var wordsAsked: Int = 0
-        /// Every flash card of the student's deck (shared + their portions), in bank order, with its status.
+        /// Every flash card of the course, in bank order, with its status for the student.
         public var vocabulary: [VocabItem] = []
         /// Questions still wrong: one line per question (its latest wrong answer), when the latest answer to it
         /// was not all right.
@@ -232,7 +233,7 @@ public struct QuizReport {
                 let n = names[t.attempt.player] ?? t.attempt.playerName
                 if !missed.contains(n) { missed.append(n) }
             }
-            return CardStat(word: w.word, meaning: w.meaning, asked: tries.count, right: right, missedBy: missed)
+            return CardStat(difficulty: bank[qi].difficulty ?? 1, word: w.word, meaning: w.meaning, asked: tries.count, right: right, missedBy: missed)
         }
     }
 
@@ -268,6 +269,7 @@ public extension MeadowCampaignSession {
         let players = engine.state.players
         return QuizReport(log: quizLog, bank: quizBank, order: players.map(\.id), names: Dictionary(uniqueKeysWithValues: players.map { ($0.id, $0.shortName) }),
                           decks: Dictionary(uniqueKeysWithValues: players.filter { !$0.host }.map { ($0.id, practiceDeck(for: $0.id)) }),
-                          cards: courseIndices.filter { quizBank[$0].type == .flashcard })
+                          // By difficulty (★ first), then in bank order.
+                          cards: classFlashDeck.sorted { (quizBank[$0].difficulty ?? 1, $0) < (quizBank[$1].difficulty ?? 1, $1) })
     }
 }

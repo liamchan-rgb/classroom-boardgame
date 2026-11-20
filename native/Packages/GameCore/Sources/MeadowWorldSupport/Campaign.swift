@@ -54,7 +54,7 @@ public struct MeadowCampaignSave:Codable,Equatable {
     public var completion:MeadowCampaignCompletion?=nil
     /// Teacher-imported multiple-choice questions; when present, roadside-find events on the map become quiz events.
     public var quizBank:[QuizQuestion]?=nil
-    /// Teacher's assignment of exclusive-question portions: portion name → player id ("" = nobody).
+    /// Old saves only (who had which portion of exclusive questions); read and kept, no longer used.
     public var quizPortions:[String:String]?=nil
     public var formatVersion=1
     public let layout:GeneratedMeadowMap
@@ -219,15 +219,6 @@ public final class MeadowCampaignSession {
     public var isMoving:Bool {travel.map{!$0.paused} ?? false}
     /// Adds questions to the trip's bank mid-trip (appended, so recorded answers keep pointing at their questions).
     /// Roadside finds become quiz spots from then on.
-    /// Gives an exclusive-question portion to a student (nil = nobody). Not a game operation: no history entry.
-    public func assignQuizPortion(_ portion:String,to player:String?)throws {
-        var next=snapshot
-        var map=next.quizPortions ?? [:]
-        map[portion]=player ?? ""
-        next.quizPortions=map
-        try next.validate()
-        try writer.write(next)
-    }
     public func appendQuizBank(_ list:[QuizQuestion])throws {
         guard !list.isEmpty else{return}
         var next=snapshot

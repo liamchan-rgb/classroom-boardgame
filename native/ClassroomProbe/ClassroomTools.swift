@@ -91,7 +91,7 @@ struct ClassroomTVOverlays:View {
                     }.frame(maxWidth:.infinity,maxHeight:.infinity)
                 }
                 if game.quiz != nil {QuizOverlayHost(game:game)}
-                if let challenge=game.challenge {ChallengeOverlay(model:challenge,unit:unit,showLevels:game.quiz == nil)}
+                if let challenge=game.challenge {ChallengeOverlay(model:challenge,unit:unit)}
                 if timer.visible {ClassTimerBadge(timer:timer,unit:unit).padding(.top,16*unit)}
                 LaserLayer(laser:game.laser)
             }.frame(width:g.size.width,height:g.size.height,alignment:.top)
@@ -281,7 +281,7 @@ enum ClassroomShortcutAction:String,CaseIterable,Identifiable {
         case .toggleTeamScores:return "记分板：个人 / 队伍切换"
         case .openQuizReport:return "打开答题报告"
         case .openQuiz:return "个人答题（回车即开题）"
-        case .openClassQuiz:return "全班题（公用题，手动发奖）"
+        case .openClassQuiz:return "全班题（老师发奖）"
         case .openPractice:return "闪卡练习"
         case .openClassPractice:return "全班闪卡"
         case .toggleLaser:return "激光笔"

@@ -272,6 +272,8 @@ extension MeadowTeacherCoordinator {
     func openWordCard(_ pick: NotesWordPick, rect: CGRect, in view: UIView) {
         guard let host = presentationHost else { return }
         NotesDictionary.shared.prewarm()
+        // Already a flash card of the current course: call it up for the class straight away.
+        if let index = existingNoteCard(pick) { openClassQuiz(index: index); return }
         let model = WordCardModel(pick: pick, dictionary: NotesDictionary.shared.ready())
         let dismiss = { [weak host] in host?.presentedViewController?.dismiss(animated: true) }
         let finish = { [weak self] (ask: Bool) in
@@ -287,6 +289,20 @@ extension MeadowTeacherCoordinator {
         screen.modalPresentationStyle = .formSheet
         screen.preferredContentSize = CGSize(width: 460, height: 500)
         host.present(screen, animated: true)
+    }
+    /// The current course's flash card for the double-clicked word, if the trip has it: the word as written, its
+    /// base form (looked → look), then a phrase around it (look after), matched on the card's front without case.
+    func existingNoteCard(_ pick: NotesWordPick) -> Int? {
+        guard let c = campaign, !quizActive else { return nil }
+        let d = NotesDictionary.shared.ready()
+        var fronts = [pick.word]
+        if let base = d?.base(of: pick.word) { fronts.append(base) }
+        fronts += d?.phrases(in: pick.tokens, at: pick.index).map(\.phrase) ?? []
+        let cards = c.classFlashDeck
+        for f in fronts.map({ $0.lowercased() }) {
+            if let i = cards.first(where: { c.quizBank[$0].prompt.lowercased() == f }) { return i }
+        }
+        return nil
     }
     /// Puts the card in the current course (the same front replaces its old card), and with `ask` shows it to the
     /// class right away as a shared question (pick who answered, right / wrong, rewards).

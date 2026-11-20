@@ -262,25 +262,6 @@ public enum QuizBankParser {
 
 public extension MeadowCampaignSession {
     var quizBank:[QuizQuestion] {snapshot.quizBank ?? []}
-    /// The portions in the bank, in first-seen order, with how many questions each has.
-    var quizPortions:[(name:String,count:Int)] {
-        var order:[String]=[],counts:[String:Int]=[:]
-        for q in quizBank where inCourse(q) { if let p=q.portion { if counts[p]==nil {order.append(p)}; counts[p,default:0]+=1 } }
-        return order.map{($0,counts[$0]!)}
-    }
-    /// Whose portion it is: the teacher's choice, else portion "n" goes to student n (p3 for "3"). With fewer
-    /// students than portions, the extra portions go round the class (3 students: portion 4 → the 1st, 5 → the 2nd).
-    /// nil = nobody.
-    func portionOwner(_ portion:String)->String? {
-        if let set=snapshot.quizPortions?[portion] {return set.isEmpty ? nil:set}
-        let id="p"+portion
-        if engine.state.units[id]?.kind == .player {return id}
-        let students=engine.state.players.filter{!$0.host}
-        guard let n=Int(portion),n>0,!students.isEmpty else{return nil}
-        // Only spread portions past the last student number; a gap in the middle (student 3 left) stays empty.
-        guard n>Int(students.last!.id.dropFirst()) ?? 0 else{return nil}
-        return students[(n-1)%students.count].id
-    }
     var quizLog:[QuizAttempt] {engine.state.quizLog ?? []}
     /// Whether a question belongs to the current course.
     func inCourse(_ q:QuizQuestion)->Bool {quizCourseQuestions.map{$0.contains(q)} ?? true}
@@ -311,11 +292,14 @@ public extension MeadowCampaignSession {
         return quizBank[i]
     }
     /// Whose turn: `actor` may answer here if the event is open and they have not answered at this node yet;
-    /// they get their own next question (专属题 first, then an unused shared one).
+    /// they get the next question nobody has had (bank order from the map seed), else one they have not had, else any.
     func quizTurn(actor:String)->(index:Int,question:QuizQuestion)? {
         guard let unit=engine.state.units[actor],isQuizNode(unit.nodeID),
               engine.state.map.nodes.first(where:{$0.id==unit.nodeID})?.siteResolved != true,
-              !quizLog.contains(where:{$0.player==actor && $0.node==unit.nodeID}),let i=personalQuizQuestion(for:actor) else{return nil}
+              !quizLog.contains(where:{$0.player==actor && $0.node==unit.nodeID}) else{return nil}
+        let answered=Set(quizLog.filter{$0.player==actor && $0.practice != true}.map(\.question)),order=dealingOrder
+        let used=usedQuizQuestions
+        guard let i=order.first(where:{!used.contains($0)}) ?? order.first(where:{!answered.contains($0)}) ?? order.first else{return nil}
         return(i,quizBank[i])
     }
     /// Bank indices in dealing order (from a start set by the map seed).
@@ -325,86 +309,34 @@ public extension MeadowCampaignSession {
         let base=Int(engine.state.map.seed % UInt64(n))
         return (0..<n).map{(base+$0)%n}.filter{inCourse(quizBank[$0])}
     }
-    /// Whether `q` is one of this student's own questions (by name, short name or number: p3 → 3).
-    func isExclusive(_ q:QuizQuestion,for player:String)->Bool {
-        if let p=q.portion {return portionOwner(p)==player}
-        guard let u=engine.state.units[player] else{return false}
-        return q.isFor(names:[u.name,u.shortName],number:Int(player.dropFirst()))
-    }
-    /// Questions already asked (personally or to the class).
+    /// Questions already asked (to a student or to the class; practice does not count).
     var usedQuizQuestions:Set<Int> {Set(quizLog.filter{$0.practice != true}.map(\.question))}
-    /// A student's next question: their own (专属) ones they have not answered, in bank order, then shared ones nobody
-    /// has had yet. `kind` narrows it; `skip` steps past that many (换一题). nil when nothing is left.
-    func personalQuizQuestion(for player:String,kind:QuizKind?=nil,skip:Int=0)->Int? {
-        let bank=quizBank,answered=Set(quizLog.filter{$0.player==player && $0.practice != true}.map(\.question)),used=usedQuizQuestions
-        let own=bank.indices.filter{inCourse(bank[$0]) && isExclusive(bank[$0],for:player) && !answered.contains($0)}
-        let shared=dealingOrder.filter{bank[$0].isShared && !used.contains($0)}
-        let fits=(own+shared).filter{kind==nil || bank[$0].type==kind}
-        return fits.isEmpty ? nil:fits[skip%fits.count]
-    }
-    /// The next shared question for the whole class (one nobody has had yet).
-    func sharedQuizQuestion(kind:QuizKind?=nil,skip:Int=0)->Int? {
-        let bank=quizBank,used=usedQuizQuestions
-        let fits=dealingOrder.filter{bank[$0].isShared && !used.contains($0) && (kind==nil || bank[$0].type==kind)}
-        return fits.isEmpty ? nil:fits[skip%fits.count]
-    }
-    /// Timed challenge: the student's next own question at this difficulty (unmarked difficulty counts as ★) that
-    /// they have not answered; nil when that level is used up.
-    func challengeQuestion(for player:String,difficulty:Int)->Int? {
-        let bank=quizBank,answered=Set(quizLog.filter{$0.player==player && $0.practice != true}.map(\.question))
-        return bank.indices.first{inCourse(bank[$0]) && !bank[$0].isShared && isExclusive(bank[$0],for:player) && (bank[$0].difficulty ?? 1)==difficulty && !answered.contains($0)}
-    }
-    /// How many own questions are left per difficulty (index 0 = ★).
-    func challengeLeft(for player:String)->[Int] {
-        let bank=quizBank,answered=Set(quizLog.filter{$0.player==player && $0.practice != true}.map(\.question))
-        var left=[0,0,0]
-        for i in bank.indices where inCourse(bank[i]) && !bank[i].isShared && isExclusive(bank[i],for:player) && !answered.contains(i) {left[min(2,max(0,(bank[i].difficulty ?? 1)-1))]+=1}
-        return left
-    }
-    /// The question most recently asked (再出一次), optionally only shared ones.
-    func lastAskedQuestion(sharedOnly:Bool=false)->Int? {
-        quizLog.last{$0.practice != true && (!sharedOnly || quizBank.indices.contains($0.question) && quizBank[$0.question].isShared)}?.question
-    }
-    /// Flash-card practice for a student, endless: cards never practised or answered first, then ones they got
-    /// wrong (oldest first), then the rest; never the card just shown. Their own cards and shared ones.
-    func practiceCard(for player:String,after last:Int?=nil)->Int? {
+    /// Whether the question was asked before in this trip (it comes up again with its options shuffled).
+    func quizAskedBefore(_ index:Int)->Bool {quizLog.contains{$0.question==index && $0.practice != true}}
+    /// The course's questions a draw may take: all of them, or one difficulty (unmarked counts as ★), optionally one kind.
+    func quizPool(_ draw:QuizDraw,kind:QuizKind?=nil)->[Int] {
         let bank=quizBank
-        let cards=bank.indices.filter{inCourse(bank[$0]) && bank[$0].type == .flashcard && (bank[$0].isShared || isExclusive(bank[$0],for:player))}
-        guard !cards.isEmpty else{return nil}
-        let mine=quizLog.filter{$0.player==player}
-        var lastSeen:[Int:Int]=[:],lastRight:[Int:Bool]=[:]
-        for (k,a) in mine.enumerated() {lastSeen[a.question]=k;lastRight[a.question]=a.correct.allSatisfy{$0}}
-        let ordered=cards.sorted{a,b in
-            func rank(_ i:Int)->Int {lastSeen[i]==nil ? 0:(lastRight[i]==false ? 1:2)}
-            return rank(a)==rank(b) ? (lastSeen[a] ?? -1,a)<(lastSeen[b] ?? -1,b):rank(a)<rank(b)
+        return courseIndices.filter{i in
+            (kind==nil || bank[i].type==kind) && {if case .difficulty(let d)=draw {return (bank[i].difficulty ?? 1)==d};return true}()
         }
-        return ordered.first{$0 != last} ?? ordered.first
     }
-    /// A student's flash-card deck in bank order: their own cards and the shared ones of the current course.
-    func practiceDeck(for player:String)->[Int] {
-        let bank=quizBank
-        return bank.indices.filter{inCourse(bank[$0]) && bank[$0].type == .flashcard && (bank[$0].isShared || isExclusive(bank[$0],for:player))}
+    /// The next question, at random from the whole course or from one difficulty. Questions the student (`player`;
+    /// nil = the class: anyone) has not had come first; once all were had, any of them may come again. `excluding`:
+    /// not these (the question on screen, for 换一题) unless nothing else is left.
+    func drawQuestion<G:RandomNumberGenerator>(_ draw:QuizDraw,for player:String?,kind:QuizKind?=nil,excluding:Set<Int>=[],using random:inout G)->Int? {
+        let pool=quizPool(draw,kind:kind)
+        guard !pool.isEmpty else{return nil}
+        let had=player.map{p in Set(quizLog.filter{$0.player==p && $0.practice != true}.map(\.question))} ?? usedQuizQuestions
+        let fresh=pool.filter{!had.contains($0) && !excluding.contains($0)}
+        let any=pool.filter{!excluding.contains($0)}
+        return (fresh.isEmpty ? (any.isEmpty ? pool:any):fresh).randomElement(using:&random)
     }
-    /// The whole-class deck in bank order: the course's shared flash cards (all of its flash cards when it has none).
-    var classFlashDeck:[Int] {
-        let bank=quizBank
-        let all=bank.indices.filter{inCourse(bank[$0]) && bank[$0].type == .flashcard}
-        let shared=all.filter{bank[$0].isShared}
-        return shared.isEmpty ? all:shared
+    func drawQuestion(_ draw:QuizDraw,for player:String?,kind:QuizKind?=nil,excluding:Set<Int>=[])->Int? {
+        var g=SystemRandomNumberGenerator();return drawQuestion(draw,for:player,kind:kind,excluding:excluding,using:&g)
     }
-    /// Flash cards for the whole class, endless: the shared flash cards of the course (all of its flash cards when
-    /// it has no shared ones), least recently shown to the class first; never the card just shown.
-    func classFlashCard(after last:Int?=nil)->Int? {
-        let bank=quizBank
-        let all=bank.indices.filter{inCourse(bank[$0]) && bank[$0].type == .flashcard}
-        let shared=all.filter{bank[$0].isShared}
-        let cards=shared.isEmpty ? all:shared
-        guard !cards.isEmpty else{return nil}
-        var lastSeen:[Int:Int]=[:]
-        for (k,a) in quizLog.enumerated() where a.shared == true && a.practice == true {lastSeen[a.question]=k}
-        let ordered=cards.sorted{(lastSeen[$0] ?? -1,$0)<(lastSeen[$1] ?? -1,$1)}
-        return ordered.first{$0 != last} ?? ordered.first
-    }
+    /// Every flash card of the current course, in bank order (the same deck for every student and the class).
+    func practiceDeck(for player:String)->[Int] {classFlashDeck}
+    var classFlashDeck:[Int] {let bank=quizBank;return courseIndices.filter{bank[$0].type == .flashcard}}
     /// Teammates at this quiz node who still have to answer.
     func quizWaiting(node:Int,team:String?)->[GameUnit] {
         let log=quizLog

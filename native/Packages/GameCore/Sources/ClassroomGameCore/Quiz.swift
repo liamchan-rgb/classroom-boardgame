@@ -36,10 +36,9 @@ public struct QuizQuestion: Codable, Equatable {
     public var tags: [String]? = nil
     public var passage: String? = nil
     public var items: [QuizItem]? = nil
-    /// Who it is for: student names or numbers (专属题). nil, or "全班", = the shared bank (公用题).
+    /// Old banks only (专属题 for certain students, pre-cut portions): read and kept, no longer used — every question
+    /// of a course is for everyone.
     public var audience: [String]? = nil
-    /// Which pre-cut portion of exclusive questions it belongs to ("1", "2", "A"…); the teacher decides in the app
-    /// whose portion is whose.
     public var portion: String? = nil
     /// The course (lesson) it belongs to: the name of the file it was imported from.
     public var course: String? = nil
@@ -49,14 +48,6 @@ public struct QuizQuestion: Codable, Equatable {
         self.kind = kind; self.difficulty = difficulty; self.seconds = seconds; self.tags = tags; self.passage = passage; self.items = items
     }
     public static let defaultCoins = 10
-    /// In the shared bank (rewards are handed out by the teacher).
-    public var isShared: Bool { portion == nil && isSharedAudience }
-    private var isSharedAudience: Bool { audience.map { $0.isEmpty || $0.contains { ["全班", "全体", "所有人", "all", "公用"].contains($0.lowercased()) } } ?? true }
-    /// Whether this exclusive question is for a student with that name (or short name) and number (p3 → 3).
-    public func isFor(names: [String], number: Int?) -> Bool {
-        guard portion == nil, !isShared, let audience else { return false }
-        return audience.contains { a in names.contains(a) || (number.map { String($0) == a } ?? false) }
-    }
     public var type: QuizKind { kind ?? .choice }
     /// What gets graded, in order.
     public var parts: [QuizItem] {
@@ -83,6 +74,55 @@ public struct QuizQuestion: Codable, Equatable {
             throw GameError("题目格式无效：「\(prompt.prefix(20))」")
         }
     }
+}
+
+/// How the next question is drawn: at random from the whole course, or at random from one difficulty (1…3).
+/// (The teacher's third way, picking it by hand, needs no draw.)
+public enum QuizDraw: Equatable, Hashable {
+    case random
+    case difficulty(Int)
+}
+
+/// A question shown with its options in another order (it came up again): `order[part][shown] = original option`.
+public struct QuizShuffle: Equatable {
+    public var question: QuizQuestion
+    public var order: [[Int]]
+    /// Picks in the bank's order shown on the shuffled card (for its reveal).
+    public func shown(_ picks: [Int?]) -> [Int?] {
+        picks.enumerated().map { p, pick in pick.flatMap { o in order.indices.contains(p) ? order[p].firstIndex(of: o) ?? o : o } }
+    }
+    /// What the student said, back in the bank's option order (for recording and grading).
+    public func original(_ picks: [Int?]) -> [Int?] {
+        picks.enumerated().map { p, pick in pick.flatMap { order.indices.contains(p) && order[p].indices.contains($0) ? order[p][$0] : $0 } }
+    }
+}
+
+public extension QuizQuestion {
+    /// Choice and fill-in questions with their options shuffled (each part on its own, never left as it was when it
+    /// has more than one option); other kinds unchanged.
+    func shuffledOptions<G: RandomNumberGenerator>(using g: inout G) -> QuizShuffle {
+        func shuffle(_ options: [String], _ answer: Int) -> (options: [String], answer: Int, order: [Int]) {
+            var order = Array(options.indices)
+            if order.count > 1 { for _ in 0..<8 { order.shuffle(using: &g); if order != Array(options.indices) { break } } }
+            return (order.map { options[$0] }, order.firstIndex(of: answer) ?? answer, order)
+        }
+        var q = self
+        switch type {
+        case .choice:
+            let s = shuffle(options, answer); q.options = s.options; q.answer = s.answer
+            return QuizShuffle(question: q, order: [s.order])
+        case .fill:
+            var orders: [[Int]] = []
+            q.items = (items ?? []).map { item in
+                let s = shuffle(item.options, item.answer); orders.append(s.order)
+                return QuizItem(prompt: item.prompt, options: s.options, answer: s.answer)
+            }
+            return QuizShuffle(question: q, order: orders)
+        default:
+            return QuizShuffle(question: q, order: parts.map { Array($0.options.indices) })
+        }
+    }
+    func shuffledOptions() -> QuizShuffle { var g = SystemRandomNumberGenerator(); return shuffledOptions(using: &g) }
 }
 
 /// One student's answer to one question, kept in the save for the answer report.

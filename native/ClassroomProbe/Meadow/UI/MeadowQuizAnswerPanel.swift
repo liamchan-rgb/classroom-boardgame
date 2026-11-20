@@ -199,7 +199,7 @@ struct QuizRewardFields: View {
             Text("参与奖").font(.callout.bold())
             ClassroomTextField(placeholder: "0", text: $reward.participation, limit: 4, keyboard: .numberPad).frame(width: 60, height: 32)
                 .padding(.horizontal, 8).background(GlassFill.field, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-            Text("公用题由老师发奖").font(.caption).foregroundStyle(GameTheme.muted)
+            Text("全班题由老师发奖").font(.caption).foregroundStyle(GameTheme.muted)
         }
     }
 }
@@ -207,8 +207,7 @@ struct QuizRewardFields: View {
 // MARK: - Personal answer panel
 
 /// Teacher side of one student's question: tap (or type A–H) what the student said, ⏎ submits and reveals.
-/// Shared-bank questions pay the coins set here (answer right) or the participation prize; the student's own
-/// questions pay by difficulty with a drop.
+/// It pays by difficulty, with a drop.
 struct MeadowQuizAnswerPanel: View {
     @ObservedObject var draft: QuizAnswerDraft
     @ObservedObject var reward: QuizManualReward
@@ -224,7 +223,7 @@ struct MeadowQuizAnswerPanel: View {
                 Image(systemName: "person.crop.circle.fill").font(.title2).foregroundStyle(GameTheme.primary)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("\(player) 作答").font(.title3.bold())
-                    Text("\(question.isShared ? "公用题" : "专属题") · \(question.type.title) \(MeadowQuizCard.stars(question)) · 限时 \(question.timeLimit) 秒" + (question.isShared ? "" : " · 满分 \(question.reward) 金币"))
+                    Text("\(question.type.title) \(MeadowQuizCard.stars(question)) · 限时 \(question.timeLimit) 秒 · 满分 \(question.reward) 金币")
                         .font(.caption).foregroundStyle(GameTheme.muted)
                 }
                 Spacer()
@@ -236,7 +235,6 @@ struct MeadowQuizAnswerPanel: View {
                 }
             }
             ScrollView { QuizAnswerRows(draft: draft) }
-            if question.isShared { QuizRewardFields(reward: reward) }
             HStack {
                 Button { onLater() } label: { Label("稍后 (Esc)", systemImage: "clock.arrow.circlepath") }.buttonStyle(GlassIconButtonStyle())
                 Spacer()

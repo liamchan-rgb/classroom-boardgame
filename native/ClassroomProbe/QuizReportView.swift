@@ -79,7 +79,7 @@ enum ChipFit {
     }
 
     // The class flash-card list: number, front, back; rows as tall as their text.
-    static let cardFront: CGFloat = 300, cardBack: CGFloat = 170
+    static let cardFront: CGFloat = 264, cardBack: CGFloat = 170
     static func cardRow(_ c: QuizReport.CardStat) -> CGFloat {
         max(height(c.word, 9.5, .bold, width: cardFront), height(c.meaning ?? "", 9, .medium, width: cardBack)) + 7
     }
@@ -524,10 +524,11 @@ struct QuizReportPageView: View {
     // MARK: Class flash-card list
 
     @ViewBuilder private func classCards(range: Range<Int>, first: Bool) -> some View {
-        banner("闪卡总表" + (first ? "" : "（续）"), "本课闪卡 \(report.cards.count) 张（公用 + 全部专属）", icon: "rectangle.stack.fill")
+        banner("闪卡总表" + (first ? "" : "（续）"), "本课闪卡 \(report.cards.count) 张 · 按难度排列", icon: "rectangle.stack.fill")
         card {
             HStack(spacing: 8) {
                 Text("#").frame(width: 22, alignment: .trailing)
+                Text("难度").frame(width: 28, alignment: .leading)
                 Text("正面").frame(width: ChipFit.cardFront, alignment: .leading)
                 Text("背面").frame(maxWidth: .infinity, alignment: .leading)
             }.font(.system(size: 8.5, weight: .bold, design: .rounded)).foregroundStyle(Ink.muted)
@@ -536,6 +537,7 @@ struct QuizReportPageView: View {
                     let c = report.cards[k]
                     HStack(alignment: .firstTextBaseline, spacing: 8) {
                         Text("\(k + 1)").font(.system(size: 8, weight: .heavy, design: .rounded)).foregroundStyle(Ink.muted).monospacedDigit().frame(width: 22, alignment: .trailing)
+                        Text(String(repeating: "★", count: max(1, min(3, c.difficulty)))).font(.system(size: 7.5, weight: .heavy)).foregroundStyle(Ink.mid).frame(width: 28, alignment: .leading)
                         Text(c.word).font(.system(size: 9.5, weight: .bold, design: .rounded)).foregroundStyle(Ink.ink)
                             .frame(width: ChipFit.cardFront, alignment: .leading).fixedSize(horizontal: false, vertical: true)
                         Text(c.meaning ?? "").font(.system(size: 9, weight: .medium, design: .rounded)).foregroundStyle(Ink.ink.opacity(0.8))
@@ -551,7 +553,7 @@ struct QuizReportPageView: View {
         if a.skipped == true { return "未作答" }
         if a.practice == true { return a.shared == true ? "全班闪卡" : "闪卡练习" }
         if a.shared == true { return "全班题" }
-        return a.limit >= 600 ? "专属挑战" : "个人题"
+        return a.limit >= 600 ? "个人挑战" : "个人题"
     }
     private func timeText(_ at: Double) -> String {
         let f = DateFormatter(); f.dateFormat = "HH:mm"; return f.string(from: Date(timeIntervalSince1970: at))

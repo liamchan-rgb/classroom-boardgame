@@ -37,7 +37,7 @@ final class MeadowQuizCard: UIView {
         MeadowPreviewPalette.stylePanel(card); card.backgroundColor = MeadowPreviewPalette.panel; card.layer.borderColor = UIColor.white.cgColor; card.layer.borderWidth = 1.5
         addSubview(card)
         let stars = Self.stars(q)
-        let prize = mode == .practice ? "练习" : q.isShared ? "老师发奖" : "满分 +\(q.reward)"
+        let prize = mode == .practice ? "练习" : mode == .classwide ? "老师发奖" : "满分 +\(q.reward)"
         header.attributedText = MeadowGlassText.iconLine(mode == .classwide ? "person.3.fill" : mode == .practice ? "rectangle.on.rectangle.angled" : "person.crop.circle.fill",
                                                          "\(player) 作答 · \(q.type.title)\(stars.isEmpty ? "" : " " + stars) · \(prize) · \(place)", size: 18, tint: MeadowPreviewPalette.gold)
         header.adjustsFontSizeToFitWidth = true; header.minimumScaleFactor = 0.6
