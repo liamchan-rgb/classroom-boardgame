@@ -226,6 +226,22 @@ public final class MeadowCampaignSession {
         try next.validate()
         try writer.write(next)
     }
+    /// The teacher corrected a question (a flash card's meaning, its difficulty…): it is changed in place, so every
+    /// answer already recorded for it stays with it (and the report shows the corrected text). Same kind and the
+    /// same number of graded parts only. Copies of it in the trip's bank and the current course change too.
+    public func replaceQuizQuestion(at index:Int,with question:QuizQuestion)throws {
+        var next=snapshot
+        guard var bank=next.quizBank,bank.indices.contains(index) else{throw GameError("没有这道题。")}
+        let old=bank[index]
+        guard question.type==old.type,question.parts.count==old.parts.count,
+              zip(question.parts,old.parts).allSatisfy({$0.options.count==$1.options.count && $0.answer==$1.answer}) else{throw GameError("只能修改题目内容，不能改题型或选项数。")}
+        try question.validate()
+        for k in bank.indices where bank[k]==old {bank[k]=question}
+        next.quizBank=bank
+        try next.validate()
+        try writer.write(next)
+        quizCourseQuestions=quizCourseQuestions?.map{$0==old ? question:$0}
+    }
     /// Paused road cursors of the teams that are not selected right now.
     public var parkedTravels:[String:MeadowCampaignTravel] {writer.snapshot.parkedTravels ?? [:]}
     /// The road cursor (active or parked) that currently holds this member.

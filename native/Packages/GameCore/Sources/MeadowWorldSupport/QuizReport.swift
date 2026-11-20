@@ -85,7 +85,7 @@ public struct QuizReport {
         /// Words missed earlier and answered right since (已改正).
         public var correctedWords: [WordMiss] = []
         public var wordsAsked: Int = 0
-        /// Every flash card of the course, in bank order, with its status for the student.
+        /// The course's ★ and ★★ flash cards (easiest first), with their status for the student.
         public var vocabulary: [VocabItem] = []
         /// Questions still wrong: one line per question (its latest wrong answer), when the latest answer to it
         /// was not all right.
@@ -268,7 +268,10 @@ public extension MeadowCampaignSession {
     var quizReport: QuizReport {
         let players = engine.state.players
         return QuizReport(log: quizLog, bank: quizBank, order: players.map(\.id), names: Dictionary(uniqueKeysWithValues: players.map { ($0.id, $0.shortName) }),
-                          decks: Dictionary(uniqueKeysWithValues: players.filter { !$0.host }.map { ($0.id, practiceDeck(for: $0.id)) }),
+                          // Each student's list: the ★ and ★★ cards (★★★ ones are left out), easiest first.
+                          decks: Dictionary(uniqueKeysWithValues: players.filter { !$0.host }.map { p in
+                              (p.id, practiceDeck(for: p.id).filter { (quizBank[$0].difficulty ?? 1) < 3 }.sorted { (quizBank[$0].difficulty ?? 1, $0) < (quizBank[$1].difficulty ?? 1, $1) })
+                          }),
                           // By difficulty (★ first), then in bank order.
                           cards: classFlashDeck.sorted { (quizBank[$0].difficulty ?? 1, $0) < (quizBank[$1].difficulty ?? 1, $1) })
     }

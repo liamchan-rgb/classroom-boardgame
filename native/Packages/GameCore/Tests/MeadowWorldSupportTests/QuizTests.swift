@@ -358,6 +358,8 @@ final class QuizTests:XCTestCase {
         XCTAssertEqual(s.classFlashDeck,[0,1,2]);XCTAssertEqual(s.practiceDeck(for:"p1"),[0,1,2]);XCTAssertEqual(s.practiceDeck(for:"p2"),[0,1,2])
         // The class list in the report: by difficulty.
         XCTAssertEqual(s.quizReport.cards.map(\.word),["elephant","tiger","rhinoceros"]);XCTAssertEqual(s.quizReport.cards.map(\.difficulty),[1,2,3])
+        // Each student's own list leaves the ★★★ cards out.
+        XCTAssertEqual(s.quizReport.students.first{$0.id=="p1"}?.vocabulary.map(\.word),["elephant","tiger"])
     }
     func testRepeatedQuestionsShuffleOptionsAndRecordTheRealAnswer()throws {
         let text="""
@@ -430,6 +432,26 @@ final class QuizTests:XCTestCase {
         // Shared to the class: the teacher's coins, points for right, nothing from the drop table.
         let shared=try s.recordQuiz(actor:"p1",question:1,picks:[0],seconds:999,free:true,manualCoins:25,shared:true)
         XCTAssertEqual(shared.coins,25);XCTAssertNil(shared.drop)
+    }
+    func testCorrectedFlashCardKeepsItsAnswers()throws {
+        var card=QuizBankParser.flashcard(front:"nose",back:"突出部分",distractors:[]);card.difficulty=1;card.course="第一章"
+        let s=try quizSession([])
+        try s.useQuizCourse("第一章",questions:[card])
+        try s.recordQuiz(actor:"p1",question:0,picks:[nil],seconds:3,free:true,shared:true,practice:true)
+        try s.recordQuiz(actor:"p1",question:0,picks:[0],seconds:3,free:true,shared:true,practice:true)
+        // The teacher fixes the meaning and the difficulty: same place in the bank, the answers stay.
+        var fixed=card;fixed.items=[QuizItem(options:["鼻子"],answer:0)];fixed.difficulty=2
+        try s.replaceQuizQuestion(at:0,with:fixed)
+        XCTAssertEqual(s.quizBank,[fixed]);XCTAssertEqual(s.quizPool(.random),[0]);XCTAssertEqual(s.quizLog.count,2)
+        let r=s.quizReport
+        XCTAssertEqual(r.cards.first?.meaning,"鼻子");XCTAssertEqual(r.cards.first?.asked,2);XCTAssertEqual(r.cards.first?.difficulty,2)
+        XCTAssertEqual(r.students.first{$0.id=="p1"}?.vocabulary.first?.status,.corrected)
+        // Reopening the trip and switching to the course with the fixed card adds nothing.
+        let restored=try MeadowCampaignSession(save:.decoded(s.snapshot.encoded()))
+        XCTAssertEqual(restored.quizBank,[fixed])
+        try restored.useQuizCourse("第一章",questions:[fixed]);XCTAssertEqual(restored.quizBank.count,1)
+        // Not another kind of question.
+        XCTAssertThrowsError(try s.replaceQuizQuestion(at:0,with:QuizQuestion(prompt:"nose?",options:["a","b"],answer:0)))
     }
     func testCoursesKeepQuestionsApartAndAnswersStay()throws {
         func course(_ name:String,_ words:[(String,String)])->[QuizQuestion] {

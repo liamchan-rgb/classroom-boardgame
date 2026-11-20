@@ -583,6 +583,94 @@ struct ClassQuizPickPanel: View {
 
 // MARK: - Flash-card practice (fixed entry, endless)
 
+/// A flash card being corrected: both sides, its difficulty, and the dictionary's meanings of its English side
+/// (tap one to use it).
+@MainActor final class FlashCardDraft: ObservableObject {
+    let index: Int
+    @Published var front: String
+    @Published var back: String
+    @Published var difficulty: Int
+    @Published var note: String?
+    /// Which side is English (the word); the meanings fill the other side.
+    let englishFront: Bool
+    let senses: [ClassroomDictionary.Sense]
+    init(index: Int, question q: QuizQuestion) {
+        self.index = index
+        let part = q.parts.first, backText = part.map { $0.options[$0.answer] } ?? ""
+        let english = q.prompt.range(of: "[A-Za-z]", options: .regularExpression) != nil
+        front = q.prompt; back = backText
+        difficulty = min(3, max(1, q.difficulty ?? 1))
+        englishFront = english
+        senses = NotesDictionary.shared.ready()?.entry(english ? q.prompt : backText)?.senses ?? []
+    }
+    func use(_ meaning: String) { if englishFront { back = meaning } else { front = meaning } }
+}
+
+/// Correcting the card on screen (闪卡 → 编辑): its answers so far stay with it.
+struct FlashCardEditor: View {
+    @ObservedObject var draft: FlashCardDraft
+    var onSave: () -> Void
+    var onCancel: () -> Void
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Label("编辑闪卡", systemImage: "pencil").font(.headline)
+                Spacer()
+                Text("已有的作答记录会保留").font(.caption).foregroundStyle(GameTheme.muted)
+            }
+            HStack {
+                Text("正面").font(.caption.bold()).foregroundStyle(GameTheme.muted).frame(width: 34, alignment: .leading)
+                ClassroomTextField(placeholder: "正面", text: $draft.front, limit: 120).frame(height: 32)
+                    .padding(.horizontal, 8).background(GlassFill.field, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            }
+            HStack {
+                Text("背面").font(.caption.bold()).foregroundStyle(GameTheme.muted).frame(width: 34, alignment: .leading)
+                ClassroomTextField(placeholder: "背面", text: $draft.back, limit: 200).frame(height: 32)
+                    .padding(.horizontal, 8).background(GlassFill.field, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            }
+            HStack(spacing: 6) {
+                Text("难度").font(.caption.bold()).foregroundStyle(GameTheme.muted).frame(width: 34, alignment: .leading)
+                ForEach(1...3, id: \.self) { d in
+                    let on = draft.difficulty == d
+                    Button { draft.difficulty = d } label: {
+                        Text(String(repeating: "★", count: d)).font(.callout.bold()).padding(.horizontal, 10).padding(.vertical, 5)
+                            .foregroundStyle(on ? Color.white : GameTheme.ink)
+                            .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(on ? GameTheme.primary : Color.white.opacity(0.55)))
+                    }.buttonStyle(.plain)
+                }
+            }
+            if !draft.senses.isEmpty {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 4) {
+                        ForEach(Array(draft.senses.enumerated()), id: \.offset) { _, sense in
+                            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                                Text(sense.pos ?? "").font(.caption.bold()).foregroundStyle(GameTheme.muted).frame(width: 34, alignment: .leading)
+                                FlowRow(spacing: 5) {
+                                    ForEach(sense.meanings, id: \.self) { m in
+                                        let on = (draft.englishFront ? draft.back : draft.front) == m
+                                        Button { KeyHostingController<EmptyView>.endEditing(); draft.use(m) } label: {
+                                            Text(m).font(.callout).padding(.horizontal, 8).padding(.vertical, 3)
+                                                .foregroundStyle(on ? Color.white : GameTheme.ink)
+                                                .background(RoundedRectangle(cornerRadius: 7, style: .continuous).fill(on ? GameTheme.primary : Color.white.opacity(0.55)))
+                                        }.buttonStyle(.plain)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }.frame(maxHeight: 130)
+            }
+            if let note = draft.note { Text(note).font(.caption.bold()).foregroundStyle(.red) }
+            HStack {
+                Button { onCancel() } label: { Label("取消", systemImage: "xmark") }.buttonStyle(GlassIconButtonStyle())
+                Spacer()
+                Button { onSave() } label: { Label("保存", systemImage: "checkmark") }.buttonStyle(GlassIconButtonStyle(prominent: true))
+            }
+        }
+        .padding(12).background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.white.opacity(0.5)))
+    }
+}
+
 @MainActor final class PracticeModel: ObservableObject {
     @Published var player: String
     @Published var right = 0
@@ -603,6 +691,8 @@ struct ClassQuizPickPanel: View {
     /// This round's marks per card (bank index → right), for the card list.
     @Published var results: [Int: Bool] = [:]
     @Published var showList = false
+    /// The card being corrected (编辑).
+    @Published var editing: FlashCardDraft?
     init(player: String, classwide: Bool = false) { self.player = player; self.classwide = classwide }
 }
 
@@ -660,9 +750,15 @@ struct PracticePanel: View {
                     }
                 }.frame(maxHeight: 200)
             }
-            if let live = game.quiz, live.mode == .practice {
+            if let draft = model.editing {
+                FlashCardEditor(draft: draft, onSave: { game.saveFlashCardEdit() }, onCancel: { model.editing = nil })
+            } else if let live = game.quiz, live.mode == .practice {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("正面：\(live.question.prompt)").font(.title2.bold())
+                    HStack(alignment: .firstTextBaseline) {
+                        Text("正面：\(live.question.prompt)").font(.title2.bold())
+                        Spacer()
+                        Button { game.editPracticeCard() } label: { Label("编辑 (E)", systemImage: "pencil") }.buttonStyle(GlassIconButtonStyle()).disabled(model.waiting)
+                    }
                     let part = live.question.parts[0]
                     Text("背面：\(part.options[part.answer])").font(.title3.bold()).foregroundStyle(GameTheme.primary)
                     HStack(spacing: 12) {
@@ -729,6 +825,11 @@ struct PracticePanel: View {
     /// The flash card with this front in the course, if there is one (fronts match without case).
     func card(front: String, in course: String) -> QuizQuestion? {
         questions.first { $0.course == course && $0.type == .flashcard && $0.prompt.lowercased() == front.lowercased() }
+    }
+    /// A corrected question takes the old one's place in its course (added when it is not there any more).
+    func replace(_ old: QuizQuestion, with new: QuizQuestion) {
+        if let i = questions.firstIndex(of: old) { questions[i] = new; save() }
+        else { addCard(new, to: new.course ?? active ?? Self.lessonWords) }
     }
     func addCard(_ card: QuizQuestion, to course: String) {
         var card = card; card.course = course

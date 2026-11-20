@@ -275,6 +275,16 @@ extension MeadowTeacherCoordinator {
         // Already a flash card of the current course: call it up for the class straight away.
         if let index = existingNoteCard(pick) { openClassQuiz(index: index); return }
         let model = WordCardModel(pick: pick, dictionary: NotesDictionary.shared.ready())
+        // New word: the meaning the sentence calls for (part of speech in the sentence; the teacher's own
+        // correction from before comes first), ★, asked to the class at once. A wrong meaning is fixed later in
+        // 闪卡 → 选卡 → 编辑 (the answers stay). Only a word the dictionary does not know opens the card to type it.
+        model.difficulty = 1
+        if let card = model.card {
+            addNoteCard(card, ask: true, picked: true)
+            message += "（意思按上下文自动选的；不对可在“闪卡 → 选卡 → 编辑”里改，作答记录保留）"
+            revision += 1
+            return
+        }
         let dismiss = { [weak host] in host?.presentedViewController?.dismiss(animated: true) }
         let finish = { [weak self] (ask: Bool) in
             guard let self, let card = model.card else { return }

@@ -433,10 +433,17 @@ final class MeadowTeacherCoordinator:ObservableObject {
         let panel=KeyHostingController(rootView:PracticePanel(game:self,model:model,onClose:{[weak self] in self?.endPractice()}))
         panel.onKey={[weak self] key in
             guard let self else{return false}
+            // Correcting a card: ⏎ saves, Esc cancels, nothing else marks or moves the deck.
+            if let model=self.practiceModel,model.editing != nil {
+                if key=="⏎" {self.saveFlashCardEdit();return true}
+                if key=="⎋" {model.editing=nil;return true}
+                return false
+            }
             switch key {
             case "⎋":self.endPractice()
             case "c","0":self.practiceAnswer(nil)
             case "d":if let q=self.quiz?.question,q.type == .flashcard {self.practiceAnswer(q.parts[0].answer)}
+            case "e":self.editPracticeCard()
             case "a":self.setPracticeClasswide(!(self.practiceModel?.classwide ?? false))
             case "o":self.setPracticeOrder(self.practiceModel?.order == .shuffled ? .sequential:.shuffled)
             case "→":self.stepPractice(1)
@@ -558,6 +565,32 @@ final class MeadowTeacherCoordinator:ObservableObject {
             live.attempt=a;live.hold=1.3;quiz=live
             revision += 1
         }catch{message=error.localizedDescription;revision += 1}
+    }
+    /// 编辑: correct the card on screen (pick another with 选卡 first).
+    func editPracticeCard(){
+        guard let c=campaign,let model=practiceModel,!model.waiting,let live=quiz,live.mode == .practice,c.quizBank.indices.contains(live.index) else{return}
+        model.editing=FlashCardDraft(index:live.index,question:c.quizBank[live.index])
+    }
+    /// Saves the corrected card in place in the trip (its answers stay with it) and in its course; the meaning is
+    /// remembered for the next double-click on that word.
+    func saveFlashCardEdit(){
+        guard let c=campaign,let model=practiceModel,let draft=model.editing,c.quizBank.indices.contains(draft.index) else{return}
+        let old=c.quizBank[draft.index]
+        let front=String(draft.front.trimmingCharacters(in:.whitespacesAndNewlines).prefix(120)),back=String(draft.back.trimmingCharacters(in:.whitespacesAndNewlines).prefix(200))
+        guard !front.isEmpty,!back.isEmpty,var item=old.items?.first,item.options.indices.contains(item.answer) else{draft.note="正面和背面都要填。";return}
+        var new=old
+        new.prompt=front;item.options[item.answer]=back;new.items=[item];new.difficulty=draft.difficulty
+        if new != old {
+            do{try c.replaceQuizQuestion(at:draft.index,with:new)}catch{draft.note=error.localizedDescription;return}
+            QuizLibrary.shared.replace(old,with:new)
+            applyQuizCourse()
+            if draft.englishFront {NotesDictionary.shared.remember(front,back)} else {NotesDictionary.shared.remember(back,front)}
+            message="已修改闪卡：\(front) → \(back)（作答记录保留）"
+        }
+        model.editing=nil
+        // The card on screen shows the corrected sides.
+        if var live=quiz,live.mode == .practice,live.index==draft.index,live.attempt==nil {quizToken += 1;live.token=quizToken;live.question=new;quiz=live}
+        revision += 1
     }
     private func endPractice(){
         practiceModel=nil;closePanel();withAnimation{quiz=nil}
