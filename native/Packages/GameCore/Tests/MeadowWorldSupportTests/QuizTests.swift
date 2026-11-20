@@ -433,6 +433,52 @@ final class QuizTests:XCTestCase {
         let shared=try s.recordQuiz(actor:"p1",question:1,picks:[0],seconds:999,free:true,manualCoins:25,shared:true)
         XCTAssertEqual(shared.coins,25);XCTAssertNil(shared.drop)
     }
+    func testWordsSaidRightInHarderQuestionsCountAsPassed()throws {
+        let text="""
+        类型：闪卡
+        难度：1
+        正面：帽子
+        背面：hat
+
+        类型：闪卡
+        难度：1
+        正面：鼻子
+        背面：nose
+
+        类型：闪卡
+        难度：2
+        正面：手套
+        背面：glove
+
+        类型：闪卡
+        难度：1
+        正面：青蛙
+        背面：frog
+
+        类型：闪卡
+        难度：3
+        正面：我的帽子戴在鼻子上。
+        背面：My hat goes on my nose.
+
+        类型：填空
+        难度：2
+        Your {{gloves|shoes}} go on your hands.
+        """
+        let bank=try QuizBankParser.parse(Data(text.utf8)),s=try quizSession(bank)
+        try s.recordQuiz(actor:"p1",question:1,picks:[nil],seconds:3,free:true,shared:true,practice:true)  // nose: wrong on its own
+        try s.recordQuiz(actor:"p1",question:4,picks:[0],seconds:3,free:true,challenge:true)              // ★★★ sentence right
+        try s.recordQuiz(actor:"p1",question:5,picks:[bank[5].parts[0].answer],seconds:3,free:true)        // ★★ fill right: gloves
+        let v=try XCTUnwrap(s.quizReport.students.first{$0.id=="p1"}).vocabulary
+        let status=Dictionary(uniqueKeysWithValues:v.map{($0.word,$0.status)})
+        XCTAssertEqual(status["hat"],.right)        // never asked alone, said right in the ★★★ sentence
+        XCTAssertEqual(status["nose"],.corrected)   // wrong alone, then right in the sentence
+        XCTAssertEqual(status["frog"],.untested)
+        // glove (★★) is in a ★★ fill-in: not harder, so still not tested on its own.
+        XCTAssertEqual(status["glove"],.untested)
+        XCTAssertTrue(QuizReport.Words("Tom looked after the dogs.").contains("look after"))
+        XCTAssertTrue(QuizReport.Words("Tom looked after the dogs.").contains("dog"))
+        XCTAssertFalse(QuizReport.Words("Tom looked after the dogs.").contains("cat"))
+    }
     func testCorrectedFlashCardKeepsItsAnswers()throws {
         var card=QuizBankParser.flashcard(front:"nose",back:"突出部分",distractors:[]);card.difficulty=1;card.course="第一章"
         let s=try quizSession([])

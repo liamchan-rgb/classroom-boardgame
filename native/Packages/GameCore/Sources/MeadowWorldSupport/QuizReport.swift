@@ -191,12 +191,26 @@ public struct QuizReport {
             s.wrongWords = ranked.filter { !fixed.contains($0.word) }
             s.correctedWords = misses.filter { fixed.contains($0.word) }
             // The whole deck: each card's latest answer (wrong before and right now = corrected), or not asked yet.
+            // Harder questions the student got fully right, in order, with their English text: a ★/★★ word inside
+            // one of them counts as passed too (said right in a ★★★ sentence, say).
+            let passedIn: [(at: Int, difficulty: Int, text: Self.Words)] = own.enumerated().compactMap { k, l in
+                guard l.attempt.rightCount == l.attempt.correct.count, !l.attempt.correct.isEmpty else { return nil }
+                return (k, l.question.difficulty ?? 1, Self.Words(Self.englishText(l.question)))
+            }
             s.vocabulary = (decks[id] ?? []).compactMap { qi in
                 guard bank.indices.contains(qi), let w = Self.word(bank[qi], part: 0) else { return nil }
-                let tries = own.filter { $0.attempt.question == qi }
-                guard let last = tries.last else { return VocabItem(word: w.word, meaning: w.meaning, status: .untested, tries: 0) }
-                let right = last.attempt.rightCount == last.attempt.correct.count
-                let everWrong = tries.contains { $0.attempt.rightCount < $0.attempt.correct.count }
+                let level = bank[qi].difficulty ?? 1
+                let tries = own.enumerated().filter { $0.element.attempt.question == qi }
+                let lastTry = tries.last
+                // The last time it came up right inside a harder question.
+                let inside = passedIn.last { $0.difficulty > level && $0.text.contains(w.word) }
+                guard let last = lastTry else {
+                    return VocabItem(word: w.word, meaning: w.meaning, status: inside != nil ? .right : .untested, tries: 0)
+                }
+                var right = last.element.attempt.rightCount == last.element.attempt.correct.count
+                // Missed on its own card, then said right in a harder question afterwards: corrected.
+                if !right, let inside, inside.at > last.offset { right = true }
+                let everWrong = tries.contains { $0.element.attempt.rightCount < $0.element.attempt.correct.count }
                 return VocabItem(word: w.word, meaning: w.meaning, status: right ? (everWrong ? .corrected : .right) : .wrong, tries: tries.count)
             }
             return s
@@ -253,6 +267,40 @@ public struct QuizReport {
             return tagged ? Word(word: expected, meaning: nil) : nil
         }
     }
+    /// A question's English as it reads when answered right: the prompt with blanks filled, the right options, the
+    /// passage.
+    static func englishText(_ q: QuizQuestion) -> String {
+        var text = q.prompt
+        let parts = q.parts
+        for (k, p) in parts.enumerated() where p.options.indices.contains(p.answer) {
+            let right = p.options[p.answer]
+            if q.type == .fill, text.contains("{{\(k + 1)}}") { text = text.replacingOccurrences(of: "{{\(k + 1)}}", with: right) }
+            else { text += " " + right }
+        }
+        if let passage = q.passage { text += " " + passage }
+        for p in parts { if let prompt = p.prompt { text += " " + prompt } }
+        return text
+    }
+    /// English words of a text, for finding a vocabulary word (or phrase) in it; plurals and simple endings match
+    /// (shoe ↔ shoes, glove ↔ gloves, look ↔ looked / looking).
+    struct Words {
+        let tokens: [String]
+        init(_ text: String) {
+            tokens = text.lowercased().split { !($0.isLetter && $0.isASCII) && $0 != "'" }.map(String.init)
+        }
+        private static func same(_ a: String, _ b: String) -> Bool {
+            if a == b { return true }
+            for end in ["s", "es", "ed", "d", "ing"] { if a + end == b || b + end == a { return true } }
+            return false
+        }
+        /// Whether the word or phrase (all its words, in a row) is in the text.
+        func contains(_ phrase: String) -> Bool {
+            let want = Words(phrase).tokens
+            guard !want.isEmpty, want.count <= tokens.count else { return false }
+            return (0...(tokens.count - want.count)).contains { start in want.indices.allSatisfy { Self.same(tokens[start + $0], want[$0]) } }
+        }
+    }
+
     /// One line naming a question in the report.
     public static func summary(_ q: QuizQuestion) -> String {
         switch q.type {

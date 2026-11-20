@@ -87,13 +87,14 @@ private struct TeacherBookConsole:View {
                     .clipShape(RoundedRectangle(cornerRadius:18,style:.continuous)).overlay(RoundedRectangle(cornerRadius:18,style:.continuous).stroke(.white.opacity(0.5),lineWidth:1))
                 QuizDock(game:game,book:true)
                 VStack(alignment:.leading,spacing:8){
-                    Toggle(isOn:$session.showNotes){Label("备注",systemImage:"note.text")}.font(.headline)
-                    if session.showNotes {
-                        HStack{
-                            Spacer()
-                            Button{editingNotes.toggle();notesFocused=editingNotes}label:{Image(systemName:editingNotes ? "checkmark.circle.fill":"pencil.circle").font(.title3)}
-                                .buttonStyle(.plain).foregroundStyle(GameTheme.primary).accessibilityLabel(editingNotes ? "完成编辑":"编辑备注")
-                        }
+                    // Always shown (the notes stay on this device; the TV never shows them).
+                    HStack{
+                        Label("备注",systemImage:"note.text").font(.headline)
+                        Spacer()
+                        Button{editingNotes.toggle();notesFocused=editingNotes}label:{Image(systemName:editingNotes ? "checkmark.circle.fill":"pencil.circle").font(.title3)}
+                            .buttonStyle(.plain).foregroundStyle(GameTheme.primary).accessibilityLabel(editingNotes ? "完成编辑":"编辑备注")
+                    }
+                    Group {
                         if editingNotes {
                             TextEditor(text:Binding(get:{session.currentNote},set:{session.editNote($0)})).focused($notesFocused)
                                 .scrollContentBackground(.hidden).padding(6).background(.white.opacity(0.35),in:RoundedRectangle(cornerRadius:12,style:.continuous))
@@ -104,7 +105,7 @@ private struct TeacherBookConsole:View {
                                 .onAppear{NotesDictionary.shared.prewarm()}
                                 .padding(8).background(.white.opacity(0.35),in:RoundedRectangle(cornerRadius:12,style:.continuous))
                         }
-                    }else{Label("仅本机可见",systemImage:"eye.slash").font(.caption).foregroundStyle(.secondary);Spacer()}
+                    }
                 }.frame(width:280).frame(maxHeight:.infinity,alignment:.top).glassPanel()
             }.frame(maxHeight:.infinity)
             HStack(spacing:6){Image(systemName:"info.circle").foregroundStyle(GameTheme.primary);Text(game.message+" · "+session.message).lineLimit(1)}
@@ -131,7 +132,6 @@ private struct TeacherBookConsole:View {
         // Book tab opened while the game was busy: put the book on the TV once it is free (this used to need 投放).
         .onChange(of:game.busy){_,busy in if !busy,game.bookTabActive,game.surface != .book {game.project(.book)}}
         .onChange(of:notesFocused){_,active in session.notesFocus(active)}
-        .onChange(of:session.showNotes){_,value in if !value{notesFocused=false}}
         .sheet(isPresented:$report){NavigationStack{ScrollView{Text(session.importReport).padding()}.navigationTitle("PPTX导入报告").toolbar{Button("完成"){report=false}}}}
         .sheet(isPresented:Binding(get:{exportingURL != nil},set:{if !$0{exportingURL=nil}})){if let url=exportingURL{ExportDocument(url:url)}}
     }
