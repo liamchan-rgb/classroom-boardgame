@@ -535,7 +535,7 @@ struct ClassQuizPanel: View {
                 Button { onEnd() } label: { Label("只揭晓 (Esc)", systemImage: "eye") }.buttonStyle(GlassIconButtonStyle())
                 Spacer()
                 let right = draft.allRight
-                Text(model.players.isEmpty ? "先选人" : "\(model.players.count) 人 · \(right ? "答对 +\(reward.amount(right: true))" : "答错 · 参与奖 +\(reward.amount(right: false))")")
+                Text(model.players.isEmpty ? "先选人" : "\(model.players.count) 人 · \(right ? "答对 " + reward.question.rewardLine : "答错 · 参与奖 +\(reward.participationCoins)")")
                     .font(.callout.bold()).foregroundStyle(right ? Color.green : GameTheme.muted)
                 Button { onSend() } label: { Label("揭晓并发奖 (⏎)", systemImage: "paperplane.fill") }.buttonStyle(GlassIconButtonStyle(prominent: true))
                     .disabled(model.players.isEmpty || draft.answered == 0)
@@ -776,8 +776,8 @@ struct PracticePanel: View {
                 Label(model.classwide ? "当前课程没有闪卡。" : "题库里没有这位同学能练的闪卡。", systemImage: "tray").foregroundStyle(GameTheme.muted)
             }
             Text(model.classwide
-                 ? "键盘：1–7 选回答的同学，D 对、C 错：记录、揭晓背面并自动下一张；空格跳过这张；←/→ 上一张/下一张，O 顺序/乱序，A 切回个人，Esc 结束。只记录、不发奖励，错词进报告。"
-                 : "键盘：D 对、C 错，记录后自动下一张；←/→ 上一张/下一张，O 顺序/乱序；1–7 换人，A 切到全班，Esc 结束。只记录、不发奖励，错词进报告。").font(.caption).foregroundStyle(GameTheme.muted)
+                 ? "键盘：1–7 选回答的同学，D 对、C 错：记录、揭晓背面并自动下一张；空格跳过这张；←/→ 上一张/下一张，O 顺序/乱序，A 切回个人，Esc 结束。答对按难度发奖（★ 10 金币 / ★★ 20 / ★★★ 30，+1 行动，+1/2/3 积分），错词进报告。"
+                 : "键盘：D 对、C 错，记录后自动下一张；←/→ 上一张/下一张，O 顺序/乱序；1–7 换人，A 切到全班，Esc 结束。答对按难度发奖，错词进报告。").font(.caption).foregroundStyle(GameTheme.muted)
         }.padding(22).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(GlassBackdrop())
     }
 }

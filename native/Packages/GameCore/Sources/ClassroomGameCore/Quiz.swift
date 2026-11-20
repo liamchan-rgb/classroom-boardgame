@@ -55,8 +55,12 @@ public struct QuizQuestion: Codable, Equatable {
         return items ?? []
     }
     /// Coins for everything right.
-    public var reward: Int { coins ?? difficulty.map { QuizRewards.baseCoins[$0 - 1] } ?? Self.defaultCoins }
-    public var points: Int { difficulty ?? 1 }
+    /// ★ 1 … ★★★ 3 (unmarked = ★).
+    public var level: Int { min(3, max(1, difficulty ?? 1)) }
+    /// Coins for a right answer, by difficulty (★ 10, ★★ 20, ★★★ 30); a bank's own 金币 no longer changes it.
+    public var reward: Int { QuizRewards.baseCoins[level - 1] }
+    /// Points for a right answer: ★ 1, ★★ 2, ★★★ 3.
+    public var points: Int { level }
     public var timeLimit: Int { seconds ?? QuizRewards.baseSeconds[(difficulty ?? 1) - 1] }
     public func validate() throws {
         let partsOK = parts.allSatisfy { p in
@@ -165,7 +169,9 @@ public struct QuizAttempt: Codable, Equatable {
 /// rolls the difficulty's drop table, and one in under half the time pays half again in coins (questions without a
 /// difficulty, from older banks, keep their plain fixed reward).
 public enum QuizRewards {
-    public static let baseCoins = [15, 30, 60]
+    /// A right answer pays by difficulty: coins, one movement step for the student's team, and points (★ = 1 … ★★★ = 3).
+    public static let baseCoins = [10, 20, 30]
+    public static let steps = 1
     public static let baseSeconds = [60, 90, 120]
     private static func item(_ id: String, _ weight: Int, _ count: Int = 1) -> LotteryPrize { LotteryPrize(item: id, count: count, coins: 0, weight: weight) }
     private static let nothing = LotteryPrize(item: nil, count: 0, coins: 0, weight: 0)
@@ -239,10 +245,13 @@ extension Evaluation {
               record.dropTier.map({ QuizRewards.drops.indices.contains($0) }) ?? true,
               attempt.texts.allSatisfy({ ($0?.count ?? 0) <= 120 }), log.count < 5000 else { throw GameError("答题记录无效。") }
         let right = attempt.rightCount, intime = !attempt.overtime
-        if attempt.practice == true {
-            attempt.coins = 0; attempt.score = 0
-        } else if let manual = record.manualCoins {
+        if let manual = record.manualCoins {
+            // The amount the campaign worked out (by difficulty, or the class's participation prize); flash-card
+            // practice pays this way too now.
             attempt.coins = manual; attempt.score = right == n ? record.points : 0
+        } else if attempt.practice == true {
+            // Practice recorded before it paid: nothing.
+            attempt.coins = 0; attempt.score = 0
         } else {
             attempt.coins = intime ? QuizRewards.coins(full: record.fullCoins, right: right, total: n, fast: record.dropTier != nil && record.noSpeedBonus != true && attempt.seconds * 2 <= Double(attempt.limit)) : 0
             attempt.score = intime && right == n ? record.points : 0

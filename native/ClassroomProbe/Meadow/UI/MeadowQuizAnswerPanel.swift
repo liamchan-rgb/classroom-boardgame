@@ -86,16 +86,21 @@ final class KeyHostingController<Content: View>: UIHostingController<Content> {
     func reset() { for i in picks.indices { picks[i] = nil; unknown[i] = false; texts[i] = "" } }
 }
 
-/// Coins the teacher sends for a shared-bank question: the reward when right, a participation prize otherwise.
+/// A right answer pays by difficulty (fixed); a wrong one to the class may get the teacher's participation prize.
 @MainActor final class QuizManualReward: ObservableObject {
-    @Published var coins: String
+    let question: QuizQuestion
     @Published var participation: String {didSet{UserDefaults.standard.set(participation,forKey:"classroom.quizParticipation")}}
     init(_ q: QuizQuestion) {
-        coins = String(q.reward)
+        question = q
         participation = UserDefaults.standard.string(forKey: "classroom.quizParticipation") ?? "2"
     }
     private static func value(_ s: String) -> Int { min(1000, max(0, Int(s.filter(\.isNumber)) ?? 0)) }
-    func amount(right: Bool) -> Int { Self.value(right ? coins : participation) }
+    var participationCoins: Int { Self.value(participation) }
+}
+
+extension QuizQuestion {
+    /// "+20 金币 +1 行动 +2 积分": what a right answer pays (by difficulty).
+    var rewardLine: String { "+\(reward) 金币 +\(QuizRewards.steps) 行动 +\(points) 积分" }
 }
 
 // MARK: - Answer rows (shared by the personal and the class panels)
@@ -193,13 +198,11 @@ struct QuizRewardFields: View {
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: "bitcoinsign.circle.fill").foregroundStyle(Color(red: 0.74, green: 0.52, blue: 0.12))
-            Text("答对").font(.callout.bold())
-            ClassroomTextField(placeholder: "0", text: $reward.coins, limit: 4, keyboard: .numberPad).frame(width: 60, height: 32)
+            Text("答对 " + reward.question.rewardLine).font(.callout.bold())
+            Spacer(minLength: 4)
+            Text("答错参与奖").font(.callout.bold())
+            ClassroomTextField(placeholder: "0", text: $reward.participation, limit: 4, keyboard: .numberPad).frame(width: 56, height: 32)
                 .padding(.horizontal, 8).background(GlassFill.field, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-            Text("参与奖").font(.callout.bold())
-            ClassroomTextField(placeholder: "0", text: $reward.participation, limit: 4, keyboard: .numberPad).frame(width: 60, height: 32)
-                .padding(.horizontal, 8).background(GlassFill.field, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-            Text("全班题由老师发奖").font(.caption).foregroundStyle(GameTheme.muted)
         }
     }
 }
@@ -207,7 +210,7 @@ struct QuizRewardFields: View {
 // MARK: - Personal answer panel
 
 /// Teacher side of one student's question: tap (or type A–H) what the student said, ⏎ submits and reveals.
-/// It pays by difficulty, with a drop.
+/// A right answer pays by difficulty.
 struct MeadowQuizAnswerPanel: View {
     @ObservedObject var draft: QuizAnswerDraft
     @ObservedObject var reward: QuizManualReward
@@ -223,7 +226,7 @@ struct MeadowQuizAnswerPanel: View {
                 Image(systemName: "person.crop.circle.fill").font(.title2).foregroundStyle(GameTheme.primary)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("\(player) 作答").font(.title3.bold())
-                    Text("\(question.type.title) \(MeadowQuizCard.stars(question)) · 限时 \(question.timeLimit) 秒 · 满分 \(question.reward) 金币")
+                    Text("\(question.type.title) \(MeadowQuizCard.stars(question)) · 限时 \(question.timeLimit) 秒 · 答对 \(question.rewardLine)")
                         .font(.caption).foregroundStyle(GameTheme.muted)
                 }
                 Spacer()

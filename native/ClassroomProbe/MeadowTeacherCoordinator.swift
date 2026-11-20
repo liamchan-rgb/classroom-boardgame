@@ -366,12 +366,12 @@ final class MeadowTeacherCoordinator:ObservableObject {
     private func sendClassQuiz(){
         guard let c=campaign,let live=quiz,live.mode == .classwide,let draft=quizDraft,let model=classModel,let reward=quizReward else{return}
         guard !model.players.isEmpty,draft.answered>0 else{model.note="先选回答的同学和他们说的答案。";return}
-        let r=draft.result,right=draft.allRight,coins=reward.amount(right:right)
+        let r=draft.result,right=draft.allRight,participation=reward.participationCoins
         let order=c.engine.state.players.map(\.id)
         do{
             for id in order where model.players.contains(id) {
-                let a=try c.recordQuiz(actor:id,question:live.index,picks:recorded(r.picks,live),texts:r.texts,seconds:Date().timeIntervalSince(live.start),free:true,manualCoins:coins,shared:true)
-                model.sent.append((a.playerName,right,coins))
+                let a=try c.recordQuiz(actor:id,question:live.index,picks:recorded(r.picks,live),texts:r.texts,seconds:Date().timeIntervalSince(live.start),free:true,participation:participation,shared:true)
+                model.sent.append((a.playerName,right,a.coins))
             }
             let answered=model.players
             model.players=[];model.note=nil
@@ -394,7 +394,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
             guard let self,let c=self.campaign,c.quizBank.indices.contains(index) else{return}
             let blanks=Array(repeating:Optional<Int>.none,count:c.quizBank[index].parts.count)
             do{
-                for u in others {try c.recordQuiz(actor:u.id,question:index,picks:blanks,seconds:0,free:true,manualCoins:practice ? nil:0,shared:true,practice:practice,skipped:true)}
+                for u in others {try c.recordQuiz(actor:u.id,question:index,picks:blanks,seconds:0,free:true,shared:true,practice:practice,skipped:true)}
                 self.message="已记入 \(names) 的错题";self.revision += 1
             }catch{self.message=error.localizedDescription;self.revision += 1}
         })
@@ -553,7 +553,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
                 live.attempt=classReveal(live.question,index:live.index)
                 live.headline=(right ? "答对：" : "答错：")+names.joined(separator:"、")
                 live.hold=1.6;quiz=live
-                revision += 1
+                renderer?.classroomRefresh();revision += 1
             }catch{model.note=error.localizedDescription}
             return
         }
@@ -563,7 +563,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
             model.results[live.index]=a.correct.allSatisfy{$0}
             model.waiting=true
             live.attempt=a;live.hold=1.3;quiz=live
-            revision += 1
+            renderer?.classroomRefresh();revision += 1
         }catch{message=error.localizedDescription;revision += 1}
     }
     /// 编辑: correct the card on screen (pick another with 选卡 first).

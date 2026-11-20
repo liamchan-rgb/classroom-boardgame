@@ -449,6 +449,23 @@ public final class MeadowCampaignSession {
         do{return try engine.apply(.grantPlayerSupplies(actors:actors,movement:movementSteps,coins:coins))}
         catch{writer.snapshot=before;throw error}
     }
+    /// Records a quiz answer; `steps` of movement go to the student's team bar with it (put back if it fails).
+    func applyQuizRecord(_ record:QuizRecord,steps:Int,id:String)throws {
+        let before=writer.snapshot
+        addMovementSteps(steps,to:record.attempt.player)
+        do{try engine.apply(.recordCampaignQuiz(record),id:id)}
+        catch{writer.snapshot=before;throw error}
+    }
+    /// Adds movement steps to the bar of the member's team (capped at a full bar), outside any engine operation (a
+    /// right quiz answer).
+    func addMovementSteps(_ steps:Int,to actor:String){
+        guard steps>0,let unit=engine.state.units[actor] else{return}
+        let key=unit.teamID ?? "party"
+        let current=movement(team:key == "party" ? nil:key)
+        let value=min(current.capacity,current.remaining+Double(steps)*MeadowMovementRules.distancePerStep)
+        if key==writer.snapshot.movementTeam {writer.snapshot.movement?.remaining=value}
+        else {if writer.snapshot.movementBalances==nil{writer.snapshot.movementBalances=[:]};writer.snapshot.movementBalances?[key]=value}
+    }
     /// Undo of a supplies grant: the engine op is reverted, and the movement it added is taken back off each team.
     public func undoSuppliesGrant()throws {
         guard let entry=engine.history.last,case .grantPlayerSupplies(let actors,let steps,_)=entry.command else{throw GameError("最近操作不是发放。")}

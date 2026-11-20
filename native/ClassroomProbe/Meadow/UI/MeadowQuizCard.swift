@@ -37,7 +37,7 @@ final class MeadowQuizCard: UIView {
         MeadowPreviewPalette.stylePanel(card); card.backgroundColor = MeadowPreviewPalette.panel; card.layer.borderColor = UIColor.white.cgColor; card.layer.borderWidth = 1.5
         addSubview(card)
         let stars = Self.stars(q)
-        let prize = mode == .practice ? "练习" : mode == .classwide ? "老师发奖" : "满分 +\(q.reward)"
+        let prize = "答对 +\(q.reward) 金币 +\(QuizRewards.steps) 行动"
         header.attributedText = MeadowGlassText.iconLine(mode == .classwide ? "person.3.fill" : mode == .practice ? "rectangle.on.rectangle.angled" : "person.crop.circle.fill",
                                                          "\(player) 作答 · \(q.type.title)\(stars.isEmpty ? "" : " " + stars) · \(prize) · \(place)", size: 18, tint: MeadowPreviewPalette.gold)
         header.adjustsFontSizeToFitWidth = true; header.minimumScaleFactor = 0.6
@@ -177,6 +177,7 @@ final class MeadowQuizCard: UIView {
         if mode == .classwide { clock.backgroundColor = MeadowPreviewPalette.primary }
         var head = attempt.overtime ? "超时 · 不发奖励" : all ? "全对！" : attempt.rightCount == 0 ? "这次没答对" : "答对 \(attempt.rightCount)/\(attempt.correct.count)"
         if attempt.coins > 0 { head += "  +\(attempt.coins) 金币" }
+        if attempt.coins > 0 && !attempt.correct.isEmpty && attempt.rightCount == attempt.correct.count { head += "  +\(QuizRewards.steps) 行动" }
         if attempt.score > 0 { head += "  +\(attempt.score) 积分" }
         if let dropName { head += "  掉落：\(dropName)" + ((attempt.dropCount ?? 1) > 1 ? "×\(attempt.dropCount!)" : "") }
         if let headline { head = headline }
