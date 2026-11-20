@@ -59,6 +59,45 @@ enum QuizPrompts {
         return lines.joined(separator: "\n") + "\n\n" + rules
     }
 
+    /// 简短版: for later messages in the same chat, after the full prompt has set the rules once. Only what this
+    /// round asks for, so the conversation does not pay for the rules again.
+    static func briefPlan(_ p: Plan) -> String {
+        func or(_ s: String, _ fallback: String) -> String { let t = s.trimmingCharacters(in: .whitespacesAndNewlines); return t.isEmpty ? fallback : t }
+        var lines = [
+            "按前面的规则（输出格式、难度与题型、输出前自检）再出一套新题库，直接出题，只输出题库正文。",
+            "- 课程名：\(or(p.course, "（按课文命名）"))（第一行 `# 课程：\(or(p.course, "课程名"))`）",
+        ]
+        let subject = p.subject.trimmingCharacters(in: .whitespacesAndNewlines), level = p.level.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !subject.isEmpty { lines.append("- 主题：" + subject) }
+        if !level.isEmpty { lines.append("- 学生水平：" + level) }
+        lines.append("- 共 \(p.total) 题：★ 单词闪卡 \(p.easy)；★★ 单词闪卡 \(p.medium)；★★★ 句子闪卡 \(p.sentences)、填空 \(p.fills)、选择 \(p.choices)、阅读 \(p.readings) 篇"
+                     + (p.readings > 0 ? "（每篇 \(p.readingQuestions) 小题）" : ""))
+        lines.append("- 闪卡：" + (p.englishFront ? "正面英文、背面中文" : "正面中文、背面英文"))
+        let extra = p.extra.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !extra.isEmpty { lines.append("- 其他要求：" + extra) }
+        let material = p.material.trimmingCharacters(in: .whitespacesAndNewlines)
+        lines += material.isEmpty ? ["", "课文或单词表在下一条消息。"] : ["", "### 课文材料", "", material]
+        return lines.joined(separator: "\n")
+    }
+    static func briefFeedback(_ f: Feedback) -> String {
+        let course = f.course.isEmpty ? "本课" : f.course
+        var lines = ["按前面的规则修改课程「\(course)」的题库：只改下面的问题，其余题原样；★/★★ 仍只能是单词闪卡。"]
+        let kinds = problems.filter(f.problems.contains)
+        if !kinds.isEmpty { lines.append("- 问题：" + kinds.joined(separator: "、")) }
+        let note = f.note.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !note.isEmpty { lines.append("- 说明：" + note) }
+        let error = f.importError.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !error.isEmpty { lines.append("- 导入报错：" + error) }
+        if !f.picked.isEmpty { lines += ["- 有问题的题：", QuizBankParser.text(f.picked).trimmingCharacters(in: .whitespacesAndNewlines)] }
+        if kinds.isEmpty && note.isEmpty && error.isEmpty && f.picked.isEmpty { lines.append("- 请通读检查答案、歧义、难度和格式。") }
+        lines.append(f.fullBank ? "输出修改后的完整题库（第一行 `# 课程：\(course)`），只输出题库正文。"
+                                : "只输出改过或新增的题，每题前一行 `# 改：原第 n 题` 或 `# 新增`。")
+        if f.attachBank {
+            lines += ["", "### 现有题库（\(f.bank.count) 题，以这份为准）", "", QuizBankParser.text(f.bank, course: f.course.isEmpty ? nil : f.course).trimmingCharacters(in: .whitespacesAndNewlines)]
+        }
+        return lines.joined(separator: "\n")
+    }
+
     static let problems = ["答案错误", "题目有歧义", "超纲或太难", "太简单", "难度标错", "题型与难度不符", "单词重复", "中文意思不准", "干扰项不合理", "题量不够", "导入格式报错"]
     struct Feedback {
         var course = ""
@@ -68,6 +107,8 @@ enum QuizPrompts {
         var importError = ""
         var fullBank = true
         var bank: [QuizQuestion] = []
+        /// 简短版 only: attach the bank as the app has it (when it was changed in the app since the chat saw it).
+        var attachBank = false
     }
     static func feedback(_ f: Feedback) -> String {
         let course = f.course.isEmpty ? "本课" : f.course
@@ -113,6 +154,10 @@ enum QuizPrompts {
     @Published var plan: QuizPrompts.Plan
     @Published var feedback = QuizPrompts.Feedback()
     @Published var copied = false
+    /// 简短版 (later messages in the same chat). Kept on this device.
+    @Published var brief = UserDefaults.standard.bool(forKey: "classroom.promptBrief") {
+        didSet { UserDefaults.standard.set(brief, forKey: "classroom.promptBrief") }
+    }
     init() {
         var p = QuizPrompts.Plan()
         let d = UserDefaults.standard
@@ -138,7 +183,10 @@ enum QuizPrompts {
     func selectCourse(_ name: String) {
         feedback.course = name; feedback.bank = QuizLibrary.shared.questions(of: name); feedback.picked = []
     }
-    var prompt: String { tab == 0 ? QuizPrompts.plan(plan) : QuizPrompts.feedback(feedback) }
+    var prompt: String {
+        tab == 0 ? (brief ? QuizPrompts.briefPlan(plan) : QuizPrompts.plan(plan))
+                 : (brief ? QuizPrompts.briefFeedback(feedback) : QuizPrompts.feedback(feedback))
+    }
     func copy() {
         save()
         UIPasteboard.general.string = prompt
@@ -162,6 +210,13 @@ struct QuizPromptEditor: View {
                 Button { model.copy() } label: { Label(model.copied ? "已复制" : "复制提示词", systemImage: model.copied ? "checkmark" : "doc.on.doc") }
                     .buttonStyle(GlassIconButtonStyle(prominent: true))
                 Button { model.save(); onClose() } label: { Label("完成 (Esc)", systemImage: "checkmark") }.buttonStyle(GlassIconButtonStyle())
+            }
+            HStack(spacing: 10) {
+                Picker("", selection: $model.brief) { Text("完整版").tag(false); Text("简短版").tag(true) }.pickerStyle(.segmented).frame(width: 170)
+                Text(model.brief
+                     ? "简短版：在同一个 AI 对话里接着用（第一次已发过完整版），不再重复规则和格式，只写这次的要求，省字数。新开对话请用完整版。"
+                     : "完整版：新开 AI 对话时用，带全部规则、格式和自检要求。之后在同一对话里接着出题或改题，切到简短版。")
+                    .font(.caption).foregroundStyle(GameTheme.muted).fixedSize(horizontal: false, vertical: true)
             }
             Text(model.tab == 0
                  ? "填好题量，复制提示词发给 AI（连同课文或单词表），把它输出的题库存成「课程名.txt」，在题库里“导入课程”。★/★★ 只出单词闪卡，★★★ 才出句子类题。"
@@ -276,8 +331,16 @@ struct QuizPromptEditor: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("让 AI 输出").font(.caption.bold()).foregroundStyle(GameTheme.muted)
                 Picker("", selection: $model.feedback.fullBank) { Text("修改后的完整题库").tag(true); Text("只输出改过的题").tag(false) }.pickerStyle(.segmented)
-                Text(model.feedback.fullBank ? "提示词会附上这门课的全部原题，AI 改完输出整套，存成同名文件重新导入即可。" : "只拿回改过的题，需要你自己替换进原文件。")
+                Text(model.brief ? (model.feedback.fullBank ? "AI 按对话里已有的题库改完输出整套，存成同名文件重新导入即可。" : "只拿回改过的题，需要你自己替换进原文件。")
+                     : model.feedback.fullBank ? "提示词会附上这门课的全部原题，AI 改完输出整套，存成同名文件重新导入即可。" : "只拿回改过的题，需要你自己替换进原文件。")
                     .font(.caption2).foregroundStyle(GameTheme.muted)
+                if model.brief {
+                    Toggle(isOn: $model.feedback.attachBank) {
+                        Text("附上 App 里的现有题库（\(model.feedback.bank.count) 题）").font(.caption.bold())
+                    }.toggleStyle(.switch).tint(GameTheme.primary)
+                    Text("在 App 里改过题、或不确定 AI 那边是不是最新版时打开；否则省掉，AI 用对话里已有的那份。")
+                        .font(.caption2).foregroundStyle(GameTheme.muted)
+                }
             }
         }.padding(.trailing, 6)
     }

@@ -62,6 +62,32 @@ final class ProbeCoreTests: XCTestCase {
         XCTAssertEqual(deck.slides[0].elements.filter { if case .image = $0 { return true }; return false }.count, 1)
     }
 
+    /// A template-made deck: the look lives in the theme, master and layout, not on the slide.
+    func testThemeMasterAndLayoutStylingIsInherited() throws {
+        let url = try XCTUnwrap(Bundle.module.url(forResource: "themed", withExtension: "pptx", subdirectory: "Fixtures"))
+        let slide = try XCTUnwrap(PPTXReader.read(Data(contentsOf: url)).slides.first)
+        // Background from the layout (tx1 → dk1), not white.
+        XCTAssertEqual(slide.background, "2B2147")
+        XCTAssertEqual(slide.elements.count, 3)
+        // The master's decorative band comes first, in accent2, and animations never target it.
+        guard case .shape(let band, "rect", "E0533D") = slide.elements[0] else { return XCTFail("master band") }
+        XCTAssertEqual(band.y, 6600000); XCTAssertEqual(slide.elementIDs[0], -1)
+        // Title: position from the layout, colour from the layout list style (bg1 → white), size/bold/font from the master.
+        guard case .text(let title, let titleText, _) = slide.elements[1] else { return XCTFail("title") }
+        XCTAssertEqual(title.x, 700000); XCTAssertEqual(title.y, 1800000)
+        let titleRun = try XCTUnwrap(titleText.first?.runs.first)
+        XCTAssertEqual(titleRun.color, "FFFFFF"); XCTAssertEqual(titleRun.points, 44); XCTAssertTrue(titleRun.bold)
+        XCTAssertEqual(titleRun.fontName, "Georgia"); XCTAssertEqual(titleText.first?.alignment, "l")
+        XCTAssertEqual(slide.styles[1]?.anchor, "b")
+        // A shape inside a group: placed through the group transform, theme colours with lumMod, outline and anchor.
+        guard case .text(let card, let cardText, _) = slide.elements[2] else { return XCTFail("card") }
+        XCTAssertEqual(card.x, 2000000); XCTAssertEqual(card.y, 4000000); XCTAssertEqual(card.width, 1000000)
+        let style = try XCTUnwrap(slide.styles[2])
+        XCTAssertEqual(style.kind, "roundRect"); XCTAssertEqual(style.fill, "352E53"); XCTAssertEqual(style.line, "E0A526")
+        XCTAssertEqual(style.lineWidth, 25400); XCTAssertEqual(style.anchor, "ctr"); XCTAssertEqual(style.insets, [0, 0, 0, 0])
+        XCTAssertEqual(cardText.first?.runs.first?.color, "F3F0FA"); XCTAssertEqual(cardText.first?.runs.first?.points, 18)
+    }
+
     func testUnsafePathBadZipAndDTDRejected() throws {
         XCTAssertThrowsError(try PPTXReader.resolve(owner: "ppt/slides/slide1.xml", target: "../../../outside.xml"))
         XCTAssertThrowsError(try PPTXReader.read(Data("not a zip".utf8)))

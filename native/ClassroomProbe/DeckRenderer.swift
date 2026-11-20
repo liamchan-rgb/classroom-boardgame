@@ -31,6 +31,16 @@ enum DeckRenderer {
         func frameOf(_ element: SlideElement) -> CGRect {
             switch element { case .image(let f, _), .shape(let f, _, _), .text(let f, _, _): return rectangle(f) }
         }
+        /// A shape's outline filled and stroked as its style says.
+        func box(_ style: SlideShapeStyle, in rect: CGRect) {
+            let path = DeckRenderer.path(style, in: rect)
+            if let fill = style.fill, style.kind != "line" { color(fill).setFill(); path.fill() }
+            if let line = style.line {
+                color(line).setStroke()
+                path.lineWidth = max(0.5, CGFloat(style.lineWidth) * scale)
+                path.stroke()
+            }
+        }
         /// Draws element `index`; for text, `paragraphs` limits which paragraphs show (the others keep their place,
         /// drawn clear) and `fill` whether the box background is drawn.
         func draw(_ index: Int, in context: UIGraphicsImageRendererContext, paragraphs: Set<Int>? = nil, fill drawFill: Bool = true) {
@@ -38,12 +48,18 @@ enum DeckRenderer {
             case .image(let frame, _):
                 pictures[index]?.draw(in: rectangle(frame))
             case .shape(let frame, let kind, let fill):
-                color(fill).setFill()
-                let path = kind == "ellipse" ? UIBezierPath(ovalIn: rectangle(frame)) : UIBezierPath(rect: rectangle(frame))
-                path.fill()
+                if let style = slide.styles[index] { box(style, in: rectangle(frame)) }
+                else if !fill.isEmpty {
+                    color(fill).setFill()
+                    (kind == "ellipse" ? UIBezierPath(ovalIn: rectangle(frame)) : UIBezierPath(rect: rectangle(frame))).fill()
+                }
             case .text(let frame, let list, let fill):
                 let rect = rectangle(frame)
-                if let fill, drawFill { color(fill).setFill(); context.fill(rect) }
+                let style = slide.styles[index]
+                if drawFill {
+                    if let style { box(style, in: rect) }
+                    else if let fill { color(fill).setFill(); context.fill(rect) }
+                }
                 let text = NSMutableAttributedString(string: "")
                 for (index, paragraph) in list.enumerated() {
                     let style = NSMutableParagraphStyle()
@@ -64,14 +80,19 @@ enum DeckRenderer {
                     }
                     if index < list.count - 1 { text.append(NSAttributedString(string: "\n")) }
                 }
-                let inset = CGFloat(91440) * scale
-                let box = rect.insetBy(dx: inset, dy: inset / 2)
+                let insets = (style?.insets ?? [91440, 45720, 91440, 45720]).map { CGFloat($0) * scale }
+                let box = CGRect(x: rect.minX + insets[0], y: rect.minY + insets[1],
+                                 width: max(1, rect.width - insets[0] - insets[2]), height: max(1, rect.height - insets[1] - insets[3]))
                 let measured = text.boundingRect(with: CGSize(width: box.width, height: .greatestFiniteMagnitude),
                                                  options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
                 if measured.height > box.height + 2, paragraphs == nil { warnings.append("文字可能超出文本框，需视觉核对。") }
+                // Vertical anchor: top, middle or bottom of the box (text taller than the box starts at the top).
+                let spare = max(0, box.height - ceil(measured.height))
+                let drop = style?.anchor == "b" ? spare : style?.anchor == "ctr" ? spare / 2 : 0
                 context.cgContext.saveGState()
-                context.cgContext.clip(to: box)
-                text.draw(with: box, options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
+                context.cgContext.clip(to: rect.insetBy(dx: -2, dy: -2))
+                text.draw(with: CGRect(x: box.minX, y: box.minY + drop, width: box.width, height: box.height - drop + 2),
+                          options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
                 context.cgContext.restoreGState()
             }
         }
@@ -111,7 +132,10 @@ enum DeckRenderer {
             let first = pieces.isEmpty
             format.opaque = first
             let image = UIGraphicsImageRenderer(size: size, format: format).image { context in
-                if first { color(slide.background).setFill(); context.fill(CGRect(origin: .zero, size: size)) }
+                if first {
+                    color(slide.background).setFill(); context.fill(CGRect(origin: .zero, size: size))
+                    if let data = slide.backgroundImage, let picture = downsampled(data, maxPixels: 2560) { picture.draw(in: CGRect(origin: .zero, size: size)) }
+                }
                 for item in pending { if case .still(let i, let p, let f) = item { draw(i, in: context, paragraphs: p, fill: f) } }
             }
             pieces.append(.still(image)); pending = []
@@ -141,6 +165,43 @@ enum DeckRenderer {
         let page = DeckPage(size: size, background: color(slide.background), pieces: pieces, layers: layers,
                             entry: steps(slide.build.entry), clicks: clicks, transition: slide.transition)
         return Result(page: page, warnings: Array(Set(warnings)).sorted())
+    }
+
+    /// The outline of a DrawingML preset shape (the common ones; anything else is drawn as its box).
+    static func path(_ style: SlideShapeStyle, in r: CGRect) -> UIBezierPath {
+        let short = min(r.width, r.height)
+        func polygon(_ points: [CGPoint]) -> UIBezierPath {
+            let path = UIBezierPath(); path.move(to: points[0]); points.dropFirst().forEach { path.addLine(to: $0) }; path.close(); return path
+        }
+        switch style.kind {
+        case "ellipse", "circle": return UIBezierPath(ovalIn: r)
+        case "roundRect", "round2SameRect", "snipRoundRect", "round1Rect":
+            return UIBezierPath(roundedRect: r, cornerRadius: short * CGFloat((style.adjust ?? 16667) / 100000))
+        case "line":
+            let path = UIBezierPath()
+            let startX = style.flipH ? r.maxX : r.minX, endX = style.flipH ? r.minX : r.maxX
+            let startY = style.flipV ? r.maxY : r.minY, endY = style.flipV ? r.minY : r.maxY
+            path.move(to: CGPoint(x: startX, y: startY)); path.addLine(to: CGPoint(x: endX, y: endY))
+            return path
+        case "triangle":
+            let apex = r.minX + r.width * CGFloat((style.adjust ?? 50000) / 100000)
+            return polygon([CGPoint(x: apex, y: r.minY), CGPoint(x: r.maxX, y: r.maxY), CGPoint(x: r.minX, y: r.maxY)])
+        case "rtTriangle": return polygon([CGPoint(x: r.minX, y: r.minY), CGPoint(x: r.minX, y: r.maxY), CGPoint(x: r.maxX, y: r.maxY)])
+        case "diamond": return polygon([CGPoint(x: r.midX, y: r.minY), CGPoint(x: r.maxX, y: r.midY), CGPoint(x: r.midX, y: r.maxY), CGPoint(x: r.minX, y: r.midY)])
+        case "parallelogram":
+            let d = short * CGFloat((style.adjust ?? 25000) / 100000)
+            return polygon([CGPoint(x: r.minX + d, y: r.minY), CGPoint(x: r.maxX, y: r.minY), CGPoint(x: r.maxX - d, y: r.maxY), CGPoint(x: r.minX, y: r.maxY)])
+        case "hexagon":
+            let d = short * CGFloat((style.adjust ?? 25000) / 100000)
+            return polygon([CGPoint(x: r.minX + d, y: r.minY), CGPoint(x: r.maxX - d, y: r.minY), CGPoint(x: r.maxX, y: r.midY),
+                            CGPoint(x: r.maxX - d, y: r.maxY), CGPoint(x: r.minX + d, y: r.maxY), CGPoint(x: r.minX, y: r.midY)])
+        case "chevron", "homePlate":
+            let d = short * CGFloat((style.adjust ?? 50000) / 100000)
+            let tail = style.kind == "chevron" ? d : 0
+            return polygon([CGPoint(x: r.minX, y: r.minY), CGPoint(x: r.maxX - d, y: r.minY), CGPoint(x: r.maxX, y: r.midY),
+                            CGPoint(x: r.maxX - d, y: r.maxY), CGPoint(x: r.minX, y: r.maxY), CGPoint(x: r.minX + tail, y: r.midY)])
+        default: return UIBezierPath(rect: r)
+        }
     }
 
     private static func downsampled(_ data: Data, maxPixels: CGFloat) -> UIImage? {
