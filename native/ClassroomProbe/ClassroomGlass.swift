@@ -14,6 +14,8 @@ struct ClassroomTextField:UIViewRepresentable {
     var onSubmit:(()->Void)?=nil
     /// Take the keyboard as soon as the field appears.
     var autoFocus=false
+    /// Called when the field loses focus (a tap elsewhere, Return without onSubmit).
+    var onEndEditing:(()->Void)?=nil
     func makeCoordinator()->Coordinator {Coordinator(self)}
     func makeUIView(context:Context)->UITextField {
         let field=UITextField()
@@ -46,7 +48,7 @@ struct ClassroomTextField:UIViewRepresentable {
             if value.count>parent.limit {value=String(value.prefix(parent.limit));field.text=value}
             parent.text=value
         }
-        func textFieldDidEndEditing(_ field:UITextField){parent.text=String((field.text ?? "").prefix(parent.limit))}
+        func textFieldDidEndEditing(_ field:UITextField){parent.text=String((field.text ?? "").prefix(parent.limit));parent.onEndEditing?()}
         func textFieldShouldReturn(_ field:UITextField)->Bool {
             if let submit=parent.onSubmit {
                 parent.text=field.text ?? "";submit()

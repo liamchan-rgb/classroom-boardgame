@@ -194,6 +194,7 @@ final class TeacherHostController: UIViewController {
         case .pauseResume:game.operation(.pauseOrResume)
         case .pageBack:session.turnPage(-1)
         case .pageForward:session.turnPage(1)
+        case .goToPage:if game.bookTabActive {session.pageJumpRequest += 1}
         case .openTimer:game.openTimer()
         case .timerStartPause:game.classTimer.toggle()
         case .timerPlus10:game.classTimer.add(10)

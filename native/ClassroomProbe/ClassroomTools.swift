@@ -267,7 +267,7 @@ struct ClassTimerPanel:View {
 // MARK: - Keyboard shortcuts
 
 enum ClassroomShortcutAction:String,CaseIterable,Identifiable {
-    case select1,select2,select3,select4,select5,select6,select7,award,grantMovement,attack,endTurn,pauseResume,pageBack,pageForward,openTimer,timerStartPause,timerPlus10,toggleScoreboard,toggleTeamScores,openQuizReport,openQuiz,openClassQuiz,openPractice,openClassPractice,toggleLaser,timerClose
+    case select1,select2,select3,select4,select5,select6,select7,award,grantMovement,attack,endTurn,pauseResume,pageBack,pageForward,goToPage,openTimer,timerStartPause,timerPlus10,toggleScoreboard,toggleTeamScores,openQuizReport,openQuiz,openClassQuiz,openPractice,openClassPractice,toggleLaser,timerClose
     /// Works everywhere, also over the pack / shop / sheets.
     var global:Bool {[.openTimer,.timerStartPause,.timerPlus10,.timerClose,.toggleScoreboard,.toggleTeamScores,.openQuiz,.openClassQuiz,.openPractice,.openClassPractice,.toggleLaser].contains(self)}
     var id:String {rawValue}
@@ -275,7 +275,7 @@ enum ClassroomShortcutAction:String,CaseIterable,Identifiable {
         switch self {
         case .select1,.select2,.select3,.select4,.select5,.select6,.select7:return "选择第\(seat!)位成员"
         case .award:return "发金币（按下后输数字回车；连按两下按输入框）";case .grantMovement:return "发体力/移动（按下后输数字回车；连按两下按输入框）";case .attack:return "战斗：普通攻击";case .endTurn:return "战斗：结束行动"
-        case .pauseResume:return "暂停 / 继续";case .pageBack:return "绘本上一页";case .pageForward:return "绘本下一页"
+        case .pauseResume:return "暂停 / 继续";case .pageBack:return "绘本上一页";case .pageForward:return "绘本下一页";case .goToPage:return "绘本跳到指定页（输页码回车）"
         case .openTimer:return "打开计时器";case .timerStartPause:return "计时开始 / 暂停";case .timerPlus10:return "计时 +10 秒"
         case .toggleScoreboard:return "显示 / 隐藏记分板"
         case .toggleTeamScores:return "记分板：个人 / 队伍切换"
@@ -292,7 +292,7 @@ enum ClassroomShortcutAction:String,CaseIterable,Identifiable {
         switch self {
         case .select1,.select2,.select3,.select4,.select5,.select6,.select7:return "person.fill"
         case .award:return "bitcoinsign.circle";case .grantMovement:return "figure.walk";case .attack:return "burst";case .endTurn:return "forward.end";case .pauseResume:return "playpause"
-        case .pageBack:return "chevron.left";case .pageForward:return "chevron.right";case .openTimer:return "timer";case .timerStartPause:return "playpause.circle"
+        case .pageBack:return "chevron.left";case .pageForward:return "chevron.right";case .goToPage:return "arrow.right.doc.on.clipboard";case .openTimer:return "timer";case .timerStartPause:return "playpause.circle"
         case .timerPlus10:return "plus.circle";case .toggleScoreboard:return "list.number";case .toggleTeamScores:return "person.3";case .openQuizReport:return "chart.bar.doc.horizontal";case .openQuiz:return "questionmark.bubble";case .openClassQuiz:return "person.3.sequence";case .openPractice:return "rectangle.on.rectangle.angled";case .openClassPractice:return "rectangle.stack.badge.person.crop";case .toggleLaser:return "smallcircle.filled.circle";case .timerClose:return "timer.circle"
         }
     }
@@ -300,7 +300,7 @@ enum ClassroomShortcutAction:String,CaseIterable,Identifiable {
     var defaultKey:String {
         switch self {
         case .select1:return "1";case .select2:return "2";case .award:return "g";case .grantMovement:return "m";case .attack:return "a";case .endTurn:return "e"
-        case .pauseResume:return " ";case .pageBack:return "←";case .pageForward:return "→";case .openTimer:return "t";case .toggleScoreboard:return "s";case .toggleTeamScores:return "d";case .openQuizReport:return "r";case .openQuiz:return "q";case .openClassQuiz:return "⇧q";case .openPractice:return "k";case .openClassPractice:return "⇧k";case .toggleLaser:return "l";case .timerClose:return "⇧t"
+        case .pauseResume:return " ";case .pageBack:return "←";case .pageForward:return "→";case .goToPage:return "p";case .openTimer:return "t";case .toggleScoreboard:return "s";case .toggleTeamScores:return "d";case .openQuizReport:return "r";case .openQuiz:return "q";case .openClassQuiz:return "⇧q";case .openPractice:return "k";case .openClassPractice:return "⇧k";case .toggleLaser:return "l";case .timerClose:return "⇧t"
         default:return ""
         }
     }

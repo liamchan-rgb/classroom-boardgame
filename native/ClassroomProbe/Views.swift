@@ -72,7 +72,7 @@ private struct TeacherBookConsole:View {
                 // No 投放 / 游戏 buttons here: opening this tab already puts the book on the TV, and the 游戏 tab
                 // brings the game back (both did exactly what the tabs do).
                 Button{session.turnPage(-1)}label:{Label("上页",systemImage:"chevron.left")}
-                GlassChip(icon:"doc.plaintext",text:"\(session.state.pageCount==0 ? 0:session.state.pageIndex+1) / \(session.state.pageCount)")
+                PageJumpChip(session:session)
                 DeckBuildChip(model:session.display)
                 Button{session.turnPage(1)}label:{Label("下页",systemImage:"chevron.right")}
                 Spacer(minLength:0)
@@ -210,6 +210,42 @@ enum NotesMarkup {
 }
 
 /// Animations left on this slide: "下页" plays the next one before turning the page.
+/// The page counter; tap it (or press P) to type a page number and press Return to jump there.
+private struct PageJumpChip:View {
+    @ObservedObject var session:TeacherSession
+    @State private var editing=false
+    @State private var text=""
+    var body:some View {
+        Group {
+            if editing {
+                HStack(spacing:5){
+                    Image(systemName:"arrow.right.doc.on.clipboard").font(.system(size:13,weight:.bold)).foregroundStyle(GameTheme.primary)
+                    ClassroomTextField(placeholder:"页码",text:$text,limit:4,keyboard:.numberPad,alignment:.center,
+                                       onSubmit:jump,autoFocus:true,onEndEditing:{editing=false}).frame(width:56,height:22)
+                    Text("/ \(session.state.pageCount)").font(.system(size:14,weight:.semibold,design:.rounded)).monospacedDigit().foregroundStyle(GameTheme.ink)
+                }
+                .padding(.horizontal,10).padding(.vertical,6)
+                .background(GlassFill.field,in:Capsule())
+                .overlay(Capsule().stroke(GameTheme.primary.opacity(0.8),lineWidth:1.5))
+            } else {
+                Button{open()}label:{GlassChip(icon:"doc.plaintext",text:"\(session.state.pageCount==0 ? 0:session.state.pageIndex+1) / \(session.state.pageCount)")}
+                    .buttonStyle(.plain).help("跳到指定页 (P)").accessibilityLabel("跳到指定页")
+            }
+        }
+        .onChange(of:session.pageJumpRequest){_,_ in open()}
+    }
+    private func open() {guard session.state.pageCount>0 else{return};text="";editing=true}
+    private func jump() {
+        // Full-width digits (Chinese keyboard) count too.
+        let digits=text.unicodeScalars.compactMap{s->Character? in
+            if ("0"..."9").contains(Character(s)) {return Character(s)}
+            if (0xFF10...0xFF19).contains(s.value) {return Character(UnicodeScalar(s.value-0xFF10+48)!)}
+            return nil}
+        if let number=Int(String(digits)),number>0 {session.goToPage(number)}
+        editing=false
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),to:nil,from:nil,for:nil)
+    }
+}
 private struct DeckBuildChip:View {
     @ObservedObject var model:PublicDisplayModel
     var body:some View {

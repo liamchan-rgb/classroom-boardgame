@@ -133,13 +133,26 @@ final class TeacherSession: ObservableObject {
         if offset < 0, display.page != nil, display.buildStep > 0 { display.buildStep -= 1; return }
         var candidate = state
         candidate.turnPage(by: offset)
+        show(candidate, step: offset < 0 ? Int.max : 0, animated: offset > 0)
+    }
+    /// Jumps straight to a page (1-based, clamped to the deck); the page starts from its first animation.
+    func goToPage(_ number: Int) {
+        guard state.pageCount > 0 else { return }
+        var candidate = state
+        candidate.pageIndex = min(state.pageCount - 1, max(0, number - 1))
+        guard candidate.pageIndex != state.pageIndex else { display.buildStep = 0; return }
+        show(candidate, step: 0, animated: true)
+    }
+    /// Bumped by the 跳页 shortcut; the book toolbar opens its page-number field.
+    @Published var pageJumpRequest = 0
+    private func show(_ candidate: ProbeState, step: Int, animated: Bool) {
         guard candidate.pageIndex != state.pageIndex || display.page == nil else { return }
         do {
             let result = try render(deck: deck, index: candidate.pageIndex)
             try persist(state: candidate)
             state = candidate
             DeckLibrary.shared.update(name: sourceName, page: candidate.pageIndex, notes: editedNotes)
-            display.show(result, step: offset < 0 ? Int.max : 0, animated: offset > 0)
+            display.show(result, step: step, animated: animated)
             publish()
             refreshReport(result?.warnings ?? [])
         } catch { message = error.localizedDescription }
