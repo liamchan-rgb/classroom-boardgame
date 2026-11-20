@@ -575,6 +575,14 @@ struct QuizReportPageView: View {
         let plan = QuizReportPage.plan(report)
         return plan.enumerated().map { i, p in AnyView(QuizReportPageView(report: report, page: p, title: title, number: i + 1, count: plan.count, course: course, itemName: itemName)) }
     }
+    /// Student report: one page per student who answered.
+    static func studentPages(_ report: QuizReport, course: String?) -> [AnyView] {
+        let students = report.students.enumerated().filter { !$0.element.lines.isEmpty }
+        return students.enumerated().map { n, e in
+            AnyView(StudentReportPage(sheet: StudentSheet(e.element, index: e.offset), course: course ?? "课堂", number: n + 1, count: students.count))
+        }
+    }
+    static func studentPageNames(_ report: QuizReport) -> [String] { report.students.filter { !$0.lines.isEmpty }.map(\.name) }
     static func images(_ views: [AnyView], scale: CGFloat = 2) -> [UIImage] {
         views.compactMap { v in let r = ImageRenderer(content: v); r.scale = scale; return r.uiImage }
     }
@@ -586,12 +594,12 @@ struct QuizReportPageView: View {
     static func stamp() -> String { let f = DateFormatter(); f.dateFormat = "yyyy-MM-dd"; return f.string(from: Date()) }
     /// One vector PDF, a page per view.
     /// "答题报告-<课程>-2026-11-19": the lesson in the file name, made safe for a file name.
-    static func baseName(_ course: String?) -> String {
+    static func baseName(_ course: String?, kind: String = "答题报告") -> String {
         let safe = course.map { String($0.map { "/\\:*?\"<>|".contains($0) ? "-" : $0 }.prefix(60)) }
-        return "答题报告-" + (safe.map { $0 + "-" } ?? "") + stamp()
+        return kind + "-" + (safe.map { $0 + "-" } ?? "") + stamp()
     }
-    static func pdf(_ views: [AnyView], course: String? = nil) throws -> URL {
-        let url = try folder().appendingPathComponent(baseName(course) + ".pdf")
+    static func pdf(_ views: [AnyView], course: String? = nil, kind: String = "答题报告") throws -> URL {
+        let url = try folder().appendingPathComponent(baseName(course, kind: kind) + ".pdf")
         var box = CGRect(origin: .zero, size: pageSize)
         guard let context = CGContext(url as CFURL, mediaBox: &box, nil) else { throw CocoaError(.fileWriteUnknown) }
         for v in views {
@@ -602,10 +610,10 @@ struct QuizReportPageView: View {
         context.closePDF()
         return url
     }
-    static func pngs(_ images: [UIImage], names: [String], course: String? = nil) throws -> [URL] {
+    static func pngs(_ images: [UIImage], names: [String], course: String? = nil, kind: String = "答题报告") throws -> [URL] {
         let dir = try folder()
         return try images.enumerated().map { i, image in
-            let url = dir.appendingPathComponent(baseName(course) + String(format: "-%02d-", i + 1) + names[i] + ".png")
+            let url = dir.appendingPathComponent(baseName(course, kind: kind) + String(format: "-%02d-", i + 1) + (names.indices.contains(i) ? names[i] : "") + ".png")
             guard let data = image.pngData() else { throw CocoaError(.fileWriteUnknown) }
             try data.write(to: url); return url
         }
@@ -634,6 +642,12 @@ struct QuizReportScreen: View {
     @State private var showExporter = false
     @State private var error: String?
     @State private var copied = false
+    /// 学生报告 (one page per student, for families) or 完整报告 (the class pages and each student's two pages).
+    @AppStorage("classroom.reportStudent") private var studentVersion = true
+    private var views: [AnyView] {
+        studentVersion ? QuizReportExport.studentPages(report, course: course) : QuizReportExport.pages(report, title: title, course: course, itemName: itemName)
+    }
+    private var kind: String { studentVersion ? "学习报告" : "答题报告" }
     /// Each student's wrong words as plain text (for a word list or a message to parents).
     private func copyWords() {
         let lines = report.students.filter { !$0.wrongWords.isEmpty }.map { s in
@@ -647,6 +661,8 @@ struct QuizReportScreen: View {
         VStack(spacing: 12) {
             HStack(spacing: 10) {
                 Label("答题报告", systemImage: "chart.bar.doc.horizontal").font(.title2.bold())
+                Picker("", selection: $studentVersion) { Text("学生报告").tag(true); Text("完整报告").tag(false) }
+                    .pickerStyle(.segmented).frame(width: 190)
                 Text("\(report.students.count) 位同学 · \(report.attempts) 次作答 · 共 \(images.count) 页").font(.callout).foregroundStyle(GameTheme.muted)
                 Spacer()
                 Button { export(pdf: true) } label: { Label("导出 PDF", systemImage: "doc.richtext") }.buttonStyle(GlassIconButtonStyle(prominent: true)).disabled(report.attempts == 0)
@@ -672,13 +688,14 @@ struct QuizReportScreen: View {
             }
         }
         .padding(20).background(GlassBackdrop())
-        .onAppear { images = QuizReportExport.images(QuizReportExport.pages(report, title: title, course: course, itemName: itemName)) }
+        .onAppear { images = QuizReportExport.images(views) }
+        .onChange(of: studentVersion) { _, _ in images = QuizReportExport.images(views) }
         .sheet(isPresented: $showExporter) { ExportPicker(urls: exporting) { showExporter = false } }
     }
     private func export(pdf: Bool) {
         do {
-            exporting = pdf ? [try QuizReportExport.pdf(QuizReportExport.pages(report, title: title, course: course, itemName: itemName), course: course)]
-                            : try QuizReportExport.pngs(images, names: QuizReportExport.pageNames(report), course: course)
+            exporting = pdf ? [try QuizReportExport.pdf(views, course: course, kind: kind)]
+                            : try QuizReportExport.pngs(images, names: studentVersion ? QuizReportExport.studentPageNames(report) : QuizReportExport.pageNames(report), course: course, kind: kind)
             error = nil; showExporter = true
         } catch { self.error = "导出失败：\(error.localizedDescription)" }
     }
@@ -700,5 +717,250 @@ private struct ExportPicker: UIViewControllerRepresentable {
         init(done: @escaping () -> Void) { self.done = done }
         func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) { done() }
         func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) { done() }
+    }
+}
+
+// MARK: - Student report (one page per student, for families)
+
+/// What one student's page shows: how they did, this lesson's ★/★★ words grouped by how they went, and the
+/// sentences (★★★ questions) to practise.
+struct StudentSheet {
+    struct Sentence { var english: String; var chinese: String?; var said: String? }
+    let name: String
+    let index: Int
+    let dates: String
+    let rate: Double
+    let right: Int
+    let total: Int
+    let levels: [(name: String, label: String, tally: QuizReport.Tally?)]
+    let todo: [QuizReport.VocabItem]
+    let improved: [QuizReport.VocabItem]
+    let mastered: [QuizReport.VocabItem]
+    let unrecorded: [QuizReport.VocabItem]
+    let sentences: [Sentence]
+    var words: Int { todo.count + improved.count + mastered.count + unrecorded.count }
+
+    init(_ s: QuizReport.Student, index: Int) {
+        name = s.name; self.index = index; rate = s.rate; right = s.right; total = s.total
+        dates = Self.dates(s.lines.map(\.attempt.at))
+        levels = [("★", "基础"), ("★★", "提高"), ("★★★", "挑战")].map { n, l in (n, l, s.byDifficulty.first { $0.name == n }) }
+        // The lesson's words once each (a word on two cards: the one that needs the most attention).
+        func rank(_ st: QuizReport.VocabItem.Status) -> Int { switch st { case .wrong: return 0; case .corrected: return 1; case .right: return 2; case .untested: return 3 } }
+        var words: [QuizReport.VocabItem] = []
+        for v in s.vocabulary {
+            if let i = words.firstIndex(where: { $0.word.lowercased() == v.word.lowercased() }) {
+                if rank(v.status) < rank(words[i].status) { words[i].status = v.status }
+                words[i].difficulty = min(words[i].difficulty, v.difficulty)
+            } else { words.append(v) }
+        }
+        var sentences: [Sentence] = []
+        for line in s.mistakes {
+            let q = line.question
+            if q.type == .flashcard {
+                guard let w = QuizReport.word(q, part: 0) else { continue }
+                // A lesson word is already in the word groups; a sentence card goes to the sentences.
+                if words.contains(where: { $0.word.lowercased() == w.word.lowercased() }) { continue }
+                sentences.append(Sentence(english: w.word, chinese: w.meaning, said: nil))
+                continue
+            }
+            let wrong = line.answers.indices.filter { !line.answers[$0].right }
+            let missed = wrong.compactMap { line.words.indices.contains($0) ? line.words[$0] : nil }
+            if !missed.isEmpty {
+                // A word missed in a choice / fill-in question: it goes with the words to practise.
+                for w in missed {
+                    if let i = words.firstIndex(where: { $0.word.lowercased() == w.word.lowercased() }) { words[i].status = .wrong }
+                    else { words.append(QuizReport.VocabItem(word: w.word, meaning: w.meaning, status: .wrong, tries: 1, difficulty: 0)) }
+                }
+                continue
+            }
+            let said = wrong.first.map { line.answers[$0].said }
+            sentences.append(Sentence(english: line.summary, chinese: "正确：" + wrong.map { line.answers[$0].expected }.joined(separator: "、"),
+                                      said: said.flatMap { QuizReport.nonAnswers.contains($0) ? nil : $0 }))
+        }
+        todo = words.filter { $0.status == .wrong }
+        improved = words.filter { $0.status == .corrected }
+        mastered = words.filter { $0.status == .right }
+        unrecorded = words.filter { $0.status == .untested }
+        self.sentences = sentences
+    }
+    static func dates(_ times: [Double]) -> String {
+        guard let a = times.min(), let b = times.max() else { return "" }
+        let cal = Calendar.current, x = Date(timeIntervalSince1970: a), y = Date(timeIntervalSince1970: b)
+        let (m1, d1) = (cal.component(.month, from: x), cal.component(.day, from: x)), (m2, d2) = (cal.component(.month, from: y), cal.component(.day, from: y))
+        if m1 == m2 && d1 == d2 { return "\(m1)月\(d1)日" }
+        return m1 == m2 ? "\(m1)月\(d1)–\(d2)日" : "\(m1)月\(d1)日–\(m2)月\(d2)日"
+    }
+    var praise: String { rate >= 0.9 ? "非常棒！" : rate >= 0.75 ? "掌握得不错。" : rate >= 0.6 ? "继续加油。" : "还需要多练习。" }
+}
+
+/// One student's page: plain words for a family, nothing about the game.
+struct StudentReportPage: View {
+    let sheet: StudentSheet
+    let course: String
+    let number: Int
+    let count: Int
+    private static let width: CGFloat = 595 - 56 - 28 - 20
+    private static func chipWidth(_ v: QuizReport.VocabItem) -> CGFloat {
+        ChipFit.text(v.word, 10, .heavy) + ChipFit.text(v.meaning ?? "", 9.5, .medium) + (v.difficulty > 0 ? CGFloat(v.difficulty) * 6 + 4 : 0) + 22
+    }
+    /// Lines of chips a group takes, and how many fit when the page is short of room.
+    private static func rows(_ items: [QuizReport.VocabItem], max: Int = 99) -> (count: Int, rows: Int) {
+        ChipFit.fit(items.map(chipWidth), line: width, spacing: 5, rows: max)
+    }
+    var body: some View {
+        // Room left for the words and sentences once the top of the page is drawn; the unrecorded words give way
+        // first, then the sentences.
+        let budget: CGFloat = 842 - 56 - 84 - 96 - 36 - 22 - 4 * 10
+        let groups = [sheet.todo, sheet.improved, sheet.mastered].filter { !$0.isEmpty }
+        let fixed: CGFloat = 34 + CGFloat(groups.count) * 36 + groups.map { CGFloat(Self.rows($0).rows) * 24 }.reduce(0, +) + (sheet.todo.isEmpty ? 34 : 0)
+        let sentenceRoom = budget - fixed - (sheet.unrecorded.isEmpty ? 0 : 36 + 24)
+        let sentencesShown = min(sheet.sentences.count, max(0, Int((sentenceRoom - 40) / 34)))
+        let laterRoom = budget - fixed - (sheet.sentences.isEmpty ? 0 : 44 + CGFloat(sentencesShown) * 34) - 36
+        let later = Self.rows(sheet.unrecorded, max: max(1, Int(laterRoom / 24)))
+        VStack(alignment: .leading, spacing: 10) {
+            header
+            summary
+            HStack(spacing: 8) {
+                ForEach(sheet.levels, id: \.name) { l in
+                    HStack(spacing: 4) {
+                        Text(l.name).foregroundStyle(Ink.gold)
+                        Text(l.label)
+                        if let t = l.tally { Text("\(t.right)/\(t.total)").fontWeight(.heavy) } else { Text("未出题").foregroundStyle(Ink.muted) }
+                    }
+                    .font(.system(size: 10, weight: .semibold, design: .rounded)).foregroundStyle(l.tally == nil ? Ink.muted : Ink.ink)
+                    .padding(.horizontal, 10).padding(.vertical, 4)
+                    .background(Capsule().fill(.white)).overlay(Capsule().stroke(Ink.line, lineWidth: 0.8))
+                }
+            }
+            box {
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    Image(systemName: "books.vertical.fill").foregroundStyle(Ink.teal)
+                    Text("本节课需要掌握的高频词").font(.system(size: 13, weight: .heavy, design: .rounded))
+                    count(sheet.words, Ink.teal)
+                    Spacer()
+                    Text("★ 基础、★★ 提高难度的重点单词，按孩子这节课的表现分组").font(.system(size: 8, weight: .medium, design: .rounded)).foregroundStyle(Ink.muted)
+                }
+                if sheet.todo.isEmpty {
+                    sub(icon: "party.popper.fill", title: "没有要再练的词", note: "", tint: Ink.good, items: [], shown: 0)
+                } else {
+                    sub(icon: "arrow.counterclockwise", title: "还要练", note: "答错了，在家可以多读几遍", tint: Ink.bad, items: sheet.todo, shown: sheet.todo.count)
+                }
+                if !sheet.improved.isEmpty { sub(icon: "chart.line.uptrend.xyaxis", title: "进步了", note: "先答错，后来答对了", tint: Ink.teal, items: sheet.improved, shown: sheet.improved.count) }
+                if !sheet.mastered.isEmpty { sub(icon: "checkmark.seal.fill", title: "已掌握", note: "答对了，或在更难的句子里说对了", tint: Ink.good, items: sheet.mastered, shown: sheet.mastered.count) }
+                if !sheet.unrecorded.isEmpty { sub(icon: "circle.dashed", title: "未记录到闪卡练习中的重点词", note: "课上学过，这节课还没有用闪卡单独考", tint: Ink.muted, items: sheet.unrecorded, shown: later.count) }
+            }
+            if !sheet.sentences.isEmpty {
+                box {
+                    HStack(alignment: .firstTextBaseline, spacing: 6) {
+                        Image(systemName: "text.quote").foregroundStyle(Ink.bad)
+                        Text("要再练的句子").font(.system(size: 13, weight: .heavy, design: .rounded))
+                        count(sheet.sentences.count, Ink.bad)
+                        Spacer()
+                        Text("英文 · 意思").font(.system(size: 8, weight: .medium, design: .rounded)).foregroundStyle(Ink.muted)
+                    }
+                    ForEach(Array(sheet.sentences.prefix(sentencesShown).enumerated()), id: \.offset) { k, s in
+                        HStack(alignment: .firstTextBaseline, spacing: 6) {
+                            Text("\(k + 1).").font(.system(size: 10, weight: .bold, design: .rounded)).foregroundStyle(Ink.muted)
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text(s.english).font(.system(size: 10.5, weight: .bold, design: .rounded)).foregroundStyle(Ink.ink)
+                                if let zh = s.chinese { Text(zh).font(.system(size: 9, weight: .medium, design: .rounded)).foregroundStyle(Ink.muted) }
+                                if let said = s.said { Text("孩子说成：\(said)").font(.system(size: 8.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.bad) }
+                            }.fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                    if sheet.sentences.count > sentencesShown {
+                        Text("另有 \(sheet.sentences.count - sentencesShown) 句").font(.system(size: 8, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted)
+                    }
+                }
+            }
+            Spacer(minLength: 0)
+            HStack {
+                Spacer()
+                Text("\(course) · 学习报告 · \(number) / \(count)").font(.system(size: 8, weight: .semibold, design: .rounded)).monospacedDigit()
+            }.foregroundStyle(Ink.muted)
+        }
+        .padding(28).frame(width: pageSize.width, height: pageSize.height, alignment: .topLeading)
+        .background(Ink.page).environment(\.colorScheme, .light)
+    }
+    private var header: some View {
+        HStack(spacing: 14) {
+            Text(quizInitial(sheet.name)).font(.system(size: 24, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                .frame(width: 50, height: 50).background(Circle().fill(Ink.avatars[sheet.index % Ink.avatars.count])).overlay(Circle().stroke(.white, lineWidth: 2.5))
+            VStack(alignment: .leading, spacing: 3) {
+                Text(course).font(.system(size: 24, weight: .heavy, design: .rounded)).foregroundStyle(.white).lineLimit(1).minimumScaleFactor(0.6)
+                Text("\(sheet.name) 的学习报告" + (sheet.dates.isEmpty ? "" : " · \(sheet.dates)")).font(.system(size: 11, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.9))
+            }
+            Spacer()
+        }
+        .padding(.horizontal, 18).padding(.vertical, 14)
+        .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(LinearGradient(colors: [Ink.teal, Ink.sea], startPoint: .leading, endPoint: .trailing)))
+    }
+    private var summary: some View {
+        HStack(spacing: 14) {
+            ZStack {
+                Circle().stroke(Ink.line, lineWidth: 8)
+                Circle().trim(from: 0, to: sheet.rate).stroke(Ink.good, style: StrokeStyle(lineWidth: 8, lineCap: .round)).rotationEffect(.degrees(-90))
+                VStack(spacing: 0) {
+                    Text("\(Int((sheet.rate * 100).rounded()))%").font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(Ink.ink)
+                    Text("答对").font(.system(size: 7.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted)
+                }
+            }.frame(width: 66, height: 66)
+            Text(summaryText).font(.system(size: 11.5, weight: .medium, design: .rounded)).foregroundStyle(Ink.ink).lineSpacing(4).fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 0)
+        }
+        .padding(14).background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white))
+        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Ink.line, lineWidth: 0.8))
+    }
+    private var summaryText: AttributedString {
+        func plain(_ s: String) -> AttributedString { AttributedString(s) }
+        func bold(_ s: String) -> AttributedString { var a = AttributedString(s); a.font = .system(size: 11.5, weight: .heavy, design: .rounded); a.foregroundColor = Ink.teal; return a }
+        var t = plain("本课答对 ") + bold("\(sheet.right)/\(sheet.total)") + plain(" 题（\(Int((sheet.rate * 100).rounded()))%），\(sheet.praise)")
+        t += plain("本节课 ") + bold("\(sheet.words)") + plain(" 个高频词中，已掌握 ") + bold("\(sheet.mastered.count + sheet.improved.count)") + plain(" 个")
+        if !sheet.improved.isEmpty { t += plain("（其中 \(sheet.improved.count) 个是先错后对）") }
+        if sheet.todo.isEmpty { t += plain("，没有需要再练的词。") }
+        else {
+            t += plain("，还要练 ") + bold("\(sheet.todo.count)") + plain(" 个：")
+            t += plain(sheet.todo.prefix(4).map { $0.word + ($0.meaning.map { "（\($0)）" } ?? "") }.joined(separator: "、") + (sheet.todo.count > 4 ? "等" : "") + "。")
+        }
+        if !sheet.sentences.isEmpty { t += plain("另有 \(sheet.sentences.count) 个句子要再练。") }
+        return t
+    }
+    private func count(_ n: Int, _ tint: Color) -> some View {
+        Text("\(n)").font(.system(size: 8.5, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+            .padding(.horizontal, 6).padding(.vertical, 1).background(Capsule().fill(tint))
+    }
+    private func box<C: View>(@ViewBuilder _ content: () -> C) -> some View {
+        VStack(alignment: .leading, spacing: 8) { content() }
+            .padding(12).frame(maxWidth: .infinity, alignment: .leading)
+            .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white))
+            .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Ink.line, lineWidth: 0.8))
+    }
+    private func sub(icon: String, title: String, note: String, tint: Color, items: [QuizReport.VocabItem], shown: Int) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .firstTextBaseline, spacing: 5) {
+                Image(systemName: icon).font(.system(size: 9, weight: .bold)).foregroundStyle(tint)
+                Text(title).font(.system(size: 10.5, weight: .heavy, design: .rounded)).foregroundStyle(Ink.ink)
+                if !items.isEmpty { count(items.count, tint) }
+                Spacer()
+                Text(note).font(.system(size: 7.5, weight: .medium, design: .rounded)).foregroundStyle(Ink.muted)
+            }
+            if !items.isEmpty {
+                WrapFlow(spacing: 5) {
+                    ForEach(Array(items.prefix(shown).enumerated()), id: \.offset) { _, v in
+                        HStack(spacing: 2) {
+                            if v.difficulty > 0 { Text(String(repeating: "★", count: v.difficulty)).font(.system(size: 6.5, weight: .heavy)).foregroundStyle(Ink.gold) }
+                            Text(v.word).font(.system(size: 10, weight: .heavy, design: .rounded)).foregroundStyle(tint == Ink.muted ? Ink.muted : Ink.ink)
+                            if let m = v.meaning { Text(m).font(.system(size: 9.5, weight: .medium, design: .rounded)).foregroundStyle(Ink.muted) }
+                        }
+                        .padding(.horizontal, 8).padding(.vertical, 4)
+                        .background(RoundedRectangle(cornerRadius: 7, style: .continuous).fill(tint.opacity(tint == Ink.muted ? 0.08 : 0.1)))
+                    }
+                }
+                if items.count > shown { Text("另有 \(items.count - shown) 个").font(.system(size: 8, weight: .semibold, design: .rounded)).foregroundStyle(Ink.muted) }
+            }
+        }
+        .padding(9).frame(maxWidth: .infinity, alignment: .leading)
+        .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(tint.opacity(0.035)))
+        .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).stroke(tint.opacity(0.18), lineWidth: 0.7))
     }
 }

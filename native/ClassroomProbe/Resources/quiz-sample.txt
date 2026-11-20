@@ -1,5 +1,5 @@
 # 林间行旅 · 自带示例题库
-# 一套题库：闪卡、选择、填空、阅读，难度 ★/★★/★★★ 都有。个人挑战与全班题都从这里抽（全随机、按难度随机或老师点选）。
+# 一套题库：★ 基础、★★ 提高为单词闪卡（本课高频词），★★★ 挑战为句子闪卡、填空、选择、阅读。个人挑战与全班题都从这里抽（全随机、按难度随机或老师点选）。
 
 类型：闪卡
 难度：1
@@ -26,13 +26,13 @@
 标签：单词
 
 类型：闪卡
-难度：3
+难度：2
 正面：pear
 背面：梨
 标签：单词
 
 类型：闪卡
-难度：3
+难度：2
 正面：peach
 背面：桃子
 标签：单词
@@ -62,13 +62,13 @@
 标签：单词
 
 类型：闪卡
-难度：3
+难度：2
 正面：panda
 背面：熊猫
 标签：单词
 
 类型：闪卡
-难度：3
+难度：2
 正面：monkey
 背面：猴子
 标签：单词
@@ -98,13 +98,13 @@
 标签：单词
 
 类型：闪卡
-难度：3
+难度：2
 正面：purple
 背面：紫色
 标签：单词
 
 类型：闪卡
-难度：3
+难度：2
 正面：black
 背面：黑色
 标签：单词
@@ -134,13 +134,13 @@
 标签：单词
 
 类型：闪卡
-难度：3
+难度：2
 正面：ear
 背面：耳朵
 标签：单词
 
 类型：闪卡
-难度：3
+难度：2
 正面：mouth
 背面：嘴巴
 标签：单词
@@ -170,13 +170,13 @@
 标签：单词
 
 类型：闪卡
-难度：3
+难度：2
 正面：grandpa
 背面：爷爷
 标签：单词
 
 类型：闪卡
-难度：3
+难度：2
 正面：grandma
 背面：奶奶
 标签：单词
@@ -206,65 +206,16 @@
 标签：单词
 
 类型：闪卡
-难度：3
+难度：2
 正面：desk
 背面：书桌
 标签：单词
 
 类型：闪卡
-难度：3
+难度：2
 正面：bag
 背面：书包
 标签：单词
-
-1. 3 × 7 = ?
-A. 18
-B. 21
-C. 24
-答案：B
-难度：1
-标签：乘法
-
-2. 下面哪个是哺乳动物？
-A. 金鱼
-B. 麻雀
-C. 鲸鱼
-D. 青蛙
-答案：C
-难度：2
-解析：鲸鱼用肺呼吸、胎生哺乳。
-
-3. 判断：太阳从西边升起。
-A. 对
-B. 错
-答案：B
-难度：1
-
-Tom {{went|goed|go}} to school and {{saw|seed|see}} a cat.
-难度：2
-时间：90
-标签：过去式, 单词
-
-I {{am|is|are}} a student. She {{is|am|are}} my friend.
-难度：1
-标签：be动词
-
-类型：阅读
-难度：3
-文章：Lily has a small garden.
-She grows tomatoes and sunflowers.
-Every morning she waters them before school.
-问：What does Lily grow?
-A. apples and roses
-B. tomatoes and sunflowers
-C. carrots and tulips
-答案：B
-问：When does she water the garden?
-A. every morning
-B. every night
-C. on Sunday
-答案：A
-标签：阅读理解
 
 类型：闪卡
 难度：1
@@ -283,3 +234,91 @@ C. on Sunday
 正面：rainbow
 背面：彩虹
 标签：单词
+
+
+# ★★★ 句子题：句子闪卡（口头造句）、填空、选择、阅读
+
+类型：闪卡
+难度：3
+正面：我有一只小兔子。
+背面：I have a little rabbit.
+标签：句子
+
+类型：闪卡
+难度：3
+正面：我的妈妈是一名老师。
+背面：My mother is a teacher.
+标签：句子
+
+类型：闪卡
+难度：3
+正面：熊猫是黑白色的。
+背面：The panda is black and white.
+标签：句子
+
+类型：闪卡
+难度：3
+正面：我用耳朵听。
+背面：I hear with my ears.
+标签：句子
+
+类型：填空
+难度：3
+Tom {{went|goed|go}} to school and {{saw|seed|see}} a cat.
+时间：90
+标签：过去式, 单词
+
+类型：填空
+难度：3
+I {{am|is|are}} a student. She {{is|am|are}} my friend.
+标签：be动词
+
+类型：填空
+难度：3
+A banana is {{yellow|blue|purple}} and an orange is {{orange|green|black}}.
+标签：颜色, 单词
+
+类型：选择
+难度：3
+Which one can swim in the sea?
+A. a rabbit
+B. a whale
+C. a tiger
+答案：B
+解析：whale（鲸鱼）生活在海里。
+标签：动物
+
+类型：选择
+难度：3
+What do you use to write?
+A. a pencil
+B. a desk
+C. a grape
+答案：A
+标签：学习用品, 单词
+
+类型：选择
+难度：3
+I see with my ___.
+A. ears
+B. eyes
+C. mouth
+答案：B
+标签：身体, 单词
+
+类型：阅读
+难度：3
+文章：Lily has a small garden.
+She grows tomatoes and sunflowers.
+Every morning she waters them before school.
+问：What does Lily grow?
+A. apples and roses
+B. tomatoes and sunflowers
+C. carrots and tulips
+答案：B
+问：When does she water the garden?
+A. every morning
+B. every night
+C. on Sunday
+答案：A
+标签：阅读理解

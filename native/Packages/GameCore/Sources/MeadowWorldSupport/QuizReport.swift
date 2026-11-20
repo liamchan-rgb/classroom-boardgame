@@ -47,6 +47,11 @@ public struct QuizReport {
         public var meaning: String?
         public var status: Status
         public var tries: Int
+        /// The card's difficulty (★ 1, ★★ 2; 0 = a word from a ★★★ question, not a card).
+        public var difficulty: Int = 1
+        public init(word: String, meaning: String?, status: Status, tries: Int, difficulty: Int = 1) {
+            self.word = word; self.meaning = meaning; self.status = status; self.tries = tries; self.difficulty = difficulty
+        }
     }
     /// One flash card of the course across the class: how often it was asked and answered right, who missed it.
     public struct CardStat: Equatable {
@@ -205,13 +210,13 @@ public struct QuizReport {
                 // The last time it came up right inside a harder question.
                 let inside = passedIn.last { $0.difficulty > level && $0.text.contains(w.word) }
                 guard let last = lastTry else {
-                    return VocabItem(word: w.word, meaning: w.meaning, status: inside != nil ? .right : .untested, tries: 0)
+                    return VocabItem(word: w.word, meaning: w.meaning, status: inside != nil ? .right : .untested, tries: 0, difficulty: level)
                 }
                 var right = last.element.attempt.rightCount == last.element.attempt.correct.count
                 // Missed on its own card, then said right in a harder question afterwards: corrected.
                 if !right, let inside, inside.at > last.offset { right = true }
                 let everWrong = tries.contains { $0.element.attempt.rightCount < $0.element.attempt.correct.count }
-                return VocabItem(word: w.word, meaning: w.meaning, status: right ? (everWrong ? .corrected : .right) : .wrong, tries: tries.count)
+                return VocabItem(word: w.word, meaning: w.meaning, status: right ? (everWrong ? .corrected : .right) : .wrong, tries: tries.count, difficulty: level)
             }
             return s
         }
