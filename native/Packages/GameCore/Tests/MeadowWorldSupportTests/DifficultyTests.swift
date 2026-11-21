@@ -78,6 +78,14 @@ final class DifficultyTests:XCTestCase {
         XCTAssertEqual(s.engine.state.units["p1"]!.coins,coins+15)
         try s.undoSuppliesGrant()
         XCTAssertEqual(s.movementRemaining,0,accuracy:1e-9);XCTAssertEqual(s.engine.state.units["p1"]!.coins,coins)
+        // Points too, in the same one operation: undone together with the steps and coins.
+        let score=s.engine.state.units["p1"]!.score
+        try s.grantSupplies(actors:["p1"],movementSteps:1,coins:5,score:3)
+        XCTAssertEqual(s.engine.state.units["p1"]!.score,score+3);XCTAssertEqual(s.engine.state.units["p1"]!.coins,coins+5)
+        try s.undoSuppliesGrant()
+        XCTAssertEqual(s.engine.state.units["p1"]!.score,score);XCTAssertEqual(s.movementRemaining,0,accuracy:1e-9)
+        try s.grantSupplies(actors:["p1"],movementSteps:0,coins:0,score:2)
+        XCTAssertEqual(s.engine.state.units["p1"]!.score,score+2)
         try s.grantSupplies(actors:["p1","p2"],movementSteps:99,coins:0)
         XCTAssertEqual(s.movementRemaining,s.movementCapacity,accuracy:1e-9)
         XCTAssertThrowsError(try s.grantSupplies(actors:["p1"],movementSteps:0,coins:0))

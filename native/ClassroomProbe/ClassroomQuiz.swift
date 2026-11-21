@@ -352,6 +352,16 @@ struct QuizLauncherPanel: View {
                 Button { onClose() } label: { Label("关闭", systemImage: "xmark") }.buttonStyle(GlassIconButtonStyle())
             }
             if let note = model.note { Text(note).font(.caption).foregroundStyle(note.hasPrefix("✓") ? GameTheme.primary : .red) }
+            // The challenge just played can still be moved to another student or taken back.
+            if game.challenge == nil, let run = game.lastChallenge, !run.ids.isEmpty, game.challengeRunUndoable {
+                HStack(spacing: 10) {
+                    Image(systemName: "clock.arrow.circlepath").foregroundStyle(.orange)
+                    Text("上次挑战：\(run.name) · \(run.ids.count) 条作答").font(.callout.bold())
+                    Spacer()
+                    ChallengeFixMenu(game: game)
+                }
+                .padding(10).background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.orange.opacity(0.12)))
+            }
             if campaign == nil {
                 Label("题库和作答记录存在行程里：先打开行程（电视上的绘本不会被切走）。", systemImage: "info.circle").foregroundStyle(GameTheme.muted)
                 HStack {
@@ -394,13 +404,34 @@ struct QuizLauncherPanel: View {
     }
 }
 
+/// 选错人了: move the challenge's answers (and their rewards) to the right student, or take them all back.
+struct ChallengeFixMenu: View {
+    @ObservedObject var game: MeadowTeacherCoordinator
+    var prominent = false
+    var body: some View {
+        if let run = game.lastChallenge {
+            Menu {
+                Section("\(run.name) · \(run.ids.count) 条作答") {
+                    ForEach(game.seatOrderedPlayers.filter { $0.id != run.player && !$0.host }, id: \.id) { u in
+                        Button { game.moveChallengeRun(to: u.id) } label: { Label("改给 \(u.shortName)（奖励一起转过去）", systemImage: "arrow.right.circle") }
+                    }
+                }
+                Button(role: .destructive) { game.undoChallengeRun() } label: { Label("撤销这次挑战（作答和奖励全部收回）", systemImage: "arrow.uturn.backward") }
+            } label: { Label("选错人了", systemImage: "person.crop.circle.badge.exclamationmark") }
+            .buttonStyle(GlassIconButtonStyle(tint: .orange, prominent: prominent))
+            .disabled(!game.challengeRunUndoable && !run.ids.isEmpty)
+        }
+    }
+}
+
 // MARK: - Timed challenge
 
 @MainActor final class ChallengeModel: ObservableObject {
     /// picking: between questions, the teacher chooses (老师点选, or a draw that found nothing).
     enum Phase: Equatable { case picking, question, finished }
-    let player: String
-    let name: String
+    /// Who answers (changed by 改给… when the wrong student was picked).
+    @Published var player: String
+    @Published var name: String
     let seconds: Int
     /// Time left when the clock last stopped, and since when it runs (nil = stopped). It runs only while a
     /// question is up and not yet answered: not while choosing, during the card's entrance or the answer's reveal.
@@ -452,6 +483,7 @@ struct ChallengePanel: View {
                             .foregroundStyle(left <= 10 ? Color.orange : model.running ? GameTheme.ink : GameTheme.muted)
                     }.help("计时只在题目出好、等学生作答时走；选题、动画和揭晓答案时暂停")
                 }
+                if model.phase != .finished { ChallengeFixMenu(game: game) }
                 Button { onEnd() } label: { Label(model.phase == .finished ? "关闭 (Esc)" : "结束 (Esc)", systemImage: "stop.circle") }.buttonStyle(GlassIconButtonStyle())
             }
             if model.phase != .finished { QuizDrawBar(game: game) }

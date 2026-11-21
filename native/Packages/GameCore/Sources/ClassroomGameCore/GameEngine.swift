@@ -172,6 +172,7 @@ struct Evaluation {
         case .editPlayer(let id,let value):try editPlayer(id,value:value)
         case .grantPlayerResources(let ids,let ap,let coins):try grantPlayerResources(ids,ap:ap,coins:coins)
         case .grantPlayerSupplies(let ids,let movement,let coins):try grantPlayerSupplies(ids,movement:movement,coins:coins)
+        case .grantPlayerRewards(let ids,let movement,let coins,let score):try grantPlayerSupplies(ids,movement:movement,coins:coins,score:score)
         case .givePlayerResource(let from,let to,let coins,let item,let count):try givePlayerResource(from:from,to:to,coins:coins,item:item,count:count)
         case .startCampaignDuel(let node,let teams):try startDuel(node:node,teams:teams)
         case .resetDuelLimits:state.pvpPairs=nil;events.append(GameEvent("duelLimitsReset"))

@@ -191,6 +191,8 @@ public enum GameCommand: Codable, Equatable {
     case grantPlayerResources(actors:[String],ap:Int,coins:Int)
     /// Picture-book grant: coins to each player; `movement` steps go to their teams' movement bars (kept by the campaign layer).
     case grantPlayerSupplies(actors:[String],movement:Int,coins:Int)
+    /// The book grant bar: movement steps (to each team's bar), coins and points to each player, in one operation.
+    case grantPlayerRewards(actors:[String],movement:Int,coins:Int,score:Int)
     /// One teammate hands coins and/or an item (from the pack, never worn gear) to another; exploration only.
     case givePlayerResource(from:String,to:String,coins:Int,item:String?,count:Int)
     /// Two teams met on a node: they fight once (per pair) as a team duel.

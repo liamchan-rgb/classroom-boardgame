@@ -588,6 +588,34 @@ final class QuizTests:XCTestCase {
         XCTAssertEqual(legacySave.archive,s.snapshot.archive)
         return legacyBytes.count
     }
+    /// A challenge given to the wrong student: all its answers come back off in one go (records, coins, points and
+    /// movement steps), or move to the right student and pay them instead.
+    func testChallengeForTheWrongStudentCanBeUndoneOrMoved()throws {
+        let bank=(0..<3).map{QuizBankParser.flashcard(front:"w\($0)",back:"词\($0)",distractors:[])}
+        let s=try quizSession(bank)
+        _=try arrive(s)  // the bar is not full, so steps show
+        let start=s.engine.state,move=s.movement(team:s.engine.state.units["p1"]!.teamID).remaining,logCount=s.quizLog.count
+        let mark=s.quizRunMark()
+        var ids:[String]=[]
+        for k in 0..<3 {let id=UUID().uuidString;try s.recordQuiz(actor:"p1",question:k,picks:[0],seconds:3,free:true,challenge:true,id:id);ids.append(id)}
+        XCTAssertGreaterThan(s.engine.state.units["p1"]!.coins,start.units["p1"]!.coins)
+        XCTAssertTrue(s.canUndoQuizRun(mark,ids:ids))
+        // Moved to p2: p1 is back where it was, p2 has the three answers and their rewards.
+        let moved=try s.moveQuizRun(mark,ids:ids,to:"p2")
+        XCTAssertEqual(moved.count,3)
+        XCTAssertEqual(s.engine.state.units["p1"]!.coins,start.units["p1"]!.coins);XCTAssertEqual(s.engine.state.units["p1"]!.score,start.units["p1"]!.score)
+        XCTAssertEqual(s.quizLog.suffix(3).map(\.player),["p2","p2","p2"]);XCTAssertEqual(s.quizLog.count,logCount+3)
+        XCTAssertEqual(s.engine.state.units["p2"]!.coins,start.units["p2"]!.coins+30)
+        // And taken back altogether: as before the challenge, movement included.
+        try s.undoQuizRun(mark,ids:moved)
+        XCTAssertEqual(s.engine.state.units,start.units);XCTAssertEqual(s.quizLog.count,logCount)
+        XCTAssertEqual(s.movement(team:s.engine.state.units["p1"]!.teamID).remaining,move,accuracy:0.001)
+        // Something else done after the run: no longer undone as a whole.
+        let mark2=s.quizRunMark(),id=UUID().uuidString
+        try s.recordQuiz(actor:"p1",question:0,picks:[0],seconds:3,free:true,challenge:true,id:id)
+        try s.recordQuiz(actor:"p2",question:1,picks:[0],seconds:3,free:true,shared:true)
+        XCTAssertFalse(s.canUndoQuizRun(mark2,ids:[id]));XCTAssertThrowsError(try s.undoQuizRun(mark2,ids:[id]))
+    }
     func testOneMovementStepPerQuestionPerTeam()throws {
         let s=try quizSession([QuizBankParser.flashcard(front:"cat",back:"猫",distractors:[]),QuizBankParser.flashcard(front:"dog",back:"狗",distractors:[])])
         _=try arrive(s)  // walking uses up part of the bar

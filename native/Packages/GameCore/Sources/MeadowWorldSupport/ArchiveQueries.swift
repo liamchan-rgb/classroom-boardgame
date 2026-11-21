@@ -38,7 +38,7 @@ public enum MeadowHistoryCategory:String,CaseIterable {case all,combat,travel,re
         switch command {
         case .startCampaignDuel,.resetDuelLimits,.startBattle,.attack,.cast,.monsterStep,.endTurn,.joinMonster,.reorderQueue,.finishBattle,.rescue,.retreatAfterDefeat:return .combat
         case .campaignMove,.move,.interactCampaignNode,.resolveCampaignSite,.answerCampaignQuiz,.recordCampaignQuiz,.editQuizRecord,.removeQuizRecord,.refillCampaignMovement:return .travel
-        case .tradeCampaignSite,.campaignLottery,.customWheel,.editPlayer,.grantPlayerResources,.grantPlayerSupplies,.givePlayerResource,.editResources,.useItem,.reward,.setHealth,.revive,.equip,.refillExploration:return .resources
+        case .tradeCampaignSite,.campaignLottery,.customWheel,.editPlayer,.grantPlayerResources,.grantPlayerSupplies,.grantPlayerRewards,.givePlayerResource,.editResources,.useItem,.reward,.setHealth,.revive,.equip,.refillExploration:return .resources
         case .configureTeams,.mergeTeams,.transferTeamResource,.teacherTransferTeamResource,.addHost,.changeTeam:return .team
         case .applyPlayerProfile:return .appearance
         case .configureCampaignSite,.configureNodeEncounter,.configureNodeReward,.resetNodeReward,.setDifficulty:return .configuration
@@ -59,7 +59,7 @@ public struct MeadowHistoryIndex:Identifiable,Equatable {
         case .useItem(let actor,_,let target):ids.formUnion([actor,target])
         case .endTurn(let actor,_):ids.insert(actor)
         case .recordCampaignQuiz(let r):ids.insert(r.attempt.player)
-        case .campaignMove(let actors,_),.move(let actors,_),.interactCampaignNode(let actors),.refillCampaignMovement(let actors,_,_),.grantPlayerResources(let actors,_,_),.grantPlayerSupplies(let actors,_,_),.reward(let actors,_):ids.formUnion(actors)
+        case .campaignMove(let actors,_),.move(let actors,_),.interactCampaignNode(let actors),.refillCampaignMovement(let actors,_,_),.grantPlayerResources(let actors,_,_),.grantPlayerSupplies(let actors,_,_),.grantPlayerRewards(let actors,_,_,_),.reward(let actors,_):ids.formUnion(actors)
         case .applyPlayerProfile(let id,_,_),.editPlayer(let id,_),.editResources(let id,_),.equip(let id,_,_),.setHealth(let id,_,_),.revive(let id),.changeTeam(let id,_):ids.insert(id)
         case .startBattle,.finishBattle:ids.formUnion(entry.before.battle?.queue ?? []);ids.formUnion(entry.after.battle?.queue ?? [])
         default:break
@@ -80,6 +80,7 @@ public struct MeadowHistoryIndex:Identifiable,Equatable {
         case .addHost:return "老师加入"
         case .grantPlayerResources:return "发放行动点 / 金币"
         case .grantPlayerSupplies:return "发放移动 / 金币"
+        case .grantPlayerRewards:return "发放移动 / 金币 / 积分"
         case .givePlayerResource:return "队友赠送"
         case .startCampaignDuel:return "队伍PVP"
         case .resetDuelLimits:return "重置PVP次数"

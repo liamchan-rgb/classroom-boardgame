@@ -472,9 +472,9 @@ public final class MeadowCampaignSession {
     }
     /// Teacher grant from the picture-book bar: coins to each chosen player, and `steps` of movement to each of their
     /// teams' bars (capped at a full bar). One undoable operation.
-    @discardableResult public func grantSupplies(actors:[String],movementSteps:Int,coins:Int)throws->OperationReceipt {
+    @discardableResult public func grantSupplies(actors:[String],movementSteps:Int,coins:Int,score:Int=0)throws->OperationReceipt {
         try requireOpenCampaign()
-        guard movementSteps>=0,coins>=0,movementSteps>0 || coins>0,!actors.isEmpty else{throw GameError("请选择发放对象和数量。")}
+        guard movementSteps>=0,coins>=0,score>=0,movementSteps>0 || coins>0 || score>0,!actors.isEmpty else{throw GameError("请选择发放对象和数量。")}
         let before=writer.snapshot
         if movementSteps>0 {
             let teams=Set(actors.compactMap{engine.state.units[$0]}.map{$0.teamID ?? "party"})
@@ -486,7 +486,7 @@ public final class MeadowCampaignSession {
                 else {if writer.snapshot.movementBalances==nil{writer.snapshot.movementBalances=[:]};writer.snapshot.movementBalances?[key]=value}
             }
         }
-        do{return try engine.apply(.grantPlayerSupplies(actors:actors,movement:movementSteps,coins:coins))}
+        do{return try engine.apply(score>0 ? .grantPlayerRewards(actors:actors,movement:movementSteps,coins:coins,score:score):.grantPlayerSupplies(actors:actors,movement:movementSteps,coins:coins))}
         catch{writer.snapshot=before;throw error}
     }
     /// Records a quiz answer; `steps` of movement go to the student's team bar with it (put back if it fails).
@@ -508,7 +508,13 @@ public final class MeadowCampaignSession {
     }
     /// Undo of a supplies grant: the engine op is reverted, and the movement it added is taken back off each team.
     public func undoSuppliesGrant()throws {
-        guard let entry=engine.history.last,case .grantPlayerSupplies(let actors,let steps,_)=entry.command else{throw GameError("最近操作不是发放。")}
+        guard let entry=engine.history.last else{throw GameError("最近操作不是发放。")}
+        let actors:[String],steps:Int
+        switch entry.command {
+        case .grantPlayerSupplies(let a,let m,_):actors=a;steps=m
+        case .grantPlayerRewards(let a,let m,_,_):actors=a;steps=m
+        default:throw GameError("最近操作不是发放。")
+        }
         let before=writer.snapshot
         let teams=Set(actors.compactMap{engine.state.units[$0]}.map{$0.teamID ?? "party"})
         let take=Double(steps)*MeadowMovementRules.distancePerStep
@@ -798,4 +804,49 @@ public final class MeadowCampaignSession {
 
 extension Array {
     subscript(safe index:Int)->Element? {indices.contains(index) ? self[index]:nil}
+}
+
+/// Where the trip stood when a run of answers began (a timed challenge): the history position and every team's
+/// movement bar, so the whole run can be taken back, or given to another student, in one go.
+public struct QuizRunMark:Equatable {
+    public let historyCount:Int
+    let movement:MeadowCampaignMovement?
+    let balances:[String:Double]?
+}
+extension MeadowCampaignSession {
+    public func quizRunMark()->QuizRunMark {
+        let s=writer.snapshot
+        return QuizRunMark(historyCount:engine.history.count,movement:s.movement,balances:s.movementBalances)
+    }
+    /// Whether the run's answers (operation ids, in order) are still the newest operations of the trip, so they can
+    /// be taken back as a whole (nothing else was done after them).
+    public func canUndoQuizRun(_ mark:QuizRunMark,ids:[String])->Bool {
+        !ids.isEmpty && engine.history.count==mark.historyCount+ids.count && engine.history.suffix(ids.count).map(\.id)==ids
+    }
+    /// Takes back every answer of the run: their records, coins, points and the movement steps they gave.
+    @discardableResult public func undoQuizRun(_ mark:QuizRunMark,ids:[String])throws->[QuizAttempt] {
+        guard canUndoQuizRun(mark,ids:ids) else{throw GameError("挑战之后还做了别的操作，不能整体撤销；可在报告的「修改作答」里逐条删除。")}
+        let attempts=Array(quizLog.suffix(ids.count))
+        let before=writer.snapshot
+        do{
+            for _ in ids {_ = try engine.undo()}
+            var next=snapshot;next.movement=mark.movement;next.movementBalances=mark.balances
+            try writer.write(next)
+        }catch{writer.snapshot=before;throw error}
+        return attempts
+    }
+    /// The run was for the wrong student: its answers are taken back and recorded again for `player` (same
+    /// questions, answers and times; rewards and steps as that student earns them). Returns the new operation ids.
+    @discardableResult public func moveQuizRun(_ mark:QuizRunMark,ids:[String],to player:String)throws->[String] {
+        guard engine.state.units[player]?.kind == .player else{throw GameError("没有这位同学。")}
+        let attempts=try undoQuizRun(mark,ids:ids)
+        var newIDs:[String]=[]
+        for a in attempts {
+            let id=UUID().uuidString
+            try recordQuiz(actor:player,question:a.question,picks:a.picks,texts:a.texts,seconds:a.seconds,at:Date(timeIntervalSince1970:a.at),
+                           free:true,challenge:true,askedAt:Date(timeIntervalSince1970:a.at-a.seconds),id:id)
+            newIDs.append(id)
+        }
+        return newIDs
+    }
 }

@@ -448,3 +448,4 @@ public extension MeadowCampaignSession {
         return try recordQuiz(actor:actor,question:turn.index,picks:[choice],seconds:0,id:id).correct.allSatisfy{$0}
     }
 }
+

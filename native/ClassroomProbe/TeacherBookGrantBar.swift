@@ -8,6 +8,7 @@ import ClassroomGameCore
     @Published var recipients=Set<String>()
     @Published var steps="1"
     @Published var coins="10"
+    @Published var score="1"
     /// Digits only (full-width digits from a Chinese keyboard count too); empty means 0.
     static func amount(_ text:String)->Int {
         let digits=text.unicodeScalars.compactMap{s->Character? in
@@ -26,7 +27,7 @@ extension MeadowTeacherCoordinator {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),to:nil,from:nil,for:nil)
         DispatchQueue.main.async { [self] in
             let ids=(campaign?.engine.state.players ?? []).map(\.id).filter{grantDraft.recipients.contains($0)}
-            grantBookPlayers(ids,movement:BookGrantDraft.amount(grantDraft.steps),coins:BookGrantDraft.amount(grantDraft.coins))
+            grantBookPlayers(ids,movement:BookGrantDraft.amount(grantDraft.steps),coins:BookGrantDraft.amount(grantDraft.coins),score:BookGrantDraft.amount(grantDraft.score))
         }
     }
 }
@@ -36,19 +37,20 @@ struct TeacherBookGrantBar:View {
     @ObservedObject var draft:BookGrantDraft
     var prepare:()->Void={}
     @State private var picking=false
-    private func grant(movement:Int,coins:Int) {
+    private func grant(movement:Int,coins:Int,score:Int=0) {
         prepare()
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),to:nil,from:nil,for:nil)
-        game.grantBookPlayers(selected,movement:movement,coins:coins)
+        game.grantBookPlayers(selected,movement:movement,coins:coins,score:score)
     }
+    enum Box {case steps,coins,score}
     /// A box's amount dropped on one player's card: only that player gets it (ticked recipients are left alone).
-    private func dropGrant(_ id:String,steps:Bool) {
+    private func dropGrant(_ id:String,_ box:Box) {
         prepare()
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),to:nil,from:nil,for:nil)
         // Read the box after the field has committed what it still holds.
         DispatchQueue.main.async {
-            let amount=BookGrantDraft.amount(steps ? draft.steps:draft.coins)
-            game.grantBookPlayers([id],movement:steps ? amount:0,coins:steps ? 0:amount)
+            let amount=BookGrantDraft.amount(box == .steps ? draft.steps:box == .coins ? draft.coins:draft.score)
+            game.grantBookPlayers([id],movement:box == .steps ? amount:0,coins:box == .coins ? amount:0,score:box == .score ? amount:0)
         }
     }
     private var players:[GameUnit] {game.campaign?.engine.state.players ?? []}
@@ -81,17 +83,23 @@ struct TeacherBookGrantBar:View {
                 #endif
             // Drag the icon onto a player's card in the preview to give that player the amount in the box.
             HStack(spacing:4){
-                GrantDragHandle(systemImage:"figure.walk",tint:GameTheme.primary,amount:draft.steps){id in dropGrant(id,steps:true)}
+                GrantDragHandle(systemImage:"figure.walk",tint:GameTheme.primary,amount:draft.steps){id in dropGrant(id,.steps)}
                 ClassroomTextField(placeholder:"0",text:$draft.steps,limit:3,keyboard:.numberPad).frame(width:40,height:36)
             }.padding(.horizontal,10).background(GlassFill.field,in:Capsule()).zIndex(1)
             HStack(spacing:4){
-                GrantDragHandle(systemImage:"bitcoinsign.circle.fill",tint:GameTheme.accent,amount:draft.coins){id in dropGrant(id,steps:false)}
+                GrantDragHandle(systemImage:"bitcoinsign.circle.fill",tint:GameTheme.accent,amount:draft.coins){id in dropGrant(id,.coins)}
                 ClassroomTextField(placeholder:"0",text:$draft.coins,limit:5,keyboard:.numberPad).frame(width:54,height:36)
+            }.padding(.horizontal,10).background(GlassFill.field,in:Capsule()).zIndex(1)
+            // Points (积分), like the coins: the box, or drag the star onto one card.
+            HStack(spacing:4){
+                GrantDragHandle(systemImage:"star.fill",tint:Color(red:0.85,green:0.6,blue:0.12),amount:draft.score){id in dropGrant(id,.score)}
+                ClassroomTextField(placeholder:"0",text:$draft.score,limit:4,keyboard:.numberPad).frame(width:44,height:36)
             }.padding(.horizontal,10).background(GlassFill.field,in:Capsule()).zIndex(1)
             Button{prepare();game.grantFromDraft()}label:{Label("发放 G",systemImage:"gift.fill")}
                 .buttonStyle(GlassIconButtonStyle(tint:GameTheme.accent,prominent:true)).disabled(selected.isEmpty || game.busy)
             Button{grant(movement:1,coins:0)}label:{Label("移动+1",systemImage:"figure.walk")}.disabled(selected.isEmpty || game.busy)
             Button{grant(movement:0,coins:10)}label:{Label("+10",systemImage:"bitcoinsign.circle")}.disabled(selected.isEmpty || game.busy)
+            Button{grant(movement:0,coins:0,score:1)}label:{Label("积分+1",systemImage:"star")}.disabled(selected.isEmpty || game.busy)
             Button{prepare();game.undoTeacherAction()}label:{Label("撤销",systemImage:"arrow.uturn.backward")}.disabled(!game.backend.canUndoTeacherAction || game.busy)
             Spacer(minLength:0)
         }.buttonStyle(GlassIconButtonStyle()).padding(.horizontal,10).padding(.vertical,6).glassPanel(radius:20,padding:0)

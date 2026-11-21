@@ -178,8 +178,23 @@ final class MeadowTeacherCoordinator:ObservableObject {
     // MARK: Timed challenge
     @Published var challenge:ChallengeModel?
     private var challengeTimer:Timer?
+    /// The latest challenge's answers, so a challenge given to the wrong student can be taken back or moved to the
+    /// right one in one go (while it runs, and after it ended, until anything else is done in the trip).
+    struct ChallengeRun {
+        let mark:QuizRunMark
+        var ids:[String]
+        var player:String
+        var name:String
+    }
+    @Published private(set) var lastChallenge:ChallengeRun?
+    /// The last challenge can still be undone or moved as a whole.
+    var challengeRunUndoable:Bool {
+        guard let run=lastChallenge,let c=campaign else{return false}
+        return c.canUndoQuizRun(run.mark,ids:run.ids)
+    }
     func startChallenge(player:String,seconds:Int){
-        guard campaign != nil,let unit=campaign?.engine.state.units[player] else{return}
+        guard let c=campaign,let unit=c.engine.state.units[player] else{return}
+        lastChallenge=ChallengeRun(mark:c.quizRunMark(),ids:[],player:player,name:unit.shortName)
         let model=ChallengeModel(player:player,name:unit.shortName,seconds:seconds)
         withAnimation{challenge=model}
         showChallengePanel()
@@ -269,7 +284,9 @@ final class MeadowTeacherCoordinator:ObservableObject {
         model.pause()
         let r=draft.result
         do{
-            let a=try c.recordQuiz(actor:model.player,question:live.index,picks:recorded(r.picks,live),texts:r.texts,seconds:Date().timeIntervalSince(model.questionStart),free:true,challenge:true,askedAt:live.start)
+            let opID=UUID().uuidString
+            let a=try c.recordQuiz(actor:model.player,question:live.index,picks:recorded(r.picks,live),texts:r.texts,seconds:Date().timeIntervalSince(model.questionStart),free:true,challenge:true,askedAt:live.start,id:opID)
+            lastChallenge?.ids.append(opID)
             model.answered += 1;if a.rightCount==a.correct.count {model.right += 1}
             model.coins += a.coins;model.score += a.score
             live.attempt=shown(a,live);live.hold=1.6;live.dropName=a.drop.flatMap{try? c.engine.catalog.item($0).name}
@@ -278,6 +295,38 @@ final class MeadowTeacherCoordinator:ObservableObject {
             if QuizDrawSettings.shared.mode == .manual {model.phase = .picking;model.draft=nil}
             renderer?.classroomRefresh();revision += 1
         }catch{model.note=error.localizedDescription}
+    }
+    /// 撤销本次挑战: every answer of the last challenge comes back off (records, coins, points, steps); a running
+    /// challenge ends.
+    func undoChallengeRun(){
+        guard let run=lastChallenge,let c=campaign else{return}
+        guard !run.ids.isEmpty else{message="这次挑战还没有记录。";revision += 1;return}
+        do{
+            try c.undoQuizRun(run.mark,ids:run.ids)
+            lastChallenge=nil
+            if challenge != nil {abortQuiz()}
+            renderer?.classroomRefresh()
+            message="已撤销 \(run.name) 的挑战（\(run.ids.count) 条作答和奖励）";revision += 1
+        }catch{message=error.localizedDescription;revision += 1}
+    }
+    /// 改给…: the last challenge's answers go to `player` instead (their rewards follow); a running challenge
+    /// goes on for them.
+    func moveChallengeRun(to player:String){
+        guard var run=lastChallenge,let c=campaign,player != run.player,let unit=c.engine.state.units[player] else{return}
+        do{
+            if !run.ids.isEmpty {run.ids=try c.moveQuizRun(run.mark,ids:run.ids,to:player)}
+            run.player=player;run.name=unit.shortName;lastChallenge=run
+            if let model=challenge {
+                model.player=player;model.name=unit.shortName
+                // The card on screen shows the new name (a fresh card; the clock goes on if a question is waiting).
+                if var live=quiz,live.mode == .challenge {
+                    quizToken += 1;live.token=quizToken;live.player=player;live.playerName=unit.shortName;quiz=live
+                    if live.attempt == nil,model.phase == .question {model.resume()}
+                }
+            }
+            renderer?.classroomRefresh()
+            message="已改给 \(unit.shortName)（\(run.ids.count) 条作答和奖励一起转过去）";revision += 1
+        }catch{message=error.localizedDescription;revision += 1}
     }
     private func challengeTick(){
         guard let model=challenge,model.phase != .finished,model.running,model.remaining<=0 else{return}
@@ -1087,11 +1136,11 @@ final class MeadowTeacherCoordinator:ObservableObject {
         do{try backend.editPlayer(id,value:value,role:.teacher);renderer?.classroomRefresh();message="玩家数值与背包已保存。";revision += 1;return true}
         catch{message=error.localizedDescription;return false}
     }
-    @discardableResult func grantBookPlayers(_ ids:[String],movement:Int,coins:Int)->Bool {
+    @discardableResult func grantBookPlayers(_ ids:[String],movement:Int,coins:Int,score:Int=0)->Bool {
         guard !busy else{message="请等待当前动作结束。";return false}
         guard !ids.isEmpty else{message="请先选择发放对象。";return false}
-        guard movement>0 || coins>0 else{message="请填写移动步数或金币数量。";return false}
-        do{try backend.grantSupplies(ids,movement:movement,coins:coins,role:.teacher);renderer?.classroomRefresh();message="已向\(ids.count)名玩家发放"+[movement>0 ? "移动\(movement)步":nil,coins>0 ? "金币\(coins)":nil].compactMap{$0}.joined(separator:"、")+"。";revision += 1;return true}
+        guard movement>0 || coins>0 || score>0 else{message="请填写移动步数、金币或积分。";return false}
+        do{try backend.grantSupplies(ids,movement:movement,coins:coins,score:score,role:.teacher);renderer?.classroomRefresh();message="已向\(ids.count)名玩家发放"+[movement>0 ? "移动\(movement)步":nil,coins>0 ? "金币\(coins)":nil,score>0 ? "积分\(score)":nil].compactMap{$0}.joined(separator:"、")+"。";revision += 1;return true}
         catch{message=error.localizedDescription;return false}
     }
     func setConnection(_ id:String,connected:Bool){if connected{externalIDs.insert(id)}else{externalIDs.remove(id)};updateMirrorDemand();if !externalConnected{frameMirror.frame=nil};revision += 1}
