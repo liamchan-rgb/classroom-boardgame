@@ -147,7 +147,7 @@ struct WheelHistoryView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         ForEach(Array(entries.enumerated()), id: \.offset) { _, e in
                             HStack(spacing: 10) {
-                                Text(Self.time.string(from: e.at)).font(.callout).monospacedDigit().foregroundStyle(GameTheme.muted).frame(width: 110, alignment: .leading)
+                                Text(Self.time.string(from: e.at)).font(.callout).monospacedDigit().foregroundStyle(GameTheme.muted).lineLimit(1).fixedSize()
                                 Text(e.prize).font(.callout.bold()).foregroundStyle(GameTheme.ink)
                                 Spacer()
                                 Text(e.wheel).font(.caption).foregroundStyle(GameTheme.muted)
