@@ -55,6 +55,16 @@ struct QuizOverlayHost: View {
     }
 }
 
+/// Over the teacher's preview while an answer is showing: a tap anywhere ends the reveal (like Esc).
+struct QuizRevealTapCatcher: View {
+    @ObservedObject var game: MeadowTeacherCoordinator
+    var body: some View {
+        if game.quiz?.attempt != nil {
+            Color.clear.contentShape(Rectangle()).onTapGesture { game.skipQuizReveal() }
+        }
+    }
+}
+
 private struct QuizCardRepresentable: UIViewRepresentable {
     let quiz: LiveQuiz
     var done: (Int) -> Void
@@ -547,6 +557,68 @@ struct QuizPlayerChips: View {
     @Published var players = Set<String>()
     @Published var sent: [(name: String, right: Bool, coins: Int)] = []
     @Published var note: String?
+    /// Questions with one set of options (choice, one-blank fill): each student's own answer (option index as
+    /// shown; -1 = 不会), so everyone is marked on what they said.
+    @Published var choices: [String: Int] = [:]
+    /// The students picked (1–7) take this answer; the pick clears so the next ones can be chosen.
+    func assign(_ option: Int) {
+        guard !players.isEmpty else { note = "先按 1–7 选同学，再按他们选的答案。"; return }
+        for id in players { choices[id] = option }
+        players = []; note = nil
+    }
+    func clearPicked() { for id in players { choices[id] = nil }; players = [] }
+    /// Whether this question takes one answer per student.
+    static func perStudent(_ q: QuizQuestion) -> Bool { q.type != .flashcard && q.parts.count == 1 && q.parts[0].options.count >= 2 }
+}
+
+/// Each student's own answer to a class question with one set of options: a row per student with the options to
+/// tap (A, B, C…, 不会); the right one is marked for the teacher only.
+struct ClassChoiceGrid: View {
+    @ObservedObject var game: MeadowTeacherCoordinator
+    @ObservedObject var model: ClassQuizModel
+    let question: QuizQuestion
+    private static let letters = ["A", "B", "C", "D", "E", "F", "G", "H"]
+    var body: some View {
+        let part = question.parts[0]
+        VStack(alignment: .leading, spacing: 8) {
+            Text(question.type == .fill ? question.prompt.replacingOccurrences(of: #"\{\{(\d+)\}\}"#, with: "（$1）", options: .regularExpression) : question.prompt)
+                .font(.headline).foregroundStyle(GameTheme.ink)
+            FlowRow(spacing: 6) {
+                ForEach(part.options.indices, id: \.self) { k in
+                    HStack(spacing: 4) {
+                        Text(Self.letters[min(k, 7)]).font(.caption.bold()).foregroundStyle(.white).frame(width: 20, height: 20).background(Circle().fill(GameTheme.primary))
+                        Text(part.options[k]).font(.callout)
+                        if k == part.answer { Image(systemName: "checkmark").font(.caption.bold()).foregroundStyle(Color.green) }
+                    }.padding(.horizontal, 8).padding(.vertical, 4).background(Capsule().fill(Color.white.opacity(0.55)))
+                }
+            }
+            Text("每人的答案（点选，或按 1–7 选人再按 A–\(Self.letters[min(part.options.count, 8) - 1])，0 不会）").font(.caption.bold()).foregroundStyle(GameTheme.muted)
+            ForEach(game.campaign?.engine.state.players.filter { !$0.host } ?? [], id: \.id) { u in
+                let picked = model.players.contains(u.id), choice = model.choices[u.id]
+                HStack(spacing: 6) {
+                    Button { if picked { model.players.remove(u.id) } else { model.players.insert(u.id) } } label: {
+                        HStack(spacing: 5) {
+                            Text("\(game.seatNumber(u.id))").font(.caption.bold()).foregroundStyle(.white).frame(width: 20, height: 20)
+                                .background(Circle().fill(picked ? Color.white.opacity(0.3) : GameTheme.primary))
+                            Text(u.shortName).font(.callout.weight(.semibold)).lineLimit(1)
+                        }.frame(width: 104, alignment: .leading).padding(.horizontal, 8).padding(.vertical, 5)
+                        .foregroundStyle(picked ? Color.white : GameTheme.ink)
+                        .background(RoundedRectangle(cornerRadius: 9, style: .continuous).fill(picked ? GameTheme.primary : Color.white.opacity(0.5)))
+                    }.buttonStyle(.plain)
+                    ForEach(part.options.indices, id: \.self) { k in option(Self.letters[min(k, 7)], on: choice == k, right: k == part.answer) { model.choices[u.id] = choice == k ? nil : k } }
+                    option("不会", on: choice == -1, right: false) { model.choices[u.id] = choice == -1 ? nil : -1 }
+                    Spacer(minLength: 0)
+                }
+            }
+        }
+    }
+    private func option(_ title: String, on: Bool, right: Bool, tap: @escaping () -> Void) -> some View {
+        Button { KeyHostingController<EmptyView>.endEditing(); tap() } label: {
+            Text(title).font(.callout.bold()).frame(minWidth: 30).padding(.horizontal, 6).padding(.vertical, 5)
+                .foregroundStyle(on ? Color.white : GameTheme.ink)
+                .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(on ? (right ? Color.green : Color.orange) : Color.white.opacity(0.55)))
+        }.buttonStyle(.plain)
+    }
 }
 
 struct ClassQuizPanel: View {
@@ -573,11 +645,15 @@ struct ClassQuizPanel: View {
                 }
             }
             if model.sent.isEmpty { QuizDrawBar(game: game) }
-            Text("谁回答了（1–7，可多选）").font(.headline)
-            QuizPlayerChips(game: game, selected: model.players, marks: marks) { id in
-                if model.players.contains(id) { model.players.remove(id) } else { model.players.insert(id) }
+            if ClassQuizModel.perStudent(draft.question) {
+                ScrollView { ClassChoiceGrid(game: game, model: model, question: draft.question) }
+            } else {
+                Text("谁回答了（1–7，可多选）").font(.headline)
+                QuizPlayerChips(game: game, selected: model.players, marks: marks) { id in
+                    if model.players.contains(id) { model.players.remove(id) } else { model.players.insert(id) }
+                }
+                ScrollView { QuizAnswerRows(draft: draft) }
             }
-            ScrollView { QuizAnswerRows(draft: draft) }
             QuizRewardFields(reward: reward)
             if !model.sent.isEmpty {
                 FlowRow(spacing: 6) {
@@ -593,13 +669,24 @@ struct ClassQuizPanel: View {
             HStack {
                 Button { onEnd() } label: { Label("只揭晓 (Esc)", systemImage: "eye") }.buttonStyle(GlassIconButtonStyle())
                 Spacer()
-                let right = draft.allRight
-                Text(model.players.isEmpty ? "先选人" : "\(model.players.count) 人 · \(right ? "答对 " + reward.question.rewardLine : "答错 · 参与奖 +\(reward.participationCoins)")")
-                    .font(.callout.bold()).foregroundStyle(right ? Color.green : GameTheme.muted)
-                Button { onSend() } label: { Label("揭晓并发奖 (⏎)", systemImage: "paperplane.fill") }.buttonStyle(GlassIconButtonStyle(prominent: true))
-                    .disabled(model.players.isEmpty || draft.answered == 0)
+                if ClassQuizModel.perStudent(draft.question) {
+                    let answer = draft.question.parts[0].answer
+                    let right = model.choices.values.filter { $0 == answer }.count
+                    Text(model.choices.isEmpty ? "先记每人的答案" : "\(model.choices.count) 人作答 · \(right) 人答对（各得 \(reward.question.rewardLine)）")
+                        .font(.callout.bold()).foregroundStyle(right > 0 ? Color.green : GameTheme.muted)
+                    Button { onSend() } label: { Label("揭晓并发奖 (⏎)", systemImage: "paperplane.fill") }.buttonStyle(GlassIconButtonStyle(prominent: true))
+                        .disabled(model.choices.isEmpty)
+                } else {
+                    let right = draft.allRight
+                    Text(model.players.isEmpty ? "先选人" : "\(model.players.count) 人 · \(right ? "答对 " + reward.question.rewardLine : "答错 · 参与奖 +\(reward.participationCoins)")")
+                        .font(.callout.bold()).foregroundStyle(right ? Color.green : GameTheme.muted)
+                    Button { onSend() } label: { Label("揭晓并发奖 (⏎)", systemImage: "paperplane.fill") }.buttonStyle(GlassIconButtonStyle(prominent: true))
+                        .disabled(model.players.isEmpty || draft.answered == 0)
+                }
             }
-            Text("键盘：1–7 选人，A–H 选答案，0 不会，⌫ 撤回，回车揭晓答案、同时发奖并记录；Esc 只揭晓不发奖。").font(.caption).foregroundStyle(GameTheme.muted)
+            Text(ClassQuizModel.perStudent(draft.question)
+                 ? "键盘：1–7 选人（可多选）再按 A–H 记下他们的答案，0 不会，⌫ 清掉选中的人的答案；回车揭晓答案、按每人的答案发奖并记录；Esc 只揭晓不发奖。"
+                 : "键盘：1–7 选人，A–H 选答案，0 不会，⌫ 撤回，回车揭晓答案、同时发奖并记录；Esc 只揭晓不发奖。").font(.caption).foregroundStyle(GameTheme.muted)
         }.padding(22).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(GlassBackdrop())
     }
     private var marks: [String: String] {
@@ -767,14 +854,18 @@ struct PracticePanel: View {
             HStack {
                 Label("闪卡", systemImage: "rectangle.on.rectangle.angled").font(.title2.bold()).fixedSize()
                 Picker("", selection: Binding(get: { model.classwide }, set: { game.setPracticeClasswide($0) })) {
-                    Text("个人").tag(false); Text("全班 (A)").tag(true)
+                    Text("个人").tag(false); Text("全班").tag(true)
                 }.pickerStyle(.segmented).frame(width: 170)
                 Text("本轮 \(model.right)/\(model.total)").font(.callout.bold()).foregroundStyle(GameTheme.muted)
                 Spacer()
                 Button { onClose() } label: { Label("结束 (Esc)", systemImage: "xmark.circle") }.buttonStyle(GlassIconButtonStyle())
             }
             if model.classwide {
-                Text("谁回答了（1–7，可多选）").font(.headline)
+                HStack {
+                    Text("谁回答了（1–7，可多选）").font(.headline)
+                    Spacer()
+                    Button { game.selectAllPracticePlayers() } label: { Label("全选 (A)", systemImage: "person.3.sequence.fill") }.buttonStyle(GlassIconButtonStyle())
+                }
                 QuizPlayerChips(game: game, selected: model.players) { id in game.togglePracticePlayer(id) }
             } else {
                 QuizPlayerChips(game: game, selected: [model.player]) { id in game.switchPractice(to: id) }
@@ -835,8 +926,8 @@ struct PracticePanel: View {
                 Label(model.classwide ? "当前课程没有闪卡。" : "题库里没有这位同学能练的闪卡。", systemImage: "tray").foregroundStyle(GameTheme.muted)
             }
             Text(model.classwide
-                 ? "键盘：1–7 选回答的同学，D 对、C 错：记录、揭晓背面并自动下一张；空格跳过这张；←/→ 上一张/下一张，O 顺序/乱序，A 切回个人，Esc 结束。答对按难度发奖（★ 10 金币 / ★★ 20 / ★★★ 30，+1 行动，+1/2/3 积分），错词进报告。"
-                 : "键盘：D 对、C 错，记录后自动下一张；←/→ 上一张/下一张，O 顺序/乱序；1–7 换人，A 切到全班，Esc 结束。答对按难度发奖，错词进报告。").font(.caption).foregroundStyle(GameTheme.muted)
+                 ? "键盘：1–7 选回答的同学，D 对、C 错：记录、揭晓背面并自动下一张；空格跳过这张；←/→ 上一张/下一张，O 顺序/乱序，A 全选（再按取消），Esc 结束。答对按难度发奖（★ 10 金币 / ★★ 20 / ★★★ 30，+1 行动，+1/2/3 积分），错词进报告。"
+                 : "键盘：D 对、C 错，记录后自动下一张；←/→ 上一张/下一张，O 顺序/乱序；1–7 换人，A 切到全班并全选，Esc 结束。答对按难度发奖，错词进报告。").font(.caption).foregroundStyle(GameTheme.muted)
         }.padding(22).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(GlassBackdrop())
     }
 }

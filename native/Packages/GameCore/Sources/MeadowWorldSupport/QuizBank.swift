@@ -414,7 +414,7 @@ public extension MeadowCampaignSession {
     /// and pays the reward. `free`: called up by the teacher anywhere, not at a quiz spot. Returns the stored attempt.
     /// `shared`: asked to the whole class; `practice`: flash-card practice.
     /// `participation`: coins for a wrong answer to a class question (the teacher's 参与奖).
-    @discardableResult func recordQuiz(actor:String,question index:Int,picks:[Int?],texts:[String?]?=nil,seconds:Double,at:Date=Date(),free:Bool=false,participation:Int=0,shared:Bool=false,practice:Bool=false,challenge:Bool=false,skipped:Bool=false,id:String=UUID().uuidString)throws->QuizAttempt {
+    @discardableResult func recordQuiz(actor:String,question index:Int,picks:[Int?],texts:[String?]?=nil,seconds:Double,at:Date=Date(),free:Bool=false,participation:Int=0,shared:Bool=false,practice:Bool=false,challenge:Bool=false,skipped:Bool=false,askedAt:Date?=nil,id:String=UUID().uuidString)throws->QuizAttempt {
         if !free {guard canManageInventory,travel==nil else{throw GameError("请抵达地点、结束战斗后答题。")}}
         guard let unit=engine.state.units[actor],quizBank.indices.contains(index) else{throw GameError("没有这道题。")}
         let q=quizBank[index],parts=q.parts
@@ -432,9 +432,12 @@ public extension MeadowCampaignSession {
         let timed = !(shared || practice || challenge || skipped)
         let right = !skipped && !correct.isEmpty && correct.allSatisfy{$0} && !(timed && attempt.overtime)
         let coins=right ? q.reward:max(0,participation)
-        // One movement step per question per team: once a teammate has answered this question right, more right
-        // answers from the same team still pay coins and points but no further step.
+        // One movement step per question per team each time it is asked (`askedAt`: when it came up; nil = ever):
+        // once a teammate has answered it right this time, more right answers from the same team still pay coins
+        // and points but no further step. A flash card asked again in a later round pays its step again.
+        let since=askedAt.map{$0.timeIntervalSince1970-0.001}
         let stepTaken=quizLog.contains{a in a.question==index && a.skipped != true && !a.correct.isEmpty && a.correct.allSatisfy{$0}
+            && since.map{a.at>=$0} ?? true
             && (engine.state.units[a.player]?.teamID ?? "party")==(unit.teamID ?? "party")}
         try applyQuizRecord(QuizRecord(attempt:attempt,fullCoins:q.reward,points:right ? q.points:0,dropTier:nil,free:free,manualCoins:coins,noSpeedBonus:true),steps:right && !stepTaken ? QuizRewards.steps:0,id:id)
         return quizLog.last!

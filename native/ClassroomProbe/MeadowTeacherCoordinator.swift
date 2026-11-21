@@ -256,7 +256,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
         model.pause()
         let r=draft.result
         do{
-            let a=try c.recordQuiz(actor:model.player,question:live.index,picks:recorded(r.picks,live),texts:r.texts,seconds:Date().timeIntervalSince(model.questionStart),free:true,challenge:true)
+            let a=try c.recordQuiz(actor:model.player,question:live.index,picks:recorded(r.picks,live),texts:r.texts,seconds:Date().timeIntervalSince(model.questionStart),free:true,challenge:true,askedAt:live.start)
             model.answered += 1;if a.rightCount==a.correct.count {model.right += 1}
             model.coins += a.coins;model.score += a.score
             live.attempt=shown(a,live);live.hold=1.6;live.dropName=a.drop.flatMap{try? c.engine.catalog.item($0).name}
@@ -314,7 +314,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
         closePanel()
         let before=c.engine.state,r=draft.result
         do{
-            let attempt=try c.recordQuiz(actor:live.player,question:live.index,picks:recorded(r.picks,live),texts:r.texts,seconds:Date().timeIntervalSince(live.start),free:live.node==nil)
+            let attempt=try c.recordQuiz(actor:live.player,question:live.index,picks:recorded(r.picks,live),texts:r.texts,seconds:Date().timeIntervalSince(live.start),free:live.node==nil,askedAt:live.start)
             live.attempt=shown(attempt,live);live.dropName=attempt.drop.flatMap{try? c.engine.catalog.item($0).name}
             quiz=live;quizGainBase=before
             renderer?.classroomRefresh();revision += 1
@@ -326,6 +326,8 @@ final class MeadowTeacherCoordinator:ObservableObject {
     func openClassQuiz(index:Int?=nil,excluding:Set<Int>=[],englishFront:Bool=false){
         // No trip open yet: the launcher offers to continue the last one.
         if campaign == nil {openQuiz();return}
+        // The last class question's answer may still be showing: the next one takes over.
+        if quiz?.mode == .classwide,quiz?.attempt != nil {quiz=nil}
         guard let c=campaign,quiz == nil,quizPanel == nil,presentationHost != nil else{return}
         guard !c.courseIndices.isEmpty else{message="当前课程没有题，先在题库里选课或导入。";revision += 1;return}
         if index == nil,QuizDrawSettings.shared.draw == nil {openClassPicker();return}
@@ -359,6 +361,14 @@ final class MeadowTeacherCoordinator:ObservableObject {
             case " ":other()
             default:
                 if let n=Int(key),n>0,let id=self.player(forSeat:n) {if model.players.contains(id){model.players.remove(id)}else{model.players.insert(id)};return true}
+                // One answer per student: the picked students take the letter (0 = 不会), ⌫ clears theirs.
+                if ClassQuizModel.perStudent(draft.question) {
+                    let letters=Array("abcdefgh").map(String.init)
+                    if let k=letters.firstIndex(of:key),k<draft.question.parts[0].options.count {model.assign(k);return true}
+                    if key=="0" {model.assign(-1);return true}
+                    if key=="⌫" {model.clearPicked();return true}
+                    return false
+                }
                 return draft.key(key)
             }
             return true
@@ -384,18 +394,37 @@ final class MeadowTeacherCoordinator:ObservableObject {
     }
     private func sendClassQuiz(){
         guard let c=campaign,let live=quiz,live.mode == .classwide,let draft=quizDraft,let model=classModel,let reward=quizReward else{return}
+        if ClassQuizModel.perStudent(draft.question) {sendClassChoices(c,live:live,model:model,reward:reward);return}
         guard !model.players.isEmpty,draft.answered>0 else{model.note="先选回答的同学和他们说的答案。";return}
         let r=draft.result,right=draft.allRight,participation=reward.participationCoins
         let order=c.engine.state.players.map(\.id)
         do{
             for id in order where model.players.contains(id) {
-                let a=try c.recordQuiz(actor:id,question:live.index,picks:recorded(r.picks,live),texts:r.texts,seconds:Date().timeIntervalSince(live.start),free:true,participation:participation,shared:true)
+                let a=try c.recordQuiz(actor:id,question:live.index,picks:recorded(r.picks,live),texts:r.texts,seconds:Date().timeIntervalSince(live.start),free:true,participation:participation,shared:true,askedAt:live.start)
                 model.sent.append((a.playerName,right,a.coins))
             }
             let answered=model.players
             model.players=[];model.note=nil
             renderer?.classroomRefresh();revision += 1
             // Sent: the TV reveals the answer as the coins go out.
+            endClassQuiz()
+            askRecordSkipped(question:live.index,answered:answered,practice:false)
+        }catch{model.note=error.localizedDescription}
+    }
+    /// One answer per student: each is marked and paid on what they said (a wrong answer gets the participation
+    /// prize, if any).
+    private func sendClassChoices(_ c:MeadowCampaignSession,live:LiveQuiz,model:ClassQuizModel,reward:QuizManualReward){
+        guard !model.choices.isEmpty else{model.note="先记下每人的答案（点选项，或 1–7 选人再按字母）。";return}
+        do{
+            for id in c.engine.state.players.map(\.id) {
+                guard let choice=model.choices[id] else{continue}
+                let a=try c.recordQuiz(actor:id,question:live.index,picks:recorded([choice<0 ? nil:choice],live),seconds:Date().timeIntervalSince(live.start),
+                                       free:true,participation:reward.participationCoins,shared:true,askedAt:live.start)
+                model.sent.append((a.playerName,a.correct.allSatisfy{$0},a.coins))
+            }
+            let answered=Set(model.choices.keys)
+            model.players=[];model.note=nil
+            renderer?.classroomRefresh();revision += 1
             endClassQuiz()
             askRecordSkipped(question:live.index,answered:answered,practice:false)
         }catch{model.note=error.localizedDescription}
@@ -426,7 +455,9 @@ final class MeadowTeacherCoordinator:ObservableObject {
     private func endClassQuiz(nobodyAnswered:Bool=false){
         let fromNotes=noteCardIndex;noteCardIndex=nil
         guard var live=quiz,live.mode == .classwide,let model=classModel else{closePanel();return}
-        closePanel()
+        // The class stays in question mode: the list (or the draw) comes back for the next question while the
+        // answer shows; Esc there ends.
+        closePanel{[weak self] in self?.openClassPicker()}
         // A card from the notes that nobody got right (nobody answered, or every answer sent was wrong) is harder
         // than thought: one star up, at most ★★ (★★★ is for sentence questions). Answers already given stay with it.
         if fromNotes==live.index,!model.sent.contains(where:\.right),let c=campaign,c.quizBank.indices.contains(live.index),c.quizBank[live.index].type == .flashcard {
@@ -444,8 +475,9 @@ final class MeadowTeacherCoordinator:ObservableObject {
         quiz=live;classModel=nil
     }
 
-    /// K: endless flash-card practice for the selected student (⇧K / A in the panel: the whole class).
-    func openPractice(classwide:Bool=false){
+    /// K: endless flash-card practice, for the whole class by default (the panel switches to one student; A picks
+    /// everybody).
+    func openPractice(classwide:Bool=true){
         if campaign == nil {openQuiz();return}
         guard let c=campaign,quiz == nil,quizPanel == nil,presentationHost != nil else{return}
         let model=PracticeModel(player:c.selectedPlayerID,classwide:classwide)
@@ -464,7 +496,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
             case "c","0":self.practiceAnswer(nil)
             case "d":if let q=self.quiz?.question,q.type == .flashcard {self.practiceAnswer(q.parts[0].answer)}
             case "e":self.editPracticeCard()
-            case "a":self.setPracticeClasswide(!(self.practiceModel?.classwide ?? false))
+            case "a":self.selectAllPracticePlayers()
             case "o":self.setPracticeOrder(self.practiceModel?.order == .shuffled ? .sequential:.shuffled)
             case "→":self.stepPractice(1)
             case "←":self.stepPractice(-1)
@@ -537,6 +569,13 @@ final class MeadowTeacherCoordinator:ObservableObject {
         rebuildDeck(keeping:current)
         if current != nil {showPracticeCard()}
     }
+    /// A: everybody answered (again: nobody). From one student's practice it switches to the whole class first.
+    func selectAllPracticePlayers(){
+        guard let c=campaign,let model=practiceModel,!model.waiting else{return}
+        if !model.classwide {setPracticeClasswide(true)}
+        let everyone=Set(c.engine.state.players.filter{!$0.host && $0.isAlive}.map(\.id))
+        model.players=model.players==everyone ? []:everyone;model.note=nil
+    }
     func togglePracticePlayer(_ id:String){
         guard let model=practiceModel,model.classwide,!model.waiting else{return}
         if model.players.contains(id){model.players.remove(id)}else{model.players.insert(id)}
@@ -566,7 +605,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
             do{
                 var names:[String]=[]
                 for id in c.engine.state.players.map(\.id) where model.players.contains(id) {
-                    let a=try c.recordQuiz(actor:id,question:live.index,picks:[option],seconds:Date().timeIntervalSince(live.start),free:true,shared:true,practice:true)
+                    let a=try c.recordQuiz(actor:id,question:live.index,picks:[option],seconds:Date().timeIntervalSince(live.start),free:true,shared:true,practice:true,askedAt:live.start)
                     names.append(a.playerName)
                 }
                 model.total += names.count;if right {model.right += names.count}
@@ -581,7 +620,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
             return
         }
         do{
-            let a=try c.recordQuiz(actor:live.player,question:live.index,picks:[option],seconds:Date().timeIntervalSince(live.start),free:true,practice:true)
+            let a=try c.recordQuiz(actor:live.player,question:live.index,picks:[option],seconds:Date().timeIntervalSince(live.start),free:true,practice:true,askedAt:live.start)
             model.total += 1;if a.correct.allSatisfy({$0}){model.right += 1}
             model.results[live.index]=a.correct.allSatisfy{$0}
             model.waiting=true
@@ -631,6 +670,12 @@ final class MeadowTeacherCoordinator:ObservableObject {
         practiceModel=nil;closePanel();withAnimation{quiz=nil}
     }
 
+    /// Esc or a tap on the preview while an answer is showing: the reveal ends now (what follows it, the next
+    /// challenge question or flash card, comes straight away).
+    @discardableResult func skipQuizReveal()->Bool {
+        guard let live=quiz,live.attempt != nil else{return false}
+        quizCardFinished(live.token);return true
+    }
     /// The card finished its reveal (called by every copy: TV and preview; the first one acts).
     func quizCardFinished(_ token:Int){
         guard let live=quiz,live.token==token,let attempt=live.attempt else{return}

@@ -282,8 +282,8 @@ enum ClassroomShortcutAction:String,CaseIterable,Identifiable {
         case .openQuizReport:return "打开答题报告"
         case .openQuiz:return "指定答题（个人挑战）"
         case .openClassQuiz:return "全班题（老师发奖）"
-        case .openPractice:return "闪卡练习"
-        case .openClassPractice:return "全班闪卡"
+        case .openPractice:return "闪卡练习（全班）"
+        case .openClassPractice:return "个人闪卡（选中的同学）"
         case .toggleLaser:return "激光笔"
         case .timerClose:return "关闭计时（停止并收起）"
         }

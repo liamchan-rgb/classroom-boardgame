@@ -156,6 +156,8 @@ final class TeacherHostController: UIViewController {
                 session.game.grantCaptureCancel()
             }
         }
+        // An answer is showing: Esc ends the reveal (before any panel uses Esc to close).
+        if presses.contains(where:{$0.key?.keyCode == .keyboardEscape}),!UIResponder.classroomTyping,session.game.skipQuizReveal() {return}
         // A question panel docked beside the preview gets its keys (Esc, ⏎, 1–7, D/C…) even when the keyboard focus
         // is somewhere else in the window, e.g. back on the notes after the word-card popup closed.
         if let onKey=session.game.dockContent?.onKey {
@@ -217,7 +219,7 @@ final class TeacherHostController: UIViewController {
         case .openQuiz:game.openQuiz()
         case .openClassQuiz:game.openClassQuiz()
         case .openPractice:game.openPractice()
-        case .openClassPractice:game.openPractice(classwide:true)
+        case .openClassPractice:game.openPractice(classwide:false)
         case .toggleLaser:game.toggleLaser()
         }
     }

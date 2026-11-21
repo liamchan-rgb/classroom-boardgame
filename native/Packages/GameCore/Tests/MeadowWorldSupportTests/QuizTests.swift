@@ -605,6 +605,12 @@ final class QuizTests:XCTestCase {
         // Another question: a step again.
         try s.recordQuiz(actor:"p2",question:1,picks:[0],seconds:2,free:true,shared:true)
         XCTAssertEqual(s.movement(team:team).remaining,start+2*step,accuracy:0.001)
+        // The same flash card asked again later (a new round): right again pays its step again, once per team.
+        let again=Date().addingTimeInterval(5)
+        try s.recordQuiz(actor:"p1",question:0,picks:[0],seconds:2,at:again,free:true,practice:true,askedAt:again)
+        XCTAssertEqual(s.movement(team:team).remaining,start+3*step,accuracy:0.001)
+        try s.recordQuiz(actor:"p2",question:0,picks:[0],seconds:2,at:again.addingTimeInterval(1),free:true,practice:true,askedAt:again)
+        XCTAssertEqual(s.movement(team:team).remaining,start+3*step,accuracy:0.001)
     }
     func testCorrectedFlashCardKeepsItsAnswers()throws {
         var card=QuizBankParser.flashcard(front:"nose",back:"突出部分",distractors:[]);card.difficulty=1;card.course="第一章"

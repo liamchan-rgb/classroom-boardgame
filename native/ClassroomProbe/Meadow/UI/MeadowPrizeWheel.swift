@@ -40,7 +40,7 @@ final class MeadowPrizeWheelView: UIView, UIGestureRecognizerDelegate {
     /// Tapping the star in the middle spins (the same as the spin button).
     var onHubTap: (() -> Void)?
     /// How long the win shows before it fades away (the prize card goes with it).
-    static let winHold = 1.0
+    static let winHold = 3.0
     /// Called when the win fades (the owner hides its prize card then).
     var onWinFaded: (() -> Void)?
     private var winToken = 0
