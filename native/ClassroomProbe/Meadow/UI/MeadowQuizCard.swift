@@ -7,6 +7,8 @@ import ClassroomGameCore
 final class MeadowQuizCard: UIView {
     private let card = UIView(), header = UILabel(), clock = UILabel(), prompt = UILabel(), result = UILabel()
     private let passage = UILabel(), questions = UILabel(), face = UILabel(), faceBox = UIView()
+    /// Reading: soft panels behind the passage and the questions.
+    private let passagePanel = UIView(), questionsPanel = UIView()
     private var optionViews: [UIView] = []
     private var question: QuizQuestion!
     private var start = Date(), limit = 60
@@ -62,7 +64,12 @@ final class MeadowQuizCard: UIView {
         case .fill:
             prompt.attributedText = fillText(answers: nil); card.addSubview(prompt)
         case .reading:
-            passage.text = q.passage; passage.font = MeadowPreviewPalette.font(26, .medium); passage.textColor = MeadowPreviewPalette.ink
+            let lines = NSMutableParagraphStyle(); lines.lineSpacing = 7; lines.paragraphSpacing = 10
+            passage.attributedText = NSAttributedString(string: q.passage ?? "", attributes: [.font: MeadowPreviewPalette.font(25, .medium), .foregroundColor: MeadowPreviewPalette.ink, .paragraphStyle: lines])
+            for panel in [passagePanel, questionsPanel] {
+                panel.backgroundColor = UIColor.white.withAlphaComponent(0.5); panel.layer.cornerRadius = 18; panel.layer.cornerCurve = .continuous
+                panel.layer.borderWidth = 1; panel.layer.borderColor = UIColor.white.withAlphaComponent(0.8).cgColor; card.addSubview(panel)
+            }
             passage.numberOfLines = 0; passage.adjustsFontSizeToFitWidth = true; passage.minimumScaleFactor = 0.5
             questions.numberOfLines = 0; questions.adjustsFontSizeToFitWidth = true; questions.minimumScaleFactor = 0.5
             questions.attributedText = readingText(attempt: nil)
@@ -108,7 +115,11 @@ final class MeadowQuizCard: UIView {
                 }
                 out.append(NSAttributedString(string: " \(part.options[part.answer]) ", attributes: [.font: MeadowPreviewPalette.font(32, .heavy), .foregroundColor: right ? UIColor.systemGreen : MeadowPreviewPalette.primary, .underlineStyle: NSUnderlineStyle.thick.rawValue]))
             } else {
-                out.append(NSAttributedString(string: " ＿\(Self.circled[min(n, 11)])＿ ", attributes: [.font: MeadowPreviewPalette.font(32, .heavy), .foregroundColor: MeadowPreviewPalette.primary]))
+                // The number first, then one unbroken line to write on.
+                out.append(NSAttributedString(string: " \(Self.circled[min(n, 11)])", attributes: [.font: MeadowPreviewPalette.font(24, .heavy), .foregroundColor: MeadowPreviewPalette.primary]))
+                out.append(NSAttributedString(string: String(repeating: "\u{00A0}", count: 14), attributes: [.font: MeadowPreviewPalette.font(32, .heavy), .foregroundColor: MeadowPreviewPalette.primary,
+                                                                                                         .underlineStyle: NSUnderlineStyle.thick.rawValue, .underlineColor: MeadowPreviewPalette.primary]))
+                out.append(NSAttributedString(string: " ", attributes: base))
             }
             n += 1; rest = rest[close.upperBound...]
         }
@@ -127,18 +138,32 @@ final class MeadowQuizCard: UIView {
         }
         return out
     }
+    /// Reading: each question on its own line, then its options one per line (letter, then the words, wrapped
+    /// lines kept under the words), with room between questions. After the reveal the right option is green with
+    /// a tick and a wrong pick is red and struck through.
     private func readingText(attempt: QuizAttempt?) -> NSAttributedString {
         let out = NSMutableAttributedString()
         for (i, part) in question.parts.enumerated() {
-            var mark = ""
-            if let attempt { mark = attempt.correct[i] ? "✓ " : "✗ " }
+            let qStyle = NSMutableParagraphStyle(); qStyle.paragraphSpacingBefore = i == 0 ? 0 : 20; qStyle.paragraphSpacing = 8; qStyle.lineSpacing = 3
+            qStyle.headIndent = 34; qStyle.tabStops = [NSTextTab(textAlignment: .left, location: 34)]; qStyle.defaultTabInterval = 34
+            var mark = "\(i + 1)."
+            if let attempt { mark = attempt.correct[i] ? "✓" : "✗" }
             let color: UIColor = attempt == nil ? MeadowPreviewPalette.ink : (attempt!.correct[i] ? .systemGreen : .systemRed)
-            out.append(NSAttributedString(string: "\(mark)\(i + 1). \(part.prompt ?? "")\n", attributes: [.font: MeadowPreviewPalette.font(24, .bold), .foregroundColor: color]))
-            let options = part.options.enumerated().map { j, o in
-                let tag = attempt != nil && j == part.answer ? "✔︎" : Self.letters[j]
-                return "\(tag). \(o)"
-            }.joined(separator: "    ")
-            out.append(NSAttributedString(string: options + (i < question.parts.count - 1 ? "\n\n" : ""), attributes: [.font: MeadowPreviewPalette.font(21, .medium), .foregroundColor: MeadowPreviewPalette.muted]))
+            out.append(NSAttributedString(string: "\(mark)\t\(part.prompt ?? "")\n", attributes: [.font: MeadowPreviewPalette.font(24, .bold), .foregroundColor: color, .paragraphStyle: qStyle]))
+            let oStyle = NSMutableParagraphStyle(); oStyle.paragraphSpacing = 5; oStyle.lineSpacing = 2
+            oStyle.firstLineHeadIndent = 34; oStyle.headIndent = 72; oStyle.tabStops = [NSTextTab(textAlignment: .left, location: 72)]
+            for (j, o) in part.options.enumerated() {
+                let right = attempt != nil && j == part.answer
+                let pickedWrong = attempt != nil && !right && attempt!.picks.indices.contains(i) && attempt!.picks[i] == j
+                let dim = attempt != nil && !right && !pickedWrong
+                let letterColor: UIColor = right ? .systemGreen : pickedWrong ? .systemRed : MeadowPreviewPalette.primary.withAlphaComponent(dim ? 0.45 : 1)
+                let textColor: UIColor = right ? .systemGreen : pickedWrong ? .systemRed : MeadowPreviewPalette.ink.withAlphaComponent(dim ? 0.45 : 0.9)
+                let last = i == question.parts.count - 1 && j == part.options.count - 1
+                out.append(NSAttributedString(string: (right ? "✓" : Self.letters[j]) + "\t", attributes: [.font: MeadowPreviewPalette.font(21, .heavy), .foregroundColor: letterColor, .paragraphStyle: oStyle]))
+                var attrs: [NSAttributedString.Key: Any] = [.font: MeadowPreviewPalette.font(22, right ? .heavy : .medium), .foregroundColor: textColor, .paragraphStyle: oStyle]
+                if pickedWrong { attrs[.strikethroughStyle] = NSUnderlineStyle.single.rawValue }
+                out.append(NSAttributedString(string: o + (last ? "" : "\n"), attributes: attrs))
+            }
         }
         return out
     }
@@ -209,9 +234,9 @@ final class MeadowQuizCard: UIView {
         case .flashcard: body = 260
         case .fill: body = min(bounds.height - 220, ceil(prompt.sizeThatFits(CGSize(width: inner, height: 700)).height) + 20)
         case .reading:
-            let half = (min(1160, bounds.width - 60) - 56) * 0.5 - 16
-            let need = max(passage.sizeThatFits(CGSize(width: half, height: .greatestFiniteMagnitude)).height, questions.sizeThatFits(CGSize(width: half, height: .greatestFiniteMagnitude)).height)
-            body = min(bounds.height - 220, max(160, ceil(need)))
+            let half = (min(1160, bounds.width - 60) - 56) * 0.5 - 12 - 36
+            let need = max(passage.sizeThatFits(CGSize(width: half, height: .greatestFiniteMagnitude)).height, questions.sizeThatFits(CGSize(width: half, height: .greatestFiniteMagnitude)).height) + 36
+            body = min(bounds.height - 220, max(180, ceil(need)))
         }
         let height = min(bounds.height - 30, 24 + 40 + 18 + body + 18 + 56 + 20)
         card.frame = CGRect(x: (bounds.width - width) / 2, y: max(15, (bounds.height - height) / 2), width: width, height: height)
@@ -240,8 +265,12 @@ final class MeadowQuizCard: UIView {
             // Text starts at the top of each column (a label would otherwise centre it in the space left).
             let left = inner * 0.5
             func fit(_ l: UILabel, _ w: CGFloat) -> CGFloat { min(avail, ceil(l.sizeThatFits(CGSize(width: w, height: .greatestFiniteMagnitude)).height)) }
-            passage.frame = CGRect(x: 28, y: top, width: left - 16, height: fit(passage, left - 16))
-            questions.frame = CGRect(x: 28 + left + 16, y: top, width: inner - left - 16, height: fit(questions, inner - left - 16))
+            let pad: CGFloat = 18
+            let pw = left - 12 - 2 * pad, qw = inner - left - 12 - 2 * pad
+            passage.frame = CGRect(x: 28 + pad, y: top + pad, width: pw, height: min(avail - 2 * pad, fit(passage, pw)))
+            questions.frame = CGRect(x: 28 + left + 12 + pad, y: top + pad, width: qw, height: min(avail - 2 * pad, fit(questions, qw)))
+            passagePanel.frame = CGRect(x: 28, y: top, width: left - 12, height: avail)
+            questionsPanel.frame = CGRect(x: 28 + left + 12, y: top, width: inner - left - 12, height: avail)
         }
         result.frame = CGRect(x: 28, y: height - 76, width: inner, height: 56)
     }

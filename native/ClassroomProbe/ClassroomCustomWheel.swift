@@ -16,8 +16,43 @@ import MeadowWorldSupport
     private init() {
         if let data = try? Data(contentsOf: url), let list = try? JSONDecoder().decode([CustomWheel].self, from: data), !list.isEmpty { wheels = list }
         else { wheels = [Self.sample] }
+        // The teacher's three wheels from the old spinner app, added once (deleting one later keeps it deleted).
+        if !UserDefaults.standard.bool(forKey: "classroom.wheelPresets1") {
+            for w in Self.presets where !wheels.contains(where: { $0.name == w.name }) { wheels.append(w) }
+            UserDefaults.standard.set(true, forKey: "classroom.wheelPresets1"); save()
+        }
         if !wheels.contains(where: { $0.name == currentName }) { currentName = wheels[0].name }
     }
+    /// Removes one prize from the current wheel (the one just won, for a draw without repeats). A wheel keeps at
+    /// least two prizes.
+    func removePrize(_ index: Int) throws {
+        var w = current
+        guard w.prizes.indices.contains(index) else { return }
+        guard w.prizes.count > 2 else { throw GameError("转盘至少要留两个格子。") }
+        w.prizes.remove(at: index)
+        guard w.totalWeight > 0 else { throw GameError("剩下的格子概率都为0，不能再移除。") }
+        try put(w, replacing: w.name)
+    }
+    /// Weights from the slice sizes in the screenshots (degrees of the circle); prizes outside the game.
+    static let presets: [CustomWheel] = [
+        CustomWheel(name: "转盘·Mickey", prizes: [
+            .init(title: "稀有黑卡x1", weight: 20), .init(title: "免罚卡", weight: 25), .init(title: "10费攻略分", weight: 15),
+            .init(title: "100积分币", weight: 90), .init(title: "谢谢惠顾", weight: 85), .init(title: "（被遮挡的格子，待填写）", weight: 70),
+            .init(title: "300积分币", weight: 25), .init(title: "500积分币", weight: 20),
+        ]),
+        CustomWheel(name: "转盘·Jessica", prizes: [
+            .init(title: "黑卡x5", weight: 82), .init(title: "200积分币", weight: 78), .init(title: "（小格，待填写）", weight: 10),
+            .init(title: "（细格，待填写）", weight: 2), .init(title: "8折券", weight: 28), .init(title: "复述奖励图片计算", weight: 20),
+            .init(title: "当天积分币奖励翻倍", weight: 18), .init(title: "VS", weight: 8), .init(title: "20费攻略分", weight: 95),
+            .init(title: "400积分币", weight: 22),
+        ]),
+        CustomWheel(name: "转盘·Jerry", prizes: [
+            .init(title: "一", weight: 3), .init(title: "积分币奖励翻倍", weight: 8), .init(title: "500积分币", weight: 12),
+            .init(title: "300积分币", weight: 85), .init(title: "10费攻略分", weight: 90), .init(title: "黑卡x3", weight: 60),
+            .init(title: "700积分币", weight: 8), .init(title: "稀有黑卡x2", weight: 12), .init(title: "免罚卡x2", weight: 30),
+            .init(title: "20费攻略分", weight: 32),
+        ]),
+    ]
     var current: CustomWheel { wheels.first { $0.name == currentName } ?? wheels[0] }
     private func save() {
         try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
@@ -56,6 +91,76 @@ import MeadowWorldSupport
     ])
 }
 
+/// Every spin of the custom wheels, kept by the app across trips (ClassroomMeadow/wheel-history.json), so a
+/// student's draws are listed whichever trip they were in. Matched by the student's name.
+@MainActor final class CustomWheelHistory {
+    struct Entry: Codable, Equatable {
+        var at: Date
+        var player: String
+        var wheel: String
+        var prize: String
+    }
+    static let shared = CustomWheelHistory()
+    private(set) var entries: [Entry] = []
+    private var url: URL { FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("ClassroomMeadow/wheel-history.json") }
+    private init() { if let data = try? Data(contentsOf: url), let list = try? JSONDecoder().decode([Entry].self, from: data) { entries = list } }
+    func add(player: String, wheel: String, prize: String) {
+        entries.append(Entry(at: Date(), player: player, wheel: wheel, prize: prize))
+        try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try? JSONEncoder().encode(entries).write(to: url, options: .atomic)
+    }
+    func of(_ player: String) -> [Entry] { entries.filter { $0.player == player }.reversed() }
+}
+
+/// One student's draws, newest first, with a count of each prize.
+struct WheelHistoryView: View {
+    let player: String
+    let entries: [CustomWheelHistory.Entry]
+    var onClose: () -> Void
+    private static let time: DateFormatter = { let f = DateFormatter(); f.dateFormat = "M月d日 HH:mm"; return f }()
+    struct Count { let prize: String; let n: Int }
+    /// How many times each prize came up, most often first.
+    static func counts(_ entries: [CustomWheelHistory.Entry]) -> [Count] {
+        var tally: [String: Int] = [:]
+        for e in entries { tally[e.prize, default: 0] += 1 }
+        let list: [Count] = tally.map { Count(prize: $0.key, n: $0.value) }
+        return list.sorted { a, b in a.n == b.n ? a.prize < b.prize : a.n > b.n }
+    }
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Label("\(player) 的抽奖记录", systemImage: "clock.arrow.circlepath").font(.title2.bold())
+                Text("共 \(entries.count) 次").font(.callout).foregroundStyle(GameTheme.muted)
+                Spacer()
+                Button { onClose() } label: { Label("关闭", systemImage: "xmark") }.buttonStyle(GlassIconButtonStyle())
+            }
+            if entries.isEmpty {
+                ContentUnavailableView("还没有抽过", systemImage: "chart.pie", description: Text("在自定义转盘里抽到的奖会记在这里（所有行程都算）。"))
+            } else {
+                FlowRow(spacing: 6) {
+                    ForEach(Self.counts(entries), id: \.prize) { c in
+                        Text("\(c.prize) ×\(c.n)").font(.callout.bold()).padding(.horizontal, 10).padding(.vertical, 5)
+                            .background(Capsule().fill(GameTheme.primary.opacity(0.12))).foregroundStyle(GameTheme.primary)
+                    }
+                }
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 6) {
+                        ForEach(Array(entries.enumerated()), id: \.offset) { _, e in
+                            HStack(spacing: 10) {
+                                Text(Self.time.string(from: e.at)).font(.callout).monospacedDigit().foregroundStyle(GameTheme.muted).frame(width: 110, alignment: .leading)
+                                Text(e.prize).font(.callout.bold()).foregroundStyle(GameTheme.ink)
+                                Spacer()
+                                Text(e.wheel).font(.caption).foregroundStyle(GameTheme.muted)
+                            }.padding(.horizontal, 12).padding(.vertical, 8)
+                            .background(RoundedRectangle(cornerRadius: 9, style: .continuous).fill(Color.white.opacity(0.55)))
+                        }
+                    }
+                }
+            }
+        }.padding(22).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(GlassBackdrop())
+    }
+}
+
 extension CustomWheel {
     /// The wheel's slices: items with their pictures, coins / score in amber, prizes outside the game as words;
     /// rarity from the item and from how unlikely the prize is.
@@ -87,6 +192,10 @@ final class CustomWheelViewController: UIViewController {
     private let edit = MeadowPreviewPalette.iconButton("slider.horizontal.3", "编辑")
     private let close = MeadowPreviewPalette.iconButton("xmark", "关闭")
     private let spin = MeadowPreviewPalette.iconButton("sparkles", "转！", prominent: true)
+    private let history = MeadowPreviewPalette.iconButton("clock.arrow.circlepath", "历史")
+    private let removeWon = MeadowPreviewPalette.iconButton("minus.circle", "移除这一格")
+    /// The slice just won (on the wheel as it was spun), for 移除这一格.
+    private var lastWin: (wheel: String, slot: Int)?
     private let wheel = MeadowPrizeWheelView()
     private let card = WheelPrizeCard()
     private var library: CustomWheelLibrary { .shared }
@@ -111,8 +220,11 @@ final class CustomWheelViewController: UIViewController {
         // No odds list: the slices' sizes show how likely each prize is.
         [header].forEach { MeadowPreviewPalette.stylePanel($0, liveBlur: true); view.addSubview($0) }
         view.addSubview(stage)
-        [titleLabel, wheelButton, members, coinsLabel, edit, close].forEach(header.addSubview)
-        [wheel, spin, result, card].forEach(stage.addSubview)
+        [titleLabel, wheelButton, members, coinsLabel, history, edit, close].forEach(header.addSubview)
+        [wheel, spin, removeWon, result, card].forEach(stage.addSubview)
+        history.addAction(UIAction { [weak self] _ in self?.openHistory() }, for: .touchUpInside)
+        removeWon.addAction(UIAction { [weak self] _ in self?.removeLastWin() }, for: .touchUpInside)
+        removeWon.isHidden = true
         titleLabel.attributedText = MeadowGlassText.iconLine("chart.pie.fill", "转盘", size: 26)
         wheelButton.titleLabel?.font = MeadowPreviewPalette.font(18, .heavy); wheelButton.tintColor = MeadowPreviewPalette.ink
         wheelButton.showsMenuAsPrimaryAction = true
@@ -134,6 +246,7 @@ final class CustomWheelViewController: UIViewController {
     private func loadWheel() {
         let w = library.current
         wheel.slices = w.slices(catalog: session.engine.catalog); card.hide(); result.text = nil
+        lastWin = nil; removeWon.isHidden = true
         wheelButton.setTitle("  \(w.name)  ▾", for: .normal)
         wheelButton.menu = UIMenu(children: library.wheels.map { item in
             UIAction(title: item.name, state: item.name == w.name ? .on : .off) { [weak self] _ in self?.library.currentName = item.name; self?.loadWheel() }
@@ -157,7 +270,8 @@ final class CustomWheelViewController: UIViewController {
             let receipt = try session.spinCustomWheel(actor: actor, wheel: w)
             guard let slot = receipt.events.first(where: { $0.kind == "customWheel" })?.amount else { return }
             spin.isEnabled = false; members.isEnabled = false; wheelButton.isEnabled = false; edit.isEnabled = false
-            card.hide(); result.text = nil
+            card.hide(); result.text = nil; lastWin = nil; removeWon.isHidden = true
+            if w.prizes.indices.contains(slot) { CustomWheelHistory.shared.add(player: session.engine.state.units[actor]?.shortName ?? actor, wheel: w.name, prize: w.prizes[slot].title) }
             refresh(); onChange?()
             let name = session.engine.state.units[actor]?.shortName ?? ""
             wheel.spin(to: slot) { [weak self] in
@@ -168,9 +282,28 @@ final class CustomWheelViewController: UIViewController {
                 if slices.indices.contains(slot) { self.card.show(slices[slot]) }
                 let prize = w.prizes[slot]
                 self.result.text = "\(name) 抽中：\(prize.title)" + (prize.offGame ? "（课堂奖励，请老师兑现）" : "（已发到背包 / 金币积分）")
+                self.lastWin = (w.name, slot); self.removeWon.isHidden = w.prizes.count <= 2
                 self.refresh(); self.onChange?()
             }
         } catch { result.text = error.localizedDescription }
+    }
+    /// 移除这一格: the prize just won leaves this wheel (saved), so it is not drawn again.
+    private func removeLastWin() {
+        guard !wheel.spinning, let win = lastWin, win.wheel == library.current.name else { return }
+        let title = library.current.prizes.indices.contains(win.slot) ? library.current.prizes[win.slot].title : ""
+        do {
+            try library.removePrize(win.slot)
+            let keep = result.text
+            loadWheel(); onChange?()
+            result.text = (keep.map { $0 + "\n" } ?? "") + "已从「\(library.current.name)」移除：\(title)"
+        } catch { result.text = error.localizedDescription }
+    }
+    /// 历史: the selected student's draws on every custom wheel, in every trip.
+    private func openHistory() {
+        let name = session.engine.state.units[actor]?.shortName ?? actor
+        let screen = UIHostingController(rootView: WheelHistoryView(player: name, entries: CustomWheelHistory.shared.of(name), onClose: { [weak self] in self?.dismiss(animated: true) }))
+        screen.modalPresentationStyle = .formSheet; screen.preferredContentSize = CGSize(width: 640, height: 620)
+        present(screen, animated: true)
     }
     private func openEditor(new: Bool) {
         guard !wheel.spinning else { return }
@@ -191,7 +324,8 @@ final class CustomWheelViewController: UIViewController {
         // Icon-and-word buttons: room for both.
         close.frame = CGRect(x: hw - 104, y: 10, width: 92, height: 44)
         edit.frame = CGRect(x: hw - 204, y: 10, width: 92, height: 44)
-        coinsLabel.frame = CGRect(x: hw - 420, y: 14, width: 206, height: 36)
+        history.frame = CGRect(x: hw - 304, y: 10, width: 92, height: 44)
+        coinsLabel.frame = CGRect(x: hw - 520, y: 14, width: 206, height: 36)
         let mx = wheelButton.frame.maxX + 14
         members.frame = CGRect(x: mx, y: 14, width: max(120, coinsLabel.frame.minX - mx - 12), height: 36)
         let top = header.frame.maxY + 12
@@ -200,6 +334,7 @@ final class CustomWheelViewController: UIViewController {
         let size = max(160, min(sw - 20, sh - 120))
         wheel.frame = CGRect(x: (sw - size) / 2, y: 0, width: size, height: size)
         spin.frame = CGRect(x: sw / 2 - 120, y: wheel.frame.maxY + 4, width: 240, height: 56)
+        removeWon.frame = CGRect(x: spin.frame.maxX + 12, y: spin.frame.minY + 4, width: 150, height: 48)
         result.frame = CGRect(x: 10, y: spin.frame.maxY + 4, width: sw - 20, height: 52)
         let cw = min(320, sw - 40)
         card.frame = CGRect(x: (sw - cw) / 2, y: wheel.frame.midY - 115, width: cw, height: 240)
