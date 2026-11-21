@@ -531,8 +531,9 @@ struct QuizPlayerChips: View {
     var marks: [String: String] = [:]
     var tap: (String) -> Void
     var body: some View {
+        // In seat-number order (the numbers the teacher set by long-pressing), so 1, 2, 3… read left to right.
         FlowRow(spacing: 8) {
-            ForEach(game.campaign?.engine.state.players ?? [], id: \.id) { u in
+            ForEach(game.seatOrderedPlayers, id: \.id) { u in
                 let on = selected.contains(u.id)
                 Button { KeyHostingController<EmptyView>.endEditing(); tap(u.id) } label: {
                     HStack(spacing: 6) {
@@ -593,7 +594,7 @@ struct ClassChoiceGrid: View {
                 }
             }
             Text("每人的答案（点选，或按 1–7 选人再按 A–\(Self.letters[min(part.options.count, 8) - 1])，0 不会）").font(.caption.bold()).foregroundStyle(GameTheme.muted)
-            ForEach(game.campaign?.engine.state.players.filter { !$0.host } ?? [], id: \.id) { u in
+            ForEach(game.seatOrderedPlayers.filter { !$0.host }, id: \.id) { u in
                 let picked = model.players.contains(u.id), choice = model.choices[u.id]
                 HStack(spacing: 6) {
                     Button { if picked { model.players.remove(u.id) } else { model.players.insert(u.id) } } label: {
@@ -696,6 +697,27 @@ struct ClassQuizPanel: View {
     }
 }
 
+/// The students nobody picked on the last shared question: put it in their mistakes, or not (no dialog, so the
+/// next question can be picked meanwhile).
+struct SkippedPromptBar: View {
+    @ObservedObject var game: MeadowTeacherCoordinator
+    var body: some View {
+        if let p = game.skippedPrompt {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("没选到：\(p.names)").font(.callout.bold()).foregroundStyle(GameTheme.ink).lineLimit(2)
+                HStack(spacing: 8) {
+                    Text("上一题记到他们的错题里吗？").font(.caption).foregroundStyle(GameTheme.muted)
+                    Spacer()
+                    Button("不记") { game.answerSkippedPrompt(record: false) }.buttonStyle(GlassIconButtonStyle())
+                    Button("记入错题") { game.answerSkippedPrompt(record: true) }.buttonStyle(GlassIconButtonStyle(prominent: true))
+                }
+            }
+            .padding(10).background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.orange.opacity(0.14)))
+            .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Color.orange.opacity(0.4), lineWidth: 1))
+        }
+    }
+}
+
 /// ⇧Q with 老师点选 (or 重新选题): choose the class question from the list; with a random way, draw one.
 struct ClassQuizPickPanel: View {
     @ObservedObject var game: MeadowTeacherCoordinator
@@ -712,6 +734,7 @@ struct ClassQuizPickPanel: View {
                 Spacer()
                 Button { onClose() } label: { Label("关闭 (Esc)", systemImage: "xmark") }.buttonStyle(GlassIconButtonStyle())
             }
+            SkippedPromptBar(game: game)
             QuizDrawBar(game: game)
             if settings.mode == .manual {
                 QuizPicker(game: game, onPick: onPick)
@@ -860,6 +883,7 @@ struct PracticePanel: View {
                 Spacer()
                 Button { onClose() } label: { Label("结束 (Esc)", systemImage: "xmark.circle") }.buttonStyle(GlassIconButtonStyle())
             }
+            SkippedPromptBar(game: game)
             if model.classwide {
                 HStack {
                     Text("谁回答了（1–7，可多选）").font(.headline)
@@ -875,9 +899,9 @@ struct PracticePanel: View {
                 Picker("", selection: Binding(get: { model.order }, set: { game.setPracticeOrder($0) })) {
                     Text("顺序").tag(PracticeModel.Order.sequential); Text("乱序").tag(PracticeModel.Order.shuffled)
                 }.pickerStyle(.segmented).frame(width: 130)
-                Button { game.stepPractice(-1) } label: { Image(systemName: "chevron.left") }.buttonStyle(GlassIconButtonStyle()).disabled(model.waiting || model.deck.isEmpty)
+                Button { game.stepPractice(-1) } label: { Image(systemName: "chevron.left") }.buttonStyle(GlassIconButtonStyle()).disabled(model.deck.isEmpty)
                 Text(model.deck.isEmpty ? "0/0" : "第 \(model.cursor + 1)/\(model.deck.count) 张").font(.callout.bold()).monospacedDigit()
-                Button { game.stepPractice(1) } label: { Image(systemName: "chevron.right") }.buttonStyle(GlassIconButtonStyle()).disabled(model.waiting || model.deck.isEmpty)
+                Button { game.stepPractice(1) } label: { Image(systemName: "chevron.right") }.buttonStyle(GlassIconButtonStyle()).disabled(model.deck.isEmpty)
                 Spacer()
                 Button { model.showList.toggle() } label: { Label(model.showList ? "收起列表" : "选卡", systemImage: "list.bullet.rectangle") }.buttonStyle(GlassIconButtonStyle(prominent: model.showList))
             }
@@ -895,7 +919,7 @@ struct PracticePanel: View {
                                 }.padding(.horizontal, 9).padding(.vertical, 5)
                                 .foregroundStyle(current ? Color.white : GameTheme.ink)
                                 .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(current ? GameTheme.primary : Color.white.opacity(0.55)))
-                            }.buttonStyle(.plain).disabled(model.waiting)
+                            }.buttonStyle(.plain)
                         }
                     }
                 }.frame(maxHeight: 200)

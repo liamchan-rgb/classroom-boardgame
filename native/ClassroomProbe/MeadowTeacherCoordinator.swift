@@ -67,6 +67,17 @@ final class MeadowTeacherCoordinator:ObservableObject {
     private var quizDraft:QuizAnswerDraft?
     private var quizReward:QuizManualReward?
     private var classModel:ClassQuizModel?
+    /// The class question list while it is docked (it gives way to the next question).
+    private weak var classPicker:UIViewController?
+    /// After a shared question: the students nobody picked, offered to put in their mistakes. Shown in the
+    /// question list / flash-card panel (not a dialog), so the next question can be picked meanwhile.
+    @Published var skippedPrompt:SkippedPrompt?
+    struct SkippedPrompt:Equatable {
+        let question:Int
+        let ids:[String]
+        let names:String
+        let practice:Bool
+    }
     /// The flash card just made from the notes and put to the class (front, course): Esc on it raises its difficulty.
     /// The trip-bank question last called up from the notes (double-click): if nobody gets it right it goes up a star.
     var noteCardIndex:Int?
@@ -131,7 +142,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
     /// Top bar "结束答题": ends whatever is going on at once (nothing more is recorded; what was already sent stays).
     func abortQuiz(){
         challengeTimer?.invalidate();challengeTimer=nil
-        practiceModel=nil;classModel=nil;quizDraft=nil;quizReward=nil;quizGainBase=nil
+        practiceModel=nil;classModel=nil;quizDraft=nil;quizReward=nil;quizGainBase=nil;skippedPrompt=nil
         closePanel()
         dockPanel=nil;dockContent=nil
         withAnimation(.easeIn(duration:0.15)){quiz=nil;challenge=nil}
@@ -246,6 +257,8 @@ final class MeadowTeacherCoordinator:ObservableObject {
     }
     /// 换一题 / 重新选题: the question on screen is dropped without a record.
     private func challengeSkip(){
+        // While an answer shows: on to the next question now.
+        if challenge != nil,quiz?.mode == .challenge,quiz?.attempt != nil {skipQuizReveal();return}
         guard let model=challenge,model.phase == .question,let live=quiz,live.attempt==nil else{return}
         model.pause();quiz=nil
         if QuizDrawSettings.shared.mode == .manual {model.phase = .picking;model.draft=nil} else {challengeNext(excluding:[live.index])}
@@ -261,6 +274,8 @@ final class MeadowTeacherCoordinator:ObservableObject {
             model.coins += a.coins;model.score += a.score
             live.attempt=shown(a,live);live.hold=1.6;live.dropName=a.drop.flatMap{try? c.engine.catalog.item($0).name}
             quiz=live
+            // 老师点选: the list is back at once, so the next question can be picked while this answer shows.
+            if QuizDrawSettings.shared.mode == .manual {model.phase = .picking;model.draft=nil}
             renderer?.classroomRefresh();revision += 1
         }catch{model.note=error.localizedDescription}
     }
@@ -326,6 +341,12 @@ final class MeadowTeacherCoordinator:ObservableObject {
     func openClassQuiz(index:Int?=nil,excluding:Set<Int>=[],englishFront:Bool=false){
         // No trip open yet: the launcher offers to continue the last one.
         if campaign == nil {openQuiz();return}
+        // The class question list is up (between questions): it gives way to this question (a double-click in the
+        // notes, a pick, a draw).
+        if let picker=classPicker,quizPanel===picker {
+            classPicker=nil
+            closePanel{[weak self] in self?.openClassQuiz(index:index,excluding:excluding,englishFront:englishFront)};return
+        }
         // The last class question's answer may still be showing: the next one takes over.
         if quiz?.mode == .classwide,quiz?.attempt != nil {quiz=nil}
         guard let c=campaign,quiz == nil,quizPanel == nil,presentationHost != nil else{return}
@@ -380,9 +401,10 @@ final class MeadowTeacherCoordinator:ObservableObject {
         guard presentationHost != nil else{return}
         let draw={[weak self] in
             guard let self,QuizDrawSettings.shared.draw != nil else{return}
-            self.closePanel{self.openClassQuiz()}
+            self.openClassQuiz()
         }
-        let panel=KeyHostingController(rootView:ClassQuizPickPanel(game:self,onPick:{[weak self] i in self?.closePanel{self?.openClassQuiz(index:i)}},onDraw:draw,onClose:{[weak self] in self?.closePanel()}))
+        let panel=KeyHostingController(rootView:ClassQuizPickPanel(game:self,onPick:{[weak self] i in self?.openClassQuiz(index:i)},onDraw:draw,onClose:{[weak self] in self?.skippedPrompt=nil;self?.closePanel()}))
+        classPicker=panel
         panel.onKey={[weak self] key in
             switch key {
             case "⎋":self?.closePanel();return true
@@ -432,22 +454,21 @@ final class MeadowTeacherCoordinator:ObservableObject {
     /// After a shared question: the students who were not picked can have it put in their mistakes (recorded as
     /// 不会 / 答错, no reward), so the report shows it for them too.
     private func askRecordSkipped(question index:Int,answered:Set<String>,practice:Bool){
-        guard let c=campaign,let host=presentationHost else{return}
+        guard let c=campaign else{return}
         let others=c.engine.state.players.filter{!answered.contains($0.id) && !$0.host}
-        guard !others.isEmpty else{return}
-        let names=others.map(\.shortName).joined(separator:"、")
-        let alert=UIAlertController(title:"没选到的同学",message:"\(names) 没有作答。把这道题记到他们的错题里吗？",preferredStyle:.alert)
-        alert.addAction(UIAlertAction(title:"不记",style:.cancel))
-        alert.addAction(UIAlertAction(title:"记入错题",style:.default){[weak self] _ in
-            guard let self,let c=self.campaign,c.quizBank.indices.contains(index) else{return}
-            let blanks=Array(repeating:Optional<Int>.none,count:c.quizBank[index].parts.count)
-            do{
-                for u in others {try c.recordQuiz(actor:u.id,question:index,picks:blanks,seconds:0,free:true,shared:true,practice:practice,skipped:true)}
-                self.message="已记入 \(names) 的错题";self.revision += 1
-            }catch{self.message=error.localizedDescription;self.revision += 1}
-        })
-        alert.preferredAction=alert.actions.last
-        host.present(alert,animated:true)
+        guard !others.isEmpty else{skippedPrompt=nil;return}
+        skippedPrompt=SkippedPrompt(question:index,ids:others.map(\.id),names:others.map(\.shortName).joined(separator:"、"),practice:practice)
+    }
+    /// 记入错题 / 不记 for the students nobody picked on the last shared question.
+    func answerSkippedPrompt(record:Bool){
+        guard let prompt=skippedPrompt else{return}
+        skippedPrompt=nil
+        guard record,let c=campaign,c.quizBank.indices.contains(prompt.question) else{return}
+        let blanks=Array(repeating:Optional<Int>.none,count:c.quizBank[prompt.question].parts.count)
+        do{
+            for id in prompt.ids {try c.recordQuiz(actor:id,question:prompt.question,picks:blanks,seconds:0,free:true,shared:true,practice:prompt.practice,skipped:true)}
+            message="已记入 \(prompt.names) 的错题";revision += 1
+        }catch{message=error.localizedDescription;revision += 1}
     }
     /// Ends the class question: the TV reveals the right answer and who got it.
     /// `nobodyAnswered`: Esc / 只揭晓 with nothing sent. On a card just made from the notes that means it was too
@@ -546,13 +567,16 @@ final class MeadowTeacherCoordinator:ObservableObject {
         showPracticeCard()
     }
     /// ← / → (and the arrow buttons): move through the deck without marking.
+    /// While a card's back shows (after marking), moving on takes over at once.
     func stepPractice(_ by:Int){
-        guard let model=practiceModel,!model.waiting,!model.deck.isEmpty else{return}
+        guard let model=practiceModel,!model.deck.isEmpty else{return}
+        model.waiting=false
         model.cursor += by;showPracticeCard()
     }
-    /// The teacher picked a card from the list.
+    /// The teacher picked a card from the list (also while the last one's back shows).
     func pickPracticeCard(_ position:Int){
-        guard let model=practiceModel,!model.waiting,model.deck.indices.contains(position) else{return}
+        guard let model=practiceModel,model.deck.indices.contains(position) else{return}
+        model.waiting=false
         model.cursor=position;showPracticeCard()
     }
     func setPracticeOrder(_ order:PracticeModel.Order){

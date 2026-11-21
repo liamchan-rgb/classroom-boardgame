@@ -326,7 +326,8 @@ extension MeadowTeacherCoordinator {
         message = "已加入「\(course)」：\(card.prompt) → \(card.parts[0].options[0])"
         guard ask else { revision += 1; return }
         guard let c = campaign else { message += "（还没有打开行程，未出题）"; revision += 1; return }
-        guard quiz == nil, challenge == nil else { message += "（正在答题，稍后在全班题里出）"; revision += 1; return }
+        // Between class questions (the list up, or an answer still showing) the new card is asked right away.
+        guard challenge == nil, quiz == nil || (quiz?.mode == .classwide && quiz?.attempt != nil) else { message += "（正在答题，稍后在全班题里出）"; revision += 1; return }
         guard let index = c.quizBank.lastIndex(where: { $0 == card }) else { revision += 1; return }
         noteCardIndex = index
         openClassQuiz(index: index)

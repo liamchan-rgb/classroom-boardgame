@@ -87,7 +87,7 @@ struct ClassroomTVOverlays:View {
                 if overlays.scoreboard {
                     Group{
                         if overlays.teamScores {ClassroomTeamScoreboard(state:game.campaign?.engine.state,unit:unit)}
-                        else {ClassroomScoreboard(players:game.campaign?.engine.state.players ?? [],unit:unit)}
+                        else {ClassroomScoreboard(players:game.campaign?.engine.state.players ?? [],state:game.campaign?.engine.state,unit:unit)}
                     }.frame(maxWidth:.infinity,maxHeight:.infinity)
                 }
                 if game.quiz != nil {QuizOverlayHost(game:game)}
@@ -126,7 +126,13 @@ private struct ClassTimerBadge:View {
 
 private struct ClassroomScoreboard:View {
     let players:[GameUnit]
+    /// For each student's team (a coloured tag) and, with two teams or more, the teams' standing below.
+    var state:GameState?=nil
     let unit:CGFloat
+    private func team(_ u:GameUnit)->(name:String,tint:Color)? {
+        guard let state,state.teams.count>1,let id=u.teamID,let i=state.teams.firstIndex(where:{$0.id==id}) else{return nil}
+        return (state.teams[i].name,ClassroomTeamScoreboard.tints[i%ClassroomTeamScoreboard.tints.count])
+    }
     private static let tints:[Color]=[Color(red:0.36,green:0.72,blue:0.52),Color(red:0.42,green:0.62,blue:0.95),Color(red:0.95,green:0.62,blue:0.36),Color(red:0.78,green:0.52,blue:0.92),Color(red:0.95,green:0.80,blue:0.38),Color(red:0.40,green:0.80,blue:0.85),Color(red:0.92,green:0.50,blue:0.55)]
     var body:some View {
         let ranked=players.sorted{($0.score,$0.coins,$1.id)>($1.score,$1.coins,$0.id)}
@@ -145,6 +151,10 @@ private struct ClassroomScoreboard:View {
                     Text(String(u.shortName.prefix(1)).uppercased()).font(.system(size:20*unit,weight:.heavy,design:.rounded))
                         .frame(width:40*unit,height:40*unit).background(Self.tints[seat%Self.tints.count],in:Circle())
                     Text(u.name).font(.system(size:26*unit,weight:.bold,design:.rounded)).lineLimit(1).minimumScaleFactor(0.6)
+                    if let t=team(u) {
+                        Text(t.name).font(.system(size:16*unit,weight:.heavy,design:.rounded)).foregroundStyle(.white).lineLimit(1)
+                            .padding(.horizontal,10*unit).padding(.vertical,3*unit).background(t.tint,in:Capsule())
+                    }
                     Spacer(minLength:0)
                     Text("\(u.score)").frame(width:150*unit,alignment:.trailing).foregroundStyle(GameTheme.primary)
                     Text("\(u.coins)").frame(width:150*unit,alignment:.trailing).foregroundStyle(Color(red:0.74,green:0.52,blue:0.12))
@@ -154,6 +164,27 @@ private struct ClassroomScoreboard:View {
                 .background(RoundedRectangle(cornerRadius:16*unit,style:.continuous).fill(.white.opacity(rank==0 ? 0.7:0.42)))
             }
             if players.isEmpty {Text("还没有进行中的行程").font(.system(size:22*unit)).foregroundStyle(GameTheme.muted)}
+            // Teams: average score of their students (as in the team view), total and head count.
+            if let state,state.teams.count>1 {
+                let rows=GameRules.teamStandings(state),order=state.teams.map(\.id)
+                HStack(spacing:10*unit){
+                    ForEach(rows){row in
+                        let tint=ClassroomTeamScoreboard.tints[(order.firstIndex(of:row.id) ?? 0)%ClassroomTeamScoreboard.tints.count]
+                        HStack(spacing:8*unit){
+                            Text("\(row.rank)").font(.system(size:20*unit,weight:.heavy,design:.rounded)).foregroundStyle(.white.opacity(0.9))
+                            VStack(alignment:.leading,spacing:1*unit){
+                                Text(row.name).font(.system(size:20*unit,weight:.heavy,design:.rounded))
+                                Text("\(row.memberIDs.count) 人 · 总 \(row.totalScore)").font(.system(size:13*unit,weight:.bold,design:.rounded)).opacity(0.85)
+                            }
+                            Spacer(minLength:4*unit)
+                            Text(row.averageScore.formatted(.number.precision(.fractionLength(0...1)))).font(.system(size:28*unit,weight:.heavy,design:.rounded)).monospacedDigit()
+                        }
+                        .foregroundStyle(.white).padding(.horizontal,14*unit).padding(.vertical,8*unit)
+                        .frame(maxWidth:.infinity).background(RoundedRectangle(cornerRadius:14*unit,style:.continuous).fill(tint))
+                    }
+                }
+                Text("队伍按队员平均积分排名").font(.system(size:14*unit,weight:.semibold,design:.rounded)).foregroundStyle(GameTheme.muted)
+            }
         }
         .padding(26*unit).frame(width:820*unit)
         // Static light glass like the console (no live blur over the moving game, which would cost every frame);
@@ -166,7 +197,7 @@ private struct ClassroomScoreboard:View {
 
 /// Team view of the scoreboard: teams ranked by the average score of their students, with each team's total,
 /// head count and coins; the members' initials sit under the team name.
-private struct ClassroomTeamScoreboard:View {
+struct ClassroomTeamScoreboard:View {
     let state:GameState?
     let unit:CGFloat
     static let tints:[Color]=[Color(red:0.90,green:0.36,blue:0.36),Color(red:0.36,green:0.56,blue:0.92),Color(red:0.32,green:0.70,blue:0.44),Color(red:0.88,green:0.68,blue:0.22),Color(red:0.66,green:0.44,blue:0.88),Color(red:0.94,green:0.56,blue:0.26)]
@@ -474,6 +505,11 @@ extension MeadowTeacherCoordinator {
         return saved[id] ?? ((ids.firstIndex(of:id) ?? 0)+1)
     }
     func player(forSeat n:Int)->String? {campaign?.engine.state.players.map(\.id).first{seatNumber($0)==n}}
+    /// The students in seat-number order (as the number keys pick them).
+    var seatOrderedPlayers:[GameUnit] {
+        let list=campaign?.engine.state.players ?? []
+        return list.sorted{a,b in let x=seatNumber(a.id),y=seatNumber(b.id);return x==y ? a.id<b.id:x<y}
+    }
     /// Give `id` number `n`; whoever had `n` takes `id`'s old number.
     func setSeatNumber(_ id:String,_ n:Int) {
         let ids=campaign?.engine.state.players.map(\.id) ?? []
