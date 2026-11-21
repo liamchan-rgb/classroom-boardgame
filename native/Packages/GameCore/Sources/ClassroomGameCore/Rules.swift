@@ -272,14 +272,113 @@ public struct GameArchive: Codable, Equatable {
     public var state: GameState
     public var history: [OperationReceipt]
     public init(catalog: GameCatalog, state: GameState, history: [OperationReceipt]) { self.catalog = catalog; self.state = state; self.history = history }
-    public func validate() throws {
+    /// `fullHistory: false` checks every history entry's order and game, but the before/after states only of the
+    /// newest one (the others were checked when they were made or read). Saving uses it; reading checks everything.
+    public func validate(fullHistory: Bool = true) throws {
         try catalog.validate(); try state.validate(catalog: catalog)
         guard formatVersion == 1, Set(history.map(\.id)).count == history.count else { throw GameError("操作历史版本或ID无效。") }
         for (index, entry) in history.enumerated() {
             guard !entry.id.isEmpty, entry.sequence == index + 1,
                   entry.before.gameID == state.gameID, entry.after.gameID == state.gameID else { throw GameError("操作历史不属于同一局或序号无效。") }
-            try entry.before.validate(catalog: catalog); try entry.after.validate(catalog: catalog)
+            if fullHistory || index == history.count - 1 { try entry.before.validate(catalog: catalog); try entry.after.validate(catalog: catalog) }
         }
+    }
+
+    // A long class keeps hundreds of entries, each with the whole state before and after (the answer log alone is
+    // tens of KB and grows with every answer). On disk each history state is stored as a change from the state
+    // before it: only the characters that changed, and the answer log as "keep the first k answers, then these".
+    // An entry's `before` is left out when it is the previous entry's `after`. In memory nothing changes, and files
+    // written before this (full states everywhere) read the same way.
+    private enum CodingKeys: String, CodingKey { case formatVersion, catalog, state, history }
+    private struct StoredState: Codable {
+        /// The state, with `units` holding only the changed characters and `quizLog` only the new answers when a
+        /// change from the previous state.
+        var state: GameState
+        var delta: Bool?
+        var unitsRemoved: [String]?
+        var quizLogKeep: Int?
+        private enum Extra: String, CodingKey { case delta, unitsRemoved, quizLogKeep }
+        init(_ full: GameState, previous: GameState?) {
+            state = full
+            guard let previous else { return }
+            delta = true
+            state.units = full.units.filter { previous.units[$0.key] != $0.value }
+            let removed = previous.units.keys.filter { full.units[$0] == nil }.sorted()
+            unitsRemoved = removed.isEmpty ? nil : removed
+            if let log = full.quizLog, let old = previous.quizLog {
+                var keep = 0
+                while keep < min(log.count, old.count), log[keep] == old[keep] { keep += 1 }
+                if keep == old.count || keep > 0 { quizLogKeep = keep; state.quizLog = Array(log[keep...]) }
+            }
+        }
+        init(from decoder: Decoder) throws {
+            state = try GameState(from: decoder)
+            let c = try decoder.container(keyedBy: Extra.self)
+            delta = try c.decodeIfPresent(Bool.self, forKey: .delta)
+            unitsRemoved = try c.decodeIfPresent([String].self, forKey: .unitsRemoved)
+            quizLogKeep = try c.decodeIfPresent(Int.self, forKey: .quizLogKeep)
+        }
+        func encode(to encoder: Encoder) throws {
+            try state.encode(to: encoder)
+            var c = encoder.container(keyedBy: Extra.self)
+            try c.encodeIfPresent(delta, forKey: .delta)
+            try c.encodeIfPresent(unitsRemoved, forKey: .unitsRemoved)
+            try c.encodeIfPresent(quizLogKeep, forKey: .quizLogKeep)
+        }
+        func resolved(previous: GameState?) throws -> GameState {
+            guard delta == true else { return state }
+            guard let previous else { throw GameError("操作历史缺少起始状态。") }
+            var s = state
+            var units = previous.units
+            for key in unitsRemoved ?? [] { units[key] = nil }
+            for (key, unit) in state.units { units[key] = unit }
+            s.units = units
+            if let keep = quizLogKeep {
+                guard let old = previous.quizLog, keep <= old.count else { throw GameError("操作历史的作答记录无效。") }
+                s.quizLog = Array(old.prefix(keep)) + (state.quizLog ?? [])
+            }
+            return s
+        }
+    }
+    private struct StoredReceipt: Codable {
+        var id: String
+        var sequence: Int
+        var command: GameCommand
+        var dice: [DiceResult]
+        var events: [GameEvent]
+        var before: StoredState?
+        var after: StoredState
+    }
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        formatVersion = try c.decodeIfPresent(Int.self, forKey: .formatVersion) ?? 1
+        catalog = try c.decode(GameCatalog.self, forKey: .catalog)
+        state = try c.decode(GameState.self, forKey: .state)
+        let stored = try c.decode([StoredReceipt].self, forKey: .history)
+        var receipts: [OperationReceipt] = []
+        receipts.reserveCapacity(stored.count)
+        for entry in stored {
+            let previous = receipts.last?.after
+            guard let before = try entry.before?.resolved(previous: previous) ?? previous else { throw GameError("操作历史缺少起始状态。") }
+            let after = try entry.after.resolved(previous: before)
+            receipts.append(OperationReceipt(id: entry.id, sequence: entry.sequence, command: entry.command, dice: entry.dice,
+                                             events: entry.events, before: before, after: after))
+        }
+        history = receipts
+    }
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(formatVersion, forKey: .formatVersion)
+        try c.encode(catalog, forKey: .catalog)
+        try c.encode(state, forKey: .state)
+        var previous: GameState?
+        let stored = history.map { r -> StoredReceipt in
+            let before: StoredState? = previous == r.before ? nil : StoredState(r.before, previous: previous)
+            defer { previous = r.after }
+            return StoredReceipt(id: r.id, sequence: r.sequence, command: r.command, dice: r.dice, events: r.events,
+                                 before: before, after: StoredState(r.after, previous: r.before))
+        }
+        try c.encode(stored, forKey: .history)
     }
     public func encoded() throws -> Data {
         try validate()

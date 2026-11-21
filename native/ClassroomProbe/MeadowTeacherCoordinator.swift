@@ -153,8 +153,8 @@ final class MeadowTeacherCoordinator:ObservableObject {
             switch key {
             case "⏎":start()
             case "⎋":self.closePanel()
-            case "+","=":model.seconds=min(1800,model.seconds+30)
-            case "-":model.seconds=max(30,model.seconds-30)
+            case "+","=":model.seconds=min(3600,model.seconds+30)
+            case "-":model.seconds=max(10,model.seconds-30)
             default:
                 if let n=Int(key),let id=self.player(forSeat:n) {model.player=id;return true}
                 return false
@@ -218,6 +218,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
     private func challengeNext(excluding:Set<Int>=[]){
         guard let c=campaign,let model=challenge,model.phase != .finished,model.remaining>0 else{return}
         model.draft=nil
+        model.pause()
         guard let draw=QuizDrawSettings.shared.draw else{model.phase = .picking;model.note=nil;return}
         guard let i=c.drawQuestion(draw,for:model.player,excluding:excluding) else{
             model.phase = .picking;model.note="这一档没有题，换个出题方式或难度。";return
@@ -229,7 +230,15 @@ final class MeadowTeacherCoordinator:ObservableObject {
         model.note=nil;model.phase = .question;model.questionStart=Date()
         quizToken += 1
         let shown=presented(i)
-        quiz=LiveQuiz(token:quizToken,index:i,question:shown.question,mode:.challenge,player:model.player,playerName:model.name,place:"个人挑战",node:nil,start:Date(),deadline:model.end,shuffle:shown.shuffle)
+        model.pause()
+        quiz=LiveQuiz(token:quizToken,index:i,question:shown.question,mode:.challenge,player:model.player,playerName:model.name,place:"个人挑战",node:nil,start:Date(),
+                      countdown:QuizCountdown{[weak model] in model?.remaining ?? 0},shuffle:shown.shuffle)
+        // The clock runs from when the card is in until the answer is picked.
+        let token=quizToken
+        DispatchQueue.main.asyncAfter(deadline:.now()+MeadowQuizCard.entrance){[weak self,weak model] in
+            guard let self,let model,self.challenge === model,model.phase == .question,self.quiz?.token==token,self.quiz?.attempt==nil else{return}
+            model.resume()
+        }
         let draft=QuizAnswerDraft(shown.question)
         // The answer is picked: reveal and pay straight away (no separate submit).
         draft.onComplete={[weak self] in self?.challengeSubmit()}
@@ -238,11 +247,13 @@ final class MeadowTeacherCoordinator:ObservableObject {
     /// 换一题 / 重新选题: the question on screen is dropped without a record.
     private func challengeSkip(){
         guard let model=challenge,model.phase == .question,let live=quiz,live.attempt==nil else{return}
-        quiz=nil
+        model.pause();quiz=nil
         if QuizDrawSettings.shared.mode == .manual {model.phase = .picking;model.draft=nil} else {challengeNext(excluding:[live.index])}
     }
     private func challengeSubmit(){
         guard let c=campaign,let model=challenge,model.phase == .question,var live=quiz,live.attempt==nil,let draft=model.draft else{return}
+        // Answer picked: the clock stops through the reveal and until the next question is up.
+        model.pause()
         let r=draft.result
         do{
             let a=try c.recordQuiz(actor:model.player,question:live.index,picks:recorded(r.picks,live),texts:r.texts,seconds:Date().timeIntervalSince(model.questionStart),free:true,challenge:true)
@@ -254,12 +265,13 @@ final class MeadowTeacherCoordinator:ObservableObject {
         }catch{model.note=error.localizedDescription}
     }
     private func challengeTick(){
-        guard let model=challenge,model.phase != .finished,model.remaining<=0 else{return}
+        guard let model=challenge,model.phase != .finished,model.running,model.remaining<=0 else{return}
         finishChallenge()
     }
     /// Time is up (or the teacher ended it): a question in progress does not count; the result shows on the TV.
     private func finishChallenge(){
         guard let model=challenge,model.phase != .finished else{return}
+        model.pause()
         challengeTimer?.invalidate();challengeTimer=nil
         if quiz?.attempt == nil {withAnimation{quiz=nil}}
         model.phase = .finished;model.draft=nil
@@ -520,7 +532,10 @@ final class MeadowTeacherCoordinator:ObservableObject {
     func setPracticeClasswide(_ on:Bool){
         guard let model=practiceModel,!model.waiting,model.classwide != on else{return}
         model.classwide=on;model.right=0;model.total=0;model.players=[];model.note=nil;model.results=[:]
-        rebuildDeck()
+        // The card on screen stays (one student ↔ the whole class answer the same card); only who answers changes.
+        let current=quiz?.mode == .practice && quiz?.attempt == nil ? quiz?.index:nil
+        rebuildDeck(keeping:current)
+        if current != nil {showPracticeCard()}
     }
     func togglePracticePlayer(_ id:String){
         guard let model=practiceModel,model.classwide,!model.waiting else{return}
@@ -796,6 +811,8 @@ final class MeadowTeacherCoordinator:ObservableObject {
         // Construct and validate without writing, then back up the live working copy.
         _=try MeadowCampaignSession(save:save)
         if let campaign{try Self.slotStore.backup(campaign.snapshot)}
+        // A background save of the trip being replaced must not land after this one.
+        MeadowCampaignSession.flushPendingSaves()
         try store.write(save.encoded())
         install(try MeadowCampaignSession(save:save,persist:store.write))
         if wasBook{project(.book)}

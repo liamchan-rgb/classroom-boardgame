@@ -24,6 +24,9 @@ final class MeadowLotteryView: UIView {
         tiers.addAction(UIAction { [weak self] _ in self?.selectTier() }, for: .valueChanged)
         note.textAlignment = .center; note.numberOfLines = 2; note.textColor = MeadowPreviewPalette.muted
         spin.addAction(UIAction { [weak self] _ in self?.go() }, for: .touchUpInside)
+        // The star in the middle spins too; the win and its prize card fade after a second.
+        wheel.onHubTap = { [weak self] in self?.go() }
+        wheel.onWinFaded = { [weak self] in self?.card.hide() }
         [tiers, wheel, spin, note, card].forEach(addSubview)
         selectTier()
     }

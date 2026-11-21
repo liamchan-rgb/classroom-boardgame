@@ -16,11 +16,14 @@ final class MeadowQuizCard: UIView {
     static let circled = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩", "⑪", "⑫"]
 
     private var mode: LiveQuiz.Mode = .personal
-    private var deadline: Date?
-    static func present(in host: UIView, question: QuizQuestion, player: String, place: String, start: Date, mode: LiveQuiz.Mode = .personal, deadline: Date? = nil) -> MeadowQuizCard {
+    /// Challenge: time left read from the challenge's clock (it stops between questions).
+    private var countdown: (() -> Double)?
+    /// How long the card takes to come in (the challenge clock starts after it).
+    static let entrance = 0.45
+    static func present(in host: UIView, question: QuizQuestion, player: String, place: String, start: Date, mode: LiveQuiz.Mode = .personal, countdown: (() -> Double)? = nil) -> MeadowQuizCard {
         host.subviews.compactMap { $0 as? MeadowQuizCard }.forEach { $0.removeFromSuperview() }
         let view = MeadowQuizCard(frame: host.bounds); view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        view.question = question; view.start = start; view.limit = question.timeLimit; view.mode = mode; view.deadline = deadline
+        view.question = question; view.start = start; view.limit = question.timeLimit; view.mode = mode; view.countdown = countdown
         view.build(player: player, place: place); host.addSubview(view)
         view.alpha = 0; view.card.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
         UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: 0.75, initialSpringVelocity: 0.6) { view.alpha = 1; view.card.transform = .identity }
@@ -80,7 +83,7 @@ final class MeadowQuizCard: UIView {
     }
     private func tick() {
         guard !revealed else { return }
-        let left = deadline.map { $0.timeIntervalSinceNow } ?? Double(limit) - Date().timeIntervalSince(start)
+        let left = countdown?() ?? Double(limit) - Date().timeIntervalSince(start)
         if left <= 0 {
             clock.text = "时间到"; clock.backgroundColor = UIColor.systemRed.withAlphaComponent(Int(Date().timeIntervalSinceReferenceDate * 2) % 2 == 0 ? 0.9 : 0.6)
         } else {

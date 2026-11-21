@@ -34,9 +34,16 @@ struct WheelSlice {
 
 /// The wheel with its rim lights, pointer, hub and win effects. The face is drawn once; spinning, the chasing lights,
 /// the pointer ticks and the bursts are Core Animation layers and particle emitters (the GPU does the frames).
-final class MeadowPrizeWheelView: UIView {
+final class MeadowPrizeWheelView: UIView, UIGestureRecognizerDelegate {
     var slices: [WheelSlice] = [] { didSet { face.slices = slices; face.setNeedsDisplay(); clearWin() } }
     private(set) var spinning = false
+    /// Tapping the star in the middle spins (the same as the spin button).
+    var onHubTap: (() -> Void)?
+    /// How long the win shows before it fades away (the prize card goes with it).
+    static let winHold = 1.0
+    /// Called when the win fades (the owner hides its prize card then).
+    var onWinFaded: (() -> Void)?
+    private var winToken = 0
 
     private let glow = CALayer()
     private let face = WheelFaceView()
@@ -76,6 +83,8 @@ final class MeadowPrizeWheelView: UIView {
         hubStar.contentsScale = UIScreen.main.scale
         hub.addSublayer(hubStar)
         layer.addSublayer(hub)
+        let tap = UITapGestureRecognizer(target: self, action: #selector(hubTapped)); tap.delegate = self
+        addGestureRecognizer(tap)
         pointer.fillColor = UIColor(red: 1, green: 0.30, blue: 0.40, alpha: 1).cgColor
         pointer.strokeColor = UIColor.white.cgColor; pointer.lineWidth = 3
         pointer.shadowColor = UIColor.black.cgColor; pointer.shadowOpacity = 0.45; pointer.shadowRadius = 5; pointer.shadowOffset = CGSize(width: 0, height: 3)
@@ -132,6 +141,13 @@ final class MeadowPrizeWheelView: UIView {
     }
 
     // MARK: Spin
+
+    /// Only taps on the hub count (the rest of the wheel lets them through).
+    func gestureRecognizer(_ g: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        let p = touch.location(in: self), c = centre, hr = max(22, radius * 0.17) + 6
+        return hypot(p.x - c.x, p.y - c.y) <= hr && onHubTap != nil && !spinning
+    }
+    @objc private func hubTapped() { onHubTap?() }
 
     /// Turns the wheel a few times and stops with slot `slot` under the pointer; `done` after it settles.
     func spin(to slot: Int, duration: Double = 4.4, done: @escaping () -> Void) {
@@ -192,7 +208,27 @@ final class MeadowPrizeWheelView: UIView {
 
     // MARK: Win
 
-    private func clearWin() { winWedge.removeAllAnimations(); winWedge.opacity = 0; effects.sublayers?.forEach { $0.removeFromSuperlayer() } }
+    private func clearWin() {
+        winToken += 1
+        winWedge.removeAllAnimations(); winWedge.opacity = 0; effects.removeAllAnimations(); effects.opacity = 1
+        effects.sublayers?.forEach { $0.removeFromSuperlayer() }
+    }
+    /// After `winHold`: the lit slice and the effects fade out, then are cleared.
+    private func fadeWinLater() {
+        let token = winToken
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.winHold) { [weak self] in
+            guard let self, self.winToken == token, !self.spinning else { return }
+            let fade = CABasicAnimation(keyPath: "opacity"); fade.toValue = 0; fade.duration = 0.3
+            fade.fillMode = .forwards; fade.isRemovedOnCompletion = false
+            self.winWedge.add(fade, forKey: "fade"); self.effects.add(fade, forKey: "fade")
+            self.onWinFaded?()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.32) { [weak self] in
+                guard let self, self.winToken == token else { return }
+                self.clearWin()
+                self.glow.shadowColor = UIColor(red: 0.45, green: 0.55, blue: 1, alpha: 1).cgColor
+            }
+        }
+    }
 
     /// Lights the winning slice and plays the celebration of its rarity (brighter for rarer prizes).
     func celebrate(_ slot: Int) {
@@ -207,6 +243,7 @@ final class MeadowPrizeWheelView: UIView {
         winWedge.shadowColor = rarity.color.cgColor; winWedge.shadowOpacity = 1; winWedge.shadowRadius = 12; winWedge.shadowOffset = .zero
         let pulse = CABasicAnimation(keyPath: "opacity"); pulse.fromValue = 1; pulse.toValue = 0.45; pulse.duration = 0.5; pulse.autoreverses = true; pulse.repeatCount = .infinity
         winWedge.opacity = 1; winWedge.add(pulse, forKey: "pulse")
+        fadeWinLater()
         glow.shadowColor = rarity.color.cgColor
         let top = CGPoint(x: c.x, y: c.y - r * 0.55)
         switch rarity {

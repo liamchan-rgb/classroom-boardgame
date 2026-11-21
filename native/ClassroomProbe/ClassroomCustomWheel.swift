@@ -122,6 +122,10 @@ final class CustomWheelViewController: UIViewController {
         for (i, p) in people.enumerated() { members.insertSegment(withTitle: p.shortName, at: i, animated: false) }
         members.addAction(UIAction { [weak self] _ in guard let self else { return }; let list = self.people; if list.indices.contains(self.members.selectedSegmentIndex) { self.actor = list[self.members.selectedSegmentIndex].id }; self.refresh() }, for: .valueChanged)
         edit.addAction(UIAction { [weak self] _ in self?.openEditor(new: false) }, for: .touchUpInside)
+        // The star in the middle spins too; the win and its prize card fade after a second (the line below the
+        // wheel keeps what was won).
+        wheel.onHubTap = { [weak self] in self?.go() }
+        wheel.onWinFaded = { [weak self] in self?.card.hide() }
         close.addAction(UIAction { [weak self] _ in self?.dismiss(animated: true) }, for: .touchUpInside)
         spin.addAction(UIAction { [weak self] _ in self?.go() }, for: .touchUpInside)
         result.font = MeadowPreviewPalette.font(20, .heavy); result.textColor = MeadowPreviewPalette.ink; result.textAlignment = .center; result.numberOfLines = 2

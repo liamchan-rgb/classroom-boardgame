@@ -555,6 +555,39 @@ final class QuizTests:XCTestCase {
         let restored=try MeadowCampaignSession(save:.decoded(s.snapshot.encoded()))
         XCTAssertEqual(restored.quizLog,s.quizLog)
     }
+    /// The history is saved as changes (only changed characters, the answer log as "keep k, then these"), so a long
+    /// class does not save every answer again in every entry; it reads back exactly, edits and removals included.
+    func testHistoryIsSavedCompactlyAndReadsBackExactly()throws {
+        let bank=(0..<12).map{QuizBankParser.flashcard(front:"w\($0)",back:"词\($0)",distractors:[])}
+        let s=try quizSession(bank)
+        for k in 0..<12 {try s.recordQuiz(actor:k%2==0 ? "p1":"p2",question:k,picks:[k%3==0 ? nil:0],seconds:2,free:true,shared:true)}
+        try s.setQuizRecord(at:3,right:true);try s.removeQuizRecord(at:1)
+        let bytes=try s.snapshot.encoded()
+        let back=try MeadowCampaignSave.decoded(bytes)
+        XCTAssertEqual(back.archive,s.snapshot.archive)
+        XCTAssertEqual(back.archive.history.map(\.before),s.engine.history.map(\.before))
+        // Every history state written in full would repeat the growing answer log; stored as changes it is not.
+        let full=try JSONSerialization.jsonObject(with:bytes) as! [String:Any]
+        let history=(full["archive"] as! [String:Any])["history"] as! [[String:Any]]
+        XCTAssertTrue(history.dropFirst().allSatisfy{$0["before"]==nil || ($0["before"] as? [String:Any])?["delta"] as? Bool==true})
+        XCTAssertTrue(history.dropFirst().allSatisfy{($0["after"] as? [String:Any])?["delta"] as? Bool==true})
+        // Files written before (full states) still read, and are much bigger.
+        let legacy=try checkLegacyHistoryReads(full,s)
+        XCTAssertGreaterThan(legacy,bytes.count)
+    }
+    private func checkLegacyHistoryReads(_ full:[String:Any],_ s:MeadowCampaignSession)throws->Int {
+        var legacy=full
+        var legacyArchive=legacy["archive"] as! [String:Any]
+        let encoder=JSONEncoder();encoder.outputFormatting=[.sortedKeys]
+        var rows:[Any]=[]
+        for receipt in s.engine.history {rows.append(try JSONSerialization.jsonObject(with:encoder.encode(receipt)))}
+        legacyArchive["history"]=rows
+        legacy["archive"]=legacyArchive
+        let legacyBytes=try JSONSerialization.data(withJSONObject:legacy)
+        let legacySave=try MeadowCampaignSave.decoded(legacyBytes)
+        XCTAssertEqual(legacySave.archive,s.snapshot.archive)
+        return legacyBytes.count
+    }
     func testOneMovementStepPerQuestionPerTeam()throws {
         let s=try quizSession([QuizBankParser.flashcard(front:"cat",back:"猫",distractors:[]),QuizBankParser.flashcard(front:"dog",back:"狗",distractors:[])])
         _=try arrive(s)  // walking uses up part of the bar

@@ -302,7 +302,11 @@ public extension MeadowCampaignSession {
     /// Whether a question belongs to the current course.
     func inCourse(_ q:QuizQuestion)->Bool {quizCourseQuestions.map{$0.contains(q)} ?? true}
     /// Bank indices of the current course.
-    var courseIndices:[Int] {quizBank.indices.filter{inCourse(quizBank[$0])}}
+    var courseIndices:[Int] {
+        let bank=quizBank
+        guard let course=quizCourseQuestions else{return Array(bank.indices)}
+        return bank.indices.filter{course.contains(bank[$0])}
+    }
     /// Switch to a course: its questions are added to the trip's bank if they are not there yet (appended, so
     /// earlier answers keep pointing at their questions), and questions are dealt from it from now on.
     func useQuizCourse(_ name:String?,questions:[QuizQuestion])throws {

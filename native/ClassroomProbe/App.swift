@@ -6,12 +6,24 @@ import MeadowWorldSupport
 @main
 struct ClassroomProbeApp: App {
     @Environment(\.scenePhase) private var scenePhase
+    init() {
+        // A long class makes the trip save large: encode and write it off the main thread (clicks stay instant),
+        // and make sure it is on disk before the app goes to the background or quits.
+        MeadowCampaignSession.persistInBackground = true
+        MeadowCampaignSession.onSaveError = { error in
+            DispatchQueue.main.async { TeacherSession.shared.show("行程保存失败：" + error.localizedDescription) }
+        }
+        NotificationCenter.default.addObserver(forName: UIApplication.willTerminateNotification, object: nil, queue: nil) { _ in
+            MeadowCampaignSession.flushPendingSaves()
+        }
+    }
     var body: some Scene {
         WindowGroup {
             TeacherHost()
                 .ignoresSafeArea()
                 .onChange(of: scenePhase) { _, phase in
                     if phase != .active {
+                        MeadowCampaignSession.flushPendingSaves()
                         TeacherSession.shared.pause(.background,enabled:true)
                         TeacherSession.shared.concealNotes()
                     } else {TeacherSession.shared.pause(.background,enabled:false)}

@@ -153,7 +153,11 @@ struct Evaluation {
                 for id in state.players.filter(\.isAlive).map(\.id) {
                     var player=try unit(id);player.ap=try GameRules.attributes(player,catalog:catalog).baseAP;state.units[id]=player
                 }
-                try start(kind:.pve,monsters:enemies)
+                // Only the team that came here fights (its members at this spot); another team standing nearby or
+                // on the same spot is not pulled into this battle.
+                let teams=Set(travelers.map{$0.teamID ?? $0.id})
+                let heroes=state.players.filter{teams.contains($0.teamID ?? $0.id) && $0.nodeID==nodeID}.map(\.id)
+                try start(kind:.pve,monsters:enemies,heroes:heroes.isEmpty ? travelers.map(\.id):heroes)
             }else{throw GameError(node.kind == .reward ? "此处补给已领取。":"此地点没有待处理事件。")}
             events.append(GameEvent("campaignInteraction",actor:actors.first,detail:String(nodeID)))
         case .refillCampaignMovement(let actors,let coins,let manual):
@@ -293,7 +297,8 @@ struct Evaluation {
         events.append(GameEvent("nodeRewardReset",detail:"node=\(id);explicit=true"))
     }
 
-    mutating func start(kind: BattleKind, monsters: [String]) throws {
+    /// `heroes`: who fights a PVE battle (the team that arrived); nil = the teams with someone where the monsters are.
+    mutating func start(kind: BattleKind, monsters: [String], heroes: [String]? = nil) throws {
         guard state.phase == .exploration, state.battle == nil else { throw GameError("新战斗应从探索阶段开始。") }
         let playerIDs = state.players.map(\.id)
         var participants = playerIDs
@@ -304,7 +309,8 @@ struct Evaluation {
             // join (the whole team, as before). With one team, or nobody there, everyone joins as always.
             let fields = Set(try monsters.map { try unit($0).nodeID })
             let teams = Set(state.players.filter { fields.contains($0.nodeID) }.map { $0.teamID ?? "" })
-            if !teams.isEmpty { participants = state.players.filter { teams.contains($0.teamID ?? "") }.map(\.id) }
+            if let heroes, !heroes.isEmpty { participants = state.players.map(\.id).filter(heroes.contains) }
+            else if !teams.isEmpty { participants = state.players.filter { teams.contains($0.teamID ?? "") }.map(\.id) }
             participants += monsters
         } else {
             guard monsters.isEmpty else { throw GameError("PVP不加入怪物。") }

@@ -107,6 +107,7 @@ final class TeacherSession: ObservableObject {
     }
     func setRegistrationStatus(_ text: String) { registrationStatus = text }
     func fileSelectionFailed(_ error: Error) { message = "选择文件失败：\(error.localizedDescription)" }
+    func show(_ text: String) { message = text }
     func select(_ id: Int) { mutate { if $0.players.contains(where: { $0.id == id }) { $0.selectedPlayerID = id } } }
     func award() {
         if mutate({ $0.awardCoins() }) { message = "奖励对象：\(selectedName)；金币已更新。" }

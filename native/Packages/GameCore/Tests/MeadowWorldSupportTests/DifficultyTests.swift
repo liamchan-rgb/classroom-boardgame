@@ -122,6 +122,19 @@ final class DifficultyTests:XCTestCase {
         XCTAssertNil(s.duelOpponent(actor:"p1"));XCTAssertThrowsError(try s.startDuel(actor:"p1"))
         try s.resetDuelLimits();XCTAssertEqual(s.duelOpponent(actor:"p1"),b.teamID)
     }
+    /// Two teams on the same monster spot: the team that takes it on fights; the other one is not pulled in.
+    func testOnlyTheArrivingTeamFightsWhenAnotherTeamIsThere()throws {
+        var c=MeadowMapConfiguration.suggested(total:8,seed:9);c.starts=2
+        let fresh=try MeadowCampaignSession.new(layout:MeadowMapGenerator.generate(c),studentClasses:["spellblade","ranger"],studentTeams:[0,1])
+        let monster=try XCTUnwrap(fresh.engine.state.units.values.filter{$0.kind == .monster}.sorted{$0.id<$1.id}.first)
+        var save=fresh.snapshot
+        save.archive.state.units["p1"]!.nodeID=monster.nodeID;save.archive.state.units["p2"]!.nodeID=monster.nodeID
+        let s=try MeadowCampaignSession(save:save)
+        XCTAssertNotEqual(s.engine.state.units["p1"]!.teamID,s.engine.state.units["p2"]!.teamID)
+        try s.interactCurrentNode(actor:"p2")
+        let queue=s.engine.state.battle?.queue ?? []
+        XCTAssertTrue(queue.contains("p2"));XCTAssertFalse(queue.contains("p1"))
+    }
     func testSplitTeamsFightTheirOwnEncounters()throws {
         var c=MeadowMapConfiguration.suggested(total:8,seed:9);c.starts=2
         let fresh=try MeadowCampaignSession.new(layout:MeadowMapGenerator.generate(c),studentClasses:["spellblade","ranger"],studentTeams:[0,1])

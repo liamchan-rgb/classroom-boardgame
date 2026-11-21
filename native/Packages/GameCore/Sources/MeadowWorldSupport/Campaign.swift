@@ -64,8 +64,8 @@ public struct MeadowCampaignSave:Codable,Equatable {
     public var movement:MeadowCampaignMovement?=nil
     public var selectedPlayerID:String?=nil
     public let appearanceID:String
-    public func validate() throws {
-        try archive.validate();try layout.configuration.validate();try layout.map.validate()
+    public func validate(fullHistory:Bool=true) throws {
+        try archive.validate(fullHistory:fullHistory);try layout.configuration.validate();try layout.map.validate()
         guard formatVersion==1,layout.generatorVersion==3,["forester","wayfarer"].contains(appearanceID),
               layout.coordinateHeight.isFinite,layout.coordinateHeight>0,
               [.exploration,.pve].contains(archive.state.phase),archive.state.battle == nil || archive.state.battle?.kind == .pve,
@@ -138,7 +138,8 @@ public struct MeadowCampaignSave:Codable,Equatable {
               (1..<t.path.count).allSatisfy({archive.state.map.neighbors(t.path[$0-1]).contains(t.path[$0])}),
               let points=Self.road(layout,from:t.path[t.leg],to:t.path[t.leg+1]),t.distance<Self.length(points)+0.000001 else {throw GameError("存档中的移动游标无效。")}
     }
-    public func encoded()throws->Data {try validate();let e=JSONEncoder();e.outputFormatting=[.sortedKeys];return try e.encode(self)}
+    /// Checks (all but the older history states, which were checked when made or read) and encodes.
+    public func encoded()throws->Data {try validate(fullHistory:false);let e=JSONEncoder();e.outputFormatting=[.sortedKeys];return try e.encode(self)}
     public static func decoded(_ bytes:Data)throws->Self {let s=try JSONDecoder().decode(Self.self,from:bytes);try s.validate();return s}
     static func road(_ layout:GeneratedMeadowMap,from:Int,to:Int)->[MeadowWorldPoint]? {
         guard let r=layout.roads.first(where:{($0.from==from && $0.to==to)||($0.to==from && $0.from==to)}) else{return nil}
@@ -149,7 +150,7 @@ public struct MeadowCampaignSave:Codable,Equatable {
 public final class MeadowCampaignStore {
     public let url:URL
     public init(url:URL){self.url=url}
-    public func read()throws->MeadowCampaignSave? {FileManager.default.fileExists(atPath:url.path) ? try .decoded(Data(contentsOf:url)):nil}
+    public func read()throws->MeadowCampaignSave? {MeadowCampaignSession.flushPendingSaves();return FileManager.default.fileExists(atPath:url.path) ? try .decoded(Data(contentsOf:url)):nil}
     @discardableResult public func preserveCompletedCampaign()throws->URL? {
         guard let save=try read(),let result=save.completion else{return nil}
         let folder=url.deletingLastPathComponent().appendingPathComponent("Completed",isDirectory:true)
@@ -197,12 +198,49 @@ private final class CampaignWriter {
         if let last=next.archive.history.last,!next.checkpoints!.contains(where:{$0.operationID==last.id}) {
             next.checkpoints!.append(MeadowCampaignCheckpoint(save:next,operationID:last.id))
         }
-        if let persist {try persist(next.encoded())};snapshot=next
+        guard let persist else{snapshot=next;return}
+        if MeadowCampaignSession.persistInBackground {
+            // Check now (a bad save must not replace the good one), encode and write off the main thread.
+            try next.validate(fullHistory:false)
+            snapshot=next
+            MeadowCampaignSaveQueue.shared.schedule(next,persist:persist)
+        } else {try persist(next.encoded());snapshot=next}
+    }
+}
+/// Encodes and writes trip saves one at a time off the main thread. A save waiting its turn is replaced by a newer
+/// one (only the latest state matters), so a burst of actions costs one write.
+final class MeadowCampaignSaveQueue {
+    static let shared=MeadowCampaignSaveQueue()
+    private let queue=DispatchQueue(label:"meadow.campaign.save",qos:.utility)
+    private let lock=NSLock()
+    private var pending:(save:MeadowCampaignSave,persist:(Data)throws->Void)?
+    private(set) var lastError:Error?
+    func schedule(_ save:MeadowCampaignSave,persist:@escaping (Data)throws->Void){
+        lock.lock();let idle=pending==nil;pending=(save,persist);lock.unlock()
+        if idle{queue.async{[weak self] in self?.drain()}}
+    }
+    private func drain(){
+        lock.lock();let job=pending;pending=nil;lock.unlock()
+        guard let job else{return}
+        do{let e=JSONEncoder();e.outputFormatting=[.sortedKeys];try job.persist(e.encode(job.save));lastError=nil}
+        catch{lastError=error;MeadowCampaignSession.onSaveError?(error)}
+    }
+    /// Waits until every scheduled save is on disk.
+    func flush(){
+        queue.sync{}
+        lock.lock();let left=pending != nil;lock.unlock()
+        if left{queue.sync{drain()}}
     }
 }
 /// Owns one persistent tabletop engine. Rendering advances a saved road cursor;
 /// rules, AP, reveal, loot and encounters commit only at actual node arrival.
 public final class MeadowCampaignSession {
+    /// The app saves in the background (a long class makes a save take seconds); tests save at once.
+    public static var persistInBackground=false
+    /// Told when a background save fails (on the save queue).
+    public static var onSaveError:((Error)->Void)?
+    /// Waits for background saves to reach the disk (before reading the file, switching trips, quitting).
+    public static func flushPendingSaves(){MeadowCampaignSaveQueue.shared.flush()}
     public let engine:GameEngine
     /// The course questions are dealt from (set by the app; nil = every question in the trip's bank). Not saved:
     /// the teacher's current course lives in the app, the trip only keeps the questions and the answers.

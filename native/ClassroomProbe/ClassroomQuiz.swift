@@ -6,6 +6,12 @@ import MeadowWorldSupport
 
 /// A quiz on screen. Shown in the TV overlays (over the game, the picture book and any panel) and in the teacher's
 /// preview; `attempt` is set once the teacher submits.
+/// A clock the quiz card reads (the same object on the TV and in the preview).
+struct QuizCountdown: Equatable {
+    let read: () -> Double
+    let id = UUID()
+    static func == (a: Self, b: Self) -> Bool { a.id == b.id }
+}
 struct LiveQuiz: Equatable {
     enum Mode: Equatable { case personal, classwide, practice, challenge }
     var token: Int
@@ -24,8 +30,9 @@ struct LiveQuiz: Equatable {
     var headline: String?
     /// How long the reveal stays (practice moves on quickly).
     var hold: Double?
-    /// Challenge: the card's clock counts down to the end of the challenge instead of the question's own limit.
-    var deadline: Date?
+    /// Challenge: the card's clock shows the challenge's time left (which stops while no question is being
+    /// answered) instead of the question's own limit.
+    var countdown: QuizCountdown?
     /// The question came up again with its options in another order: picks are mapped back for the record.
     var shuffle: QuizShuffle? = nil
 }
@@ -62,7 +69,7 @@ private struct QuizCardRepresentable: UIViewRepresentable {
             box.card?.removeFromSuperview()
             box.layoutIfNeeded()
             let who = quiz.mode == .classwide ? "全班" : quiz.playerName
-            let card = MeadowQuizCard.present(in: box, question: quiz.question, player: who, place: quiz.mode == .practice ? "闪卡练习" : quiz.mode == .challenge ? "个人挑战" : quiz.place, start: quiz.start, mode: quiz.mode, deadline: quiz.deadline)
+            let card = MeadowQuizCard.present(in: box, question: quiz.question, player: who, place: quiz.mode == .practice ? "闪卡练习" : quiz.mode == .challenge ? "个人挑战" : quiz.place, start: quiz.start, mode: quiz.mode, countdown: quiz.countdown?.read)
             card.layer.zPosition = 0
             box.card = card; box.token = quiz.token; box.revealed = false
             box.setNeedsLayout()
@@ -183,25 +190,24 @@ struct QuizPicker: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             if let c = game.campaign {
-                let unasked = c.unaskedQuestions(for: player), mistaken = c.mistakenQuestions(for: player)
-                // Tabs 0 全部, 1–3 by difficulty, 4 未考察, 5 有错.
-                let poolFor: (Int) -> [Int] = { t in
-                    t == 4 ? c.quizPool(.random).filter { unasked.contains($0) } : t == 5 ? c.quizPool(.random).filter { mistaken.contains($0) } : c.quizPool(t == 0 ? .random : .difficulty(t))
-                }
+                // Tabs 0 全部, 1–3 by difficulty, 4 未考察, 5 有错 (each list worked out once per update).
+                let pools = Self.pools(c, player: player)
                 HStack(spacing: 6) {
-                    ForEach([0, 1, 2, 3], id: \.self) { t in tabButton(t, poolFor(t).count) }
+                    ForEach([0, 1, 2, 3], id: \.self) { t in tabButton(t, pools[t].count) }
                     Spacer(minLength: 0)
                 }
                 HStack(spacing: 6) {
-                    ForEach([4, 5], id: \.self) { t in tabButton(t, poolFor(t).count) }
+                    ForEach([4, 5], id: \.self) { t in tabButton(t, pools[t].count) }
                     Spacer(minLength: 0)
                 }
                 Text("点题目即出这一题，点 👁 先预览整题；随机出题时先出未考察和有错的题").font(.caption).foregroundStyle(GameTheme.muted)
-                let pool = poolFor(tab)
+                let pool = pools[tab]
                 if pool.isEmpty { Label("这一类没有题。", systemImage: "tray").foregroundStyle(GameTheme.muted) }
+                let bank = c.quizBank, log = c.quizLog
+                // A new tab starts at the top (a short list kept at a long list's scroll position looked empty).
                 ScrollView {
-                    LazyVStack(spacing: 6) { ForEach(pool, id: \.self) { i in row(c, i) } }
-                }
+                    VStack(spacing: 6) { ForEach(pool, id: \.self) { i in row(bank[i], i, log: log) } }
+                }.id(tab)
             }
         }
     }
@@ -215,9 +221,14 @@ struct QuizPicker: View {
                 .background(Capsule().fill(on ? tint : Color.white.opacity(0.55)))
         }.buttonStyle(.plain)
     }
-    @ViewBuilder private func row(_ c: MeadowCampaignSession, _ i: Int) -> some View {
-        let q = c.quizBank[i]
-        let asked = c.quizLog.filter { $0.question == i && $0.practice != true && (player == nil || $0.player == player) }.count
+    static func pools(_ c: MeadowCampaignSession, player: String?) -> [[Int]] {
+        let all = c.quizPool(.random), bank = c.quizBank
+        let unasked = c.unaskedQuestions(for: player), mistaken = c.mistakenQuestions(for: player)
+        return [all] + (1...3).map { d in all.filter { (bank[$0].difficulty ?? 1) == d } }
+            + [all.filter { unasked.contains($0) }, all.filter { mistaken.contains($0) }]
+    }
+    @ViewBuilder private func row(_ q: QuizQuestion, _ i: Int, log: [QuizAttempt]) -> some View {
+        let asked = log.filter { $0.question == i && $0.practice != true && (player == nil || $0.player == player) }.count
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 8) {
                 Button { KeyHostingController<EmptyView>.endEditing(); onPick(i) } label: {
@@ -282,7 +293,7 @@ struct QuizPreview: View {
 /// minute, Esc close.
 @MainActor final class QuizLauncherModel: ObservableObject {
     @Published var player: String?
-    @Published var seconds: Int = max(30, UserDefaults.standard.integer(forKey: "classroom.challengeSeconds") == 0 ? 120 : UserDefaults.standard.integer(forKey: "classroom.challengeSeconds")) {
+    @Published var seconds: Int = max(10, UserDefaults.standard.integer(forKey: "classroom.challengeSeconds") == 0 ? 120 : UserDefaults.standard.integer(forKey: "classroom.challengeSeconds")) {
         didSet { UserDefaults.standard.set(seconds, forKey: "classroom.challengeSeconds") }
     }
     @Published var note: String?
@@ -297,6 +308,29 @@ struct QuizLauncherPanel: View {
 
     private var campaign: MeadowCampaignSession? { game.campaign }
     private static let presets = [60, 120, 180, 300]
+    @State private var timeInput = ""
+    private func applyTime() {
+        let text = timeInput.trimmingCharacters(in: .whitespaces)
+        guard !text.isEmpty else { return }
+        if let s = Self.seconds(text) { model.seconds = s; model.note = nil } else { model.note = "时间格式：90（秒）、1:30 或 3分" }
+        timeInput = ""
+    }
+    /// "90" → 90 s, "1:30" → 90 s, "3分" / "3m" / "3min" → 180 s, "1分30秒" → 90 s; 10 s to 60 min. Full-width digits work.
+    static func seconds(_ raw: String) -> Int? {
+        let t = raw.applyingTransform(.fullwidthToHalfwidth, reverse: false)?.lowercased().replacingOccurrences(of: " ", with: "") ?? raw
+        var total: Double?
+        let parts = t.split(separator: ":", omittingEmptySubsequences: false)
+        if parts.count == 2, let m = Double(parts[0]), let sec = Double(parts[1]) { total = m * 60 + sec }
+        else if let range = t.range(of: "分") ?? t.range(of: "min") ?? t.range(of: "m") {
+            let m = Double(t[..<range.lowerBound]) ?? (t[..<range.lowerBound].isEmpty ? nil : nil)
+            let rest = t[range.upperBound...].replacingOccurrences(of: "钟", with: "").replacingOccurrences(of: "in", with: "")
+                .replacingOccurrences(of: "秒", with: "").replacingOccurrences(of: "s", with: "")
+            if let m { total = m * 60 + (rest.isEmpty ? 0 : (Double(rest) ?? .nan)) }
+        } else { total = Double(t.replacingOccurrences(of: "秒", with: "").replacingOccurrences(of: "s", with: "")) }
+        guard let total, total.isFinite else { return nil }
+        let whole = Int(total.rounded())
+        return (10...3600).contains(whole) ? whole : nil
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -329,15 +363,20 @@ struct QuizLauncherPanel: View {
                                 .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(on ? GameTheme.primary : Color.white.opacity(0.55)))
                         }.buttonStyle(.plain)
                     }
-                    Button { model.seconds = max(30, model.seconds - 30) } label: { Image(systemName: "minus") }.buttonStyle(GlassIconButtonStyle())
-                    Text(ClassTimerModel.label(Double(model.seconds))).font(.title3.bold()).monospacedDigit().frame(minWidth: 60)
-                    Button { model.seconds = min(1800, model.seconds + 30) } label: { Image(systemName: "plus") }.buttonStyle(GlassIconButtonStyle())
+                    Button { model.seconds = max(10, model.seconds - 30) } label: { Image(systemName: "minus") }.buttonStyle(GlassIconButtonStyle())
+                    // Any time typed in: 90 (seconds), 1:30, 3分 / 3m (minutes); applied on ⏎ or when the field is left.
+                    ClassroomTextField(placeholder: ClassTimerModel.label(Double(model.seconds)), text: $timeInput, limit: 8, keyboard: .numbersAndPunctuation,
+                                       alignment: .center, onSubmit: { applyTime() }, onEndEditing: { applyTime() })
+                        .frame(width: 84, height: 36)
+                        .background(RoundedRectangle(cornerRadius: 9, style: .continuous).fill(Color.white.opacity(0.7)))
+                        .help("输入挑战时间：90 = 90 秒，1:30 = 1 分 30 秒，3分 = 3 分钟；回车确认")
+                    Button { model.seconds = min(3600, model.seconds + 30) } label: { Image(systemName: "plus") }.buttonStyle(GlassIconButtonStyle())
                     Spacer()
                     Button { onStart() } label: { Label("开始挑战 (⏎)", systemImage: "play.fill") }
                         .buttonStyle(GlassIconButtonStyle(prominent: true))
                         .disabled(model.player == nil || campaign?.courseIndices.isEmpty != false)
                 }
-                Text("开始后电视倒计时。全随机、按难度随机：答完自动抽下一题（这位同学没答过的优先，都答过才会重复；重复的选择题、填空题会打乱选项）；老师点选：每题从题单里点。学生口头作答你录入，选好即揭晓并按难度发奖，时间到即停。键盘：1–7 换人，+/− 调时间，回车开始。").font(.caption).foregroundStyle(GameTheme.muted)
+                Text("开始后电视倒计时。全随机、按难度随机：答完自动抽下一题（这位同学没答过的优先，都答过才会重复；重复的选择题、填空题会打乱选项）；老师点选：每题从题单里点。学生口头作答你录入，选好即揭晓并按难度发奖，时间到即停。时间可点预设、±30 秒或直接输入（90、1:30、3分）。计时只在题目出好、等学生作答时走，选题、动画和揭晓答案时暂停。键盘：1–7 换人，+/− 调时间，回车开始。").font(.caption).foregroundStyle(GameTheme.muted)
             }
         }
         .padding(22).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(GlassBackdrop())
@@ -353,7 +392,10 @@ struct QuizLauncherPanel: View {
     let player: String
     let name: String
     let seconds: Int
-    let end: Date
+    /// Time left when the clock last stopped, and since when it runs (nil = stopped). It runs only while a
+    /// question is up and not yet answered: not while choosing, during the card's entrance or the answer's reveal.
+    private var banked: Double
+    private(set) var runningSince: Date?
     @Published var phase: Phase = .picking
     @Published var right = 0
     @Published var answered = 0
@@ -364,9 +406,12 @@ struct QuizLauncherPanel: View {
     @Published var draft: QuizAnswerDraft?
     var questionStart = Date()
     init(player: String, name: String, seconds: Int) {
-        self.player = player; self.name = name; self.seconds = seconds; end = Date().addingTimeInterval(Double(seconds))
+        self.player = player; self.name = name; self.seconds = seconds; banked = Double(seconds)
     }
-    var remaining: Double { max(0, end.timeIntervalSinceNow) }
+    var remaining: Double { max(0, banked - (runningSince.map { Date().timeIntervalSince($0) } ?? 0)) }
+    var running: Bool { runningSince != nil }
+    func resume() { guard runningSince == nil, remaining > 0 else { return }; runningSince = Date(); objectWillChange.send() }
+    func pause() { guard runningSince != nil else { return }; banked = remaining; runningSince = nil; objectWillChange.send() }
 }
 
 /// Teacher side of a challenge: the question's answer (picked = revealed and paid), then the next question the
@@ -391,8 +436,11 @@ struct ChallengePanel: View {
                 Spacer()
                 TimelineView(.periodic(from: .now, by: 0.25)) { _ in
                     let left = model.remaining
-                    Text(model.phase == .finished ? "结束" : ClassTimerModel.label(left)).font(.system(size: 30, weight: .heavy, design: .rounded)).monospacedDigit()
-                        .foregroundStyle(left <= 10 ? Color.orange : GameTheme.ink)
+                    HStack(spacing: 4) {
+                        if model.phase != .finished && !model.running { Image(systemName: "pause.circle.fill").font(.title3).foregroundStyle(GameTheme.muted) }
+                        Text(model.phase == .finished ? "结束" : ClassTimerModel.label(left)).font(.system(size: 30, weight: .heavy, design: .rounded)).monospacedDigit()
+                            .foregroundStyle(left <= 10 ? Color.orange : model.running ? GameTheme.ink : GameTheme.muted)
+                    }.help("计时只在题目出好、等学生作答时走；选题、动画和揭晓答案时暂停")
                 }
                 Button { onEnd() } label: { Label(model.phase == .finished ? "关闭 (Esc)" : "结束 (Esc)", systemImage: "stop.circle") }.buttonStyle(GlassIconButtonStyle())
             }
