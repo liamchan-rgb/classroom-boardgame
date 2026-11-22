@@ -37,11 +37,6 @@ struct TeacherBookGrantBar:View {
     @ObservedObject var draft:BookGrantDraft
     var prepare:()->Void={}
     @State private var picking=false
-    private func grant(movement:Int,coins:Int,score:Int=0) {
-        prepare()
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),to:nil,from:nil,for:nil)
-        game.grantBookPlayers(selected,movement:movement,coins:coins,score:score)
-    }
     enum Box {case steps,coins,score}
     /// A box's amount dropped on one player's card: only that player gets it (ticked recipients are left alone).
     private func dropGrant(_ id:String,_ box:Box) {
@@ -97,9 +92,6 @@ struct TeacherBookGrantBar:View {
             }.padding(.horizontal,10).background(GlassFill.field,in:Capsule()).zIndex(1)
             Button{prepare();game.grantFromDraft()}label:{Label("发放 G",systemImage:"gift.fill")}
                 .buttonStyle(GlassIconButtonStyle(tint:GameTheme.accent,prominent:true)).disabled(selected.isEmpty || game.busy)
-            Button{grant(movement:1,coins:0)}label:{Label("移动+1",systemImage:"figure.walk")}.disabled(selected.isEmpty || game.busy)
-            Button{grant(movement:0,coins:10)}label:{Label("+10",systemImage:"bitcoinsign.circle")}.disabled(selected.isEmpty || game.busy)
-            Button{grant(movement:0,coins:0,score:1)}label:{Label("积分+1",systemImage:"star")}.disabled(selected.isEmpty || game.busy)
             Button{prepare();game.undoTeacherAction()}label:{Label("撤销",systemImage:"arrow.uturn.backward")}.disabled(!game.backend.canUndoTeacherAction || game.busy)
             Spacer(minLength:0)
         }.buttonStyle(GlassIconButtonStyle()).padding(.horizontal,10).padding(.vertical,6).glassPanel(radius:20,padding:0)

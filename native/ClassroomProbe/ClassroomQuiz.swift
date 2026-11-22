@@ -195,8 +195,15 @@ struct QuizPicker: View {
     /// Whose answers mark the rows (nil = anyone in the class).
     var player: String? = nil
     var onPick: (Int) -> Void
-    @State private var tab = 0
+    /// The tab last used (one for a student's challenge, one for class questions): the list is rebuilt after every
+    /// question, and the teacher wants to stay on the category they were picking from.
+    private static var lastTab: [Bool: Int] = [:]
+    @State private var tab: Int
     @State private var open: Int?
+    init(game: MeadowTeacherCoordinator, player: String? = nil, onPick: @escaping (Int) -> Void) {
+        self.game = game; self.player = player; self.onPick = onPick
+        _tab = State(initialValue: Self.lastTab[player == nil] ?? 0)
+    }
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             if let c = game.campaign {
@@ -225,7 +232,7 @@ struct QuizPicker: View {
         let on = tab == t
         let title = t == 0 ? "全部" : t == 4 ? "未考察" : t == 5 ? "有错" : String(repeating: "★", count: t)
         let tint = t == 5 ? Color.red : GameTheme.primary
-        return Button { tab = t; open = nil } label: {
+        return Button { tab = t; open = nil; Self.lastTab[player == nil] = t } label: {
             Text("\(title) \(n)").font(.callout.bold()).lineLimit(1).fixedSize().padding(.horizontal, 10).padding(.vertical, 6)
                 .foregroundStyle(on ? Color.white : (t == 5 && n > 0 ? Color.red : GameTheme.ink))
                 .background(Capsule().fill(on ? tint : Color.white.opacity(0.55)))

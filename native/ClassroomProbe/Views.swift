@@ -87,15 +87,17 @@ private struct TeacherBookConsole:View {
                 Button{session.turnPage(1)}label:{Label("下页",systemImage:"chevron.right")}
                 Spacer(minLength:0)
             }.buttonStyle(GlassIconButtonStyle()).padding(.horizontal,10).padding(.vertical,6).glassPanel(radius:20,padding:0)
-            // Above the preview so the amount dragged from it is drawn over the page.
-            TeacherBookGrantBar(game:game,draft:game.grantDraft,prepare:{notesFocused=false}).zIndex(1)
             HStack(alignment:.top,spacing:12){
-                PublicBookPage(model:session.display,players:game.backend.bookPlayers,draggable:true).frame(minWidth:0,maxWidth:.infinity,maxHeight:.infinity)
-                    // The teacher's preview shows the same countdown / scoreboard as the TV.
-                    .overlay{ClassroomTVOverlays(timer:game.classTimer,overlays:game.overlays,game:game)}
-                    .overlay{QuizRevealTapCatcher(game:game)}
-                    .overlay{LaserCapture(laser:game.laser)}
-                    .clipShape(RoundedRectangle(cornerRadius:18,style:.continuous)).overlay(RoundedRectangle(cornerRadius:18,style:.continuous).stroke(.white.opacity(0.5),lineWidth:1))
+                VStack(spacing:8){
+                    PublicBookPage(model:session.display,players:game.backend.bookPlayers,draggable:true).frame(minWidth:0,maxWidth:.infinity,maxHeight:.infinity)
+                        // The teacher's preview shows the same countdown / scoreboard as the TV.
+                        .overlay{ClassroomTVOverlays(timer:game.classTimer,overlays:game.overlays,game:game)}
+                        .overlay{QuizRevealTapCatcher(game:game)}
+                        .overlay{LaserCapture(laser:game.laser)}
+                        .clipShape(RoundedRectangle(cornerRadius:18,style:.continuous)).overlay(RoundedRectangle(cornerRadius:18,style:.continuous).stroke(.white.opacity(0.5),lineWidth:1))
+                    // Right under the page, next to the players' cards the boxes are dragged onto (drawn over the page while dragging).
+                    TeacherBookGrantBar(game:game,draft:game.grantDraft,prepare:{notesFocused=false}).zIndex(1)
+                }
                 QuizDock(game:game,book:true)
                 VStack(alignment:.leading,spacing:8){
                     // Always shown (the notes stay on this device; the TV never shows them).
