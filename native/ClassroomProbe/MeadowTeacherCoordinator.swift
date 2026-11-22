@@ -1089,7 +1089,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
     var duelOpponent:String? {campaign.flatMap{c in c.duelOpponent(actor:c.selectedPlayerID)}}
     func startDuel(){
         guard ready,!busy,!modalOpen,let c=campaign,duelOpponent != nil else{message="这里没有可以对战的队伍（每两队只能对战一次）。";return}
-        renderer?.startCampaignDuel(actor:c.selectedPlayerID);message="队伍PVP开始。";revision += 1
+        if renderer?.startCampaignDuel(actor:c.selectedPlayerID)==true {message="队伍PVP开始。"};revision += 1
     }
     /// GM: every pair of teams may duel again.
     func resetDuels(){

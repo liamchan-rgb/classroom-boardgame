@@ -68,7 +68,9 @@ public struct MeadowCampaignSave:Codable,Equatable {
         try archive.validate(fullHistory:fullHistory);try layout.configuration.validate();try layout.map.validate()
         guard formatVersion==1,layout.generatorVersion==3,["forester","wayfarer"].contains(appearanceID),
               layout.coordinateHeight.isFinite,layout.coordinateHeight>0,
-              [.exploration,.pve].contains(archive.state.phase),archive.state.battle == nil || archive.state.battle?.kind == .pve,
+              // A team duel (two teams on one node) is a saved battle too.
+              [.exploration,.pve].contains(archive.state.phase) || (archive.state.phase == .teamPvp && archive.state.battle?.duel == true),
+              archive.state.battle == nil || archive.state.battle?.kind == .pve || (archive.state.battle?.kind == .teamPvp && archive.state.battle?.duel == true),
               (1...6).contains(archive.state.players.filter{!$0.host}.count),archive.state.players.filter({$0.host}).count<=1,
               archive.state.players.allSatisfy({$0.host ? $0.id=="p7":(1...6).map{"p\($0)"}.contains($0.id)}),MeadowCampaignSession.isKnownCatalog(archive.catalog),
               archive.state.map.nodes.map(\.id)==layout.map.nodes.map(\.id),archive.state.map.roads==layout.map.roads else {throw GameError("探索存档与当前地图或规则不匹配。")}

@@ -1049,10 +1049,10 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     }
     /// Remembers the state a battle started from; when the battle ends, everything won in it is shown on one card.
     /// Start the team duel on `actor`'s node and open the battle view.
-    func startCampaignDuel(actor:String) {
-        guard let campaign else{return}
-        do{let receipt=try campaign.startDuel(actor:actor);battleGainBase=receipt.after;scene.refreshCampaign();refreshCampaignStatus()}
-        catch{showCampaignMessage(error.localizedDescription)}
+    @discardableResult func startCampaignDuel(actor:String)->Bool {
+        guard let campaign else{return false}
+        do{let receipt=try campaign.startDuel(actor:actor);battleGainBase=receipt.after;scene.refreshCampaign();refreshCampaignStatus();return true}
+        catch{showCampaignMessage("PVP未能开始："+error.localizedDescription);return false}
     }
     private func trackBattleGains(_ receipt:OperationReceipt) {
         if battleGainBase==nil,receipt.before.battle != nil{battleGainBase=receipt.before}

@@ -115,11 +115,18 @@ final class DifficultyTests:XCTestCase {
         save.archive.state.units["p2"]!.nodeID=a.nodeID
         save.archive.state.units["p1"]!.coins=0;save.archive.state.units["p1"]!.score=0
         save.archive.state.units["p2"]!.coins=100;save.archive.state.units["p2"]!.score=10
-        let s=try MeadowCampaignSession(save:save)
+        // Saved on every step, as in the app: the duel must be a valid save (and read back mid-fight).
+        var written:Data?
+        let s=try MeadowCampaignSession(save:save,persist:{written=$0})
         XCTAssertEqual(s.duelOpponent(actor:"p1"),b.teamID)
         let packA=s.engine.state.units["p1"]!.inventory.values.reduce(0,+),packB=s.engine.state.units["p2"]!.inventory.values.reduce(0,+)
         try s.startDuel(actor:"p1")
         XCTAssertEqual(s.engine.state.battle?.duel,true);XCTAssertEqual(Set(s.engine.state.battle?.queue ?? []),["p1","p2"])
+        let midFight=try MeadowCampaignSave.decoded(XCTUnwrap(written))
+        XCTAssertEqual(midFight.archive.state.battle?.duel,true);XCTAssertEqual(midFight.archive.state.phase,.teamPvp)
+        MeadowCampaignSession.persistInBackground=true;defer{MeadowCampaignSession.persistInBackground=false}
+        let background=try MeadowCampaignSession(save:save,persist:{_ in})
+        XCTAssertNoThrow(try background.startDuel(actor:"p1"));XCTAssertEqual(background.engine.state.battle?.duel,true)
         try s.engine.apply(.setHealth(unit:"p2",value:0,killer:nil))
         XCTAssertNil(s.engine.state.battle);XCTAssertEqual(s.engine.state.phase,.exploration)
         XCTAssertEqual(s.engine.state.lastOutcome?.winners,[a.teamID!])
