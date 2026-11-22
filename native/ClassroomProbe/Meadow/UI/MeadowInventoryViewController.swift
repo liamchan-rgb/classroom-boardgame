@@ -231,7 +231,7 @@ final class MeadowCampaignInventoryViewController:UIViewController {
     private let detailContent=UIView()
     private let detail=UIScrollView(),primary=MeadowPreviewPalette.button("使用")
     private var rows:[UIButton]=[]
-    private let filters:[(String,String)]=[("all","square.grid.2x2.fill"),("weapon","bolt.horizontal.fill"),("armor","shield.lefthalf.filled"),("accessory","sparkle"),("supplies","cross.vial.fill")]
+    private let filters:[(String,String)]=[("all","全部"),("weapon","武器"),("armor","护甲"),("accessory","饰品"),("supplies","补给")]
     init(session:MeadowCampaignSession,actor:String) {
         self.session=session;self.actor=session.playerIDs.contains(actor) ? actor:"p1";target=self.actor
         super.init(nibName:nil,bundle:nil);modalPresentationStyle = .fullScreen;isModalInPresentation=true
@@ -264,7 +264,7 @@ final class MeadowCampaignInventoryViewController:UIViewController {
         members.addAction(UIAction{[weak self] _ in
             guard let self else{return};self.actor=self.session.playerIDs[max(0,self.members.selectedSegmentIndex)];self.target=self.actor;self.selected=nil;self.filter="all";self.onActorChanged?(self.actor);self.refresh()
         },for:.valueChanged)
-        for (i,(_,symbol)) in filters.enumerated(){filterBar.insertSegment(with:UIImage(systemName:symbol),at:i,animated:false)}
+        for (i,(_,title)) in filters.enumerated(){filterBar.insertSegment(withTitle:title,at:i,animated:false)}
         filterBar.selectedSegmentTintColor=MeadowPreviewPalette.primary;filterBar.selectedSegmentIndex=0
         filterBar.addAction(UIAction{[weak self] _ in guard let self else{return};self.filter=self.filters[max(0,self.filterBar.selectedSegmentIndex)].0;self.selected=nil;self.refresh()},for:.valueChanged)
         for (i,slot) in ItemSlot.allCases.enumerated(){
@@ -327,7 +327,7 @@ final class MeadowCampaignInventoryViewController:UIViewController {
             let id=unit.equipment[slot],item=id.flatMap{try? catalog.item($0)}
             var c=UIButton.Configuration.filled();c.cornerStyle = .large;c.imagePadding=10
             c.image=id.map{MeadowItemIcon.image($0,item:item,side:34)} ?? UIImage(systemName:slotIcons[slot] ?? "circle")
-            c.title=item?.name ?? "—";c.baseForegroundColor=item == nil ? MeadowPreviewPalette.muted:MeadowPreviewPalette.ink
+            c.title=item?.name ?? "未装备"+CampInventoryProjection.slotTitle(slot);c.baseForegroundColor=item == nil ? MeadowPreviewPalette.muted:MeadowPreviewPalette.ink
             c.baseBackgroundColor=MeadowPreviewPalette.glass(.thin);c.background.strokeColor=UIColor.white.withAlphaComponent(0.7);c.background.strokeWidth=1
             c.titleTextAttributesTransformer=UIConfigurationTextAttributesTransformer{v in var v=v;v.font=MeadowPreviewPalette.font(16,.bold);return v}
             slots[i].configuration=c;slots[i].contentHorizontalAlignment = .leading
@@ -378,7 +378,8 @@ final class MeadowCampaignInventoryViewController:UIViewController {
         picture.frame=CGRect(x:(width-110)/2,y:y,width:110,height:110);detailContent.addSubview(picture);y+=122
         let name=MeadowPreviewPalette.label(item.name,size:26,weight:.heavy);name.textAlignment = .center;add(name,gap:4)
         let kind=item.slot.map{CampInventoryProjection.slotTitle($0)} ?? (item.kind == .revivalStone ? "复活":"补给")
-        let tag=UILabel();tag.attributedText=MeadowGlassText.iconLine(item.setID != nil ? "seal.fill":"tag.fill",kind+(item.setID != nil ? " · 套装":"")+"  ×\(unit.inventory[id] ?? 0)",size:15,tint:item.setID != nil ? UIColor(red:0.50,green:0.30,blue:0.80,alpha:1):MeadowPreviewPalette.muted,weight:.semibold);tag.textAlignment = .center;add(tag,gap:14)
+        let owned=unit.inventory[id] ?? 0,worn=item.slot.map{unit.equipment[$0]==id} ?? false
+        let tag=UILabel();tag.attributedText=MeadowGlassText.iconLine(item.setID != nil ? "seal.fill":"tag.fill",kind+(item.setID != nil ? " · 套装":"")+(worn ? " · 穿着":"")+(owned>0 ? " · 行囊 \(owned)":""),size:15,tint:item.setID != nil ? UIColor(red:0.50,green:0.30,blue:0.80,alpha:1):MeadowPreviewPalette.muted,weight:.semibold);tag.textAlignment = .center;add(tag,gap:14)
         let summary=CampInventoryProjection.summary(item)
         if !summary.isEmpty{line(MeadowGlassText.iconLine("info.circle.fill",summary,size:17,tint:MeadowPreviewPalette.gold,weight:.semibold))}
         primary.isHidden=false;primary.isEnabled=false
@@ -402,6 +403,7 @@ final class MeadowCampaignInventoryViewController:UIViewController {
                 primary.isEnabled=true
             }catch{line(MeadowGlassText.iconLine("exclamationmark.triangle.fill",error.localizedDescription,size:15,tint:.orange,weight:.medium))}
         }else{
+            let who=UILabel();who.attributedText=MeadowGlassText.iconLine("person.fill","用在谁身上",size:15,tint:MeadowPreviewPalette.muted,weight:.semibold);add(who,gap:6)
             let targets=UISegmentedControl(items:session.playerIDs.map{session.engine.state.units[$0]?.shortName ?? $0.uppercased()});targets.selectedSegmentIndex=session.playerIDs.firstIndex(of:target) ?? 0
             for state in [UIControl.State.normal,.selected] {targets.setTitleTextAttributes([.font:MeadowPreviewPalette.font(16,.semibold),.foregroundColor:MeadowPreviewPalette.ink],for:state)}
             targets.selectedSegmentTintColor=MeadowPreviewPalette.primary
@@ -421,21 +423,20 @@ final class MeadowCampaignInventoryViewController:UIViewController {
         let mates=session.teammates(of:actor)
         if !mates.isEmpty,session.engine.state.battle==nil {
             y+=8
-            let header=UILabel();header.attributedText=MeadowGlassText.iconLine("gift.fill","赠送给队友",size:16,tint:MeadowPreviewPalette.primary,weight:.bold);add(header,gap:8)
-            func row(_ symbol:String,_ enabled:Bool,_ action:@escaping (GameUnit)->Void) {
-                let count=CGFloat(mates.count),gap:CGFloat=8,bw=max(60,(width-40-gap*(count-1))/count)
-                for (i,mate) in mates.enumerated() {
-                    let b=MeadowPreviewPalette.iconButton(symbol,mate.shortName)
-                    b.isEnabled=enabled;b.alpha=enabled ? 1:0.45
-                    b.frame=CGRect(x:20+CGFloat(i)*(bw+gap),y:y,width:bw,height:44)
-                    b.addAction(UIAction{_ in action(mate)},for:.touchUpInside)
-                    detailContent.addSubview(b)
-                }
-                y+=52
+            let header=UILabel();header.attributedText=MeadowGlassText.iconLine("gift.fill","送给队友",size:16,tint:MeadowPreviewPalette.primary,weight:.bold);add(header,gap:8)
+            // One row per teammate: name, then "this item" and "10 coins".
+            let nameWidth:CGFloat=72,gap:CGFloat=8,bw=max(60,(width-40-nameWidth-gap*2)/2)
+            for mate in mates {
+                let name=MeadowPreviewPalette.label(mate.shortName,size:16,weight:.semibold);name.lineBreakMode = .byTruncatingTail
+                name.frame=CGRect(x:20,y:y,width:nameWidth,height:40);detailContent.addSubview(name)
+                let thing=MeadowPreviewPalette.iconButton("shippingbox.fill","这件"),coins=MeadowPreviewPalette.iconButton("bitcoinsign.circle.fill","10金币")
+                thing.isEnabled=owned>0;coins.isEnabled=unit.coins>=10
+                for (i,b) in [thing,coins].enumerated() {b.alpha=b.isEnabled ? 1:0.45;b.frame=CGRect(x:20+nameWidth+gap+CGFloat(i)*(bw+gap),y:y,width:bw,height:40);detailContent.addSubview(b)}
+                thing.addAction(UIAction{[weak self] _ in self?.gift(to:mate,item:id,coins:0)},for:.touchUpInside)
+                coins.addAction(UIAction{[weak self] _ in self?.gift(to:mate,item:nil,coins:10)},for:.touchUpInside)
+                y+=48
             }
-            row("arrow.up.forward.square",(unit.inventory[id] ?? 0)>0){[weak self] mate in self?.gift(to:mate,item:id,coins:0)}
-            row("bitcoinsign.circle",unit.coins>=10){[weak self] mate in self?.gift(to:mate,item:nil,coins:10)}
-            let hint=UILabel();hint.attributedText=MeadowGlassText.iconLine("info.circle","上排送1件此物品，下排送10金币；穿着的装备需先卸下",size:13,tint:MeadowPreviewPalette.muted,weight:.medium);hint.numberOfLines=0;add(hint)
+            if owned==0,worn {let hint=UILabel();hint.attributedText=MeadowGlassText.iconLine("info.circle","穿着的装备要先卸下才能送",size:13,tint:MeadowPreviewPalette.muted,weight:.medium);hint.numberOfLines=0;add(hint)}
         }
         detailContent.frame=CGRect(x:0,y:0,width:width,height:y+12);detail.contentSize=detailContent.bounds.size
     }

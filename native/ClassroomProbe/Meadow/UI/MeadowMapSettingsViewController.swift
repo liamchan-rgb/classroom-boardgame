@@ -194,6 +194,8 @@ final class MeadowMapSettingsViewController: UIViewController {
         startCampaignButton.addTarget(self,action:#selector(startCampaign),for:.touchUpInside)
         startCampaignButton.heightAnchor.constraint(equalToConstant:52).isActive=true
 
+        // Both cards reach down to the start button's bottom edge (a flexible spacer takes the slack).
+        for c in [mapCard,partyCard] {let gap=UIView();gap.setContentHuggingPriority(UILayoutPriority(1),for:.vertical);gap.setContentCompressionResistancePriority(UILayoutPriority(1),for:.vertical);c.addArrangedSubview(gap)}
         let leftScroll=UIScrollView(),rightScroll=UIScrollView()
         leftScroll.addSubview(mapCard);rightScroll.addSubview(partyCard)
         for v in [header,leftScroll,rightScroll,mapCard,partyCard,startCampaignButton] {v.translatesAutoresizingMaskIntoConstraints=false}
@@ -202,7 +204,8 @@ final class MeadowMapSettingsViewController: UIViewController {
         func fill(_ c:UIStackView,_ s:UIScrollView)->[NSLayoutConstraint] {
             [c.leadingAnchor.constraint(equalTo:s.contentLayoutGuide.leadingAnchor),c.trailingAnchor.constraint(equalTo:s.contentLayoutGuide.trailingAnchor),
              c.topAnchor.constraint(equalTo:s.contentLayoutGuide.topAnchor),c.bottomAnchor.constraint(equalTo:s.contentLayoutGuide.bottomAnchor),
-             c.widthAnchor.constraint(equalTo:s.frameLayoutGuide.widthAnchor)]
+             c.widthAnchor.constraint(equalTo:s.frameLayoutGuide.widthAnchor),
+             c.heightAnchor.constraint(greaterThanOrEqualTo:s.frameLayoutGuide.heightAnchor)]
         }
         NSLayoutConstraint.activate([
             header.leadingAnchor.constraint(equalTo:guide.leadingAnchor,constant:22),header.trailingAnchor.constraint(equalTo:guide.trailingAnchor,constant:-22),

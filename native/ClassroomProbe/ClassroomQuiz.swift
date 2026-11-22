@@ -1098,6 +1098,7 @@ struct QuizBankPanel: View {
     @State private var note: String?
     @State private var renaming: String?
     @State private var newName = ""
+    @State private var deleting: String?
 
     private func summary(_ list: [QuizQuestion]) -> String {
         let kinds = QuizKind.allCases.compactMap { k -> String? in let n = list.filter { $0.type == k }.count; return n > 0 ? "\(k.title) \(n)" : nil }
@@ -1106,24 +1107,45 @@ struct QuizBankPanel: View {
     }
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Label("题库", systemImage: "text.book.closed.fill").font(.title2.bold())
-                Spacer()
+            HStack(spacing: 10) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Label("题库", systemImage: "text.book.closed.fill").font(.title2.bold())
+                    Text(library.active.map { "当前课程：\($0)" } ?? "还没有当前课程").font(.callout).foregroundStyle(GameTheme.muted).lineLimit(1)
+                }
+                Spacer(minLength: 8)
                 Button { importing = true } label: { Label("导入课程", systemImage: "square.and.arrow.down") }.buttonStyle(GlassIconButtonStyle(prominent: true))
                 Button { game.openQuizPrompts() } label: { Label("出题提示词", systemImage: "wand.and.stars") }.buttonStyle(GlassIconButtonStyle())
-                Button { loadSample() } label: { Label("示例题库", systemImage: "text.book.closed") }.buttonStyle(GlassIconButtonStyle())
-                Button { onClose() } label: { Label("完成 (Esc)", systemImage: "checkmark") }.buttonStyle(GlassIconButtonStyle())
+                Menu {
+                    Button { loadSample() } label: { Label("载入示例题库", systemImage: "text.book.closed") }
+                    Divider()
+                    Text("文件格式见 docs/question-bank-format.md")
+                } label: { Label("更多", systemImage: "ellipsis.circle") }.buttonStyle(GlassIconButtonStyle()).menuStyle(.button)
+                Button { onClose() } label: { Label("完成", systemImage: "checkmark") }.buttonStyle(GlassIconButtonStyle())
             }
-            Text("每导入一个文件就是一门课（用文件名命名，同名再导入会更新这门课）。点一门课把它设为当前课程：答题、全班题、闪卡和地图答题点只出这门课的题。").font(.caption).foregroundStyle(GameTheme.muted)
+            Text("点一门课设为当前课程，答题和闪卡都从它出题。导入的文件名就是课程名，同名再导入会更新。").font(.caption).foregroundStyle(GameTheme.muted)
             if let note { Text(note).font(.callout.bold()).foregroundStyle(note.hasPrefix("✓") ? GameTheme.primary : .red) }
-            ScrollView {
-                VStack(spacing: 8) {
-                    if library.courses.isEmpty { Label("还没有课程，点“导入课程”或“示例题库”。", systemImage: "tray").foregroundStyle(GameTheme.muted).frame(maxWidth: .infinity, alignment: .leading) }
-                    ForEach(library.courses, id: \.self) { c in courseRow(c) }
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(spacing: 8) {
+                        if library.courses.isEmpty {
+                            VStack(spacing: 12) {
+                                Label("还没有课程", systemImage: "tray").font(.headline).foregroundStyle(GameTheme.muted)
+                                HStack {
+                                    Button { importing = true } label: { Label("导入课程", systemImage: "square.and.arrow.down") }.buttonStyle(GlassIconButtonStyle(prominent: true))
+                                    Button { loadSample() } label: { Label("载入示例题库", systemImage: "text.book.closed") }.buttonStyle(GlassIconButtonStyle())
+                                }
+                            }.frame(maxWidth: .infinity).padding(.vertical, 40)
+                        }
+                        ForEach(library.courses, id: \.self) { c in courseRow(c).id(c) }
+                    }
                 }
+                .onAppear { if let a = library.active { proxy.scrollTo(a, anchor: .center) } }
             }
-            Text("格式：每题空一行，写明类型与难度；全部题目是一套题库，个人挑战与全班题都从这里出。详见 docs/question-bank-format.md。").font(.caption).foregroundStyle(GameTheme.muted)
         }
+        .confirmationDialog("删除课程“\(deleting ?? "")”？", isPresented: Binding(get: { deleting != nil }, set: { if !$0 { deleting = nil } }), titleVisibility: .visible, presenting: deleting) { c in
+            Button("删除这门课", role: .destructive) { library.remove(course: c); game.applyQuizCourse(); note = "✓ 已删除“\(c)”（已作答的记录保留在行程里）"; deleting = nil }
+            Button("取消", role: .cancel) { deleting = nil }
+        } message: { _ in Text("题目会从题库移除，已作答的记录仍保留在行程里。") }
         .padding(22).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(GlassBackdrop())
         .fileImporter(isPresented: $importing, allowedContentTypes: [.plainText, .json, .text], allowsMultipleSelection: true) { result in
             do {
@@ -1154,14 +1176,17 @@ struct QuizBankPanel: View {
                 }.contentShape(Rectangle())
             }.buttonStyle(.plain)
             if renaming == c {
-                ClassroomTextField(placeholder: c, text: $newName, limit: 60, onSubmit: { library.rename(c, to: newName); renaming = nil; game.applyQuizCourse() }).frame(width: 160, height: 30)
+                ClassroomTextField(placeholder: c, text: $newName, limit: 60, onSubmit: { library.rename(c, to: newName); renaming = nil; game.applyQuizCourse() }).frame(width: 180, height: 30)
                     .padding(.horizontal, 8).background(GlassFill.field, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-                Button { library.rename(c, to: newName); renaming = nil; game.applyQuizCourse() } label: { Image(systemName: "checkmark") }.buttonStyle(GlassIconButtonStyle())
+                Button { library.rename(c, to: newName); renaming = nil; game.applyQuizCourse() } label: { Label("确定", systemImage: "checkmark") }.buttonStyle(GlassIconButtonStyle(prominent: true))
+                Button { renaming = nil } label: { Label("取消", systemImage: "xmark") }.buttonStyle(GlassIconButtonStyle())
             } else {
                 Button { game.openBankEditor(course: c, back: true) } label: { Label("编辑题目", systemImage: "square.and.pencil") }.buttonStyle(GlassIconButtonStyle())
-                Button { newName = c; renaming = c } label: { Label("改名", systemImage: "character.cursor.ibeam") }.buttonStyle(GlassIconButtonStyle())
+                Menu {
+                    Button { newName = c; renaming = c } label: { Label("改名", systemImage: "character.cursor.ibeam") }
+                    Button(role: .destructive) { deleting = c } label: { Label("删除这门课…", systemImage: "trash") }
+                } label: { Label("更多", systemImage: "ellipsis") }.buttonStyle(GlassIconButtonStyle()).menuStyle(.button)
             }
-            Button(role: .destructive) { library.remove(course: c); game.applyQuizCourse(); note = "✓ 已删除“\(c)”（已作答的记录保留在行程里）" } label: { Label("删除", systemImage: "trash") }.buttonStyle(GlassIconButtonStyle())
         }
         .padding(10).background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.white.opacity(on ? 0.7 : 0.4)))
     }

@@ -106,7 +106,7 @@ final class MeadowShopViewController:UIViewController {
         grid.isHidden=lotteryMode;detail.isHidden=lotteryMode;lottery.isHidden = !lotteryMode
         view.bringSubviewToFront(toast)
         let shopSite=node.map{CampaignSiteRules.configuration(node:$0,seed:session.engine.state.map.seed)?.kind == .shop} ?? false
-        titleLabel.attributedText=MeadowGlassText.iconLine("cart.fill",shopSite ? "商店":"行商",size:26)
+        titleLabel.attributedText=MeadowGlassText.iconLine("cart.fill",shopSite ? "商店":"行商",size:24,tint:MeadowPreviewPalette.gold,weight:.heavy)
         coinsLabel.attributedText=MeadowGlassText.iconLine("bitcoinsign.circle.fill","\(unit.coins)",size:18,tint:MeadowPreviewPalette.gold)
         buyers.selectedSegmentIndex=people.firstIndex{$0.id==actor} ?? 0
         let list=items
@@ -116,7 +116,7 @@ final class MeadowShopViewController:UIViewController {
             let p=price(item,buy:!selling),owned=unit.inventory[item.id] ?? 0
             var c=UIButton.Configuration.filled()
             c.image=MeadowItemIcon.image(item.id,item:item,side:64);c.imagePlacement = .top;c.imagePadding=6
-            c.title=item.name;c.subtitle="◎ \(p)"+(owned>0 ? "  ×\(owned)":"")
+            c.title=item.name;c.subtitle="\(p) 金币"+(owned>0 ? " · 有\(owned)":"")
             c.titleAlignment = .center;c.cornerStyle = .large
             c.titleTextAttributesTransformer=UIConfigurationTextAttributesTransformer{v in var v=v;v.font=MeadowPreviewPalette.font(16,.bold);return v}
             c.subtitleTextAttributesTransformer=UIConfigurationTextAttributesTransformer{v in var v=v;v.font=MeadowPreviewPalette.font(13,.medium);return v}
@@ -151,15 +151,15 @@ final class MeadowShopViewController:UIViewController {
         let kind=item.slot.map{CampInventoryProjection.slotTitle($0)} ?? (item.kind == .revivalStone ? "复活道具":"补给")
         let summary=CampInventoryProjection.summary(item)
         infoLabel.text=kind+(summary.isEmpty ? "":"\n"+summary)+(item.setID != nil ? "\n套装部件":"")
-        priceLabel.attributedText=MeadowGlassText.iconLine(selling ? "arrow.down.circle.fill":"tag.fill","\(p)",size:22,tint:MeadowPreviewPalette.gold)
-        let bag=MeadowGlassText.iconLine("bag.fill","\(owned) → \(selling ? owned-1:owned+1)",size:16,tint:MeadowPreviewPalette.muted)
-        let coin=MeadowGlassText.iconLine("bitcoinsign.circle","\(unit.coins) → \(selling ? unit.coins+p:unit.coins-p)",size:16,tint:MeadowPreviewPalette.muted)
+        priceLabel.attributedText=MeadowGlassText.iconLine(selling ? "arrow.down.circle.fill":"tag.fill",(selling ? "卖出 ":"价格 ")+"\(p) 金币",size:22,tint:MeadowPreviewPalette.gold)
+        let bag=MeadowGlassText.iconLine("bag.fill","行囊 \(owned) → \(selling ? owned-1:owned+1)",size:16,tint:MeadowPreviewPalette.muted)
+        let coin=MeadowGlassText.iconLine("bitcoinsign.circle","金币 \(unit.coins) → \(selling ? unit.coins+p:unit.coins-p)",size:16,tint:MeadowPreviewPalette.muted)
         let after=NSMutableAttributedString(attributedString:bag);after.append(NSAttributedString(string:"\n"));after.append(coin)
         afterLabel.attributedText=after
         let allowed=selling ? owned>0:unit.coins>=p
         action.configuration?.image=UIImage(systemName:selling ? "arrow.down.to.line":"cart.badge.plus")
         action.configuration?.imagePadding=8
-        action.configuration?.title=selling ? "+\(p)":(allowed ? "-\(p)":"金币不足")
+        action.configuration?.title=selling ? "卖出一个 · +\(p) 金币":(allowed ? "买一个 · \(p) 金币":"金币不足")
         action.isEnabled=allowed
     }
 
@@ -192,14 +192,15 @@ final class MeadowShopViewController:UIViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         let s=view.safeAreaInsets,b=view.bounds.inset(by:UIEdgeInsets(top:max(12,s.top),left:max(16,s.left),bottom:max(12,s.bottom),right:max(16,s.right)))
-        header.frame=CGRect(x:b.minX,y:b.minY,width:b.width,height:110)
+        // One header row, like the pack: title and the buyer's coins, buy / sell / draw, then who is buying, timer, close.
+        header.frame=CGRect(x:b.minX,y:b.minY,width:b.width,height:64)
         let w=header.bounds.width
-        titleLabel.frame=CGRect(x:16,y:10,width:w*0.45,height:34);coinsLabel.frame=CGRect(x:16,y:48,width:w*0.45,height:24)
-        close.frame=CGRect(x:w-64,y:12,width:50,height:44)
-        mode.frame=CGRect(x:w-340,y:12,width:260,height:40)
-        timerButton.frame=CGRect(x:w-404,y:10,width:54,height:44)
-        buyers.frame=CGRect(x:w*0.5,y:62,width:w*0.5-14,height:36)
-        let top=header.frame.maxY+12,panel=min(380,b.width*0.34)
+        titleLabel.frame=CGRect(x:18,y:14,width:110,height:36);coinsLabel.frame=CGRect(x:128,y:20,width:96,height:24)
+        mode.frame=CGRect(x:228,y:14,width:240,height:36)
+        close.frame=CGRect(x:w-62,y:10,width:50,height:44)
+        timerButton.frame=CGRect(x:w-124,y:10,width:54,height:44)
+        let bx=mode.frame.maxX+24,bw=min(CGFloat(people.count)*110,w-136-bx);buyers.frame=CGRect(x:w-136-bw,y:14,width:max(1,bw),height:36)
+        let top=header.frame.maxY+14,panel=min(380,b.width*0.34)
         detail.frame=CGRect(x:b.maxX-panel,y:top,width:panel,height:b.maxY-top)
         grid.frame=CGRect(x:b.minX,y:top,width:b.width-panel-12,height:b.maxY-top)
         let gw=grid.bounds.width-24,columns=max(2,Int(gw/170)),cw=(gw-CGFloat(columns-1)*12)/CGFloat(columns),ch:CGFloat=150
