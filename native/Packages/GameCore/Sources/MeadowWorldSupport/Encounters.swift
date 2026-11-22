@@ -11,25 +11,38 @@ public struct MeadowPlannedEncounter: Codable, Equatable {
 }
 
 public enum MeadowEncounterPlanner {
-    public static let version = 2
+    public static let version = 3
 
-    public static func plan(_ layout: GeneratedMeadowMap) -> [MeadowPlannedEncounter] {
-        guard let start=layout.map.nodes.first(where:{$0.kind == .start})?.id else{return []}
+    /// Road distance from each node to its nearest camp, and which camp that is. With several team camps every camp
+    /// gets its own easy-to-hard ring of spots around it (a single camp: the same as before).
+    public static func campDistances(_ layout: GeneratedMeadowMap) -> [Int:(camp:Int,distance:Double)] {
+        let camps=layout.map.nodes.filter{$0.kind == .start}.map(\.id).sorted()
+        var best=[Int:(camp:Int,distance:Double)]()
+        for camp in camps { best[camp]=(camp,0) }
+        var remaining=Set(layout.map.nodes.map(\.id))
         // Shortest physical road distance, rather than node ID, screen position,
         // or traversal history. Stable tie breaks avoid Dictionary/hash ordering.
-        var distances=[start:0.0],remaining=Set(layout.map.nodes.map(\.id))
         while let node=remaining.min(by:{
-            let a=distances[$0] ?? .infinity,b=distances[$1] ?? .infinity
+            let a=best[$0]?.distance ?? .infinity,b=best[$1]?.distance ?? .infinity
             return a==b ? $0<$1:a<b
         }) {
             remaining.remove(node)
-            guard let distance=distances[node] else{continue}
+            guard let here=best[node] else{continue}
             for road in layout.roads where road.from==node || road.to==node {
                 let other=road.from==node ? road.to:road.from
                 let length=zip(road.points,road.points.dropFirst()).reduce(0.0){$0+hypot($1.1.x-$1.0.x,$1.1.y-$1.0.y)}
-                distances[other]=min(distances[other] ?? .infinity,distance+length)
+                let d=here.distance+length
+                if let old=best[other],old.distance<d || (old.distance==d && old.camp<=here.camp) {continue}
+                best[other]=(here.camp,d)
             }
         }
+        return best
+    }
+
+    public static func plan(_ layout: GeneratedMeadowMap) -> [MeadowPlannedEncounter] {
+        guard layout.map.nodes.contains(where:{$0.kind == .start}) else{return []}
+        let near=campDistances(layout)
+        let distances=near.mapValues(\.distance)
         func ordered(_ kind:NodeKind)->[MapNode] {
             layout.map.nodes.filter{$0.kind==kind}.sorted {
                 let a=distances[$0.id] ?? .infinity,b=distances[$1.id] ?? .infinity
@@ -38,8 +51,13 @@ public enum MeadowEncounterPlanner {
         }
         var result=[MeadowPlannedEncounter]()
         let combats=ordered(.combat),bosses=ordered(.boss)
-        for (rank,node) in combats.enumerated() {
-            let band=rank==0 ? "opening":(rank*2<combats.count ? "middle":"deep")
+        // Each camp's own spots, nearest first: every team meets an opening fight, then middle, then deep ones.
+        let camps=Set(combats.compactMap{near[$0.id]?.camp})
+        for node in combats {
+            let mine=combats.filter{near[$0.id]?.camp==near[node.id]?.camp}
+            let rank=mine.firstIndex(where:{$0.id==node.id}) ?? 0
+            let count=camps.count>1 ? mine.count:combats.count
+            let band=rank==0 ? "opening":(rank*2<count ? "middle":"deep")
             let choices:[[String]]
             switch band {
             case "opening": choices=[["slime"]]

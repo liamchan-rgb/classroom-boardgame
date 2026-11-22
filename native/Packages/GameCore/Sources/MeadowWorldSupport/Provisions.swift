@@ -35,9 +35,14 @@ public enum MeadowProvisioning {
         // Budget whole-bar purchases (including the final partially used bar),
         // plus one reserve. Random drops are deliberately not counted as income.
         let budget=Int(ceil(max(0,tour-capacity)/capacity))*refillPrice+refillPrice
+        // Caches ordered by the road from their nearest camp, so each team's treasure grows the same way.
+        let near=MeadowEncounterPlanner.campDistances(layout)
+        let severalCamps=layout.map.nodes.filter{$0.kind == .start}.count>1
+        func reach(_ id:Int)->Double {severalCamps ? (near[id]?.distance ?? route(id)):route(id)}
         let caches=layout.map.nodes.filter{$0.kind == .reward}.sorted {
-            let a=route($0.id),b=route($1.id);return a==b ? $0.id<$1.id:a<b
+            let a=reach($0.id),b=reach($1.id);return a==b ? $0.id<$1.id:a<b
         }
+        let campCount=severalCamps ? Set(caches.compactMap{near[$0.id]?.camp}).count:1
         let first=caches.first.map{route($0.id)} ?? tour
         let initial=caches.isEmpty ? budget:min(budget,Int(ceil(max(0,first-capacity)/capacity))*refillPrice+refillPrice)
         var coins=[String:Int]()
@@ -86,9 +91,11 @@ public enum MeadowProvisioning {
             }
             let amount=perMember/caches.count+(i<perMember%caches.count ? 1:0)
             // Rising treasure curve: 6 coins at the nearest cache, +3 for each cache farther out, plus a little score.
-            let bonus=6+3*i
+            // Several camps: the rank among this camp's own caches, so no team's caches start richer.
+            let step=campCount>1 ? caches.filter{near[$0.id]?.camp==near[node.id]?.camp}.firstIndex(where:{$0.id==node.id}) ?? i:i
+            let bonus=6+3*step
             treasure[node.id]=bonus
-            rewards[node.id]=NodeReward(coins:amount+bonus,score:2+i,items:items)
+            rewards[node.id]=NodeReward(coins:amount+bonus,score:2+step,items:items)
         }
         return .init(startingCoins:coins,rewards:rewards,treeTourDistance:tour,movementCoinBudget:budget,healingPressure:pressure,bossSupplyNodes:bossSupplies,treasure:treasure)
     }

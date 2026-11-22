@@ -144,6 +144,9 @@ public struct GlobalRules: Codable, Equatable {
     public var defaultRewardScore: Int
     public var mapNodeCount: Int
     public var mapDistribution: [String: Int]
+    /// Journey trips (v3 on): every player in the fight gets the kill score and rolls item drops on their own, coins
+    /// are shared out (like raid personal loot). Absent: the killer takes it all (tabletop rules, older trips).
+    public var personalLoot: Bool?
 }
 
 public struct GameCatalog: Codable, Equatable {

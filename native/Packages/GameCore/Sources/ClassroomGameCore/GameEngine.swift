@@ -629,20 +629,38 @@ struct Evaluation {
                 let definition = try catalog.monster(defeated.templateID)
                 // Marking, all rolls and the complete payout belong to the same candidate state.
                 defeated.defeatRewarded = true; state.units[id] = defeated
-                try addScore(killer, amount: definition.score, source: definition.boss ? "bossKill" : "monsterKill", target: id)
+                // Personal loot (like a raid): every player in this fight gets the kill score and rolls each item
+                // drop on their own; coins are shared out evenly. Outside a battle (a GM edit) only the killer.
+                let fighters = state.battle.map { b in b.queue.filter { state.units[$0]?.kind == .player } } ?? []
+                let looters = catalog.rules.personalLoot == true && fighters.contains(killer) ? fighters : [killer]
+                for looter in looters {
+                    try addScore(looter, amount: definition.score, source: definition.boss ? "bossKill" : "monsterKill", target: id)
+                }
                 for drop in definition.drops {
-                    let chance: Int?
-                    if drop.percent == 0 || drop.percent == 100 { chance = nil }
-                    else { chance = try state.random.next(upperBound: 100) }
-                    let won = drop.percent == 100 || chance.map({ $0 <= drop.percent }) == true
-                    events.append(GameEvent("dropCheck", actor: killer, target: id, amount: chance ?? drop.percent,
-                                            detail: "\(drop.itemID ?? "coins"): \(won ? "获得" : "未获得")"))
-                    guard won else { continue }
-                    var receiver = try unit(killer)
-                    if let item = drop.itemID { receiver.inventory[item] = try checkedAdd(receiver.inventory[item] ?? 0, drop.count) }
-                    else { receiver.coins = try checkedAdd(receiver.coins, drop.coins) }
-                    state.units[killer] = receiver
-                    events.append(GameEvent("drop", actor: killer, target: id, amount: drop.itemID == nil ? drop.coins : drop.count, detail: drop.itemID ?? "coins"))
+                    if drop.itemID == nil {
+                        let roll: Int? = drop.percent == 0 || drop.percent == 100 ? nil : try state.random.next(upperBound: 100)
+                        let won = drop.percent == 100 || roll.map({ $0 <= drop.percent }) == true
+                        events.append(GameEvent("dropCheck", actor: killer, target: id, amount: roll ?? drop.percent, detail: "coins: \(won ? "获得" : "未获得")"))
+                        guard won else { continue }
+                        for (i, looter) in looters.enumerated() {
+                            let share = drop.coins / looters.count + (i < drop.coins % looters.count ? 1 : 0)
+                            guard share > 0 else { continue }
+                            var receiver = try unit(looter); receiver.coins = try checkedAdd(receiver.coins, share); state.units[looter] = receiver
+                            events.append(GameEvent("drop", actor: looter, target: id, amount: share, detail: "coins"))
+                        }
+                        continue
+                    }
+                    for looter in looters {
+                        let roll: Int? = drop.percent == 0 || drop.percent == 100 ? nil : try state.random.next(upperBound: 100)
+                        let won = drop.percent == 100 || roll.map({ $0 <= drop.percent }) == true
+                        events.append(GameEvent("dropCheck", actor: looter, target: id, amount: roll ?? drop.percent,
+                                                detail: "\(drop.itemID ?? "coins"): \(won ? "获得" : "未获得")"))
+                        guard won, let item = drop.itemID else { continue }
+                        var receiver = try unit(looter)
+                        receiver.inventory[item] = try checkedAdd(receiver.inventory[item] ?? 0, drop.count)
+                        state.units[looter] = receiver
+                        events.append(GameEvent("drop", actor: looter, target: id, amount: drop.count, detail: item))
+                    }
                 }
             } else if state.battle?.kind == .teamPvp || state.battle?.kind == .freeForAll {
                 guard GameRules.enemies(credited, defeated, in: state) else { continue }

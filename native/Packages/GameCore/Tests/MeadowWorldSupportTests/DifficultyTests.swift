@@ -163,6 +163,54 @@ final class DifficultyTests:XCTestCase {
         try s.removePlayer("p2");try s.removePlayer("p3")
         XCTAssertThrowsError(try s.removePlayer("p1"))
     }
+    /// Raid-style personal loot: everyone in the fight gets the kill score (3, as much as a near cache), coins are shared
+    /// out, and each fighter rolls the item drops on their own. Kill score lines up with supply caches.
+    func testPersonalLootGivesEveryFighterTheKillScoreAndASplitPurse()throws {
+        let s=try MeadowCampaignSession.new(layout:MeadowMapGenerator.generate(.suggested(total:10)),studentClasses:["spellblade","ranger","adventurer"])
+        XCTAssertEqual(s.engine.catalog.rules.personalLoot,true)
+        let monster=try XCTUnwrap(s.engine.state.units.values.filter{$0.kind == .monster}.sorted{$0.id<$1.id}.first)
+        let definition=try s.engine.catalog.monster(monster.templateID)
+        XCTAssertEqual(definition.score,definition.boss ? 10:3)
+        let purse=definition.drops.filter{$0.itemID==nil}.map(\.coins).reduce(0,+)
+        let before=s.engine.state.players.map{($0.id,$0.coins,$0.score)}
+        try s.engine.apply(.startBattle(kind:.pve,monsters:[monster.id]))
+        let fighters=s.engine.state.battle!.queue.filter{s.engine.state.units[$0]?.kind == .player}
+        XCTAssertEqual(fighters.count,3)
+        try s.engine.apply(.setHealth(unit:monster.id,value:0,killer:"p1"))
+        var gained=0
+        for (id,coins,score) in before {
+            let u=s.engine.state.units[id]!
+            XCTAssertEqual(u.score-score,definition.score,"\(id) gets the kill score")
+            gained+=u.coins-coins
+            XCTAssertLessThanOrEqual(abs((u.coins-coins)-purse/3),1)
+        }
+        XCTAssertEqual(gained,purse)
+        let caches=try MeadowProvisioning.plan(layout:s.snapshot.layout,players:s.engine.state.players,catalog:s.engine.catalog).rewards.values.map(\.score)
+        XCTAssertEqual(caches.min(),2)
+    }
+    /// Two team camps: each camp's nearest fight is an opening one and each camp's caches start from the same small
+    /// treasure, so neither camp starts next to the stronger, richer spots.
+    func testEveryCampGetsItsOwnEasyToHardRing()throws {
+        var checked=0
+        for seed in [UInt64(9),21,77,1234,98765] {
+            var c=MeadowMapConfiguration.suggested(total:14,seed:seed);c.starts=2
+            guard let layout=try? MeadowMapGenerator.generate(c) else{continue}
+            let near=MeadowEncounterPlanner.campDistances(layout)
+            let plan=MeadowEncounterPlanner.plan(layout)
+            let camps=Set(plan.filter{$0.band != "boss"}.compactMap{near[$0.nodeID]?.camp})
+            guard camps.count==2 else{continue}
+            for camp in camps {
+                let mine=plan.filter{$0.band != "boss" && near[$0.nodeID]?.camp==camp}.sorted{$0.distance<$1.distance}
+                XCTAssertEqual(mine.first?.band,"opening","seed \(seed) camp \(camp)")
+            }
+            let s=try MeadowCampaignSession.new(layout:layout,studentClasses:["spellblade","ranger"],studentTeams:[0,1])
+            let rewards=try MeadowProvisioning.plan(layout:layout,players:s.engine.state.players,catalog:s.engine.catalog).rewards
+            let byCamp=Dictionary(grouping:rewards,by:{near[$0.key]?.camp ?? -1})
+            if byCamp.count==2 {for (_,list) in byCamp {XCTAssertEqual(list.map(\.value.score).min(),2,"seed \(seed)")}}
+            checked+=1
+        }
+        XCTAssertGreaterThan(checked,0)
+    }
     /// Two teams on the same monster spot: the team that takes it on fights; the other one is not pulled in.
     func testOnlyTheArrivingTeamFightsWhenAnotherTeamIsThere()throws {
         var c=MeadowMapConfiguration.suggested(total:8,seed:9);c.starts=2

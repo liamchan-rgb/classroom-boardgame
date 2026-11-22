@@ -338,9 +338,11 @@ public final class MeadowCampaignSession {
     /// Journey rules: the tabletop catalog with journey drops. Every common monster drops coins; rare equipment
     /// (shop gear and set pieces) comes from about one common monster in 8-10, and bosses roll double (twice the
     /// rare chance and twice the purse). Combat stats are untouched. Saves keep the catalog they were made with.
+    /// Version 3 (current) adds kill score in line with supply caches: 3 for a common monster, 10 for a boss, to
+    /// every fighter (personal loot).
     public static func catalog()throws->GameCatalog {
-        if let cached=catalogs[2]{return cached}
-        let c=try journeyCatalog(version:2);catalogs[2]=c;return c
+        if let cached=catalogs[3]{return cached}
+        let c=try journeyCatalog(version:3);catalogs[3]=c;return c
     }
     /// The catalog of journeys saved before journey drops (still loadable; their drops stay as they were).
     public static func legacyCatalog()throws->GameCatalog {
@@ -348,12 +350,14 @@ public final class MeadowCampaignSession {
         let c=try journeyCatalog(version:0);catalogs[0]=c;return c
     }
     private static var catalogs:[Int:GameCatalog]=[:]
-    /// 0: tabletop drops; 1: v0.28.0 rich drops (kept so those saves load); 2: current journey drops.
+    /// 0: tabletop drops; 1: v0.28.0 rich drops (kept so those saves load); 2: journey drops; 3: 2 + kill score 3 / boss 10.
     static func journeyCatalog(version:Int)throws->GameCatalog {
         var c=try GameCatalog.initial()
+        if version>=3 {c.rules.personalLoot=true}
         if version>0 {
             for i in c.monsters.indices {
                 let health=c.monsters[i].attributes.maximumHealth,boss=c.monsters[i].boss || health>=40
+                if version>=3 {c.monsters[i].score=boss ? 10:3}
                 c.monsters[i].drops=c.monsters[i].drops.map{drop in
                     var d=drop
                     let isSet=d.itemID.flatMap{id in c.items.first{$0.id==id}?.setID} != nil
@@ -378,7 +382,7 @@ public final class MeadowCampaignSession {
         c.monsters += [stag,elder];try c.validate();return c
     }
     static func isKnownCatalog(_ c:GameCatalog)->Bool {
-        for version in 0...2 {
+        for version in 0...3 {
             if catalogs[version]==nil,let made=try? journeyCatalog(version:version){catalogs[version]=made}
             if catalogs[version]==c{return true}
         }
