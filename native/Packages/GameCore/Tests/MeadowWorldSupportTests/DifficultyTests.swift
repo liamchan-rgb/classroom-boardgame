@@ -137,6 +137,32 @@ final class DifficultyTests:XCTestCase {
         XCTAssertNil(s.duelOpponent(actor:"p1"));XCTAssertThrowsError(try s.startDuel(actor:"p1"))
         try s.resetDuelLimits();XCTAssertEqual(s.duelOpponent(actor:"p1"),b.teamID)
     }
+    /// Mid-trip team changes: a player joins another team where it stands, and a player can be removed; both are saved,
+    /// read back and can be undone. The operator moves off a player who changes team or leaves.
+    func testMidTripChangeTeamAndRemovePlayer()throws {
+        var c=MeadowMapConfiguration.suggested(total:8,seed:9);c.starts=2
+        let fresh=try MeadowCampaignSession.new(layout:MeadowMapGenerator.generate(c),studentClasses:["spellblade","ranger","adventurer"],studentTeams:[0,1,1])
+        var written:Data?
+        let s=try MeadowCampaignSession(save:fresh.snapshot,persist:{written=$0})
+        let red=s.engine.state.units["p1"]!.teamID!,blue=s.engine.state.units["p2"]!.teamID!,blueNode=s.engine.state.units["p2"]!.nodeID
+        XCTAssertNotEqual(s.engine.state.units["p1"]!.nodeID,blueNode)
+        XCTAssertEqual(s.selectedPlayerID,"p1")
+        let moved=try s.movePlayer("p1",toTeam:blue)
+        XCTAssertEqual(s.engine.state.units["p1"]!.teamID,blue);XCTAssertEqual(s.engine.state.units["p1"]!.nodeID,blueNode)
+        XCTAssertNotEqual(s.selectedPlayerID,"p1")
+        XCTAssertThrowsError(try s.movePlayer("p1",toTeam:blue))
+        XCTAssertEqual(try MeadowCampaignSave.decoded(XCTUnwrap(written)).archive.state.units["p1"]?.teamID,blue)
+        _=moved;try s.engine.undo()
+        XCTAssertEqual(s.engine.state.units["p1"]!.teamID,red);XCTAssertNotEqual(s.engine.state.units["p1"]!.nodeID,blueNode)
+        try s.selectPlayer("p3")
+        let removed=try s.removePlayer("p3")
+        XCTAssertNil(s.engine.state.units["p3"]);XCTAssertEqual(s.playerIDs,["p1","p2"]);XCTAssertNotEqual(s.selectedPlayerID,"p3")
+        let back=try MeadowCampaignSave.decoded(XCTUnwrap(written))
+        XCTAssertNil(back.archive.state.units["p3"]);XCTAssertNoThrow(try MeadowCampaignSession(save:back))
+        _=removed;try s.engine.undo();XCTAssertNotNil(s.engine.state.units["p3"])
+        try s.removePlayer("p2");try s.removePlayer("p3")
+        XCTAssertThrowsError(try s.removePlayer("p1"))
+    }
     /// Two teams on the same monster spot: the team that takes it on fights; the other one is not pulled in.
     func testOnlyTheArrivingTeamFightsWhenAnotherTeamIsThere()throws {
         var c=MeadowMapConfiguration.suggested(total:8,seed:9);c.starts=2

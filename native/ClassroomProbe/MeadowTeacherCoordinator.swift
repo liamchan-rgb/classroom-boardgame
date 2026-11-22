@@ -1075,6 +1075,23 @@ final class MeadowTeacherCoordinator:ObservableObject {
         screen.modalPresentationStyle = .formSheet;screen.preferredContentSize=CGSize(width:900,height:740)
         presenter.present(screen,animated:true)
     }
+    /// Mid-trip: move one player to another team (they walk over to where that team stands).
+    func movePlayer(_ id:String,toTeam team:String){
+        guard !busy,let c=campaign else{return}
+        let name=c.engine.state.units[id]?.shortName ?? id
+        do{try c.movePlayer(id,toTeam:team);renderer?.classroomRefresh();message="\(name) 已换到\(c.teamName(team))，站到该队所在地点。";revision += 1}catch{message=error.localizedDescription}
+    }
+    /// Mid-trip: take one player out of the game. The map is rebuilt for the smaller party; undo in 历史.
+    func removePlayer(_ id:String){
+        guard !busy,let c=campaign else{return}
+        let name=c.engine.state.units[id]?.shortName ?? id
+        do{
+            try c.removePlayer(id)
+            MeadowCampaignSession.flushPendingSaves()
+            try loadJourney(c.snapshot)
+            message="已删除玩家 \(name)（可在存档 → 历史里撤销）。";revision += 1
+        }catch{message=error.localizedDescription}
+    }
     func teamCommand(_ command:GameCommand){
         guard !busy,let c=campaign,c.travel==nil else{message="请先抵达道路目的地，再调整组队或仓库。";return}
         do{try c.checkpoint();try backend.apply(command,role:.teacher);renderer?.classroomRefresh();message="组队操作已保存。";revision += 1}catch{message=error.localizedDescription}

@@ -735,6 +735,28 @@ public final class MeadowCampaignSession {
         return engine.state.players.filter{$0.isAlive && $0.nodeID==u.nodeID && $0.teamID != nil && $0.teamID != mine && travel(holding:$0.id)==nil}
             .compactMap(\.teamID).sorted().first{!used.contains([mine,$0].sorted().joined(separator:"|"))}
     }
+    /// Mid-trip: `id` joins `team` and stands where that team stands. Neither team may be on a road.
+    @discardableResult public func movePlayer(_ id:String,toTeam team:String)throws->OperationReceipt {
+        try requireOpenCampaign()
+        guard engine.state.battle==nil else{throw GameError("请先结束战斗再换队。")}
+        guard let unit=engine.state.units[id],unit.kind == .player else{throw GameError("成员不存在。")}
+        guard travel(holding:id)==nil,!engine.state.players.contains(where:{$0.teamID==team && travel(holding:$0.id) != nil}) else{throw GameError("请先让两队都抵达地点（停在路上时不能换队）。")}
+        // The operator moves with the team bar: switch to someone else first so each team keeps its own movement bar.
+        if selectedPlayerID==id,let other=engine.state.players.first(where:{$0.id != id && $0.teamID==team}) ?? engine.state.players.first(where:{$0.id != id}) {try selectPlayer(other.id)}
+        return try engine.apply(.movePlayerToTeam(unit:id,team:team))
+    }
+    /// Mid-trip: `id` leaves the game (not during a battle, not while their team is on a road; one student stays).
+    @discardableResult public func removePlayer(_ id:String)throws->OperationReceipt {
+        try requireOpenCampaign()
+        guard engine.state.battle==nil else{throw GameError("请先结束战斗再删除玩家。")}
+        guard let unit=engine.state.units[id],unit.kind == .player else{throw GameError("成员不存在。")}
+        guard travel(holding:id)==nil else{throw GameError("这名玩家的队伍还在路上，请先让队伍抵达地点。")}
+        if selectedPlayerID==id {
+            guard let other=engine.state.players.first(where:{$0.id != id && $0.teamID==unit.teamID && $0.isAlive}) ?? engine.state.players.first(where:{$0.id != id}) else{throw GameError("至少要保留一名学生。")}
+            try selectPlayer(other.id)
+        }
+        return try engine.apply(.removePlayer(unit:id))
+    }
     public func teamName(_ id:String)->String {engine.state.teams.first{$0.id==id}?.name ?? id}
     @discardableResult public func startDuel(actor:String)throws->OperationReceipt {
         try requireOpenCampaign()

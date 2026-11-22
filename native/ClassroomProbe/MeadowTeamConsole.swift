@@ -8,7 +8,7 @@ struct MeadowTeamConsole:View {
     var onClose:(()->Void)?
     @Environment(\.dismiss) private var dismiss
     @State private var names:[String:String]=[:]
-    @State private var members:[String:String]=[:]
+    @State private var removing:GameUnit?
     @State private var newName=""
     @State private var source="party"
     @State private var destination="party"
@@ -17,13 +17,22 @@ struct MeadowTeamConsole:View {
     var body:some View {
         NavigationStack {
             Form {
-                Section("队伍与成员 · 学生 \(players.filter{!$0.host}.count)/6") {
-                    Text("换队保留个人背包、装备、生命、行动点与技能次数；队伍分实时相加。").font(.callout)
+                Section("玩家 · 学生 \(players.filter{!$0.host}.count)/6") {
+                    Text("换队立即生效：玩家走到新队伍所在地点，保留个人背包、装备、生命、行动点与技能次数。删除玩家会把他移出这局（作答记录保留在报告里），可在 存档 → 历史 里撤销。").font(.callout)
                     ForEach(players){unit in
-                        Picker(unit.name,selection:Binding(get:{members[unit.id] ?? unit.teamID ?? "party"},set:{members[unit.id]=$0})){
-                            ForEach(names.keys.sorted(),id:\.self){id in Text(names[id] ?? id).tag(id)}
-                        }
+                        HStack(spacing:10) {
+                            Text(unit.shortName).font(.body.bold()).frame(minWidth:90,alignment:.leading)
+                            Picker("队伍",selection:Binding(get:{unit.teamID ?? "party"},set:{team in if team != unit.teamID {game.movePlayer(unit.id,toTeam:team)}})){
+                                ForEach(teams){Text($0.name).tag($0.id)}
+                            }.labelsHidden().frame(maxWidth:220)
+                            Spacer()
+                            Button(role:.destructive){removing=unit}label:{Label("删除",systemImage:"person.fill.xmark")}
+                                .buttonStyle(GlassIconButtonStyle()).disabled(!unit.host && players.filter{!$0.host}.count<=1)
+                        }.disabled(locked)
                     }
+                    if locked {Label("先让各队抵达地点（停在路上、战斗中不能换队或删除）",systemImage:"figure.walk.motion").font(.caption).foregroundStyle(.secondary)}
+                }.glassRow()
+                Section("队伍名称") {
                     HStack(spacing:8) {
                         GlassField(icon:"flag.fill",placeholder:"新队伍名",text:$newName,limit:20)
                         Button{
@@ -35,9 +44,8 @@ struct MeadowTeamConsole:View {
                         GlassField(icon:"flag",placeholder:"队伍名称",text:Binding(get:{names[id] ?? ""},set:{names[id]=$0}),limit:20)
                     }
                     Button{
-                        game.teamCommand(.configureTeams(names:names,members:members));reload()
-                    }label:{Label("保存分组",systemImage:"checkmark.seal.fill")}.buttonStyle(GlassIconButtonStyle(prominent:true)).disabled(locked)
-                    if locked {Label("先让各队抵达地点再调整分组",systemImage:"figure.walk.motion").font(.caption).foregroundStyle(.secondary)}
+                        game.teamCommand(.configureTeams(names:names,members:[:]));reload()
+                    }label:{Label("保存队名",systemImage:"checkmark.seal.fill")}.buttonStyle(GlassIconButtonStyle(prominent:true)).disabled(locked)
                 }.glassRow()
                 Section("合并队伍") {
                     teamPicker("原队伍",selection:$source);teamPicker("合并到",selection:$destination)
@@ -56,15 +64,19 @@ struct MeadowTeamConsole:View {
                 }.glassRow()
                 Section{Text(game.message).foregroundStyle(.secondary)}.glassRow()
             }.glassSheet().navigationTitle("队伍").toolbar{Button{if let onClose{onClose()}else{dismiss()}}label:{Image(systemName:"checkmark.circle.fill").font(.title2)}.accessibilityLabel("完成")}.onAppear{reload()}
+            .confirmationDialog("删除玩家？",isPresented:Binding(get:{removing != nil},set:{if !$0{removing=nil}}),titleVisibility:.visible,presenting:removing){unit in
+                Button("删除 \(unit.shortName)",role:.destructive){game.removePlayer(unit.id);reload()}
+                Button("取消",role:.cancel){}
+            } message:{unit in Text("\(unit.shortName) 将离开这局游戏（金币、积分、背包随之移除；作答记录保留）。可在 存档 → 历史 里撤销。")}
         }
     }
-    /// Grouping and merging change who walks together, so they wait until no team is on a road.
-    private var locked:Bool {game.busy || game.campaign?.travel != nil || game.campaign?.parkedTravels.isEmpty==false}
+    /// Changing teams or removing players changes who walks together, so it waits until no team is on a road or fighting.
+    private var locked:Bool {game.busy || game.campaign?.travel != nil || game.campaign?.parkedTravels.isEmpty==false || game.campaign?.engine.state.battle != nil}
     private var nextTeamName:String {
         let used=Set(names.values);let pool=["红队","蓝队","绿队","金队","紫队","橙队"]
         return pool.first{!used.contains($0)} ?? "第\(names.count+1)队"
     }
-    private func reload(){names=Dictionary(uniqueKeysWithValues:teams.map{($0.id,$0.name)});members=Dictionary(uniqueKeysWithValues:players.map{($0.id,$0.teamID ?? "party")})}
+    private func reload(){names=Dictionary(uniqueKeysWithValues:teams.map{($0.id,$0.name)})}
     private func teamPicker(_ title:String,selection:Binding<String>)->some View {
         Picker(title,selection:selection){ForEach(teams){Text($0.name).tag($0.id)}}
     }

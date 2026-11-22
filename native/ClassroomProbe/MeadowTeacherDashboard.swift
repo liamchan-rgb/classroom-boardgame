@@ -102,6 +102,7 @@ struct MeadowTeacherDashboard:View {
                             Button{game.operation(.interact)}label:{Label("交互",systemImage:"hand.tap.fill")}.disabled(!game.ready || game.busy || game.campaign?.isMoving==true)
                             Button{game.operation(.inventory)}label:{Label("行囊",systemImage:"bag.fill")}.disabled(!game.ready || game.busy || game.campaign?.isCompleted != false)
                             Button{game.operation(.shop)}label:{Label("商店",systemImage:"cart.fill")}.disabled(!game.ready || game.busy || game.campaign?.isCompleted != false)
+                            Button{game.openTeamConsole()}label:{Label("队伍",systemImage:"person.3.fill")}.disabled(!game.ready || game.busy || game.campaign?.isCompleted != false)
                         }
                         Spacer(minLength:0)
                         Button{game.operation(.refill)}label:{Label("补充",systemImage:"bolt.fill")}.disabled(!game.ready || game.busy || game.campaign?.isMoving==true)

@@ -219,6 +219,10 @@ public enum GameCommand: Codable, Equatable {
     case addHost(id:String,name:String,classID:String,team:String,node:Int,appearance:PlayerAppearance?=nil)
     case applyPlayerProfile(unit:String,name:String,appearance:PlayerAppearance)
     case changeTeam(unit: String, team: String)
+    /// Mid-trip: the player joins another team and stands where that team stands (outside battle).
+    case movePlayerToTeam(unit: String, team: String)
+    /// Mid-trip: the player leaves the game (outside battle; at least one student stays).
+    case removePlayer(unit: String)
     case reorderQueue([String])
     case finishBattle(winner: String?, byScore: Bool)
     case refillExploration

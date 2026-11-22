@@ -39,7 +39,7 @@ public enum MeadowHistoryCategory:String,CaseIterable {case all,combat,travel,re
         case .startCampaignDuel,.resetDuelLimits,.startBattle,.attack,.cast,.monsterStep,.endTurn,.joinMonster,.reorderQueue,.finishBattle,.rescue,.retreatAfterDefeat:return .combat
         case .campaignMove,.move,.interactCampaignNode,.resolveCampaignSite,.answerCampaignQuiz,.recordCampaignQuiz,.editQuizRecord,.removeQuizRecord,.refillCampaignMovement:return .travel
         case .tradeCampaignSite,.campaignLottery,.customWheel,.editPlayer,.grantPlayerResources,.grantPlayerSupplies,.grantPlayerRewards,.givePlayerResource,.editResources,.useItem,.reward,.setHealth,.revive,.equip,.refillExploration:return .resources
-        case .configureTeams,.mergeTeams,.transferTeamResource,.teacherTransferTeamResource,.addHost,.changeTeam:return .team
+        case .configureTeams,.mergeTeams,.transferTeamResource,.teacherTransferTeamResource,.addHost,.changeTeam,.movePlayerToTeam,.removePlayer:return .team
         case .applyPlayerProfile:return .appearance
         case .configureCampaignSite,.configureNodeEncounter,.configureNodeReward,.resetNodeReward,.setDifficulty:return .configuration
         }
@@ -60,7 +60,7 @@ public struct MeadowHistoryIndex:Identifiable,Equatable {
         case .endTurn(let actor,_):ids.insert(actor)
         case .recordCampaignQuiz(let r):ids.insert(r.attempt.player)
         case .campaignMove(let actors,_),.move(let actors,_),.interactCampaignNode(let actors),.refillCampaignMovement(let actors,_,_),.grantPlayerResources(let actors,_,_),.grantPlayerSupplies(let actors,_,_),.grantPlayerRewards(let actors,_,_,_),.reward(let actors,_):ids.formUnion(actors)
-        case .applyPlayerProfile(let id,_,_),.editPlayer(let id,_),.editResources(let id,_),.equip(let id,_,_),.setHealth(let id,_,_),.revive(let id),.changeTeam(let id,_):ids.insert(id)
+        case .applyPlayerProfile(let id,_,_),.editPlayer(let id,_),.editResources(let id,_),.equip(let id,_,_),.setHealth(let id,_,_),.revive(let id),.changeTeam(let id,_),.movePlayerToTeam(let id,_),.removePlayer(let id):ids.insert(id)
         case .startBattle,.finishBattle:ids.formUnion(entry.before.battle?.queue ?? []);ids.formUnion(entry.after.battle?.queue ?? [])
         default:break
         }
@@ -85,7 +85,8 @@ public struct MeadowHistoryIndex:Identifiable,Equatable {
         case .startCampaignDuel:return "队伍PVP"
         case .resetDuelLimits:return "重置PVP次数"
         case .editPlayer,.editResources:return "GM修改玩家"
-        case .configureTeams,.mergeTeams,.changeTeam:return "调整队伍"
+        case .configureTeams,.mergeTeams,.changeTeam,.movePlayerToTeam:return "调整队伍"
+        case .removePlayer:return "删除玩家"
         case .transferTeamResource,.teacherTransferTeamResource:return "转移队伍资源"
         case .campaignMove,.move:return "抵达地图节点"
         case .refillCampaignMovement:return "补充地图移动条"
