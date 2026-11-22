@@ -278,6 +278,13 @@ final class MeadowTeacherCoordinator:ObservableObject {
         model.pause();quiz=nil
         if QuizDrawSettings.shared.mode == .manual {model.phase = .picking;model.draft=nil} else {challengeNext(excluding:[live.index])}
     }
+    /// 老师点选 chosen in the middle of a challenge: the question list right away. A question not answered yet is taken
+    /// back (nothing recorded); an answer being revealed keeps playing while the list is up.
+    func challengeShowList(){
+        guard let model=challenge,model.phase == .question else{return}
+        if let live=quiz,live.mode == .challenge,live.attempt==nil {model.pause();quiz=nil}
+        model.phase = .picking;model.draft=nil;model.note=nil
+    }
     private func challengeSubmit(){
         guard let c=campaign,let model=challenge,model.phase == .question,var live=quiz,live.attempt==nil,let draft=model.draft else{return}
         // Answer picked: the clock stops through the reveal and until the next question is up.

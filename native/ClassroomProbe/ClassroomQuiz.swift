@@ -518,6 +518,8 @@ struct ChallengePanel: View {
             Text("键盘：作答时 D 对 C 错（闪卡）或 A–H 选项、0 不会，选好即揭晓并发奖（填了“其他答案”时按回车）；空格换一题；等下一题时回车出题、1/2/3 按该难度出、R 全随机出；Esc 结束。时间到时正在答的这题不计。").font(.caption).foregroundStyle(GameTheme.muted)
         }
         .padding(22).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(GlassBackdrop())
+        // Switching to 老师点选 while a question is up opens the list at once (not only on the next question).
+        .onChange(of: settings.mode) { _, mode in if mode == .manual { game.challengeShowList() } }
     }
 }
 
