@@ -24,7 +24,7 @@ struct MeadowTeamConsole:View {
                             Text(unit.shortName).font(.body.bold()).frame(minWidth:90,alignment:.leading)
                             Picker("队伍",selection:Binding(get:{unit.teamID ?? "party"},set:{team in if team != unit.teamID {game.movePlayer(unit.id,toTeam:team)}})){
                                 ForEach(teams){Text($0.name).tag($0.id)}
-                            }.labelsHidden().frame(maxWidth:220)
+                            }.pickerStyle(.segmented).labelsHidden().frame(maxWidth:300)
                             Spacer()
                             Button(role:.destructive){removing=unit}label:{Label("删除",systemImage:"person.fill.xmark")}
                                 .buttonStyle(GlassIconButtonStyle()).disabled(!unit.host && players.filter{!$0.host}.count<=1)
