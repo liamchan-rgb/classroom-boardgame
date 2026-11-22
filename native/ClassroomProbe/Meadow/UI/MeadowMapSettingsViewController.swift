@@ -45,147 +45,226 @@ final class MeadowMapSettingsViewController: UIViewController {
     private let gold = MeadowPreviewPalette.gold
 
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask { .landscape }
+    /// Map size presets (number of places); a hand-edited count shows as 自定义.
+    private let sizes=[8,10,14,20]
+    private let sizePicker=UISegmentedControl(items:["小 · 8","标准 · 10","大 · 14","超大 · 20","自定义"])
+    private let advanced=UIStackView()
+    private let advancedToggle=UIButton(type:.system)
+    private let encounterToggle=UIButton(type:.system)
+    private var autoGenerate:DispatchWorkItem?
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor(red:0.80,green:0.88,blue:0.88,alpha:1);MeadowGlassBackdrop.install(in:view)
-        let scroll=UIScrollView(), rightScroll=UIScrollView(), form=UIStackView(), right=UIStackView()
-        form.axis = .vertical; form.spacing=10; right.axis = .vertical; right.spacing=12
-        let title=UILabel();title.text="随机林地";title.font = .boldSystemFont(ofSize:26);title.textColor=gold
-        form.addArrangedSubview(title)
-        let defaults=["10","4","1","3","1","1","31827"]
+        // Header: title, the less used things in one menu, close.
+        let title=UILabel();title.attributedText=MeadowGlassText.iconLine("map.fill","新地图",size:26,tint:MeadowPreviewPalette.primary,weight:.heavy)
+        let subtitle=label("左边定地图，右边排学生，点“开始新行程”。",15,.medium,MeadowPreviewPalette.muted)
+        let more=UIButton(type:.system);var moreConfig=UIButton.Configuration.plain();moreConfig.image=UIImage(systemName:"ellipsis.circle");moreConfig.title="更多";moreConfig.imagePadding=6
+        more.configuration=moreConfig;more.showsMenuAsPrimaryAction=true
+        more.menu=UIMenu(children:[UIDeferredMenuElement.uncached{[weak self] done in
+            guard let self else{done([]);return}
+            var items:[UIMenuElement]=[
+                UIAction(title:"继续已保存行程",image:UIImage(systemName:"arrow.clockwise.circle")){[weak self] _ in self?.continueCampaign()},
+                UIAction(title:"历史结算",image:UIImage(systemName:"flag.checkered")){[weak self] _ in self?.showCompletedCampaigns()},
+                UIAction(title:"职业说明",image:UIImage(systemName:"info.circle")){[weak self] _ in self?.showClassGuide()},
+                UIAction(title:"怪物动作检视",image:UIImage(systemName:"eye")){[weak self] _ in self?.showMonsterGallery()}]
+            if self.classroomCampaignReady == nil {items.append(UIAction(title:"进入林地预览",image:UIImage(systemName:"tree"),attributes:self.result==nil ? .disabled:[]){[weak self] _ in self?.enter()})}
+            done(items)
+        }])
+        let closeButton=UIButton(type:.system);closeButton.setImage(UIImage(systemName:"xmark.circle.fill",withConfiguration:UIImage.SymbolConfiguration(pointSize:26)),for:.normal)
+        closeButton.tintColor=MeadowPreviewPalette.muted;closeButton.accessibilityLabel="关闭";closeButton.addTarget(self,action:#selector(close),for:.touchUpInside)
+        let titles=UIStackView(arrangedSubviews:[title,subtitle]);titles.axis = .vertical;titles.spacing=2
+        let header=UIStackView(arrangedSubviews:[titles,UIView(),more,closeButton]);header.alignment = .center;header.spacing=12
+
+        // ── 地图 ──
+        let mapCard=card()
+        mapCard.addArrangedSubview(section("地图","map"))
+        styleSegments(sizePicker);sizePicker.selectedSegmentIndex=1
+        sizePicker.addAction(UIAction{[weak self] _ in self?.sizeChosen()},for:.valueChanged)
+        mapCard.addArrangedSubview(row("大小",sizePicker))
+        styleSegments(teamCount);teamCount.selectedSegmentIndex=0
+        teamCount.addAction(UIAction{[weak self] _ in self?.teamCountChanged()},for:.valueChanged)
+        mapCard.addArrangedSubview(row("队伍",teamCount))
+        mapCard.addArrangedSubview(label("每队一个出生营地；两队相遇可以 PVP 一次。",13,.medium,MeadowPreviewPalette.muted))
+        preview.heightAnchor.constraint(equalToConstant:250).isActive=true
+        mapCard.addArrangedSubview(preview)
+        status.textColor=MeadowPreviewPalette.ink;status.numberOfLines=0;status.font = .systemFont(ofSize:15,weight:.semibold)
+        var shuffle=UIButton.Configuration.filled();shuffle.title="换一张";shuffle.image=UIImage(systemName:"dice.fill");shuffle.imagePadding=8
+        shuffle.baseBackgroundColor=MeadowPreviewPalette.primary;shuffle.cornerStyle = .large
+        let shuffleButton=UIButton(configuration:shuffle);shuffleButton.addTarget(self,action:#selector(newSeed),for:.touchUpInside)
+        shuffleButton.setContentHuggingPriority(.required,for:.horizontal)
+        let statusRow=UIStackView(arrangedSubviews:[status,shuffleButton]);statusRow.alignment = .center;statusRow.spacing=12
+        mapCard.addArrangedSubview(statusRow)
+        // Details behind two toggles: the exact counts and seed, and the planned fights and supplies.
+        disclosure(advancedToggle,"详细设置（地点数量、道路、种子）"){[weak self] in self?.advanced.isHidden.toggle();self?.refreshToggles()}
+        mapCard.addArrangedSubview(advancedToggle)
+        advanced.axis = .vertical;advanced.spacing=6;advanced.isHidden=true
+        let defaults=["10","4","1","3","1","1",String(UInt64.random(in:0...UInt64.max))]
         for (index,name) in fields.enumerated() {
-            let row=UIStackView();row.spacing=8;row.alignment = .center
-            let label=UILabel();label.text=name;label.font = .boldSystemFont(ofSize:17);label.textColor = MeadowPreviewPalette.ink
-            label.widthAnchor.constraint(equalToConstant:90).isActive=true
             let field=UITextField();field.text=defaults[index];field.tag=index
-            field.font = .monospacedDigitSystemFont(ofSize:19,weight:.semibold);field.textColor=gold
+            field.font = .monospacedDigitSystemFont(ofSize:17,weight:.semibold);field.textColor=MeadowPreviewPalette.ink
             field.backgroundColor=MeadowPreviewPalette.glass(.medium);field.borderStyle = .roundedRect
             field.keyboardType = .numberPad;field.accessibilityLabel=name
             field.addTarget(self,action:#selector(inputChanged(_:)),for:.editingChanged)
-            inputs.append(field);row.addArrangedSubview(label);row.addArrangedSubview(field)
-            row.heightAnchor.constraint(equalToConstant:40).isActive=true
-            form.addArrangedSubview(row)
+            inputs.append(field)
             if index<6 {
+                field.widthAnchor.constraint(equalToConstant:64).isActive=true
                 let slider=UISlider();slider.tag=index;slider.minimumValue=index==0 ? 4:0
                 slider.maximumValue=index==0 ? 30:index==5 ? Float(MeadowMapGenerator.maximumExtraRoads(total:10)):9
-                slider.value=Float(defaults[index]) ?? 0;slider.minimumTrackTintColor=gold;slider.isContinuous=true
+                slider.value=Float(defaults[index]) ?? 0;slider.minimumTrackTintColor=MeadowPreviewPalette.primary;slider.isContinuous=true
                 slider.accessibilityLabel=name+"滑块"
                 slider.addTarget(self,action:#selector(slid(_:)),for:.valueChanged)
-                sliders.append(slider);form.addArrangedSubview(slider)
-            }
+                sliders.append(slider)
+                let pair=UIStackView(arrangedSubviews:[field,slider]);pair.spacing=10;pair.alignment = .center
+                advanced.addArrangedSubview(row(name,pair,width:72))
+            } else {advanced.addArrangedSubview(row("种子",field,width:72))}
         }
-        let fixed=UILabel();fixed.text="起点固定 1 · 总数与各分类自动匹配";fixed.textColor=gold;fixed.font = .boldSystemFont(ofSize:15)
-        fixed.numberOfLines=0;form.addArrangedSubview(fixed)
-        let suggest=button("恢复建议分配",action:#selector(suggested));form.addArrangedSubview(suggest)
-        let seed=button("换个种子",action:#selector(newSeed));form.addArrangedSubview(seed)
-        let close=button("返回原地图",action:#selector(close));form.addArrangedSubview(close)
-        let heading=UILabel();heading.text="建筑与道路预览";heading.font = .boldSystemFont(ofSize:22);heading.textColor=gold
-        let note=UILabel();note.text="生成地图后开始1—6名学生的行程；逐人选择职业，默认同队，进入后可调整分组。"
-        note.font = .systemFont(ofSize:17,weight:.medium);note.textColor = MeadowPreviewPalette.ink;note.numberOfLines=0
-        status.textColor=gold;status.numberOfLines=0;status.font = .boldSystemFont(ofSize:17)
-        encounters.textColor = MeadowPreviewPalette.ink;encounters.numberOfLines=0;encounters.font = .systemFont(ofSize:16,weight:.semibold)
-        generateButton.configuration=button("生成道路预览",action:#selector(generate)).configuration
-        generateButton.addTarget(self,action:#selector(generate),for:.touchUpInside)
-        enterButton.configuration=button("进入林地预览",action:#selector(enter)).configuration
-        enterButton.addTarget(self,action:#selector(enter),for:.touchUpInside)
-        right.addArrangedSubview(heading);right.addArrangedSubview(note);right.addArrangedSubview(preview)
-        right.addArrangedSubview(status);right.addArrangedSubview(generateButton);if classroomCampaignReady == nil {right.addArrangedSubview(enterButton)}
-        startCampaignButton.configuration=button("开始新行程",action:#selector(startCampaign)).configuration
-        startCampaignButton.addTarget(self,action:#selector(startCampaign),for:.touchUpInside)
-        studentCount.minimumValue=1;studentCount.maximumValue=6;studentCount.value=2
-        studentCount.addTarget(self,action:#selector(refreshPartySummary),for:.valueChanged)
-        // 班级: pick a saved class to fill names, looks, jobs and teams; save the rows below as a class.
+        let suggest=UIButton(type:.system);suggest.setTitle("按总数自动分配",for:.normal);suggest.addTarget(self,action:#selector(suggested),for:.touchUpInside)
+        suggest.contentHorizontalAlignment = .leading;advanced.addArrangedSubview(suggest)
+        mapCard.addArrangedSubview(advanced)
+        disclosure(encounterToggle,"本图的战斗与补给"){[weak self] in self?.encounters.isHidden.toggle();self?.refreshToggles()}
+        mapCard.addArrangedSubview(encounterToggle)
+        encounters.textColor = MeadowPreviewPalette.ink;encounters.numberOfLines=0;encounters.font = .systemFont(ofSize:14,weight:.medium);encounters.isHidden=true
+        mapCard.addArrangedSubview(encounters)
+        refreshToggles()
+
+        // ── 学生 ──
+        let partyCard=card()
+        partyCard.addArrangedSubview(section("学生","person.3.fill"))
         var rosterConfig=UIButton.Configuration.tinted();rosterConfig.image=UIImage(systemName:"person.3.sequence.fill");rosterConfig.imagePadding=8
         rosterConfig.baseForegroundColor=MeadowPreviewPalette.primary;rosterButton.configuration=rosterConfig
         rosterButton.showsMenuAsPrimaryAction=true;rosterButton.accessibilityLabel="班级"
         rosterButton.menu=UIMenu(children:[UIDeferredMenuElement.uncached{[weak self] done in done(self?.rosterMenuItems() ?? [])}])
-        rosterButton.heightAnchor.constraint(greaterThanOrEqualToConstant:44).isActive=true
-        refreshRosterButton();right.addArrangedSubview(rosterButton)
-        let countRow=UIStackView(arrangedSubviews:[studentCountLabel,studentCount]);countRow.distribution = .equalSpacing
-        studentCountLabel.textColor=gold;right.addArrangedSubview(countRow)
-        teamCount.selectedSegmentIndex=0;teamCount.selectedSegmentTintColor=MeadowPreviewPalette.primary
-        teamCount.setTitleTextAttributes([.foregroundColor:MeadowPreviewPalette.ink,.font:UIFont.boldSystemFont(ofSize:16)],for:.normal)
-        teamCount.setTitleTextAttributes([.foregroundColor:UIColor.white],for:.selected)
-        teamCount.addAction(UIAction{[weak self] _ in self?.teamCountChanged()},for:.valueChanged)
-        let teamLabel=UILabel();teamLabel.text="队伍（各自起点，相遇可PVP一次）";teamLabel.font = .boldSystemFont(ofSize:17);teamLabel.textColor=gold
-        let teamRow=UIStackView(arrangedSubviews:[teamLabel,teamCount]);teamRow.axis = .vertical;teamRow.spacing=6
-        right.addArrangedSubview(teamRow)
+        refreshRosterButton()
+        studentCount.minimumValue=1;studentCount.maximumValue=6;studentCount.value=2
+        studentCount.addTarget(self,action:#selector(refreshPartySummary),for:.valueChanged)
+        studentCountLabel.textColor=MeadowPreviewPalette.ink;studentCountLabel.font = .boldSystemFont(ofSize:16)
+        let countRow=UIStackView(arrangedSubviews:[rosterButton,UIView(),studentCountLabel,studentCount]);countRow.alignment = .center;countRow.spacing=10
+        partyCard.addArrangedSubview(countRow)
         for (i,selector) in classControls.enumerated() {
-            let label=UILabel();label.text="P\(i+1)职业";label.font = .boldSystemFont(ofSize:17);label.textColor=gold
+            let number=label("\(i+1)",16,.heavy,.white);number.textAlignment = .center;number.backgroundColor=MeadowPreviewPalette.primary
+            number.layer.cornerRadius=13;number.clipsToBounds=true
+            number.widthAnchor.constraint(equalToConstant:26).isActive=true;number.heightAnchor.constraint(equalToConstant:26).isActive=true
             selector.accessibilityLabel="P\(i+1)职业"
             selector.selectedSegmentIndex=i==0 ? 2:1
-            selector.setTitleTextAttributes([.foregroundColor:MeadowPreviewPalette.ink,.font:UIFont.boldSystemFont(ofSize:16)],for:.normal)
-            selector.setTitleTextAttributes([.foregroundColor:UIColor.white],for:.selected)
-            selector.selectedSegmentTintColor=MeadowPreviewPalette.primary
-            selector.heightAnchor.constraint(equalToConstant:44).isActive=true
+            styleSegments(selector,size:14)
             selector.addTarget(self,action:#selector(refreshPartySummary),for:.valueChanged)
-            let summary=classSummaries[i];summary.numberOfLines=0;summary.textColor = MeadowPreviewPalette.ink;summary.font = .systemFont(ofSize:16,weight:.semibold)
-            let name=UITextField();name.placeholder="学生姓名（可选）";name.borderStyle = .roundedRect;name.textColor = MeadowPreviewPalette.ink;name.backgroundColor=MeadowPreviewPalette.glass(.medium);studentNames.append(name)
-            let profiles=UIButton(type:.system);profiles.setTitle("读取人物档案",for:.normal);profiles.showsMenuAsPrimaryAction=true
-            // Only the used slots (of 50) are offered.
-            profiles.menu=UIMenu(children:(1...MeadowSlotStore.profileCount).compactMap{slot in
-                guard let found=try? MeadowTeacherCoordinator.slotStore.profile(slot) else{return nil}
-                let entry:MeadowSaveSlot<MeadowPlayerProfile>=found
-                return UIAction(title:"人物槽\(slot) · \(entry.value.name)"){[weak self] _ in
-                    guard let self else{return};name.text=entry.value.name;self.profileLooks["p\(i+1)"]=entry.value.appearance
-                    profiles.setTitle("已选："+entry.value.name,for:.normal);self.showFace(i)
+            let summary=classSummaries[i];summary.numberOfLines=0
+            let name=UITextField();name.placeholder="姓名";name.borderStyle = .roundedRect;name.textColor = MeadowPreviewPalette.ink;name.backgroundColor=MeadowPreviewPalette.glass(.medium);studentNames.append(name)
+            name.widthAnchor.constraint(equalToConstant:110).isActive=true
+            let profiles=UIButton(type:.system);profileButtons.append(profiles)
+            // One look button: shows the chosen face; its menu picks a random look or a saved character.
+            let dice=UIButton(type:.system);dice.setTitle("外观",for:.normal);dice.setImage(UIImage(systemName:"dice.fill"),for:.normal)
+            dice.accessibilityLabel="P\(i+1)外观";dice.showsMenuAsPrimaryAction=true
+            dice.menu=UIMenu(children:[UIDeferredMenuElement.uncached{[weak self] done in
+                guard let self else{done([]);return}
+                var items:[UIMenuElement]=[UIAction(title:"随机外观",image:UIImage(systemName:"dice")){[weak self] _ in
+                    guard let self else{return}
+                    let key="p\(i+1)",others=self.profileLooks.filter{$0.key != key}.map(\.value)
+                    self.profileLooks[key]=PlayerAppearance.random(excluding:others+(self.profileLooks[key].map{[$0]} ?? []))
+                    self.showFace(i)
+                }]
+                // Only the used character slots (of 50).
+                let saved:[UIMenuElement]=(1...MeadowSlotStore.profileCount).compactMap{slot in
+                    guard let found=try? MeadowTeacherCoordinator.slotStore.profile(slot) else{return nil}
+                    let entry:MeadowSaveSlot<MeadowPlayerProfile>=found
+                    return UIAction(title:entry.value.name,subtitle:"人物槽 \(slot)"){[weak self] _ in
+                        guard let self else{return};name.text=entry.value.name;self.profileLooks["p\(i+1)"]=entry.value.appearance;self.showFace(i)
+                    }
                 }
-            })
-            profileButtons.append(profiles)
-            // Random look for this student (body, hair, face; outfit follows armor), different from the others already picked.
-            let dice=UIButton(type:.system);dice.setTitle("随机外观",for:.normal);dice.setImage(UIImage(systemName:"dice.fill"),for:.normal)
-            dice.accessibilityLabel="P\(i+1)随机外观"
-            dice.addAction(UIAction{[weak self] _ in
-                guard let self else{return}
-                let key="p\(i+1)",others=self.profileLooks.filter{$0.key != key}.map(\.value)
-                let look=PlayerAppearance.random(excluding:others+(self.profileLooks[key].map{[$0]} ?? []))
-                self.profileLooks[key]=look
-                profiles.setTitle("读取人物档案",for:.normal)
-                self.showFace(i)
-            },for:.primaryActionTriggered)
+                if !saved.isEmpty {items.append(UIMenu(title:"读取人物档案",image:UIImage(systemName:"person.crop.square"),children:saved))}
+                done(items)
+            }])
             diceButtons.append(dice)
-            dice.setContentCompressionResistancePriority(.required,for:.horizontal)
-            profiles.setContentCompressionResistancePriority(.defaultLow,for:.horizontal)
-            let looks=UIStackView(arrangedSubviews:[profiles,dice]);looks.axis = .horizontal;looks.spacing=16;looks.alignment = .center
-            let team=teamPickers[i];team.selectedSegmentIndex=0;team.selectedSegmentTintColor=MeadowPreviewPalette.primary
-            team.setTitleTextAttributes([.foregroundColor:MeadowPreviewPalette.ink,.font:UIFont.boldSystemFont(ofSize:15)],for:.normal)
-            team.setTitleTextAttributes([.foregroundColor:UIColor.white],for:.selected);team.accessibilityLabel="P\(i+1)队伍"
-            let row=UIStackView(arrangedSubviews:[label,name,looks,selector,team,summary]);row.axis = .vertical;row.spacing=6
-            classRows.append(row);right.addArrangedSubview(row)
+            dice.setContentCompressionResistancePriority(.required,for:.horizontal);dice.widthAnchor.constraint(greaterThanOrEqualToConstant:86).isActive=true
+            let team=teamPickers[i];team.selectedSegmentIndex=0;styleSegments(team,size:13);team.accessibilityLabel="P\(i+1)队伍"
+            team.widthAnchor.constraint(equalToConstant:150).isActive=true
+            let line=UIStackView(arrangedSubviews:[number,name,dice,selector,team]);line.spacing=8;line.alignment = .center
+            line.heightAnchor.constraint(greaterThanOrEqualToConstant:40).isActive=true
+            classRows.append(line);partyCard.addArrangedSubview(line)
         }
         refreshPartySummary()
         // The question bank lives in the top bar ("题库"); a new trip starts with it (roadside finds become quizzes).
-        quizLabel.font = .systemFont(ofSize:15,weight:.semibold);quizLabel.numberOfLines=2
-        right.addArrangedSubview(quizLabel);refreshQuizLabel()
-        right.addArrangedSubview(startCampaignButton)
-        right.addArrangedSubview(button("继续已保存行程",action:#selector(continueCampaign)))
-        right.addArrangedSubview(button("历史结算",action:#selector(showCompletedCampaigns)))
-        right.addArrangedSubview(button("怪物动作检视",action:#selector(showMonsterGallery)))
-        right.addArrangedSubview(encounters)
-        preview.heightAnchor.constraint(equalToConstant:200).isActive=true
-        scroll.addSubview(form);rightScroll.addSubview(right);view.addSubview(scroll);view.addSubview(rightScroll)
-        for v in [scroll,rightScroll,form,right] { v.translatesAutoresizingMaskIntoConstraints=false }
+        quizLabel.font = .systemFont(ofSize:14,weight:.semibold);quizLabel.numberOfLines=2
+        partyCard.addArrangedSubview(quizLabel);refreshQuizLabel()
+
+        var startConfig=UIButton.Configuration.filled();startConfig.title="开始新行程";startConfig.image=UIImage(systemName:"play.fill");startConfig.imagePadding=10
+        startConfig.baseBackgroundColor=MeadowPreviewPalette.primary;startConfig.cornerStyle = .large
+        startConfig.titleTextAttributesTransformer=UIConfigurationTextAttributesTransformer{v in var v=v;v.font=UIFont.boldSystemFont(ofSize:19);return v}
+        startCampaignButton.configuration=startConfig
+        startCampaignButton.addTarget(self,action:#selector(startCampaign),for:.touchUpInside)
+        startCampaignButton.heightAnchor.constraint(equalToConstant:52).isActive=true
+
+        let leftScroll=UIScrollView(),rightScroll=UIScrollView()
+        leftScroll.addSubview(mapCard);rightScroll.addSubview(partyCard)
+        for v in [header,leftScroll,rightScroll,mapCard,partyCard,startCampaignButton] {v.translatesAutoresizingMaskIntoConstraints=false}
+        view.addSubview(header);view.addSubview(leftScroll);view.addSubview(rightScroll);view.addSubview(startCampaignButton)
         let guide=view.safeAreaLayoutGuide
+        func fill(_ c:UIStackView,_ s:UIScrollView)->[NSLayoutConstraint] {
+            [c.leadingAnchor.constraint(equalTo:s.contentLayoutGuide.leadingAnchor),c.trailingAnchor.constraint(equalTo:s.contentLayoutGuide.trailingAnchor),
+             c.topAnchor.constraint(equalTo:s.contentLayoutGuide.topAnchor),c.bottomAnchor.constraint(equalTo:s.contentLayoutGuide.bottomAnchor),
+             c.widthAnchor.constraint(equalTo:s.frameLayoutGuide.widthAnchor)]
+        }
         NSLayoutConstraint.activate([
-            scroll.leadingAnchor.constraint(equalTo:guide.leadingAnchor,constant:18),scroll.topAnchor.constraint(equalTo:guide.topAnchor,constant:14),
-            scroll.bottomAnchor.constraint(equalTo:guide.bottomAnchor,constant:-14),scroll.widthAnchor.constraint(equalTo:guide.widthAnchor,multiplier:0.39),
-            form.leadingAnchor.constraint(equalTo:scroll.contentLayoutGuide.leadingAnchor),form.trailingAnchor.constraint(equalTo:scroll.contentLayoutGuide.trailingAnchor),
-            form.topAnchor.constraint(equalTo:scroll.contentLayoutGuide.topAnchor),form.bottomAnchor.constraint(equalTo:scroll.contentLayoutGuide.bottomAnchor),
-            form.widthAnchor.constraint(equalTo:scroll.frameLayoutGuide.widthAnchor),
-            rightScroll.leadingAnchor.constraint(equalTo:scroll.trailingAnchor,constant:22),rightScroll.trailingAnchor.constraint(equalTo:guide.trailingAnchor,constant:-18),
-            rightScroll.topAnchor.constraint(equalTo:guide.topAnchor,constant:16),rightScroll.bottomAnchor.constraint(equalTo:guide.bottomAnchor,constant:-14),
-            right.leadingAnchor.constraint(equalTo:rightScroll.contentLayoutGuide.leadingAnchor),right.trailingAnchor.constraint(equalTo:rightScroll.contentLayoutGuide.trailingAnchor),
-            right.topAnchor.constraint(equalTo:rightScroll.contentLayoutGuide.topAnchor),right.bottomAnchor.constraint(equalTo:rightScroll.contentLayoutGuide.bottomAnchor),
-            right.widthAnchor.constraint(equalTo:rightScroll.frameLayoutGuide.widthAnchor)
-        ])
+            header.leadingAnchor.constraint(equalTo:guide.leadingAnchor,constant:22),header.trailingAnchor.constraint(equalTo:guide.trailingAnchor,constant:-22),
+            header.topAnchor.constraint(equalTo:guide.topAnchor,constant:14),
+            leftScroll.leadingAnchor.constraint(equalTo:guide.leadingAnchor,constant:18),leftScroll.topAnchor.constraint(equalTo:header.bottomAnchor,constant:12),
+            leftScroll.bottomAnchor.constraint(equalTo:guide.bottomAnchor,constant:-14),leftScroll.widthAnchor.constraint(equalTo:guide.widthAnchor,multiplier:0.44),
+            rightScroll.leadingAnchor.constraint(equalTo:leftScroll.trailingAnchor,constant:16),rightScroll.trailingAnchor.constraint(equalTo:guide.trailingAnchor,constant:-18),
+            rightScroll.topAnchor.constraint(equalTo:header.bottomAnchor,constant:12),rightScroll.bottomAnchor.constraint(equalTo:startCampaignButton.topAnchor,constant:-12),
+            startCampaignButton.leadingAnchor.constraint(equalTo:rightScroll.leadingAnchor),startCampaignButton.trailingAnchor.constraint(equalTo:rightScroll.trailingAnchor),
+            startCampaignButton.bottomAnchor.constraint(equalTo:guide.bottomAnchor,constant:-14),
+        ]+fill(mapCard,leftScroll)+fill(partyCard,rightScroll))
         changed()
+    }
+    // MARK: layout helpers
+    private func card()->UIStackView {
+        let c=UIStackView();c.axis = .vertical;c.spacing=10;c.isLayoutMarginsRelativeArrangement=true
+        c.directionalLayoutMargins=NSDirectionalEdgeInsets(top:16,leading:16,bottom:16,trailing:16)
+        c.backgroundColor=MeadowPreviewPalette.glass(.thick);c.layer.cornerRadius=18;c.layer.cornerCurve = .continuous
+        c.layer.borderColor=UIColor.white.withAlphaComponent(0.7).cgColor;c.layer.borderWidth=1
+        return c
+    }
+    private func section(_ text:String,_ icon:String)->UILabel {
+        let l=UILabel();l.attributedText=MeadowGlassText.iconLine(icon,text,size:19,tint:MeadowPreviewPalette.primary,weight:.bold);return l
+    }
+    private func label(_ text:String,_ size:CGFloat,_ weight:UIFont.Weight,_ color:UIColor)->UILabel {
+        let l=UILabel();l.text=text;l.font = .systemFont(ofSize:size,weight:weight);l.textColor=color;l.numberOfLines=0;return l
+    }
+    private func row(_ title:String,_ control:UIView,width:CGFloat=44)->UIStackView {
+        let l=label(title,15,.bold,MeadowPreviewPalette.ink);l.widthAnchor.constraint(equalToConstant:width).isActive=true
+        let r=UIStackView(arrangedSubviews:[l,control]);r.spacing=10;r.alignment = .center;return r
+    }
+    private func styleSegments(_ s:UISegmentedControl,size:CGFloat=15) {
+        s.selectedSegmentTintColor=MeadowPreviewPalette.primary
+        s.setTitleTextAttributes([.foregroundColor:MeadowPreviewPalette.ink,.font:UIFont.boldSystemFont(ofSize:size)],for:.normal)
+        s.setTitleTextAttributes([.foregroundColor:UIColor.white,.font:UIFont.boldSystemFont(ofSize:size)],for:.selected)
+    }
+    private var toggleTitles:[UIButton:String]=[:]
+    private func disclosure(_ b:UIButton,_ title:String,_ action:@escaping ()->Void) {
+        toggleTitles[b]=title;b.contentHorizontalAlignment = .leading
+        b.addAction(UIAction{_ in action()},for:.touchUpInside)
+    }
+    private func refreshToggles() {
+        for (b,title) in toggleTitles {
+            let open=b===advancedToggle ? !advanced.isHidden:!encounters.isHidden
+            var c=UIButton.Configuration.plain();c.title=title;c.image=UIImage(systemName:open ? "chevron.down":"chevron.right");c.imagePadding=6
+            c.baseForegroundColor=MeadowPreviewPalette.primary;c.contentInsets = .zero;b.configuration=c
+        }
+    }
+    private func sizeChosen() {
+        guard sizes.indices.contains(sizePicker.selectedSegmentIndex) else{advanced.isHidden=false;refreshToggles();return}
+        inputs[0].text=String(sizes[sizePicker.selectedSegmentIndex]);suggested()
+    }
+    private func showClassGuide() {
+        let text=(try? MeadowPartyConfiguration.classIDs.compactMap{id in try MeadowPartyConfiguration.summary(for:id,catalog:MeadowCampaignSession.catalog())}.joined(separator:"\n\n")) ?? ""
+        let alert=UIAlertController(title:"职业说明",message:text,preferredStyle:.alert);alert.addAction(UIAlertAction(title:"好",style:.default));present(alert,animated:true)
     }
     private let quizLabel=UILabel()
     /// The app's question bank (top bar "题库"), given to the new trip.
     private var quizBank:[QuizQuestion]? {let q=QuizLibrary.shared.activeQuestions;return q.isEmpty ? nil:q}
     private func refreshQuizLabel(){
-        if let bank=quizBank {quizLabel.text="当前课程“\(QuizLibrary.shared.active ?? "")”\(bank.count) 题（在顶栏切换课程）";quizLabel.textColor=gold}
-        else {quizLabel.text="题库：空（可在顶栏“题库”导入，不导入则保持原随机事件）";quizLabel.textColor=MeadowPreviewPalette.muted}
+        if let bank=quizBank {quizLabel.text="题库：\(QuizLibrary.shared.active ?? "")（\(bank.count) 题，顶栏课程菜单可切换）";quizLabel.textColor=MeadowPreviewPalette.primary}
+        else {quizLabel.text="题库：未选课程（顶栏课程菜单导入；不选则地图上是普通随机事件）";quizLabel.textColor=MeadowPreviewPalette.muted}
     }
     private func button(_ title:String,action:Selector) -> UIButton {
         let b=UIButton(type:.system);var c=UIButton.Configuration.filled();c.title=title
@@ -227,8 +306,13 @@ final class MeadowMapSettingsViewController: UIViewController {
                 slider.maximumValue=slider.tag==0 ? 30:slider.tag==5 ? Float(MeadowMapGenerator.maximumExtraRoads(total:c.total)):Float(c.total-1)
                 slider.value=Float(inputs[slider.tag].text ?? "") ?? 0
             }
-            status.text="起点1 + 战斗\(c.combat) + Boss\(c.boss) + 奖励\(c.reward) + 空地\(c.empty) = \(c.total)\n数量正确，可生成。"
+            status.text="正在生成…"
             generateButton.isEnabled=true
+            sizePicker.selectedSegmentIndex=sizes.firstIndex(of:c.total).flatMap{i in (try? MeadowMapConfiguration.suggested(total:c.total).changingTotal(to:c.total)).map{s in s.combat==c.combat && s.boss==c.boss && s.reward==c.reward && s.empty==c.empty ? i:4}} ?? 4
+            // The preview follows every change by itself (a moment after the last one).
+            autoGenerate?.cancel()
+            let work=DispatchWorkItem{[weak self] in self?.generate()}
+            autoGenerate=work;DispatchQueue.main.asyncAfter(deadline:.now()+0.35,execute:work)
         } catch {
             var detail=error.localizedDescription
             let numbers=inputs.prefix(5).compactMap{Int($0.text ?? "")}
@@ -262,7 +346,8 @@ final class MeadowMapSettingsViewController: UIViewController {
                 case .success(let (map,summary)):
                     self.result=map;self.preview.map=map;self.enterButton.isEnabled=true;self.startCampaignButton.isEnabled=true
                     self.encounters.text=summary
-                    self.status.text="\(map.map.nodes.count)个节点 · \(map.roads.count)条道路 · \(config.extraRoads)条环路\n种子 \(config.seed)"
+                    let camps=map.map.nodes.filter{$0.kind == .start}.count
+                    self.status.text="\(map.map.nodes.count) 个地点：战斗 \(config.combat) · 首领 \(config.boss) · 补给 \(config.reward) · 空地 \(config.empty)"+(camps>1 ? " · \(camps) 个营地":"")
                 case .failure(let error): self.status.text=error.localizedDescription
                 }
             }
@@ -272,18 +357,17 @@ final class MeadowMapSettingsViewController: UIViewController {
 
     /// The camps are part of the map: a new team count needs a new road preview.
     private func teamCountChanged() {
-        revision += 1;result=nil;startCampaignButton.isEnabled=false
-        status.text="队伍数已改为 \(teamCount.selectedSegmentIndex+1)，请重新生成道路预览（每队一个起点营地）。"
         refreshPartySummary()
+        changed()
     }
     /// Row i's look shown as a round face on its dice button (the portrait bakes in the background on first use).
     private func showFace(_ i:Int) {
         guard diceButtons.indices.contains(i) else{return}
         let dice=diceButtons[i],key="p\(i+1)"
         guard let look=profileLooks[key] else{
-            dice.setTitle("随机外观",for:.normal);dice.setImage(UIImage(systemName:"dice.fill"),for:.normal);return
+            dice.setTitle("外观",for:.normal);dice.setImage(UIImage(systemName:"dice.fill"),for:.normal);return
         }
-        dice.setTitle(" 换一个",for:.normal)
+        dice.setTitle(" 外观",for:.normal)
         let pixel=PixelHeroLook(body:look.body,hair:look.hair,face:look.face)
         func show(_ image:UIImage){
             guard self.profileLooks[key]==look else{return}
@@ -326,7 +410,7 @@ final class MeadowMapSettingsViewController: UIViewController {
             showFace(i)
         }
         rosterName=roster.name;refreshRosterButton();refreshPartySummary()
-        if result != nil {status.text="已载入班级“\(roster.name)”\(count)人，可以开始新行程。"}
+        if result != nil {status.text="已载入班级“\(roster.name)”（\(count) 人）"}
     }
     private func currentRoster(named name:String)->ClassRoster {
         let ids=MeadowPartyConfiguration.classIDs,teams=teamCount.selectedSegmentIndex+1
@@ -375,7 +459,7 @@ final class MeadowMapSettingsViewController: UIViewController {
     @objc private func refreshPartySummary() {
         do {
             let catalog=try MeadowCampaignSession.catalog(),config=partyConfiguration
-            studentCountLabel.text="学生人数：\(Int(studentCount.value)) / 6"
+            studentCountLabel.text="\(Int(studentCount.value)) 人"
             for (i,control) in classControls.enumerated(){classRows[i].isHidden=i>=Int(studentCount.value);classSummaries[i].text=try MeadowPartyConfiguration.summary(for:MeadowPartyConfiguration.classIDs[max(0,control.selectedSegmentIndex)],catalog:catalog)}
             // Team pickers: only with several teams, and only the teams that exist; new rows default to round-robin.
             let teams=teamCount.selectedSegmentIndex+1

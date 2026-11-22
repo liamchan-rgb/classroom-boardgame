@@ -43,34 +43,40 @@ struct MeadowTeacherDashboard:View {
                 Spacer(minLength:0)
                 ClassroomToolbarTools(game:game)
                 ToolbarGap()
-                Button{decks=true}label:{Label("课件",systemImage:"rectangle.stack")}
-                Button{game.openCharacterStudio()}label:{Label("形象",systemImage:"person.crop.circle.badge.plus")}.disabled(game.busy)
-                Button{game.openPixelCharacterLab()}label:{Label("像素人物",systemImage:"square.grid.3x3.square")}.disabled(game.busy)
-                Button{game.openGM()}label:{Label("GM",systemImage:"wand.and.stars")}.disabled(!game.ready || game.busy || game.campaign==nil)
                 Button{fullPreview = !fullScreen}label:{Label(fullScreen ? "退出":"全屏",systemImage:fullScreen ? "arrow.down.right.and.arrow.up.left":"arrow.up.left.and.arrow.down.right")}
+                // Everything not used every few minutes in class lives here, grouped; no duplicates of the bar buttons.
                 Menu {
-                    Button{game.openArchives()}label:{Label("档案 · 行程槽 · 历史",systemImage:"archivebox")}.disabled(game.busy)
-                    Button{game.settings()}label:{Label("新地图",systemImage:"map")}.disabled(game.busy || inBattle)
-                    Button{game.restore()}label:{Label("继续行程",systemImage:"arrow.clockwise.circle")}.disabled(game.busy || inBattle)
-                    Button{game.operation(.save)}label:{Label("保存",systemImage:"square.and.arrow.down")}.disabled(!game.ready || game.busy)
-                    Divider()
+                    Section("行程") {
+                        Button{game.settings()}label:{Label("新地图",systemImage:"map")}.disabled(game.busy || inBattle)
+                        Button{game.restore()}label:{Label("继续上次行程",systemImage:"arrow.clockwise.circle")}.disabled(game.busy || inBattle)
+                        Button{game.openArchives()}label:{Label("存档与历史",systemImage:"archivebox")}.disabled(game.busy)
+                        Button{game.operation(.save)}label:{Label("立即保存",systemImage:"square.and.arrow.down")}.disabled(!game.ready || game.busy)
+                    }
+                    Section("地图") {
+                        Button{game.operation(.route)}label:{Label("路线与结算",systemImage:"flag.checkered")}.disabled(!game.ready || game.busy)
+                        Button{if let id=game.selectedNode{game.operation(.editNode(id))}}label:{Label("编辑选中地点",systemImage:"pencil")}.disabled(game.selectedNode==nil || game.campaign?.isMoving==true || inBattle)
+                        Button{if let id=game.selectedNode{game.project(.encounter(id))}}label:{Label("预览选中地点的怪物",systemImage:"eye")}.disabled(game.selectedNode==nil || inBattle)
+                        Menu {
+                            ForEach(GameDifficulty.allCases,id:\.self){level in
+                                Button{game.setDifficulty(level)}label:{Label(level.title+" · "+level.summary,systemImage:game.campaign?.difficulty==level ? "checkmark.circle.fill":difficultyIcon(level))}
+                            }
+                        }label:{Label("难度",systemImage:"gauge.with.dots.needle.67percent")}.disabled(game.busy || game.campaign==nil || inBattle || game.campaign?.isCompleted==true)
+                    }
+                    Section("队伍 PVP") {
+                        Button{game.startDuel()}label:{Label("两队开战",systemImage:"figure.fencing")}.disabled(!game.ready || game.busy || inBattle || game.duelOpponent==nil)
+                        Button{game.resetDuels()}label:{Label("重置 PVP 次数",systemImage:"arrow.counterclockwise.circle")}.disabled(game.busy || game.campaign==nil || (game.campaign?.engine.state.pvpPairs ?? []).isEmpty)
+                    }
+                    Section("工具") {
+                        Button{game.openGM()}label:{Label("GM 修改数值",systemImage:"wand.and.stars")}.disabled(!game.ready || game.busy || game.campaign==nil)
+                        Button{game.openCharacterStudio()}label:{Label("人物形象",systemImage:"person.crop.circle.badge.plus")}.disabled(game.busy)
+                        Button{decks=true}label:{Label("课件",systemImage:"rectangle.stack")}
+                    }
                     Menu {
-                        ForEach(GameDifficulty.allCases,id:\.self){level in
-                            Button{game.setDifficulty(level)}label:{Label(level.title+" · "+level.summary,systemImage:game.campaign?.difficulty==level ? "checkmark.circle.fill":difficultyIcon(level))}
-                        }
-                    }label:{Label("难度",systemImage:"gauge.with.dots.needle.67percent")}.disabled(game.busy || game.campaign==nil || inBattle || game.campaign?.isCompleted==true)
-                    Button{game.award()}label:{Label("+10 金币",systemImage:"bitcoinsign.circle")}.disabled(game.busy || game.campaign==nil)
-                    Button{game.openQuizReport()}label:{Label("答题报告",systemImage:"chart.bar.doc.horizontal")}.disabled(game.campaign==nil)
-                    Button{game.openShortcutEditor()}label:{Label("快捷键",systemImage:"keyboard")}
-                    Toggle(isOn:$game.liveMirrorPreferred){Label("教师画面用 GPU 实时显示",systemImage:"display.2")}
-                    Toggle(isOn:$game.highFrameRate){Label("地图 60 帧（关：稳定 30 帧，更省电）",systemImage:"speedometer")}
-                    Button{game.openTeamConsole()}label:{Label("队伍",systemImage:"person.3")}.disabled(!game.ready || game.busy)
-                    Button{game.startDuel()}label:{Label("队伍PVP",systemImage:"figure.fencing")}.disabled(!game.ready || game.busy || inBattle || game.duelOpponent==nil)
-                    Button{game.resetDuels()}label:{Label("重置PVP次数",systemImage:"arrow.counterclockwise.circle")}.disabled(game.busy || game.campaign==nil || (game.campaign?.engine.state.pvpPairs ?? []).isEmpty)
-                    Button{game.operation(.route)}label:{Label("路线与结算",systemImage:"flag.checkered")}.disabled(!game.ready || game.busy)
-                    Divider()
-                    Button{if let id=game.selectedNode{game.operation(.editNode(id))}}label:{Label("编辑地点",systemImage:"pencil")}.disabled(game.selectedNode==nil || game.campaign?.isMoving==true || inBattle)
-                    Button{if let id=game.selectedNode{game.project(.encounter(id))}}label:{Label("怪物预览",systemImage:"eye")}.disabled(game.selectedNode==nil || inBattle)
+                        Button{game.openShortcutEditor()}label:{Label("快捷键",systemImage:"keyboard")}
+                        Toggle(isOn:$game.liveMirrorPreferred){Label("教师画面用 GPU 实时显示",systemImage:"display.2")}
+                        Toggle(isOn:$game.highFrameRate){Label("地图 60 帧（关：30 帧更省电）",systemImage:"speedometer")}
+                        Button{game.openPixelCharacterLab()}label:{Label("像素人物实验室",systemImage:"square.grid.3x3.square")}.disabled(game.busy)
+                    }label:{Label("设置",systemImage:"gearshape")}
                 }label:{Label("更多",systemImage:"ellipsis.circle")}
             }.buttonStyle(ToolbarIconStyle()).menuStyle(.button).padding(.horizontal,10).padding(.vertical,6).glassPanel(radius:20,padding:0)
             if game.campaign != nil {

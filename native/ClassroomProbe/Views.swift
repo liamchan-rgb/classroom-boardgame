@@ -47,20 +47,30 @@ private struct TeacherBookConsole:View {
                 ClassroomToolbarTools(game:game,prepare:{notesFocused=false})
                 ToolbarGap()
                 Button{notesFocused=false;decks=true}label:{Label("课件",systemImage:"rectangle.stack")}
-                Button{notesFocused=false;game.openShortcutEditor()}label:{Label("快捷键",systemImage:"keyboard")}
-                Button{notesFocused=false;game.openGM()}label:{Label("GM",systemImage:"wand.and.stars")}.disabled(game.busy || game.campaign==nil)
-                Button{notesFocused=false;game.openArchives()}label:{Label("存档",systemImage:"archivebox")}.disabled(game.busy)
-                Button{notesFocused=false;game.openCharacterStudio()}label:{Label("形象",systemImage:"person.crop.circle.badge.plus")}.disabled(game.busy)
+                // Like the game tab: the less used things in one grouped menu.
                 Menu {
-                    Button{session.loadSample()}label:{Label("内置示例",systemImage:"doc.richtext")}
-                    Button{importingBackup=false;openImporter()}label:{Label("导入 PPTX",systemImage:"square.and.arrow.down")}
-                    Button{report=true}label:{Label("导入报告",systemImage:"list.bullet.clipboard")}
-                    Divider()
-                    Button{session.save()}label:{Label("保存",systemImage:"externaldrive.badge.checkmark")}
-                    Button{session.restoreLocal()}label:{Label("恢复",systemImage:"clock.arrow.circlepath")}
-                    Button{exportingURL=session.exportedURL()}label:{Label("导出备份",systemImage:"square.and.arrow.up")}
-                    Button{importingBackup=true;openImporter()}label:{Label("导入备份",systemImage:"tray.and.arrow.down")}
-                }label:{Label("文件",systemImage:"folder")}
+                    Section("课件文件") {
+                        Button{importingBackup=false;openImporter()}label:{Label("导入 PPTX",systemImage:"square.and.arrow.down")}
+                        Button{report=true}label:{Label("上次导入报告",systemImage:"list.bullet.clipboard")}
+                        Button{session.loadSample()}label:{Label("内置示例课件",systemImage:"doc.richtext")}
+                        Menu {
+                            Button{session.save()}label:{Label("保存",systemImage:"externaldrive.badge.checkmark")}
+                            Button{session.restoreLocal()}label:{Label("恢复上次保存",systemImage:"clock.arrow.circlepath")}
+                            Button{exportingURL=session.exportedURL()}label:{Label("导出备份",systemImage:"square.and.arrow.up")}
+                            Button{importingBackup=true;openImporter()}label:{Label("导入备份",systemImage:"tray.and.arrow.down")}
+                        }label:{Label("备份与恢复",systemImage:"externaldrive")}
+                    }
+                    Section("行程") {
+                        Button{notesFocused=false;game.openArchives()}label:{Label("存档与历史",systemImage:"archivebox")}.disabled(game.busy)
+                    }
+                    Section("工具") {
+                        Button{notesFocused=false;game.openGM()}label:{Label("GM 修改数值",systemImage:"wand.and.stars")}.disabled(game.busy || game.campaign==nil)
+                        Button{notesFocused=false;game.openCharacterStudio()}label:{Label("人物形象",systemImage:"person.crop.circle.badge.plus")}.disabled(game.busy)
+                    }
+                    Menu {
+                        Button{notesFocused=false;game.openShortcutEditor()}label:{Label("快捷键",systemImage:"keyboard")}
+                    }label:{Label("设置",systemImage:"gearshape")}
+                }label:{Label("更多",systemImage:"ellipsis.circle")}
             }.buttonStyle(ToolbarIconStyle()).menuStyle(.button).padding(.horizontal,10).padding(.vertical,6).glassPanel(radius:20,padding:0)
             // The deck list sits on the toolbar (not beside the other sheets: two sheets on one view conflict).
             .sheet(isPresented:$decks){
