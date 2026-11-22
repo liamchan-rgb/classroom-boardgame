@@ -141,6 +141,8 @@ final class TeacherHostController: UIViewController {
     override func resignFirstResponder() -> Bool { heldKeys.removeAll(); return super.resignFirstResponder() }
     override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
         let session = TeacherSession.shared
+        // A grant icon is being dragged: digits and Backspace change that box's amount.
+        if BookDropTargets.shared.dragging != nil,presses.contains(where:{$0.key.map{BookDropTargets.shared.dragKey($0)} ?? false}) {return}
         guard !session.isEditingNotes,!UIResponder.classroomTyping else{heldKeys.removeAll();super.pressesBegan(presses,with:event);return}
         // A grant key is waiting for its amount: digits / Enter / Backspace / Esc belong to it.
         if session.game.grantCapture != nil,let key=presses.first?.key {

@@ -78,16 +78,16 @@ struct TeacherBookGrantBar:View {
                 #endif
             // Drag the icon onto a player's card in the preview to give that player the amount in the box.
             HStack(spacing:4){
-                GrantDragHandle(systemImage:"figure.walk",tint:GameTheme.primary,amount:draft.steps){id in dropGrant(id,.steps)}
+                GrantDragHandle(systemImage:"figure.walk",tint:GameTheme.primary,amount:$draft.steps){id in dropGrant(id,.steps)}
                 ClassroomTextField(placeholder:"0",text:$draft.steps,limit:3,keyboard:.numberPad).frame(width:40,height:36)
             }.padding(.horizontal,10).background(GlassFill.field,in:Capsule()).zIndex(1)
             HStack(spacing:4){
-                GrantDragHandle(systemImage:"bitcoinsign.circle.fill",tint:GameTheme.accent,amount:draft.coins){id in dropGrant(id,.coins)}
+                GrantDragHandle(systemImage:"bitcoinsign.circle.fill",tint:GameTheme.accent,amount:$draft.coins){id in dropGrant(id,.coins)}
                 ClassroomTextField(placeholder:"0",text:$draft.coins,limit:5,keyboard:.numberPad).frame(width:54,height:36)
             }.padding(.horizontal,10).background(GlassFill.field,in:Capsule()).zIndex(1)
             // Points (积分), like the coins: the box, or drag the star onto one card.
             HStack(spacing:4){
-                GrantDragHandle(systemImage:"star.fill",tint:Color(red:0.85,green:0.6,blue:0.12),amount:draft.score){id in dropGrant(id,.score)}
+                GrantDragHandle(systemImage:"star.fill",tint:Color(red:0.85,green:0.6,blue:0.12),amount:$draft.score){id in dropGrant(id,.score)}
                 ClassroomTextField(placeholder:"0",text:$draft.score,limit:4,keyboard:.numberPad).frame(width:44,height:36)
             }.padding(.horizontal,10).background(GlassFill.field,in:Capsule()).zIndex(1)
             Button{prepare();game.grantFromDraft()}label:{Label("发放 G",systemImage:"gift.fill")}
@@ -162,13 +162,27 @@ struct TeacherBookGrantBar:View {
     /// The card under the dragged icon (highlighted).
     @Published var hover:String?
     func target(at point:CGPoint)->String? {frames.first{$0.value.contains(point)}?.key}
+    /// The box whose icon is being dragged: digits typed meanwhile set its amount (the first digit replaces it).
+    var dragging:Binding<String>?
+    private var typedDuringDrag=false
+    func beginDrag(_ amount:Binding<String>) {dragging=amount;typedDuringDrag=false}
+    func endDrag() {dragging=nil}
+    /// Digits / Backspace while a grant icon is held; true when the key was used.
+    func dragKey(_ key:UIKey)->Bool {
+        guard let box=dragging else{return false}
+        if key.keyCode == .keyboardDeleteOrBackspace {box.wrappedValue=String(box.wrappedValue.dropLast());typedDuringDrag=true;return true}
+        let c=key.charactersIgnoringModifiers
+        guard c.count==1,let d=c.first,d.isASCII,d.isNumber else{return false}
+        let next=(typedDuringDrag ? box.wrappedValue:"")+String(d)
+        box.wrappedValue=String(next.prefix(5));typedDuringDrag=true;return true
+    }
 }
 
 /// The step / coin icon of a grant box. Drag it onto a player's card: that player gets the box's amount.
 struct GrantDragHandle:View {
     let systemImage:String
     let tint:Color
-    let amount:String
+    @Binding var amount:String
     let onDrop:(String)->Void
     @ObservedObject private var targets=BookDropTargets.shared
     @State private var drag:CGSize?
@@ -188,15 +202,21 @@ struct GrantDragHandle:View {
             }
             .gesture(DragGesture(minimumDistance:3,coordinateSpace:.global)
                 .onChanged{g in
+                    if drag == nil {
+                        // Hand the keyboard back to the window so digits typed while holding reach the box.
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),to:nil,from:nil,for:nil)
+                        targets.beginDrag($amount)
+                    }
                     drag=g.translation
                     let id=targets.target(at:g.location)
                     if id != targets.hover {targets.hover=id}
                 }
                 .onEnded{g in
+                    targets.endDrag()
                     if let id=targets.target(at:g.location) {onDrop(id)}
                     drag=nil;targets.hover=nil
                 })
-            .help("拖到玩家卡片上发放")
+            .help("拖到玩家卡片上发放；拖着时可直接敲数字改数量")
             .accessibilityHint("拖到玩家卡片上发放")
     }
 }
