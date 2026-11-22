@@ -486,17 +486,24 @@ extension PixelHeroAtlas {
 
 // 行囊里的全身预览：正面待机那一帧，按不透明像素裁到人物（含武器）外框，四周留一点边。
 extension PixelHeroAtlas {
-    private static let fullBodyCache = NSCache<NSString, UIImage>()
+    /// Kept in a plain dictionary (small cropped images, last 32 looks): an NSCache can be emptied at once under memory
+    /// pressure, and a caller that refreshes when the image is ready would then bake again and again.
+    private static var fullBodyCache: [String: UIImage] = [:]
+    private static var fullBodyOrder: [String] = []
     private static var fullBodyPending = Set<String>()
     static func fullBody(_ look: PixelHeroLook, ready: @escaping () -> Void = {}) -> UIImage? {
-        if let hit = fullBodyCache.object(forKey: look.key as NSString) { return hit }
+        if let hit = fullBodyCache[look.key] { return hit }
         guard !fullBodyPending.contains(look.key) else { return nil }
         fullBodyPending.insert(look.key)
         workQueue.async {
             let body = cell(look: look, facing: 0, column: 0).flatMap(opaqueCrop)
             DispatchQueue.main.async {
                 fullBodyPending.remove(look.key)
-                if let body { fullBodyCache.setObject(body, forKey: look.key as NSString); ready() }
+                if let body {
+                    fullBodyCache[look.key] = body; fullBodyOrder.removeAll { $0 == look.key }; fullBodyOrder.append(look.key)
+                    while fullBodyOrder.count > 32 { fullBodyCache[fullBodyOrder.removeFirst()] = nil }
+                    ready()
+                }
             }
         }
         return nil
