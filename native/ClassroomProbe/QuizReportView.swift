@@ -753,7 +753,7 @@ private struct ExportPicker: UIViewControllerRepresentable {
 /// What one student's page shows: how they did, this lesson's ★/★★ words grouped by how they went, and the
 /// challenge sentences (★★★ questions) they did not get right.
 struct StudentSheet {
-    struct Sentence { var english: String; var chinese: String?; var said: String?; var kind: String }
+    struct Sentence { var english: String; var chinese: String?; var said: String?; var kind: String; var fixed = false }
     let name: String
     let index: Int
     let dates: String
@@ -766,6 +766,8 @@ struct StudentSheet {
     let mastered: [QuizReport.VocabItem]
     let unrecorded: [QuizReport.VocabItem]
     let sentences: [Sentence]
+    /// ★★★ questions whose latest answer was all right (挑战成功).
+    let passed: [Sentence]
     var words: Int { todo.count + improved.count + mastered.count + unrecorded.count }
 
     init(_ s: QuizReport.Student, index: Int) {
@@ -810,6 +812,14 @@ struct StudentSheet {
         mastered = words.filter { $0.status == .right }
         unrecorded = words.filter { $0.status == .untested }
         self.sentences = sentences
+        let fixedOnes = Set(s.corrected.map(\.attempt.question))
+        passed = s.passedChallenges.map { line in
+            let q = line.question, fixed = fixedOnes.contains(line.attempt.question)
+            if q.type == .flashcard, let w = QuizReport.word(q, part: 0) {
+                return Sentence(english: w.word, chinese: w.meaning, said: nil, kind: "句子闪卡", fixed: fixed)
+            }
+            return Sentence(english: line.summary, chinese: "答案：" + line.answers.map(\.expected).joined(separator: "、"), said: nil, kind: q.type.title, fixed: fixed)
+        }
     }
     static func dates(_ times: [Double]) -> String {
         guard let a = times.min(), let b = times.max() else { return "" }
@@ -825,7 +835,7 @@ struct StudentSheet {
 enum StudentBlock {
     case group(kind: Int, items: [QuizReport.VocabItem], continued: Bool)
     case noTodo
-    case sentences(start: Int, items: [StudentSheet.Sentence], continued: Bool)
+    case sentences(start: Int, items: [StudentSheet.Sentence], continued: Bool, passed: Bool)
     var isWords: Bool { if case .sentences = self { return false }; return true }
 }
 
@@ -860,15 +870,19 @@ enum StudentLayout {
                 if !rest.isEmpty { newPage() }
             }
         }
-        var start = 0
-        while start < sheet.sentences.count {
-            if !sentencesOpen { left -= 56; sentencesOpen = true }
-            var n = 0, used: CGFloat = 0
-            while start + n < sheet.sentences.count, used + sentenceHeight(sheet.sentences[start + n]) <= left { used += sentenceHeight(sheet.sentences[start + n]); n += 1 }
-            if n == 0 { if pages[pages.count - 1].isEmpty { n = 1 } else { newPage(); continue } }
-            place(.sentences(start: start, items: Array(sheet.sentences[start..<start + n]), continued: start > 0), used)
-            start += n
-            if start < sheet.sentences.count { newPage() }
+        // Challenges passed, then challenges failed; each its own box, continued on the next page when needed.
+        for (list, passed) in [(sheet.passed, true), (sheet.sentences, false)] {
+            var start = 0
+            sentencesOpen = false
+            while start < list.count {
+                if !sentencesOpen { left -= 56; sentencesOpen = true }
+                var n = 0, used: CGFloat = 0
+                while start + n < list.count, used + sentenceHeight(list[start + n]) <= left { used += sentenceHeight(list[start + n]); n += 1 }
+                if n == 0 { if pages[pages.count - 1].isEmpty { n = 1 } else { newPage(); continue } }
+                place(.sentences(start: start, items: Array(list[start..<start + n]), continued: start > 0, passed: passed), used)
+                start += n
+                if start < list.count { newPage() }
+            }
         }
         return pages.filter { !$0.isEmpty }.isEmpty ? [[]] : pages.filter { !$0.isEmpty }
     }
@@ -938,13 +952,15 @@ struct StudentReportPage: View {
                 }
             }
             ForEach(Array(sentenceBlocks.enumerated()), id: \.offset) { _, block in
-                if case .sentences(let start, let items, let continued) = block {
+                if case .sentences(let start, let items, let continued, let passed) = block {
+                    let title = passed ? "挑战成功的题" : "挑战失败的句子"
                     box {
                         HStack(alignment: .firstTextBaseline, spacing: 6) {
-                            Image(systemName: "text.quote").foregroundStyle(Ink.bad)
-                            Text(continued ? "挑战失败的句子（续）" : "挑战失败的句子").font(.system(size: 13, weight: .heavy, design: .rounded))
-                            if !continued { count(sheet.sentences.count, Ink.bad) }
+                            Image(systemName: passed ? "trophy.fill" : "text.quote").foregroundStyle(passed ? Ink.good : Ink.bad)
+                            Text(continued ? title + "（续）" : title).font(.system(size: 13, weight: .heavy, design: .rounded))
+                            if !continued { count(passed ? sheet.passed.count : sheet.sentences.count, passed ? Ink.good : Ink.bad) }
                             Spacer()
+                            if passed && !continued { Text("★★★ 挑战难度，最近一次全部答对").font(.system(size: 8, weight: .medium, design: .rounded)).foregroundStyle(Ink.muted) }
                         }
                         ForEach(Array(items.enumerated()), id: \.offset) { k, s in
                             HStack(alignment: .firstTextBaseline, spacing: 6) {
@@ -955,6 +971,10 @@ struct StudentReportPage: View {
                                     if let said = s.said { Text("孩子说成：\(said)").font(.system(size: 8.5, weight: .semibold, design: .rounded)).foregroundStyle(Ink.bad) }
                                 }.fixedSize(horizontal: false, vertical: true)
                                 Spacer(minLength: 6)
+                                if s.fixed {
+                                    Text("先错后对").font(.system(size: 8, weight: .bold, design: .rounded)).foregroundStyle(Ink.good)
+                                        .padding(.horizontal, 7).padding(.vertical, 2).background(Capsule().fill(Ink.good.opacity(0.12)))
+                                }
                                 Text(s.kind).font(.system(size: 8, weight: .bold, design: .rounded)).foregroundStyle(Ink.teal)
                                     .padding(.horizontal, 7).padding(.vertical, 2).background(Capsule().fill(Ink.teal.opacity(0.1)))
                             }
@@ -1012,6 +1032,7 @@ struct StudentReportPage: View {
             t += plain("，还要练 ") + bold("\(sheet.todo.count)") + plain(" 个：")
             t += plain(sheet.todo.prefix(4).map { $0.word + ($0.meaning.map { "（\($0)）" } ?? "") }.joined(separator: "、") + (sheet.todo.count > 4 ? "等" : "") + "。")
         }
+        if !sheet.passed.isEmpty { t += plain("挑战题答对 ") + bold("\(sheet.passed.count)") + plain(" 个。") }
         if !sheet.sentences.isEmpty { t += plain("另有 \(sheet.sentences.count) 个挑战句子没有答对。") }
         return t
     }

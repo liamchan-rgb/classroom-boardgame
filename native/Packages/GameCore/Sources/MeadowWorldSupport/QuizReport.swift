@@ -102,6 +102,16 @@ public struct QuizReport {
                 return last
             }
         }
+        /// ★★★ challenge questions whose latest answer was all right: one line per question (that latest answer).
+        public var passedChallenges: [Line] {
+            var latest: [Int: Line] = [:], order: [Int] = []
+            for l in lines { if latest[l.attempt.question] == nil { order.append(l.attempt.question) }; latest[l.attempt.question] = l }
+            return order.compactMap { q in
+                guard let last = latest[q], (last.question.difficulty ?? 1) >= 3, !last.attempt.correct.isEmpty,
+                      last.attempt.rightCount == last.attempt.correct.count else { return nil }
+                return last
+            }
+        }
         /// Questions answered wrong earlier and all right later (已改正): the earlier wrong line, to show what was said.
         public var corrected: [Line] {
             var firstWrong: [Int: Line] = [:], order: [Int] = [], latestRight: [Int: Bool] = [:]

@@ -223,6 +223,21 @@ final class QuizTests:XCTestCase {
         let again=QuizReport(log:log+[a("p1",0,[nil])],bank:bank,order:["p1"]).students[0]
         XCTAssertEqual(again.wrongWords.map(\.word),["apple"]);XCTAssertEqual(again.mistakes.map(\.attempt.question),[0,3])
     }
+    func testPassedChallengesAreTheThreeStarQuestionsLastAnsweredRight()throws {
+        var bank=try QuizBankParser.parse(Data(mixed.utf8))
+        bank[0].difficulty=1;bank[2].difficulty=3;bank[3].difficulty=3
+        func a(_ q:Int,_ picks:[Int?])->QuizAttempt {
+            let parts=bank[q].parts
+            return QuizAttempt(player:"p1",playerName:"p1",node:-1,question:q,picks:picks,texts:picks.map{_ in nil},
+                               correct:parts.indices.map{picks[$0]==parts[$0].answer},seconds:5,limit:60,at:1_800_000_000)
+        }
+        let fill=bank[2].parts,reading=bank[3].parts
+        // ★ apple right (not a challenge); the ★★★ fill wrong then right (passed); the ★★★ reading right then wrong (not passed).
+        let log=[a(0,[bank[0].parts[0].answer]),a(2,[nil,nil]),a(2,fill.map{Optional($0.answer)}),a(3,reading.map{Optional($0.answer)}),a(3,[nil,nil])]
+        let s=QuizReport(log:log,bank:bank,order:["p1"]).students[0]
+        XCTAssertEqual(s.passedChallenges.map(\.attempt.question),[2])
+        XCTAssertEqual(s.mistakes.map(\.attempt.question),[3])
+    }
     func testSkippedStudentsAndWholeDecksInTheReport()throws {
         let text="""
         类型：闪卡
