@@ -148,6 +148,7 @@ struct MeadowTeacherDashboard:View {
             // The question's answer panel, beside the preview (the full-screen copy shows it when it is up).
             if fullScreen == fullPreview {QuizDock(game:game,book:false)}
             }
+            MiniGameBar(game:game)
             HStack(spacing:8){
                 Image(systemName:selectingNode && !inBattle ? "mappin.and.ellipse":(inBattle ? "hand.point.up.left.fill":"info.circle")).foregroundStyle(GameTheme.primary)
                 Text(selectingNode && !inBattle ? "点建筑选取地点":"\(game.message)").lineLimit(1).truncationMode(.tail)

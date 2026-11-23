@@ -95,6 +95,7 @@ private struct TeacherBookConsole:View {
                         .overlay{QuizRevealTapCatcher(game:game)}
                         .overlay{LaserCapture(laser:game.laser)}
                         .clipShape(RoundedRectangle(cornerRadius:18,style:.continuous)).overlay(RoundedRectangle(cornerRadius:18,style:.continuous).stroke(.white.opacity(0.5),lineWidth:1))
+                    MiniGameBar(game:game)
                     // Right under the page, next to the players' cards the boxes are dragged onto (drawn over the page while dragging).
                     TeacherBookGrantBar(game:game,draft:game.grantDraft,prepare:{notesFocused=false}).zIndex(1)
                 }

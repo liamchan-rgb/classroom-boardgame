@@ -60,7 +60,9 @@ final class MeadowTeacherCoordinator:ObservableObject {
     // MARK: Quiz (anywhere)
 
     /// The quiz on screen (TV overlays and teacher preview), nil when none.
-    @Published var quiz:LiveQuiz?
+    @Published var quiz:LiveQuiz? {didSet{if quiz?.token != oldValue?.token || quiz == nil {miniGame?.flush(quiz:quiz?.token)}}}
+    /// A classroom mini-game on the TV (boss, camp, race, memory, arena), driven by the answers sent.
+    @Published var miniGame:MiniGameModel?
     private var quizToken=0
     private weak var quizPanel:UIViewController?
     private var quizGainBase:GameState?
@@ -388,6 +390,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
             let attempt=try c.recordQuiz(actor:live.player,question:live.index,picks:recorded(r.picks,live),texts:r.texts,seconds:Date().timeIntervalSince(live.start),free:live.node==nil,askedAt:live.start)
             live.attempt=shown(attempt,live);live.dropName=attempt.drop.flatMap{try? c.engine.catalog.item($0).name}
             quiz=live;quizGainBase=before
+            feedMiniGame(question:live.index,answers:[MiniGameAnswer(player:live.player,right:attempt.rightCount==attempt.correct.count)])
             renderer?.classroomRefresh();revision += 1
         }catch{withAnimation{quiz=nil};message=error.localizedDescription;revision += 1}
     }
@@ -482,6 +485,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
                 model.sent.append((a.playerName,right,a.coins))
             }
             let answered=model.players
+            feedMiniGame(question:live.index,answers:order.filter{answered.contains($0)}.map{MiniGameAnswer(player:$0,right:right)})
             model.players=[];model.note=nil
             renderer?.classroomRefresh();revision += 1
             // Sent: the TV reveals the answer as the coins go out.
@@ -494,12 +498,15 @@ final class MeadowTeacherCoordinator:ObservableObject {
     private func sendClassChoices(_ c:MeadowCampaignSession,live:LiveQuiz,model:ClassQuizModel,reward:QuizManualReward){
         guard !model.choices.isEmpty else{model.note="先记下每人的答案（点选项，或 1–7 选人再按字母）。";return}
         do{
+            var answers:[MiniGameAnswer]=[]
             for id in c.engine.state.players.map(\.id) {
                 guard let choice=model.choices[id] else{continue}
                 let a=try c.recordQuiz(actor:id,question:live.index,picks:recorded([choice<0 ? nil:choice],live),seconds:Date().timeIntervalSince(live.start),
                                        free:true,participation:reward.participationCoins,shared:true,askedAt:live.start)
                 model.sent.append((a.playerName,a.correct.allSatisfy{$0},a.coins))
+                answers.append(MiniGameAnswer(player:id,right:a.correct.allSatisfy{$0}))
             }
+            feedMiniGame(question:live.index,answers:answers)
             let answered=Set(model.choices.keys)
             model.players=[];model.note=nil
             renderer?.classroomRefresh();revision += 1
@@ -532,6 +539,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
     private func endClassQuiz(nobodyAnswered:Bool=false){
         let fromNotes=noteCardIndex;noteCardIndex=nil
         guard var live=quiz,live.mode == .classwide,let model=classModel else{closePanel();return}
+        if nobodyAnswered,model.sent.isEmpty {feedMiniGame(question:live.index,answers:[])}
         // The class stays in question mode: the list (or the draw) comes back for the next question while the
         // answer shows; Esc there ends.
         closePanel{[weak self] in self?.openClassPicker()}

@@ -84,6 +84,7 @@ struct ClassroomTVOverlays:View {
         GeometryReader{g in
             let unit=g.size.height/720
             ZStack(alignment:.top){
+                if let mini=game.miniGame {MiniGameStage(model:mini).frame(width:g.size.width,height:g.size.height)}
                 if overlays.scoreboard {
                     Group{
                         if overlays.teamScores {ClassroomTeamScoreboard(state:game.campaign?.engine.state,unit:unit)}

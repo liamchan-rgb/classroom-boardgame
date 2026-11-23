@@ -182,6 +182,7 @@ struct ClassroomToolbarTools: View {
         Button { prepare(); game.openClassQuiz() } label: { Label("全班题", systemImage: "person.3.sequence") }.disabled(game.quizActive)
         Button { prepare(); game.openPractice() } label: { Label("闪卡", systemImage: "rectangle.on.rectangle.angled") }.disabled(game.quizActive)
         LaserButton(laser: game.laser) { prepare(); game.toggleLaser() }
+        MiniGameMenu(game: game, prepare: prepare)
         ToolbarGap()
         ClassroomScoreboardButton(overlays: game.overlays) { game.toggleScoreboard() }
         // The class answer report of the open trip: look at it, export PDF / pictures (also R).
