@@ -80,11 +80,12 @@ struct ClassroomTVOverlays:View {
     @ObservedObject var timer:ClassTimerModel
     @ObservedObject var overlays:ClassOverlayModel
     @ObservedObject var game:MeadowTeacherCoordinator
+    var showMiniGame = true
     var body:some View {
         GeometryReader{g in
             let unit=g.size.height/720
             ZStack(alignment:.top){
-                if let mini=game.miniGame {MiniGameStage(model:mini).frame(width:g.size.width,height:g.size.height)}
+                if showMiniGame,let mini=game.miniGame {MiniGameStage(model:mini).frame(width:g.size.width,height:g.size.height)}
                 if overlays.scoreboard {
                     Group{
                         if overlays.teamScores {ClassroomTeamScoreboard(state:game.campaign?.engine.state,unit:unit)}
@@ -93,7 +94,20 @@ struct ClassroomTVOverlays:View {
                 }
                 if game.quiz != nil {QuizOverlayHost(game:game)}
                 if let challenge=game.challenge {ChallengeOverlay(model:challenge,unit:unit)}
-                if timer.visible {ClassTimerBadge(timer:timer,unit:unit).padding(.top,16*unit)}
+                if timer.visible {
+                    if let mini = game.miniGame {
+                        if mini.kind == .arena {
+                            ClassTimerBadge(timer:timer,unit:unit).padding(.top,80*unit)
+                        } else {
+                            HStack {
+                                ClassTimerBadge(timer:timer,unit:unit)
+                                Spacer()
+                            }.padding(.top,16*unit).padding(.leading,20*unit)
+                        }
+                    } else {
+                        ClassTimerBadge(timer:timer,unit:unit).padding(.top,16*unit)
+                    }
+                }
                 LaserLayer(laser:game.laser)
             }.frame(width:g.size.width,height:g.size.height,alignment:.top)
         }.allowsHitTesting(false)

@@ -31,10 +31,13 @@ struct PublicSurface:View {
                 }.allowsHitTesting(false)
             }
         }.background(.black)
+        // Mini-game sits underneath modal mirrors (prize wheel / shop / inventory) so spinning the wheel from Race or
+        // Arena is visible on the external TV instead of being covered by the mini-game backdrop.
+        .overlay{if let mini=game.miniGame {MiniGameStage(model:mini).allowsHitTesting(false)}}
         // Inventory / shop / prize wheel: the teacher's actual screen, copied live (it only shows while one is open,
         // so it stays on over the picture book too: the wheel is opened from the book tab as well).
         .overlay{if !teacherPreview {MeadowPanelMirror(game:game).ignoresSafeArea()}}
-        .overlay{ClassroomTVOverlays(timer:game.classTimer,overlays:game.overlays,game:game)}
+        .overlay{ClassroomTVOverlays(timer:game.classTimer,overlays:game.overlays,game:game,showMiniGame:false)}
     }
 }
 

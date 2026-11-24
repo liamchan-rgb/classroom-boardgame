@@ -197,6 +197,7 @@ private struct TeacherGamePreview:View {
                     tap:{game.canvasTap($0,selectingNode:selectingNode)},
                     pan:game.canvasPan,zoom:{game.canvasZoom($0,anchor:$1)},hover:game.canvasHover)
             }
+            .overlay{MiniGameTapLayer(game:game)}
             .overlay{QuizRevealTapCatcher(game:game)}
             .overlay{LaserCapture(laser:game.laser)}
             .onAppear{game.previewVisibility(previewID,visible:true)}
