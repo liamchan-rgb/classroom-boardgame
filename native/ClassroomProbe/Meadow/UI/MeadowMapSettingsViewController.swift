@@ -371,7 +371,7 @@ final class MeadowMapSettingsViewController: UIViewController {
             dice.setTitle("外观",for:.normal);dice.setImage(UIImage(systemName:"dice.fill"),for:.normal);return
         }
         dice.setTitle(" 外观",for:.normal)
-        let pixel=PixelHeroLook(body:look.body,hair:look.hair,face:look.face)
+        let pixel=PixelHeroLook(body:look.body,armor:look.armor(worn:nil),hair:look.hair,hairColor:look.hairColor,face:look.face)
         func show(_ image:UIImage){
             guard self.profileLooks[key]==look else{return}
             let size=CGSize(width:30,height:30)

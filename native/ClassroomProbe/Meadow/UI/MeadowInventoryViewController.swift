@@ -317,10 +317,10 @@ final class MeadowCampaignInventoryViewController:UIViewController {
         let slot=session.playerIDs.firstIndex(of:actor) ?? 0
         let appearanceIndex=HeroFrames.appearanceIDs.firstIndex(of:look.body) ?? 0
         if PixelHeroAtlas.enabled {
-            let pixel=(actor=="p1" && unit.appearance==nil) ? (HeroFrames.pixelLook(heroIndex:0,appearanceIndex:appearanceIndex,weaponID:unit.equipment.weapon,armorID:look.armor(worn:unit.equipment.armor),hair:look.hair,face:look.face) ?? PixelHeroLook.battle(unit:unit,slot:slot)):PixelHeroLook.battle(unit:unit,slot:slot)
+            let pixel=(actor=="p1" && unit.appearance==nil) ? (HeroFrames.pixelLook(heroIndex:0,appearanceIndex:appearanceIndex,weaponID:unit.equipment.weapon,armorID:look.armor(worn:unit.equipment.armor),hair:look.hair,hairColor:look.hairColor,face:look.face) ?? PixelHeroLook.battle(unit:unit,slot:slot)):PixelHeroLook.battle(unit:unit,slot:slot)
             hero.image=PixelHeroAtlas.fullBody(pixel){[weak self,actor] in if self?.actor==actor {self?.hero.image=PixelHeroAtlas.fullBody(pixel)}}  // only the picture: a full refresh rebuilds the tiles under the pointer
         } else {
-            hero.image=HeroFrames.inventoryImages(appearanceIndex:appearanceIndex,weaponID:unit.equipment.weapon,armorID:look.armor(worn:unit.equipment.armor),hair:look.hair,face:look.face).first
+            hero.image=HeroFrames.inventoryImages(appearanceIndex:appearanceIndex,weaponID:unit.equipment.weapon,armorID:look.armor(worn:unit.equipment.armor),hair:look.hair,hairColor:look.hairColor,face:look.face).first
         }
         let slotIcons:[ItemSlot:String]=[.weapon:"bolt.horizontal.fill",.armor:"shield.lefthalf.filled",.accessory:"sparkle"]
         for (i,slot) in ItemSlot.allCases.enumerated(){

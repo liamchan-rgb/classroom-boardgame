@@ -815,7 +815,7 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         guard let campaign else{return}
         // 像素人物：每位旅人的武器、护甲都画在身上，所以所有人的装备变化都要刷新
         let units=campaign.engine.state.players.filter{$0.id=="p1" || $0.appearance != nil || PixelHeroAtlas.enabled}
-        let signature=units.map{u in "\(u.id)-\((u.appearance?.body ?? campaign.snapshot.appearanceID))-\(u.appearance?.outfit ?? "follow")-\(u.appearance?.hair ?? "original")-\(u.appearance?.face ?? "original")-\(u.equipment.weapon ?? "none")-\(u.equipment.armor ?? "none")"}.joined(separator:"|")
+        let signature=units.map{u in "\(u.id)-\((u.appearance?.body ?? campaign.snapshot.appearanceID))-\(u.appearance?.outfit ?? "follow")-\(u.appearance?.hair ?? "original")-\(u.appearance?.hairColor ?? "default")-\(u.appearance?.face ?? "original")-\(u.equipment.weapon ?? "none")-\(u.equipment.armor ?? "none")"}.joined(separator:"|")
         guard signature != profileVisualSignature else{return}
         if PixelHeroAtlas.enabled {
             // 像素人物：新外观先在后台烘好（地图图集 + 战斗帧），这期间画面保持原样，烘好再回来刷新，不卡主线程
@@ -827,7 +827,7 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
                     if let look=HeroFrames.pixelLook(heroIndex:slot%3,weaponID:u.equipment.weapon,armorID:u.equipment.armor){mapLooks.append(look)}
                 } else {
                     let a=u.appearance ?? PlayerAppearance(body:campaign.snapshot.appearanceID),index=HeroFrames.appearanceIDs.firstIndex(of:a.body) ?? 0
-                    if let look=HeroFrames.pixelLook(heroIndex:0,appearanceIndex:index,weaponID:u.equipment.weapon,armorID:a.armor(worn:u.equipment.armor),hair:a.hair,face:a.face){mapLooks.append(look)}
+                    if let look=HeroFrames.pixelLook(heroIndex:0,appearanceIndex:index,weaponID:u.equipment.weapon,armorID:a.armor(worn:u.equipment.armor),hair:a.hair,hairColor:a.hairColor,face:a.face){mapLooks.append(look)}
                 }
             }
             // 战斗帧只在后台备好，不用等
@@ -853,8 +853,8 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
                 continue
             }
             let a=u.appearance ?? PlayerAppearance(body:campaign.snapshot.appearanceID),index=HeroFrames.appearanceIDs.firstIndex(of:a.body) ?? 0,armor=a.armor(worn:u.equipment.armor)
-            try groundRenderer?.prepareP1Equipment(appearance:index,weapon:u.equipment.weapon,armor:armor,retainingCurrent:true,hair:a.hair,face:a.face)
-            for diagonal in [false,true]{names.insert(HeroFrames.atlasName(heroIndex:0,diagonal:diagonal,appearanceIndex:index,weaponID:u.equipment.weapon,armorID:armor,hair:a.hair,face:a.face))}
+            try groundRenderer?.prepareP1Equipment(appearance:index,weapon:u.equipment.weapon,armor:armor,retainingCurrent:true,hair:a.hair,hairColor:a.hairColor,face:a.face)
+            for diagonal in [false,true]{names.insert(HeroFrames.atlasName(heroIndex:0,diagonal:diagonal,appearanceIndex:index,weaponID:u.equipment.weapon,armorID:armor,hair:a.hair,hairColor:a.hairColor,face:a.face))}
             if u.id=="p1"{scene.selectP1Loadout(appearance:index,weapon:u.equipment.weapon,armor:armor)}
         }
         groundRenderer?.retainCampaignArmorAtlases(names)
@@ -1507,7 +1507,7 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
             if actor=="p1" || candidate.appearance != nil {
                 let look=candidate.appearance ?? PlayerAppearance(body:campaign.snapshot.appearanceID)
                 let index=HeroFrames.appearanceIDs.firstIndex(of:look.body) ?? 0
-                try self.groundRenderer?.prepareP1Equipment(appearance:index,weapon:candidate.equipment.weapon,armor:look.armor(worn:candidate.equipment.armor),retainingCurrent:true,hair:look.hair,face:look.face)
+                try self.groundRenderer?.prepareP1Equipment(appearance:index,weapon:candidate.equipment.weapon,armor:look.armor(worn:candidate.equipment.armor),retainingCurrent:true,hair:look.hair,hairColor:look.hairColor,face:look.face)
             }
             try campaign.equipInventory(actor:actor,slot:slot,item:item)
             self.profileVisualSignature=""

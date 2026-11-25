@@ -281,7 +281,7 @@ final class MeadowBattleActorView: UIView {
         let body = hairID == "hair-silver" || faceID == "face-amber" ? "wayfarer":"forester"
         return PixelHeroLook(body: body, armor: armorID, weapon: HeroFrames.weaponID(forBattleAsset: weaponAsset),
                              hair: hairID.flatMap { PixelHeroLook.hairStyles[$0] != nil ? $0:nil },
-                             face: faceID.flatMap { PixelHeroLook.eyeColors[$0] != nil ? $0:nil })
+                             face: faceID.flatMap { PixelHeroLook.faceSpec(for: $0) != nil ? $0:nil })
     }
 
     private func refreshPixelSprite() {

@@ -67,6 +67,30 @@ final class CustomAppearanceTests:XCTestCase {
     func testCacheIdentityIncludesIndependentHeadSelections()throws {
         let a=look,b=PlayerAppearance(body:a.body,outfit:a.outfit,hair:PlayerAppearance.hairOptions[0],face:a.face)
         let c=PlayerAppearance(body:a.body,outfit:a.outfit,hair:a.hair,face:PlayerAppearance.faceOptions[0])
-        XCTAssertNotEqual(a.visualKey,b.visualKey);XCTAssertNotEqual(a.visualKey,c.visualKey)
+        let d=PlayerAppearance(body:a.body,outfit:a.outfit,hair:a.hair,hairColor:"pink",face:a.face)
+        XCTAssertNotEqual(a.visualKey,b.visualKey);XCTAssertNotEqual(a.visualKey,c.visualKey);XCTAssertNotEqual(a.visualKey,d.visualKey)
+    }
+    func testExpandedHairColorEyesAndNonEquipmentCostumesValidateAndRoundTrip()throws {
+        XCTAssertGreaterThanOrEqual(PlayerAppearance.hairOptions.count, 20)
+        XCTAssertGreaterThanOrEqual(PlayerAppearance.hairColorOptions.count, 20)
+        XCTAssertGreaterThanOrEqual(PlayerAppearance.faceOptions.count, 18)
+        XCTAssertGreaterThanOrEqual(PlayerAppearance.costumeOptions.count, 16)
+        // Dedicated costumes must never reuse in-game armor equipment IDs.
+        for gear in ["leatherArmor","runeArmor","starlightArmor","dragonArmor"] {
+            XCTAssertFalse(PlayerAppearance.costumeOptions.contains(gear))
+        }
+        for color in PlayerAppearance.hairColorOptions {
+            let a = PlayerAppearance(body: "forester", outfit: PlayerAppearance.costumeOptions.first, hair: PlayerAppearance.hairOptions.last, hairColor: color, face: PlayerAppearance.faceOptions.last)
+            try a.validate()
+            let decoded = try JSONDecoder().decode(PlayerAppearance.self, from: JSONEncoder().encode(a))
+            XCTAssertEqual(decoded, a)
+        }
+        for costume in PlayerAppearance.costumeOptions {
+            let a = PlayerAppearance(body: "wayfarer", outfit: costume, hair: "hair_twintails", hairColor: "sky", face: "eye_hetero_gold_blue")
+            try a.validate()
+            XCTAssertEqual(a.armor(worn: "runeArmor"), costume)
+            XCTAssertEqual(a.armor(worn: nil), costume)
+        }
+        XCTAssertThrowsError(try PlayerAppearance(hairColor: "missing").validate())
     }
 }

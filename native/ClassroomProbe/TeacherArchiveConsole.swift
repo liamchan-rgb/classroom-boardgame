@@ -25,6 +25,7 @@ struct TeacherArchiveConsole:View {
     @State private var bodyStyle="forester"
     @State private var outfit="follow"
     @State private var hair="original"
+    @State private var hairColor="default"
     @State private var face="original"
     @State private var title="课堂行程"
     @State private var notice=""
@@ -50,7 +51,7 @@ struct TeacherArchiveConsole:View {
     }
     private var store:MeadowSlotStore {MeadowTeacherCoordinator.slotStore}
     private var players:[GameUnit] {game.campaign?.engine.state.players ?? []}
-    private var appearance:PlayerAppearance {.init(body:bodyStyle,outfit:outfit=="follow" ? nil:outfit,hair:hair=="original" ? nil:hair,face:face=="original" ? nil:face)}
+    private var appearance:PlayerAppearance {.init(body:bodyStyle,outfit:outfit=="follow" ? nil:outfit,hair:hair=="original" ? nil:hair,hairColor:hairColor=="default" ? nil:hairColor,face:face=="original" ? nil:face)}
     private var profile:MeadowPlayerProfile {.init(name:name,appearance:appearance)}
     private var tabCaption:String {
         switch tab {
@@ -90,6 +91,7 @@ struct TeacherArchiveConsole:View {
                 .onChange(of:bodyStyle){_,_ in updateThumbnail()}
                 .onChange(of:outfit){_,_ in updateThumbnail()}
                 .onChange(of:hair){_,_ in updateThumbnail()}
+                .onChange(of:hairColor){_,_ in updateThumbnail()}
                 .onChange(of:face){_,_ in updateThumbnail()}
                 .alert("确认操作",isPresented:$confirm){Button("取消",role:.cancel){pending=nil};Button("确认",role:.destructive){executePending()}}message:{Text(confirmation)}
         }
@@ -100,9 +102,25 @@ struct TeacherArchiveConsole:View {
                 if !players.isEmpty{Picker("角色",selection:$player){ForEach(players){Text($0.name).tag($0.id)}}}
                 HStack{Text("姓名");ClassroomTextField(placeholder:"人物名（最多40字）",text:$name)}
                 Picker("款式",selection:$bodyStyle){Text("林间绿衣").tag("forester");Text("行旅蓝衣").tag("wayfarer")}
-                Picker("衣装",selection:$outfit){Text("跟随实际护甲").tag("follow");Text("基础衣装").tag("blue");Text("皮甲").tag("leatherArmor");Text("符文甲").tag("runeArmor");Text("星辉甲 · 天仪礼甲").tag("starlightArmor");Text("龙纹甲 · 龙翼巡游甲").tag("dragonArmor")}
-                Picker("发型",selection:$hair){Text("原有发型").tag("original");ForEach(Array(PlayerAppearance.hairOptions.enumerated()),id:\.element){i,id in Text(["男式 · 短碎发","男式 · 偏分发","男式 · 小束发","女式 · 紫色盖耳长发","女式 · 侧马尾","女式 · 盘发"][i]).tag(id)}}
-                Picker("五官",selection:$face){Text("原有五官").tag("original");ForEach(Array(PlayerAppearance.faceOptions.enumerated()),id:\.element){i,id in Text(["明朗 · 蓝瞳","沉静 · 琥珀瞳","柔和 · 绿瞳","清晰 · 紫瞳"][i]).tag(id)}}
+                Picker("时装",selection:$outfit){
+                    Text("跟随实际护甲").tag("follow")
+                    if outfit != "follow", !PlayerAppearance.costumeOptions.contains(outfit) {
+                        Text(CharacterCustomizationCatalog.costumeName(outfit)).tag(outfit)
+                    }
+                    ForEach(CharacterCustomizationCatalog.costumes,id:\.id){item in Text(item.name).tag(item.id)}
+                }
+                Picker("发型",selection:$hair){
+                    Text("原有发型").tag("original")
+                    ForEach(CharacterCustomizationCatalog.hairstyles,id:\.id){item in Text(item.name).tag(item.id)}
+                }
+                Picker("发色",selection:$hairColor){
+                    Text("随体型").tag("default")
+                    ForEach(CharacterCustomizationCatalog.hairColors){item in Text(item.name).tag(item.id)}
+                }
+                Picker("瞳色",selection:$face){
+                    Text("原有瞳色").tag("original")
+                    ForEach(CharacterCustomizationCatalog.eyes){item in Text(item.name).tag(item.id)}
+                }
                 if let thumbnail{Image(uiImage:thumbnail).interpolation(.none).resizable().scaledToFit().frame(height:130).frame(maxWidth:.infinity).background(Color(red:0.08,green:0.17,blue:0.12))}
                 Text("只换样子，不改职业、数值和装备；武器跟随实际装备。").font(.caption).foregroundStyle(.secondary)
                 HStack {
@@ -120,7 +138,7 @@ struct TeacherArchiveConsole:View {
                         }
                         Spacer()
                         if let p=profiles[slot]?.value {
-                            Button("读到编辑区"){name=p.name;bodyStyle=p.appearance.body;outfit=p.appearance.outfit ?? "follow";hair=p.appearance.hair ?? "original";face=p.appearance.face ?? "original";updateThumbnail();notice="已读到编辑区，还没有应用到角色。"}.buttonStyle(.bordered)
+                            Button("读到编辑区"){name=p.name;bodyStyle=p.appearance.body;outfit=p.appearance.outfit ?? "follow";hair=p.appearance.hair ?? "original";hairColor=p.appearance.hairColor ?? "default";face=p.appearance.face ?? "original";updateThumbnail();notice="已读到编辑区，还没有应用到角色。"}.buttonStyle(.bordered)
                         }
                         Menu{
                             Button{let p=profile;savePrompt(occupied:profiles[slot] != nil || errors["p\(slot)"] != nil,message:"覆盖人物槽\(slot)？"){try store.saveProfile(p,slot:slot,title:p.name);notice="人物档案已保存到槽\(slot)。"}}label:{Label(profiles[slot]==nil ? "把编辑区存到这里":"用编辑区覆盖",systemImage:"square.and.arrow.down")}
@@ -253,8 +271,8 @@ struct TeacherArchiveConsole:View {
             }
         }.glassRow()
     }
-    private func updateThumbnail(){let index=HeroFrames.appearanceIDs.firstIndex(of:bodyStyle) ?? 0;thumbnail=HeroFrames.inventoryImages(appearanceIndex:index,weaponID:nil,armorID:appearance.armor(worn:game.campaign?.engine.state.units[player]?.equipment.armor),hair:appearance.hair,face:appearance.face).first}
-    private func readPlayer(){guard let u=game.campaign?.engine.state.units[player] else{updateThumbnail();return};name=u.name;let a=u.appearance ?? .init(body:game.campaign?.snapshot.appearanceID ?? "forester");bodyStyle=a.body;outfit=a.outfit ?? "follow";hair=a.hair ?? "original";face=a.face ?? "original";updateThumbnail()}
+    private func updateThumbnail(){let index=HeroFrames.appearanceIDs.firstIndex(of:bodyStyle) ?? 0;thumbnail=HeroFrames.inventoryImages(appearanceIndex:index,weaponID:nil,armorID:appearance.armor(worn:game.campaign?.engine.state.units[player]?.equipment.armor),hair:appearance.hair,hairColor:appearance.hairColor,face:appearance.face).first}
+    private func readPlayer(){guard let u=game.campaign?.engine.state.units[player] else{updateThumbnail();return};name=u.name;let a=u.appearance ?? .init(body:game.campaign?.snapshot.appearanceID ?? "forester");bodyStyle=a.body;outfit=a.outfit ?? "follow";hair=a.hair ?? "original";hairColor=a.hairColor ?? "default";face=a.face ?? "original";updateThumbnail()}
     private func ask(_ message:String,action:@escaping ()throws->Void){confirmation=message;pending=action;confirm=true}
     private func executePending(){defer{pending=nil;reload()};do{try pending?()}catch{notice="未完成，原文件保留："+error.localizedDescription}}
     private func savePrompt(occupied:Bool,message:String,action:@escaping ()throws->Void){if occupied{ask(message,action:action)}else{do{try action();reload()}catch{notice="未完成："+error.localizedDescription}}}

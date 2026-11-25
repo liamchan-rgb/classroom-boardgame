@@ -69,9 +69,9 @@ enum HeroFrames {
         return CustomAppearanceAssets.isCustom(name) ? CustomAppearanceAssets.image(name):UIImage(named:name)
     }
     /// 某位旅人（和 atlasName 同样的参数）对应的像素外观
-    static func pixelLook(heroIndex:Int,appearanceIndex:Int=0,weaponID:String?,armorID:String?,hair:String?=nil,face:String?=nil)->PixelHeroLook? {
+    static func pixelLook(heroIndex:Int,appearanceIndex:Int=0,weaponID:String?,armorID:String?,hair:String?=nil,hairColor:String?=nil,face:String?=nil)->PixelHeroLook? {
         guard PixelHeroAtlas.enabled else{return nil}
-        return PixelHeroAtlas.parse(atlasName(heroIndex:heroIndex,diagonal:false,appearanceIndex:appearanceIndex,weaponID:weaponID,armorID:armorID,hair:hair,face:face))?.look
+        return PixelHeroAtlas.parse(atlasName(heroIndex:heroIndex,diagonal:false,appearanceIndex:appearanceIndex,weaponID:weaponID,armorID:armorID,hair:hair,hairColor:hairColor,face:face))?.look
     }
     /// 运行时合成的图集（像素人物、旧的自定义外观）：不在素材目录里，要用 image(named:) 取
     static func isGenerated(_ name:String)->Bool { PixelHeroAtlas.isPixel(name) || CustomAppearanceAssets.isCustom(name) }
@@ -90,11 +90,11 @@ enum HeroFrames {
 
     static var appearanceTitles: [String] { layout.modularP1?.loadouts.map(\.title) ?? [] }
 
-    static func atlasName(heroIndex: Int, diagonal: Bool, appearanceIndex: Int = 0,weaponID:String?="trainingSword",armorID:String?=nil,hair:String?=nil,face:String?=nil) -> String {
+    static func atlasName(heroIndex: Int, diagonal: Bool, appearanceIndex: Int = 0,weaponID:String?="trainingSword",armorID:String?=nil,hair:String?=nil,hairColor:String?=nil,face:String?=nil) -> String {
         if PixelHeroAtlas.enabled {
-            // 所有旅人都换成像素人物：1 号按选的体型，2、3 号用预设旅人；护甲、武器、发型、五官都画出来
+            // 所有旅人都换成像素人物：1 号按选的体型，2、3 号用预设旅人；护甲/时装、武器、发型、发色、瞳色都画出来
             let body=heroIndex==0 ? (appearanceIDs.indices.contains(appearanceIndex) ? appearanceIDs[appearanceIndex]:"forester"):PixelHeroLook.presetBodies[min(2,max(0,heroIndex))]
-            return PixelHeroAtlas.name(look:PixelHeroLook(body:body,armor:armorID,weapon:weaponID,hair:hair,face:face),half:diagonal ? 1:0)
+            return PixelHeroAtlas.name(look:PixelHeroLook(body:body,armor:armorID,weapon:weaponID,hair:hair,hairColor:hairColor,face:face),half:diagonal ? 1:0)
         }
         if heroIndex==0, hair != nil || face != nil || ["starlightArmor","dragonArmor"].contains(armorID ?? "") { return CustomAppearanceAssets.name(body:appearanceIDs[appearanceIndex],armor:armorID,weapon:weaponID,hair:hair,face:face,half:diagonal ? 1:0) }
         if heroIndex == 0, let presets = layout.modularP1?.loadouts {
@@ -114,8 +114,8 @@ enum HeroFrames {
     }
 
     /// Exact idle + eight authored front-walk cells, without re-synthesizing art.
-    static func inventoryImages(appearanceIndex:Int,weaponID:String?,armorID:String?,hair:String?=nil,face:String?=nil) -> [UIImage] {
-        let name=atlasName(heroIndex:0,diagonal:false,appearanceIndex:appearanceIndex,weaponID:weaponID,armorID:armorID,hair:hair,face:face)
+    static func inventoryImages(appearanceIndex:Int,weaponID:String?,armorID:String?,hair:String?=nil,hairColor:String?=nil,face:String?=nil) -> [UIImage] {
+        let name=atlasName(heroIndex:0,diagonal:false,appearanceIndex:appearanceIndex,weaponID:weaponID,armorID:armorID,hair:hair,hairColor:hairColor,face:face)
         guard let image=image(named:name)?.cgImage else { return [] }
         let cell=image.height/atlasRows
         return (0...8).compactMap { index in
@@ -143,9 +143,9 @@ enum HeroFrames {
         return frame == 0 ? 0 : 1 + (frame - 1) * authoredFrameCount(heroIndex: heroIndex) / walkFrameCount
     }
 
-    static func load(_ hero: Int, appearanceIndex: Int = 0,weaponID:String?="trainingSword",armorID:String?=nil,hair:String?=nil,face:String?=nil) -> [[SKTexture]] {
+    static func load(_ hero: Int, appearanceIndex: Int = 0,weaponID:String?="trainingSword",armorID:String?=nil,hair:String?=nil,hairColor:String?=nil,face:String?=nil) -> [[SKTexture]] {
         [false, true].flatMap { diagonal -> [[SKTexture]] in
-            let name = atlasName(heroIndex: hero - 1, diagonal: diagonal, appearanceIndex: appearanceIndex,weaponID:weaponID,armorID:armorID,hair:hair,face:face)
+            let name = atlasName(heroIndex: hero - 1, diagonal: diagonal, appearanceIndex: appearanceIndex,weaponID:weaponID,armorID:armorID,hair:hair,hairColor:hairColor,face:face)
             guard let atlas = image(named:name)?.cgImage else {
                 fatalError("Missing hero atlas: \(name)")
             }
@@ -315,8 +315,8 @@ enum CustomAppearanceAssets {
     }
     /// One 256 px cell of the composed atlas (facing 0-7, column 0 idle, 1-8 walk), drawn from the registered components without
     /// composing the whole atlas: the character studio previews every option this way.
-    static func cell(body:String,armor:String?,weapon:String?,hair:String?,face:String?,facing:Int,column:Int)->UIImage? {
-        if PixelHeroAtlas.enabled { return PixelHeroAtlas.cell(look:PixelHeroLook(body:body,armor:armor,weapon:weapon,hair:hair,face:face),facing:facing,column:column) }
+    static func cell(body:String,armor:String?,weapon:String?,hair:String?,hairColor:String?=nil,face:String?,facing:Int,column:Int)->UIImage? {
+        if PixelHeroAtlas.enabled { return PixelHeroAtlas.cell(look:PixelHeroLook(body:body,armor:armor,weapon:weapon,hair:hair,hairColor:hairColor,face:face),facing:facing,column:column) }
         let key="cell|"+name(body:body,armor:armor,weapon:weapon,hair:hair,face:face,half:facing>=4 ? 1:0)+"|\(facing%4)|\(column)"
         if let image=cache.object(forKey:key as NSString){return image}
         let half=facing>=4 ? 1:0,outfit=armor ?? body

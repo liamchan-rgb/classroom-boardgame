@@ -2,36 +2,58 @@ import ClassroomGameCore
 import MeadowBattleSupport
 import UIKit
 
-/// 游戏里一个人物的外观：体型 + 护甲 + 武器 + 发型 + 五官（都是游戏里的 id）。
-/// spec 把它翻译成像素人物的装备（发型、衣服、武器……），交给 PixelBaker 烘焙。
+/// 游戏里一个人物的外观：体型 + 护甲/时装 + 武器 + 发型 + 发色 + 瞳色（都是游戏里的 id）。
+/// spec 把它翻译成像素人物的装备（发型、发色、瞳色、时装/护甲、武器……），交给 PixelBaker 烘焙。
 struct PixelHeroLook: Hashable {
     /// forester / wayfarer（可选体型），crimson / grove（没有自定义外观的 2、3 号旅人）
     var body: String = "forester"
-    /// 桌游物品表的护甲 id；nil = 体型自带的布衣
+    /// 桌游物品表的护甲 id 或独立时装 id（costume_*）；nil = 体型自带的布衣
     var armor: String?
     /// 桌游物品表的武器 id；nil = 空手
     var weapon: String?
     /// PlayerAppearance.hairOptions 里的 id；nil = 体型原有发型
     var hair: String?
+    /// PlayerAppearance.hairColorOptions 里的 id；nil = 体型默认发色
+    var hairColor: String?
     /// PlayerAppearance.faceOptions 里的 id；nil = 体型原有五官
     var face: String?
 
     static let presetBodies = ["forester", "crimson", "grove"]
 
-    var key: String { [body, armor ?? "base", weapon ?? "none", hair ?? "original", face ?? "original"].joined(separator: "|") }
+    var key: String {
+        [body, armor ?? "base", weapon ?? "none", hair ?? "original", hairColor ?? "default", face ?? "original"].joined(separator: "|")
+    }
 
-    init(body: String = "forester", armor: String? = nil, weapon: String? = nil, hair: String? = nil, face: String? = nil) {
-        self.body = body; self.armor = armor; self.weapon = weapon; self.hair = hair; self.face = face
+    init(body: String = "forester", armor: String? = nil, weapon: String? = nil, hair: String? = nil, hairColor: String? = nil, face: String? = nil) {
+        self.body = body; self.armor = armor; self.weapon = weapon; self.hair = hair; self.hairColor = hairColor; self.face = face
     }
 
     init?(key: String) {
         let p = key.components(separatedBy: "|")
-        guard p.count == 5 else { return nil }
-        self.init(body: p[0], armor: p[1] == "base" ? nil : p[1], weapon: p[2] == "none" ? nil : p[2],
-                  hair: p[3] == "original" ? nil : p[3], face: p[4] == "original" ? nil : p[4])
+        if p.count == 6 {
+            self.init(
+                body: p[0],
+                armor: p[1] == "base" ? nil : p[1],
+                weapon: p[2] == "none" ? nil : p[2],
+                hair: p[3] == "original" ? nil : p[3],
+                hairColor: p[4] == "default" ? nil : p[4],
+                face: p[5] == "original" ? nil : p[5]
+            )
+        } else if p.count == 5 {
+            self.init(
+                body: p[0],
+                armor: p[1] == "base" ? nil : p[1],
+                weapon: p[2] == "none" ? nil : p[2],
+                hair: p[3] == "original" ? nil : p[3],
+                hairColor: nil,
+                face: p[4] == "original" ? nil : p[4]
+            )
+        } else {
+            return nil
+        }
     }
 
-    /// 发型选项（短碎、偏分、小束、长发、侧马尾、盘发）→ 像素发型
+    /// 全部 20 种发型选项 → pixel-baker.js 里的发型 id
     static let hairStyles: [String: String] = [
         "p1-custom-hair-m1-short-v1": "hair_messy",
         "p1-custom-hair-m2-sidepart-v1": "hair_swept",
@@ -39,14 +61,54 @@ struct PixelHeroLook: Hashable {
         "p1-custom-hair-f1-bob-v1": "hair_long",
         "p1-custom-hair-f2-ponytail-v1": "hair_side_tail",
         "p1-custom-hair-f3-bun-v1": "hair_bun",
+        "hair_neat": "hair_neat",
+        "hair_ponytail": "hair_ponytail",
+        "hair_twintails": "hair_twintails",
+        "hair_twin_buns": "hair_twin_buns",
+        "hair_bob_cut": "hair_bob_cut",
+        "hair_spiky": "hair_spiky",
+        "hair_wolf_cut": "hair_wolf_cut",
+        "hair_hime_cut": "hair_hime_cut",
+        "hair_wavy_long": "hair_wavy_long",
+        "hair_half_up": "hair_half_up",
+        "hair_curtain": "hair_curtain",
+        "hair_fluffy_curl": "hair_fluffy_curl",
+        "hair_side_braid": "hair_side_braid",
+        "hair_quiff": "hair_quiff",
     ]
-    /// 五官选项（蓝瞳、琥珀、绿瞳、紫瞳）→ 圆脸的瞳色
+
+    /// 16 种纯色瞳色 → face_round 的 variant id
     static let eyeColors: [String: String] = [
         "p1-custom-face-m1-bright-v1": "blue",
         "p1-custom-face-m2-calm-v1": "amber",
         "p1-custom-face-f1-gentle-v1": "green",
         "p1-custom-face-f2-clear-v1": "violet",
+        "eye_teal": "teal",
+        "eye_ruby": "ruby",
+        "eye_sakura": "sakura",
+        "eye_gold": "gold",
+        "eye_ice": "ice",
+        "eye_obsidian": "obsidian",
+        "eye_hazel": "hazel",
+        "eye_emerald": "emerald",
+        "eye_orange": "orange",
+        "eye_silver": "silver",
+        "eye_indigo": "indigo",
+        "eye_magenta": "magenta",
     ]
+
+    /// 特殊异色瞳 → 独立 face id
+    static let specialFaces: [String: String] = [
+        "eye_hetero_gold_blue": "face_hetero_gold_blue",
+        "eye_hetero_crimson_cyan": "face_hetero_crimson_cyan",
+    ]
+
+    static func faceSpec(for id: String) -> (face: String, variant: String?)? {
+        if let eye = eyeColors[id] { return ("face_round", eye) }
+        if let special = specialFaces[id] { return (special, nil) }
+        return nil
+    }
+
     static let weapons: [String: String] = [
         "trainingSword": "weapon_training_sword",
         "huntingBow": "weapon_hunting_bow",
@@ -55,11 +117,44 @@ struct PixelHeroLook: Hashable {
         "starlightBlade": "weapon_starlight_blade",
         "dragonFangSword": "weapon_dragon_fang",
     ]
+
+    /// 游戏内护甲装备（仅在「随护甲」或读取旧存档时使用，不再放进时装选择器）
     static let armors: [String: String] = [
         "leatherArmor": "top_leather_armor",
         "runeArmor": "top_rune_armor",
         "starlightArmor": "top_starlight_armor",
         "dragonArmor": "top_dragon_armor",
+    ]
+
+    /// 独立定制时装组合（与游戏内装备护甲完全解耦，自带成套上衣 / 下装 / 鞋靴与配饰）
+    struct CostumeSpec {
+        let top: String
+        let topVariant: String?
+        let bottom: String
+        let bottomVariant: String
+        let shoes: String
+        let shoesVariant: String
+        let bag: String?
+        let bagVariant: String?
+    }
+
+    static let costumes: [String: CostumeSpec] = [
+        "costume_academy":     .init(top: "top_costume_academy",     topVariant: "navy",      bottom: "bottom_trousers",      bottomVariant: "slate",   shoes: "shoes_boots", shoesVariant: "black", bag: nil, bagVariant: nil),
+        "costume_sailor":      .init(top: "top_costume_sailor",      topVariant: "navy",      bottom: "bottom_pleated_skirt", bottomVariant: "navy",    shoes: "shoes_boots", shoesVariant: "navy",  bag: nil, bagVariant: nil),
+        "costume_mage_robe":   .init(top: "top_costume_mage_robe",   topVariant: "indigo",    bottom: "bottom_trousers",      bottomVariant: "indigo",  shoes: "shoes_boots", shoesVariant: "black", bag: nil, bagVariant: nil),
+        "costume_hoodie":      .init(top: "top_costume_hoodie",      topVariant: "coral",     bottom: "bottom_trousers",      bottomVariant: "denim",   shoes: "shoes_boots", shoesVariant: "white", bag: nil, bagVariant: nil),
+        "costume_overalls":    .init(top: "top_costume_overalls",    topVariant: "denim",     bottom: "bottom_trousers",      bottomVariant: "denim",   shoes: "shoes_boots", shoesVariant: "brown", bag: nil, bagVariant: nil),
+        "costume_kimono":      .init(top: "top_costume_kimono",      topVariant: "sakura",    bottom: "bottom_hakama",        bottomVariant: "crimson", shoes: "shoes_boots", shoesVariant: "cream", bag: nil, bagVariant: nil),
+        "costume_hanfu":       .init(top: "top_costume_hanfu",       topVariant: "jade",      bottom: "bottom_hakama",        bottomVariant: "ivory",   shoes: "shoes_boots", shoesVariant: "black", bag: nil, bagVariant: nil),
+        "costume_noble":       .init(top: "top_costume_noble",       topVariant: "wine",      bottom: "bottom_trousers",      bottomVariant: "white",   shoes: "shoes_boots", shoesVariant: "black", bag: nil, bagVariant: nil),
+        "costume_sundress":    .init(top: "top_costume_sundress",    topVariant: "sunflower", bottom: "bottom_shorts_socks",  bottomVariant: "white",   shoes: "shoes_boots", shoesVariant: "brown", bag: nil, bagVariant: nil),
+        "costume_captain":     .init(top: "top_costume_captain",     topVariant: "crimson",   bottom: "bottom_trousers",      bottomVariant: "white",   shoes: "shoes_boots", shoesVariant: "black", bag: nil, bagVariant: nil),
+        "costume_bard":        .init(top: "top_costume_bard",        topVariant: "emerald",   bottom: "bottom_trousers",      bottomVariant: "brown",   shoes: "shoes_boots", shoesVariant: "brown", bag: nil, bagVariant: nil),
+        "costume_winter_coat": .init(top: "top_costume_winter_coat", topVariant: "glacier",   bottom: "bottom_trousers",      bottomVariant: "navy",    shoes: "shoes_boots", shoesVariant: "cream", bag: nil, bagVariant: nil),
+        "costume_explorer":    .init(top: "top_costume_explorer",    topVariant: "khaki",     bottom: "bottom_trousers",      bottomVariant: "khaki",   shoes: "shoes_boots", shoesVariant: "brown", bag: "bag_satchel", bagVariant: "olive"),
+        "costume_phantom":     .init(top: "top_costume_phantom",     topVariant: "scarlet",   bottom: "bottom_trousers",      bottomVariant: "black",   shoes: "shoes_boots", shoesVariant: "black", bag: nil, bagVariant: nil),
+        "costume_chef":        .init(top: "top_costume_chef",        topVariant: "caramel",   bottom: "bottom_trousers",      bottomVariant: "dark",    shoes: "shoes_boots", shoesVariant: "black", bag: nil, bagVariant: nil),
+        "costume_idol":        .init(top: "top_costume_idol",        topVariant: "lavender",  bottom: "bottom_pleated_skirt", bottomVariant: "violet",  shoes: "shoes_boots", shoesVariant: "white", bag: nil, bagVariant: nil),
     ]
 
     private struct Base {
@@ -91,16 +186,27 @@ struct PixelHeroLook: Hashable {
         let b = base
         var slots: [String: String] = ["bottom": "bottom_trousers", "shoes": "shoes_boots"]
         var variants: [String: String] = ["bottom": "dark", "shoes": "brown"]
-        // 换发型时发色跟着体型走
         slots["hair"] = hair.flatMap { Self.hairStyles[$0] } ?? b.hair
-        variants["hair"] = b.hairColor
-        if let face, let eye = Self.eyeColors[face] {
-            slots["face"] = "face_round"; variants["face"] = eye
+        variants["hair"] = hairColor ?? b.hairColor
+        if let face, let resolved = Self.faceSpec(for: face) {
+            slots["face"] = resolved.face
+            if let eye = resolved.variant { variants["face"] = eye }
         } else {
             slots["face"] = b.face
             if let eye = b.eyes { variants["face"] = eye }
         }
-        if let armor, let top = Self.armors[armor] {
+        if let armor, let costume = Self.costumes[armor] {
+            slots["top"] = costume.top
+            if let tv = costume.topVariant { variants["top"] = tv }
+            slots["bottom"] = costume.bottom
+            variants["bottom"] = costume.bottomVariant
+            slots["shoes"] = costume.shoes
+            variants["shoes"] = costume.shoesVariant
+            if let bag = costume.bag {
+                slots["bag"] = bag
+                if let bv = costume.bagVariant { variants["bag"] = bv }
+            }
+        } else if let armor, let top = Self.armors[armor] {
             slots["top"] = top
         } else {
             slots["top"] = b.top; variants["top"] = b.topVariant
@@ -111,12 +217,152 @@ struct PixelHeroLook: Hashable {
         return ["slots": slots, "variants": variants, "skin": b.skin]
     }
 
-    /// 战斗里的人物：有自定义外观就用它（护甲按外观规则：可以「跟随所穿护甲」），否则按入队顺序用三位预设旅人
+    /// 战斗里的人物：有自定义外观就用它（护甲按外观规则：可以「跟随所穿护甲」或穿独立时装），否则按入队顺序用三位预设旅人
     static func battle(unit: GameUnit, slot: Int) -> PixelHeroLook {
         if let a = unit.appearance {
-            return PixelHeroLook(body: a.body, armor: a.armor(worn: unit.equipment.armor), weapon: unit.equipment.weapon, hair: a.hair, face: a.face)
+            return PixelHeroLook(body: a.body, armor: a.armor(worn: unit.equipment.armor), weapon: unit.equipment.weapon, hair: a.hair, hairColor: a.hairColor, face: a.face)
         }
         return PixelHeroLook(body: presetBodies[((slot % 3) + 3) % 3], armor: unit.equipment.armor, weapon: unit.equipment.weapon)
+    }
+}
+
+/// 人物自定义外观的展示目录（中文名与色板），供人物自定义工作室与存档人物页共用。
+enum CharacterCustomizationCatalog {
+    struct HairColorEntry: Identifiable {
+        let id: String
+        let name: String
+        let darkHex: UInt32
+        let midHex: UInt32
+        let lightHex: UInt32
+    }
+    struct EyeEntry: Identifiable {
+        let id: String
+        let name: String
+        let leftDark: UInt32
+        let leftMid: UInt32
+        let leftLight: UInt32
+        let rightDark: UInt32?
+        let rightMid: UInt32?
+        let rightLight: UInt32?
+        init(id: String, name: String, dark: UInt32, mid: UInt32, light: UInt32,
+             rightDark: UInt32? = nil, rightMid: UInt32? = nil, rightLight: UInt32? = nil) {
+            self.id = id; self.name = name
+            self.leftDark = dark; self.leftMid = mid; self.leftLight = light
+            self.rightDark = rightDark; self.rightMid = rightMid; self.rightLight = rightLight
+        }
+        var isHetero: Bool { rightMid != nil }
+    }
+
+    static let hairstyles: [(id: String, name: String)] = [
+        ("p1-custom-hair-m1-short-v1",    "蓬松短发"),
+        ("p1-custom-hair-m2-sidepart-v1", "侧分碎发"),
+        ("p1-custom-hair-m3-topknot-v1",  "后脑小束"),
+        ("p1-custom-hair-f1-bob-v1",      "披肩长发"),
+        ("p1-custom-hair-f2-ponytail-v1", "单侧马尾"),
+        ("p1-custom-hair-f3-bun-v1",      "高丸子盘发"),
+        ("hair_neat",                     "利落短发"),
+        ("hair_ponytail",                 "高马尾"),
+        ("hair_twintails",                "活力双马尾"),
+        ("hair_twin_buns",                "双丸子头"),
+        ("hair_bob_cut",                  "齐刘海波波"),
+        ("hair_spiky",                    "热血刺猬发"),
+        ("hair_wolf_cut",                 "狼尾层次发"),
+        ("hair_hime_cut",                 "公主切长发"),
+        ("hair_wavy_long",                "浪漫大波浪"),
+        ("hair_half_up",                  "半扎公主头"),
+        ("hair_curtain",                  "中分括号发"),
+        ("hair_fluffy_curl",              "蓬松羊毛卷"),
+        ("hair_side_braid",               "侧麻花辫"),
+        ("hair_quiff",                    "飒爽背头"),
+    ]
+
+    static let hairColors: [HairColorEntry] = [
+        .init(id: "black",    name: "墨黑",   darkHex: 0x1a1a26, midHex: 0x30323e, lightHex: 0x9098b0),
+        .init(id: "brown",    name: "暖棕",   darkHex: 0x4a2a1a, midHex: 0x7c4a2a, lightHex: 0xecc27a),
+        .init(id: "chestnut", name: "栗红",   darkHex: 0x4e1e16, midHex: 0x86362a, lightHex: 0xf0a070),
+        .init(id: "blonde",   name: "灿金",   darkHex: 0x96641e, midHex: 0xd4a036, lightHex: 0xfff2ac),
+        .init(id: "cream",    name: "奶油金", darkHex: 0x92764c, midHex: 0xd2b682, lightHex: 0xfff8e4),
+        .init(id: "caramel",  name: "焦糖橘", darkHex: 0x843412, midHex: 0xd06020, lightHex: 0xffda92),
+        .init(id: "red",      name: "绯红",   darkHex: 0x6c141c, midHex: 0xb42a2e, lightHex: 0xffa88e),
+        .init(id: "wine",     name: "酒红",   darkHex: 0x521028, midHex: 0x862044, lightHex: 0xec8aa4),
+        .init(id: "pink",     name: "樱粉",   darkHex: 0x923a5c, midHex: 0xd67094, lightHex: 0xffe6f0),
+        .init(id: "coral",    name: "珊瑚粉", darkHex: 0x903832, midHex: 0xd86c58, lightHex: 0xffe2d4),
+        .init(id: "violet",   name: "薰衣紫", darkHex: 0x462872, midHex: 0x764cb4, lightHex: 0xe0d0ff),
+        .init(id: "lavender", name: "淡丁香", darkHex: 0x6c5492, midHex: 0xa68ec8, lightHex: 0xf4eeff),
+        .init(id: "navy",     name: "靛蓝",   darkHex: 0x1e2c5c, midHex: 0x344e92, lightHex: 0xa2c2f4),
+        .init(id: "sky",      name: "天空蓝", darkHex: 0x245e98, midHex: 0x489edc, lightHex: 0xdef6ff),
+        .init(id: "teal",     name: "青绿",   darkHex: 0x185a5a, midHex: 0x2c968e, lightHex: 0xc0f6e6),
+        .init(id: "mint",     name: "薄荷绿", darkHex: 0x3a7a68, midHex: 0x70bc9c, lightHex: 0xe8fff2),
+        .init(id: "emerald",  name: "翡翠绿", darkHex: 0x185228, midHex: 0x2e8842, lightHex: 0xb4eeaa),
+        .init(id: "ash",      name: "雾灰褐", darkHex: 0x483e38, midHex: 0x786a5e, lightHex: 0xded4c6),
+        .init(id: "silver",   name: "银白",   darkHex: 0x6a7088, midHex: 0xa8b0c2, lightHex: 0xffffff),
+        .init(id: "midnight", name: "星夜紫", darkHex: 0x20163e, midHex: 0x3c2c6c, lightHex: 0xb4a4e4),
+    ]
+
+    static let eyes: [EyeEntry] = [
+        .init(id: "p1-custom-face-m1-bright-v1", name: "蔚蓝瞳",   dark: 0x1c2e6a, mid: 0x3a64c4, light: 0x86b4f4),
+        .init(id: "p1-custom-face-m2-calm-v1",   name: "琥珀瞳",   dark: 0x5a3410, mid: 0xc07a20, light: 0xf0c060),
+        .init(id: "p1-custom-face-f1-gentle-v1", name: "翠绿瞳",   dark: 0x1e4a24, mid: 0x3e8a46, light: 0x90d48a),
+        .init(id: "p1-custom-face-f2-clear-v1",  name: "紫晶瞳",   dark: 0x3a2266, mid: 0x7a52c0, light: 0xc0a0f0),
+        .init(id: "eye_teal",                    name: "碧青瞳",   dark: 0x1e3a5c, mid: 0x3e9aa8, light: 0x8ad8d8),
+        .init(id: "eye_ruby",                    name: "绯红瞳",   dark: 0x6c1020, mid: 0xcc2a3c, light: 0xff848e),
+        .init(id: "eye_sakura",                  name: "樱粉瞳",   dark: 0x7c2650, mid: 0xdc6296, light: 0xffb2d4),
+        .init(id: "eye_gold",                    name: "琉璃金瞳", dark: 0x744c0c, mid: 0xdca420, light: 0xffe478),
+        .init(id: "eye_ice",                     name: "冰晶蓝瞳", dark: 0x2c6496, mid: 0x6ec4ee, light: 0xc6f2ff),
+        .init(id: "eye_obsidian",                name: "墨玉瞳",   dark: 0x1e2030, mid: 0x424864, light: 0x8a94b4),
+        .init(id: "eye_hazel",                   name: "栗棕瞳",   dark: 0x542c14, mid: 0x985828, light: 0xd89c60),
+        .init(id: "eye_emerald",                 name: "森翡翠瞳", dark: 0x145c34, mid: 0x28b464, light: 0x86f2aa),
+        .init(id: "eye_orange",                  name: "落日橙瞳", dark: 0x7e300c, mid: 0xe46e22, light: 0xffba6c),
+        .init(id: "eye_silver",                  name: "银月瞳",   dark: 0x485068, mid: 0x8e98b2, light: 0xd4dce8),
+        .init(id: "eye_indigo",                  name: "星海蓝瞳", dark: 0x20246e, mid: 0x4454c8, light: 0x98a8ff),
+        .init(id: "eye_magenta",                 name: "莓果洋红", dark: 0x6c145e, mid: 0xc430a4, light: 0xf890e2),
+        .init(id: "eye_hetero_gold_blue",        name: "金蓝异瞳", dark: 0x744c0c, mid: 0xdca420, light: 0xffe478, rightDark: 0x1c2e6a, rightMid: 0x3a64c4, rightLight: 0x86b4f4),
+        .init(id: "eye_hetero_crimson_cyan",     name: "绯青异瞳", dark: 0x6c1020, mid: 0xcc2a3c, light: 0xff848e, rightDark: 0x2c6496, rightMid: 0x6ec4ee, rightLight: 0xc6f2ff),
+    ]
+
+    /// 16 套独立原创时装（不包含游戏内护甲装备）
+    static let costumes: [(id: String, name: String)] = [
+        ("costume_academy",     "学院制服"),
+        ("costume_sailor",      "海风海军装"),
+        ("costume_mage_robe",   "星夜学院袍"),
+        ("costume_hoodie",      "元气连帽卫衣"),
+        ("costume_overalls",    "森林背带装"),
+        ("costume_kimono",      "樱韵和服"),
+        ("costume_hanfu",       "青玉侠客衫"),
+        ("costume_noble",       "宫廷小礼服"),
+        ("costume_sundress",    "向日葵田园裙"),
+        ("costume_captain",     "航海船长装"),
+        ("costume_bard",        "吟游诗人装"),
+        ("costume_winter_coat", "冬日毛绒大衣"),
+        ("costume_explorer",    "探险家工装"),
+        ("costume_phantom",     "暗夜怪盗装"),
+        ("costume_chef",        "甜点小厨师"),
+        ("costume_idol",        "星梦偶像装"),
+    ]
+
+    static func hairstyleName(_ id: String?) -> String {
+        guard let id else { return "原有" }
+        return hairstyles.first { $0.id == id }?.name ?? id
+    }
+    static func hairColorName(_ id: String?) -> String {
+        guard let id else { return "随体型" }
+        return hairColors.first { $0.id == id }?.name ?? id
+    }
+    static func eyeName(_ id: String?) -> String {
+        guard let id else { return "原有" }
+        return eyes.first { $0.id == id }?.name ?? id
+    }
+    static func costumeName(_ id: String?) -> String {
+        guard let id else { return "随护甲" }
+        if let found = costumes.first(where: { $0.id == id }) { return found.name }
+        switch id {
+        case "blue": return "基础旅装（旧）"
+        case "leatherArmor": return "皮甲（旧）"
+        case "runeArmor": return "符文甲（旧）"
+        case "starlightArmor": return "星辉甲（旧）"
+        case "dragonArmor": return "龙纹甲（旧）"
+        default: return id
+        }
     }
 }
 
@@ -261,6 +507,42 @@ enum PixelHeroAtlas {
             blit(src: src, srcStride: w, sx: 0, sy: 0, w: w, h: h, mirrored: mirrored, dst: &out, dstStride: cell, cellX: 0, cellY: 0, ox: ox, oy: oy)
         }
         return makeImage(out, width: cell, height: cell)
+    }
+
+    /// 工作室卡片单格预览的内存缓存与后台异步烘焙（绝不阻塞主线程，支持 20 发型 / 16 时装流畅切换）
+    private static let cellTileCache: NSCache<NSString, UIImage> = {
+        let c = NSCache<NSString, UIImage>(); c.countLimit = 256; return c
+    }()
+    private static var cellTilePending: [String: [(UIImage?) -> Void]] = [:]
+
+    static func cachedCell(look: PixelHeroLook, facing: Int, column: Int, crop: CGRect? = nil) -> UIImage? {
+        let key = cellCacheKey(look: look, facing: facing, column: column, crop: crop)
+        return cellTileCache.object(forKey: key as NSString)
+    }
+
+    static func prepareCell(look: PixelHeroLook, facing: Int, column: Int, crop: CGRect? = nil, completion: @escaping (UIImage?) -> Void) {
+        let key = cellCacheKey(look: look, facing: facing, column: column, crop: crop)
+        if let hit = cellTileCache.object(forKey: key as NSString) { completion(hit); return }
+        if cellTilePending[key] != nil { cellTilePending[key]?.append(completion); return }
+        cellTilePending[key] = [completion]
+        workQueue.async {
+            let full = cell(look: look, facing: facing, column: column)
+            let final: UIImage? = {
+                guard let full else { return nil }
+                guard let crop, let cg = full.cgImage?.cropping(to: crop) else { return full }
+                return UIImage(cgImage: cg)
+            }()
+            DispatchQueue.main.async {
+                if let final { cellTileCache.setObject(final, forKey: key as NSString) }
+                let callbacks = cellTilePending.removeValue(forKey: key) ?? []
+                callbacks.forEach { $0(final) }
+            }
+        }
+    }
+
+    private static func cellCacheKey(look: PixelHeroLook, facing: Int, column: Int, crop: CGRect?) -> String {
+        let cropTag = crop.map { "\(Int($0.origin.x))_\(Int($0.origin.y))_\(Int($0.width))_\(Int($0.height))" } ?? "full"
+        return "\(look.key)|\(facing)|\(column)|\(cropTag)"
     }
 
     // MARK: 战斗

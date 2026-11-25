@@ -216,8 +216,8 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
 
     // Equipment changes prewarm only the selected two atlases, outside combat.
     // Do not preload the entire armor x appearance x weapon Cartesian product.
-    func prepareP1Equipment(appearance:Int,weapon:String?,armor:String?,retainingCurrent:Bool=false,hair:String?=nil,face:String?=nil) throws {
-        let names=[false,true].map { HeroFrames.atlasName(heroIndex:0,diagonal:$0,appearanceIndex:appearance,weaponID:weapon,armorID:armor,hair:hair,face:face) }
+    func prepareP1Equipment(appearance:Int,weapon:String?,armor:String?,retainingCurrent:Bool=false,hair:String?=nil,hairColor:String?=nil,face:String?=nil) throws {
+        let names=[false,true].map { HeroFrames.atlasName(heroIndex:0,diagonal:$0,appearanceIndex:appearance,weaponID:weapon,armorID:armor,hair:hair,hairColor:hairColor,face:face) }
         var prepared:[String:MTLTexture]=[:]
         for name in names where textures[name]==nil {
             guard let image=HeroFrames.image(named:name)?.cgImage else { throw ShadowLabError.setup("护甲投影素材缺失") }
@@ -231,7 +231,7 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
     }
     private func heroTexture(_ hero: MeadowHeroCaster) throws -> MTLTexture {
         let name = HeroFrames.atlasName(heroIndex: hero.index, diagonal: hero.facing >= 4,
-                                       appearanceIndex: hero.appearanceIndex,weaponID:hero.weaponID,armorID:hero.armorID,hair:hero.hairID,face:hero.faceID)
+                                       appearanceIndex: hero.appearanceIndex,weaponID:hero.weaponID,armorID:hero.armorID,hair:hero.hairID,hairColor:hero.hairColorID,face:hero.faceID)
         if textures[name] == nil, HeroFrames.isGenerated(name), let image = HeroFrames.image(named: name)?.cgImage {
             // 像素人物的图集按外观现烘：没预先上传的（比如没自定义外观的旅人换了武器）第一次用到时补传
             textures[name] = try upload(image)
@@ -553,6 +553,7 @@ struct MeadowHeroCaster {
     let frame: Int
     var phase: CGFloat = 0
     var hairID:String?=nil
+    var hairColorID:String?=nil
     var faceID:String?=nil
     var appearanceIndex: Int = 0
     var weaponID:String?="trainingSword"

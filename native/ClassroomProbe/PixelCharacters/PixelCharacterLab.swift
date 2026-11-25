@@ -14,6 +14,9 @@ struct PixelCharacterLab: View {
     @State private var eyes = "blue"
     @State private var top = "top_traveler"
     @State private var topVariant = "blue"
+    @State private var bottom = "bottom_trousers"
+    @State private var bottomVariant = "dark"
+    @State private var shoesVariant = "brown"
     @State private var skin = "fair"
     @State private var weapon = "weapon_training_sword"
     @State private var animation = "ready"
@@ -52,11 +55,11 @@ struct PixelCharacterLab: View {
     }
 
     private var spec: [String: Any] {
-        var slots = ["hair": hair, "face": face, "top": top, "bottom": "bottom_trousers", "shoes": "shoes_boots"]
+        var slots = ["hair": hair, "face": face, "top": top, "bottom": bottom, "shoes": "shoes_boots"]
         if !weapon.isEmpty { slots["weapon_main"] = weapon }
-        return ["slots": slots, "variants": ["hair": hairColor, "face": eyes, "top": topVariant, "bottom": "dark", "shoes": "brown"], "skin": skin]
+        return ["slots": slots, "variants": ["hair": hairColor, "face": eyes, "top": topVariant, "bottom": bottomVariant, "shoes": shoesVariant], "skin": skin]
     }
-    private var signature: String { [hair, hairColor, face, eyes, top, topVariant, skin, weapon].joined(separator: "|") }
+    private var signature: String { [hair, hairColor, face, eyes, top, topVariant, bottom, bottomVariant, shoesVariant, skin, weapon].joined(separator: "|") }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -105,6 +108,9 @@ struct PixelCharacterLab: View {
                 section("衣服与武器") {
                     picker("上衣", Binding(get: { top }, set: { top = $0; topVariant = "" }), items("top").map { ($0.id, $0.name) })
                     if !variants("top", top).isEmpty { picker("配色", $topVariant, [("", "默认")] + variants("top", top)) }
+                    picker("下装", Binding(get: { bottom }, set: { bottom = $0; bottomVariant = "" }), items("bottom").map { ($0.id, $0.name) })
+                    if !variants("bottom", bottom).isEmpty { picker("下装色", $bottomVariant, [("", "默认")] + variants("bottom", bottom)) }
+                    picker("鞋靴色", $shoesVariant, [("", "默认")] + variants("shoes", "shoes_boots"))
                     picker("武器", $weapon, [("", "空手")] + items("weapon_main").map { ($0.id, $0.name) })
                 }
                 section("预览") {
@@ -201,6 +207,9 @@ struct PixelCharacterLab: View {
         eyes = variants["face"] ?? ""
         top = slots["top"] ?? top
         topVariant = variants["top"] ?? ""
+        bottom = slots["bottom"] ?? "bottom_trousers"
+        bottomVariant = variants["bottom"] ?? ""
+        shoesVariant = variants["shoes"] ?? ""
         skin = spec["skin"] as? String ?? "fair"
         weapon = slots["weapon_main"] ?? ""
         animation = "ready"
