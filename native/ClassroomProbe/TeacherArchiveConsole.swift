@@ -101,7 +101,6 @@ struct TeacherArchiveConsole:View {
             Section("编辑姓名与装扮") {
                 if !players.isEmpty{Picker("角色",selection:$player){ForEach(players){Text($0.name).tag($0.id)}}}
                 HStack{Text("姓名");ClassroomTextField(placeholder:"人物名（最多40字）",text:$name)}
-                Picker("款式",selection:$bodyStyle){Text("林间绿衣").tag("forester");Text("行旅蓝衣").tag("wayfarer")}
                 Picker("时装",selection:$outfit){
                     Text("跟随实际护甲").tag("follow")
                     if outfit != "follow", !PlayerAppearance.costumeOptions.contains(outfit) {
@@ -114,7 +113,7 @@ struct TeacherArchiveConsole:View {
                     ForEach(CharacterCustomizationCatalog.hairstyles,id:\.id){item in Text(item.name).tag(item.id)}
                 }
                 Picker("发色",selection:$hairColor){
-                    Text("随体型").tag("default")
+                    Text("默认").tag("default")
                     ForEach(CharacterCustomizationCatalog.hairColors){item in Text(item.name).tag(item.id)}
                 }
                 Picker("瞳色",selection:$face){

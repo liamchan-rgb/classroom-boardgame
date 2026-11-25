@@ -8,7 +8,7 @@
   - **16 套独立原创非装备时装**（绝不复用游戏内皮甲/符文甲/星辉甲/龙纹甲装备）+ 3 款新程序化下装（百褶裙配长袜、短裤配长袜、阔腿长袴）与多色裤靴：学院制服、海风海军装、星夜学院袍、元气连帽卫衣、森林背带装、樱韵和服、青玉侠客衫、宫廷小礼服、向日葵田园裙、航海船长装、吟游诗人装、冬日毛绒大衣、探险家工装、暗夜怪盗装、甜点小厨师、星梦偶像装，均支持五向与完整行走/战斗持武动画。
 - **数据模型、全端渲染与自定义工作室升级**（`PlayerAppearance.swift`、`PixelHero.swift`、`HeroFrames.swift`、`MeadowShadowRenderer.swift`、`GameScene.swift`、`GameViewController.swift`、`MeadowInventoryViewController.swift`、`MeadowMapSettingsViewController.swift`、`MeadowBattleActorView.swift`、`TeacherCharacterStudio.swift`、`TeacherArchiveConsole.swift`、`PixelCharacterLab.swift`、`CustomAppearanceTests.swift`）：
   - `PlayerAppearance` 新增向后兼容的可选 `hairColor` 字段与独立 `costumeOptions`（旧存档中的护甲外观 ID 仍保留解码与校验兼容，但不再出现在时装选择器中）；全链路（大地图、Metal 投影、战斗、5 款小游戏、行囊、开局头像、存档人物页）同步贯通 `hairColor` 与新外观。
-  - `TeacherCharacterStudio` 重构为「发型 20 / 发色 20 / 瞳色 18 / 时装 16」四分类标签页：发色与瞳色采用零耗时即时色板/3×4 像素眼预览，发型与时装采用后台异步单格烘焙缓存避免主线程卡顿。
+  - `TeacherCharacterStudio` 重构为「发型 20 / 发色 20 / 瞳色 18 / 时装 16」四分类标签页（已移除冗余的「基础体型 / 款式」切换控件，发色默认项统一为「默认」）：发色与瞳色采用零耗时即时色板/3×4 像素眼预览，发型与时装采用后台异步单格烘焙缓存避免主线程卡顿。
 - **实测与未实测边界**：`python3 native/tools/build_pixel_baker.py`（Node 全量无头冒烟校验 20 发型 / 20 发色 / 18 瞳色 / 16 时装五向与战斗帧 + 离线 3×/5× 审图拼图逐项复核）、`scripts/local-build.sh test`（配置校验、`check_custom_appearance.py` 原始资源哈希校验、工具单测、ProbeCore 8/8、GameCore 含新增自定义外观单测全部通过）及 Mac Catalyst Release 编译均通过；Mac 实机运行导出 `TeacherCharacterStudio` 全部 4 个标签页 Retina 窗口快照目视复核并据此放宽了宽发型格裁剪框（测试前后 `ClassroomMeadow`、`ClassroomStage0` 及 `org.personal.classroom.stage0` 偏好设置按 SHA-256 与 `diff -rq` 逐字节还原）。因当前 Mac 处于锁屏状态（`computer-use-mcp` 截屏仅见锁屏界面），实机查验采用 App 内 Retina 窗口快照完成；尚未在真机 iPad、外接 TV 双屏及真实开局大地图/战斗中目视复核 16 套时装的实机行走与出招动画。
 
 ## 课堂小游戏独立 HD-2D 场景重构、宽屏对齐修复与宽战景前景补缝（2026-11-25，基于v0.32.4/build48，未改版本号、未存档）

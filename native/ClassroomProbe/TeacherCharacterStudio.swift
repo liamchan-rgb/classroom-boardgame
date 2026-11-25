@@ -217,12 +217,7 @@ struct TeacherCharacterStudio: View {
     private var quickBar: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 10) {
-                Picker("基础体型", selection: $body_) {
-                    Text("林间体型").tag("forester")
-                    Text("行旅体型").tag("wayfarer")
-                }
-                .pickerStyle(.segmented)
-                .frame(maxWidth: 220)
+                GlassHeader(icon: "wand.and.stars", title: "装扮搭配")
 
                 Spacer(minLength: 4)
 
@@ -374,7 +369,7 @@ struct TeacherCharacterStudio: View {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 84), spacing: 10)], spacing: 10) {
                 // Default option (follow body)
                 hairColorTile(
-                    id: "default", name: "随体型",
+                    id: "default", name: "默认",
                     dark: body_ == "wayfarer" ? 0x6a7088 : 0x4e1e16,
                     mid: body_ == "wayfarer" ? 0xa8b0c2 : 0x86362a,
                     light: body_ == "wayfarer" ? 0xffffff : 0xf0a070

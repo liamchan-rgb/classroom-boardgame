@@ -345,7 +345,7 @@ enum CharacterCustomizationCatalog {
         return hairstyles.first { $0.id == id }?.name ?? id
     }
     static func hairColorName(_ id: String?) -> String {
-        guard let id else { return "随体型" }
+        guard let id else { return "默认" }
         return hairColors.first { $0.id == id }?.name ?? id
     }
     static func eyeName(_ id: String?) -> String {
