@@ -31,6 +31,8 @@ final class TeacherSession: ObservableObject {
     @Published private(set) var state = ProbeState()
     @Published private(set) var message = "就绪"
     @Published private(set) var connectionCount = 0
+    /// iPad: show the students' screen on a connected TV / screen mirroring (off: the TV mirrors the iPad).
+    @Published var publicScreenOn = true
     @Published private(set) var registrationStatus = "正在准备公开画面。"
     @Published private(set) var importReport = "尚未导入PPTX。"
     @Published var showNotes = false

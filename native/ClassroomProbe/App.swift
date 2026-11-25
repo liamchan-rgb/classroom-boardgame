@@ -259,20 +259,57 @@ final class ClassroomAppDelegate: NSObject, UIApplicationDelegate {
 @objc(ClassroomPublicSceneDelegate)
 final class PublicSceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
+    private weak var windowScene: UIWindowScene?
+    /// The TV scenes that are connected now (the iPad 公开屏 switch shows / hides / rebuilds their windows).
+    static let live = NSHashTable<PublicSceneDelegate>.weakObjects()
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options: UIScene.ConnectionOptions) {
         guard let windowScene = scene as? UIWindowScene else { return }
-        let created = UIWindow(windowScene: windowScene)
-        created.rootViewController = UIHostingController(rootView: PublicSurface(model: TeacherSession.shared.display,game:TeacherSession.shared.game))
-        created.isHidden = false
-        window = created
+        self.windowScene = windowScene
+        Self.live.add(self)
         TeacherSession.shared.setConnection(id: session.persistentIdentifier, connected: true)
+        if TeacherSession.shared.publicScreenOn { show() }
     }
     func sceneDidDisconnect(_ scene: UIScene) {
+        Self.live.remove(self)
         TeacherSession.shared.setConnection(id: scene.session.persistentIdentifier, connected: false)
         window?.isHidden = true
         window = nil
     }
+    /// A fresh window with the public surface, filling the TV (the old one, if any, is dropped).
+    func show() {
+        guard let windowScene else { return }
+        window?.isHidden = true
+        let created = UIWindow(windowScene: windowScene)
+        created.frame = windowScene.coordinateSpace.bounds
+        created.backgroundColor = .black
+        created.rootViewController = UIHostingController(rootView: PublicSurface(model: TeacherSession.shared.display,game:TeacherSession.shared.game).ignoresSafeArea())
+        created.isHidden = false
+        window = created
+    }
+    /// Off: the TV goes back to the system's mirror of the iPad.
+    func hide() { window?.isHidden = true; window = nil }
+    static func apply(_ on: Bool) { for d in live.allObjects { if on { d.show() } else { d.hide() } } }
 }
+
+#if !targetEnvironment(macCatalyst)
+/// iPad counterpart of the Mac 公开窗口 button: with a TV / screen mirroring on, shows the students' screen on it
+/// (on) or lets the TV mirror the iPad (off); pressing it again rebuilds the TV window.
+struct IPadPublicScreenButton: View {
+    @ObservedObject var session: TeacherSession
+    var connected: Bool
+    var body: some View {
+        Button {
+            if session.publicScreenOn && connected { session.publicScreenOn = false } else { session.publicScreenOn = true }
+            PublicSceneDelegate.apply(session.publicScreenOn)
+        } label: {
+            Label(!connected ? "未接屏" : session.publicScreenOn ? "公开屏" : "镜像中",
+                  systemImage: !connected ? "tv.slash" : session.publicScreenOn ? "tv.fill" : "rectangle.on.rectangle")
+        }
+        .disabled(!connected)
+        .help("接上电视或打开屏幕镜像后：开＝电视显示学生画面，关＝电视镜像 iPad")
+    }
+}
+#endif
 
 extension UIResponder {
     private static weak var found:UIResponder?

@@ -34,6 +34,8 @@ struct MeadowTeacherDashboard:View {
                 #if targetEnvironment(macCatalyst)
                 MacPublicWindowButton(connected:game.externalConnected)
                 MacMirrorWarning()
+                #else
+                IPadPublicScreenButton(session:TeacherSession.shared,connected:game.externalConnected)
                 #endif
                 if let c=game.campaign,!inBattle {
                     GlassChip(icon:"figure.walk.motion",text:"\(MeadowMovementRules.steps(c.movementRemaining))/\(MeadowMovementRules.steps(c.movementCapacity))")

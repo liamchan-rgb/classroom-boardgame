@@ -42,6 +42,8 @@ private struct TeacherBookConsole:View {
                 #if targetEnvironment(macCatalyst)
                 MacPublicWindowButton(connected:game.externalConnected)
                 MacMirrorWarning()
+                #else
+                IPadPublicScreenButton(session:TeacherSession.shared,connected:game.externalConnected)
                 #endif
                 Spacer()
                 ClassroomToolbarTools(game:game,prepare:{notesFocused=false})
