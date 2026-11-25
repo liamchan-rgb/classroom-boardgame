@@ -1,3 +1,11 @@
+## 大地图 HD-2D 手绘地标与场景道具补齐（第 2 批 12 件，全套 33 件；2026-11-25，基于v0.32.4/build48，未改版本号、未存档）
+
+生图配额重置后，按新省额规则（每次严格单次出图 + 2×2 纯白底图集打包，共仅消耗 **3 次**生图调用）补齐上轮暂缓的全部 12 件有机手绘地标与场景道具，以独立 `.imageset` 入库 `native/ClassroomProbe/Resources/Assets.xcassets/`（未改动任何 `meadow-port-provenance.json` 锁定原文件，暂未接入大地图代码逻辑，待审图确认后接入）：
+- **2 套休息/路标节点新变体**（`512×512` RGBA，与原 `NodeWaystone` 凑齐 3 套蓝/暖灯休息节点）：`NodeShrine`（苔顶木石林间神龛与暖石灯）、`NodePavilion`（四柱木石休息亭与蓝旗吊灯）。
+- **4 套水景、桥梁与边界架构件**（`512–644px` RGBA）：`MapPond`（青碧莲叶林间泉池与苔石芦苇）、`MapBridgeWood`（绳栏拱形橡木人行桥）、`MapCliffTerrace`（草顶野花层岩边界断崖墙）、`MapPropStoneArch`（藤蔓苔藓古石拱门）。
+- **6 套路边与林间微景道具**（`252–440px` RGBA）：`MapPropSignpost`（双木箭路牌）、`MapPropLanternPost`（铁木吊灯柱，已精调阈值消除左侧轮廓外微黄光晕）、`MapPropCampfire`（石圈木柴营火，火焰画风对齐 `MiniGameBrazier`）、`MapPropRuinedPillar`（金叶纹古遗迹断柱，对齐 `NodeBossSanctum`）、`MapPropSupplies`（橡木桶/货箱/麻袋/盘绳补给堆，已镂空绳圈内白底）、`MapLogMushrooms`（空心苔藓倒木、树桩与红伞蘑菇）。
+- **实测与未实测边界**：全部 12 件切图抠图后均在真实草地（`MeadowGround`）/ 深底 / 浅底三行拼图上逐张目视复核零白边、零孤像素与镂空透草；`python3 native/tools/generate_xcode_project.py`、`validate_xcode_project.py`、`scripts/local-build.sh test`（配置、`check_custom_appearance.py` 原始资源哈希校验、工具单测、ProbeCore 8/8、GameCore 73/73）与 `MAC_OPEN=0 scripts/local-build.sh mac`（资产目录编译入 `ClassroomProbe.app`，零资产告警）全部通过。本轮仅完成资产入库与离线拼图品控，尚未接入 `RandomMap.swift` / `LivingWorld.swift` / `ShadowLabShaders.metal` 及实机大地图渲染。
+
 ## 大地图 HD-2D 像素风美术资源包扩充（2026-11-25，基于v0.32.4/build48，未改版本号、未存档）
 
 针对大地图单一绿草与节点建筑高度重复的问题，按既有 `NodeCombatOutpost` / `NodeRewardCache` / `NodeBossSanctum` / `OakA` / `Flowers` / `MeadowGround` 的 32-bit HD-2D 像素簇、左上暖阳光照与前向微俯视 3/4 透视标准，先完成并入库 **21 套全新独立大地图美术资产**（均以新建 `.imageset` 入库 `native/ClassroomProbe/Resources/Assets.xcassets/`，未改动任何 `meadow-port-provenance.json` 锁定原文件，暂未接入大地图生成/着色器逻辑，待审图确认后接入）：
