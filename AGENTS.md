@@ -1,3 +1,17 @@
+## 大地图 HD-2D 像素风美术资源包扩充（2026-11-25，基于v0.32.4/build48，未改版本号、未存档）
+
+针对大地图单一绿草与节点建筑高度重复的问题，按既有 `NodeCombatOutpost` / `NodeRewardCache` / `NodeBossSanctum` / `OakA` / `Flowers` / `MeadowGround` 的 32-bit HD-2D 像素簇、左上暖阳光照与前向微俯视 3/4 透视标准，先完成并入库 **21 套全新独立大地图美术资产**（均以新建 `.imageset` 入库 `native/ClassroomProbe/Resources/Assets.xcassets/`，未改动任何 `meadow-port-provenance.json` 锁定原文件，暂未接入大地图生成/着色器逻辑，待审图确认后接入）：
+- **6 套节点地标新变体**（`512×512` RGBA，使战斗/宝箱/Boss 三大核心节点各由 1 套扩充至 3 套独立建筑并保持红/绿/紫三色玩法辨识度）：
+  - 战斗节点：`NodeCombatTower`（石木哨堡）、`NodeCombatDen`（岩穴兽窟与红旗木栅）
+  - 宝箱补给节点：`NodeRewardWagon`（绿篷商队马车与金箱提灯）、`NodeRewardCottage`（林间苔顶补给木屋）
+  - Boss 圣殿节点：`NodeBossAltar`（双金纹方尖碑与悬浮紫晶祭坛）、`NodeBossRuins`（藤蔓古遗迹石门与双紫焰火盆）
+- **10 套季节/生态植被与岩石变体**（RGBA，保留原树干与左上受光方向，精准重映射树冠与花瓣色阶并清理孤立噪点）：
+  - 树与灌木：`MapTreeAutumnOak`（金琥珀秋橡）、`MapTreeAutumnMaple`（枫红阔叶树）、`MapTreeBlossom`（樱粉花树）、`MapTreePineAlpine`（冷青高山松）、`MapShrubAutumn`（金褐红果灌木丛）
+  - 多色花丛与岩石：`MapFlowersBlue`（蓝铃花）、`MapFlowersCrimson`（绯红虞美人）、`MapFlowersLavender`（薰衣紫花丛）、`MapRockSlate`（冷青苔石崖，适配 Boss 区）、`MapRockAutumn`（金秋苔岩崖，已剔除孤立右下噪点）
+- **2 套微景/状态组件**：`MapGroundStonePlaza`（立体斜角苔藓石板广场补丁，适配节点底座铺垫）、`MapPropVictoryBanner`（复用原 `Banner` 旗面无痕延展的立式蓝金胜利旗，适配通关节点插旗表现）。
+- **3 套无缝平铺季节/地貌草地底图**（`1024×1024` RGB，2×2 拼缝实查零接缝）：`MapGroundAutumn`（秋日金草+落叶）、`MapGroundBlossom`（春日翡翠草+落樱花瓣）、`MapGroundSanctum`（圣殿冷青苔草+碎石）。
+- **实测与未实测边界**：全部 21 件资产均已生成真实草地（`MeadowGround`）/ 深色底 / 浅色底三行拼图并逐张目视复核零白边、零孤像素与风格一致性；`python3 native/tools/generate_xcode_project.py`、`validate_xcode_project.py`、`scripts/local-build.sh test`（配置、`check_custom_appearance.py` 原始资源哈希校验、工具单测、ProbeCore 8/8、GameCore 73/73）及 `MAC_OPEN=0 scripts/local-build.sh mac`（Xcode 资产目录编译入 `ClassroomProbe.app`）全部通过。因本轮生图配额在完成 6 套核心地标后触发 `429 RESOURCE_EXHAUSTED`（约 4h44m 后重置），为坚持画质统一底线，其余需复杂有机手绘的道具（休息亭/林间神龛、林间池塘、拱形木桥、路牌/灯柱/营火）本轮未用简化几何像素凑数，待额度恢复后补齐；本轮仅完成资产入库与离线拼图品控，尚未接入 `RandomMap.swift` / `LivingWorld.swift` / `ShadowLabShaders.metal` 及实机大地图渲染。
+
 ## 课堂小游戏计分联动、擂台闪卡双人记分、地图防误触与边界缺陷修复（2026-11-25，基于v0.32.4/build48，未改版本号、未存档）
 
 按课堂实测审计与用户确认的规则口径，全面修复课堂小游戏核心判定、答题联动、地图防误触与节奏问题：
