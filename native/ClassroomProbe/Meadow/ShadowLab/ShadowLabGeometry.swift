@@ -35,6 +35,7 @@ enum ShadowLabAsset: String {
     case tent = "CampTent", fence = "Fence"
     case rockLow = "RockLow", rockHigh = "RockHigh", rockSmall = "RockSmall"
     case rockSlate = "MapRockSlate", rockAutumn = "MapRockAutumn", cliffTerrace = "MapCliffTerrace"
+    case cliffCorner = "MapCliffCorner", hillMound = "MapHillMound", waterfall = "MapWaterfall"
     case shrub = "Shrub", shrubAutumn = "MapShrubAutumn"
     case flowers = "Flowers", flowersBlue = "MapFlowersBlue", flowersCrimson = "MapFlowersCrimson", flowersLavender = "MapFlowersLavender"
     case banner = "Banner", victoryBanner = "MapPropVictoryBanner"
@@ -43,7 +44,8 @@ enum ShadowLabAsset: String {
     case rewardCache = "NodeRewardCache", rewardWagon = "NodeRewardWagon", rewardCottage = "NodeRewardCottage"
     case waystone = "NodeWaystone", shrine = "NodeShrine", pavilion = "NodePavilion"
     case groundStonePlaza = "MapGroundStonePlaza", pond = "MapPond", bridgeWood = "MapBridgeWood"
-    case stoneArch = "MapPropStoneArch", signpost = "MapPropSignpost", lanternPost = "MapPropLanternPost"
+    case lakeIslet = "MapLakeIslet", woodPier = "MapWoodPier", lakeFlora = "MapLakeFlora", stoneStairs = "MapStoneStairs"
+    case stoneArch = "MapPropStoneArch", signpost = "MapPropSignpost", lanternPost = "MapPropLanternPost", trailFence = "MapTrailFence"
     case campfire = "MapPropCampfire", ruinedPillar = "MapPropRuinedPillar", supplies = "MapPropSupplies", logMushrooms = "MapLogMushrooms"
 
     var isNodeLandmark: Bool {
@@ -64,7 +66,14 @@ enum ShadowLabAsset: String {
         }
     }
     var isShrub: Bool { self == .shrub || self == .shrubAutumn }
-    var isGroundDecal: Bool { self == .groundStonePlaza || self == .pond || self == .bridgeWood }
+    var isGroundDecal: Bool {
+        switch self {
+        case .groundStonePlaza, .pond, .bridgeWood, .lakeIslet, .woodPier, .lakeFlora, .stoneStairs:
+            return true
+        default:
+            return false
+        }
+    }
     var casterKind: Float {
         switch self {
         case .tree, .oakB, .pines, .treeAutumnOak, .treeAutumnMaple, .treeBlossom, .treePineAlpine: return 0
@@ -74,12 +83,12 @@ enum ShadowLabAsset: String {
              .bossSanctum, .bossAltar, .bossRuins,
              .rewardCache, .rewardWagon, .rewardCottage,
              .waystone, .shrine, .pavilion, .stoneArch, .ruinedPillar: return 3
-        case .fence, .signpost, .lanternPost: return 4
-        case .rockLow, .rockHigh, .rockSmall, .rockSlate, .rockAutumn, .cliffTerrace, .logMushrooms: return 5
+        case .fence, .signpost, .lanternPost, .trailFence: return 4
+        case .rockLow, .rockHigh, .rockSmall, .rockSlate, .rockAutumn, .cliffTerrace, .cliffCorner, .hillMound, .waterfall, .logMushrooms: return 5
         case .shrub, .shrubAutumn, .campfire, .supplies: return 6
         case .flowers, .flowersBlue, .flowersCrimson, .flowersLavender: return 7
         case .banner, .victoryBanner: return 8
-        case .groundStonePlaza, .pond, .bridgeWood: return 9
+        case .groundStonePlaza, .pond, .bridgeWood, .lakeIslet, .woodPier, .lakeFlora, .stoneStairs: return 9
         }
     }
     var isTree: Bool { casterKind == 0 }
@@ -100,13 +109,14 @@ enum ShadowLabAsset: String {
              .waystone, .shrine, .pavilion: return 0.08
         case .hero: return 0.125
         case .tent: return 0.10
-        case .rockLow, .rockHigh, .rockSmall, .rockSlate, .rockAutumn: return 0.10
-        case .cliffTerrace: return 0.08
+        case .rockLow, .rockHigh, .rockSmall, .rockSlate, .rockAutumn, .hillMound: return 0.10
+        case .cliffTerrace, .cliffCorner, .waterfall: return 0.08
         case .fence, .stoneArch, .supplies, .logMushrooms: return 0.08
+        case .trailFence: return 0.06
         case .campfire: return 0.12
         case .signpost, .lanternPost, .ruinedPillar, .victoryBanner: return 0.05
         case .shrub, .shrubAutumn, .flowers, .flowersBlue, .flowersCrimson, .flowersLavender, .banner: return 0.04
-        case .groundStonePlaza, .pond, .bridgeWood: return 0.50
+        case .groundStonePlaza, .pond, .bridgeWood, .lakeIslet, .woodPier, .lakeFlora, .stoneStairs: return 0.50
         }
     }
 }

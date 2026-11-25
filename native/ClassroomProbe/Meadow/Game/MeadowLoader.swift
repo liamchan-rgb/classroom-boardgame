@@ -25,19 +25,35 @@ enum MeadowLoader {
                 let definition = supplied ?? SceneDefinition.load()
                 let network = TrailNetwork(roads: definition.roads, patrolStart: definition.startNodeID)
                 let nodePoints = definition.props.filter { $0.nodeID != nil }.map { CGPoint(x: $0.x, y: $0.y + 26) }
-                let brook = MeadowRoadMask.findBrookCrossing(network: network, nodePoints: nodePoints, seed: definition.seed)
-                let mask = MeadowRoadMask.makeWithBrook(network: network, bounds: definition.worldBounds, brook: brook) {
-                    report(0.05 + $0 * 0.22, "准备道路")
+                let cobbleCenters: [(point: CGPoint, radius: CGFloat)] = definition.props.compactMap { p in
+                    guard p.nodeID != nil else { return nil }
+                    if p.asset.hasPrefix("NodeBoss") { return (CGPoint(x: p.x, y: p.y + 20), 175) }
+                    if p.asset == "CampTent" || p.asset == "NodeCombatTower" { return (CGPoint(x: p.x, y: p.y + 18), 125) }
+                    return nil
                 }
-                let props = definition.props
-                    + LivingWorld.worldDioramaProps(definition: definition, network: network, bridge: brook)
+                let water = MeadowRoadMask.planWaterSystem(network: network, nodePoints: nodePoints, mapHeight: definition.mapHeight ?? 720, seed: definition.seed)
+                let mask = MeadowRoadMask.makeWithWater(network: network, bounds: definition.worldBounds, water: water, cobbleCenters: cobbleCenters) {
+                    report(0.05 + $0 * 0.22, "准备道路与水系")
+                }
+                // Filter out any static non-landmark props inside the river/lake footprint,
+                // and skip redundant standalone MapPonds when they sit too close to the connected river/lake.
+                let safeBaseProps = definition.props.filter { prop in
+                    if prop.nodeID != nil { return true }
+                    let pt = CGPoint(x: prop.x, y: prop.y)
+                    if prop.asset == "MapPond", water.lake != nil, water.isNearWater(pt, margin: 145) { return false }
+                    return !water.isNearWater(pt, margin: 16)
+                }
+                let props = safeBaseProps
+                    + LivingWorld.worldDioramaProps(definition: definition, baseProps: safeBaseProps, network: network, water: water)
                     + LivingWorld.meadowDetails(definition: definition, network: network)
-                    + LivingWorld.roadsideGrass(network: network, seed: definition.seed)
+                    + LivingWorld.roadsideGrass(network: network, seed: definition.seed, water: water)
                 var images: [String: CGImage] = [:]
                 var textures: [String: SKTexture] = [:]
                 let names = Set(props.map(\.asset)
                     + ["MeadowGround", "MapGroundAutumn", "MapGroundBlossom", "MapGroundSanctum",
-                       "MapGroundStonePlaza", "MapPropVictoryBanner", "Banner", "OakA", "Flowers"]
+                       "MapGroundStonePlaza", "MapPropVictoryBanner", "Banner", "OakA", "Flowers",
+                       "MapWaterfall", "MapLakeIslet", "MapWoodPier", "MapLakeFlora", "MapStoneStairs",
+                       "MapHillMound", "MapCliffTerrace", "MapCliffCorner", "MapTrailFence", "MapBridgeWood"]
                     + HeroFrames.atlasNames).sorted()
                 for (index, name) in names.enumerated() {
                     guard let image = (HeroFrames.isGenerated(name) ? HeroFrames.image(named: name) : UIImage(named: name))?.cgImage else { throw ShadowLabError.setup("素材缺失：\(name)") }

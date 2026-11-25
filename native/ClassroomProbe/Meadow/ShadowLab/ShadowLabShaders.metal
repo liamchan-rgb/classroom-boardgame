@@ -207,34 +207,85 @@ fragment float4 meadowGroundFragment(LabRaster in [[stage_in]], constant LabUnif
     float2 maskUV = (p - float2(-160, -220)) / float2(1600, settings.z > 0 ? settings.z : 1160);
     float4 mask = roadMask.sample(maskSampler, maskUV);
     float edge = meadowNoise(p * 0.23) * 0.58 + meadowNoise(p * 0.73) * 0.28 + meadowHash(floor(p * 1.6)) * 0.14;
-    float coverage = smoothstep(0.10 + edge * 0.15, 0.58 + edge * 0.12, mask.r) * settings.x;
+    float coverage = smoothstep(0.10 + edge * 0.15, 0.56 + edge * 0.12, mask.r) * settings.x;
     float patches = meadowNoise(p * 0.045), fine = meadowHash(floor(p * 1.5));
-    float3 soil = mix(float3(0.37, 0.32, 0.19), float3(0.59, 0.51, 0.32), patches * 0.64 + fine * 0.25);
-    soil *= 1 - mask.g * (0.035 + meadowNoise(p * 0.11) * 0.045);
-    float2 stoneCell = floor(p * 0.48), spot = fract(p * 0.48) - 0.5;
-    float stones = step(0.95, meadowHash(stoneCell)) * (1 - smoothstep(0.08, 0.25, length(spot)));
-    soil = mix(soil, float3(0.53, 0.50, 0.37), stones * 0.40);
+
+    // Rich adventure trail: warm golden-ochre packed earth + mossy kerb shoulder + stepping stones + weathered cobblestones
+    float3 soil = mix(float3(0.41, 0.35, 0.21), float3(0.64, 0.55, 0.34), patches * 0.64 + fine * 0.25);
+    float cobbleW = smoothstep(0.50, 0.72, mask.g);
+    float ruralWear = min(mask.g / 0.45, 1.0) * (1.0 - cobbleW);
+    soil *= 1.0 - ruralWear * (0.04 + meadowNoise(p * 0.11) * 0.045);
+
+    // Darker organic road shoulder & scattered flat stepping pebbles along rural paths
+    float shoulder = smoothstep(0.06, 0.30, coverage) * (1.0 - smoothstep(0.32, 0.68, coverage));
+    soil = mix(soil, float3(0.28, 0.26, 0.16), shoulder * 0.36);
+    float2 stoneCell = floor(p * 0.44), spot = fract(p * 0.44) - 0.5;
+    float stones = step(0.92, meadowHash(stoneCell)) * (1.0 - smoothstep(0.10, 0.30, length(spot)));
+    soil = mix(soil, float3(0.57, 0.54, 0.41), stones * 0.46);
+    // Occasional larger mossy stepping flagstones along rural roads
+    float2 stepGrid = p * 0.085;
+    float2 sgCell = floor(stepGrid), sgFrac = fract(stepGrid) - 0.5;
+    float2 sgJitter = float2(meadowHash(sgCell + 3.1), meadowHash(sgCell + 19.7)) - 0.5;
+    float stepFlag = step(0.58, meadowHash(sgCell + 7.4)) * (1.0 - smoothstep(0.16, 0.31, length((sgFrac - sgJitter * 0.32) * float2(1.0, 1.35))));
+    soil = mix(soil, float3(0.54, 0.51, 0.42), stepFlag * (1.0 - cobbleW) * coverage * 0.48);
+
+    // Procedural soft-painterly weathered cobblestone paving near Sanctums, Fortresses, Camp & Bridges
+    if (cobbleW > 0.01 && coverage > 0.05) {
+        float2 cuv = p * float2(0.115, 0.145);
+        float rowShift = fract(floor(cuv.y) * 0.5) * 0.5;
+        float2 tileP = float2(cuv.x + rowShift, cuv.y);
+        float2 cid = floor(tileP), cf = fract(tileP);
+        float2 wobble = (float2(meadowNoise(p * 0.26), meadowNoise(p * 0.26 + 11.3)) - 0.5) * 0.14;
+        float2 cfw = clamp(cf + wobble, 0.0, 1.0);
+        float edgeDist = min(min(cfw.x, 1.0 - cfw.x), min(cfw.y, 1.0 - cfw.y));
+        float mortar = 1.0 - smoothstep(0.05, 0.13, edgeDist);
+        float tone = meadowHash(cid * 1.7 + 4.3);
+        float3 cobbleBase = mix(float3(0.46, 0.44, 0.39), float3(0.62, 0.58, 0.48), tone);
+        // Subtle upper-left sunlit bevel per stone
+        float bevel = smoothstep(0.10, 0.24, cfw.x) * (1.0 - smoothstep(0.76, 0.90, cfw.x))
+                    + (1.0 - smoothstep(0.08, 0.34, cfw.y)) * 0.14 - smoothstep(0.72, 0.92, cfw.y) * 0.14;
+        cobbleBase *= (0.88 + bevel * 0.16);
+        float3 mortarCol = mix(float3(0.24, 0.25, 0.17), float3(0.32, 0.36, 0.18), meadowNoise(p * 0.18));
+        float3 paved = mix(cobbleBase, mortarCol, mortar * 0.72);
+        soil = mix(soil, paved, cobbleW * smoothstep(0.18, 0.62, coverage) * 0.86);
+    }
+
     float sparse = smoothstep(0.42, 0.72, meadowNoise(p * 0.31)) * (1 - coverage * 0.78);
-    float roadAlpha = coverage * (0.78 + patches * 0.10) * (1 - sparse * 0.70);
+    float roadAlpha = coverage * (0.82 + patches * 0.10) * (1 - sparse * 0.65);
     float3 terrain = mix(grass, soil, roadAlpha);
 
-    // Sparkling forest brook encoded in roadMask.b (paired with MapBridgeWood over the road crossing)
-    float brookRaw = mask.b * settings.x;
-    if (brookRaw > 0.02) {
-        float bankEdge = smoothstep(0.06 + edge * 0.12, 0.34 + edge * 0.08, brookRaw);
-        float waterMask = smoothstep(0.34 + edge * 0.09, 0.58 + edge * 0.06, brookRaw);
-        float3 wetBank = mix(float3(0.22, 0.25, 0.14), float3(0.42, 0.39, 0.29), smoothstep(0.38, 0.76, meadowNoise(p * 0.38)));
-        terrain = mix(terrain, wetBank, bankEdge * (1.0 - waterMask * 0.55) * 0.76);
-        float flow = u.sunTime.w * 8.5;
-        float ripple1 = meadowNoise(float2(p.x * 0.16 + sin(p.y * 0.09) * 1.4, p.y * 0.10 - flow * 0.24));
-        float ripple2 = meadowNoise(float2(p.x * 0.28, p.y * 0.18 - flow * 0.38 + 7.1));
-        float depth = smoothstep(0.40, 0.92, brookRaw);
-        float3 shallowCol = float3(0.21, 0.49, 0.52);
-        float3 deepCol = float3(0.11, 0.31, 0.39);
-        float3 water = mix(shallowCol, deepCol, depth * 0.72);
-        float shimmer = smoothstep(0.68, 0.89, ripple1 * 0.6 + ripple2 * 0.4);
-        water = mix(water, float3(0.76, 0.90, 0.86), shimmer * 0.42);
-        terrain = mix(terrain, water, waterMask * 0.92);
+    // Connected Valley Water System (mountain waterfall plunge -> winding river -> woodland lake)
+    // Soft low-saturation painterly tones harmonized to MeadowGround so pixel heroes always pop cleanly!
+    float waterRaw = mask.b * settings.x;
+    if (waterRaw > 0.02) {
+        float shoreNoise = meadowNoise(p * 0.18) * 0.6 + meadowNoise(p * 0.52) * 0.4;
+        float sandMask = smoothstep(0.04 + shoreNoise * 0.10, 0.24 + shoreNoise * 0.08, waterRaw);
+        float wetRimMask = smoothstep(0.20 + shoreNoise * 0.08, 0.34 + shoreNoise * 0.06, waterRaw);
+        float waterMask = smoothstep(0.30 + shoreNoise * 0.08, 0.48 + shoreNoise * 0.05, waterRaw);
+
+        // Warm sandy-pebble beach transitioning to wet mossy shore stones
+        float3 sandCol = mix(float3(0.54, 0.49, 0.34), float3(0.65, 0.59, 0.42), meadowNoise(p * 0.12));
+        float3 wetBank = mix(float3(0.27, 0.31, 0.20), float3(0.44, 0.43, 0.34), smoothstep(0.35, 0.78, meadowNoise(p * 0.34)));
+        terrain = mix(terrain, sandCol, sandMask * (1.0 - waterMask * 0.8) * (1.0 - roadAlpha * 0.65) * 0.78);
+        terrain = mix(terrain, wetBank, wetRimMask * (1.0 - waterMask * 0.75) * 0.68);
+
+        // Calm painterly seafoam-turquoise shallows deepening to serene woodland teal lake heart
+        float flow = u.sunTime.w * 7.5;
+        float ripple1 = meadowNoise(float2(p.x * 0.13 + sin(p.y * 0.06 + u.sunTime.w * 0.6) * 1.3, p.y * 0.08 - flow * 0.22));
+        float ripple2 = meadowNoise(float2(p.x * 0.24 - flow * 0.08, p.y * 0.15 - flow * 0.34 + 7.1));
+        float depth = smoothstep(0.36, 0.90, waterRaw);
+        float3 shallowCol = float3(0.24, 0.52, 0.51);
+        float3 midCol = float3(0.16, 0.41, 0.45);
+        float3 deepCol = float3(0.10, 0.29, 0.36);
+        float3 water = mix(mix(shallowCol, midCol, smoothstep(0.0, 0.55, depth)), deepCol, smoothstep(0.45, 1.0, depth));
+
+        // Gentle sunlit water ripples & subtle shallow shore foam glint
+        float caustic = smoothstep(0.64, 0.88, ripple1 * 0.58 + ripple2 * 0.42);
+        water = mix(water, float3(0.72, 0.87, 0.84), caustic * (0.28 + (1.0 - depth) * 0.16));
+        float shoreFoam = smoothstep(0.30, 0.42, waterRaw) * (1.0 - smoothstep(0.42, 0.55, waterRaw)) * smoothstep(0.42, 0.75, ripple2);
+        water = mix(water, float3(0.80, 0.90, 0.87), shoreFoam * 0.38);
+
+        terrain = mix(terrain, water, waterMask * 0.94);
     }
 
     float cloud = smoothstep(0.25, 0.76, meadowNoise((p - float2(u.sunTime.w * 14, u.sunTime.w * 5)) * 0.0065));

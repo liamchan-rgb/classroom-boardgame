@@ -133,8 +133,9 @@ public enum MeadowMapGenerator {
         "Shrub", "MapShrubAutumn",
         "RockLow", "RockHigh", "RockSmall", "MapRockSlate", "MapRockAutumn",
         "Flowers", "MapFlowersBlue", "MapFlowersCrimson", "MapFlowersLavender",
-        "MapPond", "MapBridgeWood", "MapCliffTerrace", "MapPropStoneArch",
-        "MapPropSignpost", "MapPropLanternPost", "MapPropCampfire",
+        "MapPond", "MapBridgeWood", "MapCliffTerrace", "MapCliffCorner", "MapHillMound",
+        "MapWaterfall", "MapLakeIslet", "MapWoodPier", "MapLakeFlora", "MapStoneStairs", "MapTrailFence",
+        "MapPropStoneArch", "MapPropSignpost", "MapPropLanternPost", "MapPropCampfire",
         "MapPropRuinedPillar", "MapPropSupplies", "MapLogMushrooms",
         "MapGroundStonePlaza", "MapPropVictoryBanner"
     ]

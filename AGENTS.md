@@ -1,3 +1,16 @@
+## 大地图山谷地貌、瀑布-河流-湖泊水系与石板冒险路升级（2026-11-25，基于v0.32.4/build48，未改版本号、未存档）
+
+在保持游戏原有柔和低饱和手绘像素风（避免厚重黑描边与像素英雄冲突）前提下，落实分层山谷大地图结构，新增 8 件模块化地形/水景资产（仅消耗 **2 次**单次 2×2 纯白底图集生图）并全面升级 Metal 水系/道路着色器与 SpriteKit 山谷置景（保持 `generatorVersion = 3` 兼容旧存档）：
+- **8 件新地形与水景资产入库**（`native/ClassroomProbe/Resources/Assets.xcassets/`，均独立 `.imageset`，零改动 `meadow-port-provenance.json` 锁定原文件，已逐张在真实草地/深底/浅底拼图目视验收）：
+  - 山谷与水景：`MapWaterfall`（苔崖白沫瀑布）、`MapLakeIslet`（湖心苔岩小岛）、`MapWoodPier`（湖畔橡木码头）、`MapLakeFlora`（睡莲荷叶芦苇丛）。
+  - 地形起伏与路边细节：`MapHillMound`（柔和手绘草丘）、`MapCliffCorner`（弧形草顶崖角）、`MapStoneStairs`（古风苔石阶梯）、`MapTrailFence`（三柱绳绑木栅栏）。
+- **瀑布 → 蜿蜒溪河 → 双瓣林间湖泊连通水系与道路质感升级**（`MeadowRoadMask.swift`、`ShadowLabShaders.metal`、`ShadowLabGeometry.swift`、`SceneDefinition.swift`、`RandomMap.swift`）：
+  - `MeadowRoadMask.planWaterSystem` 自动在北缘崖壁布置瀑布与跌水潭、在开阔无建筑区规划双瓣有机湖泊，生成避让全部地标建筑（`> 104px`）的蜿蜒连贯河流并识别跨河路口（最多 2 处），在 `roadMask` 中复用 `R`（道路）/ `G`（乡村车辙土路 vs 节点/桥口风化石板路）/ `B`（瀑布潭-河道-湖泊深度场）。
+  - `meadowGroundFragment` 实现柔和低饱和水色分层（暖沙卵石滩 → 湿润苔岸 → 浅碧水带 → 林间青碧湖心与微动波光），以及乡村土路镶边卵石踩石与营地/哨堡/圣殿/桥口程序化风化石板路面；`SceneDefinition.Prop` 新增可选 `rotation` 使 `MapBridgeWood` 顺应跨河方向微倾。
+- **连续崖壁、林冠框景与成簇植被加密**（`LivingWorld.swift`、`MeadowLoader.swift`）：
+  - 北缘连续交错排布 `MapCliffTerrace` / `MapCliffCorner` / `MapHillMound` 并在崖顶上方铺设 3 排高地林冠框景（消除崖上裸草带），瀑布底端无缝落入跌水潭；湖区布置湖心岛、伸入浅水区的木码头与 6 组莲叶芦苇；Boss 圣殿入口铺 `MapStoneStairs`，营地与横路旁点缀 `MapTrailFence`，山谷坡地与边缘成簇分布约 76 组生态树林/草丘/花丛/倒木，同时清除落水或贴近主河道的冗余小泉池。
+- **实测与未实测边界**：`generate_xcode_project.py`、`validate_xcode_project.py`、`check_custom_appearance.py`（837 原始资源校验通过）、`scripts/local-build.sh test`（配置、外观校验、工具单测、`ProbeCore` 8/8、`GameCore` 73/73）与 `MAC_OPEN=0 scripts/local-build.sh mac` 全部通过；Mac 实机运行并截取 Retina 窗口图完成首轮查验与 4 项细节打磨（连续崖壁与崖顶林冠、瀑布入水无缝衔接、码头探入湖水、剔除河旁冗余小泉池）后的二次实机复拍验收（测后 `ClassroomMeadow`、`ClassroomStage0` 及 `org.personal.classroom.stage0` 偏好设置按 `diff -rq` 与 SHA-256 逐字节还原）。未在真机 iPad、外接 TV 双屏及角色实际走过木桥/石阶的动态行军流程下目视复核。
+
 ## 大地图 33 件 HD-2D 美术资产全面接入与实机渲染升级（2026-11-25，基于v0.32.4/build48，未改版本号、未存档）
 
 将已入库的全部 33 件大地图 HD-2D 像素资产全面接入地图生成、存档校验、Metal 实时投影/地表着色器与 SpriteKit 场景层（保持 `generatorVersion = 3` 完全兼容旧存档，同时旧存档打开也能获得实时微景、地貌底图与通关插旗升级）：

@@ -16,6 +16,7 @@ struct SceneDefinition: Codable {
         let mirror: Bool
         let wind: Float
         var nodeID: Int? = nil
+        var rotation: CGFloat? = nil
     }
     struct Road: Codable {
         let from: Int
