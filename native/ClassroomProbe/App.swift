@@ -6,6 +6,8 @@ import MeadowWorldSupport
 @main
 struct ClassroomProbeApp: App {
     @Environment(\.scenePhase) private var scenePhase
+    /// Before iPadOS 27 (no scene accessories), a TV still gets the public screen through the app delegate.
+    @UIApplicationDelegateAdaptor(ClassroomAppDelegate.self) private var appDelegate
     init() {
         // A long class makes the trip save large: encode and write it off the main thread (clicks stay instant),
         // and make sure it is on disk before the app goes to the background or quits.
@@ -88,7 +90,8 @@ struct TeacherHost: UIViewControllerRepresentable {
 @MainActor
 final class TeacherHostController: UIViewController {
     #if !targetEnvironment(macCatalyst)
-    private var registration: UISceneAccessoryRegistration?
+    /// An iPadOS 27 `UISceneAccessoryRegistration` (kept as Any so the app also runs on older iPadOS).
+    private var registration: Any?
     #endif
     private var heldKeys: Set<String> = []
     /// The live teacher console. Mac can bring back an extra console window (window restoration); it closes itself.
@@ -119,8 +122,13 @@ final class TeacherHostController: UIViewController {
         _ = configuration
         TeacherSession.shared.setRegistrationStatus("Mac：在屏幕镜像里选“用作扩展显示器”后点“公开窗口”，学生画面会自动放到投影屏并全屏。")
         #else
-        registration = registerSceneAccessory(.externalNonInteractive(sceneConfiguration: configuration))
-        TeacherSession.shared.setRegistrationStatus("已注册iPadOS27公开场景，等待电视连接。")
+        if #available(iOS 27.0, *) {
+            registration = registerSceneAccessory(.externalNonInteractive(sceneConfiguration: configuration))
+            TeacherSession.shared.setRegistrationStatus("已注册iPadOS27公开场景，等待电视连接。")
+        } else {
+            _ = configuration
+            TeacherSession.shared.setRegistrationStatus("等待电视连接（插上或隔空播放后自动显示学生画面）。")
+        }
         #endif
     }
     override func viewDidAppear(_ animated: Bool) {
@@ -232,6 +240,18 @@ final class TeacherHostController: UIViewController {
     }
     override func pressesCancelled(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
         heldKeys.removeAll(); super.pressesCancelled(presses, with: event)
+    }
+}
+
+/// iPadOS before 27: a connected TV asks the app delegate for its scene; it shows the public screen.
+final class ClassroomAppDelegate: NSObject, UIApplicationDelegate {
+    func application(_ application: UIApplication, configurationForConnecting session: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+        if session.role == .windowExternalDisplayNonInteractive {
+            let configuration = UISceneConfiguration(name: "Public", sessionRole: session.role)
+            configuration.delegateClass = PublicSceneDelegate.self
+            return configuration
+        }
+        return UISceneConfiguration(name: nil, sessionRole: session.role)
     }
 }
 

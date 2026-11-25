@@ -67,7 +67,7 @@ project_configs = []
 target_configs = []
 for name in ("Debug", "Release"):
     project_settings = dict(ALWAYS_SEARCH_USER_PATHS="NO", CLANG_ENABLE_MODULES="YES", CLANG_ENABLE_OBJC_ARC="YES",
-                            IPHONEOS_DEPLOYMENT_TARGET="27.0", SDKROOT="iphoneos", SWIFT_VERSION="5.0",
+                            IPHONEOS_DEPLOYMENT_TARGET="17.5", SDKROOT="iphoneos", SWIFT_VERSION="5.0",
                             SWIFT_OPTIMIZATION_LEVEL="-Onone" if name == "Debug" else "-O",
                             DEBUG_INFORMATION_FORMAT="dwarf" if name == "Debug" else "dwarf-with-dsym",
                             ENABLE_TESTABILITY="YES" if name == "Debug" else "NO")
