@@ -1,3 +1,12 @@
+## 课堂小游戏 HD-2D 战斗引擎化重构（2026-11-25，基于v0.32.4/build48，未改版本号、未存档）
+
+按现有战斗界面（`MeadowBattleLandscapeView` / `MeadowPartyBattleView`）的 HD-2D 观感与原生游戏美术资产体系，全面重构 5 款课堂小游戏舞台：
+- **美术资产收口与补齐**（`native/ClassroomProbe/Resources/Assets.xcassets/`）：移除此前 5 张独立扁平 AI 场景图（`MiniGameBg*`），全部改由游戏既有 4 层景深地景（`MeadowCampWideFarForest`/`Ground`/`Midground`/`Foreground`）与场景建筑/植被资产（`NodeBossSanctum`、`NodeCombatOutpost`、`NodeRewardCache`、`NodeWaystone`、`CampTent`、`WatchTower`、`OakA`、`Pines`、`RockHigh`、`Fence`、`Banner`）搭建；按相同像素密度、透视与配色补齐 4 件缺失透明像素道具（`MiniGameBrazier` 火盆、`MiniGameSteppingStone` 苔藓踏脚石、`MiniGameArenaRing` 圆形竞技石台、`MiniGameFinishArch` 终点木拱门），保留 `MiniGameChestClosed`/`MiniGameChestOpen`/`MiniGameCrown`（总自定义资产体积由约 4.3 MB 降至约 1.39 MB）。
+- **原生 HD-2D 渲染管线接入**（`ClassroomMiniGames.swift`）：
+  - 引入 `MeadowBattleSupport`，复用 `MeadowBattlePlateProcessor`（CoreImage 景深模糊与移轴对焦蒙版）、`MeadowPostProcess` 风格斜向日光束与漂浮微尘/火星、`PixelHeroAtlas.battle` 全身战斗精灵（呼吸待机、挥武器冲锋、受击/胜利动画、斜向落地投影与队色光环）、`MeadowMonsterFrames` 受击闪白、`MeadowPixelFX`（斩击/击中火花/圣光/金币特效）、原生 3D 宝石多面体骰子 `MeadowBattleDiceView`（打 Boss d4/d6/d10、赛跑 d6）、`MeadowBattleVitalsView` 风格延迟浅奶黄虚血条、`MeadowBattleNumber` 弹性飘字物理，以及 `MeadowPreviewPalette` 浅磨砂林间玻璃标题/播报条/面板。
+  - **5 关场景**：全班打Boss（暮光遗迹圣殿 + 双火盆 + 左侧全身小队阵型 + 3D 宝石骰与斩击飘字）、守护营地（晨光林间营地 + 哨塔/帐篷/栅栏 + 全身防守小队 + 6 块苔藓踏脚石）、答题赛跑（林间庆典草地 + 终点木拱门 + 磨砂跑道与全身奔跑英雄 + 3D 宝石 d6）、翻牌寻宝（浅景深虚化林间营地背景 + 木金羊皮桌盘与直点像素宝箱牌阵）、擂台王（林间竞技场 + `MiniGameArenaRing` 石台 + 左右对峙全身英雄与像素金皇冠/闪电徽标）。
+- **实测与未实测边界**：`generate_xcode_project.py`、`scripts/local-build.sh test`（配置/外观/工具单测 + ProbeCore 8/8 + GameCore 73/73）与 Mac Catalyst Release 编译均通过；Mac 版后台实测并导出全窗口 Retina 截图验证了全部 5 款游戏的开局画面及打 Boss 3D 掷骰/闪白/虚血条/飘字、赛跑 3D 宝石骰/闪电冲刺、翻牌舞台直点翻开，并根据首轮截图复核微调了打 Boss 铭牌位置、营地防守站位、赛跑中景建筑落地高度与擂台王皇冠/闪电悬停高度（测试后 `ClassroomMeadow`/`ClassroomStage0` 及偏好设置按 SHA-256 与 `diff -rq` 完全还原）。未在真实双屏外接 TV 与真机 iPad 上目视复核景深/粒子渲染性能，且未改动小游戏核心计分规则。
+
 ## 课堂小游戏美术与舞台视觉升级（2026-11-25，基于v0.32.4/build48，未改版本号、未存档）
 
 为 5 款课堂小游戏（全班打Boss、守护营地、答题赛跑、翻牌寻宝、擂台王）补充 HD-2D 像素风专属美术资产并重构舞台布局与视觉反馈：
