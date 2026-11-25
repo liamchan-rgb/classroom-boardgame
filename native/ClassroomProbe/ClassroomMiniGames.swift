@@ -6,11 +6,11 @@ import MeadowBattleSupport
 
 // MARK: - 课堂小游戏: boss, camp, race, memory, arena (about 10 minutes each)
 //
-// Built directly on the game's own HD-2D battle visual language:
-// - 4-layer depth-of-field plates via `MeadowBattlePlateProcessor` (farForest / focus-masked ground / midground / foreground)
-// - Native game props (`CampTent`, `WatchTower`, `NodeBossSanctum`, `NodeCombatOutpost`, `NodeRewardCache`, `NodeWaystone`,
-//   `OakA`, `OakB`, `Pines`, `RockHigh`, `RockLow`, `Fence`, `Banner`, `Flowers`) + matching pixel props
-//   (`MiniGameBrazier`, `MiniGameSteppingStone`, `MiniGameArenaRing`, `MiniGameFinishArch`, `MiniGameChestClosed/Open`, `MiniGameCrown`)
+// Built directly on the game's HD-2D battle visual language with 5 dedicated per-game HD-2D scenes:
+// - Dedicated 16:9 HD-2D pixel-art scenes (`MiniGameSceneBoss`, `MiniGameSceneCamp`, `MiniGameSceneRace`,
+//   `MiniGameSceneMemory`, `MiniGameSceneArena`) processed through CoreImage tilt-shift optical depth-of-field
+// - Grounded interactive pixel props (`MiniGameBrazier`, `MiniGameSteppingStone`, `MiniGameArenaRing`,
+//   `MiniGameFinishArch`, `MiniGameChestClosed/Open`, `MiniGameCrown`)
 // - Full-body animated battle heroes (`PixelHeroAtlas.battle`) & monsters (`MeadowMonsterFrames`) with oblique sunlight shadows
 // - Native 3D gem polyhedral dice (`MeadowBattleDiceView`), pixel VFX (`MeadowPixelFX`), battle vitals bars & frosted meadow glass
 
@@ -466,19 +466,20 @@ private struct MemoryBoardLayout {
         let r = max(1, (count + cols - 1) / cols)
         self.columns = cols
         self.rows = r
-        let cw: CGFloat = (cols == 4 ? 186 : 212) * unit
-        let ch: CGFloat = (r >= 4 ? 108 : r == 3 ? 134 : 164) * unit
-        let g: CGFloat = (r >= 4 ? 12 : 16) * unit
+        let cw: CGFloat = (cols == 4 ? 174 : 204) * unit
+        let ch: CGFloat = (r >= 4 ? 104 : r == 3 ? 130 : 160) * unit
+        let g: CGFloat = (r >= 4 ? 11 : 15) * unit
         self.cardSize = CGSize(width: cw, height: ch)
         self.gap = g
         let gw = CGFloat(cols) * cw + CGFloat(cols - 1) * g
         let gh = CGFloat(r) * ch + CGFloat(r - 1) * g
         self.gridSize = CGSize(width: gw, height: gh)
-        let sw = 282 * unit
-        let splitGap = 28 * unit
+        let sw = 260 * unit
+        let splitGap = 24 * unit
         let totalW = gw + splitGap + sw
-        let gx = (1280 * unit - totalW) / 2
-        let gy = 348 * unit - gh / 2
+        // Slightly nudged right so the oak table's top-left brass lantern & bottom-left scroll/satchel breathe cleanly!
+        let gx = (1280 * unit - totalW) / 2 + 28 * unit
+        let gy = 356 * unit - gh / 2
         self.gridOrigin = CGPoint(x: gx, y: gy)
         self.sideWidth = sw
         self.sideX = gx + gw + splitGap + sw / 2
@@ -534,94 +535,187 @@ private struct MiniGameTapContent: View {
 
 // MARK: - HD-2D Shared Battle-Engine Stage Components
 
-/// Loads & caches the native 4-layer HD-2D wide meadow plates through `MeadowBattlePlateProcessor`
-/// (optical far-forest blur, CoreImage tilt-shift focus-masked ground, soft midground, crisp foreground frame).
-private enum HD2DPlateCache {
-    static var farForest: UIImage? { MeadowBattlePlateProcessor.image(named: "MeadowCampWideFarForest", role: .farForest) }
-    static var ground: UIImage? { MeadowBattlePlateProcessor.image(named: "MeadowCampWideGround", role: .ground) }
-    static var midground: UIImage? { MeadowBattlePlateProcessor.image(named: "MeadowCampWideMidground", role: .midground) }
-    static var foreground: UIImage? { MeadowBattlePlateProcessor.image(named: "MeadowCampWideForeground", role: .foreground) }
+/// Loads & caches each mini-game's dedicated 16:9 HD-2D scene with CoreImage tilt-shift optical depth-of-field
+/// (soft out-of-focus distant forest/horizon & near foreground bokeh, razor-sharp playable ground plane — matching
+/// `MeadowBattlePlateProcessor` without reusing `MeadowCampWide*`!).
+private enum HD2DSceneCache {
+    private static let context = CIContext(options: [.useSoftwareRenderer: false])
+    private static let cache = NSCache<NSString, UIImage>()
+
+    static func scene(for kind: MiniGameModel.Kind) -> UIImage? {
+        let name: String = switch kind {
+        case .boss: "MiniGameSceneBoss"
+        case .camp: "MiniGameSceneCamp"
+        case .race: "MiniGameSceneRace"
+        case .memory: "MiniGameSceneMemory"
+        case .arena: "MiniGameSceneArena"
+        }
+        let key = "hd2d:\(name)" as NSString
+        if let hit = cache.object(forKey: key) { return hit }
+        guard let source = UIImage(named: name) else { return nil }
+        if kind == .memory {
+            cache.setObject(source, forKey: key)
+            return source
+        }
+        guard let cg = source.cgImage,
+              let processed = applyTiltShift(cg, scale: source.scale, kind: kind) else {
+            cache.setObject(source, forKey: key)
+            return source
+        }
+        cache.setObject(processed, forKey: key)
+        return processed
+    }
+
+    /// Subtle HD-2D diorama tilt-shift: keeps playable ground band 100% sharp while gently softening distant treeline & very bottom edge.
+    private static func applyTiltShift(_ cg: CGImage, scale: CGFloat, kind: MiniGameModel.Kind) -> UIImage? {
+        let extent = CGRect(x: 0, y: 0, width: cg.width, height: cg.height)
+        let input = CIImage(cgImage: cg)
+        let blurRadius: CGFloat = kind == .race ? 1.8 : 2.6
+        guard let blurFilter = CIFilter(name: "CIGaussianBlur") else { return nil }
+        blurFilter.setValue(input.clampedToExtent(), forKey: kCIInputImageKey)
+        blurFilter.setValue(blurRadius, forKey: kCIInputRadiusKey)
+        guard let blurred = blurFilter.outputImage?.cropped(to: extent),
+              let mask = focusMask(width: cg.width, height: cg.height, kind: kind),
+              let blend = CIFilter(name: "CIBlendWithMask") else { return nil }
+        blend.setValue(input, forKey: kCIInputImageKey)
+        blend.setValue(blurred, forKey: kCIInputBackgroundImageKey)
+        blend.setValue(mask, forKey: kCIInputMaskImageKey)
+        guard let out = blend.outputImage?.cropped(to: extent),
+              let result = context.createCGImage(out, from: extent) else { return nil }
+        return UIImage(cgImage: result, scale: scale, orientation: .up)
+    }
+
+    /// White (255) = razor-sharp playable ground plane; black (0) = soft HD-2D depth-of-field bokeh.
+    private static func focusMask(width: Int, height: Int, kind: MiniGameModel.Kind) -> CIImage? {
+        guard width > 0, height > 0 else { return nil }
+        // Focus band authored from top (0.0) to bottom (1.0)
+        let (farEnd, sharpStart, sharpEnd, nearStart): (CGFloat, CGFloat, CGFloat, CGFloat) =
+            kind == .race ? (0.24, 0.36, 0.87, 0.97) : (0.36, 0.50, 0.86, 0.97)
+        var pixels = [UInt8](repeating: 0, count: width * height)
+        for row in 0..<height {
+            let y = CGFloat(row) / CGFloat(max(1, height - 1))
+            let focus: CGFloat
+            if y < farEnd || y > nearStart {
+                focus = 0
+            } else if y < sharpStart {
+                let t = (y - farEnd) / max(0.001, sharpStart - farEnd)
+                focus = t * t * (3 - 2 * t)
+            } else if y <= sharpEnd {
+                focus = 1
+            } else {
+                let t = (y - sharpEnd) / max(0.001, nearStart - sharpEnd)
+                focus = 1 - t * t * (3 - 2 * t)
+            }
+            let value = UInt8((min(1, max(0, focus)) * 255).rounded())
+            let start = row * width
+            pixels.replaceSubrange(start..<(start + width), with: repeatElement(value, count: width))
+        }
+        guard let provider = CGDataProvider(data: Data(pixels) as CFData),
+              let maskCG = CGImage(
+                  width: width, height: height, bitsPerComponent: 8, bitsPerPixel: 8, bytesPerRow: width,
+                  space: CGColorSpaceCreateDeviceGray(),
+                  bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.none.rawValue),
+                  provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent
+              ) else { return nil }
+        return CIImage(cgImage: maskCG)
+    }
 }
 
-/// Full-bleed native HD-2D Meadow Battle backdrop (farForest + tilt-shift ground + optional midground)
-/// with per-game atmospheric grade matching `MeadowPostProcess`.
-private struct HD2DMeadowBackdrop: View {
+/// Full-bleed soft blurred ambient fill behind the pixel-locked 16:9 stage (matching `MeadowBattleLandscapeView.cameraBackdrop`)
+/// so ultrawide Mac teacher windows and narrower quiz-dock panes have zero black bars AND zero vertical coordinate drift!
+private struct HD2DAmbientBackdrop: View {
     let kind: MiniGameModel.Kind
     let size: CGSize
     var body: some View {
-        let plateH = max(size.height * 1.10, size.width * 1201 / 2618)
-        let plateW = plateH * 2618 / 1201
-        let yShift: CGFloat = kind == .race ? -plateH * 0.02 : -plateH * 0.04
         ZStack {
-            Color(red: 0.14, green: 0.20, blue: 0.12)
-            if let far = HD2DPlateCache.farForest {
-                Image(uiImage: far).resizable().frame(width: plateW, height: plateH).offset(y: yShift)
+            Color(red: 0.09, green: 0.12, blue: 0.09)
+            if let img = HD2DSceneCache.scene(for: kind) {
+                Image(uiImage: img)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: size.width, height: size.height)
+                    .blur(radius: 18)
+                    .scaleEffect(1.06)
+                    .overlay(Color.black.opacity(0.24))
+                    .clipped()
             }
-            if let gnd = HD2DPlateCache.ground {
-                Image(uiImage: gnd).resizable().frame(width: plateW, height: plateH).offset(y: yShift)
+        }
+        .frame(width: size.width, height: size.height)
+        .clipped()
+        .allowsHitTesting(false)
+    }
+}
+
+/// Pixel-locked 16:9 (`1280*unit × 720*unit`) dedicated HD-2D scene with CoreImage tilt-shift bokeh & subtle atmospheric polish.
+/// Shares exact coordinate space with `MiniGameWorldLayer` so actors, stones, braziers, arches & lanterns never shift across aspect ratios!
+private struct HD2DMeadowBackdrop: View {
+    let kind: MiniGameModel.Kind
+    let size: CGSize
+    var featherEdges = false
+    var body: some View {
+        ZStack {
+            Color(red: 0.11, green: 0.15, blue: 0.11)
+            if let img = HD2DSceneCache.scene(for: kind) {
+                Image(uiImage: img)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: size.width, height: size.height)
+                    .clipped()
             }
-            if kind == .camp || kind == .arena, let mid = HD2DPlateCache.midground {
-                Image(uiImage: mid).resizable().frame(width: plateW, height: plateH).offset(y: yShift)
-            }
-            // Scene-specific HD-2D color grading & optical depth bokeh
+            // Subtle cohesive warm/twilight atmospheric polish
             if kind == .boss {
-                // Twilight sanctum dusk: deep cool indigo shadows + subtle warm horizon glow
                 LinearGradient(
-                    colors: [Color(red: 0.09, green: 0.07, blue: 0.22).opacity(0.66), Color(red: 0.14, green: 0.10, blue: 0.26).opacity(0.42), Color(red: 0.08, green: 0.09, blue: 0.16).opacity(0.55)],
+                    colors: [Color(red: 0.08, green: 0.07, blue: 0.22).opacity(0.14), .clear, Color(red: 0.03, green: 0.04, blue: 0.09).opacity(0.22)],
                     startPoint: .top, endPoint: .bottom
                 )
-            } else if kind == .memory {
-                // Warm lantern-lit shallow-DoF background behind the wooden treasure table
-                Color(red: 0.18, green: 0.13, blue: 0.08).opacity(0.28)
-            } else {
-                // Warm golden-hour highlights matching MeadowPostProcess.Settings.hd2d
+            } else if kind != .memory {
                 LinearGradient(
-                    colors: [Color(red: 1.0, green: 0.90, blue: 0.66).opacity(0.14), .clear, Color(red: 0.05, green: 0.09, blue: 0.05).opacity(0.16)],
+                    colors: [Color(red: 1.0, green: 0.92, blue: 0.70).opacity(0.08), .clear, Color(red: 0.04, green: 0.07, blue: 0.04).opacity(0.12)],
                     startPoint: .topLeading, endPoint: .bottomTrailing
                 )
             }
         }
-        .blur(radius: kind == .memory ? 6.5 : 0)
-        .scaleEffect(kind == .memory ? 1.05 : 1.0)
         .frame(width: size.width, height: size.height)
         .clipped()
+        .mask {
+            if featherEdges {
+                LinearGradient(
+                    stops: [
+                        .init(color: .clear, location: 0.0),
+                        .init(color: .white, location: 0.025),
+                        .init(color: .white, location: 0.975),
+                        .init(color: .clear, location: 1.0)
+                    ],
+                    startPoint: .leading, endPoint: .trailing
+                )
+            } else {
+                Rectangle()
+            }
+        }
     }
 }
 
-/// Foreground HD-2D framing (`MeadowCampWideForeground` oak trunks + wildflowers) + drifting diagonal sunbeams,
-/// floating golden sunlit dust motes (or embers for Boss), and subtle HD-2D diorama vignette.
+/// Drifting volumetric diagonal sunbeams (or twilight moonbeams in Boss), floating sunlit dust motes / fire embers,
+/// and restrained HD-2D optical vignette matching `MeadowPostProcess.Settings.hd2d`.
 private struct HD2DAtmosphereOverlay: View {
     let kind: MiniGameModel.Kind
     let size: CGSize
-    var showForegroundFrame = true
 
     var body: some View {
-        let plateH = max(size.height * 1.10, size.width * 1201 / 2618)
-        let plateW = plateH * 2618 / 1201
-        let yShift: CGFloat = kind == .race ? -plateH * 0.02 : -plateH * 0.04
         ZStack {
-            if showForegroundFrame, let fg = HD2DPlateCache.foreground {
-                Image(uiImage: fg)
-                    .resizable()
-                    .frame(width: plateW, height: plateH)
-                    .offset(y: yShift)
-                    .colorMultiply(kind == .boss ? Color(red: 0.56, green: 0.54, blue: 0.76) : .white)
-                    .opacity(kind == .race ? 0.68 : 0.92)
-            }
-
-            // Drifting volumetric sun shafts (from upper-left, matching MeadowPostProcess) & floating motes
+            // Drifting volumetric light shafts & floating motes/embers
             TimelineView(.animation(minimumInterval: 1.0 / 24)) { ctx in
                 let t = ctx.date.timeIntervalSinceReferenceDate
                 Canvas { g, canvasSize in
-                    // 1. Soft diagonal golden sun shafts (or violet-amber twilight rays in Boss)
+                    // 1. Soft diagonal light shafts (upper-left sun/moon)
                     let rayColor: Color = kind == .boss
-                        ? Color(red: 0.78, green: 0.62, blue: 1.0)
-                        : Color(red: 1.0, green: 0.89, blue: 0.65)
-                    let rayAlpha: Double = kind == .boss ? 0.055 : (kind == .memory ? 0.06 : 0.095)
+                        ? Color(red: 0.72, green: 0.78, blue: 1.0)
+                        : Color(red: 1.0, green: 0.90, blue: 0.66)
+                    let rayAlpha: Double = kind == .boss ? 0.045 : (kind == .memory ? 0.04 : 0.075)
                     for i in 0..<4 {
                         let phase = sin(t * 0.22 + Double(i) * 1.7)
-                        let x0 = canvasSize.width * (0.06 + Double(i) * 0.24) + phase * 28
-                        let w = canvasSize.width * (0.11 + Double(i % 2) * 0.05)
+                        let x0 = canvasSize.width * (0.04 + Double(i) * 0.24) + phase * 26
+                        let w = canvasSize.width * (0.10 + Double(i % 2) * 0.05)
                         var path = Path()
                         path.move(to: CGPoint(x: x0, y: -20))
                         path.addLine(to: CGPoint(x: x0 + w, y: -20))
@@ -636,36 +730,36 @@ private struct HD2DAtmosphereOverlay: View {
                         ))
                     }
 
-                    // 2. Floating golden sunlight dust motes (or glowing warm embers in Boss)
-                    let moteCount = kind == .boss ? 22 : 16
+                    // 2. Floating golden sunlight dust motes (or glowing fire embers in Boss)
+                    let moteCount = kind == .boss ? 22 : (kind == .memory ? 12 : 16)
                     for i in 0..<moteCount {
                         let seed = Double(i) * 13.7 + 1.3
-                        let speed = kind == .boss ? 16.0 : 9.0
+                        let speed = kind == .boss ? 16.0 : 8.5
                         let cycle = (t * (speed + Double(i % 5) * 3.0) + seed * 37).truncatingRemainder(dividingBy: Double(canvasSize.height + 60))
                         let y = Double(canvasSize.height + 30) - cycle
                         let baseX = (sin(seed * 2.13) * 0.5 + 0.5) * Double(canvasSize.width)
-                        let x = baseX + sin(t * 0.7 + seed) * 26.0
-                        let r = CGFloat(2.0 + Double(i % 3) * 1.2)
+                        let x = baseX + sin(t * 0.7 + seed) * 24.0
+                        let r = CGFloat(2.0 + Double(i % 3) * 1.1)
                         let twinkle = 0.35 + 0.65 * (0.5 + 0.5 * sin(t * 2.1 + seed * 1.9))
                         let edgeFade = min(1.0, min(y / 60.0, (Double(canvasSize.height) - y) / 60.0))
-                        let a = max(0, twinkle * edgeFade * (kind == .boss ? 0.78 : 0.58))
+                        let a = max(0, twinkle * edgeFade * (kind == .boss ? 0.76 : 0.52))
                         let color: Color = kind == .boss
-                            ? (i % 3 == 0 ? Color(red: 1.0, green: 0.78, blue: 0.34) : Color(red: 1.0, green: 0.48, blue: 0.18))
-                            : Color(red: 1.0, green: 0.95, blue: 0.72)
+                            ? (i % 3 == 0 ? Color(red: 1.0, green: 0.80, blue: 0.36) : Color(red: 1.0, green: 0.48, blue: 0.18))
+                            : Color(red: 1.0, green: 0.95, blue: 0.74)
                         let glowRect = CGRect(x: x - Double(r * 2.2), y: y - Double(r * 2.2), width: Double(r * 4.4), height: Double(r * 4.4))
-                        g.fill(Path(ellipseIn: glowRect), with: .color(color.opacity(a * 0.32)))
+                        g.fill(Path(ellipseIn: glowRect), with: .color(color.opacity(a * 0.30)))
                         let coreRect = CGRect(x: x - Double(r), y: y - Double(r), width: Double(r * 2), height: Double(r * 2))
                         g.fill(Path(ellipseIn: coreRect), with: .color(color.opacity(a)))
                     }
                 }
             }
 
-            // 3. Restrained HD-2D optical vignette (matches MeadowPostProcess vignette: 0.34)
+            // 3. Restrained HD-2D diorama vignette (matches MeadowPostProcess)
             RadialGradient(
-                colors: [.clear, .clear, Color(red: 0.04, green: 0.06, blue: 0.05).opacity(kind == .boss ? 0.44 : 0.26)],
+                colors: [.clear, .clear, Color(red: 0.03, green: 0.05, blue: 0.04).opacity(kind == .boss ? 0.38 : (kind == .memory ? 0.24 : 0.22))],
                 center: .center,
-                startRadius: min(size.width, size.height) * 0.34,
-                endRadius: max(size.width, size.height) * 0.74
+                startRadius: min(size.width, size.height) * 0.38,
+                endRadius: max(size.width, size.height) * 0.76
             )
         }
         .frame(width: size.width, height: size.height)
@@ -1167,20 +1261,29 @@ struct MiniGameStage: View {
     var body: some View {
         GeometryReader { g in
             let unit = min(g.size.height / 720, g.size.width / 1280)
+            let stageSize = CGSize(width: 1280 * unit, height: 720 * unit)
+            let isUltrawide = g.size.width > stageSize.width + 6
             ZStack {
-                // Layer 0-2: Native HD-2D multi-layer Meadow Battle plates (farForest + tilt-shift ground + midground)
-                HD2DMeadowBackdrop(kind: model.kind, size: g.size)
+                // Layer 0: Full-bleed soft blurred ambient fill for ultrawide / tall viewports (zero black bars, zero coordinate drift!)
+                HD2DAmbientBackdrop(kind: model.kind, size: g.size)
 
-                // Layer 3: Scene props, full-body animated heroes, monsters, shadows & pixel VFX
-                MiniGameWorldLayer(model: model, unit: unit)
-                    .frame(width: 1280 * unit, height: 720 * unit)
+                // Layers 1-4: Pixel-locked 16:9 HD-2D Stage (`1280*unit × 720*unit`)
+                ZStack {
+                    // Layer 1: Dedicated HD-2D per-game scene with CoreImage tilt-shift optical depth-of-field
+                    HD2DMeadowBackdrop(kind: model.kind, size: stageSize, featherEdges: isUltrawide)
 
-                // Layer 4: Foreground framing (`MeadowCampWideForeground`) + drifting sunbeams, motes & vignette
-                HD2DAtmosphereOverlay(kind: model.kind, size: g.size, showForegroundFrame: model.kind != .memory)
+                    // Layer 2: Grounded interactive props, full-body animated heroes, monsters, shadows & pixel VFX
+                    MiniGameWorldLayer(model: model, unit: unit)
+                        .frame(width: stageSize.width, height: stageSize.height)
 
-                // Layer 5: Crisp UI HUD (unblurred, matching `MeadowPartyStageView` glass captions & vitals)
-                MiniGameChromeLayer(model: model, unit: unit)
-                    .frame(width: 1280 * unit, height: 720 * unit)
+                    // Layer 3: Drifting volumetric sun/moon shafts, embers/motes & optical vignette
+                    HD2DAtmosphereOverlay(kind: model.kind, size: stageSize)
+
+                    // Layer 4: Crisp UI HUD (unblurred, matching `MeadowPartyStageView` glass captions & vitals)
+                    MiniGameChromeLayer(model: model, unit: unit)
+                        .frame(width: stageSize.width, height: stageSize.height)
+                }
+                .frame(width: stageSize.width, height: stageSize.height)
             }
             .frame(width: g.size.width, height: g.size.height)
             .clipped()
@@ -1342,31 +1445,19 @@ private struct BossStage: View {
 
     var body: some View {
         if let b = model.boss {
-            let duskTint = Color(red: 0.72, green: 0.70, blue: 0.90)
             ZStack(alignment: .topLeading) {
-                // 1) Midground Game Architecture & Flora (soft optical depth-of-field blur, matching battle plates)
-                HD2DProp(name: "Pines", height: 340 * unit, depthBlur: 1.6, shadow: false, tint: duskTint)
-                    .position(x: 84 * unit, y: 245 * unit)
-                HD2DProp(name: "OakA", height: 320 * unit, depthBlur: 1.5, shadow: false, tint: duskTint)
-                    .position(x: 245 * unit, y: 248 * unit)
-                HD2DProp(name: "RockHigh", height: 225 * unit, depthBlur: 1.4, shadow: false, tint: duskTint)
-                    .position(x: 565 * unit, y: 295 * unit)
-                HD2DProp(name: "Pines", height: 330 * unit, mirrored: true, depthBlur: 1.6, shadow: false, tint: duskTint)
-                    .position(x: 1185 * unit, y: 250 * unit)
-
-                // Heroic Boss Sanctum Portal directly behind the Boss!
+                // 1) Subtle amethyst aura over the twilight ruins archway crystal built into `MiniGameSceneBoss`
                 Circle()
-                    .fill(RadialGradient(colors: [Color(red: 0.68, green: 0.34, blue: 0.96).opacity(0.45), .clear], center: .center, startRadius: 10 * unit, endRadius: 190 * unit))
-                    .frame(width: 380 * unit, height: 380 * unit)
-                    .position(x: 930 * unit, y: 270 * unit)
-                HD2DProp(name: "NodeBossSanctum", height: 340 * unit, depthBlur: 0.8, shadow: true, tint: Color(red: 0.88, green: 0.85, blue: 0.98))
-                    .position(x: 930 * unit, y: 300 * unit)
+                    .fill(RadialGradient(colors: [Color(red: 0.72, green: 0.40, blue: 1.0).opacity(0.42), .clear], center: .center, startRadius: 6 * unit, endRadius: 115 * unit))
+                    .frame(width: 230 * unit, height: 230 * unit)
+                    .position(x: 1004 * unit, y: 118 * unit)
+                    .zIndex(120)
 
-                // Twin Glowing Pixel Stone Braziers flanking the Boss Sanctum
-                brazierWithGlow(x: 695 * unit, y: 405 * unit)
-                brazierWithGlow(x: 1152 * unit, y: 405 * unit)
+                // Twin Glowing Pixel Stone Braziers planted solidly on the mossy ruins flagstones flanking the Boss
+                brazierWithGlow(x: 708 * unit, y: 474 * unit, height: 120 * unit)
+                brazierWithGlow(x: 1172 * unit, y: 492 * unit, height: 124 * unit)
 
-                // 2) Left Tactical Party Formation — REAL Full-Body Animated Battle Heroes facing RIGHT!
+                // 2) Left Tactical Party Formation — REAL Full-Body Animated Battle Heroes standing on left flagstones!
                 let spots = partyFormation(count: model.students.count)
                 ForEach(Array(model.students.enumerated()), id: \.element.id) { idx, s in
                     let p = spots[idx]
@@ -1378,7 +1469,7 @@ private struct BossStage: View {
                         return .ready
                     }()
                     let triggerDate: Date? = isAttacker ? attackAt : (heroHurtAt ?? (b.outcome == .won ? hurtAt : nil))
-                    let heroH = (model.students.count > 4 ? 174 : 210) * unit
+                    let heroH = (model.students.count > 4 ? 166 : 188) * unit
                     HD2DBattleHero(
                         student: s,
                         height: heroH,
@@ -1388,7 +1479,7 @@ private struct BossStage: View {
                         ringColor: model.studentTint(s.id)
                     )
                     .overlay(alignment: .bottom) {
-                        // Snug battle nameplate right beneath boots (matches map hero plates, never collides with heads!)
+                        // Snug battle nameplate right beneath boots with guaranteed vertical & horizontal clearance!
                         Text(s.name)
                             .font(.system(size: 14 * unit, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
@@ -1398,26 +1489,26 @@ private struct BossStage: View {
                             .overlay(RoundedRectangle(cornerRadius: 6 * unit).stroke(model.studentTint(s.id).opacity(0.92), lineWidth: 1.5 * unit))
                             .offset(y: 4 * unit)
                     }
-                    .position(x: p.x + (isAttacker ? 56 * unit : 0), y: p.y)
+                    .position(x: p.x + (isAttacker ? 52 * unit : 0), y: p.y)
                     .zIndex(Double(p.y))
                 }
 
-                // 3) Right Boss Monster with Real Oblique Shadow + Native Battle Vitals Bar + Pixel VFX!
-                HD2DMonster(id: b.monster, height: 325 * unit, mirrored: false, hurtAt: hurtAt, dead: b.outcome == .won)
+                // 3) Right Boss Monster squarely grounded on the stone ruins courtyard in front of the Sanctum Arch!
+                HD2DMonster(id: b.monster, height: 315 * unit, mirrored: false, hurtAt: hurtAt, dead: b.outcome == .won)
                     .offset(x: shake ? 14 * unit : 0)
-                    .position(x: 925 * unit, y: 425 * unit)
-                    .zIndex(460)
+                    .position(x: 950 * unit, y: 456 * unit)
+                    .zIndex(480)
 
                 HD2DPixelFXBurst(clipID: "melee_heavy_cleave_51", playedAt: fxAt, size: 280 * unit)
-                    .position(x: 900 * unit, y: 405 * unit)
-                    .zIndex(500)
+                    .position(x: 930 * unit, y: 438 * unit)
+                    .zIndex(520)
                 HD2DPixelFXBurst(clipID: "impacts_hit_spark_55", playedAt: fxAt, size: 240 * unit)
-                    .position(x: 930 * unit, y: 395 * unit)
-                    .zIndex(510)
+                    .position(x: 952 * unit, y: 428 * unit)
+                    .zIndex(530)
 
                 // Floating Battle Damage Numbers (`MeadowBattleNumber` physics!)
                 BattleFloatingNumbers(hits: b.lastHits, startedAt: numbersAt, model: model, unit: unit)
-                    .position(x: 910 * unit, y: 270 * unit)
+                    .position(x: 942 * unit, y: 286 * unit)
                     .zIndex(600)
 
                 // 4) Top-Left Class Hearts & Top-Right Battle-Style Boss Vitals HUD
@@ -1493,39 +1584,39 @@ private struct BossStage: View {
         }
     }
 
-    private func brazierWithGlow(x: CGFloat, y: CGFloat) -> some View {
+    private func brazierWithGlow(x: CGFloat, y: CGFloat, height: CGFloat) -> some View {
         ZStack {
             Circle()
                 .fill(RadialGradient(colors: [Color(red: 1.0, green: 0.68, blue: 0.22).opacity(0.55), Color.orange.opacity(0.18), .clear], center: .center, startRadius: 6 * unit, endRadius: 96 * unit))
                 .frame(width: 192 * unit, height: 192 * unit)
                 .offset(y: -34 * unit)
-            HD2DProp(name: "MiniGameBrazier", height: 132 * unit, depthBlur: 0, shadow: true)
+            HD2DProp(name: "MiniGameBrazier", height: height, depthBlur: 0, shadow: true)
         }
         .position(x: x, y: y)
         .zIndex(Double(y))
     }
 
-    /// Staggered left-side tactical battle positions matching `MeadowBattleFormation` (1–7 heroes).
+    /// Staggered left-side tactical battle positions grounded on the left ruins flagstones (zero nameplate overlap even with quiz dock open!).
     private func partyFormation(count: Int) -> [CGPoint] {
         switch count {
-        case 1: return [CGPoint(x: 350 * unit, y: 445 * unit)]
-        case 2: return [CGPoint(x: 255 * unit, y: 398 * unit), CGPoint(x: 410 * unit, y: 468 * unit)]
-        case 3: return [CGPoint(x: 230 * unit, y: 382 * unit), CGPoint(x: 418 * unit, y: 432 * unit), CGPoint(x: 270 * unit, y: 492 * unit)]
-        case 4: return [CGPoint(x: 210 * unit, y: 374 * unit), CGPoint(x: 390 * unit, y: 394 * unit), CGPoint(x: 245 * unit, y: 486 * unit), CGPoint(x: 420 * unit, y: 498 * unit)]
+        case 1: return [CGPoint(x: 355 * unit, y: 472 * unit)]
+        case 2: return [CGPoint(x: 240 * unit, y: 432 * unit), CGPoint(x: 440 * unit, y: 500 * unit)]
+        case 3: return [CGPoint(x: 185 * unit, y: 416 * unit), CGPoint(x: 455 * unit, y: 462 * unit), CGPoint(x: 305 * unit, y: 522 * unit)]
+        case 4: return [CGPoint(x: 175 * unit, y: 412 * unit), CGPoint(x: 395 * unit, y: 424 * unit), CGPoint(x: 265 * unit, y: 522 * unit), CGPoint(x: 490 * unit, y: 526 * unit)]
         default:
             return (0..<count).map { i in
                 let col = i % 2
                 let row = i / 2
                 let rows = max(1, (count + 1) / 2)
-                let x = (col == 0 ? 215.0 : 395.0) + Double(row % 2) * 28.0
-                let y = 355.0 + Double(row) * (152.0 / Double(max(1, rows - 1)))
+                let x = (col == 0 ? 185.0 : 415.0) + Double(row % 2) * 44.0
+                let y = 398.0 + Double(row) * (132.0 / Double(max(1, rows - 1)))
                 return CGPoint(x: x * unit, y: y * unit)
             }
         }
     }
 }
 
-// MARK: - 2. 守护营地 (100% Native Sunlit Meadow Camp Defense + Pixel Stepping Stones!)
+// MARK: - 2. 守护营地 (Dedicated Sunlit Camp Fortification & Horizontal Dirt Defense Road!)
 
 private struct CampStage: View {
     @ObservedObject var model: MiniGameModel
@@ -1539,48 +1630,33 @@ private struct CampStage: View {
 
     var body: some View {
         if let c = model.camp {
-            let cell = 136 * unit
-            let left = 378 * unit
-            let trailY = 524 * unit
+            let cell = 132 * unit
+            let left = 416 * unit
+            let trailY = 550 * unit
             let dist = CampDefense.length - c.position
             let species = ["slime", "wolf", "caveTroll"][c.wave]
-            let monsterH: CGFloat = (c.wave == 2 ? 236 : c.wave == 1 ? 196 : 168) * unit
-            let monsterX = dist > 0 ? (left + CGFloat(dist - 1) * cell + cell / 2) : 255 * unit
-            let monsterY = trailY - monsterH * 0.44 - 12 * unit
+            let monsterH: CGFloat = (c.wave == 2 ? 228 : c.wave == 1 ? 192 : 164) * unit
+            let monsterX = dist > 0 ? (left + CGFloat(dist - 1) * cell + cell / 2) : 305 * unit
+            let monsterY = trailY - monsterH * 0.44 - 8 * unit
 
             ZStack(alignment: .topLeading) {
-                // 1) Left Camp Fortress Built From Real Game Assets (`WatchTower`, `CampTent`, `Fence`, `Banner`, `Flowers`)
-                HD2DProp(name: "WatchTower", height: 220 * unit, depthBlur: 1.0, shadow: true)
-                    .position(x: 82 * unit, y: 320 * unit)
-                    .zIndex(180)
-                HD2DProp(name: "CampTent", width: 236 * unit, depthBlur: 0, shadow: true)
-                    .offset(x: campWarn ? -5 * unit : 0)
-                    .shadow(color: campWarn ? Color.red.opacity(0.6) : .clear, radius: 14 * unit)
-                    .position(x: 192 * unit, y: 406 * unit)
-                    .zIndex(240)
-                HD2DProp(name: "Banner", height: 74 * unit, depthBlur: 0, shadow: false)
-                    .position(x: 310 * unit, y: 382 * unit)
-                    .zIndex(250)
-                HD2DProp(name: "Fence", width: 150 * unit, depthBlur: 0, shadow: true)
-                    .position(x: 300 * unit, y: 468 * unit)
-                    .zIndex(290)
+                // 1) Camp Gate Warning Glow (pulses over the camp timber gate built into `MiniGameSceneCamp` when breached!)
+                if campWarn {
+                    Circle()
+                        .fill(RadialGradient(colors: [Color.red.opacity(0.42), .clear], center: .center, startRadius: 10 * unit, endRadius: 190 * unit))
+                        .frame(width: 380 * unit, height: 380 * unit)
+                        .position(x: 245 * unit, y: 445 * unit)
+                        .zIndex(150)
+                }
 
-                // Right Forest Ambush Edge (`Pines`, `RockHigh`)
-                HD2DProp(name: "RockHigh", height: 175 * unit, depthBlur: 1.2, shadow: false)
-                    .position(x: 1218 * unit, y: 345 * unit)
-                    .zIndex(190)
-                HD2DProp(name: "Pines", height: 265 * unit, mirrored: true, depthBlur: 1.0, shadow: false)
-                    .position(x: 1235 * unit, y: 315 * unit)
-                    .zIndex(200)
-
-                // 2) Full-Body Animated Defending Heroes Standing Guard in Front of Camp!
+                // 2) Full-Body Animated Defending Heroes Standing Guard Outside the Open Timber Camp Gate!
                 let defenders = Array(model.students.prefix(4))
                 ForEach(Array(defenders.enumerated()), id: \.element.id) { idx, s in
-                    let dx = (135 + CGFloat(idx) * 52) * unit
-                    let dy = (468 + CGFloat(idx % 2) * 26) * unit
+                    let dx = (216 + CGFloat(idx) * 46) * unit
+                    let dy = (484 + CGFloat(idx % 2) * 22) * unit
                     HD2DBattleHero(
                         student: s,
-                        height: 158 * unit,
+                        height: 152 * unit,
                         mirrored: false,
                         action: c.outcome == .won || cheerAt != nil ? .victory : .ready,
                         actionAt: cheerAt,
@@ -1590,7 +1666,7 @@ private struct CampStage: View {
                     .zIndex(Double(dy))
                 }
 
-                // 3) 6 Real Pixel-Art Stepping Stones (`MiniGameSteppingStone`) along the Sunlit Dirt Road!
+                // 3) 6 Real Pixel-Art Stepping Stones (`MiniGameSteppingStone`) seated squarely along the horizontal dirt road!
                 ForEach(1...CampDefense.length, id: \.self) { step in
                     let cx = left + CGFloat(step - 1) * cell + cell / 2
                     let active = step == dist
@@ -1600,7 +1676,7 @@ private struct CampStage: View {
                             .resizable()
                             .interpolation(.none)
                             .scaledToFit()
-                            .frame(width: cell - 6 * unit)
+                            .frame(width: cell - 10 * unit)
                             .colorMultiply(danger ? Color(red: 1.0, green: 0.78, blue: 0.74) : .white)
                             .shadow(color: active ? MiniGamePalette.gold.opacity(0.7) : .black.opacity(0.28), radius: (active ? 10 : 4) * unit, y: 3 * unit)
                         // Clean step numeral seated near the front face of the flagstone so monster feet never block it!
@@ -1718,10 +1794,12 @@ private struct RaceStage: View {
     var body: some View {
         if let r = model.race {
             let lanes = max(1, r.sides.count)
-            let top = 126 * unit
-            let bottom = 114 * unit
+            // Keep lanes cleanly on the sunlit lower emerald meadow so upper festival hills, tent & bunting shine unclipped!
+            let top: CGFloat = (lanes <= 3 ? 216 : 132) * unit
+            let bottom: CGFloat = (lanes <= 3 ? 104 : 98) * unit
             let laneAreaH = 720 * unit - top - bottom
-            let laneH = min(142 * unit, laneAreaH / CGFloat(lanes))
+            let laneH = min(140 * unit, laneAreaH / CGFloat(lanes))
+            let firstLaneY = top + (laneAreaH - laneH * CGFloat(lanes)) / 2
             let laneW = 1180 * unit
             let laneLeft = 36 * unit
             let plateW = 128 * unit
@@ -1731,17 +1809,7 @@ private struct RaceStage: View {
             let finishX = trackLeft + CGFloat(RaceTrack.length) * cellW + cellW / 2
 
             ZStack(alignment: .topLeading) {
-                // 1) Midground Meadow Festival Scenery (seated naturally on the upper meadow horizon!)
-                HD2DProp(name: "WatchTower", height: 185 * unit, depthBlur: 1.2, shadow: true)
-                    .position(x: 118 * unit, y: 186 * unit)
-                HD2DProp(name: "CampTent", width: 185 * unit, depthBlur: 1.2, shadow: true)
-                    .position(x: 1015 * unit, y: 204 * unit)
-                HD2DProp(name: "Banner", height: 64 * unit, depthBlur: 0.6, shadow: false)
-                    .position(x: 245 * unit, y: 196 * unit)
-                HD2DProp(name: "Banner", height: 64 * unit, mirrored: true, depthBlur: 0.6, shadow: false)
-                    .position(x: 895 * unit, y: 196 * unit)
-
-                // 2) Frosted Meadow-Glass Special Tile Legend Strip
+                // 1) Frosted Meadow-Glass Special Tile Legend Strip
                 HStack(spacing: 14 * unit) {
                     legendChest("礼物转盘")
                     legendItem("bolt.fill", color: MiniGamePalette.goldDeep, text: "闪电 +3")
@@ -1755,9 +1823,9 @@ private struct RaceStage: View {
                 .position(x: 640 * unit, y: 84 * unit)
                 .zIndex(700)
 
-                // 3) Translucent Frosted-Glass Lanes Letting Sunlit HD-2D Grass Shine Through
+                // 2) Translucent Frosted-Glass Lanes Letting Sunlit HD-2D Grass Shine Through
                 ForEach(Array(r.sides.enumerated()), id: \.element.id) { lane, side in
-                    let y = top + (laneAreaH - laneH * CGFloat(lanes)) / 2 + CGFloat(lane) * laneH
+                    let y = firstLaneY + CGFloat(lane) * laneH
                     let midY = y + laneH / 2
                     let current = r.current?.id == side.id && r.winner == nil
                     let at = r.positions[side.id] ?? 0
@@ -1820,19 +1888,22 @@ private struct RaceStage: View {
                         .zIndex(Double(300 + lane))
                 }
 
-                // 4) Wooden Festival Finish-Line Arch Framing the Finish Column on the Right!
-                HD2DProp(name: "MiniGameFinishArch", height: min(170 * unit, max(120 * unit, laneAreaH * 0.34)), depthBlur: 0, shadow: true)
-                    .position(x: finishX, y: top + (laneAreaH - laneH * CGFloat(lanes)) / 2 - 22 * unit)
-                    .zIndex(190)
+                // 3) Wooden Festival Finish-Line Arch planted cleanly on the grass right above the finish column (when headroom allows!)
+                if firstLaneY >= 215 * unit {
+                    let archH: CGFloat = 132 * unit
+                    HD2DProp(name: "MiniGameFinishArch", height: archH, depthBlur: 0, shadow: true)
+                        .position(x: finishX, y: firstLaneY + 12 * unit - archH / 2)
+                        .zIndex(190)
+                }
 
                 // Pixel VFX burst on boost/reward
                 HD2DPixelFXBurst(clipID: "collectGold", playedAt: fxAt, size: 150 * unit)
                     .position(fxPos)
                     .zIndex(550)
 
-                // 5) Real Native 3D Gem d6 Dice Roll (`MeadowBattleDiceView`) at Top-Right!
+                // 4) Real Native 3D Gem d6 Dice Roll (`MeadowBattleDiceView`) at Top-Right!
                 HD2DDiceStrip(dice: rolledDice, startedAt: diceAt, unit: unit)
-                    .position(x: 1130 * unit, y: 58 * unit)
+                    .position(x: 1130 * unit, y: 62 * unit)
                     .zIndex(760)
             }
             .frame(width: 1280 * unit, height: 720 * unit)
@@ -1847,7 +1918,7 @@ private struct RaceStage: View {
                     }
                     if case .landed(let side, let cell) = e, cell == .reward || cell == .boost {
                         if let lane = r.sides.firstIndex(where: { $0.id == side }) {
-                            let y = top + (laneAreaH - laneH * CGFloat(lanes)) / 2 + CGFloat(lane) * laneH + laneH / 2
+                            let y = firstLaneY + CGFloat(lane) * laneH + laneH / 2
                             let at = r.positions[side] ?? 0
                             fxPos = CGPoint(x: trackLeft + CGFloat(at) * cellW + cellW / 2, y: y)
                             fxAt = now
@@ -1982,31 +2053,20 @@ private struct MemoryStage: View {
         if let m = model.memory {
             let layout = MemoryBoardLayout(count: m.cards.count, unit: unit)
             ZStack(alignment: .topLeading) {
-                // 1) Shallow-DoF Blurred Camp Supply Props in the Sunlit Meadow Clearing Behind the Table
-                HD2DProp(name: "NodeRewardCache", height: 220 * unit, depthBlur: 4.5, shadow: false)
-                    .position(x: 92 * unit, y: 540 * unit)
-                    .opacity(0.85)
-                HD2DProp(name: "CampTent", width: 240 * unit, depthBlur: 5.0, shadow: false)
-                    .position(x: 1185 * unit, y: 525 * unit)
-                    .opacity(0.82)
-                HD2DProp(name: "NodeWaystone", height: 170 * unit, depthBlur: 4.5, shadow: false)
-                    .position(x: 1190 * unit, y: 185 * unit)
-                    .opacity(0.75)
-
-                // 2) Focal-Plane Crafted Camp Wooden Table Mat Holding the 4×4 Cards
-                let matPad = 20 * unit
-                RoundedRectangle(cornerRadius: 24 * unit, style: .continuous)
-                    .fill(LinearGradient(colors: [MiniGamePalette.woodTop, MiniGamePalette.woodBottom], startPoint: .topLeading, endPoint: .bottomTrailing))
+                // 1) Warm Antique-Gold Recessed Parchment Card Mat seated harmoniously on `MiniGameSceneMemory`'s oak tabletop
+                let matPad = 16 * unit
+                RoundedRectangle(cornerRadius: 20 * unit, style: .continuous)
+                    .fill(LinearGradient(colors: [MiniGamePalette.parchmentTop.opacity(0.92), MiniGamePalette.parchmentBottom.opacity(0.88)], startPoint: .top, endPoint: .bottom))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 18 * unit, style: .continuous)
-                            .fill(LinearGradient(colors: [MiniGamePalette.parchmentTop.opacity(0.92), MiniGamePalette.parchmentBottom.opacity(0.90)], startPoint: .top, endPoint: .bottom))
-                            .padding(10 * unit)
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 24 * unit, style: .continuous)
+                        RoundedRectangle(cornerRadius: 20 * unit, style: .continuous)
                             .stroke(MiniGamePalette.goldStroke, lineWidth: 2.5 * unit)
                     )
-                    .shadow(color: .black.opacity(0.42), radius: 18 * unit, y: 8 * unit)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16 * unit, style: .continuous)
+                            .stroke(MiniGamePalette.woodBottom.opacity(0.28), lineWidth: 1.2 * unit)
+                            .padding(5 * unit)
+                    )
+                    .shadow(color: .black.opacity(0.45), radius: 14 * unit, y: 6 * unit)
                     .frame(width: layout.gridSize.width + matPad * 2, height: layout.gridSize.height + matPad * 2)
                     .position(x: layout.gridOrigin.x + layout.gridSize.width / 2, y: layout.gridOrigin.y + layout.gridSize.height / 2)
 
@@ -2073,11 +2133,11 @@ private struct MemoryStage: View {
                         .scaleEffect(turn ? 1.03 : 1.0)
                     }
                 }
-                .position(x: layout.sideX, y: 348 * unit)
+                .position(x: layout.sideX, y: 356 * unit)
 
                 // Pixel VFX golden burst when a treasure pair is claimed!
                 HD2DPixelFXBurst(clipID: "collectGold", playedAt: sparkleAt, size: 180 * unit)
-                    .position(x: layout.sideX, y: 348 * unit)
+                    .position(x: layout.sideX, y: 356 * unit)
             }
             .frame(width: 1280 * unit, height: 720 * unit)
             .onChange(of: model.beat) { _, _ in
@@ -2201,32 +2261,13 @@ private struct ArenaStage: View {
     var body: some View {
         if let a = model.arena {
             ZStack(alignment: .topLeading) {
-                // 1) Midground Tournament Grounds Built from Real Game Assets (soft optical depth-of-field blur!)
-                HD2DProp(name: "NodeCombatOutpost", height: 225 * unit, depthBlur: 1.2, shadow: true)
-                    .position(x: 115 * unit, y: 345 * unit)
-                    .zIndex(180)
-                HD2DProp(name: "WatchTower", height: 245 * unit, depthBlur: 1.2, shadow: true)
-                    .position(x: 1165 * unit, y: 335 * unit)
-                    .zIndex(180)
-                HD2DProp(name: "Fence", width: 170 * unit, depthBlur: 0.6, shadow: true)
-                    .position(x: 240 * unit, y: 468 * unit)
-                    .zIndex(210)
-                HD2DProp(name: "Fence", width: 170 * unit, mirrored: true, depthBlur: 0.6, shadow: true)
-                    .position(x: 1040 * unit, y: 468 * unit)
-                    .zIndex(210)
-                HD2DProp(name: "Banner", height: 84 * unit, depthBlur: 0.5, shadow: false)
-                    .position(x: 265 * unit, y: 375 * unit)
-                    .zIndex(220)
-                HD2DProp(name: "Banner", height: 84 * unit, mirrored: true, depthBlur: 0.5, shadow: false)
-                    .position(x: 1015 * unit, y: 375 * unit)
-                    .zIndex(220)
-
-                // 2) Focal-Plane Circular Stone & Gold Tournament Stage (`MiniGameArenaRing`)
-                HD2DProp(name: "MiniGameArenaRing", width: 720 * unit, depthBlur: 0, shadow: true)
+                // 1) Focal-Plane Circular Stone & Gold Tournament Stage (`MiniGameArenaRing`) planted solidly on
+                // `MiniGameSceneArena`'s flat sunlit packed-earth tournament courtyard (all 3 front steps clear of bottom banner!)
+                HD2DProp(name: "MiniGameArenaRing", width: 700 * unit, depthBlur: 0, shadow: true)
                     .position(x: 640 * unit, y: 472 * unit)
                     .zIndex(280)
 
-                // 3) Champion (Left, facing RIGHT) vs Challenger (Right, mirrored facing LEFT) — Real Animated Battle Heroes!
+                // 2) Champion (Left, facing RIGHT) vs Challenger (Right, mirrored facing LEFT) — Real Animated Battle Heroes!
                 duelist(id: a.champion, champion: true, streak: a.streak, action: champAction)
                     .id("champ-\(a.champion)")
                     .position(x: 472 * unit, y: 382 * unit)

@@ -1,3 +1,14 @@
+## 课堂小游戏独立 HD-2D 场景重构、宽屏对齐修复与宽战景前景补缝（2026-11-25，基于v0.32.4/build48，未改版本号、未存档）
+
+按用户要求彻底停止复用 `MeadowCampWide*` 战斗背景，为 5 款小游戏各自独立搭建匹配游戏 32-bit HD-2D 像素画风的专属场景并根除多处错位，同时修复宽屏战斗前景裂隙：
+- **5 套专属 HD-2D 场景资产**（`native/ClassroomProbe/Resources/Assets.xcassets/MiniGameScene*.imageset/`）：
+  - `MiniGameSceneBoss`（暮光古遗迹圣殿广场，原生侧视石门与紫晶祭坛 + 苔藓石板地面）、`MiniGameSceneCamp`（晨光单营地木栅栏/营门/单哨塔/单蓝帐篷 + 水平直通土路 + 右侧暗林岩壁，消除双哨塔/三帐篷重叠）、`MiniGameSceneRace`（高位地平线庆典草坡 + 彩旗与远景蓝帐篷 + 大片开阔绿草赛道）、`MiniGameSceneMemory`（高俯角橡木营地桌盘 + 左上黄铜提灯/左下卷轴皮囊/外缘花草，移除浮空贴图 `NodeWaystone`/`CampTent`/`NodeRewardCache`）、`MiniGameSceneArena`（弧形木围栏 + 落地三色旌旗与双石柱 + 开阔平整比武土场，移除视角冲突的 `NodeCombatOutpost`/`WatchTower`/悬空旗帜）。
+  - 统一经 `HD2DSceneCache`（CoreImage `CIBlendWithMask` 移轴景深模糊）处理，保留游戏舞台地面 100% 锐利并将远景林带与近景边角自然虚化。
+- **16:9 像素锁定与非 16:9 零漂移修复**（`ClassroomMiniGames.swift`）：
+  - 引入 `HD2DAmbientBackdrop`（仿 `MeadowBattleLandscapeView.cameraBackdrop` 全铺柔和模糊氛围底）包裹严格像素锁定的 `1280*unit × 720*unit` 舞台与背景层，根治超宽 Mac 教师预览窗口与右侧答题停靠栏切换时背景 `.scaledToFill` 垂直裁切导致的提灯/帐篷/圣殿紫晶截断与元素漂移；同步微调打 Boss 三人/多人错位阵型（窄屏零铭牌遮挡）、守护营地 6 块踏脚石居中贴合土路、答题赛跑终点拱门落地贴边及擂台王石台三级石阶完整露出于底条上方。
+- **既有宽战景前景裂隙修复**（`MeadowPartyStageView.swift`、`MeadowCampWideCleanForeground.imageset`）：保留原 `MeadowCampWide*` 文件以满足 `meadow-port-provenance.json` 校验，新增 `MeadowCampWideCleanForeground`（保留原中段 `1309×1201` 并无缝羽化左右翼，消除原 `04-foreground.png` 在 `x=603..789` 与 `x=1827..2013` 的两道竖向透明白条）供 `MeadowPartyStageView` 宽屏战斗使用；`MeadowCampWideFarForest`/`MeadowCampWideGround` 左右镜像翼因本轮生图额度触发 `429 RESOURCE_EXHAUSTED`（约 3.5 小时后重置）暂未重绘。
+- **实测与未实测边界**：`generate_xcode_project.py`、`scripts/local-build.sh test`（配置/外观校验 + 工具单测 + ProbeCore 8/8 + GameCore 73/73）与 Mac Catalyst Release 编译均通过；Mac 版实测并导出全窗口 Retina 截图逐一复核了全部 5 款小游戏的超宽与窄屏停靠态（打 Boss 3D 掷骰/闪白/虚血条/飘字、守护营地、答题赛跑 3D d6/踩陷阱、翻牌直点翻开、擂台王石台与旌旗，测后 `ClassroomMeadow`/`ClassroomStage0` 及偏好设置按 SHA-256 与 `diff -rq` 完全还原）。因当前环境 macOS 录屏权限未授予（`CGPreflightScreenCaptureAccess: false`），`computer-use-mcp` 截屏仅返回纯灰屏，本轮未通过 `computer-use-mcp` 屏幕直拍而是通过 App 内窗口渲染快照复核；未在真实双屏外接 TV、真机 iPad 或实机宽屏战斗中目视复核。
+
 ## 课堂小游戏 HD-2D 战斗引擎化重构（2026-11-25，基于v0.32.4/build48，未改版本号、未存档）
 
 按现有战斗界面（`MeadowBattleLandscapeView` / `MeadowPartyBattleView`）的 HD-2D 观感与原生游戏美术资产体系，全面重构 5 款课堂小游戏舞台：

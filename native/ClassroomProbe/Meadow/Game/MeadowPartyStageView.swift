@@ -19,7 +19,7 @@ final class MeadowPartyStageView:UIView {
     /// twice as wide, with the usual scene untouched in its middle. Loaded the first time the pane is wide (the map drawer closed).
     private var widePlates:[UIImageView]=[]
     private var showsWideScene=false
-    private static let wideNames=["MeadowCampWideFarForest","MeadowCampWideGround","MeadowCampWideMidground","MeadowCampWideForeground"]
+    private static let wideNames=["MeadowCampWideFarForest","MeadowCampWideGround","MeadowCampWideMidground","MeadowCampWideCleanForeground"]
     /// The pane shows more than the world's width: the wide plates replace the usual ones.
     private func updateWideScene() {
         guard bounds.width>0,bounds.height>0 else { return }
