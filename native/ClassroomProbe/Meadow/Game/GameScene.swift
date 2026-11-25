@@ -42,11 +42,20 @@ final class GameScene: SKScene {
             // Scenery discoveries (trees, bushes) belong to the free-roam demo: no markers on a journey map.
             guard let id=d.nodeID,let node=campaign.engine.state.map.nodes.first(where:{$0.id==id}) else{discoveryNodes[index].isHidden=true;continue}
             discoveryNodes[index].isHidden=false
-            let cleared=node.rewardCompleted || ((node.kind == .combat || node.kind == .boss) && !campaign.engine.state.units.values.contains{$0.kind == .monster && $0.nodeID==id && $0.isAlive})
+            let cleared=node.rewardCompleted || ((node.kind == .combat || node.kind == .boss) && !campaign.engine.state.units.values.contains{$0.kind == .monster && $0.nodeID==id && $0.isAlive}) || node.siteResolved == true
             let symbol=cleared ? "✓":campaignSiteSymbol(id) ?? ["combat":"战","boss":"首","reward":"奖","empty":"空"][node.kind.rawValue] ?? "?"
             discoveryNodes[index].children.compactMap{$0 as? SKLabelNode}.first?.text=symbol
             discoveryNodes[index].setPixelMarker(MeadowPixelMarker(symbol:symbol))
+            if let banner = victoryBanners[id] {
+                let wasHidden = banner.isHidden
+                banner.isHidden = !cleared
+                if cleared && wasHidden && victoryBannersInitialized {
+                    banner.setScale(0.2)
+                    banner.run(.sequence([.scale(to: 1.15, duration: 0.22), .scale(to: 1.0, duration: 0.14)]))
+                }
+            }
         }
+        victoryBannersInitialized = true
         refreshCampaignRoute()
         updateActors(before:nil)
     }
@@ -131,6 +140,8 @@ final class GameScene: SKScene {
     private var edgeMarkers: [String: SKNode] = [:]
     private var gaitSunWasHidden = false
     private var discoveryNodes: [SKNode] = []
+    private var victoryBanners: [Int: SKSpriteNode] = [:]
+    private var victoryBannersInitialized = false
     private var discovered = Set<Int>()
     private var pendingDiscovery: Int?
     private var lastTime: TimeInterval = 0
@@ -249,6 +260,8 @@ final class GameScene: SKScene {
     }
 
     private func buildMarkers() {
+        victoryBanners.removeAll()
+        victoryBannersInitialized = false
         let start: SKSpriteNode = world.definition.startNodeID != nil ? MeadowShapeSprite.hitArea(radius: 10)
             : MeadowShapeSprite.circle(10, fill: SKColor(red: 0.96, green: 0.85, blue: 0.52, alpha: 1), stroke: SKColor(red: 0.40, green: 0.24, blue: 0.11, alpha: 1), lineWidth: 2.5)
         start.position = LivingWorld.position(world.definition.landmarkBadgePoint(nodeID:world.definition.startNodeID) ?? world.definition.spawn?.point ?? CGPoint(x: 285, y: 442))
@@ -281,6 +294,25 @@ final class GameScene: SKScene {
             footprint.position = LivingWorld.position(CGPoint(x: discovery.x, y: discovery.y))
             footprint.zPosition = 65
             world.addChild(footprint)
+            // Cleared-node victory banner planted beside each landmark (revealed when cleared)
+            if let nid = discovery.nodeID, let landmark = world.definition.props.first(where: { $0.nodeID == nid }) {
+                let tex = world.texture("MapPropVictoryBanner")
+                let bw: CGFloat = 40
+                let bh = bw * tex.size().height / max(1, tex.size().width)
+                let banner = SKSpriteNode(texture: tex, size: CGSize(width: bw, height: bh))
+                let bx = landmark.x + landmark.width * 0.48
+                let by = landmark.y + 8
+                banner.anchorPoint = CGPoint(x: 0.28, y: 0.05)
+                banner.position = LivingWorld.position(CGPoint(x: bx, y: by))
+                banner.zPosition = 10000 + by + 2
+                banner.isHidden = true
+                banner.name = "victory-banner-\(nid)"
+                world.effects.apply(world.effects.vegetation, to: banner,
+                                    origin: CGPoint(x: bx, y: by - bh * 0.45),
+                                    extent: CGSize(width: bw, height: bh), wind: 0.95, phase: Float(bx * 0.04))
+                world.addChild(banner)
+                victoryBanners[nid] = banner
+            }
         }
         selectionRing.zPosition = 66
         selectionRing.isHidden = true

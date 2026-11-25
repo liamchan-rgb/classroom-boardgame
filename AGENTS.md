@@ -1,3 +1,17 @@
+## 大地图 33 件 HD-2D 美术资产全面接入与实机渲染升级（2026-11-25，基于v0.32.4/build48，未改版本号、未存档）
+
+将已入库的全部 33 件大地图 HD-2D 像素资产全面接入地图生成、存档校验、Metal 实时投影/地表着色器与 SpriteKit 场景层（保持 `generatorVersion = 3` 完全兼容旧存档，同时旧存档打开也能获得实时微景、地貌底图与通关插旗升级）：
+- **地图生成与存档校验**（`MeadowWorldSupport/RandomMap.swift`、`Campaign.swift`、`RandomMapTests.swift`）：
+  - 四类节点接入全部 3 套独立建筑变体并按种子洗牌轮换：战斗（`NodeCombatOutpost`/`NodeCombatTower`/`NodeCombatDen`）、补给（`NodeRewardCache`/`NodeRewardWagon`/`NodeRewardCottage`）、Boss（`NodeBossSanctum`/`NodeBossAltar`/`NodeBossRuins`）、休息（`NodeWaystone`/`NodeShrine`/`NodePavilion`），同时抽取共享资产白名单 `MeadowMapGenerator.supportedAssets` 供 `Campaign.validate` 校验。
+  - 按连续空间地貌噪声 `biomeNoise` 与 Boss 邻近度划分圣殿苔原/金秋林/春樱草地/经典草坪四区，成簇布置 10 套新树种/灌木/多色花丛/岩石，并在开阔地与外缘优先放置林间泉池（`MapPond`）、草顶边界断崖（`MapCliffTerrace`）、古石拱门（`MapPropStoneArch`）、遗迹断柱（`MapPropRuinedPillar`）与苔藓蘑菇倒木（`MapLogMushrooms`）。
+- **Metal 地表地貌融合、林间小溪与阴影管线**（`ShadowLabGeometry.swift`、`ShadowLabShaders.metal`、`MeadowRoadMask.swift`、`MeadowShadowRenderer.swift`、`SceneDefinition.swift`、`MeadowLoader.swift`）：
+  - `ShadowLabAsset` 完整注册全部 30 件立面/地面资产，将 `MapGroundStonePlaza` / `MapPond` / `MapBridgeWood` 标记为地面贴花（不投射竖直墙体阴影），`SceneDefinition.landmarkBadgeRise` 按各新建筑实际不透明顶缘校准浮标高度。
+  - `meadowGroundFragment` 绑定 `MapGroundAutumn` / `MapGroundBlossom` / `MapGroundSanctum` 三套无缝草地底图，随世界地貌与 Boss 坐标平滑过渡；复用 `roadMask` 闲置蓝通道绘制自然避开建筑的林间小溪（水色与苔石岸边已按实机截屏精调），跨溪处放置 `MapBridgeWood` 供角色从桥面行走通过。
+- **场景微景、暖光摇曳与通关胜利旗**（`LivingWorld.swift`、`GameScene.swift`）：
+  - `LivingWorld.worldDioramaProps` 为 Boss/营地/哨堡铺设 `MapGroundStonePlaza` 石板广场，在起点营地旁布置营火（带暖光呼吸摇曳）+ 补给堆 + 吊灯柱，在补给/休息/三岔路口/Boss 旁自动点缀补给堆、路灯、路牌与断柱，路边花丛升级为四色花簇，并在外缘开阔区补充林带框景。
+  - `GameScene` 为已通关节点自动插上随风轻摆的 `MapPropVictoryBanner` 蓝金胜利旗（实时通关时带弹入动效）。
+- **实测与未实测边界**：`scripts/local-build.sh test`（工程校验、`check_custom_appearance.py`、工具单测、`ProbeCore` 8/8、`GameCore` 73/73）与 `MAC_OPEN=0 scripts/local-build.sh mac` 全部通过；Mac 实机先后验证并截取 Retina 窗口图复核了既有旧存档（含已通关节点插旗与旧图实时微景升级）以及新建 14 节点大地图的南/北半区，并依据首轮实机截屏完成了小溪避让建筑与水色柔和化、石板广场尺寸收紧、外缘林带补密与胜利旗缩放 3 项打磨及二次复拍验收（测后 `ClassroomMeadow`、`ClassroomStage0` 与 `org.personal.classroom.stage0` 偏好设置按 `diff -rq` 与 SHA-256 逐字节还原）。未在真机 iPad、外接 TV 双屏及角色实际走过木桥/触发通关插旗动画的动态流程下目视复核。
+
 ## 大地图 HD-2D 手绘地标与场景道具补齐（第 2 批 12 件，全套 33 件；2026-11-25，基于v0.32.4/build48，未改版本号、未存档）
 
 生图配额重置后，按新省额规则（每次严格单次出图 + 2×2 纯白底图集打包，共仅消耗 **3 次**生图调用）补齐上轮暂缓的全部 12 件有机手绘地标与场景道具，以独立 `.imageset` 入库 `native/ClassroomProbe/Resources/Assets.xcassets/`（未改动任何 `meadow-port-provenance.json` 锁定原文件，暂未接入大地图代码逻辑，待审图确认后接入）：

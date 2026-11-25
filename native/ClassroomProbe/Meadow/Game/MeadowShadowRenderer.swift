@@ -29,6 +29,14 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
         }
     }
 
+    private struct MeadowBiomeUniforms {
+        var boss0 = SIMD4<Float>.zero
+        var boss1 = SIMD4<Float>.zero
+        var boss2 = SIMD4<Float>.zero
+        var boss3 = SIMD4<Float>.zero
+        var params = SIMD4<Float>(0, 1, 0, 0) // x = biomePhase, y = blendStrength
+    }
+
     private struct Draw {
         let buffer: MTLBuffer
         let count: Int
@@ -49,6 +57,7 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
     private let depthState: MTLDepthStencilState
     private let receiver: MTLBuffer
     private let receiverBounds: CGRect
+    private let biomeUniforms: MeadowBiomeUniforms
     private var staticDraws: [Draw] = []
     private var textures: [String: MTLTexture] = [:]
     private var backgroundTarget: MTLTexture?
@@ -85,13 +94,21 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
     private var gpuStopped = false
 
     convenience init(device: MTLDevice, world: LivingWorld) throws {
-        try self.init(device: device, props: world.casterProps, roadMask: world.roadMask, bounds: world.worldBounds)
+        try self.init(device: device, props: world.casterProps, roadMask: world.roadMask, bounds: world.worldBounds, seed: world.definition.seed)
         world.terrain.removeFromParent()
     }
 
     init(device: MTLDevice, props: [SceneDefinition.Prop], roadMask: CGImage,
-         bounds: CGRect = LivingWorld.bounds, images: [String: CGImage] = [:], progress: ((Double, String) -> Void)? = nil) throws {
+         bounds: CGRect = LivingWorld.bounds, images: [String: CGImage] = [:], seed: UInt64 = 31827, progress: ((Double, String) -> Void)? = nil) throws {
         self.receiverBounds = bounds
+        var biome = MeadowBiomeUniforms()
+        biome.params = SIMD4<Float>(Float(Double(seed % 1024) * 0.61803398875), 1.0, 0, 0)
+        let bossCoords = props.filter { $0.asset.hasPrefix("NodeBoss") }.prefix(4).map { SIMD4<Float>(Float($0.x), Float($0.y + 26), 1, 0) }
+        if bossCoords.count > 0 { biome.boss0 = bossCoords[0] }
+        if bossCoords.count > 1 { biome.boss1 = bossCoords[1] }
+        if bossCoords.count > 2 { biome.boss2 = bossCoords[2] }
+        if bossCoords.count > 3 { biome.boss3 = bossCoords[3] }
+        self.biomeUniforms = biome
         self.device = device
         progress?(0.02, "准备投影队列")
         guard let queue = device.makeCommandQueue(), let library = device.makeDefaultLibrary() else { throw ShadowLabError.setup("地图 Metal 初始化失败") }
@@ -143,12 +160,13 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
         }
         for (index, prop) in props.enumerated() {
             guard let asset = ShadowLabAsset(rawValue: prop.asset), let image = assetImage(prop.asset) else { throw ShadowLabError.setup("未配置投影素材：\(prop.asset)") }
+            if asset.isGroundDecal { continue }
             let instance = ShadowLabInstance(asset: asset, root: Self.root(CGPoint(x: prop.x, y: prop.y)), width: Float(prop.width) / Self.units,
                                              aspect: Float(image.height) / Float(image.width), anchor: SIMD2(0.5, asset.anchorY))
             // Mutate the grouped value in place: extracting a mesh from the
             // dictionary then appending copied all preceding vertices per prop.
             groups[prop.asset, default: ShadowLabMesh()].meadowCaster(instance,
-                mirrored: prop.mirror && asset == .flowers, wind: prop.wind, phase: Float(prop.x * 0.03 + prop.y * 0.017))
+                mirrored: prop.mirror && asset.isFlower, wind: prop.wind, phase: Float(prop.x * 0.03 + prop.y * 0.017))
             progress?(0.32 + 0.40 * Double(index + 1) / Double(max(1, props.count)), "生成物件投影网格")
             casterCount += 1
         }
@@ -177,7 +195,12 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
             progress?(0.85 + Double(index + 1) / Double(HeroFrames.atlasNames.count) * 0.13, "上传人物投影图集")
         }
         guard let grass = assetImage("MeadowGround") else { throw ShadowLabError.setup("地表素材缺失") }
-        textures["MeadowGround"] = try upload(grass)
+        let grassTex = try upload(grass)
+        textures["MeadowGround"] = grassTex
+        for groundName in ["MapGroundAutumn", "MapGroundBlossom", "MapGroundSanctum"] {
+            if let img = assetImage(groundName) { textures[groundName] = try upload(img) }
+            else { textures[groundName] = grassTex }
+        }
         textures["RoadMask"] = try upload(roadMask)
         progress?(1, "完成地表投影")
     }
@@ -282,8 +305,14 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
         color.setFragmentTexture(textures["MeadowGround"], index: 0)
         color.setFragmentTexture(depthTexture, index: 1)
         color.setFragmentTexture(textures["RoadMask"], index: 2)
+        color.setFragmentTexture(textures["MapGroundAutumn"] ?? textures["MeadowGround"], index: 3)
+        color.setFragmentTexture(textures["MapGroundBlossom"] ?? textures["MeadowGround"], index: 4)
+        color.setFragmentTexture(textures["MapGroundSanctum"] ?? textures["MeadowGround"], index: 5)
         var settings = SIMD4<Float>(roads ? 1 : 0, alignment ? 1 : 0, Float(receiverBounds.height), 0)
         color.setFragmentBytes(&settings, length: MemoryLayout<SIMD4<Float>>.stride, index: 2)
+        var biome = biomeUniforms
+        if !roads { biome.params.y = 0 }
+        color.setFragmentBytes(&biome, length: MemoryLayout<MeadowBiomeUniforms>.stride, index: 3)
         color.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 6); color.endEncoding()
     }
 

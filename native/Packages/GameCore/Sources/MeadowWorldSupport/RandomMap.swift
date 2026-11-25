@@ -109,6 +109,44 @@ private struct MapRandom {
 
 public enum MeadowMapGenerator {
     public static let version = 3
+
+    /// All landmark variants per node kind; keeps Combat (red), Reward (green), Boss (gold/purple), and Rest (calm blue/warm) immediately readable.
+    public static let landmarkVariants: [NodeKind: [(asset: String, width: Double)]] = [
+        .start: [("CampTent", 105)],
+        .combat: [("NodeCombatOutpost", 90), ("NodeCombatTower", 90), ("NodeCombatDen", 92)],
+        .boss: [("NodeBossSanctum", 104), ("NodeBossAltar", 102), ("NodeBossRuins", 104)],
+        .reward: [("NodeRewardCache", 86), ("NodeRewardWagon", 92), ("NodeRewardCottage", 92)],
+        .empty: [("NodeWaystone", 76), ("NodeShrine", 80), ("NodePavilion", 84)]
+    ]
+
+    public static let landmarkAssets: [NodeKind: Set<String>] = landmarkVariants.mapValues { Set($0.map(\.asset)) }
+
+    /// Complete set of prop/landmark asset names permitted in saved campaign layouts (backward compatible with v3 saves).
+    public static let supportedAssets: Set<String> = [
+        "CampTent",
+        "NodeCombatOutpost", "NodeCombatTower", "NodeCombatDen",
+        "NodeBossSanctum", "NodeBossAltar", "NodeBossRuins",
+        "NodeRewardCache", "NodeRewardWagon", "NodeRewardCottage",
+        "NodeWaystone", "NodeShrine", "NodePavilion",
+        "OakA", "OakB", "Pines",
+        "MapTreeAutumnOak", "MapTreeAutumnMaple", "MapTreeBlossom", "MapTreePineAlpine",
+        "Shrub", "MapShrubAutumn",
+        "RockLow", "RockHigh", "RockSmall", "MapRockSlate", "MapRockAutumn",
+        "Flowers", "MapFlowersBlue", "MapFlowersCrimson", "MapFlowersLavender",
+        "MapPond", "MapBridgeWood", "MapCliffTerrace", "MapPropStoneArch",
+        "MapPropSignpost", "MapPropLanternPost", "MapPropCampfire",
+        "MapPropRuinedPillar", "MapPropSupplies", "MapLogMushrooms",
+        "MapGroundStonePlaza", "MapPropVictoryBanner"
+    ]
+
+    /// Smooth deterministic biome value in [0, 1], shared in spirit with `meadowGroundFragment` so flora matches terrain tinting.
+    public static func biomeNoise(x: Double, y: Double, seed: UInt64) -> Double {
+        let phase = Double(seed % 1024) * 0.61803398875
+        let n1 = sin(x * 0.0029 + phase) * cos(y * 0.0031 - phase * 0.7)
+        let n2 = sin((x * 0.0017 - y * 0.0021) + phase * 1.3)
+        return max(0, min(1, 0.5 + 0.34 * n1 + 0.22 * n2))
+    }
+
     public static func maximumExtraRoads(total: Int) -> Int {
         guard (4...30).contains(total) else { return 0 }
         // Preserve the previous control's conservative cycle budget. Layout is
@@ -328,21 +366,202 @@ public enum MeadowMapGenerator {
             let titles:[NodeKind:String]=[.start:"起点营地",.combat:"林间战斗",.boss:"首领遗迹",.reward:"补给棚",.empty:"林间水井"]
             let nodes=positions.indices.map{MapNode(id:$0,name:"\(titles[kinds[$0]]!) · \($0+1)",kind:kinds[$0],x:positions[$0].x/1280,y:positions[$0].y/height,reward:kinds[$0] == .reward ? NodeReward():nil)}
             let map=GameMap(nodes:nodes,roads:roads.map{MapRoad($0.from,$0.to)},seed:c.seed,revealed:Set(camps));try map.validate()
-            let catalog:[NodeKind:(String,Double)]=[.start:("CampTent",105),.combat:("NodeCombatOutpost",90),.boss:("NodeBossSanctum",104),.reward:("NodeRewardCache",86),.empty:("NodeWaystone",74)]
+            var variantRNG=MapRandom(state:c.seed ^ 0x4c414e44)
+            var variantDecks:[NodeKind:[(asset:String,width:Double)]]=[:]
+            var variantCursors:[NodeKind:Int]=[:]
+            for (kind,list) in Self.landmarkVariants {
+                var deck=list;variantRNG.shuffle(&deck);variantDecks[kind]=deck;variantCursors[kind]=0
+            }
             var props=positions.indices.map{ id -> MeadowWorldProp in
-                let (asset,width)=catalog[kinds[id]]!
-                return MeadowWorldProp(asset:asset,x:positions[id].x,y:positions[id].y-26,width:width,wind:0,nodeID:id)
+                let kind=kinds[id]
+                let deck=variantDecks[kind] ?? [("NodeWaystone",76)]
+                let cursor=variantCursors[kind] ?? 0
+                variantCursors[kind]=cursor+1
+                let pick=deck[cursor%deck.count]
+                return MeadowWorldProp(asset:pick.asset,x:positions[id].x,y:positions[id].y-26,width:pick.width,wind:0,nodeID:id)
             }
             let landmarkCount=props.count
+            let bossPositions=positions.indices.filter{kinds[$0] == .boss}.map{positions[$0]}
+            let campPositions=positions.indices.filter{kinds[$0] == .start}.map{positions[$0]}
             var decoration=MapRandom(state:c.seed ^ 0x50524f5053)
-            let assets=["OakA","OakB","Pines","RockLow","RockHigh","RockSmall","Shrub","Flowers"]
-            for _ in 0..<1800 {
-                if props.count>=c.decorationCount+landmarkCount{break}
+            let maxProps=c.decorationCount+landmarkCount
+
+            enum Zone { case sanctum, autumn, blossom, meadow }
+            func zoneAt(_ p:MeadowWorldPoint)->Zone {
+                if bossPositions.contains(where:{length($0,p)<235}) { return .sanctum }
+                let b=Self.biomeNoise(x:p.x,y:p.y,seed:c.seed)
+                if b>0.60 { return .autumn }
+                if b<0.38 { return .blossom }
+                return .meadow
+            }
+            func clearanceOK(_ p:MeadowWorldPoint,roadClear:Double=58,nodeClear:Double=84,extraPropClear:Double=0)->Bool {
+                guard self.distance(p,to:roads)>roadClear else { return false }
+                guard positions.allSatisfy({length($0,p)>nodeClear}) else { return false }
+                guard campPositions.allSatisfy({hypot($0.x-p.x,$0.y-p.y-26)>152}) else { return false }
+                return props.allSatisfy { prop in
+                    let minDist:Double
+                    if prop.nodeID != nil {
+                        minDist = prop.asset=="CampTent" ? 152 : max(126, extraPropClear)
+                    } else if prop.asset=="MapPond" || prop.asset=="MapCliffTerrace" {
+                        minDist = max(78, prop.width*0.62, extraPropClear)
+                    } else {
+                        minDist = max(36, prop.width*0.54, extraPropClear)
+                    }
+                    return hypot(prop.x-p.x,prop.y-p.y)>minDist
+                }
+            }
+            func windFor(_ asset:String)->Double {
+                if asset.hasPrefix("Rock") || asset.hasPrefix("MapRock") || asset=="MapPond" || asset=="MapCliffTerrace" || asset=="MapPropStoneArch" || asset=="MapPropRuinedPillar" || asset=="MapLogMushrooms" { return 0 }
+                return 1
+            }
+            func widthFor(_ asset:String)->Double {
+                switch asset {
+                case "Flowers","MapFlowersBlue","MapFlowersCrimson","MapFlowersLavender": return decoration.value(15,24)
+                case "Shrub","MapShrubAutumn": return decoration.value(26,38)
+                case "RockLow","RockHigh","RockSmall","MapRockSlate","MapRockAutumn": return decoration.value(70,100)
+                case "MapPond": return decoration.value(104,126)
+                case "MapCliffTerrace": return decoration.value(116,144)
+                case "MapPropStoneArch": return decoration.value(62,74)
+                case "MapPropRuinedPillar": return decoration.value(42,52)
+                case "MapLogMushrooms": return decoration.value(48,60)
+                default: return decoration.value(62,90)
+                }
+            }
+
+            // 1. Scenic focal features (ponds, border cliffs, stone arch, ruined pillars near boss, mossy logs)
+            if c.decorationCount >= 18 {
+                let targetPonds = c.total >= 12 ? 2 : 1
+                var placedPonds = 0
+                for _ in 0..<140 where placedPonds < targetPonds && props.count < maxProps {
+                    let p=MeadowWorldPoint(decoration.value(90,1190),decoration.value(85,height-95))
+                    guard clearanceOK(p,roadClear:88,nodeClear:125,extraPropClear:90) else { continue }
+                    let pw=widthFor("MapPond")
+                    props.append(MeadowWorldProp(asset:"MapPond",x:p.x,y:p.y,width:pw,wind:0))
+                    placedPonds += 1
+                    // Tuck 2 flowers beside the pond bank
+                    for _ in 0..<8 {
+                        if props.count >= maxProps { break }
+                        let ang=decoration.value(0,2 * .pi), rad=decoration.value(pw*0.58,pw*0.74)
+                        let fp=MeadowWorldPoint(p.x+cos(ang)*rad,p.y+sin(ang)*rad*0.72)
+                        if self.distance(fp,to:roads)>58 && positions.allSatisfy({length($0,fp)>84}) && campPositions.allSatisfy({hypot($0.x-fp.x,$0.y-26-fp.y)>152}) && props.allSatisfy({hypot($0.x-fp.x,$0.y-fp.y)>($0.asset=="MapPond" ? pw*0.52 : ($0.nodeID != nil ? ($0.asset=="CampTent" ? 152:126):22))}) {
+                            let fa = decoration.next()%2==0 ? "MapFlowersBlue":"Flowers"
+                            props.append(MeadowWorldProp(asset:fa,x:fp.x,y:fp.y,width:widthFor(fa),wind:1))
+                            break
+                        }
+                    }
+                }
+                // Perimeter cliff terraces framing upper/outer edges
+                let targetCliffs = min(4, max(2, c.decorationCount/28))
+                var placedCliffs = 0
+                for _ in 0..<140 where placedCliffs < targetCliffs && props.count < maxProps {
+                    let edgePick = Int(decoration.next()%4)
+                    let p:MeadowWorldPoint
+                    if edgePick < 2 { p=MeadowWorldPoint(decoration.value(40,1240),decoration.value(-55,115)) }
+                    else if edgePick == 2 { p=MeadowWorldPoint(decoration.value(-55,85),decoration.value(80,height-80)) }
+                    else { p=MeadowWorldPoint(decoration.value(1195,1335),decoration.value(80,height-80)) }
+                    guard clearanceOK(p,roadClear:72,nodeClear:112,extraPropClear:84) else { continue }
+                    props.append(MeadowWorldProp(asset:"MapCliffTerrace",x:p.x,y:p.y,width:widthFor("MapCliffTerrace"),wind:0))
+                    placedCliffs += 1
+                }
+                // Ancient ruined pillars around Boss zones
+                for boss in bossPositions {
+                    var placed = 0
+                    for _ in 0..<45 where placed < 2 && props.count < maxProps {
+                        let ang=decoration.value(0,2 * .pi), rad=decoration.value(128,215)
+                        let p=MeadowWorldPoint(boss.x+cos(ang)*rad,boss.y+sin(ang)*rad)
+                        guard (-40...1320).contains(p.x),(-40...(height+60)).contains(p.y) else { continue }
+                        guard clearanceOK(p,roadClear:64,nodeClear:105,extraPropClear:52) else { continue }
+                        props.append(MeadowWorldProp(asset:"MapPropRuinedPillar",x:p.x,y:p.y,width:widthFor("MapPropRuinedPillar"),wind:0))
+                        placed += 1
+                    }
+                }
+                // 1-2 mossy stone arches & 2-3 fallen mushroom logs in scenic woodland pockets
+                for (asset,target) in [("MapPropStoneArch", c.total >= 10 ? 2 : 1),("MapLogMushrooms", c.total >= 10 ? 3 : 2)] {
+                    var placed = 0
+                    for _ in 0..<90 where placed < target && props.count < maxProps {
+                        let p=MeadowWorldPoint(decoration.value(40,1240),decoration.value(40,height-40))
+                        guard clearanceOK(p,roadClear:68,nodeClear:105,extraPropClear:56) else { continue }
+                        props.append(MeadowWorldProp(asset:asset,x:p.x,y:p.y,width:widthFor(asset),wind:0))
+                        placed += 1
+                    }
+                }
+            }
+
+            // 2. Biome-coherent clustered groves, rocks, shrubs & wildflower meadows
+            let sanctumTrees=["MapTreePineAlpine","Pines","OakA"]
+            let autumnTrees=["MapTreeAutumnOak","MapTreeAutumnMaple","OakA"]
+            let blossomTrees=["MapTreeBlossom","OakB","OakA"]
+            let meadowTrees=["OakA","OakB","Pines","MapTreeBlossom","MapTreeAutumnOak"]
+            let sanctumFlowers=["MapFlowersLavender","MapFlowersBlue"]
+            let autumnFlowers=["MapFlowersCrimson","Flowers"]
+            let blossomFlowers=["MapFlowersBlue","MapFlowersLavender","Flowers"]
+            let meadowFlowers=["Flowers","MapFlowersBlue","MapFlowersCrimson","MapFlowersLavender"]
+
+            func pickBiomeAsset(_ zone:Zone)->String {
+                let roll=Int(decoration.next()%100)
+                switch zone {
+                case .sanctum:
+                    if roll < 44 { return sanctumTrees[Int(decoration.next()%UInt64(sanctumTrees.count))] }
+                    if roll < 70 { return decoration.next()%3 != 0 ? "MapRockSlate" : "RockLow" }
+                    if roll < 84 { return "Shrub" }
+                    return sanctumFlowers[Int(decoration.next()%UInt64(sanctumFlowers.count))]
+                case .autumn:
+                    if roll < 46 { return autumnTrees[Int(decoration.next()%UInt64(autumnTrees.count))] }
+                    if roll < 64 { return decoration.next()%3 != 0 ? "MapRockAutumn" : "RockSmall" }
+                    if roll < 82 { return "MapShrubAutumn" }
+                    return autumnFlowers[Int(decoration.next()%UInt64(autumnFlowers.count))]
+                case .blossom:
+                    if roll < 42 { return blossomTrees[Int(decoration.next()%UInt64(blossomTrees.count))] }
+                    if roll < 54 { return "RockSmall" }
+                    if roll < 70 { return "Shrub" }
+                    return blossomFlowers[Int(decoration.next()%UInt64(blossomFlowers.count))]
+                case .meadow:
+                    if roll < 44 { return meadowTrees[Int(decoration.next()%UInt64(meadowTrees.count))] }
+                    if roll < 60 { return ["RockLow","RockHigh","RockSmall"][Int(decoration.next()%3)] }
+                    if roll < 74 { return decoration.next()%3==0 ? "MapShrubAutumn" : "Shrub" }
+                    return meadowFlowers[Int(decoration.next()%UInt64(meadowFlowers.count))]
+                }
+            }
+
+            for _ in 0..<2200 {
+                if props.count>=maxProps{break}
                 let p=MeadowWorldPoint(decoration.value(-70,1350),decoration.value(-80,height+100))
-                guard self.distance(p,to:roads)>58,positions.allSatisfy({length($0,p)>84}),props.allSatisfy({hypot($0.x-p.x,$0.y-p.y)>($0.nodeID != nil ? ($0.asset=="CampTent" ? 150:130):max(42,$0.width*0.6))}) else{continue}
-                let asset=assets[Int(decoration.next()%UInt64(assets.count))]
-                let width=asset=="Flowers" ? decoration.value(14,23):asset=="Shrub" ? decoration.value(25,35):asset.hasPrefix("Rock") ? decoration.value(76,108):decoration.value(60,88)
-                props.append(MeadowWorldProp(asset:asset,x:p.x,y:p.y,width:width,wind:asset.hasPrefix("Rock") ? 0:1))
+                guard clearanceOK(p) else{continue}
+                let zone=zoneAt(p)
+                let asset=pickBiomeAsset(zone)
+                let w=widthFor(asset)
+                props.append(MeadowWorldProp(asset:asset,x:p.x,y:p.y,width:w,wind:windFor(asset)))
+
+                // Cluster companion trees, shrubs, or flower patches for organic groves instead of uniform confetti
+                let isTree = asset=="OakA" || asset=="OakB" || asset=="Pines" || asset.hasPrefix("MapTree")
+                let isFlower = asset=="Flowers" || asset.hasPrefix("MapFlowers")
+                if isTree && props.count < maxProps && decoration.next()%100 < 58 {
+                    let count = decoration.next()%2==0 ? 1 : 2
+                    for _ in 0..<count where props.count < maxProps {
+                        let ang=decoration.value(0,2 * .pi), rad=decoration.value(44,76)
+                        let cp=MeadowWorldPoint(p.x+cos(ang)*rad,p.y+sin(ang)*rad*0.78)
+                        guard (-80...1360).contains(cp.x),(-90...(height+110)).contains(cp.y) else { continue }
+                        guard clearanceOK(cp,roadClear:58,nodeClear:84,extraPropClear:0) else { continue }
+                        let subRoll=Int(decoration.next()%100)
+                        let companion:String
+                        if subRoll < 50 { companion = asset }
+                        else if subRoll < 78 { companion = zone == .autumn ? "MapShrubAutumn" : "Shrub" }
+                        else {
+                            let fl = zone == .sanctum ? sanctumFlowers : zone == .autumn ? autumnFlowers : zone == .blossom ? blossomFlowers : meadowFlowers
+                            companion = fl[Int(decoration.next()%UInt64(fl.count))]
+                        }
+                        props.append(MeadowWorldProp(asset:companion,x:cp.x,y:cp.y,width:widthFor(companion),wind:windFor(companion)))
+                    }
+                } else if isFlower && props.count < maxProps && decoration.next()%100 < 65 {
+                    let count = 1 + Int(decoration.next()%2)
+                    for _ in 0..<count where props.count < maxProps {
+                        let ang=decoration.value(0,2 * .pi), rad=decoration.value(18,34)
+                        let cp=MeadowWorldPoint(p.x+cos(ang)*rad,p.y+sin(ang)*rad*0.8)
+                        guard self.distance(cp,to:roads)>58,positions.allSatisfy({length($0,cp)>84}),campPositions.allSatisfy({hypot($0.x-cp.x,$0.y-26-cp.y)>152}) else { continue }
+                        guard props.allSatisfy({hypot($0.x-cp.x,$0.y-cp.y)>($0.nodeID != nil ? ($0.asset=="CampTent" ? 152:126):14)}) else { continue }
+                        props.append(MeadowWorldProp(asset:asset,x:cp.x,y:cp.y,width:widthFor(asset),wind:1))
+                    }
+                }
             }
             return GeneratedMeadowMap(generatorVersion:version,configuration:c,map:map,roads:roads,props:props,coordinateHeight:height,spawn:positions[start])
         }

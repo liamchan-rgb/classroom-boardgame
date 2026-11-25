@@ -24,14 +24,20 @@ enum MeadowLoader {
                 report(0.02, "读取地图")
                 let definition = supplied ?? SceneDefinition.load()
                 let network = TrailNetwork(roads: definition.roads, patrolStart: definition.startNodeID)
-                let mask = MeadowRoadMask.make(network: network, bounds: definition.worldBounds) {
+                let nodePoints = definition.props.filter { $0.nodeID != nil }.map { CGPoint(x: $0.x, y: $0.y + 26) }
+                let brook = MeadowRoadMask.findBrookCrossing(network: network, nodePoints: nodePoints, seed: definition.seed)
+                let mask = MeadowRoadMask.makeWithBrook(network: network, bounds: definition.worldBounds, brook: brook) {
                     report(0.05 + $0 * 0.22, "准备道路")
                 }
-                let props = definition.props + LivingWorld.meadowDetails(definition: definition, network: network)
-                    + LivingWorld.roadsideGrass(network: network)
+                let props = definition.props
+                    + LivingWorld.worldDioramaProps(definition: definition, network: network, bridge: brook)
+                    + LivingWorld.meadowDetails(definition: definition, network: network)
+                    + LivingWorld.roadsideGrass(network: network, seed: definition.seed)
                 var images: [String: CGImage] = [:]
                 var textures: [String: SKTexture] = [:]
-                let names = Set(props.map(\.asset) + ["MeadowGround", "Banner"]
+                let names = Set(props.map(\.asset)
+                    + ["MeadowGround", "MapGroundAutumn", "MapGroundBlossom", "MapGroundSanctum",
+                       "MapGroundStonePlaza", "MapPropVictoryBanner", "Banner", "OakA", "Flowers"]
                     + HeroFrames.atlasNames).sorted()
                 for (index, name) in names.enumerated() {
                     guard let image = (HeroFrames.isGenerated(name) ? HeroFrames.image(named: name) : UIImage(named: name))?.cgImage else { throw ShadowLabError.setup("素材缺失：\(name)") }
@@ -42,7 +48,7 @@ enum MeadowLoader {
                 if let device {
                     report(0.50, "准备实时投影")
                     var lastStage = ""
-                    renderer = try MeadowShadowRenderer(device: device, props: props, roadMask: mask, bounds: definition.worldBounds, images: images) {
+                    renderer = try MeadowShadowRenderer(device: device, props: props, roadMask: mask, bounds: definition.worldBounds, images: images, seed: definition.seed) {
                         report(0.50 + $0 * 0.23, $1)
                         if diagnosticSize != nil, lastStage != $1 {
                             lastStage = $1

@@ -30,13 +30,57 @@ struct ShadowLabFrame {
 
 enum ShadowLabAsset: String {
     case tree = "OakA", oakB = "OakB", pines = "Pines", tower = "WatchTower", hero = "Hero1Directions"
-    case tent = "CampTent", fence = "Fence", rockLow = "RockLow", rockHigh = "RockHigh", rockSmall = "RockSmall", shrub = "Shrub", flowers = "Flowers", banner = "Banner"
-    case combatOutpost = "NodeCombatOutpost", bossSanctum = "NodeBossSanctum", rewardCache = "NodeRewardCache", waystone = "NodeWaystone"
-    var isNodeLandmark: Bool { [.combatOutpost,.bossSanctum,.rewardCache,.waystone].contains(self) }
+    case treeAutumnOak = "MapTreeAutumnOak", treeAutumnMaple = "MapTreeAutumnMaple"
+    case treeBlossom = "MapTreeBlossom", treePineAlpine = "MapTreePineAlpine"
+    case tent = "CampTent", fence = "Fence"
+    case rockLow = "RockLow", rockHigh = "RockHigh", rockSmall = "RockSmall"
+    case rockSlate = "MapRockSlate", rockAutumn = "MapRockAutumn", cliffTerrace = "MapCliffTerrace"
+    case shrub = "Shrub", shrubAutumn = "MapShrubAutumn"
+    case flowers = "Flowers", flowersBlue = "MapFlowersBlue", flowersCrimson = "MapFlowersCrimson", flowersLavender = "MapFlowersLavender"
+    case banner = "Banner", victoryBanner = "MapPropVictoryBanner"
+    case combatOutpost = "NodeCombatOutpost", combatTower = "NodeCombatTower", combatDen = "NodeCombatDen"
+    case bossSanctum = "NodeBossSanctum", bossAltar = "NodeBossAltar", bossRuins = "NodeBossRuins"
+    case rewardCache = "NodeRewardCache", rewardWagon = "NodeRewardWagon", rewardCottage = "NodeRewardCottage"
+    case waystone = "NodeWaystone", shrine = "NodeShrine", pavilion = "NodePavilion"
+    case groundStonePlaza = "MapGroundStonePlaza", pond = "MapPond", bridgeWood = "MapBridgeWood"
+    case stoneArch = "MapPropStoneArch", signpost = "MapPropSignpost", lanternPost = "MapPropLanternPost"
+    case campfire = "MapPropCampfire", ruinedPillar = "MapPropRuinedPillar", supplies = "MapPropSupplies", logMushrooms = "MapLogMushrooms"
+
+    var isNodeLandmark: Bool {
+        switch self {
+        case .combatOutpost, .combatTower, .combatDen,
+             .bossSanctum, .bossAltar, .bossRuins,
+             .rewardCache, .rewardWagon, .rewardCottage,
+             .waystone, .shrine, .pavilion:
+            return true
+        default:
+            return false
+        }
+    }
+    var isFlower: Bool {
+        switch self {
+        case .flowers, .flowersBlue, .flowersCrimson, .flowersLavender: return true
+        default: return false
+        }
+    }
+    var isShrub: Bool { self == .shrub || self == .shrubAutumn }
+    var isGroundDecal: Bool { self == .groundStonePlaza || self == .pond || self == .bridgeWood }
     var casterKind: Float {
-        switch self { case .tree, .oakB, .pines: return 0; case .tower: return 1; case .hero: return 2
-        case .tent, .combatOutpost, .bossSanctum, .rewardCache, .waystone: return 3; case .fence: return 4; case .rockLow, .rockHigh, .rockSmall: return 5
-        case .shrub: return 6; case .flowers: return 7; case .banner: return 8 }
+        switch self {
+        case .tree, .oakB, .pines, .treeAutumnOak, .treeAutumnMaple, .treeBlossom, .treePineAlpine: return 0
+        case .tower: return 1
+        case .hero: return 2
+        case .tent, .combatOutpost, .combatTower, .combatDen,
+             .bossSanctum, .bossAltar, .bossRuins,
+             .rewardCache, .rewardWagon, .rewardCottage,
+             .waystone, .shrine, .pavilion, .stoneArch, .ruinedPillar: return 3
+        case .fence, .signpost, .lanternPost: return 4
+        case .rockLow, .rockHigh, .rockSmall, .rockSlate, .rockAutumn, .cliffTerrace, .logMushrooms: return 5
+        case .shrub, .shrubAutumn, .campfire, .supplies: return 6
+        case .flowers, .flowersBlue, .flowersCrimson, .flowersLavender: return 7
+        case .banner, .victoryBanner: return 8
+        case .groundStonePlaza, .pond, .bridgeWood: return 9
+        }
     }
     var isTree: Bool { casterKind == 0 }
     /// Centers of the painted post bases in Fence.png (top-origin UV).
@@ -47,10 +91,23 @@ enum ShadowLabAsset: String {
         return left.y + (u - left.x) * (right.y - left.y) / (right.x - left.x)
     }
     var anchorY: Float {
-        switch self { case .tree, .oakB, .pines: return 0.09; case .tower: return 0.14
-        case .combatOutpost, .bossSanctum, .rewardCache, .waystone: return 0.08
-        case .hero: return 0.125; case .tent: return 0.10; case .rockLow, .rockHigh, .rockSmall: return 0.10
-        case .fence: return 0.08; case .shrub, .flowers: return 0.04; case .banner: return 0.04 }
+        switch self {
+        case .tree, .oakB, .pines, .treeAutumnOak, .treeAutumnMaple, .treeBlossom, .treePineAlpine: return 0.09
+        case .tower: return 0.14
+        case .combatOutpost, .combatTower, .combatDen,
+             .bossSanctum, .bossAltar, .bossRuins,
+             .rewardCache, .rewardWagon, .rewardCottage,
+             .waystone, .shrine, .pavilion: return 0.08
+        case .hero: return 0.125
+        case .tent: return 0.10
+        case .rockLow, .rockHigh, .rockSmall, .rockSlate, .rockAutumn: return 0.10
+        case .cliffTerrace: return 0.08
+        case .fence, .stoneArch, .supplies, .logMushrooms: return 0.08
+        case .campfire: return 0.12
+        case .signpost, .lanternPost, .ruinedPillar, .victoryBanner: return 0.05
+        case .shrub, .shrubAutumn, .flowers, .flowersBlue, .flowersCrimson, .flowersLavender, .banner: return 0.04
+        case .groundStonePlaza, .pond, .bridgeWood: return 0.50
+        }
     }
 }
 
@@ -166,7 +223,7 @@ struct ShadowLabMesh {
             let t = max(0, min(1, (x - a) / (b - a)))
             return t * t * (3 - 2 * t)
         }
-        let small = instance.asset == .flowers || instance.asset == .shrub || instance.asset == .fence || instance.asset == .banner
+        let small = instance.asset.isFlower || instance.asset.isShrub || instance.asset == .fence || instance.asset == .banner || instance.asset == .victoryBanner || instance.asset == .signpost || instance.asset == .lanternPost || instance.asset == .campfire || instance.asset == .supplies
         let columns = small ? 4 : (instance.asset == .hero ? 8 : 16)
         let rows = small ? 8 : 32
         let roofDepth = instance.asset == .tower ? instance.proxyCenter.y - instance.root.y : 0
@@ -176,7 +233,7 @@ struct ShadowLabMesh {
             let screenUp = (point.y - instance.anchor.y) * instance.screenHeight
             var depth: Float
             switch instance.asset {
-            case .tree, .oakB, .pines:
+            case .tree, .oakB, .pines, .treeAutumnOak, .treeAutumnMaple, .treeBlossom, .treePineAlpine:
                 let canopy = 1 - smooth(0.70, 0.86, v)
                 let back = 1 - smooth(0.23, 0.39, v)
                 let front = smooth(0.57, 0.72, v)
@@ -201,12 +258,12 @@ struct ShadowLabMesh {
             case .fence:
                 let groundV = ShadowLabAsset.fenceGroundV(at: u)
                 depth = (1 - groundV - instance.anchor.y) * instance.screenHeight / ShadowLabMath.cameraUp.y
-            case .tent, .rockLow, .rockHigh, .rockSmall, .shrub, .flowers, .banner, .combatOutpost, .bossSanctum, .rewardCache, .waystone:
+            default:
                 // A sloping footprint keeps the lower art on the receiver;
                 // raised details retain their alpha silhouette above it.
                 let footV = 1 - instance.anchor.y - 0.09 * abs(u - 0.5) * 2
                 let footprint = (1 - footV - instance.anchor.y) * instance.screenHeight / ShadowLabMath.cameraUp.y
-                let volume: Float = (instance.asset == .tent || instance.asset.isNodeLandmark) ? 0.18 : 0.07
+                let volume: Float = (instance.asset == .tent || instance.asset.isNodeLandmark || instance.asset == .stoneArch || instance.asset == .cliffTerrace) ? 0.18 : 0.07
                 depth = footprint + sin(u * .pi) * volume * instance.width * (1 - smooth(0.40, 0.88, v))
             }
             var height = (screenUp - depth * ShadowLabMath.cameraUp.y) / ShadowLabMath.cameraUp.z

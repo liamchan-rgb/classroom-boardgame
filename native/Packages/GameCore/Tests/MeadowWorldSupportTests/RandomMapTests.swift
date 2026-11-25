@@ -13,13 +13,13 @@ final class RandomMapTests: XCTestCase {
             let landmarks=result.props.filter{$0.nodeID != nil}
             XCTAssertEqual(landmarks.count,n)
             XCTAssertEqual(Set(landmarks.compactMap(\.nodeID)),Set(result.map.nodes.map(\.id)))
-            let assets:[NodeKind:String]=[.start:"CampTent",.combat:"NodeCombatOutpost",.boss:"NodeBossSanctum",.reward:"NodeRewardCache",.empty:"NodeWaystone"]
             for node in result.map.nodes {
                 let building=landmarks.first{$0.nodeID==node.id}!
-                XCTAssertEqual(building.asset,assets[node.kind])
+                XCTAssertTrue(MeadowMapGenerator.landmarkAssets[node.kind]!.contains(building.asset), "unexpected landmark \(building.asset) for \(node.kind)")
                 XCTAssertEqual(building.x,node.x*1280,accuracy:0.000001)
                 XCTAssertEqual(building.y+26,node.y*result.coordinateHeight,accuracy:0.000001)
             }
+            XCTAssertTrue(result.props.allSatisfy{MeadowMapGenerator.supportedAssets.contains($0.asset)})
             XCTAssertEqual(result.map.nodes.filter{$0.kind == .start}.count,1)
             for (kind,count) in [(NodeKind.combat,c.combat),(.boss,c.boss),(.reward,c.reward),(.empty,c.empty)] {
                 XCTAssertEqual(result.map.nodes.filter{$0.kind==kind}.count,count)

@@ -45,9 +45,21 @@ struct SceneDefinition: Codable {
     // Rise from the foot to the actual opaque PNG top, including each asset's
     // aspect and alpha margin. A short roof badge never floats at canvas top.
     static func landmarkBadgeRise(asset: String, width: CGFloat) -> CGFloat {
-        let rises:[String:CGFloat]=["CampTent":(404*0.90-8)/607,
-            "NodeCombatOutpost":0.92-43/512.0,"NodeBossSanctum":0.92-38/512.0,
-            "NodeRewardCache":0.92-102/512.0,"NodeWaystone":0.92-17/512.0]
+        let rises:[String:CGFloat]=[
+            "CampTent":(404*0.90-8)/607,
+            "NodeCombatOutpost":0.92-43/512.0,
+            "NodeCombatTower":0.92-24/512.0,
+            "NodeCombatDen":0.92-73/512.0,
+            "NodeBossSanctum":0.92-38/512.0,
+            "NodeBossAltar":0.92-73/512.0,
+            "NodeBossRuins":0.92-47/512.0,
+            "NodeRewardCache":0.92-102/512.0,
+            "NodeRewardWagon":0.92-79/512.0,
+            "NodeRewardCottage":0.92-45/512.0,
+            "NodeWaystone":0.92-17/512.0,
+            "NodeShrine":0.92-24/512.0,
+            "NodePavilion":0.92-24/512.0
+        ]
         return width*(rises[asset] ?? 0.92)+14
     }
     func landmarkBadgePoint(nodeID: Int?) -> CGPoint? {

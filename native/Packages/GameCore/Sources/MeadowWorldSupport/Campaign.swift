@@ -79,7 +79,7 @@ public struct MeadowCampaignSave:Codable,Equatable {
             guard Set(checkpoints.map(\.operationID)).count==checkpoints.count,checkpoints.allSatisfy({operations.contains($0.operationID)}) else{throw GameError("历史移动快照无效。")}
         }
         let ids=Set(layout.map.nodes.map(\.id))
-        let assets=Set(["CampTent","NodeCombatOutpost","NodeBossSanctum","NodeRewardCache","NodeWaystone","OakA","OakB","Pines","RockLow","RockHigh","RockSmall","Shrub","Flowers"])
+        let assets=MeadowMapGenerator.supportedAssets
         guard layout.props.allSatisfy({assets.contains($0.asset)}),archive.state.units.values.filter({$0.kind == .monster}).allSatisfy({u in
             archive.catalog.monsters.contains(where:{$0.id==u.templateID}) && (u.id=="m-\(u.nodeID)-1" || u.id=="m-\(u.nodeID)-2" || u.id=="m-\(u.nodeID)-3")
         }) else {throw GameError("探索资源或怪物数据不受支持。")}

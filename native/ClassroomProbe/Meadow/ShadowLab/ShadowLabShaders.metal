@@ -140,22 +140,70 @@ float meadowNoise(float2 p) {
     return mix(mix(meadowHash(i), meadowHash(i + float2(1, 0)), f.x),
                mix(meadowHash(i + float2(0, 1)), meadowHash(i + 1), f.x), f.y);
 }
+struct MeadowBiomeUniforms {
+    float4 bossPoints[4]; // xy = world point in map pixels, z = active (>0.5), w = unused
+    float4 params;        // x = biomePhase, y = biomeBlendStrength, z = unused, w = unused
+};
+
+float3 sampleScatteredGround(texture2d<float> tex, sampler tile, float2 uv, float2 a, float2 b, float2 c, float2 d, float2 weight) {
+    float3 sa = tex.sample(tile, uv + float2(meadowHash(a), meadowHash(a + 17.3))).rgb;
+    float3 sb = tex.sample(tile, uv + float2(meadowHash(b), meadowHash(b + 17.3))).rgb;
+    float3 sc = tex.sample(tile, uv + float2(meadowHash(c), meadowHash(c + 17.3))).rgb;
+    float3 sd = tex.sample(tile, uv + float2(meadowHash(d), meadowHash(d + 17.3))).rgb;
+    return mix(mix(sa, sb, weight.x), mix(sc, sd, weight.x), weight.y);
+}
+
 fragment float4 meadowGroundFragment(LabRaster in [[stage_in]], constant LabUniforms &u [[buffer(1)]],
-                                    constant float4 &settings [[buffer(2)]], texture2d<float> grassTexture [[texture(0)]],
-                                    depth2d<float> shadowMap [[texture(1)]], texture2d<float> roadMask [[texture(2)]]) {
+                                    constant float4 &settings [[buffer(2)]],
+                                    constant MeadowBiomeUniforms &biome [[buffer(3)]],
+                                    texture2d<float> grassTexture [[texture(0)]],
+                                    depth2d<float> shadowMap [[texture(1)]],
+                                    texture2d<float> roadMask [[texture(2)]],
+                                    texture2d<float> autumnTexture [[texture(3)]],
+                                    texture2d<float> blossomTexture [[texture(4)]],
+                                    texture2d<float> sanctumTexture [[texture(5)]]) {
     constexpr sampler tile(coord::normalized, address::repeat, filter::linear);
     constexpr sampler maskSampler(coord::normalized, address::clamp_to_edge, filter::linear);
     float2 p = float2(in.world.x * 32 + 640, 360 - in.world.y * 32 * 0.8137334712);
     float2 cell = floor(p / 190), weight = smoothstep(0.0, 1.0, fract(p / 190));
     float2 uv = p / 440;
     float2 a = cell, b = cell + float2(1, 0), c = cell + float2(0, 1), d = cell + 1;
-    float3 sa = grassTexture.sample(tile, uv + float2(meadowHash(a), meadowHash(a + 17.3))).rgb;
-    float3 sb = grassTexture.sample(tile, uv + float2(meadowHash(b), meadowHash(b + 17.3))).rgb;
-    float3 sc = grassTexture.sample(tile, uv + float2(meadowHash(c), meadowHash(c + 17.3))).rgb;
-    float3 sd = grassTexture.sample(tile, uv + float2(meadowHash(d), meadowHash(d + 17.3))).rgb;
-    float3 grass = mix(mix(sa, sb, weight.x), mix(sc, sd, weight.x), weight.y);
-    grass = mix(grass, float3(0.25, 0.34, 0.12), 0.15 + (1 - meadowNoise(p * 0.0037)) * 0.10);
-    grass = mix(float3(dot(grass, float3(0.299, 0.587, 0.114))), grass, 0.88);
+    float3 grass = sampleScatteredGround(grassTexture, tile, uv, a, b, c, d, weight);
+
+    // Coherent world-space biome blending matching RandomMap's biomeNoise + Boss Sanctum zones
+    float biomeStrength = biome.params.y;
+    if (biomeStrength > 0.01) {
+        float phase = biome.params.x;
+        float n1 = sin(p.x * 0.0029 + phase) * cos(p.y * 0.0031 - phase * 0.7);
+        float n2 = sin((p.x * 0.0017 - p.y * 0.0021) + phase * 1.3);
+        float edgeJitter = (meadowNoise(p * 0.018) - 0.5) * 0.14;
+        float bVal = clamp(0.5 + 0.34 * n1 + 0.22 * n2 + edgeJitter, 0.0, 1.0);
+        float autumnW = smoothstep(0.55, 0.74, bVal) * 0.78 * biomeStrength;
+        float blossomW = (1.0 - smoothstep(0.24, 0.43, bVal)) * 0.68 * biomeStrength;
+        float sanctumW = 0.0;
+        for (int bi = 0; bi < 4; bi++) {
+            if (biome.bossPoints[bi].z > 0.5) {
+                float dist = length(p - biome.bossPoints[bi].xy) + edgeJitter * 140.0;
+                sanctumW = max(sanctumW, (1.0 - smoothstep(100.0, 265.0, dist)) * 0.86);
+            }
+        }
+        sanctumW *= biomeStrength;
+        if (autumnW > 0.01) {
+            float3 aut = sampleScatteredGround(autumnTexture, tile, uv, a, b, c, d, weight);
+            grass = mix(grass, aut, autumnW);
+        }
+        if (blossomW > 0.01) {
+            float3 bls = sampleScatteredGround(blossomTexture, tile, uv, a, b, c, d, weight);
+            grass = mix(grass, bls, blossomW);
+        }
+        if (sanctumW > 0.01) {
+            float3 snc = sampleScatteredGround(sanctumTexture, tile, uv, a, b, c, d, weight);
+            grass = mix(grass, snc, sanctumW);
+        }
+    }
+
+    grass = mix(grass, float3(0.25, 0.34, 0.12), 0.10 + (1 - meadowNoise(p * 0.0037)) * 0.08);
+    grass = mix(float3(dot(grass, float3(0.299, 0.587, 0.114))), grass, 0.92);
     float2 maskUV = (p - float2(-160, -220)) / float2(1600, settings.z > 0 ? settings.z : 1160);
     float4 mask = roadMask.sample(maskSampler, maskUV);
     float edge = meadowNoise(p * 0.23) * 0.58 + meadowNoise(p * 0.73) * 0.28 + meadowHash(floor(p * 1.6)) * 0.14;
@@ -168,9 +216,30 @@ fragment float4 meadowGroundFragment(LabRaster in [[stage_in]], constant LabUnif
     soil = mix(soil, float3(0.53, 0.50, 0.37), stones * 0.40);
     float sparse = smoothstep(0.42, 0.72, meadowNoise(p * 0.31)) * (1 - coverage * 0.78);
     float roadAlpha = coverage * (0.78 + patches * 0.10) * (1 - sparse * 0.70);
+    float3 terrain = mix(grass, soil, roadAlpha);
+
+    // Sparkling forest brook encoded in roadMask.b (paired with MapBridgeWood over the road crossing)
+    float brookRaw = mask.b * settings.x;
+    if (brookRaw > 0.02) {
+        float bankEdge = smoothstep(0.06 + edge * 0.12, 0.34 + edge * 0.08, brookRaw);
+        float waterMask = smoothstep(0.34 + edge * 0.09, 0.58 + edge * 0.06, brookRaw);
+        float3 wetBank = mix(float3(0.22, 0.25, 0.14), float3(0.42, 0.39, 0.29), smoothstep(0.38, 0.76, meadowNoise(p * 0.38)));
+        terrain = mix(terrain, wetBank, bankEdge * (1.0 - waterMask * 0.55) * 0.76);
+        float flow = u.sunTime.w * 8.5;
+        float ripple1 = meadowNoise(float2(p.x * 0.16 + sin(p.y * 0.09) * 1.4, p.y * 0.10 - flow * 0.24));
+        float ripple2 = meadowNoise(float2(p.x * 0.28, p.y * 0.18 - flow * 0.38 + 7.1));
+        float depth = smoothstep(0.40, 0.92, brookRaw);
+        float3 shallowCol = float3(0.21, 0.49, 0.52);
+        float3 deepCol = float3(0.11, 0.31, 0.39);
+        float3 water = mix(shallowCol, deepCol, depth * 0.72);
+        float shimmer = smoothstep(0.68, 0.89, ripple1 * 0.6 + ripple2 * 0.4);
+        water = mix(water, float3(0.76, 0.90, 0.86), shimmer * 0.42);
+        terrain = mix(terrain, water, waterMask * 0.92);
+    }
+
     float cloud = smoothstep(0.25, 0.76, meadowNoise((p - float2(u.sunTime.w * 14, u.sunTime.w * 5)) * 0.0065));
     float light = 0.65 + cloud * 0.36 + exp(-length(p - float2(-100, -170)) * 0.0012) * 0.07;
-    float3 base = mix(grass, soil, roadAlpha) * light;
+    float3 base = terrain * light;
     float visibility = labVisibility(in.world, u, shadowMap);
     float marker = min(distance(p, float2(540, 300)), min(distance(p, float2(740, 300)), distance(p, float2(640, 440))));
     if (settings.y > 0.5 && marker < 8) return float4(0, 1, 1, 1);
