@@ -21,8 +21,8 @@ final class KeyHostingController<Content: View>: UIHostingController<Content> {
     /// Ends typing in any field (taps on option buttons do this, so letter keys pick again).
     static func endEditing() { UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil) }
     override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
-        // An answer is showing: Esc ends the reveal first (the panel's own Esc would close it).
-        if presses.contains(where: { $0.key?.keyCode == .keyboardEscape }), TeacherSession.shared.game.skipQuizReveal() { return }
+        // An answer is showing: Esc or Space ends the reveal first (advancing any waiting mini-game).
+        if presses.contains(where: { $0.key?.keyCode == .keyboardEscape || $0.key?.keyCode == .keyboardSpacebar }), !UIResponder.classroomTyping, TeacherSession.shared.game.skipQuizReveal() { return }
         var handled = false
         for press in presses { if let key = press.key, let token = ClassroomShortcuts.panelToken(key), onKey?(token) == true { handled = true } }
         if handled { return }

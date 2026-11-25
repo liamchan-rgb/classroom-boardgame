@@ -1,3 +1,18 @@
+## 课堂小游戏计分联动、擂台闪卡双人记分、地图防误触与边界缺陷修复（2026-11-25，基于v0.32.4/build48，未改版本号、未存档）
+
+按课堂实测审计与用户确认的规则口径，全面修复课堂小游戏核心判定、答题联动、地图防误触与节奏问题：
+- **全班打Boss / 守护营地未勾选学生口径与结算联动**（`MeadowWorldSupport/ClassroomMiniGames.swift`、`MeadowTeacherCoordinator.swift`、`ClassroomQuiz.swift`、`ClassroomMiniGames.swift`）：
+  - `MiniGameRound` 新增 `applyingSkipped(_:recordAsWrong:)`；当打 Boss 或守护营地存在未勾选学生时，复用既有「没选到：... 记入错题 / 不记」提示条并在教师确认后再统计正确率结算（记入错题则补记为答错计入分母，不记则仅按已选学生结算；切下一题或关闭面板时自动按不记结算防止丢轮次）。
+- **擂台王双人独立记分与全班闪卡逐人记分**（`ClassroomQuiz.swift`、`MeadowTeacherCoordinator.swift`）：
+  - `ClassQuizPanel` 为全班闪卡（及擂台王多小题）新增逐人「对 / 错」网格 `ClassFlashcardGrid`（支持一键全班对/错、单人点选及 `1–7 + D/C` 键盘记分）；擂台王开启时置顶金色「擂台双人独立记分」卡片（含擂主/挑战徽标、漏标提示与可折叠其他同学区，避免 Mac Catalyst `ScrollView` 内 `DisclosureGroup` 子树丢失问题），支持同一闪卡内分别记录一方答对、一方答错；答题赛跑同步在逐人列表中置顶并标注本轮成员。
+- **保留指定答题联动并消除误伤状态**（`MeadowWorldSupport/ClassroomMiniGames.swift`、`MeadowTeacherCoordinator.swift`、`ClassroomMiniGames.swift`）：
+  - 地图指定答题与顶部「指定答题（个人挑战）」均以 `singleStudent: true` 接入小游戏（闪卡练习 `K` 按用户要求保持独立）；`RaceTrack.resolve` 忽略非本轮队伍的个人作答不误判失败；`ArenaKing.resolve` 忽略旁观者作答，并对擂主/挑战者的单独作答进行暂存配对（双方均作答后再结算，全班题自动清空暂存并覆盖）。
+- **底层地图暂停/防误触、揭晓提速与边界清理**（`MeadowTeacherCoordinator.swift`、`MeadowTeacherDashboard.swift`、`ClassroomMiniGames.swift`、`App.swift`、`MeadowQuizAnswerPanel.swift`）：
+  - 开启小游戏时自动暂停行军并取消战斗敌方 AI；`tick()`、`classroomAdvanceTravel`、画布点击/拖拽/缩放、战斗操作与快捷键及顶部地图/战斗操作栏均加 `miniGame == nil` 防护并显示锁定提示（保留行囊/商店/队伍/转盘上层浮窗可用）。
+  - 小游戏期间答题揭晓时长缩短为 1.8 秒（原 5 秒），支持点击画面、按 `Esc` / 空格或点底栏「立即推进」随时跳过等待，并以唯一递增 ID 替换 `MiniGameModel.queue` 兜底定时器防止重复轮次误触发。
+  - 边界收口：`install(_:)` 切图/读档自动结束残留小游戏与未完成答题；`MiniGameSide.sides` 在分队模式下保留未分队（`teamID == nil`）学生为独立参赛方并修正队名与配色；翻牌寻宝全面隔离全班/个人答题喂入；`只揭晓 (Esc)` 清除上一题残留的「没选到」提示条。
+- **实测与未实测边界**：`scripts/local-build.sh test`（工程校验、工具单测、`ProbeCore` 8/8、`GameCore` 4 个测试目标全部通过，含 `MiniGameTests` 13/13 新增未选学生分母、单人赛跑/擂台防误伤、未分队学生保留单测）与 Mac Catalyst Release 编译均通过；Mac 版后台静默（不弹窗抢焦）实机验证并截取 Retina 窗口图复核了打 Boss 地图锁定与未选学生「记入错题」后 Boss 反击扣心、`只揭晓` +「立即推进」、擂台王闪卡双人一错一对触发登台动画全流程（测后 `ClassroomMeadow`、`ClassroomStage0` 及 `org.personal.classroom.stage0` 偏好设置按 `diff -rq` 与 SHA-256 逐字节还原）。未在真机 iPad、外接 TV 双屏及真实战斗中暂停/恢复的场景下目视复核。
+
 ## 程序化人物自定义美术资源大幅扩充（2026-11-25，基于v0.32.4/build48，未改版本号、未存档）
 
 沿用现有 `pixel-baker.js` 的 32-bit HD-2D 程序化像素绘制管线（OKLab 五阶色板、Bayer 抖动、法线光照、自动明暗轮廓与分层投射阴影），大幅扩充人物自定义的外观资源并打通全端渲染与界面：

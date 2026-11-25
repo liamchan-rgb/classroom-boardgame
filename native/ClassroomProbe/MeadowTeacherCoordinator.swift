@@ -75,10 +75,24 @@ final class MeadowTeacherCoordinator:ObservableObject {
     /// question list / flash-card panel (not a dialog), so the next question can be picked meanwhile.
     @Published var skippedPrompt:SkippedPrompt?
     struct SkippedPrompt:Equatable {
+        struct PendingMiniGame:Equatable {
+            let question:Int
+            let answers:[MiniGameAnswer]
+            let kindTitle:String
+        }
         let question:Int
         let ids:[String]
         let names:String
         let practice:Bool
+        var pendingMiniGame:PendingMiniGame?=nil
+    }
+    /// If a Boss/Camp round was waiting on the skipped-students prompt, settle it without marking mistakes and clear the prompt.
+    func flushPendingSkippedMiniGame(){
+        guard let prompt=skippedPrompt else{return}
+        skippedPrompt=nil
+        if let pending=prompt.pendingMiniGame {
+            feedMiniGame(question:pending.question,answers:pending.answers)
+        }
     }
     /// The flash card just made from the notes and put to the class (front, course): Esc on it raises its difficulty.
     /// The trip-bank question last called up from the notes (double-click): if nobody gets it right it goes up a star.
@@ -300,6 +314,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
             model.coins += a.coins;model.score += a.score
             live.attempt=shown(a,live);live.hold=1.6;live.dropName=a.drop.flatMap{try? c.engine.catalog.item($0).name}
             quiz=live
+            feedMiniGame(question:live.index,answers:[MiniGameAnswer(player:model.player,right:a.rightCount==a.correct.count)],singleStudent:true)
             // 老师点选: the list is back at once, so the next question can be picked while this answer shows.
             if QuizDrawSettings.shared.mode == .manual {model.phase = .picking;model.draft=nil}
             renderer?.classroomRefresh();revision += 1
@@ -389,8 +404,9 @@ final class MeadowTeacherCoordinator:ObservableObject {
         do{
             let attempt=try c.recordQuiz(actor:live.player,question:live.index,picks:recorded(r.picks,live),texts:r.texts,seconds:Date().timeIntervalSince(live.start),free:live.node==nil,askedAt:live.start)
             live.attempt=shown(attempt,live);live.dropName=attempt.drop.flatMap{try? c.engine.catalog.item($0).name}
+            if miniGame != nil && miniGame?.kind != .memory {live.hold=1.8}
             quiz=live;quizGainBase=before
-            feedMiniGame(question:live.index,answers:[MiniGameAnswer(player:live.player,right:attempt.rightCount==attempt.correct.count)])
+            feedMiniGame(question:live.index,answers:[MiniGameAnswer(player:live.player,right:attempt.rightCount==attempt.correct.count)],singleStudent:true)
             renderer?.classroomRefresh();revision += 1
         }catch{withAnimation{quiz=nil};message=error.localizedDescription;revision += 1}
     }
@@ -414,6 +430,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
         guard let i=index ?? QuizDrawSettings.shared.draw.flatMap({c.drawQuestion($0,for:nil,excluding:excluding)}) else{
             message="这一档没有题，换个出题方式或难度。";revision += 1;openClassPicker();return
         }
+        flushPendingSkippedMiniGame()
         quizToken += 1
         let shown=presented(i),start=Date()
         var q=shown.question
@@ -441,11 +458,17 @@ final class MeadowTeacherCoordinator:ObservableObject {
             case " ":other()
             default:
                 if let n=Int(key),n>0,let id=self.player(forSeat:n) {if model.players.contains(id){model.players.remove(id)}else{model.players.insert(id)};return true}
-                // One answer per student: the picked students take the letter (0 = 不会), ⌫ clears theirs.
-                if ClassQuizModel.perStudent(draft.question) {
+                // One answer per student: choice/fill uses A–H + 0; flashcard / Arena duel uses D 对 + C/0 错.
+                if ClassQuizModel.isChoicePerStudent(draft.question) {
                     let letters=Array("abcdefgh").map(String.init)
                     if let k=letters.firstIndex(of:key),k<draft.question.parts[0].options.count {model.assign(k);return true}
                     if key=="0" {model.assign(-1);return true}
+                    if key=="⌫" {model.clearPicked();return true}
+                    return false
+                }
+                if ClassQuizModel.isFlashcardPerStudent(draft.question) || self.miniGame?.kind == .arena {
+                    if key=="d" {model.assign(draft.question.parts.first?.answer ?? 0);return true}
+                    if key=="c" || key=="0" {model.assign(-1);return true}
                     if key=="⌫" {model.clearPicked();return true}
                     return false
                 }
@@ -462,11 +485,11 @@ final class MeadowTeacherCoordinator:ObservableObject {
             guard let self,QuizDrawSettings.shared.draw != nil else{return}
             self.openClassQuiz()
         }
-        let panel=KeyHostingController(rootView:ClassQuizPickPanel(game:self,onPick:{[weak self] i in self?.openClassQuiz(index:i)},onDraw:draw,onClose:{[weak self] in self?.skippedPrompt=nil;self?.closePanel()}))
+        let panel=KeyHostingController(rootView:ClassQuizPickPanel(game:self,onPick:{[weak self] i in self?.openClassQuiz(index:i)},onDraw:draw,onClose:{[weak self] in self?.flushPendingSkippedMiniGame();self?.closePanel()}))
         classPicker=panel
         panel.onKey={[weak self] key in
             switch key {
-            case "⎋":self?.closePanel();return true
+            case "⎋":self?.flushPendingSkippedMiniGame();self?.closePanel();return true
             case "⏎":draw();return true
             default:return false
             }
@@ -475,7 +498,8 @@ final class MeadowTeacherCoordinator:ObservableObject {
     }
     private func sendClassQuiz(){
         guard let c=campaign,let live=quiz,live.mode == .classwide,let draft=quizDraft,let model=classModel,let reward=quizReward else{return}
-        if ClassQuizModel.perStudent(draft.question) {sendClassChoices(c,live:live,model:model,reward:reward);return}
+        let isArena=miniGame?.kind == .arena
+        if ClassQuizModel.perStudent(draft.question,arena:isArena) {sendClassChoices(c,live:live,model:model,reward:reward);return}
         guard !model.players.isEmpty,draft.answered>0 else{model.note="先选回答的同学和他们说的答案。";return}
         let r=draft.result,right=draft.allRight,participation=reward.participationCoins
         let order=c.engine.state.players.map(\.id)
@@ -485,53 +509,80 @@ final class MeadowTeacherCoordinator:ObservableObject {
                 model.sent.append((a.playerName,right,a.coins))
             }
             let answered=model.players
-            feedMiniGame(question:live.index,answers:order.filter{answered.contains($0)}.map{MiniGameAnswer(player:$0,right:right)})
+            let answers=order.filter{answered.contains($0)}.map{MiniGameAnswer(player:$0,right:right)}
             model.players=[];model.note=nil
             renderer?.classroomRefresh();revision += 1
             // Sent: the TV reveals the answer as the coins go out.
-            endClassQuiz()
-            askRecordSkipped(question:live.index,answered:answered,practice:false)
+            deliverClassQuizToMiniGame(question:live.index,answers:answers,answered:answered)
         }catch{model.note=error.localizedDescription}
     }
     /// One answer per student: each is marked and paid on what they said (a wrong answer gets the participation
-    /// prize, if any).
+    /// prize, if any). Covers choice, single-blank fill, flashcard, and Arena duel marking.
     private func sendClassChoices(_ c:MeadowCampaignSession,live:LiveQuiz,model:ClassQuizModel,reward:QuizManualReward){
-        guard !model.choices.isEmpty else{model.note="先记下每人的答案（点选项，或 1–7 选人再按字母）。";return}
+        guard !model.choices.isEmpty else{
+            model.note=ClassQuizModel.isChoicePerStudent(live.question)
+                ? "先记下每人的答案（点选项，或 1–7 选人再按字母）。"
+                : "先记下每人的对错（直接点对/错，或 1–7 选人再按 D/C）。"
+            return
+        }
         do{
             var answers:[MiniGameAnswer]=[]
             for id in c.engine.state.players.map(\.id) {
                 guard let choice=model.choices[id] else{continue}
-                let a=try c.recordQuiz(actor:id,question:live.index,picks:recorded([choice<0 ? nil:choice],live),seconds:Date().timeIntervalSince(live.start),
+                let picks:[Int?]
+                if live.question.parts.count==1 {
+                    picks=recorded([choice<0 ? nil:choice],live)
+                } else {
+                    picks=choice<0 ? Array(repeating:nil,count:live.question.parts.count) : recorded(live.question.parts.map(\.answer),live)
+                }
+                let a=try c.recordQuiz(actor:id,question:live.index,picks:picks,seconds:Date().timeIntervalSince(live.start),
                                        free:true,participation:reward.participationCoins,shared:true,askedAt:live.start)
                 model.sent.append((a.playerName,a.correct.allSatisfy{$0},a.coins))
                 answers.append(MiniGameAnswer(player:id,right:a.correct.allSatisfy{$0}))
             }
-            feedMiniGame(question:live.index,answers:answers)
             let answered=Set(model.choices.keys)
             model.players=[];model.note=nil
             renderer?.classroomRefresh();revision += 1
-            endClassQuiz()
-            askRecordSkipped(question:live.index,answered:answered,practice:false)
+            deliverClassQuizToMiniGame(question:live.index,answers:answers,answered:answered)
         }catch{model.note=error.localizedDescription}
+    }
+    /// Ends the class question and either holds Boss/Camp accuracy until the teacher responds to the skipped-student
+    /// prompt (same workflow as outside mini-games) or queues the round immediately.
+    private func deliverClassQuizToMiniGame(question index:Int,answers:[MiniGameAnswer],answered:Set<String>){
+        guard let c=campaign else{return}
+        let others=c.engine.state.players.filter{!answered.contains($0.id) && !$0.host}
+        endClassQuiz()
+        if let g=miniGame,(g.kind == .boss || g.kind == .camp),!g.finished,!others.isEmpty {
+            askRecordSkipped(question:index,answered:answered,practice:false,
+                             pendingMiniGame:SkippedPrompt.PendingMiniGame(question:index,answers:answers,kindTitle:g.kind.title))
+            return
+        }
+        feedMiniGame(question:index,answers:answers)
+        askRecordSkipped(question:index,answered:answered,practice:false)
     }
     /// After a shared question: the students who were not picked can have it put in their mistakes (recorded as
     /// 不会 / 答错, no reward), so the report shows it for them too.
-    private func askRecordSkipped(question index:Int,answered:Set<String>,practice:Bool){
+    private func askRecordSkipped(question index:Int,answered:Set<String>,practice:Bool,pendingMiniGame:SkippedPrompt.PendingMiniGame?=nil){
         guard let c=campaign else{return}
         let others=c.engine.state.players.filter{!answered.contains($0.id) && !$0.host}
         guard !others.isEmpty else{skippedPrompt=nil;return}
-        skippedPrompt=SkippedPrompt(question:index,ids:others.map(\.id),names:others.map(\.shortName).joined(separator:"、"),practice:practice)
+        skippedPrompt=SkippedPrompt(question:index,ids:others.map(\.id),names:others.map(\.shortName).joined(separator:"、"),practice:practice,pendingMiniGame:pendingMiniGame)
     }
     /// 记入错题 / 不记 for the students nobody picked on the last shared question.
     func answerSkippedPrompt(record:Bool){
         guard let prompt=skippedPrompt else{return}
         skippedPrompt=nil
-        guard record,let c=campaign,c.quizBank.indices.contains(prompt.question) else{return}
-        let blanks=Array(repeating:Optional<Int>.none,count:c.quizBank[prompt.question].parts.count)
-        do{
-            for id in prompt.ids {try c.recordQuiz(actor:id,question:prompt.question,picks:blanks,seconds:0,free:true,shared:true,practice:prompt.practice,skipped:true)}
-            message="已记入 \(prompt.names) 的错题";revision += 1
-        }catch{message=error.localizedDescription;revision += 1}
+        if record,let c=campaign,c.quizBank.indices.contains(prompt.question) {
+            let blanks=Array(repeating:Optional<Int>.none,count:c.quizBank[prompt.question].parts.count)
+            do{
+                for id in prompt.ids {try c.recordQuiz(actor:id,question:prompt.question,picks:blanks,seconds:0,free:true,shared:true,practice:prompt.practice,skipped:true)}
+                message="已记入 \(prompt.names) 的错题";revision += 1
+            }catch{message=error.localizedDescription;revision += 1}
+        }
+        if let pending=prompt.pendingMiniGame {
+            let finalAnswers=MiniGameRound(level:1,answers:pending.answers).applyingSkipped(prompt.ids,recordAsWrong:record).answers
+            feedMiniGame(question:pending.question,answers:finalAnswers)
+        }
     }
     /// Ends the class question: the TV reveals the right answer and who got it.
     /// `nobodyAnswered`: Esc / 只揭晓 with nothing sent. On a card just made from the notes that means it was too
@@ -539,7 +590,8 @@ final class MeadowTeacherCoordinator:ObservableObject {
     private func endClassQuiz(nobodyAnswered:Bool=false){
         let fromNotes=noteCardIndex;noteCardIndex=nil
         guard var live=quiz,live.mode == .classwide,let model=classModel else{closePanel();return}
-        if nobodyAnswered,model.sent.isEmpty {feedMiniGame(question:live.index,answers:[])}
+        let emptyReveal=nobodyAnswered && model.sent.isEmpty
+        if emptyReveal {skippedPrompt=nil}
         // The class stays in question mode: the list (or the draw) comes back for the next question while the
         // answer shows; Esc there ends.
         closePanel{[weak self] in self?.openClassPicker()}
@@ -557,7 +609,9 @@ final class MeadowTeacherCoordinator:ObservableObject {
         let winners=model.sent.filter(\.right).map(\.name)
         live.attempt=QuizAttempt(player:"",playerName:"全班",node:-1,question:live.index,picks:parts.map{$0.answer},texts:parts.map{_ in nil},correct:parts.map{_ in true},seconds:0,limit:q.timeLimit,at:Date().timeIntervalSince1970)
         live.headline=winners.isEmpty ? (model.sent.isEmpty ? "正确答案" : "这题没人答对") : "答对：" + winners.joined(separator:"、")
+        if miniGame != nil && miniGame?.kind != .memory {live.hold=1.8}
         quiz=live;classModel=nil
+        if emptyReveal {feedMiniGame(question:live.index,answers:[])}
     }
 
     /// K: endless flash-card practice, for the whole class by default (the panel switches to one student; A picks
@@ -823,12 +877,13 @@ final class MeadowTeacherCoordinator:ObservableObject {
     private var lastTick=ProcessInfo.processInfo.systemUptime
     private var aiKey:String?
     private var wipeSince:Double?
+    func cancelEnemyWork(){enemyWork?.cancel();enemyWork=nil;aiKey=nil}
     private func tick(){
         let now=ProcessInfo.processInfo.systemUptime,delta=min(0.5,max(0,now-lastTick));lastTick=now
         defer{publishChanges();updateMirrorDemand()}
-        renderer?.classroomFinishBattleIfReady()
+        if miniGame == nil {renderer?.classroomFinishBattleIfReady()}
         // Whole party down: let the fall play for a moment, then stand everyone up on the map with 1 health.
-        if let c=campaign,c.mustRetreat,!busy,surface != .book {
+        if let c=campaign,c.mustRetreat,!busy,surface != .book,miniGame == nil {
             if wipeSince==nil {wipeSince=now}
             if let since=wipeSince,now-since>=2.5 {
                 wipeSince=nil
@@ -837,15 +892,15 @@ final class MeadowTeacherCoordinator:ObservableObject {
             }
             return
         } else {wipeSince=nil}
-        guard UIApplication.shared.applicationState == .active,ready,!modalOpen,let c=campaign,c.engine.state.battle != nil,surface != .book,c.engine.state.pauseReasons.isEmpty else{enemyWork?.cancel();enemyWork=nil;aiKey=nil;return}
+        guard UIApplication.shared.applicationState == .active,ready,!modalOpen,let c=campaign,c.engine.state.battle != nil,surface != .book,miniGame == nil,c.engine.state.pauseReasons.isEmpty else{cancelEnemyWork();return}
         guard !busy else{return}
         do{
             if try c.engine.advanceClock(by:delta) != nil {renderer?.classroomRefresh()}
-            guard let actor=c.engine.state.battle?.current,c.engine.state.units[actor]?.kind == .monster else{enemyWork?.cancel();enemyWork=nil;aiKey=nil;return}
+            guard let actor=c.engine.state.battle?.current,c.engine.state.units[actor]?.kind == .monster else{cancelEnemyWork();return}
             let key=c.engine.state.gameID+":"+actor+":"+String(c.engine.history.count)
             guard aiKey != key else{return};enemyWork?.cancel();aiKey=key
             let task=DispatchWorkItem{[weak self,weak c] in
-                guard let self,let c,self.campaign === c,!self.busy,!self.modalOpen,c.engine.state.pauseReasons.isEmpty,self.surface != .book else{return}
+                guard let self,let c,self.campaign === c,!self.busy,!self.modalOpen,c.engine.state.pauseReasons.isEmpty,self.surface != .book,self.miniGame == nil else{return}
                 self.renderer?.classroomEnemyStep()
             }
             enemyWork=task;DispatchQueue.main.asyncAfter(deadline:.now()+0.65,execute:task)
@@ -896,7 +951,9 @@ final class MeadowTeacherCoordinator:ObservableObject {
     }
     func install(_ session:MeadowCampaignSession){
         do{
-            enemyWork?.cancel();enemyWork=nil;aiKey=nil
+            cancelEnemyWork()
+            miniGame=nil;skippedPrompt=nil
+            if quizActive {abortQuiz()}
             try backend.install(session,role:.teacher)
             if let old=renderer {old.willMove(toParent:nil);old.view.removeFromSuperview();old.removeFromParent()}
             let controller=GameViewController(campaign:session,classroomMode:true)
@@ -907,7 +964,10 @@ final class MeadowTeacherCoordinator:ObservableObject {
             controller.classroomMirrorEnabled=false
             controller.classroomFrameAvailable={ [weak self] in self?.publishMirrorFrame() }
             frameMirror.frame=nil
-            controller.classroomAdvanceTravel={ [backend] distance in try backend.advanceTravel(distance:distance,role:.teacher) }
+            controller.classroomAdvanceTravel={ [weak self,backend] distance in
+                guard self?.miniGame == nil else{return []}
+                return try backend.advanceTravel(distance:distance,role:.teacher)
+            }
             controller.classroomBattleModel={ [backend] in try backend.battleModel(role:.teacher) }
             controller.classroomStatus={ [weak self] text in guard let self,self.message != text else{return};self.message=text;self.revision += 1 }
             controller.classroomInventoryChanged={ [weak self] id in self?.project(id.map{.inventory($0)} ?? .exploration) }
@@ -987,6 +1047,13 @@ final class MeadowTeacherCoordinator:ObservableObject {
         presenter.present(screen,animated:true)
     }
     func operation(_ operation:GameViewController.TeacherOperation){
+        if miniGame != nil {
+            switch operation {
+            case .interact,.refill,.pauseOrResume,.editNode,.zoom,.pan:
+                message="小游戏进行中，底层地图已暂停，请先结束小游戏。";revision += 1;return
+            case .inventory,.shop,.team,.route,.save: break
+            }
+        }
         do{try renderer?.classroomPerform(operation,role:.teacher);revision += 1}catch{message=error.localizedDescription}
     }
     func project(_ value:ClassroomPublicSurface){
@@ -1006,14 +1073,14 @@ final class MeadowTeacherCoordinator:ObservableObject {
     }
     func select(_ id:String){do{try backend.selectPlayer(id,role:.teacher);selectedTarget=id;renderer?.classroomRefresh();revision += 1}catch{message=error.localizedDescription}}
     func canTapCanvas(_ point:CGPoint)->Bool {
-        guard ready,!modalOpen,surface != .book else{return false}
+        guard ready,!modalOpen,surface != .book,miniGame == nil else{return false}
         if renderer?.classroomHasGainPopup==true {return true}
         guard !busy else{return false}
         if campaign?.engine.state.battle != nil {return (try? renderer?.classroomBattleHit(at:point,role:.teacher)) != nil}
         return canBeginMapGesture(point)
     }
     func chooseBattleTarget(_ id:String){
-        guard !busy,!modalOpen else{return}
+        guard !busy,!modalOpen,miniGame == nil else{return}
         selectedTarget=id;hoveredCanvasAction=nil
         try? renderer?.classroomFocus(nil,target:id,role:.teacher)
         revision += 1
@@ -1021,12 +1088,13 @@ final class MeadowTeacherCoordinator:ObservableObject {
     private var hoveredCanvasAction:PartyAction?
     func canvasHover(_ point:CGPoint?){
         var action:PartyAction?
-        if let point,ready,!busy,!modalOpen,case .action(let value)?=try? renderer?.classroomBattleHit(at:point,role:.teacher),canUse(value){action=value}
+        if let point,ready,!busy,!modalOpen,miniGame == nil,case .action(let value)?=try? renderer?.classroomBattleHit(at:point,role:.teacher),canUse(value){action=value}
         guard action != hoveredCanvasAction else{return}
         hoveredCanvasAction=action;focus(action)
     }
     func canvasTap(_ point:CGPoint,selectingNode:Bool){
         guard ready else{message="画面还在准备，请稍候。";return}
+        guard miniGame == nil else{return}
         if !modalOpen,(try? renderer?.classroomGainPopupTap(at:point,role:.teacher))==true {revision += 1;return}
         guard !busy,!modalOpen else{message="请等待当前动作结束或关闭后台对话框。";return}
         if campaign?.engine.state.battle != nil {
@@ -1051,7 +1119,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
             revision += 1
         }catch{message=error.localizedDescription}
     }
-    var canManipulateMap:Bool {ready && !busy && !modalOpen && surface.acceptsMapInput && campaign?.engine.state.battle==nil && campaign?.isCompleted==false}
+    var canManipulateMap:Bool {ready && !busy && !modalOpen && miniGame == nil && surface.acceptsMapInput && campaign?.engine.state.battle==nil && campaign?.isCompleted==false}
     func canBeginMapGesture(_ point:CGPoint)->Bool {
         guard canManipulateMap else{return false}
         return (try? renderer?.classroomWorldPoint(at:point,role:.teacher)) != nil
@@ -1065,10 +1133,11 @@ final class MeadowTeacherCoordinator:ObservableObject {
         do{try renderer?.classroomZoom(by:scale,anchor:anchor,role:.teacher)}catch{message=error.localizedDescription}
     }
     func canUse(_ action:PartyAction)->Bool {
-        guard ready,!busy,!modalOpen else{return false}
+        guard ready,!busy,!modalOpen,miniGame == nil else{return false}
         return (try? backend.battleTarget(for:action,selected:selectedTarget,role:.teacher)) != nil
     }
     func battle(_ action:PartyAction){
+        guard miniGame == nil else{message="小游戏进行中，底层战斗已暂停，请先结束小游戏。";revision += 1;return}
         guard !busy,!modalOpen,campaign?.engine.state.pauseReasons.isEmpty==true else{message="请先关闭后台对话框并继续战斗。";return}
         do{let target=try backend.battleTarget(for:action,selected:selectedTarget,role:.teacher);try renderer?.classroomAction(action,target:target,role:.teacher);revision += 1}catch{message=error.localizedDescription}
     }
@@ -1120,7 +1189,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
     /// The other team on the selected player's node that this team may still duel.
     var duelOpponent:String? {campaign.flatMap{c in c.duelOpponent(actor:c.selectedPlayerID)}}
     func startDuel(){
-        guard ready,!busy,!modalOpen,let c=campaign,duelOpponent != nil else{message="这里没有可以对战的队伍（每两队只能对战一次）。";return}
+        guard ready,!busy,!modalOpen,miniGame == nil,let c=campaign,duelOpponent != nil else{message=miniGame != nil ? "小游戏进行中，请先结束小游戏。":"这里没有可以对战的队伍（每两队只能对战一次）。";return}
         if renderer?.startCampaignDuel(actor:c.selectedPlayerID)==true {message="队伍PVP开始。"};revision += 1
     }
     /// GM: every pair of teams may duel again.

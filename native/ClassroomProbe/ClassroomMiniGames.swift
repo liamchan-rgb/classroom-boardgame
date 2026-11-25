@@ -53,8 +53,10 @@ import MeadowBattleSupport
     /// The line under the board: what just happened.
     @Published var banner: String?
     @Published var rewarded = false
+    @Published private(set) var hasPendingRound = false
     private var dice: MiniGameDice
-    private var pending: (round: MiniGameRound, token: Int?)?
+    private var pendingID = 0
+    private var pending: (id: Int, round: MiniGameRound, token: Int?)?
 
     init(kind: Kind, state: GameState, playerIDs: [String], seats: (String) -> Int, bank: [QuizQuestion], course: [Int]) {
         self.kind = kind
@@ -74,6 +76,8 @@ import MeadowBattleSupport
         for u in ordered {
             if isTeamMode, let tid = u.teamID, let teamIdx = state.teams.firstIndex(where: { $0.id == tid }) {
                 st[u.id] = teamIdx
+            } else if isTeamMode, let soloIdx = t[u.id] {
+                st[u.id] = soloIdx
             } else {
                 st[u.id] = max(0, seats(u.id) - 1)
             }
@@ -135,28 +139,37 @@ import MeadowBattleSupport
     /// Who answers the next question (turn games), for the teacher's bar.
     var answering: String? {
         switch kind {
-        case .race: race?.current.map { s in isTeamMode ? "\(s.name)（\(s.members.map(name).joined(separator: "、"))）" : s.name }
+        case .race:
+            race?.current.map { s in
+                let isTeamSide = isTeamMode && (s.members.count > 1 || s.id != s.members.first)
+                return isTeamSide ? "\(s.name)（\(s.members.map(name).joined(separator: "、"))）" : s.name
+            }
         case .arena: arena.map { "\(name($0.champion)) 对 \(name($0.challenger))" }
         default: nil
         }
     }
 
     /// A question was answered: applied once the answer card is gone (or straight away when none shows).
-    func queue(_ round: MiniGameRound, quiz token: Int?) {
+    func queue(_ round: MiniGameRound, quiz token: Int?, fallback: Double = 3.2) {
         guard !finished, kind != .memory else { return }
-        if let p = pending { apply(p.round) }
-        pending = (round, token)
-        if token == nil { flush(quiz: nil) }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 7) { [weak self] in
-            guard let self, let p = self.pending, p.round == round else { return }
-            self.pending = nil; self.apply(p.round)
+        if let p = pending { pending = nil; hasPendingRound = false; apply(p.round) }
+        if token == nil { apply(round); return }
+        pendingID += 1
+        let entryID = pendingID
+        pending = (entryID, round, token)
+        hasPendingRound = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + max(2.2, fallback)) { [weak self] in
+            guard let self, let p = self.pending, p.id == entryID else { return }
+            self.pending = nil; self.hasPendingRound = false
+            self.apply(p.round)
         }
     }
     func flush(quiz token: Int?) {
         guard let p = pending, token == nil || token != p.token else { return }
-        pending = nil
+        pending = nil; hasPendingRound = false
         apply(p.round)
     }
+    func flushNow() { flush(quiz: nil) }
     private func apply(_ q: MiniGameRound) {
         withAnimation(.spring(response: 0.45, dampingFraction: 0.78)) {
             switch kind {
@@ -174,11 +187,18 @@ import MeadowBattleSupport
                     banner = c.outcome == .won ? "撑过了 \(CampDefense.rounds) 题，营地安全！" : c.outcome == .lost ? "怪物冲进营地了……" : ["全对！把怪物打退一步", "守住了！怪物停在原地", "怪物逼近一步！"][c.lastMove + 1]
                 }
             case .race:
-                race?.resolve(q, dice: &dice)
+                guard race?.resolve(q, dice: &dice) == true else { return }
                 if let r = race { banner = raceLine(r) }
             case .arena:
                 guard let before = arena else { return }
-                arena?.resolve(q)
+                guard arena?.resolve(q) == true else {
+                    if q.singleStudent, let only = q.answers.first, let a = arena,
+                       only.player == a.champion || only.player == a.challenger {
+                        let other = only.player == a.champion ? a.challenger : a.champion
+                        banner = "已记录 \(name(only.player)) \(only.right ? "答对" : "答错")，等待 \(name(other)) 作答…"
+                    }
+                    return
+                }
                 if let a = arena {
                     switch a.last {
                     case .dethroned: banner = "挑战成功！\(name(a.champion)) 成为新擂主"
@@ -284,6 +304,10 @@ extension MeadowTeacherCoordinator {
         }
         if kind != .memory, c.courseIndices.isEmpty { message = "当前课程没有题，先在题库里选课或导入。"; revision += 1; return }
         if quizActive { abortQuiz() }
+        // Freeze underlying map movement & battle AI while the mini-game covers the stage.
+        if c.isMoving { try? c.setPaused(true); renderer?.classroomRefresh() }
+        cancelEnemyWork()
+        skippedPrompt = nil
         let model = MiniGameModel(kind: kind, state: c.engine.state, playerIDs: c.playerIDs, seats: { [weak self] in self?.seatNumber($0) ?? 0 },
                                   bank: c.quizBank, course: c.courseIndices)
         model.banner = kind.rule
@@ -292,17 +316,34 @@ extension MeadowTeacherCoordinator {
         revision += 1
     }
     func endMiniGame() {
+        if var p = skippedPrompt, p.pendingMiniGame != nil {
+            p.pendingMiniGame = nil
+            skippedPrompt = p
+        }
         withAnimation(.easeIn(duration: 0.25)) { miniGame = nil }
         message = "小游戏已结束"; revision += 1
     }
     /// The answers just sent to a question (class or one student) go to the game on screen.
-    func feedMiniGame(question index: Int, answers: [MiniGameAnswer]) {
-        guard let g = miniGame, let c = campaign, c.quizBank.indices.contains(index) else { return }
-        g.queue(MiniGameRound(level: c.quizBank[index].level, answers: answers), quiz: quiz?.token)
+    func feedMiniGame(question index: Int, answers: [MiniGameAnswer], singleStudent: Bool = false) {
+        guard let g = miniGame, g.kind != .memory, !g.finished, let c = campaign, c.quizBank.indices.contains(index) else { return }
+        if singleStudent, let only = answers.first {
+            if g.kind == .race, let side = g.race?.current, !side.members.contains(only.player) {
+                message = "答题赛跑当前轮到 \(g.answering ?? side.name)，\(g.name(only.player)) 的个人作答不计入本轮。"
+                revision += 1
+                return
+            }
+            if g.kind == .arena, let a = g.arena, only.player != a.champion && only.player != a.challenger {
+                message = "擂台当前为 \(g.name(a.champion)) 对 \(g.name(a.challenger))，\(g.name(only.player)) 的个人作答不计入擂台。"
+                revision += 1
+                return
+            }
+        }
+        let round = MiniGameRound(level: c.quizBank[index].level, answers: answers, singleStudent: singleStudent)
+        g.queue(round, quiz: quiz?.token, fallback: (quiz?.hold ?? 1.8) + 1.4)
     }
     /// The question for the next turn: the class question (its panel picks who answered).
     func miniGameAsk() {
-        guard let g = miniGame, !g.finished else { return }
+        guard let g = miniGame, g.kind != .memory, !g.finished else { return }
         if quiz?.mode == .classwide, quiz?.attempt != nil { quiz = nil }
         openClassQuiz()
     }
@@ -378,6 +419,16 @@ private struct MiniGameBarContent: View {
                         .buttonStyle(GlassIconButtonStyle(tint: .orange)).disabled(model.rewarded || model.winners.isEmpty)
                 }
                 if model.kind != .memory && !model.finished {
+                    if game.skippedPrompt?.pendingMiniGame != nil {
+                        Label("请先在右侧确认未选学生", systemImage: "exclamationmark.circle.fill")
+                            .font(.caption.bold())
+                            .foregroundStyle(.orange)
+                            .padding(.horizontal, 10).padding(.vertical, 5)
+                            .background(Capsule().fill(Color.orange.opacity(0.14)))
+                    } else if model.hasPendingRound || game.quiz?.attempt != nil {
+                        Button { if !game.skipQuizReveal() { model.flushNow() } } label: { Label("立即推进", systemImage: "forward.fill") }
+                            .buttonStyle(GlassIconButtonStyle(tint: .orange, prominent: true))
+                    }
                     Button { game.miniGameAsk() } label: { Label("出题 ⇧Q", systemImage: "questionmark.bubble.fill") }
                         .buttonStyle(GlassIconButtonStyle(prominent: true)).disabled(game.quiz?.mode == .classwide && game.quiz?.attempt == nil)
                 }

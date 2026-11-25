@@ -14,6 +14,7 @@ struct MeadowTeacherDashboard:View {
         workspace(fullScreen:false).padding(8).background(GlassBackdrop())
             .fullScreenCover(isPresented:$fullPreview){workspace(fullScreen:true).padding(8).background(GlassBackdrop())}
             .onChange(of:fullPreview){_,value in game.localOutputPreview=value}
+            .onChange(of:game.miniGame != nil){_,active in if active {selectingNode=false}}
             // 课件 from the game tab: opening a deck (or importing one) goes on in the book tab.
             .sheet(isPresented:$decks){
                 DeckLibraryPanel(session:TeacherSession.shared,onImport:{
@@ -23,6 +24,7 @@ struct MeadowTeacherDashboard:View {
             }
     }
     private var inBattle:Bool {game.campaign?.engine.state.battle != nil}
+    private var miniGameActive:Bool {game.miniGame != nil}
     private var targetName:String {game.campaign?.engine.state.units[game.selectedTarget]?.name ?? "选择目标"}
     private func workspace(fullScreen:Bool)->some View {
         VStack(spacing:8){
@@ -54,8 +56,8 @@ struct MeadowTeacherDashboard:View {
                     }
                     Section("地图") {
                         Button{game.operation(.route)}label:{Label("路线与结算",systemImage:"flag.checkered")}.disabled(!game.ready || game.busy)
-                        Button{if let id=game.selectedNode{game.operation(.editNode(id))}}label:{Label("编辑选中地点",systemImage:"pencil")}.disabled(game.selectedNode==nil || game.campaign?.isMoving==true || inBattle)
-                        Button{if let id=game.selectedNode{game.project(.encounter(id))}}label:{Label("预览选中地点的怪物",systemImage:"eye")}.disabled(game.selectedNode==nil || inBattle)
+                        Button{if let id=game.selectedNode{game.operation(.editNode(id))}}label:{Label("编辑选中地点",systemImage:"pencil")}.disabled(miniGameActive || game.selectedNode==nil || game.campaign?.isMoving==true || inBattle)
+                        Button{if let id=game.selectedNode{game.project(.encounter(id))}}label:{Label("预览选中地点的怪物",systemImage:"eye")}.disabled(miniGameActive || game.selectedNode==nil || inBattle)
                         Menu {
                             ForEach(GameDifficulty.allCases,id:\.self){level in
                                 Button{game.setDifficulty(level)}label:{Label(level.title+" · "+level.summary,systemImage:game.campaign?.difficulty==level ? "checkmark.circle.fill":difficultyIcon(level))}
@@ -63,7 +65,7 @@ struct MeadowTeacherDashboard:View {
                         }label:{Label("难度",systemImage:"gauge.with.dots.needle.67percent")}.disabled(game.busy || game.campaign==nil || inBattle || game.campaign?.isCompleted==true)
                     }
                     Section("队伍 PVP") {
-                        Button{game.startDuel()}label:{Label("两队开战",systemImage:"figure.fencing")}.disabled(!game.ready || game.busy || inBattle || game.duelOpponent==nil)
+                        Button{game.startDuel()}label:{Label("两队开战",systemImage:"figure.fencing")}.disabled(miniGameActive || !game.ready || game.busy || inBattle || game.duelOpponent==nil)
                         Button{game.resetDuels()}label:{Label("重置 PVP 次数",systemImage:"arrow.counterclockwise.circle")}.disabled(game.busy || game.campaign==nil || (game.campaign?.engine.state.pvpPairs ?? []).isEmpty)
                     }
                     Section("工具") {
@@ -85,35 +87,38 @@ struct MeadowTeacherDashboard:View {
                         Menu {
                             ForEach(battleTargets){u in Button(u.name){game.chooseBattleTarget(u.id)}}
                         }label:{Label(targetName,systemImage:"scope")}
-                        .disabled(!game.ready || game.busy)
+                        .disabled(miniGameActive || !game.ready || game.busy)
                         Menu {
                             ForEach([PartyAction.smallPotion,.largePotion,.shieldPotion,.revivalStone],id:\.rawValue){action in
                                 Button(action.title){game.battle(action)}.disabled(!game.canUse(action))
                             }
-                        }label:{Label("道具",systemImage:"cross.vial.fill")}.disabled(!game.ready || game.busy)
+                        }label:{Label("道具",systemImage:"cross.vial.fill")}.disabled(miniGameActive || !game.ready || game.busy)
                         let paused=game.campaign?.engine.state.pauseReasons.contains(.manual)==true
-                        Button{game.toggleBattlePause()}label:{Label(paused ? "继续":"暂停",systemImage:paused ? "play.fill":"pause.fill")}.disabled(game.busy)
+                        Button{game.toggleBattlePause()}label:{Label(paused ? "继续":"暂停",systemImage:paused ? "play.fill":"pause.fill")}.disabled(miniGameActive || game.busy)
                         Menu {
                             Button(role:.destructive){game.leaveBattle()}label:{Label("确认撤离战斗（无掉落，怪物留在原地）",systemImage:"figure.walk.departure")}
-                        }label:{Label("撤离",systemImage:"figure.walk.departure")}.disabled(!game.ready || game.busy || game.campaign?.canLeaveBattle != true)
+                        }label:{Label("撤离",systemImage:"figure.walk.departure")}.disabled(miniGameActive || !game.ready || game.busy || game.campaign?.canLeaveBattle != true)
                         Spacer(minLength:0)
-                        Button{game.battle(.endTurn)}label:{Label("结束",systemImage:"forward.end.fill")}.buttonStyle(GlassIconButtonStyle(prominent:true)).disabled(!game.canUse(.endTurn))
+                        Button{game.battle(.endTurn)}label:{Label("结束",systemImage:"forward.end.fill")}.buttonStyle(GlassIconButtonStyle(prominent:true)).disabled(miniGameActive || !game.canUse(.endTurn))
                     }else{
                         memberPicker
                         Button{selectingNode.toggle();if selectingNode{game.project(.exploration)}}label:{Label(selectingNode ? "完成":"选点",systemImage:selectingNode ? "checkmark.circle.fill":"mappin.and.ellipse")}
-                            .buttonStyle(GlassIconButtonStyle(tint:selectingNode ? .orange:GameTheme.primary)).disabled(!game.ready || game.busy)
+                            .buttonStyle(GlassIconButtonStyle(tint:selectingNode ? .orange:GameTheme.primary)).disabled(miniGameActive || !game.ready || game.busy)
                         if selectingNode {
-                            Button{if let id=game.selectedNode{game.operation(.editNode(id))}}label:{Label("修改",systemImage:"pencil")}.disabled(game.selectedNode==nil || game.campaign?.isMoving==true)
+                            Button{if let id=game.selectedNode{game.operation(.editNode(id))}}label:{Label("修改",systemImage:"pencil")}.disabled(miniGameActive || game.selectedNode==nil || game.campaign?.isMoving==true)
                         }else{
-                            Button{game.operation(.interact)}label:{Label("交互",systemImage:"hand.tap.fill")}.disabled(!game.ready || game.busy || game.campaign?.isMoving==true)
+                            Button{game.operation(.interact)}label:{Label("交互",systemImage:"hand.tap.fill")}.disabled(miniGameActive || !game.ready || game.busy || game.campaign?.isMoving==true)
                             Button{game.operation(.inventory)}label:{Label("行囊",systemImage:"bag.fill")}.disabled(!game.ready || game.busy || game.campaign?.isCompleted != false)
                             Button{game.operation(.shop)}label:{Label("商店",systemImage:"cart.fill")}.disabled(!game.ready || game.busy || game.campaign?.isCompleted != false)
                             Button{game.openTeamConsole()}label:{Label("队伍",systemImage:"person.3.fill")}.disabled(!game.ready || game.busy || game.campaign?.isCompleted != false)
                         }
                         Spacer(minLength:0)
-                        Button{game.operation(.refill)}label:{Label("补充",systemImage:"bolt.fill")}.disabled(!game.ready || game.busy || game.campaign?.isMoving==true)
+                        if miniGameActive {
+                            Label("小游戏进行中，地图已锁定",systemImage:"lock.fill").font(.caption.bold()).foregroundStyle(.orange)
+                        }
+                        Button{game.operation(.refill)}label:{Label("补充",systemImage:"bolt.fill")}.disabled(miniGameActive || !game.ready || game.busy || game.campaign?.isMoving==true)
                         Button{game.operation(.pauseOrResume)}label:{Label(game.campaign?.isMoving==true ? "暂停":"出发",systemImage:game.campaign?.isMoving==true ? "pause.fill":"play.fill")}
-                            .buttonStyle(GlassIconButtonStyle(prominent:true)).disabled(!game.ready || game.busy)
+                            .buttonStyle(GlassIconButtonStyle(prominent:true)).disabled(miniGameActive || !game.ready || game.busy)
                     }
                 }.buttonStyle(GlassIconButtonStyle()).menuStyle(.button).padding(.horizontal,10).padding(.vertical,6).glassPanel(radius:20,padding:0)
             }
@@ -139,7 +144,7 @@ struct MeadowTeacherDashboard:View {
                         Button{TeacherSession.shared.concealNotes();game.project(.exploration)}label:{Label("切回游戏",systemImage:"gamecontroller.fill")}
                             .buttonStyle(GlassIconButtonStyle(prominent:true)).scaleEffect(1.2)
                     }.foregroundStyle(.white).padding(28).background(.black.opacity(0.55),in:RoundedRectangle(cornerRadius:22,style:.continuous))
-                }else if !inBattle,game.surface != .exploration {
+                }else if !inBattle,game.surface != .exploration,!miniGameActive {
                     VStack{HStack{Spacer();Button{game.project(.exploration)}label:{Label("地图",systemImage:"map")}.buttonStyle(GlassIconButtonStyle(tint:.white)).padding(12)};Spacer()}
                 }
             // minWidth 0: the preview gives up width to the docked answer panel.

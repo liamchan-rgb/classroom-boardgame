@@ -604,13 +604,46 @@ struct QuizPlayerChips: View {
     @Published var choices: [String: Int] = [:]
     /// The students picked (1–7) take this answer; the pick clears so the next ones can be chosen.
     func assign(_ option: Int) {
-        guard !players.isEmpty else { note = "先按 1–7 选同学，再按他们选的答案。"; return }
+        guard !players.isEmpty else { note = "先按 1–7 选同学，再按他们的答案。"; return }
         for id in players { choices[id] = option }
         players = []; note = nil
     }
     func clearPicked() { for id in players { choices[id] = nil }; players = [] }
-    /// Whether this question takes one answer per student.
-    static func perStudent(_ q: QuizQuestion) -> Bool { q.type != .flashcard && q.parts.count == 1 && q.parts[0].options.count >= 2 }
+    /// Whether this question takes a per-student multiple-choice/fill option (A–H / 不会).
+    static func isChoicePerStudent(_ q: QuizQuestion) -> Bool { q.type != .flashcard && q.parts.count == 1 && q.parts[0].options.count >= 2 }
+    /// Whether this question is a flashcard that can be marked right/wrong independently per student.
+    static func isFlashcardPerStudent(_ q: QuizQuestion) -> Bool { q.type == .flashcard && q.parts.count == 1 && !q.parts[0].options.isEmpty }
+    /// Whether the panel uses per-student marking (choice, single-blank fill, flashcard, or any Arena duel question).
+    static func perStudent(_ q: QuizQuestion, arena: Bool = false) -> Bool { isChoicePerStudent(q) || isFlashcardPerStudent(q) || arena }
+    static func isRightChoice(_ choice: Int, for q: QuizQuestion) -> Bool {
+        isChoicePerStudent(q) ? choice == q.parts[0].answer : choice >= 0
+    }
+}
+
+/// Helper to put active Arena duelists or current Race side members at the top of per-student class grids.
+@MainActor private func miniGameOrderedStudents(for game: MeadowTeacherCoordinator) -> [GameUnit] {
+    let all = game.seatOrderedPlayers.filter { !$0.host }
+    if let a = game.miniGame?.arena {
+        let front = [a.champion, a.challenger].compactMap { id in all.first { $0.id == id } }
+        let rest = all.filter { $0.id != a.champion && $0.id != a.challenger }
+        return front + rest
+    }
+    if let side = game.miniGame?.race?.current {
+        let active = Set(side.members)
+        return all.filter { active.contains($0.id) } + all.filter { !active.contains($0.id) }
+    }
+    return all
+}
+
+@MainActor private func miniGameRoleBadge(for id: String, game: MeadowTeacherCoordinator) -> (text: String, tint: Color)? {
+    if let a = game.miniGame?.arena {
+        if id == a.champion { return ("擂主", Color(red: 0.85, green: 0.58, blue: 0.12)) }
+        if id == a.challenger { return ("挑战", .orange) }
+    }
+    if let side = game.miniGame?.race?.current, side.members.contains(id) {
+        return ("本轮", GameTheme.primary)
+    }
+    return nil
 }
 
 /// Each student's own answer to a class question with one set of options: a row per student with the options to
@@ -635,15 +668,20 @@ struct ClassChoiceGrid: View {
                 }
             }
             Text("每人的答案（点选，或按 1–7 选人再按 A–\(Self.letters[min(part.options.count, 8) - 1])，0 不会）").font(.caption.bold()).foregroundStyle(GameTheme.muted)
-            ForEach(game.seatOrderedPlayers.filter { !$0.host }, id: \.id) { u in
+            ForEach(miniGameOrderedStudents(for: game), id: \.id) { u in
                 let picked = model.players.contains(u.id), choice = model.choices[u.id]
+                let badge = miniGameRoleBadge(for: u.id, game: game)
                 HStack(spacing: 6) {
                     Button { if picked { model.players.remove(u.id) } else { model.players.insert(u.id) } } label: {
                         HStack(spacing: 5) {
                             Text("\(game.seatNumber(u.id))").font(.caption.bold()).foregroundStyle(.white).frame(width: 20, height: 20)
                                 .background(Circle().fill(picked ? Color.white.opacity(0.3) : GameTheme.primary))
                             Text(u.shortName).font(.callout.weight(.semibold)).lineLimit(1)
-                        }.frame(width: 104, alignment: .leading).padding(.horizontal, 8).padding(.vertical, 5)
+                            if let badge {
+                                Text(badge.text).font(.system(size: 10, weight: .heavy)).foregroundStyle(.white)
+                                    .padding(.horizontal, 5).padding(.vertical, 1).background(Capsule().fill(badge.tint))
+                            }
+                        }.frame(minWidth: 112, alignment: .leading).padding(.horizontal, 8).padding(.vertical, 5)
                         .foregroundStyle(picked ? Color.white : GameTheme.ink)
                         .background(RoundedRectangle(cornerRadius: 9, style: .continuous).fill(picked ? GameTheme.primary : Color.white.opacity(0.5)))
                     }.buttonStyle(.plain)
@@ -663,6 +701,151 @@ struct ClassChoiceGrid: View {
     }
 }
 
+/// Independent right/wrong marking per student for classwide flashcards (and multi-part Arena duels).
+struct ClassFlashcardGrid: View {
+    @ObservedObject var game: MeadowTeacherCoordinator
+    @ObservedObject var model: ClassQuizModel
+    let question: QuizQuestion
+    @State private var showOthers = false
+    private var rightCode: Int { question.parts.first?.answer ?? 0 }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            if question.type == .flashcard, let part = question.parts.first, part.options.indices.contains(part.answer) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("正面：\(question.prompt)").font(.title3.bold()).foregroundStyle(GameTheme.ink)
+                    Text("背面：\(part.options[part.answer])").font(.title3.bold()).foregroundStyle(GameTheme.primary)
+                }
+                .padding(10).frame(maxWidth: .infinity, alignment: .leading)
+                .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.white.opacity(0.55)))
+            } else {
+                QuizPreview(question: question)
+                    .padding(10).background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.white.opacity(0.55)))
+            }
+
+            if let arena = game.miniGame?.arena {
+                let all = game.seatOrderedPlayers.filter { !$0.host }
+                let duelists = [arena.champion, arena.challenger].compactMap { id in all.first { $0.id == id } }
+                let spectators = all.filter { $0.id != arena.champion && $0.id != arena.challenger }
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Label("擂台双人独立记分", systemImage: "crown.fill").font(.subheadline.bold()).foregroundStyle(.orange)
+                        Spacer()
+                        quickButton("都对", tint: .green) {
+                            for u in duelists { model.choices[u.id] = rightCode }
+                            model.players = []; model.note = nil
+                        }
+                        quickButton("都错", tint: .red) {
+                            for u in duelists { model.choices[u.id] = -1 }
+                            model.players = []; model.note = nil
+                        }
+                    }
+                    ForEach(duelists, id: \.id) { u in studentRow(u) }
+                    let markedChamp = model.choices[arena.champion] != nil
+                    let markedChal = model.choices[arena.challenger] != nil
+                    if markedChamp != markedChal {
+                        Text("提示：还有一位对战同学未标记，未标记的一方提交时将按未答对处理。")
+                            .font(.caption).foregroundStyle(.orange)
+                    }
+                }
+                .padding(10)
+                .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.orange.opacity(0.10)))
+                .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Color.orange.opacity(0.35), lineWidth: 1))
+
+                if !spectators.isEmpty {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Button { showOthers.toggle() } label: {
+                            HStack(spacing: 6) {
+                                Image(systemName: showOthers ? "chevron.down" : "chevron.right").font(.caption.bold())
+                                Text("其他同学（可选，\(spectators.count) 人）").font(.caption.bold())
+                                Spacer()
+                            }
+                            .foregroundStyle(GameTheme.muted)
+                            .padding(.vertical, 4)
+                            .contentShape(Rectangle())
+                        }.buttonStyle(.plain)
+                        if showOthers {
+                            ForEach(spectators, id: \.id) { u in studentRow(u) }
+                        }
+                    }
+                }
+            } else {
+                let students = miniGameOrderedStudents(for: game)
+                HStack(spacing: 6) {
+                    Text("每人的对错（点按钮，或 1–7 再按 D/C）").font(.caption.bold()).foregroundStyle(GameTheme.muted).lineLimit(1)
+                    Spacer(minLength: 4)
+                    quickButton("全班对", tint: .green) {
+                        for u in students { model.choices[u.id] = rightCode }
+                        model.players = []; model.note = nil
+                    }
+                    quickButton("全班错", tint: .red) {
+                        for u in students { model.choices[u.id] = -1 }
+                        model.players = []; model.note = nil
+                    }
+                    if !model.choices.isEmpty {
+                        quickButton("清空", tint: GameTheme.muted) { model.choices = [:]; model.players = [] }
+                    }
+                }
+                ForEach(students, id: \.id) { u in studentRow(u) }
+            }
+        }
+    }
+
+    private func studentRow(_ u: GameUnit) -> some View {
+        let picked = model.players.contains(u.id)
+        let choice = model.choices[u.id]
+        let isRight = choice != nil && choice! >= 0
+        let isWrong = choice == -1
+        let badge = miniGameRoleBadge(for: u.id, game: game)
+        return HStack(spacing: 8) {
+            Button { if picked { model.players.remove(u.id) } else { model.players.insert(u.id) } } label: {
+                HStack(spacing: 5) {
+                    Text("\(game.seatNumber(u.id))").font(.caption.bold()).foregroundStyle(.white).frame(width: 20, height: 20)
+                        .background(Circle().fill(picked ? Color.white.opacity(0.3) : GameTheme.primary))
+                    Text(u.shortName).font(.callout.weight(.semibold)).lineLimit(1)
+                    if let badge {
+                        Text(badge.text).font(.system(size: 10, weight: .heavy)).foregroundStyle(.white)
+                            .padding(.horizontal, 5).padding(.vertical, 1).background(Capsule().fill(badge.tint))
+                    }
+                }.frame(minWidth: 120, alignment: .leading).padding(.horizontal, 8).padding(.vertical, 6)
+                .foregroundStyle(picked ? Color.white : GameTheme.ink)
+                .background(RoundedRectangle(cornerRadius: 9, style: .continuous).fill(picked ? GameTheme.primary : Color.white.opacity(0.55)))
+            }.buttonStyle(.plain)
+
+            Button {
+                KeyHostingController<EmptyView>.endEditing()
+                model.choices[u.id] = isRight ? nil : rightCode
+                model.note = nil
+            } label: {
+                Label("对", systemImage: "checkmark.circle.fill")
+                    .font(.callout.bold()).padding(.horizontal, 14).padding(.vertical, 6)
+                    .foregroundStyle(isRight ? Color.white : Color.green)
+                    .background(RoundedRectangle(cornerRadius: 9, style: .continuous).fill(isRight ? Color.green : Color.green.opacity(0.14)))
+            }.buttonStyle(.plain)
+
+            Button {
+                KeyHostingController<EmptyView>.endEditing()
+                model.choices[u.id] = isWrong ? nil : -1
+                model.note = nil
+            } label: {
+                Label("错", systemImage: "xmark.circle.fill")
+                    .font(.callout.bold()).padding(.horizontal, 14).padding(.vertical, 6)
+                    .foregroundStyle(isWrong ? Color.white : Color.red)
+                    .background(RoundedRectangle(cornerRadius: 9, style: .continuous).fill(isWrong ? Color.red : Color.red.opacity(0.14)))
+            }.buttonStyle(.plain)
+            Spacer(minLength: 0)
+        }
+    }
+
+    private func quickButton(_ title: String, tint: Color, action: @escaping () -> Void) -> some View {
+        Button { KeyHostingController<EmptyView>.endEditing(); action() } label: {
+            Text(title).font(.caption.bold()).foregroundStyle(tint)
+                .padding(.horizontal, 8).padding(.vertical, 4)
+                .background(RoundedRectangle(cornerRadius: 7, style: .continuous).fill(tint.opacity(0.14)))
+        }.buttonStyle(.plain)
+    }
+}
+
 struct ClassQuizPanel: View {
     @ObservedObject var game: MeadowTeacherCoordinator
     @ObservedObject var model: ClassQuizModel
@@ -673,6 +856,9 @@ struct ClassQuizPanel: View {
     var onEnd: () -> Void
     var onOther: () -> Void
     var body: some View {
+        let isArena = game.miniGame?.kind == .arena
+        let useChoiceGrid = ClassQuizModel.isChoicePerStudent(draft.question)
+        let usePerStudent = ClassQuizModel.perStudent(draft.question, arena: isArena)
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 10) {
                 Image(systemName: "person.3.fill").font(.title2).foregroundStyle(GameTheme.primary)
@@ -687,8 +873,10 @@ struct ClassQuizPanel: View {
                 }
             }
             if model.sent.isEmpty { QuizDrawBar(game: game) }
-            if ClassQuizModel.perStudent(draft.question) {
+            if useChoiceGrid {
                 ScrollView { ClassChoiceGrid(game: game, model: model, question: draft.question) }
+            } else if usePerStudent {
+                ScrollView { ClassFlashcardGrid(game: game, model: model, question: draft.question) }
             } else {
                 Text("谁回答了（1–7，可多选）").font(.headline)
                 QuizPlayerChips(game: game, selected: model.players, marks: marks) { id in
@@ -711,10 +899,9 @@ struct ClassQuizPanel: View {
             HStack {
                 Button { onEnd() } label: { Label("只揭晓 (Esc)", systemImage: "eye") }.buttonStyle(GlassIconButtonStyle())
                 Spacer()
-                if ClassQuizModel.perStudent(draft.question) {
-                    let answer = draft.question.parts[0].answer
-                    let right = model.choices.values.filter { $0 == answer }.count
-                    Text(model.choices.isEmpty ? "先记每人的答案" : "\(model.choices.count) 人作答 · \(right) 人答对（各得 \(reward.question.rewardLine)）")
+                if usePerStudent {
+                    let right = model.choices.values.filter { ClassQuizModel.isRightChoice($0, for: draft.question) }.count
+                    Text(model.choices.isEmpty ? (useChoiceGrid ? "先记每人的答案" : "先记每人的对错") : "\(model.choices.count) 人作答 · \(right) 人答对（各得 \(reward.question.rewardLine)）")
                         .font(.callout.bold()).foregroundStyle(right > 0 ? Color.green : GameTheme.muted)
                     Button { onSend() } label: { Label("揭晓并发奖 (⏎)", systemImage: "paperplane.fill") }.buttonStyle(GlassIconButtonStyle(prominent: true))
                         .disabled(model.choices.isEmpty)
@@ -726,8 +913,10 @@ struct ClassQuizPanel: View {
                         .disabled(model.players.isEmpty || draft.answered == 0)
                 }
             }
-            Text(ClassQuizModel.perStudent(draft.question)
+            Text(useChoiceGrid
                  ? "键盘：1–7 选人（可多选）再按 A–H 记下他们的答案，0 不会，⌫ 清掉选中的人的答案；回车揭晓答案、按每人的答案发奖并记录；Esc 只揭晓不发奖。"
+                 : usePerStudent
+                 ? "键盘：直接点对/错，或按 1–7 选人再按 D（对）/ C（错），⌫ 清除；回车揭晓并发奖；Esc 只揭晓不发奖。"
                  : "键盘：1–7 选人，A–H 选答案，0 不会，⌫ 撤回，回车揭晓答案、同时发奖并记录；Esc 只揭晓不发奖。").font(.caption).foregroundStyle(GameTheme.muted)
         }.padding(22).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(GlassBackdrop())
     }
@@ -747,7 +936,8 @@ struct SkippedPromptBar: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text("没选到：\(p.names)").font(.callout.bold()).foregroundStyle(GameTheme.ink).lineLimit(2)
                 HStack(spacing: 8) {
-                    Text("上一题记到他们的错题里吗？").font(.caption).foregroundStyle(GameTheme.muted)
+                    Text(p.pendingMiniGame.map { "上一题记到他们的错题里吗？（选完后统计正确率结算\($0.kindTitle)）" } ?? "上一题记到他们的错题里吗？")
+                        .font(.caption).foregroundStyle(GameTheme.muted)
                     Spacer()
                     Button("不记") { game.answerSkippedPrompt(record: false) }.buttonStyle(GlassIconButtonStyle())
                     Button("记入错题") { game.answerSkippedPrompt(record: true) }.buttonStyle(GlassIconButtonStyle(prominent: true))

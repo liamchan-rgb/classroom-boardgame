@@ -17,9 +17,22 @@ public struct MiniGameAnswer: Equatable {
 public struct MiniGameRound: Equatable {
     public var level: Int
     public var answers: [MiniGameAnswer]
-    public init(level: Int, answers: [MiniGameAnswer]) { self.level = min(3, max(1, level)); self.answers = answers }
+    /// True when the round came from a single student's individual question (not a classwide question).
+    public var singleStudent: Bool
+    public init(level: Int, answers: [MiniGameAnswer], singleStudent: Bool = false) {
+        self.level = min(3, max(1, level))
+        self.answers = answers
+        self.singleStudent = singleStudent
+    }
     public var rightCount: Int { answers.filter(\.right).count }
     public func answer(of player: String) -> MiniGameAnswer? { answers.first { $0.player == player } }
+    /// Incorporates unselected students as wrong answers when the teacher chooses to record them as mistakes.
+    public func applyingSkipped(_ skippedIDs: [String], recordAsWrong: Bool) -> MiniGameRound {
+        guard recordAsWrong else { return self }
+        let existing = Set(answers.map(\.player))
+        let extra = skippedIDs.filter { !existing.contains($0) }.map { MiniGameAnswer(player: $0, right: false) }
+        return MiniGameRound(level: level, answers: answers + extra, singleStudent: singleStudent)
+    }
 }
 
 /// Seeded dice for the games (same seed, same rolls).
@@ -51,14 +64,18 @@ public struct MiniGameSide: Equatable, Identifiable {
     public var members: [String]
     public init(id: String, name: String, members: [String]) { self.id = id; self.name = name; self.members = members }
 
-    /// Teams when there are two or more with students, otherwise every student on their own.
+    /// Teams when there are two or more with students (plus any unassigned students as solo sides), otherwise every student on their own.
     public static func sides(_ state: GameState) -> [MiniGameSide] {
         let students = state.players.filter { !$0.host }
         let teams = state.teams.compactMap { team -> MiniGameSide? in
             let members = students.filter { $0.teamID == team.id }.map(\.id)
             return members.isEmpty ? nil : MiniGameSide(id: team.id, name: team.name, members: members)
         }
-        if teams.count >= 2 { return teams }
+        if teams.count >= 2 {
+            let assigned = Set(teams.flatMap(\.members))
+            let unassigned = students.filter { !assigned.contains($0.id) }.map { MiniGameSide(id: $0.id, name: $0.shortName, members: [$0.id]) }
+            return teams + unassigned
+        }
         return students.map { MiniGameSide(id: $0.id, name: $0.shortName, members: [$0.id]) }
     }
 }
@@ -170,8 +187,13 @@ public struct RaceTrack: Equatable {
         return cells
     }
     public var current: MiniGameSide? { sides.isEmpty ? nil : sides[turn % sides.count] }
-    public mutating func resolve(_ q: MiniGameRound, dice: inout MiniGameDice) {
-        guard winner == nil, let side = current else { return }
+    @discardableResult
+    public mutating func resolve(_ q: MiniGameRound, dice: inout MiniGameDice) -> Bool {
+        guard winner == nil, let side = current else { return false }
+        // A single student's individual question only drives the turn when that student belongs to the active side.
+        if q.singleStudent {
+            guard let only = q.answers.first, side.members.contains(only.player) else { return false }
+        }
         events = []
         let right = q.answers.contains { $0.right && side.members.contains($0.player) }
         var at = positions[side.id] ?? 0
@@ -180,10 +202,10 @@ public struct RaceTrack: Equatable {
             if !right {
                 at = max(0, at - 2); positions[side.id] = at
                 events.append(.trapFailed(side: side.id, to: at))
-                turn += 1; return
+                turn += 1; return true
             }
         }
-        guard right else { events.append(.missed(side: side.id)); turn += 1; return }
+        guard right else { events.append(.missed(side: side.id)); turn += 1; return true }
         let roll = dice.roll(6)
         at = min(Self.length, at + roll)
         events.append(.moved(side: side.id, roll: roll, to: at))
@@ -199,6 +221,7 @@ public struct RaceTrack: Equatable {
         }
         positions[side.id] = at
         if at >= Self.length { winner = side.id } else { turn += 1 }
+        return true
     }
     /// Sides by how far along they are.
     public var standings: [MiniGameSide] { sides.sorted { (positions[$0.id] ?? 0) > (positions[$1.id] ?? 0) } }
@@ -276,15 +299,34 @@ public struct ArenaKing: Equatable {
     public var last: Result?
     /// The champion just reached 3, 6, … wins in a row.
     public var bonus = false
+    /// Partial duel answers buffered when champion and challenger answer separate single-student questions.
+    public var staged: [String: Bool] = [:]
+    public var stagedLevel = 1
     public init?(players: [String]) {
         guard players.count >= 2 else { return nil }
         champion = players[0]; challenger = players[1]; line = Array(players.dropFirst(2))
     }
-    public mutating func resolve(_ q: MiniGameRound) {
-        let defender = q.answer(of: champion)?.right ?? false, attacker = q.answer(of: challenger)?.right ?? false
+    @discardableResult
+    public mutating func resolve(_ q: MiniGameRound) -> Bool {
+        let defender: Bool
+        let attacker: Bool
+        let level: Int
+        if q.singleStudent {
+            guard let only = q.answers.first, only.player == champion || only.player == challenger else { return false }
+            staged[only.player] = only.right
+            stagedLevel = max(stagedLevel, q.level)
+            guard let d = staged[champion], let a = staged[challenger] else { return false }
+            defender = d; attacker = a; level = stagedLevel
+            staged = [:]; stagedLevel = 1
+        } else {
+            staged = [:]; stagedLevel = 1
+            defender = q.answer(of: champion)?.right ?? false
+            attacker = q.answer(of: challenger)?.right ?? false
+            level = q.level
+        }
         round += 1; bonus = false
         let loser: String
-        if attacker && (!defender || q.level == 3) {
+        if attacker && (!defender || level == 3) {
             loser = champion; champion = challenger; streak = 1; last = .dethroned
             wins[champion, default: 0] += 1
         } else if defender {
@@ -297,6 +339,7 @@ public struct ArenaKing: Equatable {
         best[champion] = max(best[champion] ?? 0, streak)
         line.append(loser)
         challenger = line.removeFirst()
+        return true
     }
     /// Players by wins (then their best streak).
     public func ranking(_ players: [String]) -> [String] {

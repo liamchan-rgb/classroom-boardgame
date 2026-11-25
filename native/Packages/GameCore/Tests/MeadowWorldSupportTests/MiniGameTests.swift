@@ -173,4 +173,90 @@ final class MiniGameTests: XCTestCase {
         XCTAssertTrue(arena.bonus)
         XCTAssertEqual(arena.ranking(["a", "b", "c"]), ["c", "a", "b"])
     }
+
+    func testSkippedStudentsAdjustBossAndCampAccuracyOnlyWhenRecorded() {
+        let partial = round(2, [("p1", true)])
+        let ignored = partial.applyingSkipped(["p2", "p3"], recordAsWrong: false)
+        XCTAssertEqual(ignored.answers.count, 1)
+        let recorded = partial.applyingSkipped(["p1", "p2", "p3"], recordAsWrong: true)
+        XCTAssertEqual(recorded.answers.count, 3)
+        XCTAssertEqual(recorded.rightCount, 1)
+
+        var bossRecord = BossRaid(monster: "caveTroll", students: 3), dice1 = MiniGameDice(seed: 11)
+        bossRecord.resolve(recorded, dice: &dice1)
+        XCTAssertEqual(bossRecord.lastHits.count, 1)
+        XCTAssertTrue(bossRecord.lastCounter)
+        XCTAssertEqual(bossRecord.hearts, 4)
+
+        var bossIgnore = BossRaid(monster: "caveTroll", students: 3), dice2 = MiniGameDice(seed: 11)
+        bossIgnore.resolve(ignored, dice: &dice2)
+        XCTAssertEqual(bossIgnore.lastHits.count, 1)
+        XCTAssertFalse(bossIgnore.lastCounter)
+        XCTAssertEqual(bossIgnore.hearts, 5)
+
+        XCTAssertEqual(CampDefense.move(recorded), 1)
+        XCTAssertEqual(CampDefense.move(ignored), -1)
+    }
+
+    func testRaceSingleStudentIgnoresOtherSidesWithoutPenalizingCurrentTurn() {
+        let sides = [MiniGameSide(id: "red", name: "红队", members: ["p1", "p2"]), MiniGameSide(id: "blue", name: "蓝队", members: ["p3"])]
+        var race = RaceTrack(sides: sides, seed: 5), dice = MiniGameDice(seed: 9)
+        race.trapped.insert("red"); race.positions["red"] = 5
+        // Single-student quiz for blue member p3 while red is up: ignored, red is neither trapped nor skipped.
+        let nonTurn = MiniGameRound(level: 2, answers: [MiniGameAnswer(player: "p3", right: true)], singleStudent: true)
+        XCTAssertFalse(race.resolve(nonTurn, dice: &dice))
+        XCTAssertEqual(race.current?.id, "red")
+        XCTAssertEqual(race.positions["red"], 5)
+        XCTAssertTrue(race.trapped.contains("red"))
+        // Single-student quiz for red member p2: resolves normally and escapes trap.
+        let ownTurn = MiniGameRound(level: 2, answers: [MiniGameAnswer(player: "p2", right: true)], singleStudent: true)
+        XCTAssertTrue(race.resolve(ownTurn, dice: &dice))
+        XCTAssertFalse(race.trapped.contains("red"))
+        XCTAssertEqual(race.current?.id, "blue")
+    }
+
+    func testArenaSingleStudentStagesDuelistsAndIgnoresSpectators() {
+        var arena = ArenaKing(players: ["a", "b", "c"])!
+        // Spectator c answering individually does not disturb champion a vs challenger b.
+        XCTAssertFalse(arena.resolve(MiniGameRound(level: 2, answers: [MiniGameAnswer(player: "c", right: true)], singleStudent: true)))
+        XCTAssertEqual([arena.champion, arena.challenger], ["a", "b"])
+        XCTAssertEqual(arena.round, 0)
+        // Champion a answers right alone: buffered until challenger b also answers.
+        XCTAssertFalse(arena.resolve(MiniGameRound(level: 2, answers: [MiniGameAnswer(player: "a", right: true)], singleStudent: true)))
+        XCTAssertEqual(arena.staged["a"], true)
+        XCTAssertEqual(arena.round, 0)
+        // Challenger b answers wrong: duel now resolves cleanly with a defending.
+        XCTAssertTrue(arena.resolve(MiniGameRound(level: 2, answers: [MiniGameAnswer(player: "b", right: false)], singleStudent: true)))
+        XCTAssertTrue(arena.staged.isEmpty)
+        XCTAssertEqual(arena.last, .defended)
+        XCTAssertEqual([arena.champion, arena.challenger], ["a", "c"])
+        // Next duel: challenger c answers right first, then champion a answers wrong -> c dethrones a.
+        XCTAssertFalse(arena.resolve(MiniGameRound(level: 1, answers: [MiniGameAnswer(player: "c", right: true)], singleStudent: true)))
+        XCTAssertTrue(arena.resolve(MiniGameRound(level: 1, answers: [MiniGameAnswer(player: "a", right: false)], singleStudent: true)))
+        XCTAssertEqual(arena.last, .dethroned)
+        XCTAssertEqual(arena.champion, "c")
+        // Classwide round overrides any stale staged single-student answer.
+        XCTAssertFalse(arena.resolve(MiniGameRound(level: 1, answers: [MiniGameAnswer(player: "c", right: false)], singleStudent: true)))
+        XCTAssertTrue(arena.resolve(round(2, [("c", true), ("b", false)])))
+        XCTAssertTrue(arena.staged.isEmpty)
+        XCTAssertEqual(arena.last, .defended)
+    }
+
+    func testSidesKeepsUnassignedStudentsInTeamMode() throws {
+        var config = MeadowMapConfiguration.suggested(total: 4, seed: 317)
+        config.combat = 0; config.boss = 0; config.reward = 3; config.empty = 0; config.extraRoads = 0
+        let session = try MeadowCampaignSession.new(layout: try MeadowMapGenerator.generate(config))
+        var state = session.engine.state
+        state.teams = [GameTeam(id: "t1", name: "红队"), GameTeam(id: "t2", name: "蓝队")]
+        var p1 = state.units["p1"]!; p1.name = "Alice"; p1.teamID = "t1"; p1.host = false
+        var p2 = state.units["p2"]!; p2.name = "Bob"; p2.teamID = "t2"; p2.host = false
+        var p3 = p1; p3.id = "p3"; p3.name = "Charlie"; p3.teamID = nil; p3.host = false
+        var host = p1; host.id = "p7"; host.name = "Teacher"; host.teamID = "t1"; host.host = true
+        state.units = ["p1": p1, "p2": p2, "p3": p3, "p7": host]
+        let sides = MiniGameSide.sides(state)
+        XCTAssertEqual(sides.map(\.id), ["t1", "t2", "p3"])
+        XCTAssertEqual(sides[0].members, ["p1"])
+        XCTAssertEqual(sides[1].members, ["p2"])
+        XCTAssertEqual(sides[2].members, ["p3"])
+    }
 }
