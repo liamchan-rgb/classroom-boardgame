@@ -1,6 +1,7 @@
 import SwiftUI
 import UIKit
 import UniformTypeIdentifiers
+import ClassroomProbeCore
 
 struct TeacherConsole:View {
     @ObservedObject var session:TeacherSession
@@ -16,7 +17,11 @@ struct TeacherConsole:View {
         .onChange(of:session.bookTabRequest){_,_ in tab=1}
         .onChange(of:tab){_,value in
             session.game.bookTabActive = value==1
-            if value==0,session.game.surface == .book {session.concealNotes();session.game.project(.exploration)}
+            if value==0 {
+                KeyHostingController<EmptyView>.endEditing()
+                session.concealNotes()
+                if session.game.surface == .book {session.game.project(.exploration)}
+            }
             // Opening the book tab puts the picture book on the TV straight away.
             if value==1,session.game.surface != .book,!session.game.busy {session.game.project(.book)}
         }
@@ -30,9 +35,6 @@ private struct TeacherBookConsole:View {
     @State private var importingBackup=false
     @State private var report=false
     @State private var exportingURL:URL?
-    @FocusState private var notesFocused:Bool
-    /// Notes show formatted (bold / underline from the PPT); the pencil switches to the raw text with its ** / __ marks.
-    @State private var editingNotes=false
     @State private var decks=false
     var body:some View {
         VStack(alignment:.leading,spacing:10){
@@ -46,9 +48,9 @@ private struct TeacherBookConsole:View {
                 IPadPublicScreenButton(session:TeacherSession.shared,connected:game.externalConnected)
                 #endif
                 Spacer()
-                ClassroomToolbarTools(game:game,prepare:{notesFocused=false})
+                ClassroomToolbarTools(game:game,prepare:{KeyHostingController<EmptyView>.endEditing()})
                 ToolbarGap()
-                Button{notesFocused=false;decks=true}label:{Label("课件",systemImage:"rectangle.stack")}
+                Button{KeyHostingController<EmptyView>.endEditing();decks=true}label:{Label("课件",systemImage:"rectangle.stack")}
                 // Like the game tab: the less used things in one grouped menu.
                 Menu {
                     Section("课件文件") {
@@ -63,14 +65,14 @@ private struct TeacherBookConsole:View {
                         }label:{Label("备份与恢复",systemImage:"externaldrive")}
                     }
                     Section("行程") {
-                        Button{notesFocused=false;game.openArchives()}label:{Label("存档与历史",systemImage:"archivebox")}.disabled(game.busy)
+                        Button{KeyHostingController<EmptyView>.endEditing();game.openArchives()}label:{Label("存档与历史",systemImage:"archivebox")}.disabled(game.busy)
                     }
                     Section("工具") {
-                        Button{notesFocused=false;game.openGM()}label:{Label("GM 修改数值",systemImage:"wand.and.stars")}.disabled(game.busy || game.campaign==nil)
-                        Button{notesFocused=false;game.openCharacterStudio()}label:{Label("人物形象",systemImage:"person.crop.circle.badge.plus")}.disabled(game.busy)
+                        Button{KeyHostingController<EmptyView>.endEditing();game.openGM()}label:{Label("GM 修改数值",systemImage:"wand.and.stars")}.disabled(game.busy || game.campaign==nil)
+                        Button{KeyHostingController<EmptyView>.endEditing();game.openCharacterStudio()}label:{Label("人物形象",systemImage:"person.crop.circle.badge.plus")}.disabled(game.busy)
                     }
                     Menu {
-                        Button{notesFocused=false;game.openShortcutEditor()}label:{Label("快捷键",systemImage:"keyboard")}
+                        Button{KeyHostingController<EmptyView>.endEditing();game.openShortcutEditor()}label:{Label("快捷键",systemImage:"keyboard")}
                     }label:{Label("设置",systemImage:"gearshape")}
                 }label:{Label("更多",systemImage:"ellipsis.circle")}
             }.buttonStyle(ToolbarIconStyle()).menuStyle(.button).padding(.horizontal,10).padding(.vertical,6).glassPanel(radius:20,padding:0)
@@ -100,29 +102,37 @@ private struct TeacherBookConsole:View {
                         .clipShape(RoundedRectangle(cornerRadius:18,style:.continuous)).overlay(RoundedRectangle(cornerRadius:18,style:.continuous).stroke(.white.opacity(0.5),lineWidth:1))
                     MiniGameBar(game:game)
                     // Right under the page, next to the players' cards the boxes are dragged onto (drawn over the page while dragging).
-                    TeacherBookGrantBar(game:game,draft:game.grantDraft,prepare:{notesFocused=false}).zIndex(1)
+                    TeacherBookGrantBar(game:game,draft:game.grantDraft,prepare:{KeyHostingController<EmptyView>.endEditing()}).zIndex(1)
                 }
                 QuizDock(game:game,book:true)
                 VStack(alignment:.leading,spacing:8){
-                    // Always shown (the notes stay on this device; the TV never shows them).
+                    // Always shown and directly editable with live bold / underline formatting (no lock button or raw markers).
                     HStack{
                         Label("备注",systemImage:"note.text").font(.headline)
                         Spacer()
-                        Button{editingNotes.toggle();notesFocused=editingNotes}label:{Image(systemName:editingNotes ? "checkmark.circle.fill":"pencil.circle").font(.title3)}
-                            .buttonStyle(.plain).foregroundStyle(GameTheme.primary).accessibilityLabel(editingNotes ? "完成编辑":"编辑备注")
                     }
-                    Group {
-                        if editingNotes {
-                            TextEditor(text:Binding(get:{session.currentNote},set:{session.editNote($0)})).focused($notesFocused)
-                                .scrollContentBackground(.hidden).padding(6).background(.white.opacity(0.35),in:RoundedRectangle(cornerRadius:12,style:.continuous))
-                            Text("**加粗**  __下划线__").font(.caption2).foregroundStyle(.secondary)
-                        } else {
-                            // Double-click an English word (or a word of a phrase) → flash card for the class.
-                            NotesWordText(raw:session.currentNote){pick,rect,view in game.openWordCard(pick,rect:rect,in:view)}
-                                .onAppear{NotesDictionary.shared.prewarm()}
-                                .padding(8).background(.white.opacity(0.35),in:RoundedRectangle(cornerRadius:12,style:.continuous))
+                    ZStack(alignment:.topLeading) {
+                        if session.currentNote.isEmpty {
+                            Text("点击输入备注（⌘B 粗体，⌘U 下划线）")
+                                .font(.system(size:17))
+                                .foregroundStyle(.secondary.opacity(0.6))
+                                .padding(.horizontal,11).padding(.vertical,16)
+                                .allowsHitTesting(false)
                         }
+                        NotesWordText(
+                            raw:session.currentNote,
+                            onEdit:{session.editNote($0)},
+                            onFocus:{session.notesFocus($0)},
+                            onPick:{pick,rect,view in game.openWordCard(pick,rect:rect,in:view)},
+                            onPickSelection:{selection,rect,view in game.openSelectionCard(selection,rect:rect,in:view)}
+                        )
+                        .onAppear{NotesDictionary.shared.prewarm()}
                     }
+                    .frame(maxWidth:.infinity,maxHeight:.infinity)
+                    .padding(6)
+                    .background(.white.opacity(0.35),in:RoundedRectangle(cornerRadius:12,style:.continuous))
+                    Text("双击单词出闪卡 · 框选按 K · ⌘B 粗体 · ⌘U 下划线")
+                        .font(.caption2).foregroundStyle(.secondary).lineLimit(1).minimumScaleFactor(0.75)
                 }.frame(width:280).frame(maxHeight:.infinity,alignment:.top).glassPanel()
             }.frame(maxHeight:.infinity)
             HStack(spacing:6){Image(systemName:"info.circle").foregroundStyle(GameTheme.primary);Text(game.message+" · "+session.message).lineLimit(1)}
@@ -148,14 +158,13 @@ private struct TeacherBookConsole:View {
         }message:{Text(session.importOutcome ?? "")}
         // Book tab opened while the game was busy: put the book on the TV once it is free (this used to need 投放).
         .onChange(of:game.busy){_,busy in if !busy,game.bookTabActive,game.surface != .book {game.project(.book)}}
-        .onChange(of:notesFocused){_,active in session.notesFocus(active)}
         .sheet(isPresented:$report){NavigationStack{ScrollView{Text(session.importReport).padding()}.navigationTitle("PPTX导入报告").toolbar{Button("完成"){report=false}}}}
         .sheet(isPresented:Binding(get:{exportingURL != nil},set:{if !$0{exportingURL=nil}})){if let url=exportingURL{ExportDocument(url:url)}}
     }
     /// 选文件改用 UIKit 的文档选择器，从最上层的界面弹出。原来的 SwiftUI .fileImporter 从「文件」菜单里点时，
     /// 菜单还在收起就要弹窗，和同一视图上的两个 .sheet 冲突，会静默弹不出来（点了导入没反应）。
     private func openImporter(){
-        notesFocused=false;session.pause(.filePicker,enabled:true)
+        KeyHostingController<EmptyView>.endEditing();session.pause(.filePicker,enabled:true)
         let backup=importingBackup
         let types:[UTType]=backup ? [.json]:[UTType("org.openxmlformats.presentationml.presentation"),UTType(filenameExtension:"pptx")].compactMap{$0}
         DocumentImportPresenter.shared.present(types:types.isEmpty ? [.data]:types){url in
@@ -207,21 +216,13 @@ struct ExportDocument:UIViewControllerRepresentable {
 /// Speaker-notes markup from the PPT import: **bold** and __underline__ (they can nest).
 enum NotesMarkup {
     static func attributed(_ raw:String)->AttributedString {
-        var out=AttributedString(),bold=false,underline=false,buffer=""
-        func flush(){
-            guard !buffer.isEmpty else{return}
-            var piece=AttributedString(buffer)
-            if bold {piece.inlinePresentationIntent = .stronglyEmphasized;piece.font = .system(size:17,weight:.bold)}
-            if underline {piece.underlineStyle = .single}
-            out.append(piece);buffer=""
+        var out=AttributedString()
+        for span in NotesMarkupCodec.parse(raw) {
+            var piece=AttributedString(span.text)
+            if span.bold {piece.inlinePresentationIntent = .stronglyEmphasized;piece.font = .system(size:17,weight:.bold)}
+            if span.underline {piece.underlineStyle = .single}
+            out.append(piece)
         }
-        let chars=Array(raw);var i=0
-        while i<chars.count {
-            if i+1<chars.count,chars[i]=="*",chars[i+1]=="*" {flush();bold.toggle();i+=2;continue}
-            if i+1<chars.count,chars[i]=="_",chars[i+1]=="_" {flush();underline.toggle();i+=2;continue}
-            buffer.append(chars[i]);i+=1
-        }
-        flush()
         return out
     }
 }

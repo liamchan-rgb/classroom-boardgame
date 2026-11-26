@@ -142,3 +142,63 @@ public struct ProbeBackup: Codable {
         return backup
     }
 }
+
+/// Pure representation & lossless serializer for formatted speaker notes (`**bold**` and `__underline__`).
+public struct NotesMarkupSpan: Equatable {
+    public var text: String
+    public var bold: Bool
+    public var underline: Bool
+    public init(text: String, bold: Bool, underline: Bool) {
+        self.text = text; self.bold = bold; self.underline = underline
+    }
+}
+
+public enum NotesMarkupCodec {
+    public static func parse(_ raw: String) -> [NotesMarkupSpan] {
+        var spans: [NotesMarkupSpan] = []
+        var bold = false, underline = false, buffer = ""
+        func flush() {
+            guard !buffer.isEmpty else { return }
+            if let last = spans.last, last.bold == bold, last.underline == underline {
+                spans[spans.count - 1].text += buffer
+            } else {
+                spans.append(NotesMarkupSpan(text: buffer, bold: bold, underline: underline))
+            }
+            buffer = ""
+        }
+        let chars = Array(raw)
+        var i = 0
+        while i < chars.count {
+            if i + 1 < chars.count, chars[i] == "*", chars[i + 1] == "*" { flush(); bold.toggle(); i += 2; continue }
+            if i + 1 < chars.count, chars[i] == "_", chars[i + 1] == "_" { flush(); underline.toggle(); i += 2; continue }
+            buffer.append(chars[i]); i += 1
+        }
+        flush()
+        return spans
+    }
+
+    public static func encode(_ spans: [NotesMarkupSpan]) -> String {
+        var out = ""
+        var curBold = false, curUnderline = false
+        func setStyle(bold: Bool, underline: Bool) {
+            if curBold && !bold { out += "**"; curBold = false }
+            if curUnderline && !underline { out += "__"; curUnderline = false }
+            if !curUnderline && underline { out += "__"; curUnderline = true }
+            if !curBold && bold { out += "**"; curBold = true }
+        }
+        for span in spans where !span.text.isEmpty {
+            let parts = span.text.split(separator: "\n", omittingEmptySubsequences: false)
+            for (idx, part) in parts.enumerated() {
+                if idx > 0 {
+                    setStyle(bold: false, underline: false)
+                    out.append("\n")
+                }
+                guard !part.isEmpty else { continue }
+                setStyle(bold: span.bold, underline: span.underline)
+                out.append(contentsOf: part)
+            }
+        }
+        setStyle(bold: false, underline: false)
+        return out
+    }
+}

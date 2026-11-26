@@ -184,4 +184,28 @@ final class ProbeCoreTests: XCTestCase {
         let still = try XMLTree.read(Data("<p:sld xmlns:p=\"urn:p\"><p:cSld/></p:sld>".utf8), part: "s.xml")
         XCTAssertTrue(PPTXAnimations.build(still, warnings: &warnings).isEmpty); XCTAssertNil(PPTXAnimations.transition(still))
     }
+
+    func testNotesMarkupRoundTripNeverLeaksTokens() {
+        let samples = [
+            "The __**bubble**__ went all the way back\nto Benny's __**house**__.\nAnd then do you know\n__** where **__ the\n__**bubble**__ went?",
+            "先读**重点词**，再__划线__结束",
+            "**bold**__underline__plain",
+            "**multi\nline bold** plain"
+        ]
+        for raw in samples {
+            let parsed = NotesMarkupCodec.parse(raw)
+            XCTAssertFalse(parsed.map(\.text).joined().contains("**"))
+            XCTAssertFalse(parsed.map(\.text).joined().contains("__"))
+            let reencoded = NotesMarkupCodec.encode(parsed)
+            let reparsed = NotesMarkupCodec.parse(reencoded)
+            XCTAssertEqual(reparsed, parsed)
+        }
+        XCTAssertEqual(
+            NotesMarkupCodec.encode([
+                NotesMarkupSpan(text: "ice", bold: true, underline: false),
+                NotesMarkupSpan(text: " cream", bold: true, underline: true)
+            ]),
+            "**ice__ cream__**"
+        )
+    }
 }

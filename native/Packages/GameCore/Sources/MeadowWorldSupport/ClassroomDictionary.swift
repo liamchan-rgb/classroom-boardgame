@@ -129,4 +129,94 @@ public final class ClassroomDictionary {
         "Preposition": ["prep."], "Pronoun": ["pron."], "Conjunction": ["conj."], "Interjection": ["int.", "interj."],
         "Determiner": ["art.", "det."], "Number": ["num."],
     ]
+
+    /// Trims whitespace/surrounding sentence punctuation and collapses internal runs of whitespace.
+    public static func normalizedTerm(_ raw: String) -> String {
+        let trimChars = CharacterSet.whitespacesAndNewlines.union(CharacterSet(charactersIn: ".,!?;:\"'()[]{}“”‘’。，！？；：（）【】"))
+        let cleaned = raw.trimmingCharacters(in: trimChars)
+        return cleaned.components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty }.joined(separator: " ")
+    }
+
+    /// Lowercased comparison key treating hyphens/underscores/repeated spaces uniformly (`"ice-cream"` ↔ `"ice cream"`).
+    public static func matchableKey(_ raw: String) -> String {
+        let mapped = raw.lowercased().map { ($0 == "-" || $0 == "_") ? Character(" ") : $0 }
+        return String(mapped).components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty }.joined(separator: " ")
+    }
+
+    /// Finds a flashcard in `cards` for the word at `index` inside `tokens`.
+    /// Multi-word compounds/phrases around `index` (longest first, whether in the dictionary or only in `cards`) are
+    /// matched before single-word cards so clicking either word of `"ice cream"` picks `"ice cream"`.
+    public static func matchingFlashcard(tokens: [String], at index: Int, cards: [(index: Int, english: String)], dictionary: ClassroomDictionary?) -> Int? {
+        guard tokens.indices.contains(index), !cards.isEmpty else { return nil }
+        let prepared = cards.map { (index: $0.index, exact: $0.english.lowercased(), key: matchableKey($0.english)) }
+        func findHit(_ candidates: [String]) -> Int? {
+            for c in candidates {
+                let low = c.lowercased()
+                if let hit = prepared.first(where: { $0.exact == low }) { return hit.index }
+            }
+            for c in candidates {
+                let k = matchableKey(c)
+                if !k.isEmpty, let hit = prepared.first(where: { $0.key == k }) { return hit.index }
+            }
+            return nil
+        }
+
+        let forms: [[String]] = tokens.map { tok in
+            let l = tok.lowercased()
+            if let b = dictionary?.base(of: l), b != l { return [l, b] }
+            return [l]
+        }
+        let maxSpan = min(6, tokens.count)
+        let dictPhrases = dictionary?.phrases(in: tokens, at: index) ?? []
+
+        if maxSpan >= 2 {
+            for len in stride(from: maxSpan, through: 2, by: -1) {
+                var candidates: [String] = []
+                for m in dictPhrases where m.tokens.count == len {
+                    candidates.append(m.phrase)
+                }
+                let lo = max(0, index - len + 1), hi = min(index, tokens.count - len)
+                if lo <= hi {
+                    for start in lo...hi {
+                        let slice = forms[start..<(start + len)]
+                        if len <= 4 {
+                            var built = [""]
+                            for opts in slice {
+                                built = built.flatMap { prefix in opts.map { prefix.isEmpty ? $0 : "\(prefix) \($0)" } }
+                            }
+                            candidates.append(contentsOf: built)
+                        } else {
+                            candidates.append(slice.map { $0[0] }.joined(separator: " "))
+                            if let lastBase = slice.last?.last {
+                                candidates.append((slice.dropLast().map { $0[0] } + [lastBase]).joined(separator: " "))
+                            }
+                            candidates.append(slice.map { $0.last ?? $0[0] }.joined(separator: " "))
+                        }
+                    }
+                }
+                if let hit = findHit(candidates) { return hit }
+            }
+        }
+        // Longer dictionary gapped phrases (>6 words, if ever present).
+        if let hit = findHit(dictPhrases.filter { $0.tokens.count > maxSpan }.map(\.phrase)) { return hit }
+        return findHit(forms[index])
+    }
+
+    /// Finds an existing flashcard matching an explicitly highlighted text selection.
+    public static func matchingFlashcard(selection: String, cards: [(index: Int, english: String)], dictionary: ClassroomDictionary?) -> Int? {
+        let cleaned = normalizedTerm(selection)
+        guard !cleaned.isEmpty, !cards.isEmpty else { return nil }
+        let prepared = cards.map { (index: $0.index, exact: $0.english.lowercased(), key: matchableKey($0.english)) }
+        var candidates = [cleaned]
+        if !cleaned.contains(" "), let base = dictionary?.base(of: cleaned) { candidates.append(base) }
+        for c in candidates {
+            let low = c.lowercased()
+            if let hit = prepared.first(where: { $0.exact == low }) { return hit.index }
+        }
+        for c in candidates {
+            let k = matchableKey(c)
+            if !k.isEmpty, let hit = prepared.first(where: { $0.key == k }) { return hit.index }
+        }
+        return nil
+    }
 }

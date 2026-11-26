@@ -46,6 +46,7 @@ def main() -> None:
                 rec["mode"] = im.mode
         files_meta.append(rec)
 
+    fx_doc = json.loads((PACK / "pixel-fx/recipes_expansion.json").read_text(encoding="utf-8"))
     manifest = {
         "package": "meadow-expansion-art-v1",
         "version": "1.0.0",
@@ -62,9 +63,9 @@ def main() -> None:
             "monsterProjectiles": 8,
             "wearableWeapons": 17,
             "wearableArmors": 14,
-            "pixelFXPacks": 8,
-            "pixelFXClips": 23,
-            "pixelFXRecipes": 70,
+            "pixelFXPacks": fx_doc.get("packs", 8),
+            "pixelFXClips": len(fx_doc.get("clips", [])),
+            "pixelFXRecipes": len(fx_doc.get("recipes", {})),
             "qaPreviews": len(list((PACK / "previews").glob("*.png"))),
             "totalFiles": len(files_meta),
             "totalBytes": sum(f["bytes"] for f in files_meta),

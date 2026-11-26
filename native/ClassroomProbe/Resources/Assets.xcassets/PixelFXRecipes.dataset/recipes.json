@@ -1290,6 +1290,363 @@
       "cols": 20,
       "back": true,
       "front": true
+    },
+    {
+      "id": "iron_bastion_wall",
+      "w": 100,
+      "h": 89,
+      "ox": 27,
+      "oy": 71,
+      "n": 29,
+      "cols": 40,
+      "back": true,
+      "front": true
+    },
+    {
+      "id": "bark_aegis_shell",
+      "w": 99,
+      "h": 85,
+      "ox": 49,
+      "oy": 66,
+      "n": 35,
+      "cols": 41,
+      "back": true,
+      "front": true
+    },
+    {
+      "id": "crystal_shell_dome",
+      "w": 98,
+      "h": 114,
+      "ox": 49,
+      "oy": 94,
+      "n": 34,
+      "cols": 41,
+      "back": true,
+      "front": true
+    },
+    {
+      "id": "night_plume_ward",
+      "w": 93,
+      "h": 88,
+      "ox": 49,
+      "oy": 68,
+      "n": 35,
+      "cols": 44,
+      "back": true,
+      "front": true
+    },
+    {
+      "id": "glacial_wings_ward",
+      "w": 131,
+      "h": 127,
+      "ox": 63,
+      "oy": 103,
+      "n": 39,
+      "cols": 31,
+      "back": true,
+      "front": true
+    },
+    {
+      "id": "astral_dome_barrier",
+      "w": 116,
+      "h": 103,
+      "ox": 59,
+      "oy": 76,
+      "n": 37,
+      "cols": 35,
+      "back": true,
+      "front": true
+    },
+    {
+      "id": "spore_bubble_coat",
+      "w": 91,
+      "h": 95,
+      "ox": 45,
+      "oy": 76,
+      "n": 32,
+      "cols": 45,
+      "back": true,
+      "front": true
+    },
+    {
+      "id": "prayer_veil_curtain",
+      "w": 82,
+      "h": 87,
+      "ox": 41,
+      "oy": 72,
+      "n": 34,
+      "cols": 49,
+      "back": true,
+      "front": true
+    },
+    {
+      "id": "holy_orb_proj",
+      "w": 101,
+      "h": 44,
+      "ox": 79,
+      "oy": 22,
+      "n": 12,
+      "cols": 12,
+      "back": false,
+      "front": true,
+      "loop": true
+    },
+    {
+      "id": "scout_mark_target",
+      "w": 84,
+      "h": 84,
+      "ox": 42,
+      "oy": 70,
+      "n": 29,
+      "cols": 29,
+      "back": false,
+      "front": true
+    },
+    {
+      "id": "wind_dash_step",
+      "w": 132,
+      "h": 78,
+      "ox": 76,
+      "oy": 58,
+      "n": 30,
+      "cols": 31,
+      "back": true,
+      "front": true
+    },
+    {
+      "id": "shield_bash_wave",
+      "w": 118,
+      "h": 99,
+      "ox": 21,
+      "oy": 74,
+      "n": 12,
+      "cols": 12,
+      "back": false,
+      "front": true
+    },
+    {
+      "id": "oath_banner_plant",
+      "w": 116,
+      "h": 166,
+      "ox": 58,
+      "oy": 141,
+      "n": 40,
+      "cols": 35,
+      "back": true,
+      "front": true
+    },
+    {
+      "id": "elder_tree_bloom",
+      "w": 130,
+      "h": 136,
+      "ox": 65,
+      "oy": 121,
+      "n": 41,
+      "cols": 31,
+      "back": true,
+      "front": true
+    },
+    {
+      "id": "gale_arrow_rain",
+      "w": 271,
+      "h": 131,
+      "ox": 181,
+      "oy": 113,
+      "n": 25,
+      "cols": 15,
+      "back": true,
+      "front": true
+    },
+    {
+      "id": "skybreaker_lance",
+      "w": 191,
+      "h": 254,
+      "ox": 107,
+      "oy": 205,
+      "n": 34,
+      "cols": 21,
+      "back": true,
+      "front": true
+    },
+    {
+      "id": "arcane_overdrive_surge",
+      "w": 110,
+      "h": 146,
+      "ox": 55,
+      "oy": 125,
+      "n": 34,
+      "cols": 37,
+      "back": true,
+      "front": true
+    },
+    {
+      "id": "warlord_roar_wave",
+      "w": 162,
+      "h": 153,
+      "ox": 81,
+      "oy": 111,
+      "n": 30,
+      "cols": 25,
+      "back": false,
+      "front": true
+    },
+    {
+      "id": "wildwood_breeze_wave",
+      "w": 194,
+      "h": 113,
+      "ox": 100,
+      "oy": 90,
+      "n": 36,
+      "cols": 21,
+      "back": true,
+      "front": true
+    },
+    {
+      "id": "frost_fang_bite",
+      "w": 108,
+      "h": 108,
+      "ox": 54,
+      "oy": 80,
+      "n": 24,
+      "cols": 24,
+      "back": false,
+      "front": true
+    },
+    {
+      "id": "tribal_drum_chant",
+      "w": 173,
+      "h": 94,
+      "ox": 87,
+      "oy": 67,
+      "n": 34,
+      "cols": 23,
+      "back": true,
+      "front": true
+    },
+    {
+      "id": "wasp_swarm_buzz",
+      "w": 89,
+      "h": 82,
+      "ox": 45,
+      "oy": 67,
+      "n": 33,
+      "cols": 46,
+      "back": true,
+      "front": true
+    },
+    {
+      "id": "wolf_frost_howl",
+      "w": 102,
+      "h": 111,
+      "ox": 52,
+      "oy": 121,
+      "n": 36,
+      "cols": 36,
+      "back": false,
+      "front": true
+    },
+    {
+      "id": "cap_spore_slam",
+      "w": 185,
+      "h": 100,
+      "ox": 93,
+      "oy": 72,
+      "n": 31,
+      "cols": 22,
+      "back": true,
+      "front": true
+    },
+    {
+      "id": "mana_barrier_hex",
+      "w": 102,
+      "h": 93,
+      "ox": 47,
+      "oy": 73,
+      "n": 35,
+      "cols": 40,
+      "back": true,
+      "front": true
+    },
+    {
+      "id": "acorn_spin_proj",
+      "w": 74,
+      "h": 26,
+      "ox": 61,
+      "oy": 14,
+      "n": 10,
+      "cols": 10,
+      "back": false,
+      "front": true,
+      "loop": true
+    },
+    {
+      "id": "shaman_orb_proj",
+      "w": 108,
+      "h": 44,
+      "ox": 86,
+      "oy": 22,
+      "n": 14,
+      "cols": 14,
+      "back": false,
+      "front": true,
+      "loop": true
+    },
+    {
+      "id": "shadow_feather_proj",
+      "w": 103,
+      "h": 33,
+      "ox": 81,
+      "oy": 18,
+      "n": 10,
+      "cols": 10,
+      "back": false,
+      "front": true,
+      "loop": true
+    },
+    {
+      "id": "eclipse_orb_proj",
+      "w": 116,
+      "h": 54,
+      "ox": 89,
+      "oy": 27,
+      "n": 14,
+      "cols": 14,
+      "back": false,
+      "front": true,
+      "loop": true
+    },
+    {
+      "id": "nature_boulder_smash",
+      "w": 213,
+      "h": 93,
+      "ox": 20,
+      "oy": 77,
+      "n": 38,
+      "cols": 19,
+      "back": true,
+      "front": true
+    },
+    {
+      "id": "arcane_time_clock",
+      "w": 165,
+      "h": 132,
+      "ox": 81,
+      "oy": 115,
+      "n": 45,
+      "cols": 24,
+      "back": true,
+      "front": true
+    },
+    {
+      "id": "fire_ring_nova",
+      "w": 210,
+      "h": 116,
+      "ox": 105,
+      "oy": 81,
+      "n": 44,
+      "cols": 19,
+      "back": true,
+      "front": true
     }
   ],
   "recipes": {
@@ -1907,23 +2264,17 @@
         "anchor": "caster"
       },
       {
-        "clip": "projectiles_plasma_shot_45",
-        "at": 0.24,
+        "clip": "holy_orb_proj",
+        "at": 0.22,
         "anchor": "fly",
         "flight": 0.24,
         "lift": 18
       },
       {
         "clip": "holy_sunburst_16",
-        "at": 0.46,
+        "at": 0.44,
         "anchor": "target",
         "dy": -14
-      },
-      {
-        "clip": "impacts_hit_spark_10",
-        "at": 0.48,
-        "anchor": "target",
-        "dy": -10
       },
       {
         "clip": "holy_heal_15",
@@ -1933,26 +2284,26 @@
     ],
     "prayerHeal": [
       {
-        "clip": "holy_heal_15",
-        "at": 0.04,
+        "clip": "prayer_veil_curtain",
+        "at": 0.02,
         "anchor": "target"
       },
       {
-        "clip": "holy_halo_18",
-        "at": 0.16,
+        "clip": "holy_heal_15",
+        "at": 0.14,
         "anchor": "target"
       }
     ],
     "blessingVeil": [
       {
-        "clip": "holy_blessing_17",
+        "clip": "prayer_veil_curtain",
         "at": 0.04,
         "anchor": "target",
         "stagger": 0.08
       },
       {
-        "clip": "impacts_shield_block",
-        "at": 0.22,
+        "clip": "holy_blessing_17",
+        "at": 0.18,
         "anchor": "target",
         "stagger": 0.08
       }
@@ -1960,90 +2311,69 @@
     "quickShot": [
       {
         "clip": "projectiles_arrow_42",
-        "at": 0.14,
+        "at": 0.12,
         "anchor": "fly",
-        "flight": 0.18,
+        "flight": 0.17,
         "lift": 16
       },
       {
         "clip": "impacts_hit_spark_43",
-        "at": 0.32,
+        "at": 0.29,
         "anchor": "target",
         "dy": -10
       }
     ],
     "nimbleStep": [
       {
-        "clip": "nature_leaf_storm",
+        "clip": "wind_dash_step",
         "at": 0.02,
-        "anchor": "caster"
-      },
-      {
-        "clip": "status_rage_13",
-        "at": 0.16,
         "anchor": "caster"
       }
     ],
     "scoutMark": [
       {
-        "clip": "holy_sunburst_16",
-        "at": 0.04,
-        "anchor": "caster",
-        "dy": -22
-      },
-      {
-        "clip": "status_rage_13",
-        "at": 0.18,
+        "clip": "scout_mark_target",
+        "at": 0.08,
         "anchor": "target",
         "stagger": 0.07
       }
     ],
     "shieldBash": [
       {
-        "clip": "melee_hammer_smash",
+        "clip": "shield_bash_wave",
         "at": 0.14,
-        "anchor": "target",
-        "dx": -14
+        "anchor": "caster",
+        "dx": 8
       },
       {
         "clip": "impacts_blunt_hit_6",
         "at": 0.26,
         "anchor": "target",
         "dy": -8
-      },
-      {
-        "clip": "impacts_shield_block",
-        "at": 0.2,
-        "anchor": "caster"
       }
     ],
     "ironBulwark": [
       {
         "clip": "arcane_rune_circle_11",
-        "at": 0.04,
+        "at": 0.02,
         "anchor": "caster"
       },
       {
-        "clip": "impacts_shield_block",
-        "at": 0.18,
+        "clip": "iron_bastion_wall",
+        "at": 0.14,
         "anchor": "target",
         "stagger": 0.08
       }
     ],
     "steadfastVow": [
       {
-        "clip": "holy_heal_15",
+        "clip": "iron_bastion_wall",
         "at": 0.04,
         "anchor": "caster"
       },
       {
         "clip": "impacts_shield_block",
-        "at": 0.14,
-        "anchor": "caster"
-      },
-      {
-        "clip": "status_rage_13",
-        "at": 0.22,
+        "at": 0.18,
         "anchor": "caster"
       }
     ],
@@ -2055,19 +2385,19 @@
       },
       {
         "clip": "fire_fireball_47",
-        "at": 0.26,
+        "at": 0.24,
         "anchor": "fly",
-        "flight": 0.26,
+        "flight": 0.25,
         "lift": 18
       },
       {
         "clip": "fire_flame_pillar",
-        "at": 0.5,
+        "at": 0.48,
         "anchor": "target"
       },
       {
         "clip": "status_burning_7",
-        "at": 0.58,
+        "at": 0.56,
         "anchor": "target"
       }
     ],
@@ -2084,7 +2414,7 @@
       },
       {
         "clip": "frost_shard_burst",
-        "at": 0.44,
+        "at": 0.42,
         "anchor": "target",
         "stagger": 0.07
       }
@@ -2092,18 +2422,12 @@
     "manaBarrier": [
       {
         "clip": "arcane_rune_circle_12",
-        "at": 0.04,
+        "at": 0.02,
         "anchor": "caster"
       },
       {
-        "clip": "explosions_plasma_blast",
+        "clip": "mana_barrier_hex",
         "at": 0.14,
-        "anchor": "caster",
-        "dy": -16
-      },
-      {
-        "clip": "impacts_shield_block",
-        "at": 0.22,
         "anchor": "target",
         "stagger": 0.08
       }
@@ -2151,19 +2475,14 @@
     "judgmentStrike": [
       {
         "clip": "holy_smite_hammer",
-        "at": 0.16,
+        "at": 0.14,
         "anchor": "target"
       },
       {
         "clip": "impacts_crit_hit_3",
-        "at": 0.34,
+        "at": 0.32,
         "anchor": "target",
         "dy": -10
-      },
-      {
-        "clip": "holy_heal_15",
-        "at": 0.28,
-        "anchor": "caster"
       }
     ],
     "radiantBaptism": [
@@ -2176,27 +2495,26 @@
       },
       {
         "clip": "holy_heal_aoe_25",
-        "at": 0.18,
+        "at": 0.16,
         "anchor": "center",
         "dy": 6
       },
       {
-        "clip": "seraph_wing_shield",
-        "at": 0.32,
+        "clip": "holy_halo_18",
+        "at": 0.3,
         "anchor": "target",
         "stagger": 0.08
       }
     ],
     "oathBanner": [
       {
-        "clip": "holy_feather_burst_21",
-        "at": 0.05,
-        "anchor": "caster",
-        "dy": -20
+        "clip": "oath_banner_plant",
+        "at": 0.04,
+        "anchor": "caster"
       },
       {
         "clip": "holy_blessing_17",
-        "at": 0.24,
+        "at": 0.28,
         "anchor": "target",
         "stagger": 0.08
       }
@@ -2206,35 +2524,30 @@
         "clip": "wind_thunder_bolt",
         "at": 0.14,
         "anchor": "fly",
-        "flight": 0.22,
+        "flight": 0.2,
         "lift": 18
       },
       {
         "clip": "wind_spark_impact",
-        "at": 0.36,
+        "at": 0.34,
         "anchor": "target",
         "dy": -10
       },
       {
         "clip": "lightning_bolt_strike",
-        "at": 0.36,
+        "at": 0.34,
         "anchor": "target"
       }
     ],
     "galeBarrage": [
       {
-        "clip": "wind_gale_barrage",
-        "at": 0.12,
-        "anchor": "center"
-      },
-      {
-        "clip": "lightning_thunderclap",
-        "at": 0.28,
+        "clip": "gale_arrow_rain",
+        "at": 0.08,
         "anchor": "center"
       },
       {
         "clip": "wind_spark_impact",
-        "at": 0.38,
+        "at": 0.34,
         "anchor": "target",
         "dy": -10,
         "stagger": 0.07
@@ -2242,61 +2555,48 @@
     ],
     "windMomentum": [
       {
-        "clip": "nature_leaf_storm",
-        "at": 0.08,
+        "clip": "wind_dash_step",
+        "at": 0.06,
         "anchor": "target",
         "stagger": 0.07
       },
       {
-        "clip": "wind_spark_impact",
-        "at": 0.18,
-        "anchor": "caster",
-        "dy": -10
+        "clip": "nature_leaf_storm",
+        "at": 0.1,
+        "anchor": "caster"
       }
     ],
     "thornSnare": [
       {
         "clip": "thorn_vine_erupt",
-        "at": 0.14,
+        "at": 0.12,
         "anchor": "target",
         "stagger": 0.08
       },
       {
         "clip": "thorn_root_sweep",
-        "at": 0.2,
+        "at": 0.18,
         "anchor": "center",
         "dx": -60
-      },
-      {
-        "clip": "nature_healing_bloom_24",
-        "at": 0.26,
-        "anchor": "caster"
       }
     ],
     "elderBloom": [
       {
-        "clip": "nature_healing_bloom_24",
-        "at": 0.06,
-        "anchor": "target",
-        "stagger": 0.08
+        "clip": "elder_tree_bloom",
+        "at": 0.04,
+        "anchor": "center"
       },
       {
-        "clip": "holy_heal_aoe_25",
-        "at": 0.2,
-        "anchor": "center",
-        "dy": 6
+        "clip": "nature_healing_bloom_24",
+        "at": 0.24,
+        "anchor": "target",
+        "stagger": 0.08
       }
     ],
     "barkAegis": [
       {
-        "clip": "thorn_vine_erupt",
-        "at": 0.08,
-        "anchor": "target",
-        "stagger": 0.08
-      },
-      {
-        "clip": "impacts_shield_block",
-        "at": 0.24,
+        "clip": "bark_aegis_shell",
+        "at": 0.06,
         "anchor": "target",
         "stagger": 0.08
       }
@@ -2309,12 +2609,12 @@
       },
       {
         "clip": "astral_meteor_rain",
-        "at": 0.36,
+        "at": 0.34,
         "anchor": "center"
       },
       {
         "clip": "impacts_crit_hit_40",
-        "at": 0.72,
+        "at": 0.7,
         "anchor": "target",
         "dy": -10,
         "stagger": 0.08
@@ -2322,57 +2622,35 @@
     ],
     "astralDome": [
       {
-        "clip": "astral_zodiac_ring",
-        "at": 0.04,
-        "anchor": "center"
-      },
-      {
-        "clip": "seraph_wing_shield",
-        "at": 0.26,
+        "clip": "astral_dome_barrier",
+        "at": 0.06,
         "anchor": "target",
         "stagger": 0.08
       }
     ],
     "arcaneOverdrive": [
       {
-        "clip": "arcane_rune_circle_28",
-        "at": 0.0,
+        "clip": "arcane_overdrive_surge",
+        "at": 0.02,
         "anchor": "caster"
       },
       {
         "clip": "explosions_plasma_blast",
-        "at": 0.22,
+        "at": 0.26,
         "anchor": "center",
         "dy": -16
-      },
-      {
-        "clip": "status_rage_26",
-        "at": 0.36,
-        "anchor": "target",
-        "stagger": 0.07
       }
     ],
     "skybreaker": [
       {
-        "clip": "melee_spear_sweep",
-        "at": 0.18,
-        "anchor": "caster",
-        "dx": 16
-      },
-      {
-        "clip": "holy_smite_hammer",
-        "at": 0.26,
+        "clip": "skybreaker_lance",
+        "at": 0.12,
         "anchor": "target"
       },
       {
         "clip": "lightning_bolt_strike",
-        "at": 0.34,
+        "at": 0.3,
         "anchor": "target"
-      },
-      {
-        "clip": "seraph_wing_shield",
-        "at": 0.4,
-        "anchor": "caster"
       }
     ],
     "valkyrieGuard": [
@@ -2390,74 +2668,58 @@
     ],
     "warlordRoar": [
       {
-        "clip": "lightning_thunderclap",
-        "at": 0.08,
+        "clip": "warlord_roar_wave",
+        "at": 0.06,
         "anchor": "caster"
       },
       {
-        "clip": "holy_sunburst_39",
-        "at": 0.14,
-        "anchor": "caster",
-        "dy": -24,
-        "behind": true
-      },
-      {
-        "clip": "status_rage_26",
-        "at": 0.3,
-        "anchor": "target",
-        "stagger": 0.08
+        "clip": "lightning_thunderclap",
+        "at": 0.12,
+        "anchor": "caster"
       }
     ],
     "wildwoodBreeze": [
       {
-        "clip": "nature_leaf_storm",
-        "at": 0.06,
-        "anchor": "target",
-        "stagger": 0.08
+        "clip": "wildwood_breeze_wave",
+        "at": 0.04,
+        "anchor": "center"
       },
       {
-        "clip": "nature_healing_bloom_24",
-        "at": 0.18,
-        "anchor": "center"
+        "clip": "nature_leaf_storm",
+        "at": 0.16,
+        "anchor": "target",
+        "stagger": 0.08
       }
     ],
     "galeVolley": [
       {
-        "clip": "wind_thunder_bolt",
-        "at": 0.1,
-        "anchor": "fly",
-        "flight": 0.2,
-        "lift": 20
+        "clip": "gale_arrow_rain",
+        "at": 0.06,
+        "anchor": "center"
       },
       {
         "clip": "wind_gale_barrage",
-        "at": 0.22,
+        "at": 0.24,
         "anchor": "center"
       },
       {
         "clip": "lightning_bolt_strike",
-        "at": 0.34,
+        "at": 0.42,
         "anchor": "target",
         "stagger": 0.08
       }
     ],
     "oakBulwark": [
       {
-        "clip": "thorn_vine_erupt",
+        "clip": "bark_aegis_shell",
+        "at": 0.06,
+        "anchor": "target",
+        "stagger": 0.08
+      },
+      {
+        "clip": "nature_quake_rift",
         "at": 0.08,
-        "anchor": "target",
-        "stagger": 0.08
-      },
-      {
-        "clip": "melee_hammer_smash",
-        "at": 0.1,
         "anchor": "caster"
-      },
-      {
-        "clip": "impacts_shield_block",
-        "at": 0.26,
-        "anchor": "target",
-        "stagger": 0.08
       }
     ],
     "emberNova": [
@@ -2467,20 +2729,19 @@
         "anchor": "caster"
       },
       {
-        "clip": "fire_flame_pillar",
-        "at": 0.28,
-        "anchor": "target",
-        "stagger": 0.09
+        "clip": "fire_ring_nova",
+        "at": 0.24,
+        "anchor": "center"
       },
       {
-        "clip": "arcane_star_fall_9",
-        "at": 0.32,
-        "anchor": "center",
-        "dy": -4
+        "clip": "fire_flame_pillar",
+        "at": 0.36,
+        "anchor": "target",
+        "stagger": 0.08
       },
       {
         "clip": "status_burning_48",
-        "at": 0.6,
+        "at": 0.58,
         "anchor": "target"
       }
     ],
@@ -2492,13 +2753,13 @@
       },
       {
         "clip": "holy_heal_aoe_25",
-        "at": 0.24,
+        "at": 0.22,
         "anchor": "center",
         "dy": 6
       },
       {
         "clip": "seraph_wing_shield",
-        "at": 0.36,
+        "at": 0.34,
         "anchor": "target",
         "stagger": 0.08
       }
@@ -2530,37 +2791,32 @@
     ],
     "sporeCoat": [
       {
-        "clip": "thorn_spore_cloud",
-        "at": 0.06,
-        "anchor": "caster"
-      },
-      {
-        "clip": "impacts_shield_block",
-        "at": 0.24,
+        "clip": "spore_bubble_coat",
+        "at": 0.04,
         "anchor": "caster"
       }
     ],
     "waspFrenzy": [
       {
-        "clip": "venom_swarm_aura",
-        "at": 0.06,
+        "clip": "wasp_swarm_buzz",
+        "at": 0.04,
         "anchor": "caster"
       },
       {
-        "clip": "status_rage_13",
-        "at": 0.22,
+        "clip": "venom_swarm_aura",
+        "at": 0.16,
         "anchor": "caster"
       }
     ],
     "vineGuard": [
       {
         "clip": "thorn_vine_erupt",
-        "at": 0.06,
+        "at": 0.04,
         "anchor": "caster"
       },
       {
-        "clip": "impacts_shield_block",
-        "at": 0.26,
+        "clip": "bark_aegis_shell",
+        "at": 0.16,
         "anchor": "caster"
       }
     ],
@@ -2578,59 +2834,48 @@
     ],
     "shamanChant": [
       {
-        "clip": "sonic_harmony_wave",
-        "at": 0.06,
+        "clip": "tribal_drum_chant",
+        "at": 0.04,
         "anchor": "center"
-      },
-      {
-        "clip": "status_rage_13",
-        "at": 0.24,
-        "anchor": "target",
-        "stagger": 0.08
       }
     ],
     "emberBreath": [
       {
         "clip": "fire_fire_breath_5",
-        "at": 0.18,
+        "at": 0.16,
         "anchor": "caster",
         "dx": 14,
         "dy": -24
       },
       {
         "clip": "status_burning_7",
-        "at": 0.44,
+        "at": 0.42,
         "anchor": "target",
         "stagger": 0.08
       }
     ],
     "nightPlume": [
       {
-        "clip": "shadow_dark_explosion",
-        "at": 0.08,
-        "anchor": "caster"
-      },
-      {
-        "clip": "impacts_shield_block",
-        "at": 0.24,
+        "clip": "night_plume_ward",
+        "at": 0.04,
         "anchor": "caster"
       }
     ],
     "runeCleave": [
       {
         "clip": "melee_spear_sweep",
-        "at": 0.18,
+        "at": 0.16,
         "anchor": "caster",
         "dx": 14
       },
       {
         "clip": "melee_heavy_cleave_36",
-        "at": 0.24,
+        "at": 0.22,
         "anchor": "caster"
       },
       {
         "clip": "impacts_crit_hit_3",
-        "at": 0.42,
+        "at": 0.4,
         "anchor": "target",
         "dy": -10
       }
@@ -2638,113 +2883,95 @@
     "armorCharge": [
       {
         "clip": "arcane_rune_circle_11",
-        "at": 0.05,
+        "at": 0.04,
         "anchor": "caster"
       },
       {
-        "clip": "impacts_shield_block",
-        "at": 0.22,
+        "clip": "iron_bastion_wall",
+        "at": 0.18,
         "anchor": "caster"
       }
     ],
     "crystalShell": [
       {
-        "clip": "explosions_plasma_blast",
-        "at": 0.08,
-        "anchor": "caster",
-        "dy": -16
-      },
-      {
-        "clip": "impacts_shield_block",
-        "at": 0.22,
+        "clip": "crystal_shell_dome",
+        "at": 0.04,
         "anchor": "caster"
       }
     ],
     "quakeSlam": [
+      {
+        "clip": "melee_hammer_smash",
+        "at": 0.12,
+        "anchor": "caster",
+        "dx": 10
+      },
       {
         "clip": "nature_quake_rift",
         "at": 0.18,
         "anchor": "center"
       },
       {
-        "clip": "melee_hammer_smash",
-        "at": 0.34,
-        "anchor": "target",
-        "stagger": 0.08
+        "clip": "nature_boulder_smash",
+        "at": 0.22,
+        "anchor": "caster",
+        "dx": 10
       }
     ],
     "frostHowl": [
       {
-        "clip": "frost_nova_ring",
-        "at": 0.08,
+        "clip": "wolf_frost_howl",
+        "at": 0.04,
         "anchor": "caster"
-      },
-      {
-        "clip": "status_rage_13",
-        "at": 0.28,
-        "anchor": "target",
-        "stagger": 0.07
       }
     ],
     "frostFang": [
       {
-        "clip": "ice_spikes_wave",
-        "at": 0.16,
-        "anchor": "target",
-        "dx": -50
+        "clip": "frost_fang_bite",
+        "at": 0.14,
+        "anchor": "target"
       },
       {
         "clip": "frost_shard_burst",
-        "at": 0.34,
+        "at": 0.3,
         "anchor": "target"
       }
     ],
     "kingRegen": [
       {
         "clip": "thorn_spore_cloud",
-        "at": 0.06,
+        "at": 0.04,
         "anchor": "caster"
       },
       {
         "clip": "nature_healing_bloom_24",
-        "at": 0.22,
+        "at": 0.2,
         "anchor": "caster"
       }
     ],
     "capSlam": [
       {
-        "clip": "melee_hammer_smash",
-        "at": 0.16,
+        "clip": "cap_spore_slam",
+        "at": 0.14,
         "anchor": "center"
-      },
-      {
-        "clip": "thorn_spore_cloud",
-        "at": 0.32,
-        "anchor": "target",
-        "stagger": 0.08
       }
     ],
     "warlordRally": [
       {
+        "clip": "tribal_drum_chant",
+        "at": 0.04,
+        "anchor": "caster"
+      },
+      {
         "clip": "bomb_star_smoke",
-        "at": 0.08,
-        "anchor": "caster"
-      },
-      {
-        "clip": "lightning_thunderclap",
-        "at": 0.2,
-        "anchor": "caster"
-      },
-      {
-        "clip": "status_rage_26",
-        "at": 0.32,
+        "at": 0.22,
         "anchor": "caster"
       }
     ],
     "boomBomb": [
       {
         "clip": "bomb_lob_proj",
-        "at": 0.16,
+        "at": 0.14,
         "anchor": "fly",
         "flight": 0.3,
         "lift": 24,
@@ -2752,38 +2979,33 @@
       },
       {
         "clip": "bomb_firework_blast",
-        "at": 0.46,
+        "at": 0.44,
         "anchor": "center",
         "dy": -38
       },
       {
         "clip": "bomb_star_smoke",
-        "at": 0.5,
+        "at": 0.48,
         "anchor": "target",
         "stagger": 0.08
       }
     ],
     "heartwoodWall": [
       {
-        "clip": "thorn_vine_erupt",
-        "at": 0.06,
+        "clip": "bark_aegis_shell",
+        "at": 0.04,
         "anchor": "caster"
       },
       {
-        "clip": "impacts_shield_block",
-        "at": 0.24,
+        "clip": "thorn_vine_erupt",
+        "at": 0.18,
         "anchor": "caster"
       }
     ],
     "ancientRegen": [
       {
-        "clip": "nature_healing_bloom_24",
-        "at": 0.06,
-        "anchor": "caster"
-      },
-      {
-        "clip": "nature_leaf_storm",
-        "at": 0.2,
+        "clip": "elder_tree_bloom",
+        "at": 0.04,
         "anchor": "caster"
       }
     ],
@@ -2810,30 +3032,25 @@
     ],
     "glacialWard": [
       {
-        "clip": "frost_nova_ring",
-        "at": 0.06,
-        "anchor": "caster"
-      },
-      {
-        "clip": "impacts_shield_block",
-        "at": 0.26,
+        "clip": "glacial_wings_ward",
+        "at": 0.04,
         "anchor": "caster"
       }
     ],
     "frostRebirth": [
       {
+        "clip": "glacial_wings_ward",
+        "at": 0.04,
+        "anchor": "caster"
+      },
+      {
         "clip": "frost_blizzard_storm",
-        "at": 0.06,
+        "at": 0.18,
         "anchor": "caster"
       },
       {
         "clip": "holy_heal_23",
-        "at": 0.22,
-        "anchor": "caster"
-      },
-      {
-        "clip": "frost_shard_burst",
-        "at": 0.32,
+        "at": 0.26,
         "anchor": "caster"
       }
     ],
@@ -2847,50 +3064,39 @@
       },
       {
         "clip": "frost_blizzard_storm",
-        "at": 0.3,
+        "at": 0.28,
         "anchor": "center"
       },
       {
         "clip": "ice_spikes_wave",
-        "at": 0.4,
+        "at": 0.38,
         "anchor": "center",
         "dx": -70
       }
     ],
     "celestialBastion": [
       {
+        "clip": "astral_dome_barrier",
+        "at": 0.04,
+        "anchor": "caster"
+      },
+      {
         "clip": "shadow_eclipse_corona",
-        "at": 0.06,
+        "at": 0.14,
         "anchor": "caster",
         "dy": -36,
         "behind": true
-      },
-      {
-        "clip": "astral_zodiac_ring",
-        "at": 0.1,
-        "anchor": "caster"
-      },
-      {
-        "clip": "seraph_wing_shield",
-        "at": 0.28,
-        "anchor": "caster"
       }
     ],
     "stellarSurge": [
       {
-        "clip": "astral_zodiac_ring",
-        "at": 0.06,
+        "clip": "arcane_time_clock",
+        "at": 0.04,
         "anchor": "caster"
       },
       {
-        "clip": "explosions_plasma_blast",
-        "at": 0.22,
-        "anchor": "caster",
-        "dy": -16
-      },
-      {
-        "clip": "status_rage_26",
-        "at": 0.32,
+        "clip": "arcane_overdrive_surge",
+        "at": 0.16,
         "anchor": "caster"
       }
     ],
@@ -2917,7 +3123,7 @@
     ],
     "projAcorn": [
       {
-        "clip": "projectiles_arrow_42",
+        "clip": "acorn_spin_proj",
         "at": 0.0,
         "anchor": "fly",
         "flight": 0.24,
@@ -2947,7 +3153,7 @@
     ],
     "projShamanOrb": [
       {
-        "clip": "projectiles_plasma_shot_45",
+        "clip": "shaman_orb_proj",
         "at": 0.0,
         "anchor": "fly",
         "flight": 0.26,
@@ -2975,7 +3181,7 @@
     ],
     "projShadowFeather": [
       {
-        "clip": "projectiles_plasma_shot_45",
+        "clip": "shadow_feather_proj",
         "at": 0.0,
         "anchor": "fly",
         "flight": 0.2,
@@ -3020,7 +3226,7 @@
     ],
     "projEclipseOrb": [
       {
-        "clip": "projectiles_plasma_shot_45",
+        "clip": "eclipse_orb_proj",
         "at": 0.0,
         "anchor": "fly",
         "flight": 0.26,

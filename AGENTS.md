@@ -1,3 +1,14 @@
+## 拓展技能特效去复用专研与 33 组按名自研原生 PixelFX 模块全量接入（2026-11-26，基于v0.32.4/build48，未改版本号、未存档）
+
+针对「部分拓展技能过度复用原库素材造成撞车」与「技能名与特效画面不贴合」的反馈，沿用与原版 77 组特效同源的 `patch-gg/pixelfx` 双缓冲像素引擎（`color` + 加法 `light`、`120 Hz` 粒子、`edgeFade`、`composite(..., null)`、20 FPS `back+front` 双层切片），代码原创 33 组按技能名量身定制的原生 `pixelfx` JS 模块并重构全部 70 条拓展技能配方：
+- **33 组原生自研模块 + 38 组精选原库 = 71 组拓展片段入库**（`native/ClassroomProbe/Resources/Assets.xcassets/PixelFX_*.imageset/`、`design/art-expansion-v1/pixel-fx/`、`artifacts/meadow-expansion-art-v1.zip`）：
+  - **9 组专属护盾与屏障分化**：`iron_bastion_wall`（钢铁壁垒塔盾）、`bark_aegis_shell`（树皮灵甲木栅）、`crystal_shell_dome`（晶化护壳紫晶棱锥）、`night_plume_ward`（夜幕羽盾弯月暗羽）、`glacial_wings_ward`（寒冰羽壁冰凰双翼）、`astral_dome_barrier`（穹顶圣盾/星穹壁垒星座玻璃穹顶）、`spore_bubble_coat`（孢子薄膜翡翠泡）、`prayer_veil_curtain`（祈祷/祈福光幕）、`mana_barrier_hex`（魔力屏障六边形魔网）。
+  - **11 组招牌职业/套装技按名自研**：`holy_orb_proj`（圣光弹）、`scout_mark_target`（弱点标记旋转准星）、`wind_dash_step`（轻身步/猎风迅捷螺旋风线）、`shield_bash_wave`（盾击震荡重盾冲击月牙）、`oath_banner_plant`（誓约战旗红金十字旗插地飘扬）、`elder_tree_bloom`（生命古树/古木再生破土成荫发光古树）、`gale_arrow_rain`（疾风连射/飓风齐射 12 支青金风箭斜雨）、`skybreaker_lance`（天穹断空带翼金雷长枪贯天）、`arcane_overdrive_surge`（奥术超载/星核充能青紫双螺旋）、`warlord_roar_wave`（战神怒吼锯齿冲击波+战神皇冠）、`wildwood_breeze_wave`（林风祈愿翠绿春风丝带+花瓣）。
+  - **13 组怪物招牌技/弹道与诗人/炸弹模块**：`frost_fang_bite`（冰牙连扑上下冰狼利齿猛咬）、`tribal_drum_chant`（战鼓呐喊/战酋号令中心皮绳战鼓+火环图腾）、`wasp_swarm_buzz`（蜂群振翅条纹毒蜂群）、`wolf_frost_howl`（霜狼嗥叫银月寒霜音波）、`cap_spore_slam`（菌盖震击红菌波+孢子云），以及 4 组怪物专属弹道（`acorn_spin_proj` 橡果、`shaman_orb_proj` 萨满灵球、`shadow_feather_proj` 暗影羽箭、`eclipse_orb_proj` 黑洞星蚀球）、吟游诗人 3 组与哥布林爆弹 1 组；同步新增 `nature_boulder_smash`、`arcane_time_clock`、`fire_ring_nova` 3 组精选原库特效。全部 33 组自研模块通过 `node tools/check.mjs custom` **33/33 通过、0 错误、0 警告**。
+- **70 条拓展配方复用度大幅压降与全量资产同步**（`PixelFXRecipes.dataset/recipes.json`、`design/art-expansion-v1/pixel-fx/recipes_expansion.json`、`design/art-expansion-v1/tools/verify_expansion_pack.py`、`design/art-expansion-v1/tools/package_expansion_pack.py`）：
+  - 70 条拓展配方共调用 **94 组不重复片段**（71 组拓展片段零闲置），`impacts_shield_block` 由 14 次降至 1 次，`status_rage` 由 10 次降至 0 次，`projectiles_plasma_shot_45` 由 4 次降至 0 次，`seraph_wing_shield` 由 6 次降至 2 次，最高单片段复用由 14 次降至 4 次；主工程 PixelFX 总规模增至 **148 组片段（原 77 + 拓展 71）/ 116 条配方**，并同步重跑 `generate_xcode_project.py` 与 `validate_xcode_project.py`。
+- **实测与未实测边界**：全部 33 组自研模块完成 3 页 5 帧序列图与 71 组总览图人工目视复核并精修 7 组细节；70 条配方程序化舞台坐标/方向/质心审计 0 告警；`verify_expansion_pack.py --zip artifacts/meadow-expansion-art-v1.zip`（235 文件 SHA-256 与非循环末帧全透明校验）、`scripts/local-build.sh test`（93 Swift 源码工程校验、837 项锁定原文件零改动校验、工具单测、`ProbeCore` 8/8、`GameCore` 501/501，合计 **509/509** 全通过）与 `MAC_OPEN=0 scripts/local-build.sh mac` Release 编译全通过，`xcrun assetutil --info Assets.car` 交叉验证 824 项编译资产中全部 148/148 组 PixelFX 与 116/116 条配方零缺失。尚未在 Mac / iPad 实机战斗画面中逐一施放并目视验收全部 70 条新技能的实时节奏与叠层观感。
+
 ## 怪物技能特效释放方向根因排查与全链路修复（2026-11-26，基于v0.32.4/build48，未改版本号、未存档）
 
 针对「部分怪物技能特效释放方向相反」的反馈，对战斗特效方向计算、怪物移动路径、AI 目标筛选及全部 39 组新片段与 70 条拓展配方做了全链路核查与根因修复：

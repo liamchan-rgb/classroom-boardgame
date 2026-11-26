@@ -92,6 +92,7 @@ final class TeacherSession: ObservableObject {
     }
     func notesFocus(_ active: Bool) {
         isEditingNotes = active
+        if !active { DeckLibrary.shared.update(name: sourceName, page: state.pageIndex, notes: editedNotes) }
         pause(.notes, enabled: active)
     }
     func concealNotes() {

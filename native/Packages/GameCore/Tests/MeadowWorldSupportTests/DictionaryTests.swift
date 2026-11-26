@@ -47,4 +47,25 @@ final class DictionaryTests: XCTestCase {
         XCTAssertEqual(d.entry("booked")?.senses, [.init(pos: "n.", meanings: ["书", "书籍"]), .init(pos: "v.", meanings: ["登记", "预订"])])
         XCTAssertEqual(d.phrases(in: ["look", "after", "it"], at: 0).first?.phrase, "look after")
     }
+
+    func testCompoundFlashcardMatchesEitherWordAndSelection() {
+        let d = Self.shared
+        let cards = [(0, "ice"), (1, "ice cream"), (2, "teddy bear"), (3, "pick up")]
+        // Clicking either "ice" or "cream" picks "ice cream" over single-word "ice".
+        let s1 = ["I", "want", "ice", "cream", "now"]
+        XCTAssertEqual(ClassroomDictionary.matchingFlashcard(tokens: s1, at: 2, cards: cards, dictionary: d), 1)
+        XCTAssertEqual(ClassroomDictionary.matchingFlashcard(tokens: s1, at: 3, cards: cards, dictionary: d), 1)
+        // Inflected compound ("ice creams") and single-word fallback ("Put ice in it").
+        XCTAssertEqual(ClassroomDictionary.matchingFlashcard(tokens: ["Two", "ice", "creams"], at: 1, cards: cards, dictionary: d), 1)
+        XCTAssertEqual(ClassroomDictionary.matchingFlashcard(tokens: ["Put", "ice", "in"], at: 1, cards: cards, dictionary: d), 0)
+        // Custom compound not in dictionary phrases ("teddy bear"): still matches from either word!
+        XCTAssertEqual(ClassroomDictionary.matchingFlashcard(tokens: ["My", "teddy", "bear"], at: 1, cards: cards, dictionary: nil), 2)
+        XCTAssertEqual(ClassroomDictionary.matchingFlashcard(tokens: ["My", "teddy", "bear"], at: 2, cards: cards, dictionary: nil), 2)
+        // Separable dictionary verb phrase.
+        XCTAssertEqual(ClassroomDictionary.matchingFlashcard(tokens: ["Pick", "it", "up"], at: 0, cards: cards, dictionary: d), 3)
+        XCTAssertEqual(ClassroomDictionary.matchingFlashcard(tokens: ["Pick", "it", "up"], at: 2, cards: cards, dictionary: d), 3)
+        // Hyphenated / selected text.
+        XCTAssertEqual(ClassroomDictionary.matchingFlashcard(selection: "  Ice-cream. ", cards: cards, dictionary: d), 1)
+        XCTAssertEqual(ClassroomDictionary.normalizedTerm(" \"ice cream!\" "), "ice cream")
+    }
 }
