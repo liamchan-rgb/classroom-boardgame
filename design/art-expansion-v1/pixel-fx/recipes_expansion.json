@@ -1,0 +1,1321 @@
+{
+  "version": 1,
+  "fps": 20,
+  "packs": 8,
+  "clips": [
+    {
+      "id": "frost_nova_ring",
+      "w": 144,
+      "h": 96,
+      "ox": 72,
+      "oy": 66,
+      "n": 22,
+      "cols": 24,
+      "back": true,
+      "front": true
+    },
+    {
+      "id": "frost_shard_burst",
+      "w": 120,
+      "h": 108,
+      "ox": 60,
+      "oy": 56,
+      "n": 18,
+      "cols": 18,
+      "back": false,
+      "front": true
+    },
+    {
+      "id": "frost_blizzard_storm",
+      "w": 172,
+      "h": 144,
+      "ox": 86,
+      "oy": 118,
+      "n": 28,
+      "cols": 22,
+      "back": true,
+      "front": true
+    },
+    {
+      "id": "wind_gale_barrage",
+      "w": 160,
+      "h": 124,
+      "ox": 80,
+      "oy": 102,
+      "n": 22,
+      "cols": 22,
+      "back": false,
+      "front": true
+    },
+    {
+      "id": "wind_thunder_bolt",
+      "w": 104,
+      "h": 32,
+      "ox": 92,
+      "oy": 16,
+      "n": 12,
+      "cols": 12,
+      "back": false,
+      "front": true,
+      "loop": true
+    },
+    {
+      "id": "wind_spark_impact",
+      "w": 112,
+      "h": 96,
+      "ox": 56,
+      "oy": 48,
+      "n": 14,
+      "cols": 14,
+      "back": false,
+      "front": true
+    },
+    {
+      "id": "thorn_vine_erupt",
+      "w": 128,
+      "h": 116,
+      "ox": 64,
+      "oy": 98,
+      "n": 24,
+      "cols": 24,
+      "back": true,
+      "front": true
+    },
+    {
+      "id": "thorn_spore_cloud",
+      "w": 120,
+      "h": 108,
+      "ox": 60,
+      "oy": 88,
+      "n": 24,
+      "cols": 24,
+      "back": true,
+      "front": true
+    },
+    {
+      "id": "thorn_root_sweep",
+      "w": 168,
+      "h": 96,
+      "ox": 84,
+      "oy": 78,
+      "n": 22,
+      "cols": 22,
+      "back": false,
+      "front": true
+    },
+    {
+      "id": "sonic_note_proj",
+      "w": 88,
+      "h": 36,
+      "ox": 74,
+      "oy": 18,
+      "n": 12,
+      "cols": 12,
+      "back": false,
+      "front": true,
+      "loop": true
+    },
+    {
+      "id": "sonic_harmony_wave",
+      "w": 148,
+      "h": 112,
+      "ox": 74,
+      "oy": 84,
+      "n": 24,
+      "cols": 24,
+      "back": true,
+      "front": true
+    },
+    {
+      "id": "sonic_anthem_burst",
+      "w": 128,
+      "h": 116,
+      "ox": 64,
+      "oy": 60,
+      "n": 20,
+      "cols": 20,
+      "back": false,
+      "front": true
+    },
+    {
+      "id": "venom_sting_proj",
+      "w": 84,
+      "h": 28,
+      "ox": 76,
+      "oy": 14,
+      "n": 10,
+      "cols": 10,
+      "back": false,
+      "front": true,
+      "loop": true
+    },
+    {
+      "id": "venom_swarm_aura",
+      "w": 104,
+      "h": 96,
+      "ox": 52,
+      "oy": 78,
+      "n": 22,
+      "cols": 24,
+      "back": true,
+      "front": true
+    },
+    {
+      "id": "venom_splash_hit",
+      "w": 96,
+      "h": 88,
+      "ox": 48,
+      "oy": 44,
+      "n": 14,
+      "cols": 14,
+      "back": false,
+      "front": true
+    },
+    {
+      "id": "bomb_lob_proj",
+      "w": 44,
+      "h": 44,
+      "ox": 22,
+      "oy": 22,
+      "n": 10,
+      "cols": 10,
+      "back": false,
+      "front": true,
+      "loop": true
+    },
+    {
+      "id": "bomb_firework_blast",
+      "w": 156,
+      "h": 140,
+      "ox": 78,
+      "oy": 76,
+      "n": 24,
+      "cols": 24,
+      "back": false,
+      "front": true
+    },
+    {
+      "id": "bomb_star_smoke",
+      "w": 120,
+      "h": 96,
+      "ox": 60,
+      "oy": 74,
+      "n": 18,
+      "cols": 18,
+      "back": false,
+      "front": true
+    },
+    {
+      "id": "seraph_aegis_descend",
+      "w": 184,
+      "h": 184,
+      "ox": 92,
+      "oy": 162,
+      "n": 30,
+      "cols": 20,
+      "back": true,
+      "front": true
+    },
+    {
+      "id": "seraph_wing_shield",
+      "w": 128,
+      "h": 120,
+      "ox": 64,
+      "oy": 104,
+      "n": 24,
+      "cols": 24,
+      "back": true,
+      "front": true
+    },
+    {
+      "id": "astral_meteor_rain",
+      "w": 188,
+      "h": 176,
+      "ox": 94,
+      "oy": 152,
+      "n": 32,
+      "cols": 20,
+      "back": true,
+      "front": true
+    },
+    {
+      "id": "astral_eclipse_beam",
+      "w": 204,
+      "h": 84,
+      "ox": 24,
+      "oy": 42,
+      "n": 26,
+      "cols": 18,
+      "back": false,
+      "front": true
+    },
+    {
+      "id": "astral_zodiac_ring",
+      "w": 136,
+      "h": 104,
+      "ox": 68,
+      "oy": 82,
+      "n": 26,
+      "cols": 24,
+      "back": true,
+      "front": true
+    }
+  ],
+  "recipes": {
+    "holyBolt": [
+      {
+        "clip": "arcane_spell_charge_14",
+        "at": 0.0,
+        "anchor": "caster"
+      },
+      {
+        "clip": "projectiles_plasma_shot_45",
+        "at": 0.25,
+        "anchor": "fly",
+        "flight": 0.24,
+        "lift": 18
+      },
+      {
+        "clip": "impacts_hit_spark_10",
+        "at": 0.49,
+        "anchor": "target",
+        "dy": -10
+      },
+      {
+        "clip": "holy_heal_15",
+        "at": 0.35,
+        "anchor": "caster"
+      }
+    ],
+    "prayerHeal": [
+      {
+        "clip": "holy_heal_15",
+        "at": 0.05,
+        "anchor": "target"
+      },
+      {
+        "clip": "holy_halo_18",
+        "at": 0.18,
+        "anchor": "target"
+      }
+    ],
+    "blessingVeil": [
+      {
+        "clip": "holy_blessing_17",
+        "at": 0.05,
+        "anchor": "target",
+        "stagger": 0.08
+      },
+      {
+        "clip": "shieldForm",
+        "at": 0.25,
+        "anchor": "target",
+        "stagger": 0.08
+      }
+    ],
+    "quickShot": [
+      {
+        "clip": "projectiles_arrow_42",
+        "at": 0.16,
+        "anchor": "fly",
+        "flight": 0.18,
+        "lift": 16
+      },
+      {
+        "clip": "impacts_hit_spark_43",
+        "at": 0.34,
+        "anchor": "target",
+        "dy": -10
+      }
+    ],
+    "nimbleStep": [
+      {
+        "clip": "shieldForm",
+        "at": 0.05,
+        "anchor": "caster"
+      },
+      {
+        "clip": "status_rage_13",
+        "at": 0.15,
+        "anchor": "caster"
+      }
+    ],
+    "scoutMark": [
+      {
+        "clip": "holy_sunburst_16",
+        "at": 0.05,
+        "anchor": "caster"
+      },
+      {
+        "clip": "status_rage_13",
+        "at": 0.18,
+        "anchor": "target",
+        "stagger": 0.07
+      }
+    ],
+    "shieldBash": [
+      {
+        "clip": "impacts_blunt_hit_6",
+        "at": 0.18,
+        "anchor": "target",
+        "dy": -8
+      },
+      {
+        "clip": "shieldForm",
+        "at": 0.2,
+        "anchor": "caster"
+      }
+    ],
+    "ironBulwark": [
+      {
+        "clip": "arcane_rune_circle_11",
+        "at": 0.05,
+        "anchor": "caster"
+      },
+      {
+        "clip": "shieldForm",
+        "at": 0.22,
+        "anchor": "target",
+        "stagger": 0.08
+      }
+    ],
+    "steadfastVow": [
+      {
+        "clip": "holy_heal_15",
+        "at": 0.05,
+        "anchor": "caster"
+      },
+      {
+        "clip": "status_rage_13",
+        "at": 0.18,
+        "anchor": "caster"
+      }
+    ],
+    "fireball": [
+      {
+        "clip": "arcane_spell_charge_4",
+        "at": 0.0,
+        "anchor": "caster"
+      },
+      {
+        "clip": "fire_fireball_47",
+        "at": 0.28,
+        "anchor": "fly",
+        "flight": 0.26,
+        "lift": 18
+      },
+      {
+        "clip": "impacts_blunt_hit_6",
+        "at": 0.54,
+        "anchor": "target",
+        "dy": -8
+      },
+      {
+        "clip": "status_burning_7",
+        "at": 0.58,
+        "anchor": "target"
+      }
+    ],
+    "frostNova": [
+      {
+        "clip": "arcane_spell_charge_8",
+        "at": 0.0,
+        "anchor": "caster"
+      },
+      {
+        "clip": "frost_nova_ring",
+        "at": 0.25,
+        "anchor": "center"
+      },
+      {
+        "clip": "frost_shard_burst",
+        "at": 0.42,
+        "anchor": "target",
+        "dy": -10,
+        "stagger": 0.07
+      }
+    ],
+    "manaBarrier": [
+      {
+        "clip": "arcane_rune_circle_12",
+        "at": 0.05,
+        "anchor": "caster"
+      },
+      {
+        "clip": "shieldForm",
+        "at": 0.18,
+        "anchor": "caster"
+      },
+      {
+        "clip": "holy_blessing_19",
+        "at": 0.25,
+        "anchor": "target",
+        "stagger": 0.07
+      }
+    ],
+    "sonicNote": [
+      {
+        "clip": "sonic_note_proj",
+        "at": 0.14,
+        "anchor": "fly",
+        "flight": 0.22,
+        "lift": 18
+      },
+      {
+        "clip": "sonic_anthem_burst",
+        "at": 0.36,
+        "anchor": "target",
+        "dy": -10
+      },
+      {
+        "clip": "shieldForm",
+        "at": 0.3,
+        "anchor": "caster"
+      }
+    ],
+    "healingLullaby": [
+      {
+        "clip": "sonic_harmony_wave",
+        "at": 0.05,
+        "anchor": "center"
+      },
+      {
+        "clip": "holy_heal_aoe_25",
+        "at": 0.22,
+        "anchor": "center"
+      }
+    ],
+    "heroicAnthem": [
+      {
+        "clip": "sonic_harmony_wave",
+        "at": 0.05,
+        "anchor": "caster"
+      },
+      {
+        "clip": "sonic_anthem_burst",
+        "at": 0.28,
+        "anchor": "target",
+        "dy": -8,
+        "stagger": 0.08
+      }
+    ],
+    "judgmentStrike": [
+      {
+        "clip": "holy_holy_pillar_30",
+        "at": 0.15,
+        "anchor": "target"
+      },
+      {
+        "clip": "impacts_crit_hit_3",
+        "at": 0.36,
+        "anchor": "target",
+        "dy": -10
+      },
+      {
+        "clip": "holy_heal_15",
+        "at": 0.32,
+        "anchor": "caster"
+      }
+    ],
+    "radiantBaptism": [
+      {
+        "clip": "holy_sunburst_16",
+        "at": 0.05,
+        "anchor": "center"
+      },
+      {
+        "clip": "holy_heal_aoe_25",
+        "at": 0.2,
+        "anchor": "center"
+      },
+      {
+        "clip": "seraph_wing_shield",
+        "at": 0.35,
+        "anchor": "target",
+        "stagger": 0.08
+      }
+    ],
+    "oathBanner": [
+      {
+        "clip": "holy_feather_burst_21",
+        "at": 0.05,
+        "anchor": "caster"
+      },
+      {
+        "clip": "holy_blessing_17",
+        "at": 0.22,
+        "anchor": "target",
+        "stagger": 0.08
+      }
+    ],
+    "piercingArrow": [
+      {
+        "clip": "wind_thunder_bolt",
+        "at": 0.18,
+        "anchor": "fly",
+        "flight": 0.18,
+        "lift": 18
+      },
+      {
+        "clip": "wind_spark_impact",
+        "at": 0.36,
+        "anchor": "target",
+        "dy": -10
+      }
+    ],
+    "galeBarrage": [
+      {
+        "clip": "wind_gale_barrage",
+        "at": 0.15,
+        "anchor": "center"
+      },
+      {
+        "clip": "wind_spark_impact",
+        "at": 0.42,
+        "anchor": "target",
+        "dy": -10,
+        "stagger": 0.07
+      }
+    ],
+    "windMomentum": [
+      {
+        "clip": "shieldForm",
+        "at": 0.05,
+        "anchor": "caster"
+      },
+      {
+        "clip": "wind_spark_impact",
+        "at": 0.12,
+        "anchor": "caster"
+      },
+      {
+        "clip": "status_rage_13",
+        "at": 0.22,
+        "anchor": "target",
+        "stagger": 0.07
+      }
+    ],
+    "thornSnare": [
+      {
+        "clip": "thorn_vine_erupt",
+        "at": 0.12,
+        "anchor": "target",
+        "stagger": 0.08
+      },
+      {
+        "clip": "thorn_spore_cloud",
+        "at": 0.3,
+        "anchor": "center"
+      },
+      {
+        "clip": "nature_healing_bloom_24",
+        "at": 0.32,
+        "anchor": "caster"
+      }
+    ],
+    "elderBloom": [
+      {
+        "clip": "nature_healing_bloom_24",
+        "at": 0.05,
+        "anchor": "center"
+      },
+      {
+        "clip": "holy_heal_aoe_25",
+        "at": 0.24,
+        "anchor": "center"
+      }
+    ],
+    "barkAegis": [
+      {
+        "clip": "thorn_spore_cloud",
+        "at": 0.05,
+        "anchor": "center"
+      },
+      {
+        "clip": "shieldForm",
+        "at": 0.22,
+        "anchor": "target",
+        "stagger": 0.08
+      }
+    ],
+    "meteorStarfall": [
+      {
+        "clip": "astral_zodiac_ring",
+        "at": 0.0,
+        "anchor": "caster"
+      },
+      {
+        "clip": "astral_meteor_rain",
+        "at": 0.25,
+        "anchor": "center"
+      },
+      {
+        "clip": "impacts_crit_hit_40",
+        "at": 0.72,
+        "anchor": "target",
+        "dy": -10,
+        "stagger": 0.08
+      }
+    ],
+    "astralDome": [
+      {
+        "clip": "astral_zodiac_ring",
+        "at": 0.05,
+        "anchor": "center"
+      },
+      {
+        "clip": "seraph_wing_shield",
+        "at": 0.25,
+        "anchor": "target",
+        "stagger": 0.08
+      }
+    ],
+    "arcaneOverdrive": [
+      {
+        "clip": "arcane_rune_circle_28",
+        "at": 0.0,
+        "anchor": "caster"
+      },
+      {
+        "clip": "astral_zodiac_ring",
+        "at": 0.2,
+        "anchor": "center"
+      },
+      {
+        "clip": "status_rage_26",
+        "at": 0.35,
+        "anchor": "target",
+        "stagger": 0.07
+      }
+    ],
+    "skybreaker": [
+      {
+        "clip": "melee_heavy_cleave_51",
+        "at": 0.15,
+        "anchor": "caster"
+      },
+      {
+        "clip": "holy_holy_pillar_30",
+        "at": 0.36,
+        "anchor": "target"
+      },
+      {
+        "clip": "impacts_crit_hit_40",
+        "at": 0.5,
+        "anchor": "target",
+        "dy": -10
+      },
+      {
+        "clip": "seraph_wing_shield",
+        "at": 0.4,
+        "anchor": "caster"
+      }
+    ],
+    "valkyrieGuard": [
+      {
+        "clip": "seraph_aegis_descend",
+        "at": 0.08,
+        "anchor": "center"
+      },
+      {
+        "clip": "seraph_wing_shield",
+        "at": 0.42,
+        "anchor": "target",
+        "stagger": 0.08
+      }
+    ],
+    "warlordRoar": [
+      {
+        "clip": "holy_sunburst_39",
+        "at": 0.05,
+        "anchor": "caster"
+      },
+      {
+        "clip": "status_rage_26",
+        "at": 0.2,
+        "anchor": "target",
+        "stagger": 0.07
+      }
+    ],
+    "wildwoodBreeze": [
+      {
+        "clip": "nature_healing_bloom_24",
+        "at": 0.05,
+        "anchor": "center"
+      },
+      {
+        "clip": "thorn_spore_cloud",
+        "at": 0.2,
+        "anchor": "center"
+      }
+    ],
+    "galeVolley": [
+      {
+        "clip": "wind_gale_barrage",
+        "at": 0.12,
+        "anchor": "center"
+      },
+      {
+        "clip": "wind_spark_impact",
+        "at": 0.4,
+        "anchor": "target",
+        "dy": -10,
+        "stagger": 0.07
+      }
+    ],
+    "oakBulwark": [
+      {
+        "clip": "thorn_vine_erupt",
+        "at": 0.05,
+        "anchor": "caster"
+      },
+      {
+        "clip": "nature_healing_bloom_24",
+        "at": 0.18,
+        "anchor": "center"
+      },
+      {
+        "clip": "shieldForm",
+        "at": 0.28,
+        "anchor": "target",
+        "stagger": 0.08
+      }
+    ],
+    "emberNova": [
+      {
+        "clip": "arcane_spell_charge_4",
+        "at": 0.0,
+        "anchor": "caster"
+      },
+      {
+        "clip": "fire_fire_breath_5",
+        "at": 0.3,
+        "anchor": "caster",
+        "dx": 12,
+        "dy": -24
+      },
+      {
+        "clip": "arcane_star_fall_9",
+        "at": 0.4,
+        "anchor": "center",
+        "dy": -4
+      },
+      {
+        "clip": "status_burning_48",
+        "at": 0.65,
+        "anchor": "target",
+        "stagger": 0.07
+      }
+    ],
+    "seraphAegis": [
+      {
+        "clip": "seraph_aegis_descend",
+        "at": 0.05,
+        "anchor": "center"
+      },
+      {
+        "clip": "holy_heal_aoe_25",
+        "at": 0.35,
+        "anchor": "center"
+      },
+      {
+        "clip": "seraph_wing_shield",
+        "at": 0.48,
+        "anchor": "target",
+        "stagger": 0.08
+      }
+    ],
+    "astralJudgement": [
+      {
+        "clip": "astral_zodiac_ring",
+        "at": 0.0,
+        "anchor": "caster"
+      },
+      {
+        "clip": "astral_meteor_rain",
+        "at": 0.22,
+        "anchor": "center"
+      },
+      {
+        "clip": "astral_eclipse_beam",
+        "at": 0.45,
+        "anchor": "caster",
+        "dx": 10,
+        "dy": -22
+      },
+      {
+        "clip": "impacts_crit_hit_40",
+        "at": 0.72,
+        "anchor": "target",
+        "dy": -10,
+        "stagger": 0.08
+      }
+    ],
+    "sporeCoat": [
+      {
+        "clip": "thorn_spore_cloud",
+        "at": 0.05,
+        "anchor": "caster"
+      },
+      {
+        "clip": "shieldForm",
+        "at": 0.22,
+        "anchor": "caster"
+      }
+    ],
+    "waspFrenzy": [
+      {
+        "clip": "venom_swarm_aura",
+        "at": 0.05,
+        "anchor": "caster"
+      },
+      {
+        "clip": "status_rage_13",
+        "at": 0.2,
+        "anchor": "caster"
+      }
+    ],
+    "vineGuard": [
+      {
+        "clip": "thorn_vine_erupt",
+        "at": 0.05,
+        "anchor": "caster"
+      },
+      {
+        "clip": "shieldForm",
+        "at": 0.25,
+        "anchor": "caster"
+      }
+    ],
+    "shamanMend": [
+      {
+        "clip": "nature_healing_bloom_24",
+        "at": 0.05,
+        "anchor": "target"
+      }
+    ],
+    "shamanChant": [
+      {
+        "clip": "sonic_harmony_wave",
+        "at": 0.05,
+        "anchor": "caster"
+      },
+      {
+        "clip": "status_rage_13",
+        "at": 0.22,
+        "anchor": "target",
+        "stagger": 0.08
+      }
+    ],
+    "emberBreath": [
+      {
+        "clip": "fire_fire_breath_5",
+        "at": 0.15,
+        "anchor": "caster",
+        "dx": 10,
+        "dy": -24
+      },
+      {
+        "clip": "status_burning_7",
+        "at": 0.45,
+        "anchor": "target",
+        "stagger": 0.08
+      }
+    ],
+    "nightPlume": [
+      {
+        "clip": "arcane_rune_circle_12",
+        "at": 0.05,
+        "anchor": "caster"
+      },
+      {
+        "clip": "shieldForm",
+        "at": 0.2,
+        "anchor": "caster"
+      }
+    ],
+    "runeCleave": [
+      {
+        "clip": "melee_heavy_cleave_36",
+        "at": 0.18,
+        "anchor": "caster"
+      },
+      {
+        "clip": "impacts_crit_hit_3",
+        "at": 0.4,
+        "anchor": "target",
+        "dy": -10
+      }
+    ],
+    "armorCharge": [
+      {
+        "clip": "arcane_rune_circle_11",
+        "at": 0.05,
+        "anchor": "caster"
+      },
+      {
+        "clip": "shieldForm",
+        "at": 0.22,
+        "anchor": "caster"
+      }
+    ],
+    "crystalShell": [
+      {
+        "clip": "arcane_mana_burst_46",
+        "at": 0.05,
+        "anchor": "caster"
+      },
+      {
+        "clip": "shieldForm",
+        "at": 0.24,
+        "anchor": "caster"
+      }
+    ],
+    "quakeSlam": [
+      {
+        "clip": "impacts_heavy_landing_34",
+        "at": 0.15,
+        "anchor": "center"
+      },
+      {
+        "clip": "impacts_blunt_hit_6",
+        "at": 0.3,
+        "anchor": "target",
+        "dy": -6,
+        "stagger": 0.08
+      }
+    ],
+    "frostHowl": [
+      {
+        "clip": "frost_nova_ring",
+        "at": 0.08,
+        "anchor": "caster"
+      },
+      {
+        "clip": "status_rage_13",
+        "at": 0.24,
+        "anchor": "target",
+        "stagger": 0.08
+      }
+    ],
+    "frostFang": [
+      {
+        "clip": "frost_shard_burst",
+        "at": 0.2,
+        "anchor": "target",
+        "dy": -10
+      },
+      {
+        "clip": "impacts_crit_hit_3",
+        "at": 0.32,
+        "anchor": "target",
+        "dy": -10
+      }
+    ],
+    "kingRegen": [
+      {
+        "clip": "thorn_spore_cloud",
+        "at": 0.05,
+        "anchor": "caster"
+      },
+      {
+        "clip": "nature_healing_bloom_24",
+        "at": 0.2,
+        "anchor": "caster"
+      }
+    ],
+    "capSlam": [
+      {
+        "clip": "impacts_heavy_landing_34",
+        "at": 0.15,
+        "anchor": "center"
+      },
+      {
+        "clip": "thorn_spore_cloud",
+        "at": 0.25,
+        "anchor": "center"
+      }
+    ],
+    "warlordRally": [
+      {
+        "clip": "bomb_star_smoke",
+        "at": 0.05,
+        "anchor": "caster"
+      },
+      {
+        "clip": "shieldForm",
+        "at": 0.2,
+        "anchor": "caster"
+      },
+      {
+        "clip": "status_rage_26",
+        "at": 0.25,
+        "anchor": "caster"
+      }
+    ],
+    "boomBomb": [
+      {
+        "clip": "bomb_lob_proj",
+        "at": 0.12,
+        "anchor": "fly",
+        "flight": 0.34,
+        "arc": 46,
+        "lift": 22
+      },
+      {
+        "clip": "bomb_firework_blast",
+        "at": 0.46,
+        "anchor": "center"
+      },
+      {
+        "clip": "bomb_star_smoke",
+        "at": 0.62,
+        "anchor": "center"
+      }
+    ],
+    "heartwoodWall": [
+      {
+        "clip": "thorn_vine_erupt",
+        "at": 0.05,
+        "anchor": "caster"
+      },
+      {
+        "clip": "shieldForm",
+        "at": 0.25,
+        "anchor": "caster"
+      }
+    ],
+    "ancientRegen": [
+      {
+        "clip": "nature_healing_bloom_24",
+        "at": 0.05,
+        "anchor": "caster"
+      },
+      {
+        "clip": "thorn_spore_cloud",
+        "at": 0.18,
+        "anchor": "caster"
+      }
+    ],
+    "rootSweep": [
+      {
+        "clip": "thorn_root_sweep",
+        "at": 0.12,
+        "anchor": "center"
+      },
+      {
+        "clip": "impacts_blunt_hit_6",
+        "at": 0.38,
+        "anchor": "target",
+        "dy": -6,
+        "stagger": 0.08
+      }
+    ],
+    "glacialWard": [
+      {
+        "clip": "frost_nova_ring",
+        "at": 0.05,
+        "anchor": "caster"
+      },
+      {
+        "clip": "shieldForm",
+        "at": 0.24,
+        "anchor": "caster"
+      }
+    ],
+    "frostRebirth": [
+      {
+        "clip": "frost_shard_burst",
+        "at": 0.05,
+        "anchor": "caster"
+      },
+      {
+        "clip": "holy_heal_23",
+        "at": 0.2,
+        "anchor": "caster"
+      }
+    ],
+    "blizzardBreath": [
+      {
+        "clip": "frost_blizzard_storm",
+        "at": 0.12,
+        "anchor": "center"
+      },
+      {
+        "clip": "frost_shard_burst",
+        "at": 0.55,
+        "anchor": "target",
+        "dy": -10,
+        "stagger": 0.08
+      }
+    ],
+    "celestialBastion": [
+      {
+        "clip": "astral_zodiac_ring",
+        "at": 0.05,
+        "anchor": "caster"
+      },
+      {
+        "clip": "shieldForm",
+        "at": 0.25,
+        "anchor": "caster"
+      }
+    ],
+    "stellarSurge": [
+      {
+        "clip": "astral_zodiac_ring",
+        "at": 0.05,
+        "anchor": "caster"
+      },
+      {
+        "clip": "holy_heal_23",
+        "at": 0.2,
+        "anchor": "caster"
+      },
+      {
+        "clip": "status_rage_26",
+        "at": 0.28,
+        "anchor": "caster"
+      }
+    ],
+    "eclipseRay": [
+      {
+        "clip": "astral_zodiac_ring",
+        "at": 0.0,
+        "anchor": "caster"
+      },
+      {
+        "clip": "astral_eclipse_beam",
+        "at": 0.25,
+        "anchor": "caster",
+        "dx": 14,
+        "dy": -26
+      },
+      {
+        "clip": "astral_meteor_rain",
+        "at": 0.5,
+        "anchor": "center"
+      }
+    ],
+    "projAcorn": [
+      {
+        "clip": "projectiles_arrow_42",
+        "at": 0.0,
+        "anchor": "fly",
+        "flight": 0.24,
+        "arc": 22,
+        "lift": 16
+      },
+      {
+        "clip": "impacts_hit_spark_10",
+        "at": 0.24,
+        "anchor": "target",
+        "dy": -8
+      }
+    ],
+    "projVenomSting": [
+      {
+        "clip": "venom_sting_proj",
+        "at": 0.0,
+        "anchor": "fly",
+        "flight": 0.2,
+        "lift": 20
+      },
+      {
+        "clip": "venom_splash_hit",
+        "at": 0.2,
+        "anchor": "target",
+        "dy": -8
+      }
+    ],
+    "projShamanOrb": [
+      {
+        "clip": "projectiles_plasma_shot_45",
+        "at": 0.0,
+        "anchor": "fly",
+        "flight": 0.26,
+        "lift": 18
+      },
+      {
+        "clip": "thorn_spore_cloud",
+        "at": 0.26,
+        "anchor": "target",
+        "dy": -6
+      }
+    ],
+    "projEmberBall": [
+      {
+        "clip": "fire_fireball_47",
+        "at": 0.0,
+        "anchor": "fly",
+        "flight": 0.24,
+        "lift": 18
+      },
+      {
+        "clip": "status_burning_7",
+        "at": 0.24,
+        "anchor": "target"
+      }
+    ],
+    "projShadowFeather": [
+      {
+        "clip": "projectiles_plasma_shot_45",
+        "at": 0.0,
+        "anchor": "fly",
+        "flight": 0.2,
+        "lift": 22
+      },
+      {
+        "clip": "impacts_hit_spark_33",
+        "at": 0.2,
+        "anchor": "target",
+        "dy": -10
+      }
+    ],
+    "projBoomBomb": [
+      {
+        "clip": "bomb_lob_proj",
+        "at": 0.0,
+        "anchor": "fly",
+        "flight": 0.3,
+        "arc": 38,
+        "lift": 20
+      },
+      {
+        "clip": "bomb_firework_blast",
+        "at": 0.3,
+        "anchor": "target",
+        "dy": -8
+      }
+    ],
+    "projFrostShard": [
+      {
+        "clip": "wind_thunder_bolt",
+        "at": 0.0,
+        "anchor": "fly",
+        "flight": 0.22,
+        "lift": 22
+      },
+      {
+        "clip": "frost_shard_burst",
+        "at": 0.22,
+        "anchor": "target",
+        "dy": -10
+      }
+    ],
+    "projEclipseOrb": [
+      {
+        "clip": "projectiles_plasma_shot_45",
+        "at": 0.0,
+        "anchor": "fly",
+        "flight": 0.26,
+        "lift": 24
+      },
+      {
+        "clip": "astral_zodiac_ring",
+        "at": 0.26,
+        "anchor": "target"
+      }
+    ]
+  }
+}

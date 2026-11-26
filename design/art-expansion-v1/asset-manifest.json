@@ -1,0 +1,1512 @@
+{
+  "package": "meadow-expansion-art-v1",
+  "version": "1.0.0",
+  "specSource": "design/主游戏拓展企划_职业装备怪物_美术交接_v1.txt",
+  "baseAppVersion": "v0.32.4/build48",
+  "installed": false,
+  "builtAtUTC": "2026-11-26T11:08:27Z",
+  "summary": {
+    "classBadges": 14,
+    "itemIcons": 53,
+    "itemIconFX": 41,
+    "monsters": 16,
+    "monsterSheets": 32,
+    "monsterProjectiles": 8,
+    "wearableWeapons": 17,
+    "wearableArmors": 14,
+    "pixelFXPacks": 8,
+    "pixelFXClips": 23,
+    "pixelFXRecipes": 70,
+    "qaPreviews": 9,
+    "totalFiles": 187,
+    "totalBytes": 13170902
+  },
+  "categoryFileCounts": {
+    "root": 1,
+    "class-badges": 14,
+    "item-icon-fx": 41,
+    "item-icons": 53,
+    "monsters": 41,
+    "pixel-baker": 1,
+    "pixel-fx": 24,
+    "previews": 9,
+    "tools": 3
+  },
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 2950,
+      "sha256": "e8ea20294c6238bf294e254a8303657ce4273514d10928f35ec0fda03aa2b1fe"
+    },
+    {
+      "path": "class-badges/ClassBadgeAcolyte.png",
+      "bytes": 55944,
+      "sha256": "ffbf04de4916947a99a3c8a7488cf642da7c9ceefa92c4c0cfdf82500e91a55a",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA"
+    },
+    {
+      "path": "class-badges/ClassBadgeAdventurer.png",
+      "bytes": 90718,
+      "sha256": "b93b9b8f556301e1113dfefbc503a36d0ea18741e8733e39e9923e30277c388b",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA"
+    },
+    {
+      "path": "class-badges/ClassBadgeArchmage.png",
+      "bytes": 2780,
+      "sha256": "cbc9925bc89e0d0950ef8a2a589d8e2c8458fb3e40480a1d7260560fb49c589e",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA"
+    },
+    {
+      "path": "class-badges/ClassBadgeBard.png",
+      "bytes": 54230,
+      "sha256": "c1b0a8804fec06de9919d2e85928ac155e9b768d8586c79bd2eb415a4537d167",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA"
+    },
+    {
+      "path": "class-badges/ClassBadgeDragonKnight.png",
+      "bytes": 63184,
+      "sha256": "d4f20dd31942c5133970089a426d606edbbc2a15d69561d7e96faa495ebc9e19",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA"
+    },
+    {
+      "path": "class-badges/ClassBadgeDruid.png",
+      "bytes": 58184,
+      "sha256": "775aee7985ff559af11e64888c17057f861096cc4a65d22def7754b2add06a4d",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA"
+    },
+    {
+      "path": "class-badges/ClassBadgeElementalist.png",
+      "bytes": 62732,
+      "sha256": "64620ffcb9c18541fe5158bc747b7ccfc596bcd1de3c7513c56be56a52a4b93c",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA"
+    },
+    {
+      "path": "class-badges/ClassBadgeGuardian.png",
+      "bytes": 61093,
+      "sha256": "0ef4362260171f691b1279ee77275898678780933c7e83164b28e0ca3d948756",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA"
+    },
+    {
+      "path": "class-badges/ClassBadgePaladin.png",
+      "bytes": 75912,
+      "sha256": "acdc15b13b6f48f720eada9300bade989d6416c73a868bc4a92e540b992a6719",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA"
+    },
+    {
+      "path": "class-badges/ClassBadgeRanger.png",
+      "bytes": 69014,
+      "sha256": "7b089b6e07fa63de894f92a05a192697de29dc032b6f65d64e3c881d05d78f5e",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA"
+    },
+    {
+      "path": "class-badges/ClassBadgeScout.png",
+      "bytes": 56553,
+      "sha256": "fbda2eac064929516293736922662053becbc616fc77f435e0d018833e70fa0d",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA"
+    },
+    {
+      "path": "class-badges/ClassBadgeSpellblade.png",
+      "bytes": 74620,
+      "sha256": "fcaec7f670f075c6cda759a08dbb49d14f49c1d245b00c4888623946888798e5",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA"
+    },
+    {
+      "path": "class-badges/ClassBadgeValkyrie.png",
+      "bytes": 2607,
+      "sha256": "7eb251838da8cc0222c6ea5b9b135e6b317ae330bbd2f18bc35821aeec8d7bf1",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA"
+    },
+    {
+      "path": "class-badges/ClassBadgeWindstalker.png",
+      "bytes": 51635,
+      "sha256": "73ea7cf062bb30a66ffe7072fbbb6794702dc0014aae0cb5243f85a72add368c",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXAegisArmor.png",
+      "bytes": 24062,
+      "sha256": "389481b880b4368c94f09ae6704c4b6fb9850f91ed2403ac41c2427fcfef443f",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXAegisCharm.png",
+      "bytes": 21568,
+      "sha256": "4bec176c2c843c50c6d3b4930590c04cbe48b3b5adb8ba6a6e91ef2846fec82e",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXAegisCrystal.png",
+      "bytes": 21299,
+      "sha256": "42a71766d9b6751e464a95a49be70d6bfb97fa53a97d581a26007076c40527d7",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXAegisLance.png",
+      "bytes": 23984,
+      "sha256": "98a17703a3ef89abe8f2fa8e9a9b18c6d0cdda127d8fff10e59089c17b04c234",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXArcaneMantle.png",
+      "bytes": 18603,
+      "sha256": "509adb135c06b77fbc1ec4ce81dcd094ff56c4304c34935237bbfb9aca93b0da",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXAstralArmor.png",
+      "bytes": 28276,
+      "sha256": "5747989fd27e4cc5a24894cc90a868535e06cec75f87c2ea2bc6bc51135a9fbd",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXAstralCharm.png",
+      "bytes": 23530,
+      "sha256": "bf64135163bd39de9ee400a73137c171571443eb4fdf1686807023e5aaf1fbbf",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXAstralCodex.png",
+      "bytes": 20056,
+      "sha256": "84c6db625cce0f7f9e1ab7e72c3cb5cf6145b34955d435cb479ad7f25f99f4f7",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXAstralGreatbow.png",
+      "bytes": 24016,
+      "sha256": "53ed0d8dc397c1573d813e1216dcf151482336eb53f881b59f228cdcf864dd56",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXChainmailCoat.png",
+      "bytes": 14136,
+      "sha256": "d28d2e46675ef72929a61f01754be6c8c94c01164794dee974a88b3dea269eeb",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXChronoPocketwatch.png",
+      "bytes": 17020,
+      "sha256": "2aa866f881d64f4962b35a9926d1e2dcad0dd7518ecac2c83c9ac36f7c00dbe7",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXCrownOfValor.png",
+      "bytes": 19080,
+      "sha256": "1e7c218376b9b5860a022a45e11a0eac291b01484285d1f8018cf9ce7cafb4cb",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXCrystalBarrierFlask.png",
+      "bytes": 16152,
+      "sha256": "b81fcfdfbfe97058740d1f343f19e6c4ac2f3c1067f86df46bff16e30ae99b0c",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXEagleEyeLens.png",
+      "bytes": 13440,
+      "sha256": "53102d5174215bd19e1b9f8c26edc9621fe39006b6fd6f5367e977e2bde920fe",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXEmberArmor.png",
+      "bytes": 18065,
+      "sha256": "ff7dcd8ad72681fe615580f2b356c146001f100a453abda5e0541384659358e3",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXEmberCharm.png",
+      "bytes": 14668,
+      "sha256": "58c757f36ba5bfa64a2bea5b19bc296c3ee2f8da30d3edae8f7d49e24917a789",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXEmberStaff.png",
+      "bytes": 16015,
+      "sha256": "649d69e86bb9d4841772b7ba0558a8205edf93853b66d07e6790c779e62ed160",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXEmeraldScepter.png",
+      "bytes": 15756,
+      "sha256": "18b7561d62a8cb905df9fecf32cf137082363689cadf4e142f2c74db8f918feb",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXFlameAxe.png",
+      "bytes": 19425,
+      "sha256": "03b6e1f4cc41424589fcf74767d3394a9475904e4930aa96a10b6bd3c5358ac9",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXFrostWand.png",
+      "bytes": 14425,
+      "sha256": "6ed01f7d1db5dd7678d0d7f296648750dbfd10b41272f407385e2bc3a5ddb43e",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXGaleArmor.png",
+      "bytes": 14715,
+      "sha256": "f926a163c3c0b8c0623fa4b588884d2139aa65da59b6e5a04ae029a51ff6467c",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXGaleCharm.png",
+      "bytes": 12536,
+      "sha256": "d9e8852228f65277010f20eeacd7177924545c7b76ef14139eb48324b68f6d2f",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXGaleLongbow.png",
+      "bytes": 16630,
+      "sha256": "ba8126965ce559b079c3226c1d72e98fe70724d116950b0d002af12583630a2a",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXHoneySalve.png",
+      "bytes": 13199,
+      "sha256": "f041de56ea06f9622021d0132b338a575893dde9ad9f9f9582239feb737f67e4",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXInfinityHourglass.png",
+      "bytes": 19107,
+      "sha256": "a145790f3b2ee5a6d1c57f68491a270788efdd0b28c0e76f92417e85aea81ee0",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXIronbarkElixir.png",
+      "bytes": 11245,
+      "sha256": "e9e945a5bfdedc7903ab52159bc93263735edf6ded4da8760eca650b3f4c1075",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXKnightHalberd.png",
+      "bytes": 15481,
+      "sha256": "f01df03a4b1739c6345a4c12dcb62ae98d017ef517a9ae1a57d663ad3b4eddd8",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXMithrilPlate.png",
+      "bytes": 17800,
+      "sha256": "48c865137b98b5000e8acd24dc0a170fd889bcc522a57fd277d039ee17b7837c",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXOakArmor.png",
+      "bytes": 14469,
+      "sha256": "5008479fb831d9f4f574d4ab50da874eb1fe7a11dca087e2bf0a00555acd920c",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXOakCharm.png",
+      "bytes": 12428,
+      "sha256": "e69765108d0512d51880df1db8be53bcf3c0d60a137e1625b30c097de4a0d1bf",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXOakHammer.png",
+      "bytes": 15891,
+      "sha256": "907bcee4f7a8419ee4c236b5bca81f88827ac16a7fa48ea83da656acc471b411",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXPhoenixFeatherRobe.png",
+      "bytes": 25141,
+      "sha256": "c00377c080eac96de4de8e7514350a367ca086401e801f4bac61172d1a2ff11f",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXPhoenixNectar.png",
+      "bytes": 22327,
+      "sha256": "05af864f120c800f34c456302c1b74b4b0a634e6fb9b733c45152e313d143731",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXRubyHeartPendant.png",
+      "bytes": 15612,
+      "sha256": "f8ec92ce9de9a03cad5a4a91680469ae79e4482865a8a7e369659f149f1586f6",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXShadowTwinblades.png",
+      "bytes": 20305,
+      "sha256": "7bbe2a6e0167bd8ba6ec9722047f020659fa03ee00bd0b47ec3f08985b5eabe6",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXStarlightElixir.png",
+      "bytes": 20635,
+      "sha256": "a839456ba9dc467c71f401242b8a23a6e9f7cb1376ca5087ba577a5bdae4b0ba",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXSunbreakerBlade.png",
+      "bytes": 24499,
+      "sha256": "6858d4cd089d53bd26b0150a4b4d50a9459cf5ebb2dfb0a85651423d19ce83e0",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXSuperPotion.png",
+      "bytes": 14062,
+      "sha256": "43adbd04847b1a6fef59d15474c21359c67a98604fb8786abd968162d72dd799",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXThunderCrossbow.png",
+      "bytes": 18103,
+      "sha256": "6adcf403fd586e5f1508118a663f9123069fc3349a113af9c6b6967288f81a20",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXTitanFortressArmor.png",
+      "bytes": 23595,
+      "sha256": "a03b2c57e439bade7bec121c1858769e0af97a619b8bba9f759d647efd65777a",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icon-fx/PixelIconFXWindrunnerGarb.png",
+      "bytes": 14748,
+      "sha256": "4776ec04df2e4ccee143c8f6a648a037efc7121395b80d2c5b0ce345c07a8c69",
+      "width": 4608,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconAegisArmor.png",
+      "bytes": 2923,
+      "sha256": "d358cbabf3318989fc77e680707b708f4c8729f058f3244e1bf804054c24f3e7",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconAegisCharm.png",
+      "bytes": 2478,
+      "sha256": "4879964032079474b860eab87d64b41a5fa8c69b77abd83ea3570ed3603cce41",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconAegisCrystal.png",
+      "bytes": 2661,
+      "sha256": "f8ce58305a84872a509250192fbcab66730be35d2fccb8a7d24cff778973c422",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconAegisLance.png",
+      "bytes": 2883,
+      "sha256": "7499d7f91f26c17a21610b953fb80c95da3bb5f9c37df906e20e9d0bf83e1fee",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconArcaneMantle.png",
+      "bytes": 3107,
+      "sha256": "8efe91fdbd610b44eee8eb5dddd044c1c2ec07253ecd34500fba582895b91b18",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconAstralArmor.png",
+      "bytes": 3319,
+      "sha256": "36de3f7778a23090e801c25007a63be8e4c019186ff7ccf26377de07214f49bc",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconAstralCharm.png",
+      "bytes": 2802,
+      "sha256": "dff0ad4fc8641394eab37df617c5d7a6962206f2509fbab6cbaaf64d58f13ffa",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconAstralCodex.png",
+      "bytes": 2429,
+      "sha256": "87ec491929a69c2cb8cd59b804f76b9fc222ed0d3425958ddebb437f4cb059f7",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconAstralGreatbow.png",
+      "bytes": 2819,
+      "sha256": "3e6e017a166c486cb707b07dc0e6b0ad41b3251943858f65067df4bdf6a8aaf1",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconBerryTea.png",
+      "bytes": 2368,
+      "sha256": "59386549ba761882e893826714c89c2913ae984128685750523dc4efc67a8282",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconChainmailCoat.png",
+      "bytes": 2651,
+      "sha256": "f436735c6f9dd65623329cc233950558a6cbb7a024870a75dc11c8126e7b1640",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconChronoPocketwatch.png",
+      "bytes": 2763,
+      "sha256": "fdf16ac32fe05fbde3c8612b152f0d5f3c90c7391976a2fd68ecc92ae2385aba",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconCloverAmulet.png",
+      "bytes": 2728,
+      "sha256": "cfbb1c3d2039382d53c8ead5ddff7f99d75b857f968c8bf4c1bd698195e8d9d6",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconCrownOfValor.png",
+      "bytes": 2346,
+      "sha256": "723ca864b4cce96bd0bbf3bc311181f9734cc6f3e8fab6bbfa6e5963c750da5a",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconCrystalBarrierFlask.png",
+      "bytes": 2442,
+      "sha256": "93b8637ccefdd72b96ee40c218d3d414f8f86c4ea380bcfe0a158c24b8c63cd3",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconEagleEyeLens.png",
+      "bytes": 2594,
+      "sha256": "14d7e5bbadb9b22defe14759199681983c95e8e477ee8161b42256aca27c6b73",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconEmberArmor.png",
+      "bytes": 3056,
+      "sha256": "7f576f47ddd22c60b7a21ad327eb3d6fba0361365021e97e7f22e81a6b65de92",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconEmberCharm.png",
+      "bytes": 2377,
+      "sha256": "6c0a41d7db89ba7df4469f5630c72a2e161ea4231c2c437da7474fce79ea4a4d",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconEmberStaff.png",
+      "bytes": 2599,
+      "sha256": "5649ac5a7945fbefee227026dd11208d6b1a288f88414c181d0893d74050d429",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconEmeraldScepter.png",
+      "bytes": 2581,
+      "sha256": "077fe644f5f3fc25c91ddf24ba09db29b7cf4d40df6f072207969fc821bbd0d6",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconFlameAxe.png",
+      "bytes": 3010,
+      "sha256": "d59a6a5709cda37384af249b32408c20cd904f949c298ce51552a85a49062728",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconFrostWand.png",
+      "bytes": 2667,
+      "sha256": "0a43100cf2cabfdf502af5909d56015f0b1b3a851e046393271965017ac36128",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconGaleArmor.png",
+      "bytes": 2902,
+      "sha256": "83bf99c76e33376702afc46cd3d0a9ccd6dd23d87d54b2dcee9d5c9fe0e38bd9",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconGaleCharm.png",
+      "bytes": 2484,
+      "sha256": "f10336894c19d41e8b3fa209bfa9f63b676856018986ab53359e26a714550ff1",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconGaleLongbow.png",
+      "bytes": 2917,
+      "sha256": "d042c003dd0315de1563fe1e7f890036ccecae733b8213bf894a7641f6030aa9",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconHoneySalve.png",
+      "bytes": 2497,
+      "sha256": "94a16491c439a6fc872ad0f2d7ce85cf4f973ccd29d7e75fe66891f6cda0b0af",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconInfinityHourglass.png",
+      "bytes": 2442,
+      "sha256": "cc94710953814c79347c418f520a54ece650045cc20295987d926f2912686921",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconIronDagger.png",
+      "bytes": 2511,
+      "sha256": "0a0e4c49c517d1811ea74c98460075d1aa249658d1e97552e9d695be749e8f34",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconIronbarkElixir.png",
+      "bytes": 2113,
+      "sha256": "8994c660c5a49fa7edb06cb43701f380d979886f2a4650fcc686cfdf1d0025b9",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconKnightHalberd.png",
+      "bytes": 2914,
+      "sha256": "4135f71f558479af26665708c64727d6e29d527ea064542749b602a151215c0a",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconMithrilPlate.png",
+      "bytes": 2962,
+      "sha256": "45411b0c536314c308d8a3fcee8fb1e86c41f2cbd79ff973f75f596ff0ae850b",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconOakArmor.png",
+      "bytes": 2746,
+      "sha256": "2744ba9e8157d7440f79f9eaca83eb3140fda384f12b80a87c6e9777c6e9cbc5",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconOakCharm.png",
+      "bytes": 2404,
+      "sha256": "86380bcdd35a6033d8b1f63ad08e02b8c66edefef89b64be1b599e0620da2df7",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconOakHammer.png",
+      "bytes": 3076,
+      "sha256": "eb2c78f3688fef5eeccea4f9044121aeb0ff3d3825f2d3ada5f8fb748d52d2f3",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconOakSlingshot.png",
+      "bytes": 2483,
+      "sha256": "40029bd648190df9d0e2f055438c6f692ca76fec53ce3049ee842076e38aa44c",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconPhoenixFeatherRobe.png",
+      "bytes": 3129,
+      "sha256": "f1c3b70a7d461b87841ab123984894561014113d4cffbb71a1620ba2ab8977bd",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconPhoenixNectar.png",
+      "bytes": 2630,
+      "sha256": "93b85cc64fccf750ddcd9ded9af43fe30a71b0ec52b31d756dc89869e50de8fe",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconRubyHeartPendant.png",
+      "bytes": 2351,
+      "sha256": "cad279113252fc78a02ac2559396ed779ac3648003f14b8f14f37a83b7fa6fc8",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconShadowTwinblades.png",
+      "bytes": 2727,
+      "sha256": "3367a3e2734b50b8db49beba59b62835590dc182e69ad39b8bf9ad643b921854",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconStarlightElixir.png",
+      "bytes": 2401,
+      "sha256": "7d2c100be62ee2fcad19c004e30cba810560b73062a213cd27d8866e66abcf87",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconStuddedVest.png",
+      "bytes": 2708,
+      "sha256": "a026542ec16516a402088418d42c418875cb7326dfa8f3b3fe03fddc4d68ebc1",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconSunbreakerBlade.png",
+      "bytes": 3003,
+      "sha256": "c612f78b5b77b1157e332160234fadf34e2e8bad774d6d9894dd0a011b896c95",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconSuperPotion.png",
+      "bytes": 2065,
+      "sha256": "acab23a3d67955017c6955d1007e66e95708dcc348155f77a1cd2938c479cec5",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconSwiftBootsCharm.png",
+      "bytes": 2264,
+      "sha256": "578ea36ea83585b6e0b2fff59d4ef359702d69bacd3907b331f578f26ef1747d",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconThunderCrossbow.png",
+      "bytes": 2966,
+      "sha256": "65e9246b9458db7faa2191c70fb5743bafe4c0d4880e4a96f5ba15160fb63087",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconTitanFortressArmor.png",
+      "bytes": 2966,
+      "sha256": "267afbd09fa7a2472aa8c71e4388c9e9b6ff631bb756600caaacb2e078bbaafd",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconTravelerCloak.png",
+      "bytes": 2466,
+      "sha256": "3ff07ecf6b8d8867ebbf17ba7ddf8139bbe78234e0173b5cbe4fe33c7ea048a0",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconWildwoodArmor.png",
+      "bytes": 2716,
+      "sha256": "b7b37840304789cb496d4e82e3901efa2a3c4d671f4b2dbbef550f711f646bde",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconWildwoodCharm.png",
+      "bytes": 2303,
+      "sha256": "90b78f294452f902a76d7b8ee74afd68d18fe37630582fe6c427d42be28a8293",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconWildwoodSpear.png",
+      "bytes": 2653,
+      "sha256": "3ac9c56c3584824c1813414cb6af3d24a6a184f26c6809e8a2c45841b5658ba8",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconWindrunnerGarb.png",
+      "bytes": 2856,
+      "sha256": "42dd9707b859badf958b2d1ab0d4328d1b4ff9cfa1cc77acd4f3ef48e10a6134",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconWoodenStaff.png",
+      "bytes": 2557,
+      "sha256": "aee8fbfc99ea4baf38ea81c13eaadf7096817211b0d05ec5be79a271256d48df",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "item-icons/PixelIconWoodenWhistle.png",
+      "bytes": 2342,
+      "sha256": "f36965f2addb0578a2051bc846aefb9fc881ad41603d15fe86e00d3874e11c83",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "monsters/MeadowMonsterAcornBanditDeath.png",
+      "bytes": 224596,
+      "sha256": "be279a16a8e22330ab5b64fa6369cfd277a92e778550fa9e34ce61b77fca3348",
+      "width": 4096,
+      "height": 1600,
+      "mode": "P"
+    },
+    {
+      "path": "monsters/MeadowMonsterAcornBanditMotion.png",
+      "bytes": 311459,
+      "sha256": "3de9918f021e9c47fc5d795f2679379599bb1dd7a4c887b6f483d49ada4c5133",
+      "width": 3072,
+      "height": 1792,
+      "mode": "P"
+    },
+    {
+      "path": "monsters/MeadowMonsterBrambleSpriteDeath.png",
+      "bytes": 256303,
+      "sha256": "7a9edc825f6ac83839ef95a7b13b75abf4cd392a2b6875099c3304cb43d7e6b1",
+      "width": 4096,
+      "height": 1600,
+      "mode": "P"
+    },
+    {
+      "path": "monsters/MeadowMonsterBrambleSpriteMotion.png",
+      "bytes": 375875,
+      "sha256": "64977ec3726c0f01fed1badaa95525d44f567042215f91f676035a63383d4401",
+      "width": 3072,
+      "height": 1792,
+      "mode": "P"
+    },
+    {
+      "path": "monsters/MeadowMonsterBubbleCrabDeath.png",
+      "bytes": 181191,
+      "sha256": "a8ff7e732cfc7c6b19496721f7ef3c24e8bae8535c45954a7268f14a8bee9927",
+      "width": 4096,
+      "height": 1600,
+      "mode": "P"
+    },
+    {
+      "path": "monsters/MeadowMonsterBubbleCrabMotion.png",
+      "bytes": 251199,
+      "sha256": "b339614b7a500706a3163a4f46be6d67a70eac9256892e61babce72077da2d91",
+      "width": 3072,
+      "height": 1792,
+      "mode": "P"
+    },
+    {
+      "path": "monsters/MeadowMonsterCrystalGolemDeath.png",
+      "bytes": 309134,
+      "sha256": "0fa0d99ed5e0de6e25187c5221ab905831dec03eff6c5439f4d94900d368ea22",
+      "width": 4096,
+      "height": 1600,
+      "mode": "P"
+    },
+    {
+      "path": "monsters/MeadowMonsterCrystalGolemMotion.png",
+      "bytes": 441300,
+      "sha256": "efb6d335249797996d72d58c02920a7b01cc31688be9184f0057f026b22553ba",
+      "width": 3072,
+      "height": 1792,
+      "mode": "P"
+    },
+    {
+      "path": "monsters/MeadowMonsterEclipseBehemothDeath.png",
+      "bytes": 322683,
+      "sha256": "b3051937322f036e586f4f8879d9847b3d3aeaa38bb082887d706dffd902683b",
+      "width": 4096,
+      "height": 1600,
+      "mode": "P"
+    },
+    {
+      "path": "monsters/MeadowMonsterEclipseBehemothMotion.png",
+      "bytes": 471859,
+      "sha256": "d69900dace742f7b4d41f070b7d943ab64a97b219ee200a7475febc9ea072961",
+      "width": 3072,
+      "height": 1792,
+      "mode": "P"
+    },
+    {
+      "path": "monsters/MeadowMonsterEmberLizardDeath.png",
+      "bytes": 207949,
+      "sha256": "c141d0b2b23a8e62bcead8441085662ebdaaf9a7da07f4b87d8d654ef0abd0a4",
+      "width": 4096,
+      "height": 1600,
+      "mode": "P"
+    },
+    {
+      "path": "monsters/MeadowMonsterEmberLizardMotion.png",
+      "bytes": 287865,
+      "sha256": "77276b0de603f18eb3ec7f0b5f815458a39fb66967aa489571108c55e746330a",
+      "width": 3072,
+      "height": 1792,
+      "mode": "P"
+    },
+    {
+      "path": "monsters/MeadowMonsterFrostAlphaWolfDeath.png",
+      "bytes": 243259,
+      "sha256": "38d1518a4a1cd76557f33acc19875deebef76c42251e850ad8214d2ce7f092d5",
+      "width": 4096,
+      "height": 1600,
+      "mode": "P"
+    },
+    {
+      "path": "monsters/MeadowMonsterFrostAlphaWolfMotion.png",
+      "bytes": 352128,
+      "sha256": "3c71a267c8135f44c2f26f8d2469a7fcacbba5410eddb23c7a222f31a590870f",
+      "width": 3072,
+      "height": 1792,
+      "mode": "P"
+    },
+    {
+      "path": "monsters/MeadowMonsterFrostPhoenixDeath.png",
+      "bytes": 241547,
+      "sha256": "514709d3477a2d5130971dddc98f70180b1ad3ef12270441d7a72f03a20737e3",
+      "width": 4096,
+      "height": 1600,
+      "mode": "P"
+    },
+    {
+      "path": "monsters/MeadowMonsterFrostPhoenixMotion.png",
+      "bytes": 350449,
+      "sha256": "2b6431b80f2afd4e955315d06d8cd955887e0a83d1a156e4d7fad5b8b629769c",
+      "width": 3072,
+      "height": 1792,
+      "mode": "P"
+    },
+    {
+      "path": "monsters/MeadowMonsterGoblinShamanDeath.png",
+      "bytes": 186025,
+      "sha256": "b783023ff75bf7af5e8e1b2e31fb200705956edd5dd4edcb348310ab77b341f5",
+      "width": 4096,
+      "height": 1600,
+      "mode": "P"
+    },
+    {
+      "path": "monsters/MeadowMonsterGoblinShamanMotion.png",
+      "bytes": 263189,
+      "sha256": "41eb67079e2e11a0f0cf48561dec2bffd0b231d1f04769fa36b868b2a67b09e5",
+      "width": 3072,
+      "height": 1792,
+      "mode": "P"
+    },
+    {
+      "path": "monsters/MeadowMonsterGoblinWarlordDeath.png",
+      "bytes": 363643,
+      "sha256": "ed20bdcde81099dca813d034635db64fa3fe925fc5f28b07c8dbc25653ab9774",
+      "width": 4096,
+      "height": 1600,
+      "mode": "P"
+    },
+    {
+      "path": "monsters/MeadowMonsterGoblinWarlordMotion.png",
+      "bytes": 526201,
+      "sha256": "755f7e6fa0c461627134996c075001505b5792e6de95f075be16e764453bab6e",
+      "width": 3072,
+      "height": 1792,
+      "mode": "P"
+    },
+    {
+      "path": "monsters/MeadowMonsterHopShroomDeath.png",
+      "bytes": 150003,
+      "sha256": "90e72697433f7f43d59099513cba55702d366208d766fea840ea122991917083",
+      "width": 4096,
+      "height": 1600,
+      "mode": "P"
+    },
+    {
+      "path": "monsters/MeadowMonsterHopShroomMotion.png",
+      "bytes": 198778,
+      "sha256": "fd17f0ea4b403fb2db8100c85bbdbf148b4153f36d9b753036a98f1b91d9e089",
+      "width": 3072,
+      "height": 1792,
+      "mode": "P"
+    },
+    {
+      "path": "monsters/MeadowMonsterMushroomKingDeath.png",
+      "bytes": 231216,
+      "sha256": "1653c1cfa33c86e78654af89e70213b2af6c2f63a01e6ef2bde15775f3660c5b",
+      "width": 4096,
+      "height": 1600,
+      "mode": "P"
+    },
+    {
+      "path": "monsters/MeadowMonsterMushroomKingMotion.png",
+      "bytes": 328339,
+      "sha256": "fc7380c654b26c30b5d7087abe9ffb65c1adc6fe331fb02b5a639be84a024323",
+      "width": 3072,
+      "height": 1792,
+      "mode": "P"
+    },
+    {
+      "path": "monsters/MeadowMonsterRuneKnightDeath.png",
+      "bytes": 216646,
+      "sha256": "761309b74ef371d4f0baca977c7674f540f93cd7c4b5be6f9b603ec8df38c976",
+      "width": 4096,
+      "height": 1600,
+      "mode": "P"
+    },
+    {
+      "path": "monsters/MeadowMonsterRuneKnightMotion.png",
+      "bytes": 305291,
+      "sha256": "f006b493492a5d366eb87f526f1bb527106cebfec0fcf2e384edf1058ea46421",
+      "width": 3072,
+      "height": 1792,
+      "mode": "P"
+    },
+    {
+      "path": "monsters/MeadowMonsterShadowOwlDeath.png",
+      "bytes": 185391,
+      "sha256": "15add126cd7aad4364be9f96bda09825d7bb2018cfdcc4792bced42cec882703",
+      "width": 4096,
+      "height": 1600,
+      "mode": "P"
+    },
+    {
+      "path": "monsters/MeadowMonsterShadowOwlMotion.png",
+      "bytes": 259627,
+      "sha256": "f8db4fc089442215d3894dd001c8ec97bf522f029eea8f290e7df3cea42b08a7",
+      "width": 3072,
+      "height": 1792,
+      "mode": "P"
+    },
+    {
+      "path": "monsters/MeadowMonsterStingWaspDeath.png",
+      "bytes": 130719,
+      "sha256": "acffd639a3706ef11d531d0d97d8cac17b9a43182bfff73262c8146db1602447",
+      "width": 4096,
+      "height": 1600,
+      "mode": "P"
+    },
+    {
+      "path": "monsters/MeadowMonsterStingWaspMotion.png",
+      "bytes": 179780,
+      "sha256": "2ad02987a05d05a2581dd7a9adafbcf394b3c54f694c9390219c506984b7996b",
+      "width": 3072,
+      "height": 1792,
+      "mode": "P"
+    },
+    {
+      "path": "monsters/MeadowMonsterThornTreantDeath.png",
+      "bytes": 348627,
+      "sha256": "c595a249fd33ea4d454d46892233f12c547cafb4d3475b635baec50db1efc26f",
+      "width": 4096,
+      "height": 1600,
+      "mode": "P"
+    },
+    {
+      "path": "monsters/MeadowMonsterThornTreantMotion.png",
+      "bytes": 511694,
+      "sha256": "394783d8923e15294dc3f3f5cf640a0680476f45ad4ef243c5cd99a301cea877",
+      "width": 3072,
+      "height": 1792,
+      "mode": "P"
+    },
+    {
+      "path": "monsters/motion_expansion.json",
+      "bytes": 15853,
+      "sha256": "2d5a609ca030c9664b796a92b48196e1fa75723da7596fec83849092feddc991"
+    },
+    {
+      "path": "monsters/projectiles/ProjAcorn.png",
+      "bytes": 312,
+      "sha256": "1b528660282f9439fe774181418bbfebcccb5fcec3616fe612ce6bcf3cd66846",
+      "width": 64,
+      "height": 64,
+      "mode": "RGBA"
+    },
+    {
+      "path": "monsters/projectiles/ProjBoomBomb.png",
+      "bytes": 410,
+      "sha256": "579cebeeb8452ffd0b128d8242ed16a61a2e6d62d8fb45cdd6aac4cdb2d38718",
+      "width": 64,
+      "height": 64,
+      "mode": "RGBA"
+    },
+    {
+      "path": "monsters/projectiles/ProjEclipseOrb.png",
+      "bytes": 536,
+      "sha256": "a4d718bfc8b9fb4024833e644fd29203140f6690a84454cfe55cf9e271195921",
+      "width": 128,
+      "height": 64,
+      "mode": "RGBA"
+    },
+    {
+      "path": "monsters/projectiles/ProjEmberBall.png",
+      "bytes": 475,
+      "sha256": "276d42da6f4ff8ce064edeba9442be944c533cb14be14edf88edc559233868ff",
+      "width": 128,
+      "height": 64,
+      "mode": "RGBA"
+    },
+    {
+      "path": "monsters/projectiles/ProjFrostShard.png",
+      "bytes": 331,
+      "sha256": "89da502229a5e6e26a0df899e62ba6be165ea13dd002e7801a57c6c1fb3cf774",
+      "width": 128,
+      "height": 64,
+      "mode": "RGBA"
+    },
+    {
+      "path": "monsters/projectiles/ProjShadowFeather.png",
+      "bytes": 367,
+      "sha256": "345b2f2404c831b78b3281bef51ecf18173753763481e0491d3a5d22dfb63776",
+      "width": 128,
+      "height": 64,
+      "mode": "RGBA"
+    },
+    {
+      "path": "monsters/projectiles/ProjShamanOrb.png",
+      "bytes": 309,
+      "sha256": "9a1750d00db634ea9c9342e0450b478d20a1ffc7a24a6307306e4233b40b3a6a",
+      "width": 64,
+      "height": 64,
+      "mode": "RGBA"
+    },
+    {
+      "path": "monsters/projectiles/ProjVenomSting.png",
+      "bytes": 358,
+      "sha256": "1550bd625005a514fa1187cc7ca81b8d70863a20d296348e5fab234eab4e5bea",
+      "width": 128,
+      "height": 64,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-baker/pixel_equipment_expansion.js",
+      "bytes": 44914,
+      "sha256": "d13a3155e1c0e433ab68c5b18df77fd290ac89385218d2a5f563970dfb45b9ac"
+    },
+    {
+      "path": "pixel-fx/PixelFX_astral_eclipse_beam.png",
+      "bytes": 22283,
+      "sha256": "65ace90db0b3ba8e9564c1785cf379f11e4e102d0c74410fe8cb5414d04254d0",
+      "width": 3672,
+      "height": 168,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_astral_meteor_rain.png",
+      "bytes": 29063,
+      "sha256": "c73c87c77b69566c0cf9645b01a85734bbd673a8f56c67d303c6228bab31d028",
+      "width": 3760,
+      "height": 704,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_astral_zodiac_ring.png",
+      "bytes": 17651,
+      "sha256": "4ea2ad1123de0501068510c9a90bcb9e080db9541392a5d2dd6416647a296bd1",
+      "width": 3264,
+      "height": 312,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_bomb_firework_blast.png",
+      "bytes": 36031,
+      "sha256": "a81717e6aeb37619794ae69850d48f11fa619dc398a1a5c99b68b8011e551da5",
+      "width": 3744,
+      "height": 140,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_bomb_lob_proj.png",
+      "bytes": 620,
+      "sha256": "540b5f03637091fbf52e76f02623617a05469eb846f1b29a8661a026454a379a",
+      "width": 440,
+      "height": 44,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_bomb_star_smoke.png",
+      "bytes": 7167,
+      "sha256": "3be75d108a9fcdeef0fd71e384c664a8da3899af5fbc01a460e75e7cfdb38e55",
+      "width": 2160,
+      "height": 96,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_frost_blizzard_storm.png",
+      "bytes": 78497,
+      "sha256": "d6d099b8fdaf7a6819de413db69cda0933372f0600aaf8a2aebecb95882dd3b9",
+      "width": 3784,
+      "height": 432,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_frost_nova_ring.png",
+      "bytes": 16958,
+      "sha256": "3ff49da272f29a16b217ccbe7d32aff32f719758c8af9e4c7ae351ddf64693a3",
+      "width": 3456,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_frost_shard_burst.png",
+      "bytes": 6509,
+      "sha256": "a452cb628f01487251ba8c421b1c2480255d523396b2432e89f664b1f525f842",
+      "width": 2160,
+      "height": 108,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_seraph_aegis_descend.png",
+      "bytes": 30607,
+      "sha256": "c79a1450d3ef8ad429b80961701f2cdbfd9af0bd23abfe6c3c4368f6051b0d08",
+      "width": 3680,
+      "height": 552,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_seraph_wing_shield.png",
+      "bytes": 14375,
+      "sha256": "5571e4b2dee9f388b88df9904168eadee0a93695fd923fda427ab728c4f0d956",
+      "width": 3072,
+      "height": 240,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_sonic_anthem_burst.png",
+      "bytes": 11106,
+      "sha256": "efdd46101ad9045ca591a26d80969d63732a8c7ff999edc495669b2183737a0c",
+      "width": 2560,
+      "height": 116,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_sonic_harmony_wave.png",
+      "bytes": 17154,
+      "sha256": "42dc376a4ef6ba36fdaf83f3c2b54000f93e9f6a29311de000bd64c497549699",
+      "width": 3552,
+      "height": 224,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_sonic_note_proj.png",
+      "bytes": 1174,
+      "sha256": "781a42d6d706b47456d95e35337255ab0a4fba13ca97bbcb732f945cdff85df3",
+      "width": 1056,
+      "height": 36,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_thorn_root_sweep.png",
+      "bytes": 16748,
+      "sha256": "c7a7cbc6fe284acf1ef81618955b0745920d3f47f4bbedaf125c8484ebfa0586",
+      "width": 3696,
+      "height": 96,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_thorn_spore_cloud.png",
+      "bytes": 11625,
+      "sha256": "41e6784a8c71d33b42a78c9069a121999bdd8e40c160db245b512d9dd795bfc8",
+      "width": 2880,
+      "height": 216,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_thorn_vine_erupt.png",
+      "bytes": 32230,
+      "sha256": "df1430d28312135c99700909ccb7f38ea2d983388b91a8c76cb93c9683b99df7",
+      "width": 3072,
+      "height": 232,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_venom_splash_hit.png",
+      "bytes": 3287,
+      "sha256": "2c25dbe3d21bc1c00ed99d69b19a6b06833582a9f005e1ae3b195c530a1cfb40",
+      "width": 1344,
+      "height": 88,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_venom_sting_proj.png",
+      "bytes": 718,
+      "sha256": "114631852873c52d987bfd2400bdfa9be8169278d0ec27e8fd60d32bf64a73ba",
+      "width": 840,
+      "height": 28,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_venom_swarm_aura.png",
+      "bytes": 9522,
+      "sha256": "9d57fe2f03ca5ed0e03a3960a97b6593f4a0dbd0343928c60119c82c01c31060",
+      "width": 2496,
+      "height": 192,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_wind_gale_barrage.png",
+      "bytes": 16512,
+      "sha256": "da9da9dbc57cf83da46d58b6e0eb232717ac203c8102ce1b8664928e46d45e11",
+      "width": 3520,
+      "height": 124,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_wind_spark_impact.png",
+      "bytes": 9045,
+      "sha256": "a801c67ae6e0535df8ed7ad8c76bcfe26a169a41e4970a8fd60aa9b8e2b99737",
+      "width": 1568,
+      "height": 96,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_wind_thunder_bolt.png",
+      "bytes": 1193,
+      "sha256": "a6ab3ca0647eef85035396e8f3d1075edff0800f29430e0657f72472032b7f9d",
+      "width": 1248,
+      "height": 32,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/recipes_expansion.json",
+      "bytes": 24788,
+      "sha256": "284b6e0a5cb523507b32d426a96434da537441059e0950675fc0894550ecb03a"
+    },
+    {
+      "path": "previews/qa_class_badges.png",
+      "bytes": 416777,
+      "sha256": "d806b36735a3c2d5f9d2962114c4da817139d2f4ac1a4c4f523d89e1fb2b32ee",
+      "width": 1120,
+      "height": 640,
+      "mode": "RGB"
+    },
+    {
+      "path": "previews/qa_item_icon_fx_samples.png",
+      "bytes": 54754,
+      "sha256": "8c7ce3a3b5ab8bebcbef785f42ecedb85e7d1fb1db369ca90094eacaa7cc5890",
+      "width": 918,
+      "height": 1062,
+      "mode": "RGB"
+    },
+    {
+      "path": "previews/qa_item_icons_all53.png",
+      "bytes": 65560,
+      "sha256": "f3bc5068a6eff99d31e1171d06c3f30f55a7a1539ff3a7de0d5d00bbba11cf7f",
+      "width": 1260,
+      "height": 876,
+      "mode": "RGB"
+    },
+    {
+      "path": "previews/qa_monster_projectiles.png",
+      "bytes": 6675,
+      "sha256": "ef644cf62ad47f7da419c2722fe82147d1b594f3eedbb59401823de05a85879d",
+      "width": 592,
+      "height": 192,
+      "mode": "RGB"
+    },
+    {
+      "path": "previews/qa_monsters_base16.png",
+      "bytes": 751738,
+      "sha256": "52df59104db113494ac2e99248d37890c0b1946e7ab0b32280f2c834abd62c2a",
+      "width": 1040,
+      "height": 960,
+      "mode": "RGB"
+    },
+    {
+      "path": "previews/qa_monsters_motion_death_samples.png",
+      "bytes": 328685,
+      "sha256": "d4366cdcceff61fc3e5433094dfcb69139938946ca4046943c99c49bd8820f5c",
+      "width": 1152,
+      "height": 816,
+      "mode": "RGB"
+    },
+    {
+      "path": "previews/qa_pixel_baker_armors.png",
+      "bytes": 57684,
+      "sha256": "3ad71b82a330c439f21bda8720b1c9bce7ecccc7c354d1ed6c4ee453386d5917",
+      "width": 1400,
+      "height": 522,
+      "mode": "RGB"
+    },
+    {
+      "path": "previews/qa_pixel_baker_weapons.png",
+      "bytes": 49395,
+      "sha256": "c215349dc6d917bdfa734537a3c223f291cc77316addc77c60ef65941a131bb8",
+      "width": 1344,
+      "height": 534,
+      "mode": "RGB"
+    },
+    {
+      "path": "previews/qa_pixel_fx_8packs.png",
+      "bytes": 51482,
+      "sha256": "0ef82a54d7a9c5f35061840c5a9619f26d20beeaa894118567199239333e1bc2",
+      "width": 950,
+      "height": 1424,
+      "mode": "RGB"
+    },
+    {
+      "path": "tools/install_expansion_pack.py",
+      "bytes": 6708,
+      "sha256": "5ff0ab4eabb6a8081804ba2b18510fef7c279f913a5a1a6d10db8f65583a18c4"
+    },
+    {
+      "path": "tools/package_expansion_pack.py",
+      "bytes": 3168,
+      "sha256": "d9051534a95444466355a16f2f81fcfb96d21b21b55153f50bcd2720e356f6c5"
+    },
+    {
+      "path": "tools/verify_expansion_pack.py",
+      "bytes": 16166,
+      "sha256": "38eb4e94f817d99a2826e3833b30237b760b266fc648628f702d76726c3bd8f2"
+    }
+  ]
+}

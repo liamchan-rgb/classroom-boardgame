@@ -1,0 +1,971 @@
+{
+  "version": 1,
+  "attackSeconds": 0.96,
+  "deathSeconds": 0.8,
+  "records": [
+    {
+      "id": "hopShroom",
+      "name": "蹦跳菇灵",
+      "asset": "MeadowMonsterHopShroom",
+      "canvas": [
+        384,
+        256
+      ],
+      "anchor": [
+        178.5,
+        240
+      ],
+      "deathCanvas": [
+        512,
+        320
+      ],
+      "deathAnchor": [
+        178.5,
+        272
+      ],
+      "scale": 0.88,
+      "contacts": [
+        [
+          154.5,
+          240
+        ],
+        [
+          201.5,
+          240
+        ]
+      ],
+      "clips": {
+        "idle": {
+          "offset": 0,
+          "count": 12
+        },
+        "attack": {
+          "offset": 12,
+          "count": 24
+        },
+        "cast": {
+          "offset": 36,
+          "count": 12
+        },
+        "hurt": {
+          "offset": 48,
+          "count": 8
+        }
+      },
+      "deathCount": 40,
+      "sourceCropSize": [
+        359,
+        349
+      ],
+      "hitAnchor": [
+        140,
+        170
+      ]
+    },
+    {
+      "id": "acornBandit",
+      "name": "橡果盗贼鼠",
+      "asset": "MeadowMonsterAcornBandit",
+      "canvas": [
+        384,
+        256
+      ],
+      "anchor": [
+        178.5,
+        240
+      ],
+      "deathCanvas": [
+        512,
+        320
+      ],
+      "deathAnchor": [
+        178.5,
+        272
+      ],
+      "scale": 0.88,
+      "contacts": [
+        [
+          129.0,
+          240
+        ],
+        [
+          191.0,
+          240
+        ]
+      ],
+      "clips": {
+        "idle": {
+          "offset": 0,
+          "count": 12
+        },
+        "attack": {
+          "offset": 12,
+          "count": 24
+        },
+        "cast": {
+          "offset": 36,
+          "count": 12
+        },
+        "hurt": {
+          "offset": 48,
+          "count": 8
+        }
+      },
+      "deathCount": 40,
+      "sourceCropSize": [
+        405,
+        328
+      ],
+      "hitAnchor": [
+        129,
+        165
+      ],
+      "projectile": "ProjAcorn",
+      "muzzleOffset": [
+        -86,
+        -83
+      ]
+    },
+    {
+      "id": "bubbleCrab",
+      "name": "溪畔泡泡蟹",
+      "asset": "MeadowMonsterBubbleCrab",
+      "canvas": [
+        384,
+        256
+      ],
+      "anchor": [
+        178.5,
+        240
+      ],
+      "deathCanvas": [
+        512,
+        320
+      ],
+      "deathAnchor": [
+        178.5,
+        272
+      ],
+      "scale": 0.88,
+      "contacts": [
+        [
+          235.5,
+          240
+        ]
+      ],
+      "clips": {
+        "idle": {
+          "offset": 0,
+          "count": 12
+        },
+        "attack": {
+          "offset": 12,
+          "count": 24
+        },
+        "cast": {
+          "offset": 36,
+          "count": 12
+        },
+        "hurt": {
+          "offset": 48,
+          "count": 8
+        }
+      },
+      "deathCount": 40,
+      "sourceCropSize": [
+        369,
+        308
+      ],
+      "hitAnchor": [
+        136,
+        173
+      ]
+    },
+    {
+      "id": "stingWasp",
+      "name": "毒刺大黄蜂",
+      "asset": "MeadowMonsterStingWasp",
+      "canvas": [
+        384,
+        256
+      ],
+      "anchor": [
+        178.5,
+        240
+      ],
+      "deathCanvas": [
+        512,
+        320
+      ],
+      "deathAnchor": [
+        178.5,
+        272
+      ],
+      "scale": 0.88,
+      "contacts": [
+        [
+          168.5,
+          240
+        ]
+      ],
+      "clips": {
+        "idle": {
+          "offset": 0,
+          "count": 12
+        },
+        "attack": {
+          "offset": 12,
+          "count": 24
+        },
+        "cast": {
+          "offset": 36,
+          "count": 12
+        },
+        "hurt": {
+          "offset": 48,
+          "count": 8
+        }
+      },
+      "deathCount": 40,
+      "sourceCropSize": [
+        355,
+        380
+      ],
+      "hitAnchor": [
+        143,
+        146
+      ],
+      "projectile": "ProjVenomSting",
+      "muzzleOffset": [
+        -63,
+        -102
+      ]
+    },
+    {
+      "id": "brambleSprite",
+      "name": "荆棘藤蔓妖",
+      "asset": "MeadowMonsterBrambleSprite",
+      "canvas": [
+        384,
+        256
+      ],
+      "anchor": [
+        178.5,
+        240
+      ],
+      "deathCanvas": [
+        512,
+        320
+      ],
+      "deathAnchor": [
+        178.5,
+        272
+      ],
+      "scale": 0.88,
+      "contacts": [
+        [
+          146.5,
+          240
+        ],
+        [
+          217.5,
+          240
+        ]
+      ],
+      "clips": {
+        "idle": {
+          "offset": 0,
+          "count": 12
+        },
+        "attack": {
+          "offset": 12,
+          "count": 24
+        },
+        "cast": {
+          "offset": 36,
+          "count": 12
+        },
+        "hurt": {
+          "offset": 48,
+          "count": 8
+        }
+      },
+      "deathCount": 40,
+      "sourceCropSize": [
+        445,
+        392
+      ],
+      "hitAnchor": [
+        130,
+        160
+      ]
+    },
+    {
+      "id": "goblinShaman",
+      "name": "哥布林萨满",
+      "asset": "MeadowMonsterGoblinShaman",
+      "canvas": [
+        384,
+        256
+      ],
+      "anchor": [
+        178.5,
+        240
+      ],
+      "deathCanvas": [
+        512,
+        320
+      ],
+      "deathAnchor": [
+        178.5,
+        272
+      ],
+      "scale": 0.88,
+      "contacts": [
+        [
+          145.0,
+          240
+        ],
+        [
+          224.0,
+          240
+        ]
+      ],
+      "clips": {
+        "idle": {
+          "offset": 0,
+          "count": 12
+        },
+        "attack": {
+          "offset": 12,
+          "count": 24
+        },
+        "cast": {
+          "offset": 36,
+          "count": 12
+        },
+        "hurt": {
+          "offset": 48,
+          "count": 8
+        }
+      },
+      "deathCount": 40,
+      "sourceCropSize": [
+        313,
+        383
+      ],
+      "hitAnchor": [
+        145,
+        163
+      ],
+      "projectile": "ProjShamanOrb",
+      "muzzleOffset": [
+        -59,
+        -86
+      ]
+    },
+    {
+      "id": "emberLizard",
+      "name": "灰烬火蜥蜴",
+      "asset": "MeadowMonsterEmberLizard",
+      "canvas": [
+        384,
+        256
+      ],
+      "anchor": [
+        178.5,
+        240
+      ],
+      "deathCanvas": [
+        512,
+        320
+      ],
+      "deathAnchor": [
+        178.5,
+        272
+      ],
+      "scale": 0.88,
+      "contacts": [
+        [
+          148.0,
+          240
+        ],
+        [
+          231.0,
+          240
+        ]
+      ],
+      "clips": {
+        "idle": {
+          "offset": 0,
+          "count": 12
+        },
+        "attack": {
+          "offset": 12,
+          "count": 24
+        },
+        "cast": {
+          "offset": 36,
+          "count": 12
+        },
+        "hurt": {
+          "offset": 48,
+          "count": 8
+        }
+      },
+      "deathCount": 40,
+      "sourceCropSize": [
+        381,
+        298
+      ],
+      "hitAnchor": [
+        131,
+        170
+      ],
+      "projectile": "ProjEmberBall",
+      "muzzleOffset": [
+        -84,
+        -78
+      ]
+    },
+    {
+      "id": "shadowOwl",
+      "name": "影翼夜枭",
+      "asset": "MeadowMonsterShadowOwl",
+      "canvas": [
+        384,
+        256
+      ],
+      "anchor": [
+        178.5,
+        240
+      ],
+      "deathCanvas": [
+        512,
+        320
+      ],
+      "deathAnchor": [
+        178.5,
+        272
+      ],
+      "scale": 0.88,
+      "contacts": [
+        [
+          180.0,
+          240
+        ]
+      ],
+      "clips": {
+        "idle": {
+          "offset": 0,
+          "count": 12
+        },
+        "attack": {
+          "offset": 12,
+          "count": 24
+        },
+        "cast": {
+          "offset": 36,
+          "count": 12
+        },
+        "hurt": {
+          "offset": 48,
+          "count": 8
+        }
+      },
+      "deathCount": 40,
+      "sourceCropSize": [
+        434,
+        395
+      ],
+      "hitAnchor": [
+        133,
+        140
+      ],
+      "projectile": "ProjShadowFeather",
+      "muzzleOffset": [
+        -80,
+        -109
+      ]
+    },
+    {
+      "id": "runeKnight",
+      "name": "符文铠甲兵",
+      "asset": "MeadowMonsterRuneKnight",
+      "canvas": [
+        384,
+        256
+      ],
+      "anchor": [
+        178.5,
+        240
+      ],
+      "deathCanvas": [
+        512,
+        320
+      ],
+      "deathAnchor": [
+        178.5,
+        272
+      ],
+      "scale": 0.88,
+      "contacts": [
+        [
+          157.0,
+          240
+        ],
+        [
+          248.0,
+          240
+        ]
+      ],
+      "clips": {
+        "idle": {
+          "offset": 0,
+          "count": 12
+        },
+        "attack": {
+          "offset": 12,
+          "count": 24
+        },
+        "cast": {
+          "offset": 36,
+          "count": 12
+        },
+        "hurt": {
+          "offset": 48,
+          "count": 8
+        }
+      },
+      "deathCount": 40,
+      "sourceCropSize": [
+        442,
+        425
+      ],
+      "hitAnchor": [
+        132,
+        156
+      ]
+    },
+    {
+      "id": "crystalGolem",
+      "name": "晶核魔像",
+      "asset": "MeadowMonsterCrystalGolem",
+      "canvas": [
+        384,
+        256
+      ],
+      "anchor": [
+        178.5,
+        240
+      ],
+      "deathCanvas": [
+        512,
+        320
+      ],
+      "deathAnchor": [
+        178.5,
+        272
+      ],
+      "scale": 0.94,
+      "contacts": [
+        [
+          129.5,
+          240
+        ],
+        [
+          230.5,
+          240
+        ]
+      ],
+      "clips": {
+        "idle": {
+          "offset": 0,
+          "count": 12
+        },
+        "attack": {
+          "offset": 12,
+          "count": 24
+        },
+        "cast": {
+          "offset": 36,
+          "count": 12
+        },
+        "hurt": {
+          "offset": 48,
+          "count": 8
+        }
+      },
+      "deathCount": 40,
+      "sourceCropSize": [
+        451,
+        426
+      ],
+      "hitAnchor": [
+        129,
+        152
+      ]
+    },
+    {
+      "id": "frostAlphaWolf",
+      "name": "暗霜狼王",
+      "asset": "MeadowMonsterFrostAlphaWolf",
+      "canvas": [
+        384,
+        256
+      ],
+      "anchor": [
+        178.5,
+        240
+      ],
+      "deathCanvas": [
+        512,
+        320
+      ],
+      "deathAnchor": [
+        178.5,
+        272
+      ],
+      "scale": 0.94,
+      "contacts": [
+        [
+          154.0,
+          240
+        ]
+      ],
+      "clips": {
+        "idle": {
+          "offset": 0,
+          "count": 12
+        },
+        "attack": {
+          "offset": 12,
+          "count": 24
+        },
+        "cast": {
+          "offset": 36,
+          "count": 12
+        },
+        "hurt": {
+          "offset": 48,
+          "count": 8
+        }
+      },
+      "deathCount": 40,
+      "sourceCropSize": [
+        466,
+        395
+      ],
+      "hitAnchor": [
+        129,
+        161
+      ]
+    },
+    {
+      "id": "mushroomKing",
+      "name": "巨冠菇王",
+      "asset": "MeadowMonsterMushroomKing",
+      "canvas": [
+        384,
+        256
+      ],
+      "anchor": [
+        178.5,
+        240
+      ],
+      "deathCanvas": [
+        512,
+        320
+      ],
+      "deathAnchor": [
+        178.5,
+        272
+      ],
+      "scale": 1.04,
+      "contacts": [
+        [
+          136.0,
+          240
+        ],
+        [
+          255.0,
+          240
+        ]
+      ],
+      "clips": {
+        "idle": {
+          "offset": 0,
+          "count": 12
+        },
+        "attack": {
+          "offset": 12,
+          "count": 24
+        },
+        "cast": {
+          "offset": 36,
+          "count": 12
+        },
+        "hurt": {
+          "offset": 48,
+          "count": 8
+        }
+      },
+      "deathCount": 40,
+      "sourceCropSize": [
+        395,
+        446
+      ],
+      "hitAnchor": [
+        135,
+        148
+      ]
+    },
+    {
+      "id": "goblinWarlord",
+      "name": "哥布林战酋",
+      "asset": "MeadowMonsterGoblinWarlord",
+      "canvas": [
+        384,
+        256
+      ],
+      "anchor": [
+        178.5,
+        240
+      ],
+      "deathCanvas": [
+        512,
+        320
+      ],
+      "deathAnchor": [
+        178.5,
+        272
+      ],
+      "scale": 1.04,
+      "contacts": [
+        [
+          96.5,
+          240
+        ],
+        [
+          287.5,
+          240
+        ]
+      ],
+      "clips": {
+        "idle": {
+          "offset": 0,
+          "count": 12
+        },
+        "attack": {
+          "offset": 12,
+          "count": 24
+        },
+        "cast": {
+          "offset": 36,
+          "count": 12
+        },
+        "hurt": {
+          "offset": 48,
+          "count": 8
+        }
+      },
+      "deathCount": 40,
+      "sourceCropSize": [
+        463,
+        365
+      ],
+      "hitAnchor": [
+        117,
+        149
+      ],
+      "projectile": "ProjBoomBomb",
+      "muzzleOffset": [
+        -108,
+        -101
+      ]
+    },
+    {
+      "id": "thornTreant",
+      "name": "千年古树精",
+      "asset": "MeadowMonsterThornTreant",
+      "canvas": [
+        384,
+        256
+      ],
+      "anchor": [
+        178.5,
+        240
+      ],
+      "deathCanvas": [
+        512,
+        320
+      ],
+      "deathAnchor": [
+        178.5,
+        272
+      ],
+      "scale": 1.04,
+      "contacts": [
+        [
+          120.5,
+          240
+        ],
+        [
+          219.5,
+          240
+        ]
+      ],
+      "clips": {
+        "idle": {
+          "offset": 0,
+          "count": 12
+        },
+        "attack": {
+          "offset": 12,
+          "count": 24
+        },
+        "cast": {
+          "offset": 36,
+          "count": 12
+        },
+        "hurt": {
+          "offset": 48,
+          "count": 8
+        }
+      },
+      "deathCount": 40,
+      "sourceCropSize": [
+        459,
+        486
+      ],
+      "hitAnchor": [
+        130,
+        144
+      ]
+    },
+    {
+      "id": "frostPhoenix",
+      "name": "冰晶霜凰",
+      "asset": "MeadowMonsterFrostPhoenix",
+      "canvas": [
+        384,
+        256
+      ],
+      "anchor": [
+        178.5,
+        240
+      ],
+      "deathCanvas": [
+        512,
+        320
+      ],
+      "deathAnchor": [
+        178.5,
+        272
+      ],
+      "scale": 1.04,
+      "contacts": [
+        [
+          201.0,
+          240
+        ]
+      ],
+      "clips": {
+        "idle": {
+          "offset": 0,
+          "count": 12
+        },
+        "attack": {
+          "offset": 12,
+          "count": 24
+        },
+        "cast": {
+          "offset": 36,
+          "count": 12
+        },
+        "hurt": {
+          "offset": 48,
+          "count": 8
+        }
+      },
+      "deathCount": 40,
+      "sourceCropSize": [
+        474,
+        476
+      ],
+      "hitAnchor": [
+        130,
+        132
+      ],
+      "projectile": "ProjFrostShard",
+      "muzzleOffset": [
+        -85,
+        -118
+      ]
+    },
+    {
+      "id": "eclipseBehemoth",
+      "name": "蚀星古巨像",
+      "asset": "MeadowMonsterEclipseBehemoth",
+      "canvas": [
+        384,
+        256
+      ],
+      "anchor": [
+        178.5,
+        240
+      ],
+      "deathCanvas": [
+        512,
+        320
+      ],
+      "deathAnchor": [
+        178.5,
+        272
+      ],
+      "scale": 1.04,
+      "contacts": [
+        [
+          127.5,
+          240
+        ],
+        [
+          222.5,
+          240
+        ]
+      ],
+      "clips": {
+        "idle": {
+          "offset": 0,
+          "count": 12
+        },
+        "attack": {
+          "offset": 12,
+          "count": 24
+        },
+        "cast": {
+          "offset": 36,
+          "count": 12
+        },
+        "hurt": {
+          "offset": 48,
+          "count": 8
+        }
+      },
+      "deathCount": 40,
+      "sourceCropSize": [
+        406,
+        483
+      ],
+      "hitAnchor": [
+        135,
+        143
+      ],
+      "projectile": "ProjEclipseOrb",
+      "muzzleOffset": [
+        -76,
+        -108
+      ]
+    }
+  ]
+}

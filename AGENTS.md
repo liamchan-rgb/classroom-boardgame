@@ -1,3 +1,16 @@
+## 主游戏拓展美术资产与 PixelFX 特效包构建与封包（待安装，2026-11-26，基于v0.32.4/build48，未改版本号、未存档）
+
+严格依据 `design/主游戏拓展企划_职业装备怪物_美术交接_v1.txt` 与游戏现行渲染/资产规范，完成全部拓展美术与特效制作、视觉审查、SHA-256 校验与独立封包，**按要求仅构建封包、未安装至主工程**（`native/ClassroomProbe/Resources/`、`pixel-baker.js`、`initial-content.json` 及 837 项锁定原文件均零改动）：
+- **独立交付目录与归档包**：完整资源树位于 `design/art-expansion-v1/`（共 188 个文件含 `asset-manifest.json` 校验清单），压缩归档包位于 `artifacts/meadow-expansion-art-v1.zip`（12.4 MB，已通过 `zipfile.testzip()` 与全量 SHA-256 校验），并附只读校验脚本 `design/art-expansion-v1/tools/verify_expansion_pack.py` 与就绪待命的一键安装脚本 `design/art-expansion-v1/tools/install_expansion_pack.py`（默认 `--dry-run`，确认后执行 `--apply` 安装）。
+- **资产与特效覆盖（100% 对齐企划第 0.2 节）**：
+  - **14 枚职业徽章**（`class-badges/ClassBadge*.png`，`256×256` RGBA 硬像素去白边，新增 10 + 统一既有 4）。
+  - **53 张物品静态图标 + 41 条动态发光条**（`item-icons/PixelIcon*.png` `512×512` 32×32×16 NN；`item-icon-fx/PixelIconFX*.png` `4608×192` 24 帧 12 FPS 无缝循环，覆盖 13 稀有蓝 + 13 史诗紫 + 15 传说橙金）。
+  - **31 件角色上身像素装备**（`pixel-baker/pixel_equipment_expansion.js`：17 把武器严格归入 `down/shoulder/bow/up` 骨架 + 9 把史诗/传说 4 相位 `bakeFx` 流光；14 套护甲 `top_<snake_case>` 兼容 20 发型/18 瞳色 + 7 套史诗/传说 `bakeFx`）。
+  - **16 只新怪物（32 张双序列帧图集）+ 8 张远程弹道 + `motion_expansion.json`**（`Motion` `3072×1792` 8×7=56 帧朝左；`Death` `4096×1600` 8×5=40 帧童趣无血腥消散且末帧 100% 透明；`mode=P` 索引透明 PNG）。
+  - **8 组新增 PixelFX 特效包（23 片段）+ 70 条配方**（`pixel-fx/PixelFX_*.png` 与 `recipes_expansion.json`，20 FPS `back+front` 双层图集，覆盖全部 30 新职业技、6 套装技、26 怪物技与 8 远程攻击；全部引用 clip ID 均与既有 77 组素材库校验闭合）。
+  - **9 张视觉 QA 验收拼图**（`design/art-expansion-v1/previews/qa_*.png`），均已人工逐张核查。
+- **实测与未实测边界**：`verify_expansion_pack.py --zip artifacts/meadow-expansion-art-v1.zip`（含 Node.js 内存注入无头烘焙验证全部 31 件穿戴件 + `bakeFx`、尺寸/格式/去白边/末帧透明/SHA-256 与压缩包完整度）、`install_expansion_pack.py`（Dry-Run 确认 171 个新 imageset 零冲突）及 `scripts/local-build.sh test`（工程配置、837 项外观校验、工具单测、`ProbeCore` 8/8、`GameCore` 73/73）全部通过；因按要求暂未安装入库，尚未在 Mac/iPad 实机战斗画面中加载演示这些新增资产与特效。
+
 ## 主游戏职业、装备与怪物 3 倍以上拓展企划与美术交接文档（2026-11-26，基于v0.32.4/build48，未改版本号、未存档）
 
 基于现有 `initial-content.json`、四档难度曲线（`Difficulty.swift`）及 HD-2D 像素资产管线（`MeadowItemIcon.swift`、`pixel-baker.js`、`MeadowMonsterVisuals.dataset/motion.json`、`PixelFXRecipes`），产出面向美术团队的交接企划文本 `design/主游戏拓展企划_职业装备怪物_美术交接_v1.txt`：
