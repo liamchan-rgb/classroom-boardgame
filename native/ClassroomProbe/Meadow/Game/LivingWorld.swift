@@ -299,9 +299,13 @@ final class LivingWorld: SKNode {
         func isWater(_ p: CGPoint, margin: CGFloat = 14) -> Bool {
             water?.isNearWater(p, margin: margin) ?? false
         }
+        func isBridgeOrStair(_ p: CGPoint, pad: CGFloat = 16) -> Bool {
+            (water?.isNearBridge(p, padAlong: pad, padAcross: pad + 6) ?? false)
+            || (water?.isNearStair(p, radius: 34 + pad * 0.5) ?? false)
+        }
 
         func canPlaceMicro(_ p: CGPoint, roadClear: CGFloat = 24, propClear: CGFloat = 24, ignoreNodeID: Int? = nil) -> Bool {
-            guard !isWater(p, margin: 12) else { return false }
+            guard !isWater(p, margin: 12), !isBridgeOrStair(p, pad: 12) else { return false }
             guard network.project(p).error > roadClear else { return false }
             for other in existing {
                 if let ignoreNodeID, other.nodeID == ignoreNodeID { continue }
@@ -409,12 +413,45 @@ final class LivingWorld: SKNode {
                 let isletY = lake.center.y + 4
                 added.append(SceneDefinition.Prop(asset: "MapLakeIslet", x: isletX, y: isletY, width: max(62, min(86, lake.rx * 0.60)), mirror: false, wind: 0))
 
-                // Rustic oak pier extending cleanly into the shallow translucent water
-                let rightShore = CGPoint(x: lake.center.x + lake.rx * 0.72, y: lake.center.y + lake.ry * 0.14)
-                let leftShore = CGPoint(x: lake.center.x - lake.rx * 0.72, y: lake.center.y + lake.ry * 0.14)
-                let useRight = network.project(rightShore).error >= network.project(leftShore).error
-                let pierPt = useRight ? rightShore : leftShore
-                added.append(SceneDefinition.Prop(asset: "MapWoodPier", x: pierPt.x, y: pierPt.y, width: 70, mirror: useRight, wind: 0))
+                // IRONCLAD SHORELINE-LOCKED PIER: MapWoodPier's painted 3/4 deck runs along ~28° (NW->SE unmirrored, NE->SW mirrored).
+                // Ray-march strictly along upper-right (NE, mirror=true) and upper-left (NW, mirror=false) bays
+                // so the pier ALWAYS projects perpendicular from dry shore straight into the lake center!
+                let pierAngles: [CGFloat] = [-0.50, -0.32, -.pi + 0.50, -.pi + 0.32, -0.15, -.pi + 0.15]
+                var bestPier: (pt: CGPoint, mirror: Bool, score: CGFloat)?
+                for ang in pierAngles {
+                    let dx = cos(ang), dy = sin(ang)
+                    var shoreDist: CGFloat? = nil
+                    var r: CGFloat = 24
+                    while r <= max(lake.rx, lake.lobeRx) * 2.2 {
+                        let sample = CGPoint(x: lake.center.x + dx * r, y: lake.center.y + dy * r)
+                        if water.waterDepthFactor(at: sample) < 0.24 {
+                            shoreDist = r
+                            break
+                        }
+                        r += 3
+                    }
+                    guard let sd = shoreDist else { continue }
+                    // Shift pier center slightly waterward (-10px from exact waterline) so stone abutment (+18px) grips dry grass
+                    // and wooden outer pilings (-36px) stand solidly in deep reflective lake water!
+                    let cand = CGPoint(x: lake.center.x + dx * (sd - 10), y: lake.center.y + dy * (sd - 10))
+                    let landCheck = CGPoint(x: lake.center.x + dx * (sd + 14), y: lake.center.y + dy * (sd + 14))
+                    let waterCheck = CGPoint(x: lake.center.x + dx * (sd - 34), y: lake.center.y + dy * (sd - 34))
+                    guard water.waterDepthFactor(at: landCheck) < 0.12 && water.waterDepthFactor(at: waterCheck) > 0.45 else { continue }
+                    let roadClear = network.project(cand).error
+                    let nodeClear = existing.filter { $0.nodeID != nil }.map { hypot($0.x - cand.x, $0.y - cand.y) }.min() ?? 300
+                    let isletClear = hypot(cand.x - isletX, cand.y - isletY)
+                    guard roadClear > 40 && nodeClear > 86 && isletClear > 54 else { continue }
+                    let mirror = dx > 0
+                    let alignBonus: CGFloat = abs(abs(ang) - 0.50) < 0.20 || abs(abs(ang) - (.pi - 0.50)) < 0.20 ? 45 : 15
+                    let score = min(roadClear, 140) + min(nodeClear, 180) + alignBonus
+                    if bestPier == nil || score > bestPier!.score {
+                        bestPier = (cand, mirror, score)
+                    }
+                }
+                let pierPt: CGPoint? = bestPier?.pt
+                if let bp = bestPier {
+                    added.append(SceneDefinition.Prop(asset: "MapWoodPier", x: bp.pt.x, y: bp.pt.y, width: 66, mirror: bp.mirror, wind: 0))
+                }
 
                 // Lily pads, pink lotuses & shoreline reeds inside the shallow lake edge
                 for i in 0..<7 {
@@ -422,7 +459,8 @@ final class LivingWorld: SKNode {
                     let radScale: CGFloat = i % 2 == 0 ? 0.66 : 0.86
                     let fx = lake.center.x + cos(ang) * lake.rx * radScale
                     let fy = lake.center.y + sin(ang) * lake.ry * radScale
-                    if hypot(fx - isletX, fy - isletY) < 42 || hypot(fx - pierPt.x, fy - pierPt.y) < 38 { continue }
+                    if hypot(fx - isletX, fy - isletY) < 42 { continue }
+                    if let pierPt, hypot(fx - pierPt.x, fy - pierPt.y) < 42 { continue }
                     added.append(SceneDefinition.Prop(asset: "MapLakeFlora", x: fx, y: fy, width: random.value(34, 46), mirror: i % 2 == 1, wind: 0.6))
                 }
 
@@ -450,70 +488,72 @@ final class LivingWorld: SKNode {
                 }
             }
 
-            // Riverbank boulders, drooping willows, ferns & reeds along river bends
+            // Riverbank boulders, drooping willows, ferns & reeds along river bends (strictly outside bridge OBB!)
             if water.riverPoints.count >= 6 {
                 for idx in stride(from: 3, to: water.riverPoints.count - 2, by: 3) {
                     let rp = water.riverPoints[idx]
-                    guard water.bridges.allSatisfy({ hypot($0.center.x - rp.x, $0.center.y - rp.y) > 58 }) else { continue }
+                    guard !isBridgeOrStair(rp, pad: 24) else { continue }
                     let side: CGFloat = idx % 2 == 0 ? 1 : -1
                     let bankPt = CGPoint(x: rp.x + side * 26, y: rp.y + 4)
-                    guard network.project(bankPt).error > 32,
+                    guard !isBridgeOrStair(bankPt, pad: 20), network.project(bankPt).error > 32,
                           existing.allSatisfy({ $0.nodeID == nil || hypot($0.x - bankPt.x, $0.y - bankPt.y) > 88 }) else { continue }
                     if idx % 9 == 0 {
-                        let willowPt = CGPoint(x: rp.x + side * 40, y: rp.y)
-                        if !isWater(willowPt, margin: 12) && network.project(willowPt).error > 52 {
+                        let willowPt = CGPoint(x: rp.x + side * 42, y: rp.y)
+                        if !isWater(willowPt, margin: 12) && !isBridgeOrStair(willowPt, pad: 26) && network.project(willowPt).error > 52 {
                             added.append(SceneDefinition.Prop(asset: "MapTreeWillow", x: willowPt.x, y: willowPt.y, width: random.value(76, 90), mirror: false, wind: 1.0))
                         }
                     } else if idx % 6 == 0 {
-                        added.append(SceneDefinition.Prop(asset: "MapRiverBoulders", x: bankPt.x, y: bankPt.y, width: random.value(34, 46), mirror: side < 0, wind: 0))
+                        added.append(SceneDefinition.Prop(asset: "MapRiverBoulders", x: bankPt.x, y: bankPt.y, width: random.value(34, 44), mirror: side < 0, wind: 0))
                     } else if idx % 3 == 0 {
                         added.append(SceneDefinition.Prop(asset: "MapLakeFlora", x: rp.x + side * 16, y: rp.y, width: 30, mirror: side < 0, wind: 0.6))
                         let tuftPt = CGPoint(x: rp.x + side * 32, y: rp.y + 6)
-                        if !isWater(tuftPt, margin: 4) && network.project(tuftPt).error > 26 {
+                        if !isWater(tuftPt, margin: 4) && !isBridgeOrStair(tuftPt, pad: 18) && network.project(tuftPt).error > 26 {
                             added.append(SceneDefinition.Prop(asset: idx % 2 == 0 ? "MapFernsCluster" : "MapTallGrassTuft", x: tuftPt.x, y: tuftPt.y, width: 26, mirror: side < 0, wind: 1.15))
                         }
                     }
                 }
             }
 
-            // MATHEMATICALLY ALIGNED BRIDGES (strictly matched horizontal/vertical sprite + exact SpriteKit zRotation!)
+            // IRONCLAD ALIGNED BRIDGES (strictly matched horizontal/vertical sprite, clean OBB clearance!)
             for bridge in water.bridges {
                 let asset = bridge.orientation == .horizontal ? "MapBridgeHoriz" : "MapBridgeVert"
-                let w: CGFloat = bridge.orientation == .horizontal ? 92 : 60
+                let w: CGFloat = bridge.orientation == .horizontal ? 92 : 50
                 added.append(SceneDefinition.Prop(
                     asset: asset, x: bridge.center.x, y: bridge.center.y,
                     width: w, mirror: bridge.mirror, wind: 0, rotation: bridge.angle
                 ))
-                // Frame bridge abutments with wet river stones & lush bank ferns just off the road
+                // Place mossy bank boulders ONLY strictly outside the bridge railing OBB (|across| >= 46px along riverbank!)
                 let perpX = -bridge.roadDir.dy, perpY = bridge.roadDir.dx
                 for side in [CGFloat(-1), CGFloat(1)] {
-                    let rockPt = CGPoint(x: bridge.center.x + perpX * side * 34 + bridge.roadDir.dx * side * 14,
-                                         y: bridge.center.y + perpY * side * 34 + bridge.roadDir.dy * side * 14)
-                    if network.project(rockPt).error > 24 {
-                        added.append(SceneDefinition.Prop(asset: "MapRiverBoulders", x: rockPt.x, y: rockPt.y, width: 32, mirror: side < 0, wind: 0))
+                    let rockPt = CGPoint(
+                        x: bridge.center.x + perpX * side * 48 + bridge.roadDir.dx * side * 18,
+                        y: bridge.center.y + perpY * side * 48 + bridge.roadDir.dy * side * 18
+                    )
+                    if !bridge.contains(rockPt, padAlong: 10, padAcross: 18)
+                        && network.project(rockPt).error > 28
+                        && existing.allSatisfy({ $0.nodeID == nil || hypot($0.x - rockPt.x, $0.y - rockPt.y) > 62 }) {
+                        added.append(SceneDefinition.Prop(asset: "MapRiverBoulders", x: rockPt.x, y: rockPt.y, width: 30, mirror: side < 0, wind: 0))
                     }
                 }
             }
 
-            // MATHEMATICALLY ALIGNED STONE STAIRS (strictly locked to road centerline where roads climb elevation terraces!)
+            // IRONCLAD CLIFF-EMBEDDED FRONT STONE STAIRS (placed ONLY where straight N-S road climbs a real 26px terrace wall!)
             for stair in water.stairs {
-                let asset = stair.orientation == .front ? "MapStairsFront" : "MapStairsSide"
-                let w: CGFloat = stair.orientation == .front ? 34 : 44
                 added.append(SceneDefinition.Prop(
-                    asset: asset, x: stair.center.x, y: stair.center.y,
-                    width: w, mirror: stair.mirror, wind: 0, rotation: stair.angle
+                    asset: "MapStairsFront", x: stair.center.x, y: stair.center.y,
+                    width: 30, mirror: false, wind: 0, rotation: stair.angle
                 ))
             }
 
-            // Natural rocky outcrops + ferns accenting elevated hillside flanks (blended organically, never isolated flat cakes!)
+            // Natural mossy boulders & ferns grounding elevated plateau cliff corners (strictly off-road & clear of stairs!)
             for plat in water.plateaus {
-                for offsetX in [CGFloat(-64), CGFloat(64)] {
-                    let ep = CGPoint(x: plat.center.x + offsetX, y: plat.center.y + plat.radius * 0.88)
-                    if !isWater(ep, margin: 24) && network.project(ep).error > 56
+                for offsetX in [CGFloat(-plat.rx * 0.62), CGFloat(plat.rx * 0.62)] {
+                    let ep = CGPoint(x: plat.center.x + offsetX, y: plat.center.y + plat.ry * 0.96)
+                    if !isWater(ep, margin: 24) && !isBridgeOrStair(ep, pad: 24) && network.project(ep).error > 56
                         && existing.allSatisfy({ $0.nodeID == nil || hypot($0.x - ep.x, $0.y - ep.y) > 94 })
                         && added.allSatisfy({ (ShadowLabAsset(rawValue: $0.asset)?.isGroundDecal == true) || hypot($0.x - ep.x, $0.y - ep.y) > 84 }) {
                         let outcrop = offsetX < 0 ? "RockLow" : "MapRiverBoulders"
-                        added.append(SceneDefinition.Prop(asset: outcrop, x: ep.x, y: ep.y, width: random.value(58, 76), mirror: offsetX < 0, wind: 0))
+                        added.append(SceneDefinition.Prop(asset: outcrop, x: ep.x, y: ep.y, width: random.value(54, 72), mirror: offsetX < 0, wind: 0))
                         added.append(SceneDefinition.Prop(asset: "MapFernsCluster", x: ep.x + (offsetX < 0 ? 22 : -22), y: ep.y + 8, width: 28, mirror: offsetX > 0, wind: 1.1))
                     }
                 }
@@ -671,7 +711,7 @@ final class LivingWorld: SKNode {
         var grovesPlaced = 0
         for _ in 0..<(maxGroves * 6) where grovesPlaced < maxGroves {
             let pt = CGPoint(x: random.value(-80, 1360), y: random.value(75, mapH + 95))
-            guard !isWater(pt, margin: 22) else { continue }
+            guard !isWater(pt, margin: 22), !isBridgeOrStair(pt, pad: 22) else { continue }
             guard network.project(pt).error > 56 else { continue }
             guard existing.allSatisfy({ hypot($0.x - pt.x, $0.y - pt.y) > ($0.nodeID != nil ? 106 : 32) }) else { continue }
             guard added.allSatisfy({ other in
@@ -743,7 +783,7 @@ final class LivingWorld: SKNode {
         var tuftsPlaced = 0
         for _ in 0..<(maxTufts * 4) where tuftsPlaced < maxTufts {
             let pt = CGPoint(x: random.value(20, 1260), y: random.value(100, mapH - 20))
-            guard !isWater(pt, margin: 14), network.project(pt).error > 26 else { continue }
+            guard !isWater(pt, margin: 14), !isBridgeOrStair(pt, pad: 16), network.project(pt).error > 26 else { continue }
             guard existing.allSatisfy({ hypot($0.x - pt.x, $0.y - pt.y) > ($0.nodeID != nil ? 76 : 22) }) else { continue }
             guard added.allSatisfy({ (ShadowLabAsset(rawValue: $0.asset)?.isGroundDecal == true) || hypot($0.x - pt.x, $0.y - pt.y) > 22 }) else { continue }
             let (_, shrubs, ground) = biomePalette(at: pt)
@@ -811,8 +851,8 @@ final class LivingWorld: SKNode {
                 let px = point.x - dy / length * offset * side
                 let py = point.y + dx / length * offset * side
                 let pt = CGPoint(x: px, y: py)
-                let clearBridge = water?.bridges.allSatisfy({ hypot($0.center.x - px, $0.center.y - py) > 48 }) ?? true
-                let clearStair = water?.stairs.allSatisfy({ hypot($0.center.x - px, $0.center.y - py) > 34 }) ?? true
+                let clearBridge = !(water?.isNearBridge(pt, padAlong: 18, padAcross: 22) ?? false)
+                let clearStair = !(water?.isNearStair(pt, radius: 34) ?? false)
                 if clearBridge && clearStair && water?.isNearWater(pt, margin: 10) != true {
                     let pick = palette[Int(random.next() * CGFloat(palette.count)) % palette.count]
                     let w: CGFloat = (pick == "MapTallGrassTuft" || pick == "MapFernsCluster") ? random.value(17, 25) : random.value(12, 18)
