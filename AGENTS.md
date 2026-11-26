@@ -1,3 +1,16 @@
+## 大地图 32 位像素纹理台地崖壁、闭环高差纵深与全向 3/4 透视石阶重构（2026-11-26，基于v0.32.4/build48，未改版本号、未存档）
+
+针对上一轮 400% 近景审图反馈的 3 项核心问题（程序化平滑竖条崖壁纹理与像素风画面割裂、小圆台地切穿斜路导致高差纵深感别扭、2D 刚性旋转正面石阶违背 3/4 重力透视且仅覆单向），升级崖壁材质管线、高地形态与全向石阶体系：
+- **无缝 32 位 HD-2D 像素风崖壁贴图 `MapCliffWallTile` 接入 Metal `texture(7)`**（`native/ClassroomProbe/Resources/Assets.xcassets/MapCliffWallTile.imageset/`、`MeadowLoader.swift`、`MeadowShadowRenderer.swift`、`ShadowLabShaders.metal`）：
+  - 单次生成并制作水平无缝、亮度均衡的 `1024×512` 32 位像素集群花岗岩崖壁贴图（与 `RockLow`/`MeadowGround` 像素粒度与色调完全统一），在 `meadowGroundFragment` 中按 `76×36px`（1:1 像素比例）实时铺贴至 **36px 立体台地崖壁**，叠加西南暖阳/东南冷岩曲面受光调制，彻底替换原先的平滑程序化竖条纹理。
+- **真实闭环台地高差纵深感与斜路/岩块避让**（`MeadowRoadMask.swift`、`ShadowLabShaders.metal`、`LivingWorld.swift`）：
+  - 台地轮廓由紧小圆盆升级为平直南缘的有机方圆高地（超椭圆 `p=2.5`），上台面施加 `24px` 垂向草地视差偏移与暖阳明度抬升、北缘增加背坡收口阴影与亮脊、崖底投射 3 层东南向柔和落影，彻底消除「凹槽/沟渠」错觉。
+  - 新增 `evaluatePlateauCandidate` 严格审计：在允许小幅平移/缩放寻优的前提下，确保任何穿越可见南向崖壁的道路均具备合法的 3/4 透视石阶落点（零裸土斜路直接横切垂直石崖），且所有建筑屋顶与 `isOnCliffWall` 判定范围内的岩块/灌木/花草均严格避开崖面。
+- **全 5 向 3/4 透视零倾角石阶体系（兼顾所有爬坡方位）**（`MeadowRoadMask.swift`、`LivingWorld.swift`、`MapStairsFront.imageset`）：
+  - 裁除 `MapStairsFront` 上下多余凸出石耳（`339×344`）使其齐平嵌入 36px 崖壁切口。
+  - 取消 2D 刚性旋转（所有石阶统一 `zRotation = 0`，保持 3/4 重力竖直壁面），按道路真实上坡单位切向量全向自动匹配对应透视素材：正北 `↑`（`MapStairsFront`）、东北 `↗`（`MapStoneStairs`）、西北 `↖`（`MapStoneStairs` 水平镜像）、正东 `→`（`MapStairsSide` 踏步居中偏移）、正西 `←`（`MapStairsSide` 水平镜像），南向背坡自动走风化石板斜坡。
+- **实测与未实测边界**：`generate_xcode_project.py`、`validate_xcode_project.py`、`check_custom_appearance.py`（837 原始资源校验通过）、`scripts/local-build.sh test`（配置、外观校验、工具单测、`ProbeCore` 8/8、`GameCore` 73/73）与 `MAC_OPEN=0 scripts/local-build.sh mac` 全部通过；Mac 实机对 1930px 长图完成 Retina 复拍与 200% 局部特写验收（确认 32 位像素风花岗岩崖壁与 `RockLow`/建筑完全统一、西北斜向 `MapStoneStairs` 零倾角严丝合缝嵌入 36px 崖壁、无裸土斜路切崖、无浮空崖面岩块、桥与码头稳定对齐，0.9 秒双帧动态流水比对实测 `26.70%` 像素变化；测后本机 `ClassroomMeadow`、`ClassroomStage0` 及偏好设置按 `diff -rq` 与 SHA-256 逐字节还原）。未在真机 iPad、外接 TV 双屏及角色实际走过各向石阶与木桥的动态行军过程下目视复核。
+
 ## 大地图 3/4 立体高差台地崖壁与桥梁/石阶/码头严密几何放置规则重构（2026-11-26，基于v0.32.4/build48，未改版本号、未存档）
 
 针对上一轮实机近景反馈的 4 项问题（坡度高差处仅呈现生硬黑线缺乏纵深、桥梁河石压栏及桥台一角悬空落水、侧向石阶悬空偏离道路、湖畔码头脱离岸线漂浮水中），对地形高程着色与构筑物放置规则进行根因级重写：

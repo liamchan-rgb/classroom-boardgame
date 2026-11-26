@@ -69,7 +69,8 @@ final class LivingWorld: SKNode {
                 let pt = CGPoint(x: prop.x, y: prop.y)
                 if prop.asset == "MapPond", w.lake != nil, w.isNearWater(pt, margin: 165) { return false }
                 if prop.asset == "MapCliffTerrace" || prop.asset == "MapCliffCorner", pt.y < 110 { return false }
-                return !w.isNearWater(pt, margin: 18)
+                if w.isOnCliffWall(pt, margin: 14) { return false }
+                return !w.isNearWater(pt, margin: 18) && !w.isNearBridge(pt, padAlong: 16, padAcross: 20)
             }
         } ?? definition.props
 
@@ -224,9 +225,9 @@ final class LivingWorld: SKNode {
         } else {
             node.zPosition = 10000 + prop.y
         }
-        // Allow horizontal flip on flora, piers, side-ascending stairs (to face uphill!), and organic river rocks.
+        // Allow horizontal flip on flora, piers, diagonal/side 3/4 stairs (to ascend uphill!), and organic rocks.
         let allowFlip = asset?.isFlower == true || prop.asset == "MapLakeFlora" || prop.asset == "MapWoodPier"
-            || prop.asset == "MapStairsSide" || prop.asset == "MapRiverBoulders" || prop.asset == "MapTerraceCliff"
+            || prop.asset == "MapStairsSide" || prop.asset == "MapStoneStairs" || prop.asset == "MapRiverBoulders" || prop.asset == "MapTerraceCliff"
         node.xScale = prop.mirror && allowFlip ? -1 : 1
         let vegetationShader = (asset?.isFlower == true || asset?.isShrub == true) ? effects.meadowPlants : effects.vegetation
         if vegetationEnabled { effects.apply(vegetationShader, to: node,
@@ -301,11 +302,14 @@ final class LivingWorld: SKNode {
         }
         func isBridgeOrStair(_ p: CGPoint, pad: CGFloat = 16) -> Bool {
             (water?.isNearBridge(p, padAlong: pad, padAcross: pad + 6) ?? false)
-            || (water?.isNearStair(p, radius: 34 + pad * 0.5) ?? false)
+            || (water?.isNearStair(p, radius: 36 + pad * 0.5) ?? false)
+        }
+        func isCliffFace(_ p: CGPoint, margin: CGFloat = 16) -> Bool {
+            water?.isOnCliffWall(p, margin: margin) ?? false
         }
 
         func canPlaceMicro(_ p: CGPoint, roadClear: CGFloat = 24, propClear: CGFloat = 24, ignoreNodeID: Int? = nil) -> Bool {
-            guard !isWater(p, margin: 12), !isBridgeOrStair(p, pad: 12) else { return false }
+            guard !isWater(p, margin: 12), !isBridgeOrStair(p, pad: 12), !isCliffFace(p, margin: 14) else { return false }
             guard network.project(p).error > roadClear else { return false }
             for other in existing {
                 if let ignoreNodeID, other.nodeID == ignoreNodeID { continue }
@@ -537,23 +541,30 @@ final class LivingWorld: SKNode {
                 }
             }
 
-            // IRONCLAD CLIFF-EMBEDDED FRONT STONE STAIRS (placed ONLY where straight N-S road climbs a real 26px terrace wall!)
+            // ALL-DIRECTION 3/4 PERSPECTIVE STONE STAIRS (Front ↑, Diag NE ↗, Diag NW ↖, Side E →, Side W ←):
+            // Every sprite stays strictly upright (zRotation = 0) so vertical walls respect 3/4 orthographic gravity!
             for stair in water.stairs {
                 added.append(SceneDefinition.Prop(
-                    asset: "MapStairsFront", x: stair.center.x, y: stair.center.y,
-                    width: 30, mirror: false, wind: 0, rotation: stair.angle
+                    asset: stair.assetName,
+                    x: stair.center.x,
+                    y: stair.center.y + stair.verticalOffset,
+                    width: stair.spriteWidth,
+                    mirror: stair.mirror,
+                    wind: 0,
+                    rotation: 0
                 ))
             }
 
-            // Natural mossy boulders & ferns grounding elevated plateau cliff corners (strictly off-road & clear of stairs!)
+            // Natural boulders & ferns placed cleanly ON THE LOWER VALLEY FLOOR below mesa corners (NEVER floating on the cliff face!)
             for plat in water.plateaus {
-                for offsetX in [CGFloat(-plat.rx * 0.62), CGFloat(plat.rx * 0.62)] {
-                    let ep = CGPoint(x: plat.center.x + offsetX, y: plat.center.y + plat.ry * 0.96)
-                    if !isWater(ep, margin: 24) && !isBridgeOrStair(ep, pad: 24) && network.project(ep).error > 56
+                for offsetX in [CGFloat(-plat.rx * 0.65), CGFloat(plat.rx * 0.65)] {
+                    let ep = CGPoint(x: plat.center.x + offsetX, y: plat.center.y + plat.ry + 48)
+                    if !isWater(ep, margin: 24) && !isBridgeOrStair(ep, pad: 24) && !isCliffFace(ep, margin: 16)
+                        && network.project(ep).error > 56
                         && existing.allSatisfy({ $0.nodeID == nil || hypot($0.x - ep.x, $0.y - ep.y) > 94 })
                         && added.allSatisfy({ (ShadowLabAsset(rawValue: $0.asset)?.isGroundDecal == true) || hypot($0.x - ep.x, $0.y - ep.y) > 84 }) {
                         let outcrop = offsetX < 0 ? "RockLow" : "MapRiverBoulders"
-                        added.append(SceneDefinition.Prop(asset: outcrop, x: ep.x, y: ep.y, width: random.value(54, 72), mirror: offsetX < 0, wind: 0))
+                        added.append(SceneDefinition.Prop(asset: outcrop, x: ep.x, y: ep.y, width: random.value(52, 68), mirror: offsetX < 0, wind: 0))
                         added.append(SceneDefinition.Prop(asset: "MapFernsCluster", x: ep.x + (offsetX < 0 ? 22 : -22), y: ep.y + 8, width: 28, mirror: offsetX > 0, wind: 1.1))
                     }
                 }
@@ -573,7 +584,7 @@ final class LivingWorld: SKNode {
             else if edge == 2 { hx = random.value(160, 1120); hy = random.value(mapH - 70, mapH + 60) }
             else { hx = random.value(180, 1100); hy = random.value(160, mapH - 110) }
             let hp = CGPoint(x: hx, y: hy)
-            guard !isWater(hp, margin: 38), network.project(hp).error > 84 else { continue }
+            guard !isWater(hp, margin: 38), !isCliffFace(hp, margin: 22), network.project(hp).error > 84 else { continue }
             guard existing.allSatisfy({ hypot($0.x - hx, $0.y - hy) > ($0.nodeID != nil ? 136 : 64) }) else { continue }
             guard added.allSatisfy({ (ShadowLabAsset(rawValue: $0.asset)?.isGroundDecal == true) || hypot($0.x - hx, $0.y - hy) > 96 }) else { continue }
             let hAsset = hillsPlaced % 3 == 0 ? "MapHillMound" : (hillsPlaced % 3 == 1 ? "RockLow" : "MapRockSlate")
@@ -711,7 +722,7 @@ final class LivingWorld: SKNode {
         var grovesPlaced = 0
         for _ in 0..<(maxGroves * 6) where grovesPlaced < maxGroves {
             let pt = CGPoint(x: random.value(-80, 1360), y: random.value(75, mapH + 95))
-            guard !isWater(pt, margin: 22), !isBridgeOrStair(pt, pad: 22) else { continue }
+            guard !isWater(pt, margin: 22), !isBridgeOrStair(pt, pad: 22), !isCliffFace(pt, margin: 18) else { continue }
             guard network.project(pt).error > 56 else { continue }
             guard existing.allSatisfy({ hypot($0.x - pt.x, $0.y - pt.y) > ($0.nodeID != nil ? 106 : 32) }) else { continue }
             guard added.allSatisfy({ other in
@@ -758,7 +769,7 @@ final class LivingWorld: SKNode {
                     let ang = random.value(0, .pi * 2)
                     let rad = ci == 0 ? random.value(34, 54) : random.value(20, 38)
                     let cp = CGPoint(x: pt.x + cos(ang) * rad, y: pt.y + sin(ang) * rad * 0.72)
-                    guard !isWater(cp, margin: 18), network.project(cp).error > 42 else { continue }
+                    guard !isWater(cp, margin: 18), !isCliffFace(cp, margin: 16), network.project(cp).error > 42 else { continue }
                     guard existing.allSatisfy({ hypot($0.x - cp.x, $0.y - cp.y) > ($0.nodeID != nil ? 100 : 26) }) else { continue }
                     let cAsset: String
                     let cw: CGFloat
@@ -783,7 +794,7 @@ final class LivingWorld: SKNode {
         var tuftsPlaced = 0
         for _ in 0..<(maxTufts * 4) where tuftsPlaced < maxTufts {
             let pt = CGPoint(x: random.value(20, 1260), y: random.value(100, mapH - 20))
-            guard !isWater(pt, margin: 14), !isBridgeOrStair(pt, pad: 16), network.project(pt).error > 26 else { continue }
+            guard !isWater(pt, margin: 14), !isBridgeOrStair(pt, pad: 16), !isCliffFace(pt, margin: 14), network.project(pt).error > 26 else { continue }
             guard existing.allSatisfy({ hypot($0.x - pt.x, $0.y - pt.y) > ($0.nodeID != nil ? 76 : 22) }) else { continue }
             guard added.allSatisfy({ (ShadowLabAsset(rawValue: $0.asset)?.isGroundDecal == true) || hypot($0.x - pt.x, $0.y - pt.y) > 22 }) else { continue }
             let (_, shrubs, ground) = biomePalette(at: pt)
@@ -853,7 +864,8 @@ final class LivingWorld: SKNode {
                 let pt = CGPoint(x: px, y: py)
                 let clearBridge = !(water?.isNearBridge(pt, padAlong: 18, padAcross: 22) ?? false)
                 let clearStair = !(water?.isNearStair(pt, radius: 34) ?? false)
-                if clearBridge && clearStair && water?.isNearWater(pt, margin: 10) != true {
+                let clearCliff = !(water?.isOnCliffWall(pt, margin: 10) ?? false)
+                if clearBridge && clearStair && clearCliff && water?.isNearWater(pt, margin: 10) != true {
                     let pick = palette[Int(random.next() * CGFloat(palette.count)) % palette.count]
                     let w: CGFloat = (pick == "MapTallGrassTuft" || pick == "MapFernsCluster") ? random.value(17, 25) : random.value(12, 18)
                     props.append(SceneDefinition.Prop(asset: pick, x: px, y: py, width: w, mirror: random.next() > 0.5, wind: 1.25))

@@ -188,12 +188,28 @@ fragment float4 meadowGroundFragment(LabRaster in [[stage_in]], constant LabUnif
                                     texture2d<float> autumnTexture [[texture(3)]],
                                     texture2d<float> blossomTexture [[texture(4)]],
                                     texture2d<float> sanctumTexture [[texture(5)]],
-                                    texture2d<float> terrainField [[texture(6)]]) {
+                                    texture2d<float> terrainField [[texture(6)]],
+                                    texture2d<float> cliffWallTexture [[texture(7)]]) {
     constexpr sampler tile(coord::normalized, address::repeat, filter::linear);
     constexpr sampler maskSampler(coord::normalized, address::clamp_to_edge, filter::linear);
+    constexpr sampler cliffSampler(coord::normalized, s_address::repeat, t_address::clamp_to_edge, filter::linear);
     float2 p = float2(in.world.x * 32 + 640, 360 - in.world.y * 32 * 0.8137334712);
-    float2 cell = floor(p / 190), weight = smoothstep(0.0, 1.0, fract(p / 190));
-    float2 uv = p / 440;
+    float worldH = settings.z > 0 ? settings.z : 1160.0;
+    float2 maskUV = (p - float2(-160, -220)) / float2(1600.0, worldH);
+    float4 mask = roadMask.sample(maskSampler, maskUV);
+
+    // Pre-sample terrainField so upper mesa plateaus shift grass UV vertically for genuine 3/4 elevation parallax!
+    float4 tField = float4(0.36, 0.5, 0.75, 0.0);
+    float upperPlateauW = 0.0;
+    if (biome.params.z > 0.5 && settings.x > 0.5) {
+        tField = terrainField.sample(maskSampler, maskUV);
+        if (mask.b < 0.05) {
+            upperPlateauW = smoothstep(0.48, 0.78, tField.a);
+        }
+    }
+    float2 pg = p - float2(0.0, upperPlateauW * 24.0);
+    float2 cell = floor(pg / 190), weight = smoothstep(0.0, 1.0, fract(pg / 190));
+    float2 uv = pg / 440;
     float2 a = cell, b = cell + float2(1, 0), c = cell + float2(0, 1), d = cell + 1;
     float3 grass = sampleScatteredGround(grassTexture, tile, uv, a, b, c, d, weight);
 
@@ -201,9 +217,9 @@ fragment float4 meadowGroundFragment(LabRaster in [[stage_in]], constant LabUnif
     float biomeStrength = biome.params.y;
     if (biomeStrength > 0.01) {
         float phase = biome.params.x;
-        float n1 = sin(p.x * 0.0029 + phase) * cos(p.y * 0.0031 - phase * 0.7);
-        float n2 = sin((p.x * 0.0017 - p.y * 0.0021) + phase * 1.3);
-        float edgeJitter = (meadowNoise(p * 0.018) - 0.5) * 0.14;
+        float n1 = sin(pg.x * 0.0029 + phase) * cos(pg.y * 0.0031 - phase * 0.7);
+        float n2 = sin((pg.x * 0.0017 - pg.y * 0.0021) + phase * 1.3);
+        float edgeJitter = (meadowNoise(pg * 0.018) - 0.5) * 0.14;
         float bVal = clamp(0.5 + 0.34 * n1 + 0.22 * n2 + edgeJitter, 0.0, 1.0);
         float autumnW = smoothstep(0.55, 0.74, bVal) * 0.78 * biomeStrength;
         float blossomW = (1.0 - smoothstep(0.24, 0.43, bVal)) * 0.68 * biomeStrength;
@@ -230,123 +246,105 @@ fragment float4 meadowGroundFragment(LabRaster in [[stage_in]], constant LabUnif
     }
 
     // Subtle organic meadow variation (clover patches, wild moss, dry sunlit grass tufts)
-    float meadowVar = meadowNoise(p * 0.0037) * 0.65 + meadowNoise(p * 0.014) * 0.35;
+    float meadowVar = meadowNoise(pg * 0.0037) * 0.65 + meadowNoise(pg * 0.014) * 0.35;
     grass = mix(grass, float3(0.24, 0.33, 0.13), 0.10 + (1.0 - meadowVar) * 0.09);
     grass = mix(float3(dot(grass, float3(0.299, 0.587, 0.114))), grass, 0.93);
 
-    float worldH = settings.z > 0 ? settings.z : 1160.0;
-    float2 maskUV = (p - float2(-160, -220)) / float2(1600.0, worldH);
-    float4 mask = roadMask.sample(maskSampler, maskUV);
-
     // -------------------------------------------------------------------------
-    // 1. SILKY ROLLING HILLSHADING + TRUE 3/4 VERTICAL 24px CLIFF TERRACES
-    //    - Broad smooth sunlit-vs-shaded meadow undulation (ZERO black hairline creases!)
-    //    - True 3/4 perspective south-facing 24px stratified mossy stone cliff face on elevated plateaus:
-    //      sunlit overhanging grass rim -> vertical faceted stone columns -> dark talus foot -> soft SE cast shadow!
+    // 1. SILKY ROLLING HILLSHADING + HAND-PAINTED 32-BIT HD-2D 36px CLIFF TERRACES
+    //    - Samples real seamless MapCliffWallTile (matching RockLow & MeadowGround pixel clusters!)
+    //    - Closed raised-mesa visual cues: sunlit upper plateau parallax + subtle north back-rim bevel
+    //      + 36px textured pixel-art south cliff wall + broad 26px directional SE cast shadow!
     // -------------------------------------------------------------------------
-    float4 tField = float4(0.36, 0.5, 0.75, 0.0);
-    float elevation = 0.36;
+    float elevation = tField.r;
     float3 terrainNormal = float3(0.0, 0.0, 1.0);
     float hillShade = 1.0;
     float3 hillTint = float3(1.0);
     float cliffWallMask = 0.0;
     float3 cliffWallColor = float3(0.0);
     float terraceCastShadow = 1.0;
-    float plateauLift = 1.0;
+    float3 plateauLiftCol = float3(1.0);
 
     if (biome.params.z > 0.5 && settings.x > 0.5) {
-        tField = terrainField.sample(maskSampler, maskUV);
-        elevation = tField.r;
-        // Wide smooth finite-difference step (10px) eliminates every thin dark line artifact!
-        float2 eps = float2(10.0 / 1600.0, 10.0 / worldH);
+        // Wide smooth finite-difference step (11px) eliminates every thin dark line artifact!
+        float2 eps = float2(11.0 / 1600.0, 11.0 / worldH);
         float hL = terrainField.sample(maskSampler, maskUV - float2(eps.x, 0.0)).r;
         float hR = terrainField.sample(maskSampler, maskUV + float2(eps.x, 0.0)).r;
         float hU = terrainField.sample(maskSampler, maskUV - float2(0.0, eps.y)).r;
         float hD = terrainField.sample(maskSampler, maskUV + float2(0.0, eps.y)).r;
         float2 grad = float2(hR - hL, hD - hU);
-        terrainNormal = normalize(float3(-grad.x * 11.5, -grad.y * 11.5, 1.0));
-        float3 sunDir = normalize(float3(-0.68, -0.56, 0.72));
+        terrainNormal = normalize(float3(-grad.x * 10.5, -grad.y * 10.5, 1.0));
+        float3 sunDir = normalize(float3(-0.68, -0.56, 0.74));
         float ndotl = dot(terrainNormal, sunDir);
 
-        // Soft, painterly sunlit NW slopes vs lush cool shaded SE hollows (ZERO harsh black stripes!)
-        hillShade = clamp(0.84 + (ndotl - 0.58) * 0.42, 0.76, 1.15);
+        hillShade = clamp(0.85 + (ndotl - 0.58) * 0.38, 0.78, 1.14);
         float warmSide = smoothstep(0.58, 0.92, ndotl);
         float coolSide = 1.0 - smoothstep(0.28, 0.62, ndotl);
-        hillTint = mix(float3(1.0), float3(1.06, 1.02, 0.92), warmSide * 0.65)
-                 * mix(float3(1.0), float3(0.88, 0.94, 0.96), coolSide * 0.55);
+        hillTint = mix(float3(1.0), float3(1.06, 1.02, 0.92), warmSide * 0.62)
+                 * mix(float3(1.0), float3(0.89, 0.94, 0.96), coolSide * 0.52);
 
-        // Higher mountain foothills subtly shift alpine pine-moss; valleys stay moist deep green
         float alpineW = smoothstep(0.58, 0.90, elevation);
         grass = mix(grass, grass * float3(0.86, 0.93, 0.89), alpineW * 0.48);
         float valleyW = 1.0 - smoothstep(0.24, 0.42, elevation);
         grass = mix(grass, grass * float3(0.88, 0.95, 0.86), valleyW * 0.22);
 
-        // TRUE 3/4-PERSPECTIVE TERRACED ELEVATION CLIFF WALL (dry land only: mask.b < 0.05)
+        // TRUE 3/4-PERSPECTIVE TEXTURED MESA TERRACE (dry land only: mask.b < 0.05)
         if (mask.b < 0.05) {
-            float wallH = 26.0; // Visible vertical 3/4 cliff drop height in world pixels!
+            float wallH = 36.0; // Unmistakable 36px 1-tier JRPG vertical elevation step!
             float pHere = tField.a;
-            float p1 = terrainField.sample(maskSampler, maskUV - float2(0.0, 6.5 / worldH)).a;
-            float p2 = terrainField.sample(maskSampler, maskUV - float2(0.0, 13.0 / worldH)).a;
-            float p3 = terrainField.sample(maskSampler, maskUV - float2(0.0, 19.5 / worldH)).a;
+            // 6 vertical samples from pixel up to wallH north to recover exact smooth wall height V in [0=foot .. 1=lip]
+            float s1 = terrainField.sample(maskSampler, maskUV - float2(0.0,  6.0 / worldH)).a;
+            float s2 = terrainField.sample(maskSampler, maskUV - float2(0.0, 12.0 / worldH)).a;
+            float s3 = terrainField.sample(maskSampler, maskUV - float2(0.0, 18.0 / worldH)).a;
+            float s4 = terrainField.sample(maskSampler, maskUV - float2(0.0, 24.0 / worldH)).a;
+            float s5 = terrainField.sample(maskSampler, maskUV - float2(0.0, 30.0 / worldH)).a;
             float pTop = terrainField.sample(maskSampler, maskUV - float2(0.0, wallH / worldH)).a;
 
-            // Upper elevated plateau sits physically closer to the sun (+8% warm clarity)
-            plateauLift = mix(1.0, 1.08, smoothstep(0.50, 0.85, pHere));
+            // Sun-kissed clarity on the elevated upper mesa so higher ground visibly rises toward the sky!
+            plateauLiftCol = mix(float3(1.0), float3(1.10, 1.09, 1.02), upperPlateauW);
 
-            // Bright sunlit overhanging mossy grass lip right along the south crest of every plateau!
-            float pBelow = terrainField.sample(maskSampler, maskUV + float2(0.0, 7.0 / worldH)).a;
-            float crestLip = smoothstep(0.52, 0.85, pHere) * (1.0 - smoothstep(0.25, 0.62, pBelow));
-            grass = mix(grass, grass * float3(1.20, 1.24, 0.94) + float3(0.04, 0.05, 0.01), crestLip * 0.65);
+            // Closed back-rim bevel on NORTH edge of the mesa (prevents Escher sunken-trench illusion!)
+            float pSouth9 = terrainField.sample(maskSampler, maskUV + float2(0.0, 9.0 / worldH)).a;
+            float pSouth18 = terrainField.sample(maskSampler, maskUV + float2(0.0, 18.0 / worldH)).a;
+            float northBackShadow = smoothstep(0.48, 0.82, max(pSouth9, pSouth18)) * (1.0 - smoothstep(0.32, 0.64, pHere));
+            float northRimLit = smoothstep(0.55, 0.88, pHere) * (1.0 - smoothstep(0.25, 0.60, s1));
+            grass = mix(grass, grass * float3(1.12, 1.14, 0.98), northRimLit * 0.45);
 
-            // Exposed south-facing vertical 26px rock cliff face (where pTop is high plateau, pHere is lower valley!)
-            // Smoothly taper east/west grazing side flanks into lush grassy slopes (eliminates sharp crescent tip slivers!)
+            // Exposed south-facing 36px hand-painted pixel-art granite cliff face!
             float pTopL = terrainField.sample(maskSampler, maskUV + float2(-14.0 / 1600.0, -wallH / worldH)).a;
             float pTopR = terrainField.sample(maskSampler, maskUV + float2( 14.0 / 1600.0, -wallH / worldH)).a;
-            float sideGrad = abs(pTopR - pTopL);
-            float southFacing = smoothstep(0.10, 0.34, pTop - pHere) * (1.0 - smoothstep(0.55, 0.95, sideGrad));
-            float wallPresence = smoothstep(0.45, 0.68, pTop) * (1.0 - smoothstep(0.42, 0.66, pHere)) * southFacing;
-            if (wallPresence > 0.01) {
-                // Estimate normalized height wallV in [0=cliff foot .. 1=upper grass lip]
-                float wallV = clamp((pHere + p1 + p2 + p3) * 0.25, 0.0, 1.0);
-                // Vertical faceted granite/sandstone rock pillars matching RockLow & MapCliffTerrace!
-                float colCoord = p.x * 0.105 + meadowNoise(p * 0.03) * 1.4;
-                float colId = floor(colCoord);
-                float colFrac = fract(colCoord);
-                float pillarBevel = smoothstep(0.06, 0.28, colFrac) * (1.0 - smoothstep(0.70, 0.94, colFrac));
-                float leftSunFacet = 1.0 - smoothstep(0.18, 0.78, colFrac);
-                float strata = meadowNoise(float2(colId * 3.7 + p.x * 0.04, p.y * 0.22 + wallV * 5.0));
-                float crack = 1.0 - smoothstep(0.02, 0.14, min(colFrac, 1.0 - colFrac));
-                float hCrack = 1.0 - smoothstep(0.03, 0.12, abs(fract(wallV * 2.6 + meadowHash(float2(colId, 4.1)) * 0.6) - 0.5));
+            float sideSlope = pTopL - pTopR; // >0 = cliff faces SE (shaded), <0 = cliff faces SW (sunlit!)
+            float southFacing = smoothstep(0.08, 0.30, pTop - pHere) * (1.0 - smoothstep(0.62, 0.96, abs(sideSlope)));
+            float rawWall = smoothstep(0.42, 0.68, pTop) * (1.0 - smoothstep(0.46, 0.72, pHere)) * southFacing;
+            if (rawWall > 0.01) {
+                // Smooth normalized height from cliff foot (0) to upper grass overhang lip (1)
+                float wallV = clamp((pHere + s1 + s2 + s3 + s4 + s5) / 6.0, 0.0, 1.0);
+                // Sample real seamless 32-bit HD-2D MapCliffWallTile (2:1 aspect -> 76px wide x 36px tall = 1:1 crisp pixels!)
+                float cliffU = p.x / 76.0;
+                float cliffV = clamp(1.0 - wallV, 0.01, 0.99);
+                float3 cliffTex = cliffWallTexture.sample(cliffSampler, float2(cliffU, cliffV)).rgb;
 
-                float3 rockLit  = float3(0.64, 0.56, 0.43); // Warm sunlit buff-taupe granite (matches RockLow!)
-                float3 rockMid  = float3(0.44, 0.39, 0.34);
-                float3 rockDark = float3(0.22, 0.20, 0.22); // Cool slate rock shadow & deep vertical fissure
-                float3 stone = mix(rockMid, rockLit, leftSunFacet * 0.72 + strata * 0.28);
-                stone *= mix(0.84, 1.08, pillarBevel);
-                stone = mix(stone, rockDark, max(crack * 0.76, hCrack * 0.42));
+                // Subtle directional 3D curvature lighting: SW cliff bends catch warm sun, SE bends cool slate!
+                float faceLight = clamp(1.0 - sideSlope * 0.36, 0.76, 1.18);
+                float3 faceTint = sideSlope < 0.0
+                    ? mix(float3(1.0), float3(1.08, 1.03, 0.94), clamp(-sideSlope, 0.0, 1.0) * 0.65)
+                    : mix(float3(1.0), float3(0.86, 0.90, 0.96), clamp(sideSlope, 0.0, 1.0) * 0.65);
+                cliffTex *= faceLight * faceTint;
 
-                // Top overhanging mossy grass fringe draping down the upper 24% of the cliff face!
-                float drape = 0.74 + (meadowNoise(float2(p.x * 0.14, 2.3)) - 0.5) * 0.16;
-                float overhangMoss = smoothstep(drape - 0.08, drape + 0.06, wallV);
-                float underLipAO = exp(-pow((wallV - (drape - 0.07)) / 0.09, 2.0));
-                stone *= (1.0 - underLipAO * 0.46); // Crisp dark shadow right under overhanging grass turf!
-                float3 turfCol = mix(float3(0.32, 0.42, 0.16), float3(0.56, 0.62, 0.24), meadowNoise(p * 0.16));
-                stone = mix(stone, turfCol, overhangMoss * 0.92);
-
-                // Dark ambient-occlusion foot crease anchoring the cliff base organically into lower grass
-                float footAO = 1.0 - smoothstep(0.0, 0.22, wallV);
-                stone *= (1.0 - footAO * 0.38);
-
-                cliffWallMask = wallPresence;
-                cliffWallColor = stone;
+                // Soft organic edge blend at very top grass turf (wallV > 0.88) & talus foot (wallV < 0.12)
+                float topBlend = 1.0 - smoothstep(0.88, 0.99, wallV);
+                float botBlend = smoothstep(0.02, 0.14, wallV);
+                cliffWallMask = rawWall * topBlend * botBlend;
+                cliffWallColor = cliffTex;
             }
 
-            // Soft directional cast shadow projected SE (down-right) onto lower meadow from the 26px raised terrace!
-            float pCaster = terrainField.sample(maskSampler, maskUV - float2(14.0 / 1600.0, (wallH + 14.0) / worldH)).a;
-            float pCasterNear = terrainField.sample(maskSampler, maskUV - float2(8.0 / 1600.0, (wallH + 6.0) / worldH)).a;
-            float inLowerValley = 1.0 - smoothstep(0.38, 0.62, max(pHere, pTop));
-            float castAmt = smoothstep(0.35, 0.75, max(pCaster, pCasterNear)) * inLowerValley;
-            terraceCastShadow = mix(1.0, 0.68, castAmt * 0.85);
+            // Broad, soft directional SE cast shadow falling onto the lower meadow below the 36px raised mesa!
+            float inLowerValley = 1.0 - smoothstep(0.36, 0.62, max(pHere, pTop));
+            float sh1 = terrainField.sample(maskSampler, maskUV - float2( 7.0 / 1600.0, (wallH +  6.0) / worldH)).a;
+            float sh2 = terrainField.sample(maskSampler, maskUV - float2(16.0 / 1600.0, (wallH + 15.0) / worldH)).a;
+            float sh3 = terrainField.sample(maskSampler, maskUV - float2(25.0 / 1600.0, (wallH + 24.0) / worldH)).a;
+            float castAmt = (smoothstep(0.42, 0.78, sh1) * 0.55 + smoothstep(0.42, 0.78, sh2) * 0.30 + smoothstep(0.42, 0.78, sh3) * 0.15) * inLowerValley;
+            terraceCastShadow = mix(1.0, 0.64, clamp(castAmt, 0.0, 1.0)) * mix(1.0, 0.85, northBackShadow * 0.72);
         }
     }
 
@@ -396,12 +394,12 @@ fragment float4 meadowGroundFragment(LabRaster in [[stage_in]], constant LabUnif
     float roadAlpha = coverage * (0.82 + patches * 0.10) * (1 - sparse * 0.65);
     float3 terrain = mix(grass, soil, roadAlpha);
 
-    // Apply silky rolling hillshading, elevated plateau lift, and directional terrace cast shadow
-    terrain *= hillShade * hillTint * plateauLift * terraceCastShadow;
-    // Composite the 3/4 vertical stratified stone cliff face on dry land, opening cleanly wherever a road/stairway passes through!
+    // Apply silky rolling hillshading, elevated sunlit mesa lift, and directional terrace cast shadow
+    terrain *= hillShade * hillTint * plateauLiftCol * terraceCastShadow;
+    // Composite the hand-painted 32-bit pixel-art 36px cliff face, opening cleanly ONLY right at cobblestone stair notches!
     if (cliffWallMask > 0.01) {
-        float roadCut = smoothstep(0.18, 0.52, coverage);
-        terrain = mix(terrain, cliffWallColor, cliffWallMask * (1.0 - roadCut * 0.92));
+        float stairCut = smoothstep(0.24, 0.56, coverage) * smoothstep(0.48, 0.72, mask.g);
+        terrain = mix(terrain, cliffWallColor, cliffWallMask * (1.0 - stairCut * 0.95));
     }
 
     // -------------------------------------------------------------------------

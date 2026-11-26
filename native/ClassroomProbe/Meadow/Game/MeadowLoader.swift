@@ -51,7 +51,8 @@ enum MeadowLoader {
                     let pt = CGPoint(x: prop.x, y: prop.y)
                     if prop.asset == "MapPond", water.lake != nil, water.isNearWater(pt, margin: 165) { return false }
                     if prop.asset == "MapCliffTerrace" || prop.asset == "MapCliffCorner", pt.y < 110 { return false }
-                    return !water.isNearWater(pt, margin: 18)
+                    if water.isOnCliffWall(pt, margin: 14) { return false }
+                    return !water.isNearWater(pt, margin: 18) && !water.isNearBridge(pt, padAlong: 16, padAcross: 20)
                 }
                 let props = safeBaseProps
                     + LivingWorld.worldDioramaProps(definition: definition, baseProps: safeBaseProps, network: network, water: water)
@@ -61,11 +62,12 @@ enum MeadowLoader {
                 var textures: [String: SKTexture] = [:]
                 let names = Set(props.map(\.asset)
                     + ["MeadowGround", "MapGroundAutumn", "MapGroundBlossom", "MapGroundSanctum",
+                       "MapCliffWallTile",
                        "MapGroundStonePlaza", "MapPropVictoryBanner", "Banner", "OakA", "Flowers",
                        "MapMountainPeakA", "MapMountainPeakB", "MapWaterfallGorge", "MapTerraceCliff",
                        "MapTreeWillow", "MapTreeBirch", "MapTreeCypress", "MapTreeAncientOak",
                        "MapFernsCluster", "MapTallGrassTuft", "MapBerryBush", "MapRiverBoulders",
-                       "MapBridgeHoriz", "MapBridgeVert", "MapStairsFront", "MapStairsSide",
+                       "MapBridgeHoriz", "MapBridgeVert", "MapStairsFront", "MapStairsSide", "MapStoneStairs",
                        "MapLakeIslet", "MapWoodPier", "MapLakeFlora", "MapHillMound", "MapTrailFence"]
                     + HeroFrames.atlasNames).sorted()
                 for (index, name) in names.enumerated() {

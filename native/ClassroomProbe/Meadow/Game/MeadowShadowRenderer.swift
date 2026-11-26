@@ -202,7 +202,7 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
         guard let grass = assetImage("MeadowGround") else { throw ShadowLabError.setup("地表素材缺失") }
         let grassTex = try upload(grass)
         textures["MeadowGround"] = grassTex
-        for groundName in ["MapGroundAutumn", "MapGroundBlossom", "MapGroundSanctum"] {
+        for groundName in ["MapGroundAutumn", "MapGroundBlossom", "MapGroundSanctum", "MapCliffWallTile"] {
             if let img = assetImage(groundName) { textures[groundName] = try upload(img) }
             else { textures[groundName] = grassTex }
         }
@@ -335,6 +335,7 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
         color.setFragmentTexture(textures["MapGroundBlossom"] ?? textures["MeadowGround"], index: 4)
         color.setFragmentTexture(textures["MapGroundSanctum"] ?? textures["MeadowGround"], index: 5)
         color.setFragmentTexture(textures["TerrainField"] ?? textures["RoadMask"], index: 6)
+        color.setFragmentTexture(textures["MapCliffWallTile"] ?? textures["MeadowGround"], index: 7)
         var settings = SIMD4<Float>(roads ? 1 : 0, alignment ? 1 : 0, Float(receiverBounds.height), 0)
         color.setFragmentBytes(&settings, length: MemoryLayout<SIMD4<Float>>.stride, index: 2)
         var biome = biomeUniforms

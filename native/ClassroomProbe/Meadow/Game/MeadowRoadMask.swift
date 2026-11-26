@@ -32,13 +32,47 @@ struct MeadowWaterSystem {
         }
     }
     struct Stair {
-        enum Orientation { case front, side }
+        /// All 5 visible 3/4-perspective climb directions (all rendered strictly upright at zRotation = 0
+        /// so vertical walls & risers ALWAYS respect 3/4 orthographic gravity!).
+        enum Orientation {
+            case front   // ↑ Straight North (MapStairsFront, mirror=false)
+            case diagNE  // ↗ Diagonal Northeast (MapStoneStairs, mirror=false)
+            case diagNW  // ↖ Diagonal Northwest (MapStoneStairs, mirror=true)
+            case sideE   // → Horizontal East (MapStairsSide, mirror=false)
+            case sideW   // ← Horizontal West (MapStairsSide, mirror=true)
+        }
         let center: CGPoint
         /// Unit tangent pointing strictly UPHILL along the road in map coordinates.
         let uphillDir: CGVector
-        let angle: CGFloat
         let orientation: Orientation
-        let mirror: Bool
+        var assetName: String {
+            switch orientation {
+            case .front: return "MapStairsFront"
+            case .diagNE, .diagNW: return "MapStoneStairs"
+            case .sideE, .sideW: return "MapStairsSide"
+            }
+        }
+        var mirror: Bool {
+            switch orientation {
+            case .diagNW, .sideW: return true
+            default: return false
+            }
+        }
+        var spriteWidth: CGFloat {
+            switch orientation {
+            case .front: return 32
+            case .diagNE, .diagNW: return 44
+            case .sideE, .sideW: return 54
+            }
+        }
+        /// Vertical offset so the walkable treads (not the lower retaining wall) lock onto the road centerline.
+        var verticalOffset: CGFloat {
+            switch orientation {
+            case .front: return 0
+            case .diagNE, .diagNW: return 2
+            case .sideE, .sideW: return 6
+            }
+        }
     }
     struct Plateau {
         let center: CGPoint
@@ -109,35 +143,46 @@ struct MeadowWaterSystem {
         return max(0.02, min(1.0, h))
     }
 
-    /// Crisp organic elevated terrace plateau footprint in [0, 1]:
-    /// - 1.0 = flat elevated upper highland plateau
-    /// - 0.0 = lower meadow valley
-    /// Rendered by `meadowGroundFragment` as a TRUE 3/4 vertical 24px stratified mossy cliff wall
-    /// on the south-facing drop, with sunlit overhanging grass lip and directional SE cast shadow!
+    /// Crisp flat-fronted organic mesa plateau footprint in [0, 1]:
+    /// Uses a superellipse (p=2.5) with gentle organic contour modulation so the south-facing cliff runs
+    /// naturally east-west like classic HD-2D highlands (NOT a pinched smiley-face bowl!).
     func plateauMask(at p: CGPoint) -> CGFloat {
         guard !plateaus.isEmpty else { return 0 }
         let phase = Double(seed % 1024) * 0.61803398875
         let px = Double(p.x), py = Double(p.y)
-        let warpX = CGFloat(20.0 * sin(py * 0.013 + phase) + 9.0 * cos(px * 0.021 - phase))
-        let warpY = CGFloat(14.0 * cos(px * 0.014 - phase * 0.7) + 7.0 * sin(py * 0.019 + phase))
+        let warpX = CGFloat(14.0 * sin(py * 0.012 + phase) + 6.0 * cos(px * 0.020 - phase))
+        let warpY = CGFloat(9.0 * cos(px * 0.013 - phase * 0.7) + 4.0 * sin(py * 0.018 + phase))
 
         var best: CGFloat = 0
         for plat in plateaus {
             let dx = (p.x + warpX) - plat.center.x
             let dy = (p.y + warpY) - plat.center.y
-            let nx = dx / max(1, plat.rx)
-            let ny = dy / max(1, plat.ry)
-            let ang = atan2(Double(ny), Double(nx))
-            let wob = CGFloat(1.0 + 0.11 * sin(ang * 2.0 + phase) + 0.06 * cos(ang * 3.0 - phase * 1.1))
-            let d = hypot(nx, ny) / wob
-            if d < 1.16 {
-                // Crisp terrace lip transition (0.88..1.08) so GPU draws a sharp sunlit cliff edge + 24px rock face!
-                let t = max(0, min(1, (1.08 - d) / 0.20))
+            let nx = abs(dx) / max(1, plat.rx)
+            let ny = abs(dy) / max(1, plat.ry)
+            let ang = atan2(Double(dy), Double(dx))
+            let wob = CGFloat(1.0 + 0.07 * sin(ang * 2.0 + phase) + 0.04 * cos(ang * 3.0 - phase * 1.1))
+            // Superellipse p=2.5 creates a crisp broad flat-topped mesa with natural rounded corners!
+            let d = CGFloat(pow(pow(Double(nx), 2.5) + pow(Double(ny), 2.5), 1.0 / 2.5)) / wob
+            if d < 1.14 {
+                let t = max(0, min(1, (1.07 - d) / 0.16))
                 let smooth = t * t * (3.0 - 2.0 * t)
                 best = max(best, smooth)
             }
         }
         return best
+    }
+
+    /// True if `p` falls on or immediately adjacent to any exposed 36px south-facing vertical cliff wall,
+    /// so boulders, trees, shrubs, and fences NEVER float mid-cliff!
+    func isOnCliffWall(_ p: CGPoint, margin: CGFloat = 14) -> Bool {
+        guard !plateaus.isEmpty else { return false }
+        let pHere = plateauMask(at: p)
+        let pNorth = plateauMask(at: CGPoint(x: p.x, y: p.y - 36 - margin * 0.5))
+        let pSouth = plateauMask(at: CGPoint(x: p.x, y: p.y + margin))
+        // Either sitting on the vertical cliff face itself (pNorth high, pHere low) OR straddling the grass lip
+        if pNorth > 0.35 && pHere < 0.85 { return true }
+        if pHere > 0.25 && pSouth < 0.75 && pNorth > 0.75 { return true }
+        return false
     }
 
     /// Continuous smooth water depth factor in [0, 1] used by both heightfield carving, pier ray-marching & GPU water mask.
@@ -477,43 +522,140 @@ enum MeadowRoadMask {
             }
         }
 
-        // 5. Design organic elevated highland plateaus (rendered as TRUE 24px 3/4 vertical stone-cliff terraces!)
-        //    Rule: Keep plateau footprints strictly clear of the river/lake AND ensure NO neighboring building straddles a cliff wall!
+        // 5. Design organic elevated highland mesa plateaus (rendered with hand-painted 32-bit MapCliffWallTile!)
+        //    STRICT GEOMETRIC INVARIANTS:
+        //    - Never overlap river, lake, or bridge OBBs
+        //    - Never let ANY building apron or roof straddle the 36px vertical cliff wall or cast shadow
+        //    - Every road crossing the visible south-facing cliff wall MUST have room for a proper 3/4 perspective staircase
+        //      (ZERO bare un-staired dirt roads slicing flatly across a sheer vertical stone cliff!)
         var plateaus: [MeadowWaterSystem.Plateau] = []
         let tempWater = MeadowWaterSystem(
             waterfall: bestWF, plungePool: plungePool, riverPoints: river, lake: lake,
             bridges: bridges, stairs: [], plateaus: [], hills: [], seed: seed, mapHeight: safeH
         )
-        func tryAddPlateau(center: CGPoint, rx: CGFloat, ry: CGFloat, height: CGFloat) {
-            // Never overlap a plateau cliff with the river or lake!
-            let checkRadius = max(rx, ry) + 28
-            guard !tempWater.isNearWater(center, margin: checkRadius * 0.72) else { return }
-            guard plateaus.allSatisfy({ hypot($0.center.x - center.x, $0.center.y - center.y) > ($0.rx + rx) * 1.15 }) else { return }
-            // Shrink slightly if any neighboring building apron OR roof sits inside the 26px south cliff wall band!
-            func nodeStraddlesCliff(_ n: CGPoint, _ rxv: CGFloat, _ ryv: CGFloat) -> Bool {
-                for probe in [n, CGPoint(x: n.x, y: n.y - 36), CGPoint(x: n.x, y: n.y - 68)] {
-                    let d = hypot((probe.x - center.x) / max(1, rxv), (probe.y - center.y) / max(1, ryv))
-                    if d > 0.70 && d < 1.34 { return true }
+
+        func classifyStair(_ ux: CGFloat, _ uy: CGFloat) -> MeadowWaterSystem.Stair.Orientation? {
+            // All 5 visible 3/4 orthographic climb sectors (all rendered at zRotation = 0!):
+            //   ↑ North:    uy < -0.90 (within ~25° of vertical)
+            //   ↗ Diag NE:  ux >= 0.34, uy < -0.34
+            //   ↖ Diag NW:  ux <= -0.34, uy < -0.34
+            //   → Side E:   ux > 0.84, |uy| <= 0.54
+            //   ← Side W:   ux < -0.84, |uy| <= 0.54
+            //   (Southward climbs uy > 0.34 cross the receding north back-rim and use smooth cobblestone ramps!)
+            if uy < -0.90 { return .front }
+            if uy < -0.34 { return ux >= 0 ? .diagNE : .diagNW }
+            if abs(uy) <= 0.54 && abs(ux) > 0.84 { return ux >= 0 ? .sideE : .sideW }
+            return nil
+        }
+
+        func evaluatePlateauCandidate(_ cand: MeadowWaterSystem.Plateau) -> [MeadowWaterSystem.Stair]? {
+            let checkRadius = max(cand.rx, cand.ry) + 34
+            guard !tempWater.isNearWater(cand.center, margin: checkRadius * 0.76) else { return nil }
+            guard plateaus.allSatisfy({ hypot($0.center.x - cand.center.x, $0.center.y - cand.center.y) > ($0.rx + cand.rx) * 1.18 }) else { return nil }
+            // Check NO building apron or tall roof sits in the 36px cliff drop band + shadow zone
+            let testSys = MeadowWaterSystem(
+                waterfall: bestWF, plungePool: plungePool, riverPoints: river, lake: lake,
+                bridges: bridges, stairs: [], plateaus: [cand], hills: [], seed: seed, mapHeight: safeH
+            )
+            for n in nodePoints {
+                // Check apron, mid-building, and upper roof against cliff wall band!
+                for probe in [n, CGPoint(x: n.x, y: n.y - 34), CGPoint(x: n.x, y: n.y - 68)] {
+                    if testSys.isOnCliffWall(probe, margin: 18) { return nil }
                 }
-                return false
             }
-            var adjRx = rx, adjRy = ry
-            if nodePoints.contains(where: { nodeStraddlesCliff($0, adjRx, adjRy) }) {
-                adjRx *= 0.78; adjRy *= 0.78
+            // Audit EVERY road edge crossing this plateau's visible south-facing cliff wall!
+            var foundStairs: [MeadowWaterSystem.Stair] = []
+            for edge in network.edges {
+                var d: CGFloat = 10
+                var lastP = testSys.plateauMask(at: edge.trail.point(at: 0))
+                while d <= edge.trail.length {
+                    let pt = edge.trail.point(at: d)
+                    let curP = testSys.plateauMask(at: pt)
+                    if (lastP < 0.5 && curP >= 0.5) || (lastP >= 0.5 && curP < 0.5) {
+                        // Exact lip crossing! Check whether this crossing is on the VISIBLE south-facing cliff face!
+                        let isVisibleCliff = testSys.plateauMask(at: CGPoint(x: pt.x, y: pt.y - 26)) > 0.55
+                            && testSys.plateauMask(at: CGPoint(x: pt.x, y: pt.y + 22)) < 0.45
+                        if isVisibleCliff {
+                            // MUST be able to place a clean 3/4 perspective staircase here — never leave a bare dirt cut!
+                            guard d >= 34 && d <= edge.trail.length - 34 else { return nil }
+                            let pBack = edge.trail.point(at: max(0, d - 24))
+                            let pFwd  = edge.trail.point(at: min(edge.trail.length, d + 24))
+                            let inDx = pt.x - pBack.x, inDy = pt.y - pBack.y
+                            let outDx = pFwd.x - pt.x, outDy = pFwd.y - pt.y
+                            let inLen = max(0.001, hypot(inDx, inDy)), outLen = max(0.001, hypot(outDx, outDy))
+                            guard (inDx * outDx + inDy * outDy) / (inLen * outLen) > 0.88 else { return nil }
+
+                            // Compute exact uphill unit vector (pointing from lower valley UP onto plateau!)
+                            let pBackPlat = testSys.plateauMask(at: pBack)
+                            let pFwdPlat  = testSys.plateauMask(at: pFwd)
+                            let sgn: CGFloat = pFwdPlat >= pBackPlat ? 1 : -1
+                            let ux0 = (pFwd.x - pBack.x) * sgn
+                            let uy0 = (pFwd.y - pBack.y) * sgn
+                            let ulen = max(0.001, hypot(ux0, uy0))
+                            let ux = ux0 / ulen, uy = uy0 / ulen
+
+                            guard let orient = classifyStair(ux, uy) else { return nil }
+                            guard !tempWater.isNearWater(pt, margin: 34),
+                                  !tempWater.isNearBridge(pt, padAlong: 46, padAcross: 46),
+                                  nodePoints.allSatisfy({ hypot($0.x - pt.x, ($0.y - 12) - pt.y) > 48 }),
+                                  foundStairs.allSatisfy({ hypot($0.center.x - pt.x, $0.center.y - pt.y) > 74 }) else { return nil }
+
+                            // Center staircase squarely inside the 36px cliff drop (lip at pt.y -> cliff foot at pt.y + 36)
+                            let stairCenter = CGPoint(x: pt.x, y: pt.y + 18)
+                            foundStairs.append(MeadowWaterSystem.Stair(
+                                center: stairCenter,
+                                uphillDir: CGVector(dx: ux, dy: uy),
+                                orientation: orient
+                            ))
+                        }
+                    }
+                    lastP = curP
+                    d += 6
+                }
             }
-            guard adjRx >= 76 else { return }
-            guard !nodePoints.contains(where: { nodeStraddlesCliff($0, adjRx, adjRy) }) else { return }
-            plateaus.append(.init(center: center, rx: adjRx, ry: adjRy, height: height))
+            return foundStairs
+        }
+
+        var stairs: [MeadowWaterSystem.Stair] = []
+        func tryAddPlateau(center: CGPoint, rx: CGFloat, ry: CGFloat, height: CGFloat) {
+            // Try clean shifts & slight size variations to find a zero-conflict mesa where EVERY south-cliff road has proper 3/4 stairs!
+            let shifts: [(CGFloat, CGFloat, CGFloat)] = [
+                (0, 0, 1.0), (0, -18, 0.92), (0, 16, 0.92),
+                (-28, 0, 0.92), (28, 0, 0.92),
+                (0, -14, 0.80), (-22, -14, 0.82), (22, -14, 0.82)
+            ]
+            var bestPick: (plat: MeadowWaterSystem.Plateau, stairs: [MeadowWaterSystem.Stair], score: Int)?
+            for (dx, dy, sc) in shifts {
+                let cand = MeadowWaterSystem.Plateau(
+                    center: CGPoint(x: center.x + dx, y: center.y + dy),
+                    rx: rx * sc, ry: ry * sc, height: height
+                )
+                if let candStairs = evaluatePlateauCandidate(cand) {
+                    // Prefer clean mesas with 1-2 embedded staircases and minimal shift!
+                    let score = min(candStairs.count, 2) * 30 - Int(abs(dx) + abs(dy)) / 4
+                    if bestPick == nil || score > bestPick!.score {
+                        bestPick = (cand, candStairs, score)
+                    }
+                }
+            }
+            if let pick = bestPick {
+                plateaus.append(pick.plat)
+                for s in pick.stairs {
+                    if stairs.allSatisfy({ hypot($0.center.x - s.center.x, $0.center.y - s.center.y) > 88 }) {
+                        stairs.append(s)
+                    }
+                }
+            }
         }
 
         for bp in bossPoints {
-            tryAddPlateau(center: CGPoint(x: bp.x, y: bp.y - 18), rx: 128, ry: 96, height: 0.24)
+            tryAddPlateau(center: CGPoint(x: bp.x, y: bp.y - 18), rx: 142, ry: 88, height: 0.24)
         }
         for np in nodePoints {
             if let sp = startPoint, hypot(np.x - sp.x, np.y - sp.y) < 130 { continue }
             if bossPoints.contains(where: { hypot($0.x - np.x, $0.y - np.y) < 160 }) { continue }
             if np.y > 180 && np.y < safeH - 180 && plateaus.count < bossPoints.count + 2 {
-                tryAddPlateau(center: CGPoint(x: np.x, y: np.y - 16), rx: 112, ry: 84, height: 0.20)
+                tryAddPlateau(center: CGPoint(x: np.x, y: np.y - 16), rx: 132, ry: 82, height: 0.20)
             }
         }
 
@@ -528,74 +670,6 @@ enum MeadowRoadMask {
             let rx = rng.value(145, 230)
             let ry = rx * rng.value(0.68, 0.88)
             hills.append(.init(center: CGPoint(x: hx, y: hy), rx: rx, ry: ry, height: rng.value(0.08, 0.14)))
-        }
-
-        let provisional = MeadowWaterSystem(
-            waterfall: bestWF, plungePool: plungePool, riverPoints: river, lake: lake,
-            bridges: bridges, stairs: [], plateaus: plateaus, hills: hills, seed: seed, mapHeight: safeH
-        )
-
-        // 6. IRONCLAD STAIRCASE PLACEMENT (ZERO floating side-wall stairs on flat grass!):
-        //    Place `MapStairsFront` ONLY where a straight, predominantly vertical N-S road
-        //    physically climbs UP a REAL south-facing 24px terrace cliff wall (`pNorth > 0.72` && `pSouth < 0.28`)!
-        var stairs: [MeadowWaterSystem.Stair] = []
-        for edge in network.edges {
-            guard edge.trail.length >= 88 else { continue }
-            var bestAtEdge: (center: CGPoint, uphill: CGVector, angle: CGFloat, score: CGFloat)?
-            var d: CGFloat = 40
-            while d <= edge.trail.length - 40 {
-                let pt = edge.trail.point(at: d)
-                // Must sit RIGHT on a real south-facing terrace cliff drop!
-                let pNorth = provisional.plateauMask(at: CGPoint(x: pt.x, y: pt.y - 22))
-                let pSouth = provisional.plateauMask(at: CGPoint(x: pt.x, y: pt.y + 18))
-                let pCenter = provisional.plateauMask(at: pt)
-                if pNorth > 0.72 && pSouth < 0.28 && pCenter > 0.18 && pCenter < 0.82 {
-                    let pBack = edge.trail.point(at: max(0, d - 26))
-                    let pFwd  = edge.trail.point(at: min(edge.trail.length, d + 26))
-                    let inDx = pt.x - pBack.x, inDy = pt.y - pBack.y
-                    let outDx = pFwd.x - pt.x, outDy = pFwd.y - pt.y
-                    let inLen = max(0.001, hypot(inDx, inDy)), outLen = max(0.001, hypot(outDx, outDy))
-                    let straightDot = (inDx * outDx + inDy * outDy) / (inLen * outLen)
-
-                    // Point uphill toward the higher plateau (north = negative Y in map coords!)
-                    let pBackPlat = provisional.plateauMask(at: pBack)
-                    let pFwdPlat  = provisional.plateauMask(at: pFwd)
-                    let sgn: CGFloat = pFwdPlat >= pBackPlat ? 1 : -1
-                    let ux0 = (pFwd.x - pBack.x) * sgn
-                    let uy0 = (pFwd.y - pBack.y) * sgn
-                    let ulen = max(0.001, hypot(ux0, uy0))
-                    let ux = ux0 / ulen, uy = uy0 / ulen
-
-                    // STRICT RULES: straight road (dot > 0.93), cleanly ascending northward (uy < -0.78 => within ±38° of vertical!),
-                    // strictly clear of buildings (>54px), water (>42px), bridges (>85px)!
-                    let clearAll = straightDot > 0.93
-                        && uy < -0.78
-                        && !provisional.isNearWater(pt, margin: 38)
-                        && !provisional.isNearBridge(pt, padAlong: 48, padAcross: 48)
-                        && nodePoints.allSatisfy { hypot($0.x - pt.x, ($0.y - 12) - pt.y) > 54 }
-                    if clearAll {
-                        // Place stair centered squarely on the 24px cliff wall (shifted +10px south of the 0.50 contour lip)
-                        let stairCenter = CGPoint(x: pt.x - ux * 8, y: pt.y - uy * 8)
-                        let raw = atan2(-uy, ux) // near +pi/2
-                        let skAngle = max(-0.36, min(0.36, raw - .pi / 2))
-                        let score = (pNorth - pSouth) + (-uy) * 0.5
-                        if bestAtEdge == nil || score > bestAtEdge!.score {
-                            bestAtEdge = (stairCenter, CGVector(dx: ux, dy: uy), skAngle, score)
-                        }
-                    }
-                }
-                d += 6
-            }
-            if let hit = bestAtEdge,
-               stairs.allSatisfy({ hypot($0.center.x - hit.center.x, $0.center.y - hit.center.y) > 120 }) {
-                stairs.append(MeadowWaterSystem.Stair(
-                    center: hit.center,
-                    uphillDir: hit.uphill,
-                    angle: hit.angle,
-                    orientation: .front,
-                    mirror: false
-                ))
-            }
         }
 
         return MeadowWaterSystem(
