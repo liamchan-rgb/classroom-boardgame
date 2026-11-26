@@ -12,12 +12,17 @@ final class LivingWorld: SKNode {
     let terrain = SKNode()
     private(set) var sunlightOverlay: SKSpriteNode?
     private(set) var roadMask: CGImage!
+    private(set) var terrainField: CGImage?
+    private(set) var waterSystem: MeadowWaterSystem?
     private(set) var casterProps: [SceneDefinition.Prop] = []
     private(set) var shadowCount = 0
     private(set) var objectCount = 0
     private(set) var longestPopulateBatchSeconds: Double = 0
 
-    init(definition: SceneDefinition, roadMask: CGImage? = nil, props: [SceneDefinition.Prop]? = nil, textures: [String: SKTexture] = [:], effects preparedEffects: EnvironmentShaders? = nil, deferProps: Bool = false, renderTerrain: Bool = true,
+    init(definition: SceneDefinition, roadMask: CGImage? = nil, terrainField: CGImage? = nil,
+         waterSystem: MeadowWaterSystem? = nil, props: [SceneDefinition.Prop]? = nil,
+         textures: [String: SKTexture] = [:], effects preparedEffects: EnvironmentShaders? = nil,
+         deferProps: Bool = false, renderTerrain: Bool = true,
          vegetationEnabled: Bool = true, atmosphereEnabled: Bool = true) {
         self.definition = definition
         self.textures = textures
@@ -27,28 +32,58 @@ final class LivingWorld: SKNode {
         super.init()
         addChild(terrain)
         let nodePoints = definition.props.filter { $0.nodeID != nil }.map { CGPoint(x: $0.x, y: $0.y + 26) }
+        let bossPoints = definition.props.filter { $0.nodeID != nil && $0.asset.hasPrefix("NodeBoss") }.map { CGPoint(x: $0.x, y: $0.y + 26) }
+        let startPoint = definition.props.first(where: { $0.asset == "CampTent" }).map { CGPoint(x: $0.x, y: $0.y + 26) }
         let cobbleCenters: [(point: CGPoint, radius: CGFloat)] = definition.props.compactMap { p in
             guard p.nodeID != nil else { return nil }
             if p.asset.hasPrefix("NodeBoss") { return (CGPoint(x: p.x, y: p.y + 20), 175) }
             if p.asset == "CampTent" || p.asset == "NodeCombatTower" { return (CGPoint(x: p.x, y: p.y + 18), 125) }
             return nil
         }
-        let water = roadMask == nil ? MeadowRoadMask.planWaterSystem(network: network, nodePoints: nodePoints, mapHeight: definition.mapHeight ?? 720, seed: definition.seed) : nil
-        if renderTerrain { buildGround(); buildRoads(mask: roadMask ?? MeadowRoadMask.makeWithWater(network: network, bounds: worldBounds, water: water, cobbleCenters: cobbleCenters)) }
-        else { self.roadMask = roadMask ?? MeadowRoadMask.makeWithWater(network: network, bounds: worldBounds, water: water, cobbleCenters: cobbleCenters) }
+        let water: MeadowWaterSystem?
+        if let waterSystem {
+            water = waterSystem
+        } else if roadMask == nil {
+            water = MeadowRoadMask.planWaterSystem(
+                network: network, nodePoints: nodePoints, bossPoints: bossPoints,
+                startPoint: startPoint, mapHeight: definition.mapHeight ?? 720, seed: definition.seed
+            )
+        } else {
+            water = nil
+        }
+        self.waterSystem = water
+        if let roadMask {
+            self.roadMask = roadMask
+            self.terrainField = terrainField
+            if renderTerrain { buildGround(); buildRoads(mask: roadMask) }
+        } else {
+            let built = MeadowRoadMask.makeTerrainTextures(network: network, bounds: worldBounds, water: water, cobbleCenters: cobbleCenters)
+            self.roadMask = built.roadMask
+            self.terrainField = built.terrainField
+            if renderTerrain { buildGround(); buildRoads(mask: built.roadMask) }
+        }
+
         let safeBaseProps = water.map { w in
             definition.props.filter { prop in
                 if prop.nodeID != nil { return true }
                 let pt = CGPoint(x: prop.x, y: prop.y)
-                if prop.asset == "MapPond", w.lake != nil, w.isNearWater(pt, margin: 145) { return false }
-                return !w.isNearWater(pt, margin: 16)
+                if prop.asset == "MapPond", w.lake != nil, w.isNearWater(pt, margin: 165) { return false }
+                if prop.asset == "MapCliffTerrace" || prop.asset == "MapCliffCorner", pt.y < 110 { return false }
+                return !w.isNearWater(pt, margin: 18)
             }
         } ?? definition.props
+
         let allProps = props ?? (safeBaseProps
             + Self.worldDioramaProps(definition: definition, baseProps: safeBaseProps, network: network, water: water)
             + Self.meadowDetails(definition: definition, network: network)
             + Self.roadsideGrass(network: network, seed: definition.seed, water: water))
         if !deferProps { for prop in allProps { addProp(prop) } }
+
+        // Real-time animated flowing waterfall cascade + rising mist anchored directly inside MapWaterfallGorge!
+        if let water, let wf = water.waterfall, let plunge = water.plungePool {
+            buildWaterfallCascade(at: wf, plunge: plunge)
+        }
+
         if atmosphereEnabled {
             addOverlay(shader: effects.backMist, depth: 95)
             sunlightOverlay = effects.makeSunlightOverlay(size: .zero)
@@ -58,6 +93,36 @@ final class LivingWorld: SKNode {
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    /// Real-time GPU animated flowing waterfall sheet + billowing mist spray pouring through MapWaterfallGorge
+    /// directly into the Metal plunge pool's expanding concentric foam rings (100% unified color & motion).
+    private func buildWaterfallCascade(at wf: CGPoint, plunge: CGPoint) {
+        let gorgeBaseY = wf.y + 40
+        // Cascade flows vertically down the central canyon chute of MapWaterfallGorge into the plunge pool
+        let cascadeSize = CGSize(width: 72, height: 118)
+        let cascadeCenter = CGPoint(x: wf.x, y: wf.y - 4)
+        effects.waterfall.uniformNamed("u_wfOrigin")?.vectorFloat2Value = SIMD2(Float(cascadeCenter.x), Float(cascadeCenter.y))
+        effects.waterfall.uniformNamed("u_wfExtent")?.vectorFloat2Value = SIMD2(Float(cascadeSize.width), Float(cascadeSize.height))
+        let cascade = SKSpriteNode(color: .white, size: cascadeSize)
+        cascade.name = "animatedWaterfall"
+        cascade.position = Self.position(cascadeCenter)
+        cascade.shader = effects.waterfall
+        // Render directly over MapWaterfallGorge (z = 10000 + gorgeBaseY), below foreground trees/heroes
+        cascade.zPosition = 10000 + gorgeBaseY + 2
+        addChild(cascade)
+
+        // Soft billowing sunlit mist cloud hovering right over the impact point in the plunge pool
+        let mistSize = CGSize(width: 138, height: 84)
+        let mistCenter = CGPoint(x: plunge.x, y: plunge.y - 4)
+        effects.waterfallMist.uniformNamed("u_mistOrigin")?.vectorFloat2Value = SIMD2(Float(mistCenter.x), Float(mistCenter.y))
+        effects.waterfallMist.uniformNamed("u_mistExtent")?.vectorFloat2Value = SIMD2(Float(mistSize.width), Float(mistSize.height))
+        let mist = SKSpriteNode(color: .white, size: mistSize)
+        mist.name = "waterfallMist"
+        mist.position = Self.position(mistCenter)
+        mist.shader = effects.waterfallMist
+        mist.zPosition = 10000 + gorgeBaseY + 8
+        addChild(mist)
+    }
 
     /// The sun belongs to the viewport, not the world transform. Both production
     /// and diagnostic scenes attach this same overlay directly to the scene.
@@ -76,7 +141,7 @@ final class LivingWorld: SKNode {
         var index = 0
         func batch() {
             let began = ProcessInfo.processInfo.systemUptime
-            let end = min(index + 8, props.count)
+            let end = min(index + 12, props.count)
             while index < end { addProp(props[index]); index += 1 }
             longestPopulateBatchSeconds = max(longestPopulateBatchSeconds, ProcessInfo.processInfo.systemUptime - began)
             progress(Double(index) / Double(max(1, props.count)))
@@ -148,8 +213,8 @@ final class LivingWorld: SKNode {
         if let rotation = prop.rotation { node.zRotation = rotation }
         if asset?.isGroundDecal == true {
             switch prop.asset {
-            case "MapBridgeWood": node.zPosition = 62
-            case "MapStoneStairs": node.zPosition = 60
+            case "MapBridgeHoriz", "MapBridgeVert", "MapBridgeWood": node.zPosition = 64
+            case "MapStairsFront", "MapStairsSide", "MapStoneStairs": node.zPosition = 61
             case "MapWoodPier": node.zPosition = 58
             case "MapLakeIslet": node.zPosition = 56
             case "MapLakeFlora": node.zPosition = 55
@@ -159,8 +224,10 @@ final class LivingWorld: SKNode {
         } else {
             node.zPosition = 10000 + prop.y
         }
-        // Preserve upper-left painted highlights on solid objects; allow subtle horizontal flip on flora & hill mounds.
-        node.xScale = prop.mirror && (asset?.isFlower == true || prop.asset == "MapLakeFlora" || prop.asset == "MapWoodPier") ? -1 : 1
+        // Allow horizontal flip on flora, piers, side-ascending stairs (to face uphill!), and organic river rocks.
+        let allowFlip = asset?.isFlower == true || prop.asset == "MapLakeFlora" || prop.asset == "MapWoodPier"
+            || prop.asset == "MapStairsSide" || prop.asset == "MapRiverBoulders" || prop.asset == "MapTerraceCliff"
+        node.xScale = prop.mirror && allowFlip ? -1 : 1
         let vegetationShader = (asset?.isFlower == true || asset?.isShrub == true) ? effects.meadowPlants : effects.vegetation
         if vegetationEnabled { effects.apply(vegetationShader, to: node,
                       origin: CGPoint(x: prop.x, y: prop.y - height * (0.5 - node.anchorPoint.y)),
@@ -172,7 +239,6 @@ final class LivingWorld: SKNode {
             casterProps.append(prop)
             shadowCount += 1
         }
-        // Subtle warm firelight / lantern glow flicker for living HD-2D warmth
         if prop.asset == "MapPropCampfire" || prop.asset == "MapPropLanternPost" {
             let glowSize = prop.asset == "MapPropCampfire" ? prop.width * 1.65 : prop.width * 1.45
             let glow = SKSpriteNode(texture: Self.warmGlowTexture, size: CGSize(width: glowSize, height: glowSize * 0.78))
@@ -190,8 +256,6 @@ final class LivingWorld: SKNode {
             glow.run(pulse)
             node.addChild(glow)
         }
-        // CampTent already contains its stitched banner. The tower needs a
-        // separate flag, anchored at the roof peak instead of the image top.
         if prop.asset == "WatchTower" {
             let bannerTexture = texture("Banner")
             let width = min(34, max(22, prop.width * 0.40))
@@ -209,8 +273,11 @@ final class LivingWorld: SKNode {
         }
     }
 
-    /// Live valley topography, connected waterfall-river-lake features, roadside construction,
-    /// and lush overlapping perimeter woodlands. Runs deterministically for both new and legacy saves.
+    /// Major HD-2D Overworld Overhaul:
+    /// - Multi-layered towering northern alpine mountain massif & dark wet waterfall gorge (zero Lego block wall!)
+    /// - Mathematically aligned horizontal/vertical bridges & road-tangent stone stairs
+    /// - Interior terraced embankments, rolling hills, wet river boulders & lakeside willows
+    /// - Lush multi-scale ecological biodiversity across 18+ distinct tree/shrub/fern/grass/flower species!
     static func worldDioramaProps(
         definition: SceneDefinition,
         baseProps: [SceneDefinition.Prop],
@@ -218,7 +285,7 @@ final class LivingWorld: SKNode {
         water: MeadowWaterSystem?
     ) -> [SceneDefinition.Prop] {
         var added: [SceneDefinition.Prop] = []
-        var random = MeadowRandom(seed: definition.seed ^ 0x44494f52414d41)
+        var random = MeadowRandom(seed: definition.seed ^ 0x44494f52414d42)
         let existing = baseProps
         let mapH = definition.mapHeight ?? 720
         let bossPoints = existing.filter { $0.asset.hasPrefix("NodeBoss") }.map { CGPoint(x: $0.x, y: $0.y + 26) }
@@ -247,161 +314,246 @@ final class LivingWorld: SKNode {
             return true
         }
 
-        // 1. Connected Mountain Waterfall + Flanking Cliff Ridge + Woodland Lake Features + Bridges
-        if let water {
-            if let wf = water.waterfall {
-                added.append(SceneDefinition.Prop(asset: "MapWaterfall", x: wf.x, y: wf.y + 38, width: 128, mirror: false, wind: 0))
-                // Frame the waterfall seamlessly with tightly joined flanking cliff terraces & highland pines
-                for side in [CGFloat(-1), CGFloat(1)] {
-                    let cx = wf.x + side * 102
-                    let cy = wf.y + 26
-                    if !isWater(CGPoint(x: cx, y: cy), margin: 2) && network.project(CGPoint(x: cx, y: cy)).error > 44
-                        && existing.allSatisfy({ $0.nodeID == nil || hypot($0.x - cx, $0.y - cy) > 100 }) {
-                        let cAsset = side > 0 ? "MapCliffCorner" : "MapCliffTerrace"
-                        added.append(SceneDefinition.Prop(asset: cAsset, x: cx, y: cy, width: 148, mirror: false, wind: 0))
-                    }
-                    for tOff in [CGFloat(54), CGFloat(116)] {
-                        let tx = wf.x + side * tOff
-                        let ty = wf.y - 36 + random.value(-14, 8)
-                        if network.project(CGPoint(x: tx, y: ty)).error > 46 {
-                            let tAsset = random.next() > 0.40 ? "MapTreePineAlpine" : "OakA"
-                            added.append(SceneDefinition.Prop(asset: tAsset, x: tx, y: ty, width: random.value(74, 94), mirror: false, wind: 1.0))
-                        }
+        // =====================================================================
+        // 1. TOWERING MULTI-LAYERED NORTHERN ALPINE MOUNTAIN RANGE & WATERFALL GORGE
+        //    Replaces flat repeated cliff blocks with majestic interlocking granite massifs!
+        // =====================================================================
+        // 1a. Back Alpine Skyline Layer (huge interlocking granite peaks rising high behind the valley!)
+        let backPeakXs: [CGFloat] = [-80, 120, 325, 535, 745, 960, 1170, 1360]
+        for (idx, baseX) in backPeakXs.enumerated() {
+            let px = baseX + random.value(-26, 26)
+            let py = random.value(-64, -22)
+            let asset = (idx % 2 == 0) ? "MapMountainPeakA" : "MapMountainPeakB"
+            let w = random.value(285, 365)
+            added.append(SceneDefinition.Prop(asset: asset, x: px, y: py, width: w, mirror: false, wind: 0))
+        }
+
+        // 1b. Waterfall Canyon Gorge + Towering Source Mountain Peak Behind Gorge + Flanking Buttresses
+        if let water, let wf = water.waterfall, let plunge = water.plungePool {
+            // Soaring source mountain peak rising directly behind the waterfall chasm so water emerges from high peaks!
+            added.append(SceneDefinition.Prop(asset: "MapMountainPeakA", x: wf.x - 10, y: wf.y - 42, width: 320, mirror: false, wind: 0))
+            // Dry wet-rock gorge chute (our animated SKShader waterfall cascades straight through its center!)
+            added.append(SceneDefinition.Prop(asset: "MapWaterfallGorge", x: wf.x, y: wf.y + 40, width: 156, mirror: false, wind: 0))
+
+            // Towering mountain buttresses hugging left & right of the waterfall gorge to conceal its flanks organically
+            for side in [CGFloat(-1), CGFloat(1)] {
+                let bx = wf.x + side * 124
+                let by = wf.y + 34
+                let buttress = side < 0 ? "MapMountainPeakB" : "MapMountainPeakA"
+                added.append(SceneDefinition.Prop(asset: buttress, x: bx, y: by, width: 225, mirror: false, wind: 0))
+                // Clinging alpine cypresses & pines framing the cliff gorge shoulders
+                for (dx, dy, tw, tAsset) in [
+                    (side * 66, CGFloat(-22), CGFloat(56), "MapTreeCypress"),
+                    (side * 82, CGFloat(32), CGFloat(66), "MapTreePineAlpine"),
+                    (side * 120, CGFloat(46), CGFloat(74), "Pines")
+                ] {
+                    let pt = CGPoint(x: wf.x + dx, y: wf.y + dy)
+                    if !isWater(pt, margin: 6) && network.project(pt).error > 42
+                        && existing.allSatisfy({ $0.nodeID == nil || hypot($0.x - pt.x, $0.y - pt.y) > 96 }) {
+                        added.append(SceneDefinition.Prop(asset: tAsset, x: pt.x, y: pt.y, width: tw, mirror: false, wind: 0.9))
                     }
                 }
+                // Wet mossy river boulders framing the base of the plunge pool!
+                let rbPt = CGPoint(x: plunge.x + side * 46, y: plunge.y + 12)
+                added.append(SceneDefinition.Prop(asset: "MapRiverBoulders", x: rbPt.x, y: rbPt.y, width: 54, mirror: side > 0, wind: 0))
+                // Lush bank ferns clinging to the damp mossy gorge stones
+                let fnPt = CGPoint(x: plunge.x + side * 62, y: plunge.y + 22)
+                if !isWater(fnPt, margin: 2) {
+                    added.append(SceneDefinition.Prop(asset: "MapFernsCluster", x: fnPt.x, y: fnPt.y, width: 32, mirror: side < 0, wind: 1.0))
+                }
             }
+        }
 
+        // 1c. Mid-Mountain Foothill Crags & Dense Alpine Conifer Slopes across Northern Rim
+        var foothillX: CGFloat = -70
+        var fIdx = 0
+        while foothillX <= 1350 {
+            let fy = random.value(10, 56) + (fIdx % 2 == 0 ? -12 : 12)
+            let fp = CGPoint(x: foothillX, y: fy)
+            let clearWF = water?.waterfall.map { abs($0.x - foothillX) > 165 } ?? true
+            if clearWF && !isWater(fp, margin: 18) && network.project(fp).error > 66
+                && existing.allSatisfy({ $0.nodeID == nil || hypot($0.x - foothillX, $0.y - fy) > 114 }) {
+                let roll = random.next()
+                let asset = roll < 0.40 ? "MapMountainPeakB" : (roll < 0.72 ? "MapMountainPeakA" : "MapTerraceCliff")
+                let w = asset == "MapTerraceCliff" ? random.value(165, 205) : random.value(185, 245)
+                added.append(SceneDefinition.Prop(asset: asset, x: foothillX, y: fy, width: w, mirror: fIdx % 2 == 1, wind: 0))
+            }
+            foothillX += random.value(128, 168)
+            fIdx += 1
+        }
+        // Rich conifer & alpine forest mantle sweeping along the mountain foothills
+        let alpineForest = ["MapTreePineAlpine", "Pines", "MapTreeCypress", "MapTreeAncientOak", "MapTreeBirch"]
+        var crownX: CGFloat = -110
+        while crownX <= 1390 {
+            for rowY in [CGFloat(-44), CGFloat(14), CGFloat(58)] {
+                let tx = crownX + random.value(-22, 22)
+                let ty = rowY + random.value(-12, 14)
+                let pt = CGPoint(x: tx, y: ty)
+                let clearWF = water?.waterfall.map { abs($0.x - tx) > 64 || ty < $0.y - 46 } ?? true
+                guard clearWF, !isWater(pt, margin: 16), network.project(pt).error > 58 else { continue }
+                guard existing.allSatisfy({ $0.nodeID == nil || hypot($0.x - tx, $0.y - ty) > 102 }) else { continue }
+                let pick = alpineForest[Int(random.next() * CGFloat(alpineForest.count)) % alpineForest.count]
+                let w: CGFloat = pick == "MapTreeCypress" ? random.value(48, 66) : random.value(68, 92)
+                added.append(SceneDefinition.Prop(asset: pick, x: tx, y: ty, width: w, mirror: false, wind: 1.0))
+            }
+            crownX += random.value(58, 80)
+        }
+
+        // =====================================================================
+        // 2. WATERFRONT ECOSYSTEM: LAKE, WILLOWS, RIVER BOULDERS & LOCKED BRIDGES/STAIRS
+        // =====================================================================
+        if let water {
             if let lake = water.lake {
-                // Mossy woodland islet resting gracefully inside the lake heart
+                // Mossy woodland islet resting gracefully inside the dark alpine lake heart
                 let isletX = lake.center.x + (lake.lobeCenter.x - lake.center.x) * 0.25
                 let isletY = lake.center.y + 4
-                added.append(SceneDefinition.Prop(asset: "MapLakeIslet", x: isletX, y: isletY, width: max(62, min(86, lake.rx * 0.62)), mirror: false, wind: 0))
+                added.append(SceneDefinition.Prop(asset: "MapLakeIslet", x: isletX, y: isletY, width: max(62, min(86, lake.rx * 0.60)), mirror: false, wind: 0))
 
-                // Rustic lakeside wooden pier projecting cleanly into the turquoise lake water
+                // Rustic oak pier extending cleanly into the shallow translucent water
                 let rightShore = CGPoint(x: lake.center.x + lake.rx * 0.72, y: lake.center.y + lake.ry * 0.14)
                 let leftShore = CGPoint(x: lake.center.x - lake.rx * 0.72, y: lake.center.y + lake.ry * 0.14)
                 let useRight = network.project(rightShore).error >= network.project(leftShore).error
                 let pierPt = useRight ? rightShore : leftShore
                 added.append(SceneDefinition.Prop(asset: "MapWoodPier", x: pierPt.x, y: pierPt.y, width: 70, mirror: useRight, wind: 0))
 
-                // Lily pads, pink lotuses & shoreline cattails scattered organically around the lake
-                for i in 0..<6 {
-                    let ang = CGFloat(i) / 6.0 * .pi * 2 + random.value(-0.22, 0.22)
-                    let radScale = i % 2 == 0 ? 0.64 : 0.86
+                // Lily pads, pink lotuses & shoreline reeds inside the shallow lake edge
+                for i in 0..<7 {
+                    let ang = CGFloat(i) / 7.0 * .pi * 2 + random.value(-0.20, 0.20)
+                    let radScale: CGFloat = i % 2 == 0 ? 0.66 : 0.86
                     let fx = lake.center.x + cos(ang) * lake.rx * radScale
                     let fy = lake.center.y + sin(ang) * lake.ry * radScale
                     if hypot(fx - isletX, fy - isletY) < 42 || hypot(fx - pierPt.x, fy - pierPt.y) < 38 { continue }
                     added.append(SceneDefinition.Prop(asset: "MapLakeFlora", x: fx, y: fy, width: random.value(34, 46), mirror: i % 2 == 1, wind: 0.6))
                 }
-                // Lush shoreline boulders, flowers & trees framing the lake bank
-                for i in 0..<10 {
-                    let ang = CGFloat(i) / 10.0 * .pi * 2 + 0.18
-                    let bx = lake.center.x + cos(ang) * (lake.rx + 28)
-                    let by = lake.center.y + sin(ang) * (lake.ry + 24)
+
+                // Lush lakeside ecosystem: weeping willows, wet river boulders, ferns, tall grass & bluebells!
+                for i in 0..<14 {
+                    let ang = CGFloat(i) / 14.0 * .pi * 2 + 0.14
+                    let bx = lake.center.x + cos(ang) * (lake.rx + 26)
+                    let by = lake.center.y + sin(ang) * (lake.ry + 22)
                     let bp = CGPoint(x: bx, y: by)
-                    guard !isWater(bp, margin: 4), network.project(bp).error > 42,
-                          existing.allSatisfy({ $0.nodeID == nil || hypot($0.x - bx, $0.y - by) > 96 }) else { continue }
-                    if i % 3 == 0 {
-                        let treePick = ["MapTreeBlossom", "OakA", "MapTreeAutumnOak", "MapTreePineAlpine"][i % 4]
-                        added.append(SceneDefinition.Prop(asset: treePick, x: bx, y: by, width: random.value(62, 82), mirror: false, wind: 1.0))
-                    } else if i % 3 == 1 {
+                    guard !isWater(bp, margin: 4), network.project(bp).error > 38,
+                          existing.allSatisfy({ $0.nodeID == nil || hypot($0.x - bx, $0.y - by) > 94 }) else { continue }
+                    switch i % 5 {
+                    case 0:
+                        let treePick = (i % 10 == 0) ? "MapTreeWillow" : "MapTreeBirch"
+                        added.append(SceneDefinition.Prop(asset: treePick, x: bx, y: by, width: random.value(76, 94), mirror: false, wind: 1.0))
+                    case 1:
+                        added.append(SceneDefinition.Prop(asset: "MapRiverBoulders", x: bx, y: by, width: random.value(40, 54), mirror: i % 2 == 0, wind: 0))
+                    case 2:
+                        added.append(SceneDefinition.Prop(asset: "MapFernsCluster", x: bx, y: by, width: random.value(28, 38), mirror: i % 2 == 1, wind: 1.1))
+                    case 3:
+                        added.append(SceneDefinition.Prop(asset: "MapTallGrassTuft", x: bx, y: by, width: random.value(24, 34), mirror: i % 2 == 0, wind: 1.25))
+                    default:
                         added.append(SceneDefinition.Prop(asset: "MapFlowersBlue", x: bx, y: by, width: random.value(16, 22), mirror: i % 2 == 0, wind: 1.1))
-                    } else {
-                        added.append(SceneDefinition.Prop(asset: "Shrub", x: bx, y: by, width: random.value(28, 38), mirror: false, wind: 1.0))
                     }
                 }
             }
 
-            // Shoreline water flora along river bends + bridges over every road-river crossing
+            // Riverbank boulders, drooping willows, ferns & reeds along river bends
             if water.riverPoints.count >= 6 {
-                for idx in stride(from: 4, to: water.riverPoints.count - 3, by: 5) {
+                for idx in stride(from: 3, to: water.riverPoints.count - 2, by: 3) {
                     let rp = water.riverPoints[idx]
-                    guard water.bridges.allSatisfy({ hypot($0.center.x - rp.x, $0.center.y - rp.y) > 54 }) else { continue }
+                    guard water.bridges.allSatisfy({ hypot($0.center.x - rp.x, $0.center.y - rp.y) > 58 }) else { continue }
                     let side: CGFloat = idx % 2 == 0 ? 1 : -1
-                    added.append(SceneDefinition.Prop(asset: "MapLakeFlora", x: rp.x + side * 18, y: rp.y, width: 32, mirror: side < 0, wind: 0.6))
+                    let bankPt = CGPoint(x: rp.x + side * 26, y: rp.y + 4)
+                    guard network.project(bankPt).error > 32,
+                          existing.allSatisfy({ $0.nodeID == nil || hypot($0.x - bankPt.x, $0.y - bankPt.y) > 88 }) else { continue }
+                    if idx % 9 == 0 {
+                        let willowPt = CGPoint(x: rp.x + side * 40, y: rp.y)
+                        if !isWater(willowPt, margin: 12) && network.project(willowPt).error > 52 {
+                            added.append(SceneDefinition.Prop(asset: "MapTreeWillow", x: willowPt.x, y: willowPt.y, width: random.value(76, 90), mirror: false, wind: 1.0))
+                        }
+                    } else if idx % 6 == 0 {
+                        added.append(SceneDefinition.Prop(asset: "MapRiverBoulders", x: bankPt.x, y: bankPt.y, width: random.value(34, 46), mirror: side < 0, wind: 0))
+                    } else if idx % 3 == 0 {
+                        added.append(SceneDefinition.Prop(asset: "MapLakeFlora", x: rp.x + side * 16, y: rp.y, width: 30, mirror: side < 0, wind: 0.6))
+                        let tuftPt = CGPoint(x: rp.x + side * 32, y: rp.y + 6)
+                        if !isWater(tuftPt, margin: 4) && network.project(tuftPt).error > 26 {
+                            added.append(SceneDefinition.Prop(asset: idx % 2 == 0 ? "MapFernsCluster" : "MapTallGrassTuft", x: tuftPt.x, y: tuftPt.y, width: 26, mirror: side < 0, wind: 1.15))
+                        }
+                    }
                 }
             }
+
+            // MATHEMATICALLY ALIGNED BRIDGES (strictly matched horizontal/vertical sprite + exact SpriteKit zRotation!)
             for bridge in water.bridges {
-                added.append(SceneDefinition.Prop(asset: "MapBridgeWood", x: bridge.center.x, y: bridge.center.y, width: 88, mirror: false, wind: 0, rotation: bridge.angle))
+                let asset = bridge.orientation == .horizontal ? "MapBridgeHoriz" : "MapBridgeVert"
+                let w: CGFloat = bridge.orientation == .horizontal ? 92 : 60
+                added.append(SceneDefinition.Prop(
+                    asset: asset, x: bridge.center.x, y: bridge.center.y,
+                    width: w, mirror: bridge.mirror, wind: 0, rotation: bridge.angle
+                ))
+                // Frame bridge abutments with wet river stones & lush bank ferns just off the road
+                let perpX = -bridge.roadDir.dy, perpY = bridge.roadDir.dx
                 for side in [CGFloat(-1), CGFloat(1)] {
-                    let fp = CGPoint(x: bridge.center.x + side * 44, y: bridge.center.y + 18)
-                    if !isWater(fp, margin: 2) && network.project(fp).error > 16 {
-                        added.append(SceneDefinition.Prop(asset: "MapFlowersBlue", x: fp.x, y: fp.y, width: 16, mirror: side < 0, wind: 1.1))
+                    let rockPt = CGPoint(x: bridge.center.x + perpX * side * 34 + bridge.roadDir.dx * side * 14,
+                                         y: bridge.center.y + perpY * side * 34 + bridge.roadDir.dy * side * 14)
+                    if network.project(rockPt).error > 24 {
+                        added.append(SceneDefinition.Prop(asset: "MapRiverBoulders", x: rockPt.x, y: rockPt.y, width: 32, mirror: side < 0, wind: 0))
+                    }
+                }
+            }
+
+            // MATHEMATICALLY ALIGNED STONE STAIRS (strictly locked to road centerline where roads climb elevation terraces!)
+            for stair in water.stairs {
+                let asset = stair.orientation == .front ? "MapStairsFront" : "MapStairsSide"
+                let w: CGFloat = stair.orientation == .front ? 34 : 44
+                added.append(SceneDefinition.Prop(
+                    asset: asset, x: stair.center.x, y: stair.center.y,
+                    width: w, mirror: stair.mirror, wind: 0, rotation: stair.angle
+                ))
+            }
+
+            // Natural rocky outcrops + ferns accenting elevated hillside flanks (blended organically, never isolated flat cakes!)
+            for plat in water.plateaus {
+                for offsetX in [CGFloat(-64), CGFloat(64)] {
+                    let ep = CGPoint(x: plat.center.x + offsetX, y: plat.center.y + plat.radius * 0.88)
+                    if !isWater(ep, margin: 24) && network.project(ep).error > 56
+                        && existing.allSatisfy({ $0.nodeID == nil || hypot($0.x - ep.x, $0.y - ep.y) > 94 })
+                        && added.allSatisfy({ (ShadowLabAsset(rawValue: $0.asset)?.isGroundDecal == true) || hypot($0.x - ep.x, $0.y - ep.y) > 84 }) {
+                        let outcrop = offsetX < 0 ? "RockLow" : "MapRiverBoulders"
+                        added.append(SceneDefinition.Prop(asset: outcrop, x: ep.x, y: ep.y, width: random.value(58, 76), mirror: offsetX < 0, wind: 0))
+                        added.append(SceneDefinition.Prop(asset: "MapFernsCluster", x: ep.x + (offsetX < 0 ? 22 : -22), y: ep.y + 8, width: 28, mirror: offsetX > 0, wind: 1.1))
                     }
                 }
             }
         }
 
-        // 2. Sculpted Continuous Northern Mountain Cliff Rim + Lush Highland Forest Crown
-        var cliffX: CGFloat = -40
-        var cliffIndex = 0
-        while cliffX <= 1320 {
-            let cy = random.value(-26, 26) + (cliffIndex % 2 == 0 ? -8 : 10)
-            let cp = CGPoint(x: cliffX, y: cy)
-            let clearWF = water?.waterfall.map { hypot($0.x - cliffX, $0.y - cy) > 125 } ?? true
-            if clearWF && !isWater(cp, margin: 14) && network.project(cp).error > 64
-                && existing.allSatisfy({ $0.nodeID == nil || hypot($0.x - cliffX, $0.y - cy) > 106 }) {
-                let roll = random.next()
-                let cAsset = roll < 0.42 ? "MapCliffTerrace" : (roll < 0.72 ? "MapCliffCorner" : "MapHillMound")
-                added.append(SceneDefinition.Prop(asset: cAsset, x: cliffX, y: cy, width: random.value(144, 174), mirror: false, wind: 0))
-            }
-            cliffX += random.value(92, 118)
-            cliffIndex += 1
-        }
-        // Dense continuous highland woodland wall crowning the plateau behind the northern cliff rim
-        let highlandTrees = ["MapTreePineAlpine", "Pines", "OakA", "MapTreeAutumnOak", "MapTreeAutumnMaple", "OakB"]
-        var crownX: CGFloat = -110
-        while crownX <= 1390 {
-            for rowY in [CGFloat(-118), CGFloat(-74), CGFloat(-38)] {
-                let tx = crownX + random.value(-22, 22)
-                let ty = rowY + random.value(-12, 12)
-                let pt = CGPoint(x: tx, y: ty)
-                let clearWFTop = water?.waterfall.map { abs($0.x - tx) > 48 || ty < $0.y - 34 } ?? true
-                guard clearWFTop, !isWater(pt, margin: 12), network.project(pt).error > 58 else { continue }
-                let pick = highlandTrees[Int(random.next() * CGFloat(highlandTrees.count)) % highlandTrees.count]
-                added.append(SceneDefinition.Prop(asset: pick, x: tx, y: ty, width: random.value(72, 98), mirror: false, wind: 1.0))
-            }
-            crownX += random.value(54, 72)
-        }
-
-        // Rolling grassy hills across quiet flanks & southern corners (breaks flat meadow!)
+        // Rolling sculpted grassy hills & mossy outcrops scaled to map height (breaks flat meadow organically!)
+        let mapScale = max(1.0, mapH / 760.0)
+        let maxHills = min(14, Int((6.0 * mapScale).rounded()))
         var hillsPlaced = 0
-        for _ in 0..<110 where hillsPlaced < 7 {
+        for _ in 0..<(maxHills * 18) where hillsPlaced < maxHills {
             let edge = hillsPlaced % 4
             let hx: CGFloat
             let hy: CGFloat
-            if edge == 0 { hx = random.value(-55, 160); hy = random.value(140, mapH - 80) }
-            else if edge == 1 { hx = random.value(1120, 1335); hy = random.value(140, mapH - 80) }
-            else if edge == 2 { hx = random.value(140, 1140); hy = random.value(mapH - 70, mapH + 65) }
-            else { hx = random.value(160, 1120); hy = random.value(140, mapH - 120) }
+            if edge == 0 { hx = random.value(-40, 190); hy = random.value(150, mapH - 70) }
+            else if edge == 1 { hx = random.value(1090, 1320); hy = random.value(150, mapH - 70) }
+            else if edge == 2 { hx = random.value(160, 1120); hy = random.value(mapH - 70, mapH + 60) }
+            else { hx = random.value(180, 1100); hy = random.value(160, mapH - 110) }
             let hp = CGPoint(x: hx, y: hy)
             guard !isWater(hp, margin: 38), network.project(hp).error > 84 else { continue }
-            guard existing.allSatisfy({ hypot($0.x - hx, $0.y - hy) > ($0.nodeID != nil ? 138 : 66) }) else { continue }
-            guard added.allSatisfy({ (ShadowLabAsset(rawValue: $0.asset)?.isGroundDecal == true) || hypot($0.x - hx, $0.y - hy) > 95 }) else { continue }
-            added.append(SceneDefinition.Prop(asset: "MapHillMound", x: hx, y: hy, width: random.value(118, 152), mirror: false, wind: 0))
+            guard existing.allSatisfy({ hypot($0.x - hx, $0.y - hy) > ($0.nodeID != nil ? 136 : 64) }) else { continue }
+            guard added.allSatisfy({ (ShadowLabAsset(rawValue: $0.asset)?.isGroundDecal == true) || hypot($0.x - hx, $0.y - hy) > 96 }) else { continue }
+            let hAsset = hillsPlaced % 3 == 0 ? "MapHillMound" : (hillsPlaced % 3 == 1 ? "RockLow" : "MapRockSlate")
+            let hw: CGFloat = hAsset == "MapHillMound" ? random.value(112, 140) : random.value(68, 92)
+            added.append(SceneDefinition.Prop(asset: hAsset, x: hx, y: hy, width: hw, mirror: hillsPlaced % 2 == 1, wind: 0))
             hillsPlaced += 1
         }
 
-        // 3. Node plazas, stone stairs, trail fences & storytelling micro-props around landmarks
+        // =====================================================================
+        // 3. NODE PLAZAS & STORYTELLING MICRO-PROPS AROUND LANDMARKS
+        // =====================================================================
         for prop in existing where prop.nodeID != nil {
             let nid = prop.nodeID!
             let basePoint = CGPoint(x: prop.x, y: prop.y)
 
-            // Mossy cobblestone plaza underlay tightly framing Boss Sanctums, Start Camp, and Stone Watchkeeps
             if prop.asset.hasPrefix("NodeBoss") || prop.asset == "CampTent" || prop.asset == "NodeCombatTower" {
                 let plazaW = prop.width * (prop.asset == "CampTent" ? 1.14 : 1.08)
                 added.append(SceneDefinition.Prop(asset: "MapGroundStonePlaza", x: prop.x, y: prop.y - 4, width: plazaW, mirror: false, wind: 0))
             }
 
-            // Carved stone stairs leading up to Boss Sanctum terrace when approach road lies to the south
-            if prop.asset.hasPrefix("NodeBoss") {
-                let stairPt = CGPoint(x: basePoint.x, y: basePoint.y + 30)
-                if !isWater(stairPt, margin: 10) && network.project(stairPt).error < 28 {
-                    added.append(SceneDefinition.Prop(asset: "MapStoneStairs", x: stairPt.x, y: stairPt.y, width: 46, mirror: false, wind: 0))
-                }
-            }
-
-            // Starting camp vignette: warm campfire + supply pile + trail lantern + rustic trail fence
             if prop.asset == "CampTent" {
                 let candidates: [(String, CGPoint, CGFloat)] = [
                     ("MapPropCampfire", CGPoint(x: basePoint.x - 54, y: basePoint.y + 22), 34),
@@ -461,14 +613,14 @@ final class LivingWorld: SKNode {
             }
         }
 
-        // 4. Rustic roadside trail fences along scenic horizontal road shoulders
+        // 4. Rustic roadside trail fences along clean horizontal road shoulders
         var fencesPlaced = 0
         for edge in network.edges where fencesPlaced < 5 {
             guard edge.trail.length > 130 else { continue }
             let d = edge.trail.length * 0.48
             let pt = edge.trail.point(at: d)
             let a = edge.trail.point(at: d - 12), b = edge.trail.point(at: d + 12)
-            guard abs(b.y - a.y) < abs(b.x - a.x) * 0.35 else { continue }
+            guard abs(b.y - a.y) < abs(b.x - a.x) * 0.30 else { continue }
             let fPt = CGPoint(x: pt.x, y: pt.y - 25)
             if canPlaceMicro(fPt, roadClear: 20, propClear: 34) {
                 added.append(SceneDefinition.Prop(asset: "MapTrailFence", x: fPt.x, y: fPt.y, width: 48, mirror: false, wind: 0))
@@ -476,85 +628,147 @@ final class LivingWorld: SKNode {
             }
         }
 
-        // 5. Lush Overlapping Woodland Groves & Wildflower Meadows (cohesive biome pockets, zero bald grass!)
+        // =====================================================================
+        // 5. LUSH MULTI-LAYERED ECOLOGICAL GROVES & UNDERGROWTH BIODIVERSITY
+        //    18+ species: Ancient Oak, Willow, Birch, Cypress, Blossom, Maple, Alpine Pine,
+        //    Berry Bushes, Woodland Ferns, Tall Meadow Grass, Mossy Logs & 4-Color Wildflowers!
+        // =====================================================================
         let phase = Double(definition.seed % 1024) * 0.61803398875
-        func biomeTrees(at pt: CGPoint) -> ([String], [String], String) {
-            if bossPoints.contains(where: { hypot($0.x - pt.x, $0.y - pt.y) < 250 }) {
-                return (["MapTreePineAlpine", "Pines", "OakA"], ["MapFlowersLavender", "MapFlowersBlue"], "Shrub")
+        func biomePalette(at pt: CGPoint) -> (trees: [String], shrubs: [String], ground: [String]) {
+            if bossPoints.contains(where: { hypot($0.x - pt.x, $0.y - pt.y) < 255 }) {
+                return (
+                    ["MapTreeCypress", "MapTreePineAlpine", "Pines", "MapTreeAncientOak"],
+                    ["Shrub", "MapBerryBush"],
+                    ["MapFernsCluster", "MapTallGrassTuft", "MapFlowersLavender", "MapFlowersBlue"]
+                )
             }
             let n1 = sin(Double(pt.x) * 0.0029 + phase) * cos(Double(pt.y) * 0.0031 - phase * 0.7)
             let n2 = sin((Double(pt.x) * 0.0017 - Double(pt.y) * 0.0021) + phase * 1.3)
             let b = max(0, min(1, 0.5 + 0.34 * n1 + 0.22 * n2))
             if b > 0.58 {
-                return (["MapTreeAutumnOak", "MapTreeAutumnMaple", "OakA"], ["MapFlowersCrimson", "Flowers"], "MapShrubAutumn")
+                return (
+                    ["MapTreeAutumnOak", "MapTreeAutumnMaple", "MapTreeBirch", "MapTreeAncientOak"],
+                    ["MapShrubAutumn", "MapBerryBush"],
+                    ["MapTallGrassTuft", "MapFernsCluster", "MapFlowersCrimson", "Flowers"]
+                )
             }
             if b < 0.38 {
-                return (["MapTreeBlossom", "OakB", "OakA"], ["MapFlowersBlue", "MapFlowersLavender", "Flowers"], "Shrub")
+                return (
+                    ["MapTreeBlossom", "MapTreeBirch", "MapTreeWillow", "OakB"],
+                    ["MapBerryBush", "Shrub"],
+                    ["MapFernsCluster", "MapTallGrassTuft", "MapFlowersBlue", "MapFlowersLavender", "Flowers"]
+                )
             }
-            return (["OakA", "OakB", "Pines", "MapTreeAutumnOak", "MapTreeBlossom"], ["Flowers", "MapFlowersBlue", "MapFlowersCrimson", "MapFlowersLavender"], "Shrub")
+            return (
+                ["MapTreeAncientOak", "MapTreeBirch", "OakA", "OakB", "MapTreeCypress", "Pines", "MapTreeBlossom", "MapTreeAutumnOak"],
+                ["MapBerryBush", "Shrub", "MapShrubAutumn"],
+                ["MapTallGrassTuft", "MapFernsCluster", "Flowers", "MapFlowersBlue", "MapFlowersCrimson", "MapFlowersLavender"]
+            )
         }
 
+        // 5a. Cohesive multi-layer woodland groves scaled to map height (lush from north to south on both compact & epic maps!)
+        let maxGroves = min(245, Int((110.0 * mapScale).rounded()))
         var grovesPlaced = 0
-        for _ in 0..<520 where grovesPlaced < 76 {
-            // Bias slightly toward framing the valley edges & quiet open meadows while keeping central roads crisp
-            let pt = CGPoint(x: random.value(-85, 1365), y: random.value(-85, mapH + 100))
-            guard !isWater(pt, margin: 24) else { continue }
-            guard network.project(pt).error > 66 else { continue }
-            guard existing.allSatisfy({ hypot($0.x - pt.x, $0.y - pt.y) > ($0.nodeID != nil ? 114 : 38) }) else { continue }
+        for _ in 0..<(maxGroves * 6) where grovesPlaced < maxGroves {
+            let pt = CGPoint(x: random.value(-80, 1360), y: random.value(75, mapH + 95))
+            guard !isWater(pt, margin: 22) else { continue }
+            guard network.project(pt).error > 56 else { continue }
+            guard existing.allSatisfy({ hypot($0.x - pt.x, $0.y - pt.y) > ($0.nodeID != nil ? 106 : 32) }) else { continue }
             guard added.allSatisfy({ other in
                 if ShadowLabAsset(rawValue: other.asset)?.isGroundDecal == true { return true }
-                let minD: CGFloat = (other.asset.hasPrefix("MapCliff") || other.asset == "MapWaterfall") ? 58 : 34
+                let minD: CGFloat = (other.asset.hasPrefix("MapMountain") || other.asset == "MapWaterfallGorge") ? 88 : 28
                 return hypot(other.x - pt.x, other.y - pt.y) > minD
             }) else { continue }
 
-            let (trees, flowers, shrub) = biomeTrees(at: pt)
+            let (trees, shrubs, ground) = biomePalette(at: pt)
             let roll = random.next()
             let asset: String
             let w: CGFloat
             let wind: Float
-            if roll < 0.58 {
+            if roll < 0.52 {
                 asset = trees[Int(random.next() * CGFloat(trees.count)) % trees.count]
-                w = random.value(62, 90)
+                switch asset {
+                case "MapTreeAncientOak": w = random.value(84, 106)
+                case "MapTreeCypress": w = random.value(48, 66)
+                case "MapTreeBirch": w = random.value(62, 82)
+                case "MapTreeWillow": w = random.value(74, 92)
+                default: w = random.value(64, 88)
+                }
                 wind = 1.0
-            } else if roll < 0.74 {
-                asset = shrub
-                w = random.value(28, 40)
+            } else if roll < 0.70 {
+                asset = shrubs[Int(random.next() * CGFloat(shrubs.count)) % shrubs.count]
+                w = random.value(28, 42)
                 wind = 1.0
-            } else if roll < 0.80 {
+            } else if roll < 0.76 {
                 asset = "MapLogMushrooms"
-                w = random.value(44, 56)
+                w = random.value(42, 54)
                 wind = 0
             } else {
-                asset = flowers[Int(random.next() * CGFloat(flowers.count)) % flowers.count]
-                w = random.value(15, 24)
-                wind = 1.15
+                asset = ground[Int(random.next() * CGFloat(ground.count)) % ground.count]
+                w = (asset == "MapFernsCluster" || asset == "MapTallGrassTuft") ? random.value(22, 34) : random.value(15, 23)
+                wind = 1.2
             }
             added.append(SceneDefinition.Prop(asset: asset, x: pt.x, y: pt.y, width: w, mirror: random.next() > 0.5, wind: wind))
             grovesPlaced += 1
 
-            // Tuck 1-2 overlapping companion trees/shrubs/flower clusters directly beside grove seeds for true lush forest walls!
-            if roll < 0.58 && grovesPlaced < 76 {
-                let compCount = random.next() > 0.45 ? 2 : 1
-                for _ in 0..<compCount where grovesPlaced < 76 {
+            // Ground every tree naturally with 2-3 companion trees / berry bushes / ferns / tall grass tufts!
+            if roll < 0.52 && grovesPlaced < maxGroves {
+                let compCount = random.next() > 0.35 ? 3 : 2
+                for ci in 0..<compCount where grovesPlaced < maxGroves {
                     let ang = random.value(0, .pi * 2)
-                    let rad = random.value(34, 56)
+                    let rad = ci == 0 ? random.value(34, 54) : random.value(20, 38)
                     let cp = CGPoint(x: pt.x + cos(ang) * rad, y: pt.y + sin(ang) * rad * 0.72)
-                    guard !isWater(cp, margin: 22), network.project(cp).error > 64 else { continue }
-                    guard existing.allSatisfy({ hypot($0.x - cp.x, $0.y - cp.y) > ($0.nodeID != nil ? 112 : 32) }) else { continue }
-                    guard added.allSatisfy({ (ShadowLabAsset(rawValue: $0.asset)?.isGroundDecal == true) || hypot($0.x - cp.x, $0.y - cp.y) > 28 }) else { continue }
-                    let subRoll = random.next()
-                    let cAsset = subRoll < 0.55 ? asset : (subRoll < 0.80 ? shrub : flowers[Int(random.next() * CGFloat(flowers.count)) % flowers.count])
-                    let cw: CGFloat = cAsset.hasPrefix("MapFlowers") || cAsset == "Flowers" ? random.value(15, 23) : (cAsset == shrub ? random.value(26, 36) : random.value(58, 82))
-                    added.append(SceneDefinition.Prop(asset: cAsset, x: cp.x, y: cp.y, width: cw, mirror: random.next() > 0.5, wind: 1.0))
+                    guard !isWater(cp, margin: 18), network.project(cp).error > 42 else { continue }
+                    guard existing.allSatisfy({ hypot($0.x - cp.x, $0.y - cp.y) > ($0.nodeID != nil ? 100 : 26) }) else { continue }
+                    let cAsset: String
+                    let cw: CGFloat
+                    if ci == 0 && random.next() < 0.62 && network.project(cp).error > 56 {
+                        cAsset = trees[Int(random.next() * CGFloat(trees.count)) % trees.count]
+                        cw = cAsset == "MapTreeCypress" ? random.value(44, 60) : random.value(56, 78)
+                    } else if ci == 1 {
+                        cAsset = shrubs[Int(random.next() * CGFloat(shrubs.count)) % shrubs.count]
+                        cw = random.value(24, 36)
+                    } else {
+                        cAsset = ground[Int(random.next() * CGFloat(ground.count)) % ground.count]
+                        cw = (cAsset == "MapFernsCluster" || cAsset == "MapTallGrassTuft") ? random.value(20, 32) : random.value(14, 22)
+                    }
+                    added.append(SceneDefinition.Prop(asset: cAsset, x: cp.x, y: cp.y, width: cw, mirror: random.next() > 0.5, wind: 1.1))
                     grovesPlaced += 1
                 }
             }
         }
+
+        // 5b. Interior Meadow Wild-Grass, Fern & Wildflower Carpets scaled to map height!
+        let maxTufts = min(195, Int((78.0 * mapScale).rounded()))
+        var tuftsPlaced = 0
+        for _ in 0..<(maxTufts * 4) where tuftsPlaced < maxTufts {
+            let pt = CGPoint(x: random.value(20, 1260), y: random.value(100, mapH - 20))
+            guard !isWater(pt, margin: 14), network.project(pt).error > 26 else { continue }
+            guard existing.allSatisfy({ hypot($0.x - pt.x, $0.y - pt.y) > ($0.nodeID != nil ? 76 : 22) }) else { continue }
+            guard added.allSatisfy({ (ShadowLabAsset(rawValue: $0.asset)?.isGroundDecal == true) || hypot($0.x - pt.x, $0.y - pt.y) > 22 }) else { continue }
+            let (_, shrubs, ground) = biomePalette(at: pt)
+            let r = random.next()
+            let asset: String
+            let w: CGFloat
+            if r < 0.42 {
+                asset = "MapTallGrassTuft"; w = random.value(22, 32)
+            } else if r < 0.72 {
+                asset = "MapFernsCluster"; w = random.value(22, 32)
+            } else if r < 0.84 && network.project(pt).error > 42 {
+                asset = shrubs[Int(random.next() * CGFloat(shrubs.count)) % shrubs.count]; w = random.value(24, 34)
+            } else {
+                asset = ground[Int(random.next() * CGFloat(ground.count)) % ground.count]
+                w = (asset == "MapFernsCluster" || asset == "MapTallGrassTuft") ? random.value(20, 28) : random.value(14, 21)
+            }
+            added.append(SceneDefinition.Prop(asset: asset, x: pt.x, y: pt.y, width: w, mirror: random.next() > 0.5, wind: 1.25))
+            tuftsPlaced += 1
+        }
+
         return added
     }
 
     static func meadowDetails(definition: SceneDefinition, network: TrailNetwork) -> [SceneDefinition.Prop] {
-        if definition.startNodeID != nil { return [] } // Generated decorations already reserve node/road clearances.
+        if definition.startNodeID != nil { return [] }
         var props: [SceneDefinition.Prop] = []
         var random = MeadowRandom(seed: definition.seed)
         for index in 0..<110 {
@@ -563,8 +777,8 @@ final class LivingWorld: SKNode {
             if network.project(point).error < 38 { continue }
             if CGRect(x: 215, y: 275, width: 360, height: 160).contains(point) { continue }
             if definition.props.contains(where: { hypot($0.x - point.x, $0.y - point.y) < 23 }) { continue }
-            let name = index % 9 == 0 ? "Shrub" : "Flowers"
-            let width = name == "Shrub" ? random.value(23, 34) : random.value(12, 23)
+            let name = index % 9 == 0 ? "Shrub" : (index % 3 == 0 ? "MapTallGrassTuft" : "Flowers")
+            let width = name == "Shrub" ? random.value(23, 34) : (name == "MapTallGrassTuft" ? random.value(20, 28) : random.value(12, 23))
             props.append(SceneDefinition.Prop(asset: name, x: point.x, y: point.y, width: width,
                                          mirror: random.next() > 0.5, wind: 1.15))
         }
@@ -583,7 +797,7 @@ final class LivingWorld: SKNode {
     static func roadsideGrass(network: TrailNetwork, seed: UInt64 = 39281, water: MeadowWaterSystem? = nil) -> [SceneDefinition.Prop] {
         var props: [SceneDefinition.Prop] = []
         var random = MeadowRandom(seed: seed ^ 0x39281)
-        let palette = ["Flowers", "MapFlowersBlue", "MapFlowersCrimson", "MapFlowersLavender"]
+        let palette = ["MapTallGrassTuft", "MapFernsCluster", "Flowers", "MapFlowersBlue", "MapFlowersCrimson", "MapFlowersLavender", "MapTallGrassTuft"]
         for edge in network.edges {
             var distance: CGFloat = 14
             while distance < edge.trail.length - 14 {
@@ -593,15 +807,18 @@ final class LivingWorld: SKNode {
                 let dy = ahead.y - point.y
                 let length = max(0.1, (dx * dx + dy * dy).squareRoot())
                 let side: CGFloat = random.next() > 0.5 ? 1 : -1
-                let offset = edge.width / 2 + random.value(1, 5)
+                let offset = edge.width / 2 + random.value(2, 7)
                 let px = point.x - dy / length * offset * side
                 let py = point.y + dx / length * offset * side
-                if water?.isNearWater(CGPoint(x: px, y: py), margin: 8) != true {
-                    let pickIdx = Int(random.next() * CGFloat(palette.count)) % palette.count
-                    props.append(SceneDefinition.Prop(asset: palette[pickIdx], x: px, y: py,
-                                                 width: random.value(8, 15), mirror: random.next() > 0.5, wind: 1.2))
+                let pt = CGPoint(x: px, y: py)
+                let clearBridge = water?.bridges.allSatisfy({ hypot($0.center.x - px, $0.center.y - py) > 48 }) ?? true
+                let clearStair = water?.stairs.allSatisfy({ hypot($0.center.x - px, $0.center.y - py) > 34 }) ?? true
+                if clearBridge && clearStair && water?.isNearWater(pt, margin: 10) != true {
+                    let pick = palette[Int(random.next() * CGFloat(palette.count)) % palette.count]
+                    let w: CGFloat = (pick == "MapTallGrassTuft" || pick == "MapFernsCluster") ? random.value(17, 25) : random.value(12, 18)
+                    props.append(SceneDefinition.Prop(asset: pick, x: px, y: py, width: w, mirror: random.next() > 0.5, wind: 1.25))
                 }
-                distance += random.value(22, 38)
+                distance += random.value(26, 46)
             }
         }
         return props

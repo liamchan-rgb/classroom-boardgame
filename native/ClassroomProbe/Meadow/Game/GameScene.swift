@@ -213,6 +213,7 @@ final class GameScene: SKScene {
     func prepare(_ prepared: PreparedMeadow, progress: @escaping (Double) -> Void, completion: @escaping () -> Void) {
         let began = ProcessInfo.processInfo.systemUptime
         let staged = LivingWorld(definition: prepared.definition, roadMask: prepared.roadMask,
+            terrainField: prepared.terrainField, waterSystem: prepared.waterSystem,
             props: prepared.props, textures: prepared.textures, effects: prepared.effects,
             deferProps: true, renderTerrain: prepared.renderer == nil)
         setupTimings["worldInit"] = ProcessInfo.processInfo.systemUptime - began

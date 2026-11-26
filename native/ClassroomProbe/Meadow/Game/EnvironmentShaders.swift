@@ -23,6 +23,8 @@ final class EnvironmentShaders {
     let backMist: SKShader
     let frontMist: SKShader
     let sunlight: SKShader
+    let waterfall: SKShader
+    let waterfallMist: SKShader
     private(set) var currentCast = MeadowSun.cast
 
     private static let noise = """
@@ -232,6 +234,86 @@ final class EnvironmentShaders {
         """, uniforms: [clock(), SKUniform(name: "u_sunCast",
                                             vectorFloat2: SIMD2(Float(MeadowSun.cast.dx), Float(MeadowSun.cast.dy))),
                         SKUniform(name: "u_viewSize", vectorFloat2: SIMD2(1280, 720))])
+
+        // Real-time animated flowing waterfall cascade (pure SKUniforms, zero SKAttributes, strictly ascending smoothstep):
+        // shares exact realistic alpine-emerald & sunlit foam palette with meadowGroundFragment!
+        waterfall = SKShader(source: Self.noise + """
+        void main() {
+            vec2 uv = v_tex_coord; // uv.y = 1.0 top crest, uv.y = 0.0 bottom plunge impact
+            float t = u_sceneTime;
+            float drop = 1.0 - uv.y; // 0 at top lip -> 1 at plunge pool base
+            // Organic tapered width widening slightly as the cascade tumbles over the lower ledge
+            float halfW = mix(0.24, 0.39, pow(max(drop, 0.001), 0.85));
+            float xDist = abs(uv.x - 0.5);
+            float edgeWarp = (noise21(vec2(uv.x * 5.0, uv.y * 7.0 + t * 2.4)) - 0.5) * 0.085;
+            float bodyMask = 1.0 - smoothstep(halfW - 0.11, halfW + 0.03, xDist + edgeWarp);
+            float topMask = 1.0 - smoothstep(0.86, 0.99, uv.y);
+            float botMask = smoothstep(0.01, 0.16, uv.y);
+            float mask = bodyMask * topMask * botMask;
+
+            // Multi-speed vertical gravity-accelerated water filaments pouring downward!
+            float accel = 1.0 + drop * 0.72;
+            float s1 = noise21(vec2(uv.x * 15.0, uv.y * 4.8 + t * 2.5 * accel));
+            float s2 = noise21(vec2(uv.x * 26.0 + 4.3, uv.y * 8.2 + t * 3.9 * accel));
+            float s3 = noise21(vec2(uv.x * 44.0 - 2.1, uv.y * 12.5 + t * 5.4 * accel));
+            float braid = 0.70 + 0.30 * cos((uv.x - 0.5) * 19.0 + sin(uv.y * 6.5 + t * 3.1) * 0.75);
+            float streams = (s1 * 0.46 + s2 * 0.35 + s3 * 0.19) * braid;
+
+            // Exact realistic alpine mountain-stream colors harmonized with meadowGroundFragment river!
+            vec3 deepStream = vec3(0.055, 0.155, 0.175);
+            vec3 midStream  = vec3(0.135, 0.285, 0.295);
+            vec3 litRibbon  = vec3(0.75, 0.84, 0.82);
+            vec3 foamSpray  = vec3(0.92, 0.95, 0.91);
+
+            // Upper-left sunlight bias across the falling water sheet
+            float sideSun = 1.0 - smoothstep(0.22, 0.78, uv.x);
+            vec3 col = mix(deepStream, midStream, smoothstep(0.26, 0.72, streams) * (0.62 + 0.38 * sideSun));
+
+            // Two-tier rocky ledge splash bursts (upper crest lip + mid-cliff rock ledge + roaring plunge foot)
+            float topLipFoam = exp(-pow((uv.y - 0.86) / 0.08, 2.0)) * smoothstep(0.28, 0.70, s1);
+            float ledgeBurst = exp(-pow((uv.y - 0.46) / 0.10, 2.0)) * smoothstep(0.30, 0.72, s2);
+            float plungeChurn = (1.0 - smoothstep(0.02, 0.28, uv.y)) * smoothstep(0.22, 0.68, s2 * 0.58 + s3 * 0.42);
+            float ribbonHighlight = smoothstep(0.54, 0.80, streams) * (0.55 + 0.45 * sideSun);
+
+            col = mix(col, litRibbon, clamp(ribbonHighlight * 0.74 + topLipFoam * 0.46, 0.0, 0.86));
+            col = mix(col, foamSpray, clamp(ledgeBurst * 0.68 + plungeChurn * 0.86 + smoothstep(0.73, 0.91, streams) * 0.54, 0.0, 0.92));
+
+            vec2 wp = u_wfOrigin + vec2((uv.x - 0.5) * u_wfExtent.x, (0.5 - uv.y) * u_wfExtent.y);
+            float light = sunStrength(wp, t);
+            col *= light;
+
+            float alpha = mask * clamp(0.44 + streams * 0.50 + plungeChurn * 0.45 + ledgeBurst * 0.30, 0.0, 0.93);
+            gl_FragColor = vec4(col * alpha, alpha);
+        }
+        """, uniforms: [
+            clock(),
+            SKUniform(name: "u_wfOrigin", vectorFloat2: SIMD2(640, 20)),
+            SKUniform(name: "u_wfExtent", vectorFloat2: SIMD2(74, 114))
+        ])
+
+        // Soft billowing waterfall mist & spray hovering over the plunge pool (pure SKUniforms)
+        waterfallMist = SKShader(source: Self.noise + """
+        void main() {
+            vec2 uv = v_tex_coord;
+            float t = u_sceneTime;
+            vec2 d = (uv - vec2(0.5, 0.46)) * vec2(2.0, 2.2);
+            float r = length(d);
+            float radial = 1.0 - smoothstep(0.16, 0.96, r);
+            float n1 = noise21(vec2(uv.x * 5.0, uv.y * 5.0 - t * 0.72));
+            float n2 = noise21(vec2(uv.x * 10.2 + sin(t * 0.6) * 0.8, uv.y * 9.2 - t * 1.32) + 7.2);
+            float puff = smoothstep(0.32, 0.82, n1 * 0.6 + n2 * 0.4);
+            float core = (1.0 - smoothstep(0.0, 0.52, r)) * smoothstep(0.28, 0.74, n2);
+            vec2 wp = u_mistOrigin + vec2((uv.x - 0.5) * u_mistExtent.x, (0.5 - uv.y) * u_mistExtent.y);
+            float light = sunStrength(wp, t);
+            vec3 mistCol = vec3(0.86, 0.91, 0.88) * light;
+            float alpha = clamp(radial * (puff * 0.44 + core * 0.40), 0.0, 0.58);
+            gl_FragColor = vec4(mistCol * alpha, alpha);
+        }
+        """, uniforms: [
+            clock(),
+            SKUniform(name: "u_mistOrigin", vectorFloat2: SIMD2(640, 56)),
+            SKUniform(name: "u_mistExtent", vectorFloat2: SIMD2(138, 86))
+        ])
     }
 
     func makeSunlightOverlay(size: CGSize) -> SKSpriteNode {
@@ -252,7 +334,7 @@ final class EnvironmentShaders {
 
     func update(time: TimeInterval) {
         currentCast = MeadowSun.cast(at: time)
-        for shader in [ground, vegetation, meadowPlants, shadow, soil, backMist, frontMist, sunlight] {
+        for shader in [ground, vegetation, meadowPlants, shadow, soil, backMist, frontMist, sunlight, waterfall, waterfallMist] {
             shader.uniformNamed("u_sceneTime")?.floatValue = Float(time)
         }
         sunlight.uniformNamed("u_sunCast")?.vectorFloat2Value = SIMD2(Float(currentCast.dx), Float(currentCast.dy))

@@ -34,7 +34,8 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
         var boss1 = SIMD4<Float>.zero
         var boss2 = SIMD4<Float>.zero
         var boss3 = SIMD4<Float>.zero
-        var params = SIMD4<Float>(0, 1, 0, 0) // x = biomePhase, y = blendStrength
+        var params = SIMD4<Float>(0, 1, 0, 0) // x = biomePhase, y = blendStrength, z = terrainFieldActive
+        var plunge = SIMD4<Float>.zero        // xy = plungePool center, z = active (>0.5)
     }
 
     private struct Draw {
@@ -94,15 +95,19 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
     private var gpuStopped = false
 
     convenience init(device: MTLDevice, world: LivingWorld) throws {
-        try self.init(device: device, props: world.casterProps, roadMask: world.roadMask, bounds: world.worldBounds, seed: world.definition.seed)
+        try self.init(device: device, props: world.casterProps, roadMask: world.roadMask, terrainField: world.terrainField, plungePool: world.waterSystem?.plungePool, bounds: world.worldBounds, seed: world.definition.seed)
         world.terrain.removeFromParent()
     }
 
     init(device: MTLDevice, props: [SceneDefinition.Prop], roadMask: CGImage,
+         terrainField: CGImage? = nil, plungePool: CGPoint? = nil,
          bounds: CGRect = LivingWorld.bounds, images: [String: CGImage] = [:], seed: UInt64 = 31827, progress: ((Double, String) -> Void)? = nil) throws {
         self.receiverBounds = bounds
         var biome = MeadowBiomeUniforms()
-        biome.params = SIMD4<Float>(Float(Double(seed % 1024) * 0.61803398875), 1.0, 0, 0)
+        biome.params = SIMD4<Float>(Float(Double(seed % 1024) * 0.61803398875), 1.0, terrainField != nil ? 1.0 : 0.0, 0)
+        if let plungePool {
+            biome.plunge = SIMD4<Float>(Float(plungePool.x), Float(plungePool.y), 1.0, 0)
+        }
         let bossCoords = props.filter { $0.asset.hasPrefix("NodeBoss") }.prefix(4).map { SIMD4<Float>(Float($0.x), Float($0.y + 26), 1, 0) }
         if bossCoords.count > 0 { biome.boss0 = bossCoords[0] }
         if bossCoords.count > 1 { biome.boss1 = bossCoords[1] }
@@ -201,7 +206,12 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
             if let img = assetImage(groundName) { textures[groundName] = try upload(img) }
             else { textures[groundName] = grassTex }
         }
-        textures["RoadMask"] = try upload(roadMask)
+        textures["RoadMask"] = try uploadRawRGBA(roadMask)
+        if let terrainField {
+            textures["TerrainField"] = try uploadRawRGBA(terrainField)
+        } else {
+            textures["TerrainField"] = textures["RoadMask"]
+        }
         progress?(1, "完成地表投影")
     }
 
@@ -219,6 +229,22 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
     private func draw(_ mesh: ShadowLabMesh, texture: MTLTexture, kind: Float) throws -> Draw {
         guard let buffer = device.makeBuffer(bytes: mesh.vertices, length: mesh.vertices.count * MemoryLayout<ShadowLabVertex>.stride) else { throw ShadowLabError.setup("地图投影网格上传失败") }
         return Draw(buffer: buffer, count: mesh.vertices.count, texture: texture, kind: kind)
+    }
+
+    /// Uploads raw unpremultiplied 4-channel data masks (RoadMask / TerrainField) bit-for-bit without alpha premultiplication.
+    private func uploadRawRGBA(_ image: CGImage) throws -> MTLTexture {
+        let w = image.width, h = image.height
+        let d = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba8Unorm, width: w, height: h, mipmapped: false)
+        d.storageMode = .shared; d.usage = .shaderRead
+        guard let texture = device.makeTexture(descriptor: d),
+              let cfData = image.dataProvider?.data,
+              let ptr = CFDataGetBytePtr(cfData),
+              CFDataGetLength(cfData) >= image.bytesPerRow * h else {
+            return try upload(image)
+        }
+        texture.replace(region: MTLRegionMake2D(0, 0, w, h), mipmapLevel: 0, withBytes: ptr, bytesPerRow: image.bytesPerRow)
+        textureUploadCount += 1
+        return texture
     }
 
     private func upload(_ image: CGImage) throws -> MTLTexture {
@@ -308,6 +334,7 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
         color.setFragmentTexture(textures["MapGroundAutumn"] ?? textures["MeadowGround"], index: 3)
         color.setFragmentTexture(textures["MapGroundBlossom"] ?? textures["MeadowGround"], index: 4)
         color.setFragmentTexture(textures["MapGroundSanctum"] ?? textures["MeadowGround"], index: 5)
+        color.setFragmentTexture(textures["TerrainField"] ?? textures["RoadMask"], index: 6)
         var settings = SIMD4<Float>(roads ? 1 : 0, alignment ? 1 : 0, Float(receiverBounds.height), 0)
         color.setFragmentBytes(&settings, length: MemoryLayout<SIMD4<Float>>.stride, index: 2)
         var biome = biomeUniforms

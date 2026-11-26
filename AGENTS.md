@@ -1,3 +1,19 @@
+## 大地图整体美术与渲染管线大改：动态流动瀑布、写实流向水体、3D起伏地形、高山源头与轴对齐桥阶（2026-11-26，基于v0.32.4/build48，未改版本号、未存档）
+
+针对实机反馈的 7 项结构性视觉问题（瀑布静态且与河流色系割裂、水体偏卡通、探索区过于平坦、植被种类偏少、源头缺高山气势、桥与台阶未对齐、岩石边缘白边），对大地图美术资产、地形高程与 Metal/SpriteKit 渲染管线实施底层重构（保持 `generatorVersion = 3` 完全兼容旧存档，旧存档打开即自动获得全套地形、水系、动态瀑布与植被升级）：
+- **全量既有素材数学去白边 + 新增 16 件高山/植被/轴对齐桥阶资产**（`native/ClassroomProbe/Resources/Assets.xcassets/`，仅消耗 4 次单次 2×2 图集生图，零改动 `meadow-port-provenance.json` 锁定原文件）：
+  - 对既有 26 件非锁定 AI 抠图 PNG 统一执行白底色去污与内向色彩扩张，将外缘白边像素占比由 `32%–85%` 降至 `0.0%–1.8%`（岩石/崖壁/桥梁/建筑均在黑底与草地拼图验收零白边）。
+  - 新入库 16 件零白边独立 `.imageset`：高山与岩峡（`MapMountainPeakA`、`MapMountainPeakB`、`MapWaterfallGorge` 干湿暗岩峡道、`MapTerraceCliff`）、4 种全新轮廓乔木（`MapTreeWillow` 垂柳、`MapTreeBirch` 白桦、`MapTreeCypress` 柏树、`MapTreeAncientOak` 古橡）、4 种林下与河岸生态（`MapFernsCluster` 蕨类、`MapTallGrassTuft` 高草麦穗、`MapBerryBush` 浆果灌木、`MapRiverBoulders` 湿润河石），以及 4 件严格屏幕轴对齐结构（`MapBridgeHoriz`、`MapBridgeVert`、`MapStairsFront`、`MapStairsSide`）。
+- **连续 3D 地形高程场、真实感流向水体与实时动态瀑布**（`MeadowRoadMask.swift`、`MeadowShadowRenderer.swift`、`ShadowLabShaders.metal`、`EnvironmentShaders.swift`、`MeadowLoader.swift`、`GameScene.swift`）：
+  - `MeadowRoadMask.makeTerrainTextures` 同步生成 `roadMask`（`R` 道路含桥下清泥、`G` 车辙/石板、`B` 水深）与半分辨率未预乘原始数据纹理 `terrainField`（`R` 连续世界高程、`G/B` 精确下游流向矢量、`A` 急流与跌水潭湍流能量），由 `MeadowShadowRenderer.uploadRawRGBA` 无损上传至 Metal `texture(6)`。
+  - `meadowGroundFragment` 基于 `terrainField.r` 实时求取 3D 地形法线并对草地与道路统一施加西北暖阳/东南冷影坡面光照，叠加高地坡地与河谷下切地形起伏；水体全面替换为物理启发式渲染（湿润暗化卵石岸与西北凹岸阴影、双相位流向图平流、浅水折射河床鹅卵石与移动焦散、Beer-Lambert 深度吸收至深林青灰湖心、Fresnel 天空/林冠反射、暖金波光高光、以及围绕跌水潭中心向外扩散的动态同心浪圈）。
+  - 移除静态 `MapWaterfall` 贴图，在 `EnvironmentShaders` 新增纯 `SKUniform` 驱动的实时重力流动态瀑布着色器 `waterfall` 与上升水雾着色器 `waterfallMist`，直接覆盖于 `MapWaterfallGorge` 暗湿岩道上并与河流水色/云影光照明暗完全统一。
+- **高山源头重构、严丝合缝桥阶对齐与高密分层生态**（`LivingWorld.swift`、`ShadowLabGeometry.swift`、`RandomMap.swift`）：
+  - 北缘替换为多层交错的巨幅花岗岩高峰（`MapMountainPeakA/B`）配高寒柏松林带与瀑布源头主峰；河道按地图高度自适应蜿蜒并在入湖口喇叭形展开。
+  - 所有跨河路口统一按道路切线方向与 SpriteKit `atan2(-dy, dx)` 精确匹配 `MapBridgeHoriz` / `MapBridgeVert`（并微调局部河段与道路垂直、清理桥下河面泥土、两端铺石板桥台）；石阶仅放置在真实高程爬坡直路段道路中心线上并按上坡方向匹配 `MapStairsFront` / `MapStairsSide`。
+  - 植被按地图实际高度等比缩放，覆盖 18+ 乔木/灌木/蕨类/高草/河石/四色花丛多层群落。
+- **实测与未实测边界**：`generate_xcode_project.py`、`validate_xcode_project.py`、`check_custom_appearance.py`（837 原始资源校验通过）、`scripts/local-build.sh test`（配置、外观校验、工具单测、`ProbeCore` 8/8、`GameCore` 73/73）与 `MAC_OPEN=0 scripts/local-build.sh mac` 全部通过；Mac 实机对 1930px 长图完成两轮无焦点干扰的 Retina 截屏（首轮排查并修复动态瀑布 `SKAttribute` 白块、高地露岩圆环、跨河漏桥与长图植被密度；次轮北/中/南四帧验收通过，0.9 秒间隔双帧比对实测 `25.97%` 像素动态变化且 200% 局部放大确认瀑布水流/潭面浪圈/木桥中心线/石阶对齐与零白边），测后本机 `ClassroomMeadow`、`ClassroomStage0` 及 `org.personal.classroom.stage0` 偏好设置按 `diff -rq` 与 SHA-256 逐字节还原。未在真机 iPad、外接 TV 双屏及角色实际走过木桥/石阶的动态行军过程下目视复核。
+
 ## 大地图山谷地貌、瀑布-河流-湖泊水系与石板冒险路升级（2026-11-25，基于v0.32.4/build48，未改版本号、未存档）
 
 在保持游戏原有柔和低饱和手绘像素风（避免厚重黑描边与像素英雄冲突）前提下，落实分层山谷大地图结构，新增 8 件模块化地形/水景资产（仅消耗 **2 次**单次 2×2 纯白底图集生图）并全面升级 Metal 水系/道路着色器与 SpriteKit 山谷置景（保持 `generatorVersion = 3` 兼容旧存档）：

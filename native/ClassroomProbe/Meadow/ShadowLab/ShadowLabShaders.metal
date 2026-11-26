@@ -142,7 +142,8 @@ float meadowNoise(float2 p) {
 }
 struct MeadowBiomeUniforms {
     float4 bossPoints[4]; // xy = world point in map pixels, z = active (>0.5), w = unused
-    float4 params;        // x = biomePhase, y = biomeBlendStrength, z = unused, w = unused
+    float4 params;        // x = biomePhase, y = biomeBlendStrength, z = terrainFieldActive, w = unused
+    float4 plunge;        // xy = waterfall plunge pool center, z = active (>0.5), w = unused
 };
 
 float3 sampleScatteredGround(texture2d<float> tex, sampler tile, float2 uv, float2 a, float2 b, float2 c, float2 d, float2 weight) {
@@ -153,6 +154,31 @@ float3 sampleScatteredGround(texture2d<float> tex, sampler tile, float2 uv, floa
     return mix(mix(sa, sb, weight.x), mix(sc, sd, weight.x), weight.y);
 }
 
+// Smooth organic pebble / river-stone synthesis for submerged riverbed & rocky embankments
+float meadowVoronoiStone(float2 p) {
+    float2 i = floor(p), f = fract(p);
+    float d1 = 8.0, d2 = 8.0;
+    for (int oy = -1; oy <= 1; oy++) {
+        for (int ox = -1; ox <= 1; ox++) {
+            float2 g = float2(float(ox), float(oy));
+            float2 o = float2(meadowHash(i + g + 1.3), meadowHash(i + g + 19.7));
+            float2 r = g + o - f;
+            float d = dot(r, r);
+            if (d < d1) { d2 = d1; d1 = d; }
+            else if (d < d2) { d2 = d; }
+        }
+    }
+    return smoothstep(0.02, 0.24, sqrt(d2) - sqrt(d1));
+}
+
+// Multi-octave flow-advected water wave height (used for analytical refraction normal & sun glints)
+float meadowWaveHeight(float2 q, float t) {
+    float n1 = meadowNoise(q * 1.15 + float2(0.0, -t * 0.22));
+    float n2 = meadowNoise(q * 2.45 + float2(t * 0.14, -t * 0.35) + 7.4);
+    float n3 = meadowNoise(q * 5.20 - float2(t * 0.26, t * 0.18) + 19.1);
+    return n1 * 0.54 + n2 * 0.31 + n3 * 0.15;
+}
+
 fragment float4 meadowGroundFragment(LabRaster in [[stage_in]], constant LabUniforms &u [[buffer(1)]],
                                     constant float4 &settings [[buffer(2)]],
                                     constant MeadowBiomeUniforms &biome [[buffer(3)]],
@@ -161,7 +187,8 @@ fragment float4 meadowGroundFragment(LabRaster in [[stage_in]], constant LabUnif
                                     texture2d<float> roadMask [[texture(2)]],
                                     texture2d<float> autumnTexture [[texture(3)]],
                                     texture2d<float> blossomTexture [[texture(4)]],
-                                    texture2d<float> sanctumTexture [[texture(5)]]) {
+                                    texture2d<float> sanctumTexture [[texture(5)]],
+                                    texture2d<float> terrainField [[texture(6)]]) {
     constexpr sampler tile(coord::normalized, address::repeat, filter::linear);
     constexpr sampler maskSampler(coord::normalized, address::clamp_to_edge, filter::linear);
     float2 p = float2(in.world.x * 32 + 640, 360 - in.world.y * 32 * 0.8137334712);
@@ -202,34 +229,94 @@ fragment float4 meadowGroundFragment(LabRaster in [[stage_in]], constant LabUnif
         }
     }
 
-    grass = mix(grass, float3(0.25, 0.34, 0.12), 0.10 + (1 - meadowNoise(p * 0.0037)) * 0.08);
-    grass = mix(float3(dot(grass, float3(0.299, 0.587, 0.114))), grass, 0.92);
-    float2 maskUV = (p - float2(-160, -220)) / float2(1600, settings.z > 0 ? settings.z : 1160);
+    // Subtle organic meadow variation (clover patches, wild moss, dry sunlit grass tufts)
+    float meadowVar = meadowNoise(p * 0.0037) * 0.65 + meadowNoise(p * 0.014) * 0.35;
+    grass = mix(grass, float3(0.24, 0.33, 0.13), 0.10 + (1.0 - meadowVar) * 0.09);
+    grass = mix(float3(dot(grass, float3(0.299, 0.587, 0.114))), grass, 0.93);
+
+    float worldH = settings.z > 0 ? settings.z : 1160.0;
+    float2 maskUV = (p - float2(-160, -220)) / float2(1600.0, worldH);
     float4 mask = roadMask.sample(maskSampler, maskUV);
+
+    // -------------------------------------------------------------------------
+    // 1. CONTINUOUS 3D ELEVATION HEIGHTFIELD: HILLSHADING & TERRACE EMBANKMENTS
+    // -------------------------------------------------------------------------
+    float4 tField = float4(0.34, 0.5, 0.75, 0.0);
+    float elevation = 0.34;
+    float3 terrainNormal = float3(0.0, 0.0, 1.0);
+    float slopeMag = 0.0;
+    float hillShade = 1.0;
+    float3 hillTint = float3(1.0);
+    if (biome.params.z > 0.5 && settings.x > 0.5) {
+        tField = terrainField.sample(maskSampler, maskUV);
+        elevation = tField.r;
+        float2 eps = float2(4.0 / 1600.0, 4.0 / worldH);
+        float hL = terrainField.sample(maskSampler, maskUV - float2(eps.x, 0.0)).r;
+        float hR = terrainField.sample(maskSampler, maskUV + float2(eps.x, 0.0)).r;
+        float hU = terrainField.sample(maskSampler, maskUV - float2(0.0, eps.y)).r;
+        float hD = terrainField.sample(maskSampler, maskUV + float2(0.0, eps.y)).r;
+        float2 grad = float2(hR - hL, hD - hU);
+        // Add subtle organic micro-relief so hills & ridges never look like smooth plastic blobs
+        float microR = (meadowNoise(p * 0.036) - 0.5) * 0.008;
+        grad += float2(microR, microR * 0.8);
+        slopeMag = length(grad);
+        // Analytical normal in map space (+X right, +Y down, +Z up); sun shines from upper-left (-X, -Y, +Z)
+        terrainNormal = normalize(float3(-grad.x * 32.0, -grad.y * 32.0, 1.0));
+        float3 sunDir = normalize(float3(-0.68, -0.58, 0.56));
+        float ndotl = dot(terrainNormal, sunDir);
+        // Sculpted warm sunlit NW hill crests vs cool lush shaded SE slopes across the entire valley!
+        hillShade = clamp(0.66 + ndotl * 0.62, 0.56, 1.26);
+        float warmSide = smoothstep(0.45, 0.92, ndotl);
+        float coolSide = 1.0 - smoothstep(0.12, 0.56, ndotl);
+        hillTint = mix(float3(1.0), float3(1.08, 1.03, 0.91), warmSide * 0.78)
+                 * mix(float3(1.0), float3(0.82, 0.90, 0.95), coolSide * 0.74);
+        // Higher mountain foothills subtly shift richer alpine pine-moss & rocky slate
+        float alpineW = smoothstep(0.56, 0.88, elevation);
+        grass = mix(grass, grass * float3(0.84, 0.92, 0.88), alpineW * 0.55);
+        // Lower hollow valleys are slightly moister & deeper green
+        float valleyW = 1.0 - smoothstep(0.22, 0.42, elevation);
+        grass = mix(grass, grass * float3(0.86, 0.95, 0.84), valleyW * 0.25);
+
+        // Exposed mossy stratified rock ONLY on genuinely steep alpine cliffs & dramatic hillside scarps (no circular rings!)
+        float rockBreak = (meadowNoise(p * 0.045) - 0.5) * 0.016;
+        float rockExposure = smoothstep(0.032, 0.072, slopeMag + rockBreak) * (1.0 - smoothstep(0.18, 0.36, mask.b));
+        if (rockExposure > 0.01) {
+            float strata = meadowNoise(float2(p.x * 0.055 + meadowNoise(p * 0.02) * 2.0, p.y * 0.16 + elevation * 18.0));
+            float cracks = meadowVoronoiStone(p * float2(0.055, 0.085));
+            float3 warmStone = float3(0.52, 0.47, 0.37);
+            float3 slateStone = float3(0.30, 0.30, 0.31);
+            float3 rockCol = mix(slateStone, warmStone, strata * 0.60 + cracks * 0.40);
+            float mossBand = smoothstep(0.42, 0.74, meadowNoise(p * 0.08 + float2(0.0, elevation * 12.0)));
+            rockCol = mix(rockCol, float3(0.26, 0.35, 0.16), mossBand * 0.52);
+            float southFace = smoothstep(0.010, 0.042, -grad.y);
+            float embShade = mix(1.0, 0.68, southFace * 0.72);
+            grass = mix(grass, rockCol * embShade, rockExposure * 0.62);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // 2. ADVENTURE TRAILS (RURAL PACKED EARTH + STEPPING STONES + COBBLESTONES)
+    // -------------------------------------------------------------------------
     float edge = meadowNoise(p * 0.23) * 0.58 + meadowNoise(p * 0.73) * 0.28 + meadowHash(floor(p * 1.6)) * 0.14;
     float coverage = smoothstep(0.10 + edge * 0.15, 0.56 + edge * 0.12, mask.r) * settings.x;
     float patches = meadowNoise(p * 0.045), fine = meadowHash(floor(p * 1.5));
 
-    // Rich adventure trail: warm golden-ochre packed earth + mossy kerb shoulder + stepping stones + weathered cobblestones
-    float3 soil = mix(float3(0.41, 0.35, 0.21), float3(0.64, 0.55, 0.34), patches * 0.64 + fine * 0.25);
+    float3 soil = mix(float3(0.41, 0.35, 0.22), float3(0.62, 0.53, 0.34), patches * 0.64 + fine * 0.25);
     float cobbleW = smoothstep(0.50, 0.72, mask.g);
     float ruralWear = min(mask.g / 0.45, 1.0) * (1.0 - cobbleW);
     soil *= 1.0 - ruralWear * (0.04 + meadowNoise(p * 0.11) * 0.045);
 
-    // Darker organic road shoulder & scattered flat stepping pebbles along rural paths
     float shoulder = smoothstep(0.06, 0.30, coverage) * (1.0 - smoothstep(0.32, 0.68, coverage));
-    soil = mix(soil, float3(0.28, 0.26, 0.16), shoulder * 0.36);
+    soil = mix(soil, float3(0.27, 0.25, 0.16), shoulder * 0.38);
     float2 stoneCell = floor(p * 0.44), spot = fract(p * 0.44) - 0.5;
     float stones = step(0.92, meadowHash(stoneCell)) * (1.0 - smoothstep(0.10, 0.30, length(spot)));
-    soil = mix(soil, float3(0.57, 0.54, 0.41), stones * 0.46);
-    // Occasional larger mossy stepping flagstones along rural roads
+    soil = mix(soil, float3(0.56, 0.53, 0.41), stones * 0.46);
     float2 stepGrid = p * 0.085;
     float2 sgCell = floor(stepGrid), sgFrac = fract(stepGrid) - 0.5;
     float2 sgJitter = float2(meadowHash(sgCell + 3.1), meadowHash(sgCell + 19.7)) - 0.5;
     float stepFlag = step(0.58, meadowHash(sgCell + 7.4)) * (1.0 - smoothstep(0.16, 0.31, length((sgFrac - sgJitter * 0.32) * float2(1.0, 1.35))));
-    soil = mix(soil, float3(0.54, 0.51, 0.42), stepFlag * (1.0 - cobbleW) * coverage * 0.48);
+    soil = mix(soil, float3(0.53, 0.50, 0.41), stepFlag * (1.0 - cobbleW) * coverage * 0.46);
 
-    // Procedural soft-painterly weathered cobblestone paving near Sanctums, Fortresses, Camp & Bridges
     if (cobbleW > 0.01 && coverage > 0.05) {
         float2 cuv = p * float2(0.115, 0.145);
         float rowShift = fract(floor(cuv.y) * 0.5) * 0.5;
@@ -240,8 +327,7 @@ fragment float4 meadowGroundFragment(LabRaster in [[stage_in]], constant LabUnif
         float edgeDist = min(min(cfw.x, 1.0 - cfw.x), min(cfw.y, 1.0 - cfw.y));
         float mortar = 1.0 - smoothstep(0.05, 0.13, edgeDist);
         float tone = meadowHash(cid * 1.7 + 4.3);
-        float3 cobbleBase = mix(float3(0.46, 0.44, 0.39), float3(0.62, 0.58, 0.48), tone);
-        // Subtle upper-left sunlit bevel per stone
+        float3 cobbleBase = mix(float3(0.45, 0.43, 0.38), float3(0.60, 0.56, 0.47), tone);
         float bevel = smoothstep(0.10, 0.24, cfw.x) * (1.0 - smoothstep(0.76, 0.90, cfw.x))
                     + (1.0 - smoothstep(0.08, 0.34, cfw.y)) * 0.14 - smoothstep(0.72, 0.92, cfw.y) * 0.14;
         cobbleBase *= (0.88 + bevel * 0.16);
@@ -254,41 +340,131 @@ fragment float4 meadowGroundFragment(LabRaster in [[stage_in]], constant LabUnif
     float roadAlpha = coverage * (0.82 + patches * 0.10) * (1 - sparse * 0.65);
     float3 terrain = mix(grass, soil, roadAlpha);
 
-    // Connected Valley Water System (mountain waterfall plunge -> winding river -> woodland lake)
-    // Soft low-saturation painterly tones harmonized to MeadowGround so pixel heroes always pop cleanly!
+    // Apply 3D terrain hillshading to BOTH meadow & adventure trails so roads visibly climb ridges & dip into valleys!
+    terrain *= hillShade * hillTint;
+
+    // -------------------------------------------------------------------------
+    // 3. REALISTIC PHYSICALLY-INSPIRED FLOWING WATER (ZERO CARTOON CYAN!)
+    //    - Wet darkened mossy/pebble riverbank + recessed NW bank cast shadow
+    //    - Dual-phase directional flow-map advection along exact river curve
+    //    - Underwater refracted river pebbles + drifting sunlight caustics
+    //    - Beer-Lambert exponential depth absorption into moody mountain slate-teal
+    //    - Fresnel sky/canopy reflection + crisp golden sun specular wave glints
+    //    - Churning concentric waterfall plunge-pool foam rings & rapid whitewater
+    // -------------------------------------------------------------------------
     float waterRaw = mask.b * settings.x;
-    if (waterRaw > 0.02) {
-        float shoreNoise = meadowNoise(p * 0.18) * 0.6 + meadowNoise(p * 0.52) * 0.4;
-        float sandMask = smoothstep(0.04 + shoreNoise * 0.10, 0.24 + shoreNoise * 0.08, waterRaw);
-        float wetRimMask = smoothstep(0.20 + shoreNoise * 0.08, 0.34 + shoreNoise * 0.06, waterRaw);
-        float waterMask = smoothstep(0.30 + shoreNoise * 0.08, 0.48 + shoreNoise * 0.05, waterRaw);
+    float cloud = smoothstep(0.25, 0.76, meadowNoise((p - float2(u.sunTime.w * 14, u.sunTime.w * 5)) * 0.0065));
+    if (waterRaw > 0.015) {
+        float t = u.sunTime.w;
+        float turb = tField.a;
+        float2 flowDir = (tField.gb * 2.0 - 1.0);
+        float flowMag = length(flowDir);
+        float2 flowUnit = flowMag > 0.05 ? (flowDir / flowMag) : float2(0.0, 1.0);
+        float flowSpeed = mix(0.22, 1.15, clamp(flowMag * 0.85 + turb * 0.55, 0.0, 1.0));
 
-        // Warm sandy-pebble beach transitioning to wet mossy shore stones
-        float3 sandCol = mix(float3(0.54, 0.49, 0.34), float3(0.65, 0.59, 0.42), meadowNoise(p * 0.12));
-        float3 wetBank = mix(float3(0.27, 0.31, 0.20), float3(0.44, 0.43, 0.34), smoothstep(0.35, 0.78, meadowNoise(p * 0.34)));
-        terrain = mix(terrain, sandCol, sandMask * (1.0 - waterMask * 0.8) * (1.0 - roadAlpha * 0.65) * 0.78);
-        terrain = mix(terrain, wetBank, wetRimMask * (1.0 - waterMask * 0.75) * 0.68);
+        float shoreBreak = (meadowNoise(p * 0.16) * 0.62 + meadowNoise(p * 0.48) * 0.38 - 0.5) * 0.11;
+        float wEff = clamp(waterRaw + shoreBreak, 0.0, 1.0);
 
-        // Calm painterly seafoam-turquoise shallows deepening to serene woodland teal lake heart
-        float flow = u.sunTime.w * 7.5;
-        float ripple1 = meadowNoise(float2(p.x * 0.13 + sin(p.y * 0.06 + u.sunTime.w * 0.6) * 1.3, p.y * 0.08 - flow * 0.22));
-        float ripple2 = meadowNoise(float2(p.x * 0.24 - flow * 0.08, p.y * 0.15 - flow * 0.34 + 7.1));
-        float depth = smoothstep(0.36, 0.90, waterRaw);
-        float3 shallowCol = float3(0.24, 0.52, 0.51);
-        float3 midCol = float3(0.16, 0.41, 0.45);
-        float3 deepCol = float3(0.10, 0.29, 0.36);
-        float3 water = mix(mix(shallowCol, midCol, smoothstep(0.0, 0.55, depth)), deepCol, smoothstep(0.45, 1.0, depth));
+        // 3a. Natural wet darkened ground & river-worn pebble shore (no cartoonish bright cream stripe!)
+        float wetShore = smoothstep(0.02, 0.24, wEff);
+        float waterSurface = smoothstep(0.21, 0.34, wEff);
+        float pebblePat = meadowVoronoiStone(p * 0.19);
+        float3 wetStones = mix(float3(0.20, 0.21, 0.17), float3(0.36, 0.35, 0.28), pebblePat * 0.7 + meadowNoise(p * 0.35) * 0.3);
+        // Darken real terrain where water soaks the bank + blend natural wet riverbank stones
+        float3 soakedGround = mix(terrain * 0.62, wetStones, smoothstep(0.10, 0.25, wEff) * 0.65);
+        // Recessed riverbank shadow cast along NW/N edge by top-left sun
+        float bankShadow = 1.0 - smoothstep(0.16, 0.30, wEff) * (1.0 - smoothstep(0.32, 0.52, wEff)) * clamp(-terrainNormal.x * 1.4 - terrainNormal.y * 1.4, 0.0, 1.0) * 0.48;
+        terrain = mix(terrain, soakedGround * bankShadow, wetShore * (1.0 - waterSurface * 0.85));
 
-        // Gentle sunlit water ripples & subtle shallow shore foam glint
-        float caustic = smoothstep(0.64, 0.88, ripple1 * 0.58 + ripple2 * 0.42);
-        water = mix(water, float3(0.72, 0.87, 0.84), caustic * (0.28 + (1.0 - depth) * 0.16));
-        float shoreFoam = smoothstep(0.30, 0.42, waterRaw) * (1.0 - smoothstep(0.42, 0.55, waterRaw)) * smoothstep(0.42, 0.75, ripple2);
-        water = mix(water, float3(0.80, 0.90, 0.87), shoreFoam * 0.38);
+        if (waterSurface > 0.005) {
+            // 3b. Dual-phase flow-map UV advection (seamless infinite downstream motion!)
+            float cycleRate = 0.38;
+            float ph0 = fract(t * cycleRate);
+            float ph1 = fract(t * cycleRate + 0.5);
+            float blend = abs(2.0 * ph0 - 1.0);
+            float2 flowStep = flowUnit * (flowSpeed * 42.0);
+            float2 q0 = (p - flowStep * ph0) * 0.082;
+            float2 q1 = (p - flowStep * ph1) * 0.082 + float2(11.3, 5.7);
 
-        terrain = mix(terrain, water, waterMask * 0.94);
+            // Analytical water surface normal from dual-phase wave heightfield
+            float hC = mix(meadowWaveHeight(q0, t), meadowWaveHeight(q1, t), blend);
+            float hX = mix(meadowWaveHeight(q0 + float2(0.18, 0.0), t), meadowWaveHeight(q1 + float2(0.18, 0.0), t), blend);
+            float hY = mix(meadowWaveHeight(q0 + float2(0.0, 0.18), t), meadowWaveHeight(q1 + float2(0.0, 0.18), t), blend);
+            float waveAmp = mix(1.35, 2.55, turb);
+            float3 waterNormal = normalize(float3((hC - hX) * waveAmp, (hC - hY) * waveAmp, 1.0));
+
+            // 3c. Underwater refracted riverbed (submerged pebbles, silt & moss visible through clear shallows!)
+            float depth = smoothstep(0.22, 0.94, wEff);
+            float2 refractP = p + waterNormal.xy * (10.0 + depth * 12.0);
+            float bedPebble = meadowVoronoiStone(refractP * 0.15) * 0.65 + meadowVoronoiStone(refractP * 0.36) * 0.35;
+            float bedTone = meadowNoise(refractP * 0.065);
+            float3 riverBed = mix(float3(0.16, 0.18, 0.13), float3(0.39, 0.37, 0.27), bedPebble * 0.68 + bedTone * 0.32);
+
+            // Shimmering animated sunlight caustics dancing over the shallow/mid riverbed
+            float c0 = meadowNoise(q0 * 2.1 + waterNormal.xy * 1.4);
+            float c1 = meadowNoise(q1 * 2.1 + waterNormal.xy * 1.4 + 4.2);
+            float caustRaw = mix(c0, c1, blend);
+            float caustics = pow(smoothstep(0.46, 0.88, caustRaw), 2.4) * (1.0 - depth * 0.72) * (0.45 + cloud * 0.55);
+            riverBed += float3(0.22, 0.25, 0.18) * caustics * 0.85;
+
+            // 3d. Physically-inspired Beer-Lambert depth absorption (crystal olive-clear -> rich alpine slate-emerald!)
+            float opticalDepth = depth * 1.85;
+            float3 transmittance = exp(-opticalDepth * float3(2.85, 1.38, 1.18));
+            float3 deepScatter = mix(float3(0.065, 0.175, 0.185), float3(0.032, 0.095, 0.125), smoothstep(0.35, 1.0, depth));
+            float3 waterBody = riverBed * transmittance + deepScatter * (1.0 - transmittance);
+
+            // 3e. Fresnel sky, cloud & dark overhanging forest-canopy reflection
+            float3 viewDir = normalize(float3(0.0, 0.44, 0.90));
+            float fresnel = pow(1.0 - clamp(dot(waterNormal, viewDir), 0.0, 1.0), 2.6);
+            float skyPatch = smoothstep(0.28, 0.80, meadowNoise((p * 0.008) + waterNormal.xy * 0.65 - float2(t * 0.06, t * 0.02)));
+            float3 skyRefl = mix(float3(0.14, 0.22, 0.19), float3(0.56, 0.65, 0.64), skyPatch * (0.45 + cloud * 0.55));
+            // Darken reflection right under north/west shoreline banks (trees & cliffs reflecting in edge water!)
+            float bankEdge = 1.0 - smoothstep(0.22, 0.44, wEff);
+            skyRefl = mix(skyRefl, float3(0.07, 0.12, 0.09), bankEdge * 0.55);
+            float3 waterCol = mix(waterBody, skyRefl, clamp(0.14 + fresnel * 0.56, 0.0, 0.64));
+
+            // 3f. Crisp golden sunlight specular wave glints twinkling downstream
+            float3 sunDirW = normalize(float3(-0.62, -0.52, 0.58));
+            float3 halfVec = normalize(sunDirW + viewDir);
+            float spec = pow(max(dot(waterNormal, halfVec), 0.0), 42.0) * (0.35 + cloud * 0.75);
+            float microSpec = pow(smoothstep(0.68, 0.94, hC), 4.0) * (0.18 + turb * 0.35) * (0.4 + cloud * 0.6);
+            waterCol += float3(0.95, 0.91, 0.76) * (spec * 0.72 + microSpec * 0.28);
+
+            // 3g. Animated waterfall plunge-pool concentric churn rings & narrow rapid white-water streaks!
+            float foam = 0.0;
+            // Subtle aerated current ribbons in fast river rapids
+            if (turb > 0.18) {
+                float streak0 = meadowNoise(float2(dot(p, float2(-flowUnit.y, flowUnit.x)) * 0.18,
+                                                 dot(p, flowUnit) * 0.055 - t * 2.2));
+                float streak1 = meadowNoise(float2(dot(p, float2(-flowUnit.y, flowUnit.x)) * 0.30 + 5.1,
+                                                 dot(p, flowUnit) * 0.09 - t * 3.1));
+                float rapidFoam = smoothstep(0.62, 0.86, streak0 * 0.58 + streak1 * 0.42) * smoothstep(0.18, 0.62, turb) * smoothstep(0.28, 0.55, wEff);
+                foam = max(foam, rapidFoam * 0.42);
+            }
+            // Churning concentric splash rings expanding outward from the exact waterfall impact point!
+            if (biome.plunge.z > 0.5) {
+                float2 dp = (p - biome.plunge.xy) * float2(0.88, 1.18);
+                float pd = length(dp);
+                if (pd < 68.0) {
+                    float falloff = (1.0 - smoothstep(6.0, 62.0, pd));
+                    float ringWave = 0.5 + 0.5 * sin(pd * 0.36 - t * 6.8 + hC * 4.2);
+                    float splashNoise = meadowNoise(dp * 0.14 - float2(0.0, t * 2.6));
+                    float coreChurn = (1.0 - smoothstep(4.0, 26.0, pd)) * smoothstep(0.32, 0.76, splashNoise);
+                    float outerRings = pow(ringWave, 3.2) * falloff * smoothstep(0.36, 0.78, splashNoise);
+                    foam = max(foam, clamp(coreChurn * 0.88 + outerRings * 0.62, 0.0, 0.92));
+                }
+            }
+            // Delicate broken water-lip froth right along shallow rocky edges
+            float edgeFroth = smoothstep(0.22, 0.30, wEff) * (1.0 - smoothstep(0.30, 0.40, wEff)) * smoothstep(0.56, 0.84, hC) * (0.20 + turb * 0.45);
+            foam = max(foam, edgeFroth * 0.45);
+
+            float3 foamCol = mix(float3(0.76, 0.83, 0.81), float3(0.94, 0.95, 0.90), 0.35 + cloud * 0.65);
+            waterCol = mix(waterCol, foamCol, clamp(foam, 0.0, 0.88));
+
+            terrain = mix(terrain, waterCol, waterSurface);
+        }
     }
 
-    float cloud = smoothstep(0.25, 0.76, meadowNoise((p - float2(u.sunTime.w * 14, u.sunTime.w * 5)) * 0.0065));
     float light = 0.65 + cloud * 0.36 + exp(-length(p - float2(-100, -170)) * 0.0012) * 0.07;
     float3 base = terrain * light;
     float visibility = labVisibility(in.world, u, shadowMap);
