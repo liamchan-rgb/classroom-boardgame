@@ -19,7 +19,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
     private var lastUIState:UIState?
     private func publishChanges(){
         let c=campaign,state=c?.engine.state
-        let next=UIState(gameID:state?.gameID,surface:surface,historyID:c?.engine.history.last?.id,historyCount:c?.engine.history.count ?? 0,movement:Int(ceil(c?.movementRemaining ?? 0)),current:state?.battle?.current,pauses:state?.pauseReasons ?? [],busy:busy,ready:ready,moving:c?.isMoving ?? false,travel:c?.travel != nil,player:c?.selectedPlayerID)
+        let next=UIState(gameID:state?.gameID,surface:surface,historyID:c?.engine.history.last?.id,historyCount:c?.engine.history.count ?? 0,movement:c.map{MeadowMovementRules.steps($0.movementRemaining)} ?? 0,current:state?.battle?.current,pauses:state?.pauseReasons ?? [],busy:busy,ready:ready,moving:c?.isMoving ?? false,travel:c?.travel != nil,player:c?.selectedPlayerID)
         if next != lastUIState {lastUIState=next;revision += 1}
     }
     /// While the GPU live mirror is on screen, the image mirror (map readback + overlay capture) is not needed at all.
@@ -107,10 +107,11 @@ final class MeadowTeacherCoordinator:ObservableObject {
     /// Kept strongly: the dock only holds a copy of its view, so nothing else keeps the panel (and closing it
     /// must still find it).
     private var dockPanel:UIViewController?
-    func presentPanel(_ panel:UIViewController,size:CGSize,dock:Bool=false){
+    func presentPanel(_ panel:UIViewController,size:CGSize,dock:Bool=false,instant:Bool=false){
         if dock,let content=(panel as? DockablePanel)?.dockContent() {
             quizPanel=panel;dockPanel=panel
-            withAnimation(.easeOut(duration:0.2)){dockContent=content}
+            if instant && dockContent != nil {dockContent=content}
+            else {withAnimation(.easeOut(duration:0.2)){dockContent=content}}
             return
         }
         panel.modalPresentationStyle = .formSheet;panel.preferredContentSize=size
@@ -268,17 +269,17 @@ final class MeadowTeacherCoordinator:ObservableObject {
         }
         challengeAsk(i)
     }
-    func challengeAsk(_ i:Int){
+    func challengeAsk(_ i:Int,instant:Bool=false){
         guard let c=campaign,let model=challenge,model.phase != .finished,model.remaining>0,c.quizBank.indices.contains(i) else{return}
         model.note=nil;model.phase = .question;model.questionStart=Date()
         quizToken += 1
         let shown=presented(i)
         model.pause()
         quiz=LiveQuiz(token:quizToken,index:i,question:shown.question,mode:.challenge,player:model.player,playerName:model.name,place:"个人挑战",node:nil,start:Date(),
-                      countdown:QuizCountdown{[weak model] in model?.remaining ?? 0},shuffle:shown.shuffle)
+                      countdown:QuizCountdown{[weak model] in model?.remaining ?? 0},shuffle:shown.shuffle,instant:instant)
         // The clock runs from when the card is in until the answer is picked.
         let token=quizToken
-        DispatchQueue.main.asyncAfter(deadline:.now()+MeadowQuizCard.entrance){[weak self,weak model] in
+        DispatchQueue.main.asyncAfter(deadline:.now()+(instant ? 0:MeadowQuizCard.entrance)){[weak self,weak model] in
             guard let self,let model,self.challenge === model,model.phase == .question,self.quiz?.token==token,self.quiz?.attempt==nil else{return}
             model.resume()
         }
@@ -425,22 +426,23 @@ final class MeadowTeacherCoordinator:ObservableObject {
     func askNoteCard(at index:Int,englishFront:Bool=false){
         guard let c=campaign,c.quizBank.indices.contains(index),canSwitchNotesFlashcard else{return}
         if let live=quiz,live.index==index,live.attempt==nil,live.question.type == .flashcard {return}
+        let instant=quiz != nil
         if let model=practiceModel {
             model.waiting=false;model.note=nil
-            rebuildDeck(keeping:index);showPracticeCard()
+            rebuildDeck(keeping:index);showPracticeCard(instant:instant)
             return
         }
         if let model=challenge,model.phase != .finished {
-            challengeAsk(index)
+            challengeAsk(index,instant:instant)
             return
         }
         noteCardIndex=index
-        openClassQuiz(index:index,englishFront:englishFront)
+        openClassQuiz(index:index,englishFront:englishFront,instant:instant)
     }
 
     /// ⇧Q: a question to the whole class (drawn the teacher's way, or picked from the list); the teacher picks who
     /// answered and sends rewards by hand.
-    func openClassQuiz(index:Int?=nil,excluding:Set<Int>=[],englishFront:Bool=false){
+    func openClassQuiz(index:Int?=nil,excluding:Set<Int>=[],englishFront:Bool=false,instant:Bool=false){
         // No trip open yet: the launcher offers to continue the last one.
         if campaign == nil {openQuiz();return}
         // Replacing the class picker, a completed class reveal, or an active classwide flashcard.
@@ -450,18 +452,21 @@ final class MeadowTeacherCoordinator:ObservableObject {
             classPicker=nil;classModel=nil;quizDraft=nil;quizReward=nil;skippedPrompt=nil
             if let panel=quizPanel {
                 if panel===dockPanel {
-                    quizPanel=nil;dockPanel=nil;dockContent=nil
+                    quizPanel=nil;dockPanel=nil
+                    if !instant {dockContent=nil}
                 } else {
-                    closePanel{[weak self] in self?.quiz=nil;self?.openClassQuiz(index:index,excluding:excluding,englishFront:englishFront)};return
+                    closePanel{[weak self] in self?.quiz=nil;self?.openClassQuiz(index:index,excluding:excluding,englishFront:englishFront,instant:instant)};return
                 }
             }
-            quiz=nil
+            if !instant {quiz=nil}
+        } else if quiz != nil || quizPanel != nil {
+            return
         }
-        guard let c=campaign,quiz == nil,quizPanel == nil,presentationHost != nil else{return}
-        guard !c.courseIndices.isEmpty else{message="当前课程没有题，先在题库里选课或导入。";revision += 1;return}
-        if index == nil,QuizDrawSettings.shared.draw == nil {openClassPicker();return}
+        guard let c=campaign,presentationHost != nil else{return}
+        guard !c.courseIndices.isEmpty else{quiz=nil;dockContent=nil;message="当前课程没有题，先在题库里选课或导入。";revision += 1;return}
+        if index == nil,QuizDrawSettings.shared.draw == nil {quiz=nil;openClassPicker();return}
         guard let i=index ?? QuizDrawSettings.shared.draw.flatMap({c.drawQuestion($0,for:nil,excluding:excluding)}) else{
-            message="这一档没有题，换个出题方式或难度。";revision += 1;openClassPicker();return
+            quiz=nil;message="这一档没有题，换个出题方式或难度。";revision += 1;openClassPicker();return
         }
         flushPendingSkippedMiniGame()
         quizToken += 1
@@ -472,7 +477,9 @@ final class MeadowTeacherCoordinator:ObservableObject {
         if englishFront,q.type == .flashcard,q.prompt.range(of:"[A-Za-z]",options:.regularExpression)==nil,let w=QuizReport.word(q,part:0),let meaning=w.meaning {
             q.prompt=w.word;q.items=[QuizItem(options:[meaning],answer:0)]
         }
-        withAnimation(.easeOut(duration:0.2)){quiz=LiveQuiz(token:quizToken,index:i,question:q,mode:.classwide,player:"",playerName:"全班",place:"全班题",node:nil,start:start,shuffle:shown.shuffle)}
+        let nextQuiz=LiveQuiz(token:quizToken,index:i,question:q,mode:.classwide,player:"",playerName:"全班",place:"全班题",node:nil,start:start,shuffle:shown.shuffle,instant:instant)
+        if instant {quiz=nextQuiz}
+        else {withAnimation(.easeOut(duration:0.2)){quiz=nextQuiz}}
         let draft=QuizAnswerDraft(q),reward=QuizManualReward(q),model=ClassQuizModel()
         quizDraft=draft;quizReward=reward;classModel=model
         let other={[weak self,weak model] in
@@ -509,7 +516,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
             }
             return true
         }
-        presentPanel(panel,size:CGSize(width:780,height:q.type == .reading ? 820:680),dock:true)
+        presentPanel(panel,size:CGSize(width:780,height:q.type == .reading ? 820:680),dock:true,instant:instant)
     }
     /// 老师点选 (or a draw that found nothing): the class question list in the dock.
     private func openClassPicker(){
@@ -695,7 +702,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
         if current == nil {showPracticeCard()}
     }
     /// Shows the card at the deck position (the teacher's pick, or the next one).
-    private func showPracticeCard(){
+    private func showPracticeCard(instant:Bool=false){
         guard let c=campaign,let model=practiceModel else{return}
         guard !model.deck.isEmpty else{withAnimation{quiz=nil};return}
         model.cursor=(model.cursor%model.deck.count+model.deck.count)%model.deck.count
@@ -703,9 +710,9 @@ final class MeadowTeacherCoordinator:ObservableObject {
         quizToken += 1;model.waiting=false
         if model.classwide {
             model.players=[];model.note=nil
-            quiz=LiveQuiz(token:quizToken,index:i,question:c.quizBank[i],mode:.practice,player:"",playerName:"全班",place:"全班闪卡",node:nil,start:Date())
+            quiz=LiveQuiz(token:quizToken,index:i,question:c.quizBank[i],mode:.practice,player:"",playerName:"全班",place:"全班闪卡",node:nil,start:Date(),instant:instant)
         } else if let unit=c.engine.state.units[model.player] {
-            quiz=LiveQuiz(token:quizToken,index:i,question:c.quizBank[i],mode:.practice,player:model.player,playerName:unit.shortName,place:"闪卡练习",node:nil,start:Date())
+            quiz=LiveQuiz(token:quizToken,index:i,question:c.quizBank[i],mode:.practice,player:model.player,playerName:unit.shortName,place:"闪卡练习",node:nil,start:Date(),instant:instant)
         }
     }
     /// After a card is marked: the next one (a shuffled deck is shuffled again at the end of each round).

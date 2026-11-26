@@ -175,4 +175,27 @@ final class ClassroomGMTests:XCTestCase {
             XCTAssertLessThan(CGFloat(l.rows.count)*l.card.height,tv.height*0.25)
         }
     }
+
+    func testGameCompactCardsStayBottomRightCompactAcrossPartySizes()throws {
+        let hosts=[CGSize(width:1920,height:1080),CGSize(width:1280,height:720),CGSize(width:670,height:377)]
+        XCTAssertNil(ClassroomBookStatusLayout.compactCards(in:hosts[0],players:0))
+        XCTAssertNil(ClassroomBookStatusLayout.compactCards(in:.zero,players:3))
+        XCTAssertEqual(ClassroomBookStatusLayout.compactCards(in:hosts[0],players:2)?.rows,[2])
+        XCTAssertEqual(ClassroomBookStatusLayout.compactCards(in:hosts[0],players:4)?.rows,[4])
+        XCTAssertEqual(ClassroomBookStatusLayout.compactCards(in:hosts[0],players:5)?.rows,[3,2])
+        XCTAssertEqual(ClassroomBookStatusLayout.compactCards(in:hosts[0],players:7)?.rows,[4,3])
+        for host in hosts {
+            for n in 1...7 {
+                let compact=try XCTUnwrap(ClassroomBookStatusLayout.compactCards(in:host,players:n))
+                let book=try XCTUnwrap(ClassroomBookStatusLayout.cards(in:host,players:n))
+                let columns=compact.rows.max()!
+                let stripWidth=CGFloat(columns)*compact.card.width+CGFloat(columns-1)*compact.spacing
+                let stripHeight=CGFloat(compact.rows.count)*compact.card.height+CGFloat(compact.rows.count-1)*compact.spacing
+                XCTAssertLessThanOrEqual(compact.card.width,book.card.width+0.001)
+                XCTAssertLessThanOrEqual(compact.card.height,book.card.height+0.001)
+                XCTAssertLessThanOrEqual(stripWidth,host.width*0.62+0.01)
+                XCTAssertLessThan(stripHeight,host.height*0.25)
+            }
+        }
+    }
 }

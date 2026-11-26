@@ -33,6 +33,7 @@ private struct TeacherBookConsole:View {
     @ObservedObject var game:MeadowTeacherCoordinator
     var showGame:()->Void={}
     @State private var importingBackup=false
+    @State private var notesSelection:NotesSelectionTarget?
     @State private var report=false
     @State private var exportingURL:URL?
     @State private var decks=false
@@ -125,10 +126,22 @@ private struct TeacherBookConsole:View {
                             onEdit:{session.editNote($0)},
                             onFocus:{session.notesFocus($0)},
                             onPick:{pick,rect,view in game.openWordCard(pick,rect:rect,in:view)},
-                            onPickSelection:{selection,rect,view in game.openSelectionCard(selection,rect:rect,in:view)}
+                            onPickSelection:{selection,rect,view in game.openSelectionCard(selection,rect:rect,in:view)},
+                            onSelectionChange:{notesSelection=$0}
                         )
                         .onAppear{NotesDictionary.shared.prewarm()}
                     }
+                    .overlay {
+                        if let target=notesSelection,session.state.pageCount > 0 {
+                            NotesSelectionBubble(
+                                target:target,
+                                inDeck:game.existingSelectionCard(target.term) != nil,
+                                replacing:game.quiz != nil,
+                                onTrigger:{target.trigger()}
+                            )
+                        }
+                    }
+                    .zIndex(2)
                     .frame(maxWidth:.infinity,maxHeight:.infinity)
                     .padding(6)
                     .background(.white.opacity(0.35),in:RoundedRectangle(cornerRadius:12,style:.continuous))

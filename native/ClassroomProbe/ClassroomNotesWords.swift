@@ -76,10 +76,22 @@ extension NotesMarkup {
     }
 }
 
-/// Editable rich-text UITextView supporting Cmd+B / Cmd+U formatting, double-click word cards, and K on selection.
+/// Highlighted phrase in the notes ready for the floating quick-flashcard bubble or pressing K.
+struct NotesSelectionTarget: Equatable {
+    var term: String
+    var rect: CGRect
+    var trigger: () -> Void
+    static func == (lhs: NotesSelectionTarget, rhs: NotesSelectionTarget) -> Bool {
+        lhs.term == rhs.term && abs(lhs.rect.minX - rhs.rect.minX) < 0.5 && abs(lhs.rect.minY - rhs.rect.minY) < 0.5 && abs(lhs.rect.width - rhs.rect.width) < 0.5 && abs(lhs.rect.height - rhs.rect.height) < 0.5
+    }
+}
+
+/// Editable rich-text UITextView supporting Cmd+B / Cmd+U formatting, double-click word cards, and K / bubble on selection.
 final class NotesTextView: UITextView {
     var onTriggerSelection: ((String, CGRect, UIView) -> Void)?
+    var onSelectionChange: ((NotesSelectionTarget?) -> Void)?
     var suppressKUntil: TimeInterval = 0
+    var suppressSelectionBubbleUntil: TimeInterval = 0
 
     override var keyCommands: [UIKeyCommand]? {
         var cmds = (super.keyCommands ?? []).filter {
@@ -109,42 +121,104 @@ final class NotesTextView: UITextView {
     }
 
     override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
-        if selectedRange.length > 0, markedTextRange == nil, presses.count == 1,
+        if markedTextRange == nil, presses.count == 1,
            let key = presses.first?.key,
-           key.modifierFlags.intersection([.command, .control, .alternate, .shift]).isEmpty,
+           key.modifierFlags.intersection([.command, .control, .alternate]).isEmpty,
            key.charactersIgnoringModifiers.lowercased() == "k",
            triggerSelectionFlashcard() {
-            suppressKUntil = ProcessInfo.processInfo.systemUptime + 0.08
+            suppressKUntil = ProcessInfo.processInfo.systemUptime + 0.15
             return
         }
         super.pressesBegan(presses, with: event)
     }
 
-    private func triggerSelectionFlashcard() -> Bool {
-        let range = selectedRange
-        guard range.length > 0, NSMaxRange(range) <= (text as NSString).length else { return false }
-        let selected = (text as NSString).substring(with: range)
-        let cleaned = ClassroomDictionary.normalizedTerm(selected)
-        guard !cleaned.isEmpty else { return false }
-        var rect = CGRect(x: bounds.midX, y: bounds.midY, width: 1, height: 1)
-        if let textRange = selectedTextRange {
-            let first = firstRect(for: textRange)
-            if !first.isNull && !first.isEmpty { rect = first }
+    override func insertText(_ text: String) {
+        if interceptSelectionKIfNeeded(text) { return }
+        super.insertText(text)
+    }
+
+    override func setMarkedText(_ markedText: String?, selectedRange: NSRange) {
+        if let markedText, interceptSelectionKIfNeeded(markedText) { return }
+        super.setMarkedText(markedText, selectedRange: selectedRange)
+    }
+
+    func shouldInterceptSelectionK(in range: NSRange, replacementText text: String) -> Bool {
+        guard text.lowercased() == "k" else { return false }
+        if ProcessInfo.processInfo.systemUptime < suppressKUntil { return true }
+        guard markedTextRange == nil, let info = selectionCardInfo(in: range) else { return false }
+        suppressKUntil = ProcessInfo.processInfo.systemUptime + 0.15
+        DispatchQueue.main.async { [weak self] in
+            self?.completeSelectionTrigger(info)
         }
+        return true
+    }
+
+    private func interceptSelectionKIfNeeded(_ text: String) -> Bool {
+        guard text.lowercased() == "k" else { return false }
+        if ProcessInfo.processInfo.systemUptime < suppressKUntil { return true }
+        guard markedTextRange == nil, triggerSelectionFlashcard() else { return false }
+        suppressKUntil = ProcessInfo.processInfo.systemUptime + 0.15
+        return true
+    }
+
+    func selectionCardInfo(in customRange: NSRange? = nil) -> (term: String, rect: CGRect, range: NSRange)? {
+        guard markedTextRange == nil else { return nil }
+        let range = customRange ?? selectedRange
+        let ns = text as NSString
+        guard range.length > 0, NSMaxRange(range) <= ns.length else { return nil }
+        let selected = ns.substring(with: range)
+        let cleaned = ClassroomDictionary.normalizedTerm(selected)
+        guard !cleaned.isEmpty,
+              cleaned.unicodeScalars.contains(where: { CharacterSet.letters.contains($0) && $0.isASCII }) else { return nil }
+        var rect = CGRect(x: bounds.midX, y: bounds.midY, width: 1, height: 1)
+        if let startPos = position(from: beginningOfDocument, offset: range.location),
+           let endPos = position(from: startPos, offset: range.length),
+           let textRange = textRange(from: startPos, to: endPos) {
+            let rects = selectionRects(for: textRange)
+                .map { convert($0.rect, from: textInputView) }
+                .filter { !$0.isNull && !$0.isEmpty && $0.width.isFinite && $0.height.isFinite }
+            if let first = rects.first {
+                rect = rects.dropFirst().reduce(first) { $0.union($1) }
+            } else {
+                let fallback = convert(firstRect(for: textRange), from: textInputView)
+                if !fallback.isNull && !fallback.isEmpty { rect = fallback }
+            }
+        }
+        return (cleaned, rect, range)
+    }
+
+    func currentSelectionTarget() -> NotesSelectionTarget? {
+        guard ProcessInfo.processInfo.systemUptime >= suppressSelectionBubbleUntil,
+              let info = selectionCardInfo() else { return nil }
+        return NotesSelectionTarget(term: info.term, rect: info.rect) { [weak self] in
+            self?.triggerSelectionFlashcard()
+        }
+    }
+
+    @discardableResult
+    func triggerSelectionFlashcard() -> Bool {
+        guard let info = selectionCardInfo() else { return false }
+        completeSelectionTrigger(info)
+        return true
+    }
+
+    private func completeSelectionTrigger(_ info: (term: String, rect: CGRect, range: NSRange)) {
+        suppressSelectionBubbleUntil = ProcessInfo.processInfo.systemUptime + 0.15
+        onSelectionChange?(nil)
         let hostWindow = window
-        selectedRange = NSRange(location: range.location, length: 0)
+        selectedRange = NSRange(location: info.range.location, length: 0)
         resignFirstResponder()
         if hostWindow?.rootViewController?.presentedViewController == nil {
             hostWindow?.rootViewController?.becomeFirstResponder()
         }
-        onTriggerSelection?(cleaned, rect, self)
+        onTriggerSelection?(info.term, info.rect, self)
         DispatchQueue.main.async { [weak self, weak hostWindow] in
+            self?.onSelectionChange?(nil)
             self?.resignFirstResponder()
             if hostWindow?.rootViewController?.presentedViewController == nil {
                 hostWindow?.rootViewController?.becomeFirstResponder()
             }
         }
-        return true
     }
 
     private func applyStyleToggle(bold: Bool) {
@@ -256,7 +330,7 @@ struct NotesWordPick: Identifiable {
 }
 
 /// The teacher's notes: directly editable rich text (bold / underline) without exposing raw markers;
-/// double-click an English word (or any word of a compound card) or highlight a phrase and press K to summon a flashcard.
+/// double-click an English word (or any word of a compound card) or highlight a phrase to trigger via bubble or K.
 struct NotesWordText: UIViewRepresentable {
     let raw: String
     var editable: Bool = true
@@ -264,6 +338,7 @@ struct NotesWordText: UIViewRepresentable {
     var onFocus: (Bool) -> Void
     var onPick: (NotesWordPick, CGRect, UIView) -> Void
     var onPickSelection: (String, CGRect, UIView) -> Void
+    var onSelectionChange: (NotesSelectionTarget?) -> Void = { _ in }
 
     func makeCoordinator() -> Coordinator { Coordinator() }
     func makeUIView(context: Context) -> NotesTextView {
@@ -287,11 +362,14 @@ struct NotesWordText: UIViewRepresentable {
         context.coordinator.onEdit = onEdit
         context.coordinator.onFocus = onFocus
         context.coordinator.onPick = onPick
+        context.coordinator.onSelectionChange = onSelectionChange
         v.onTriggerSelection = onPickSelection
+        v.onSelectionChange = onSelectionChange
         if context.coordinator.raw != raw {
             context.coordinator.raw = raw
             v.attributedText = NotesMarkup.uiText(raw)
             v.typingAttributes = [.font: UIFont.systemFont(ofSize: NotesMarkup.fontSize), .foregroundColor: UIColor.label]
+            DispatchQueue.main.async { onSelectionChange(nil) }
         }
     }
     final class Coordinator: NSObject, UITextViewDelegate, UIGestureRecognizerDelegate {
@@ -299,12 +377,21 @@ struct NotesWordText: UIViewRepresentable {
         var onEdit: ((String) -> Void)?
         var onFocus: ((Bool) -> Void)?
         var onPick: ((NotesWordPick, CGRect, UIView) -> Void)?
+        var onSelectionChange: ((NotesSelectionTarget?) -> Void)?
 
-        func textViewDidBeginEditing(_ textView: UITextView) { onFocus?(true) }
-        func textViewDidEndEditing(_ textView: UITextView) { onFocus?(false) }
+        func textViewDidBeginEditing(_ textView: UITextView) {
+            onFocus?(true)
+            publishSelection(textView)
+        }
+        func textViewDidEndEditing(_ textView: UITextView) {
+            onFocus?(false)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) { [weak self, weak textView] in
+                guard let self, let tv = textView as? NotesTextView else { return }
+                if !tv.isFirstResponder || tv.selectedRange.length == 0 { self.onSelectionChange?(nil) }
+            }
+        }
         func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
-            if let notesView = textView as? NotesTextView, range.length > 0, text.lowercased() == "k",
-               ProcessInfo.processInfo.systemUptime < notesView.suppressKUntil {
+            if let notesView = textView as? NotesTextView, notesView.shouldInterceptSelectionK(in: range, replacementText: text) {
                 return false
             }
             return true
@@ -314,10 +401,21 @@ struct NotesWordText: UIViewRepresentable {
             let encoded = NotesMarkup.raw(from: textView.attributedText)
             raw = encoded
             onEdit?(encoded)
+            publishSelection(textView)
+        }
+        func textViewDidChangeSelection(_ textView: UITextView) { publishSelection(textView) }
+        func scrollViewDidScroll(_ scrollView: UIScrollView) {
+            if let tv = scrollView as? UITextView { publishSelection(tv) }
+        }
+
+        private func publishSelection(_ textView: UITextView) {
+            guard let notesView = textView as? NotesTextView else { return }
+            let target = (notesView.isFirstResponder || notesView.window == nil) ? notesView.currentSelectionTarget() : nil
+            onSelectionChange?(target)
         }
 
         @objc func doubleTap(_ g: UITapGestureRecognizer) {
-            guard let v = g.view as? UITextView, let pos = v.closestPosition(to: g.location(in: v)) else { return }
+            guard let v = g.view as? NotesTextView, let pos = v.closestPosition(to: g.location(in: v)) else { return }
             let location = v.offset(from: v.beginningOfDocument, to: pos)
             guard let pick = NotesWordPick.at(location, in: v.text) else { return }
             // The word's rectangle, for the popover arrow.
@@ -326,6 +424,8 @@ struct NotesWordText: UIViewRepresentable {
                 ?? v.tokenizer.rangeEnclosingPosition(pos, with: .word, inDirection: UITextDirection(rawValue: UITextStorageDirection.backward.rawValue)) {
                 rect = v.firstRect(for: r)
             }
+            v.suppressSelectionBubbleUntil = ProcessInfo.processInfo.systemUptime + 0.15
+            onSelectionChange?(nil)
             let hostWindow = v.window
             v.selectedRange = NSRange(location: location, length: 0)
             v.resignFirstResponder()
@@ -333,7 +433,8 @@ struct NotesWordText: UIViewRepresentable {
                 hostWindow?.rootViewController?.becomeFirstResponder()
             }
             onPick?(pick, rect, v)
-            DispatchQueue.main.async { [weak v, weak hostWindow] in
+            DispatchQueue.main.async { [weak self, weak v, weak hostWindow] in
+                self?.onSelectionChange?(nil)
                 guard let v else { return }
                 v.selectedRange = NSRange(location: min(location, (v.text as NSString).length), length: 0)
                 v.resignFirstResponder()
@@ -343,6 +444,56 @@ struct NotesWordText: UIViewRepresentable {
             }
         }
         func gestureRecognizer(_ g: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer) -> Bool { true }
+    }
+}
+
+/// Floating quick-quiz bubble above (or below) any selected compound word / phrase in the notes box.
+struct NotesSelectionBubble: View {
+    let target: NotesSelectionTarget
+    let inDeck: Bool
+    let replacing: Bool
+    let onTrigger: () -> Void
+    @State private var size = CGSize(width: 140, height: 32)
+    var body: some View {
+        GeometryReader { geo in
+            let x = max(2, min(max(2, geo.size.width - size.width - 2), target.rect.midX - size.width / 2))
+            let aboveY = target.rect.minY - size.height - 6
+            let belowY = min(max(2, geo.size.height - size.height - 2), target.rect.maxY + 6)
+            let y = aboveY >= 2 ? aboveY : belowY
+            ZStack(alignment: .topLeading) {
+                Button(action: onTrigger) {
+                    HStack(spacing: 5) {
+                        Image(systemName: inDeck ? "rectangle.on.rectangle.angled" : "sparkles")
+                            .font(.caption.weight(.bold))
+                        Text("\(inDeck && replacing ? "换" : "出")「\(target.term)」")
+                            .font(.caption.weight(.bold))
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                        Text("K")
+                            .font(.caption2.weight(.heavy).monospaced())
+                            .padding(.horizontal, 5).padding(.vertical, 1)
+                            .background(.white.opacity(0.22), in: Capsule())
+                    }
+                    .padding(.horizontal, 10).padding(.vertical, 6)
+                    .foregroundStyle(.white)
+                    .background(Capsule().fill(LinearGradient(
+                        colors: [GameTheme.primary, GameTheme.primary.opacity(0.88)],
+                        startPoint: .top, endPoint: .bottom
+                    )))
+                    .overlay(Capsule().stroke(.white.opacity(0.45), lineWidth: 1))
+                    .shadow(color: .black.opacity(0.22), radius: 8, y: 3)
+                }
+                .buttonStyle(.plain)
+                .frame(maxWidth: max(120, geo.size.width - 6))
+                .background(GeometryReader { b in
+                    Color.clear
+                        .onAppear { size = b.size }
+                        .onChange(of: b.size) { _, next in size = next }
+                })
+                .offset(x: x, y: y)
+                .help("点击快速出闪卡（或按 K）")
+            }
+        }
     }
 }
 

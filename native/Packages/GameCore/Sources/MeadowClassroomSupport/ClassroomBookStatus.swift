@@ -40,6 +40,19 @@ public enum ClassroomBookStatusLayout {
         let width=max(80,min(host.width*0.24,height*2.8,fit))
         return ClassroomBookCardLayout(rows:rows,card:CGSize(width:width,height:height),spacing:spacing)
     }
+    /// Compact frosted player strip in the bottom-right corner of the game map: tighter than the book view
+    /// and bounded to the right ~62% of the frame so the top-left encounter preview stays clear.
+    public static func compactCards(in host:CGSize,players:Int)->ClassroomBookCardLayout? {
+        guard host.width.isFinite,host.height.isFinite,host.width>0,host.height>0,(1...7).contains(players) else{return nil}
+        let columns=players<=4 ? players:(players+1)/2
+        var rows=[Int](),left=players
+        while left>0 {let n=min(columns,left);rows.append(n);left-=n}
+        let spacing=max(3,host.height*0.008)
+        let height=max(36,host.height*(rows.count==1 ? 0.084:0.076))
+        let fit=(host.width*0.62-CGFloat(columns-1)*spacing)/CGFloat(columns)
+        let width=max(72,min(host.width*0.175,height*2.8,fit))
+        return ClassroomBookCardLayout(rows:rows,card:CGSize(width:width,height:height),spacing:spacing)
+    }
     public static let heightFraction=0.09
     public static func height(in host:CGSize,players:Int)->CGFloat {
         guard host.width.isFinite,host.height.isFinite,host.width>0,host.height>0,(1...7).contains(players) else{return 0}

@@ -212,7 +212,7 @@ private struct TeacherGamePreview:View {
                     tap:{game.canvasTap($0,selectingNode:selectingNode)},
                     pan:game.canvasPan,zoom:{game.canvasZoom($0,anchor:$1)},hover:game.canvasHover)
             }
-            .overlay{if dropTargets.isDragging,game.surface != .book,game.miniGame == nil {GameDropTargetOverlay(game:game)}}
+            .overlay{if dropTargets.isDragging,game.surface != .book,game.miniGame == nil,game.campaign?.engine.state.battle != nil {GameDropTargetOverlay(game:game)}}
             .overlay{MiniGameTapLayer(game:game)}
             .overlay{QuizRevealTapCatcher(game:game)}
             .overlay{LaserCapture(laser:game.laser)}

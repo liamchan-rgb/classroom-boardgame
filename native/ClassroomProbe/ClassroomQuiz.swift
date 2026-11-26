@@ -35,6 +35,8 @@ struct LiveQuiz: Equatable {
     var countdown: QuizCountdown?
     /// The question came up again with its options in another order: picks are mapped back for the record.
     var shuffle: QuizShuffle? = nil
+    /// True when replacing an active flashcard from notes so card and dock swap cleanly without entrance animation.
+    var instant: Bool = false
 }
 
 /// Hosts the UIKit quiz card inside the SwiftUI overlays on a 720-point-high canvas, so the card looks the same on
@@ -79,7 +81,7 @@ private struct QuizCardRepresentable: UIViewRepresentable {
             box.card?.removeFromSuperview()
             box.layoutIfNeeded()
             let who = quiz.mode == .classwide ? "全班" : quiz.playerName
-            let card = MeadowQuizCard.present(in: box, question: quiz.question, player: who, place: quiz.mode == .practice ? "闪卡练习" : quiz.mode == .challenge ? "个人挑战" : quiz.place, start: quiz.start, mode: quiz.mode, countdown: quiz.countdown?.read)
+            let card = MeadowQuizCard.present(in: box, question: quiz.question, player: who, place: quiz.mode == .practice ? "闪卡练习" : quiz.mode == .challenge ? "个人挑战" : quiz.place, start: quiz.start, mode: quiz.mode, countdown: quiz.countdown?.read, animated: !quiz.instant)
             card.layer.zPosition = 0
             box.card = card; box.token = quiz.token; box.revealed = false
             box.setNeedsLayout()
@@ -112,7 +114,7 @@ struct QuizDock: View {
     var book: Bool
     var body: some View {
         if let content = game.dockContent, game.bookTabActive == book {
-            DockedPanel(content: content).id(content.id).frame(width: 480).layoutPriority(1)
+            DockedPanel(content: content).frame(width: 480).layoutPriority(1)
                 .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                 .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(.white.opacity(0.5), lineWidth: 1))
                 .transition(.move(edge: .trailing).combined(with: .opacity))
@@ -122,12 +124,21 @@ struct QuizDock: View {
 
 private struct DockedPanel: UIViewControllerRepresentable {
     let content: DockContent
+    func makeCoordinator() -> Coordinator { Coordinator() }
     func makeUIViewController(context: Context) -> KeyHostingController<AnyView> {
-        let c = KeyHostingController(rootView: content.view); c.onKey = content.onKey
+        context.coordinator.contentID = content.id
+        let c = KeyHostingController(rootView: AnyView(content.view.id(content.id))); c.onKey = content.onKey
         c.view.backgroundColor = .clear
         return c
     }
-    func updateUIViewController(_ c: KeyHostingController<AnyView>, context: Context) { c.onKey = content.onKey }
+    func updateUIViewController(_ c: KeyHostingController<AnyView>, context: Context) {
+        c.onKey = content.onKey
+        guard context.coordinator.contentID != content.id else { return }
+        context.coordinator.contentID = content.id
+        c.rootView = AnyView(content.view.id(content.id))
+        if c.view.window != nil && c.presentedViewController == nil { c.becomeFirstResponder() }
+    }
+    final class Coordinator { var contentID: UUID? }
 }
 
 // MARK: - How questions are drawn

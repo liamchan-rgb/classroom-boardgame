@@ -22,13 +22,17 @@ final class MeadowQuizCard: UIView {
     private var countdown: (() -> Double)?
     /// How long the card takes to come in (the challenge clock starts after it).
     static let entrance = 0.45
-    static func present(in host: UIView, question: QuizQuestion, player: String, place: String, start: Date, mode: LiveQuiz.Mode = .personal, countdown: (() -> Double)? = nil) -> MeadowQuizCard {
+    static func present(in host: UIView, question: QuizQuestion, player: String, place: String, start: Date, mode: LiveQuiz.Mode = .personal, countdown: (() -> Double)? = nil, animated: Bool = true) -> MeadowQuizCard {
         host.subviews.compactMap { $0 as? MeadowQuizCard }.forEach { $0.removeFromSuperview() }
         let view = MeadowQuizCard(frame: host.bounds); view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         view.question = question; view.start = start; view.limit = question.timeLimit; view.mode = mode; view.countdown = countdown
         view.build(player: player, place: place); host.addSubview(view)
-        view.alpha = 0; view.card.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
-        UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: 0.75, initialSpringVelocity: 0.6) { view.alpha = 1; view.card.transform = .identity }
+        if animated {
+            view.alpha = 0; view.card.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
+            UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: 0.75, initialSpringVelocity: 0.6) { view.alpha = 1; view.card.transform = .identity }
+        } else {
+            view.layoutIfNeeded()
+        }
         return view
     }
     deinit { ticker?.invalidate() }

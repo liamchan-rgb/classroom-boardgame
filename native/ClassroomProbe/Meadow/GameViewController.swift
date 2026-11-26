@@ -122,7 +122,7 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
             let ids=Set(players.map(\.id))
             return frames.filter{ids.contains($0.key)}
         }
-        guard !campaignHUD.isHidden else{return [:]}
+        guard !classroomMode,!campaignHUD.isHidden else{return [:]}
         var result:[String:CGRect]=[:]
         for (i,u) in players.enumerated() where i<campaignHealth.count && !campaignHealth[i].isHidden {
             result[u.id]=campaignHUD.convert(campaignHealth[i].frame,to:rootView)
@@ -515,14 +515,15 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
             campaignEdit.frame=CGRect(x:controlsX+(buttonWidth+gap)*3,y:buttonY,width:buttonWidth,height:38)
             let compact=view.bounds.height<430
             let routeTop=top+button+10,routeHeight:CGFloat=compact ? 78:56
-            let leftWidth=min(430,max(180,campaignHUD.frame.minX-controlsX-8))
+            let leftWidth=min(430,max(180,classroomMode ? mapWidth*0.36:campaignHUD.frame.minX-controlsX-8))
             campaignRoutePanel.frame=CGRect(x:controlsX,y:routeTop,width:compact ? leftWidth:controlsRight-controlsX,height:routeHeight)
             campaignRouteTitle.frame=CGRect(x:12,y:3,width:campaignRoutePanel.bounds.width-24,height:24)
             campaignRouteDetail.frame=CGRect(x:12,y:26,width:campaignRoutePanel.bounds.width-24,height:routeHeight-28)
             campaignRouteDetail.numberOfLines=compact ? 3:1
-            campaignRoutePanel.isHidden=battlePreviewActive || (compact && !encounterPreview.isHidden)
-            let previewTop=compact ? routeTop:campaignRoutePanel.frame.maxY+6
-            encounterPreview.frame=CGRect(x:controlsX,y:previewTop,width:leftWidth,height:max(120,min(encounterPreview.preferredHeight,buttonY-previewTop-8)))
+            campaignRoutePanel.isHidden=true
+            let previewTop=classroomMode ? max(inset.top,10):(compact ? routeTop:top+button+10)
+            let previewBottom=classroomMode ? view.bounds.height-12:buttonY-8
+            encounterPreview.frame=CGRect(x:controlsX,y:previewTop,width:leftWidth,height:max(120,min(encounterPreview.preferredHeight,previewBottom-previewTop)))
         }
         let summaryMaxX=campaign == nil ? view.bounds.width-max(inset.right,10)-8:campaignEdit.frame.minX-8
         randomMapSummary.frame=CGRect(x:randomMapButton.frame.maxX+8,y:randomMapButton.frame.minY,
@@ -1028,8 +1029,9 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     }
 
     private func configureCampaignControls() {
-        MeadowPreviewPalette.stylePanel(campaignHUD);view.addSubview(campaignHUD)
-        MeadowPreviewPalette.stylePanel(campaignRoutePanel);view.addSubview(campaignRoutePanel)
+        MeadowPreviewPalette.stylePanel(campaignHUD);MeadowPreviewPalette.stylePanel(campaignRoutePanel)
+        campaignHUD.isHidden=classroomMode;campaignRoutePanel.isHidden=true
+        if !classroomMode {view.addSubview(campaignHUD)}
         campaignRoutePanel.isUserInteractionEnabled=false
         campaignRoutePanel.addSubview(campaignRouteTitle);campaignRoutePanel.addSubview(campaignRouteDetail)
         campaignRouteTitle.accessibilityIdentifier="campaignRouteDestination"
@@ -1389,7 +1391,7 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     private func refreshEncounterPreview(){
         let wasHidden=encounterPreview.isHidden
         defer{
-            campaignRoutePanel.isHidden=battlePreviewActive || (view.bounds.height<430 && !encounterPreview.isHidden)
+            campaignRoutePanel.isHidden=true
             if wasHidden != encounterPreview.isHidden{view.setNeedsLayout()}
         }
         guard let campaign,let id=previewEncounterNode,!battlePreviewActive,campaign.engine.state.battle==nil,!scene.selectingCampaignNode,
@@ -1421,7 +1423,9 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         campaignBattle.configuration?.title=state.battle != nil ? "继续战斗":(eventAvailable ? (campaign.siteAvailable(actor:actor) ? (campaign.siteKind(node:node!.id) == .shop ? "进入商店":"处理事件"):"交互地点"):"暂无事件")
         campaignBattle.isHidden=battlePreviewActive;campaignBattle.isEnabled = !campaign.isCompleted && (state.battle != nil || (!busy && eventAvailable))
         campaignMovement.show("移动",value:MeadowMovementRules.steps(campaign.movementRemaining),maximum:max(1,MeadowMovementRules.steps(campaign.movementCapacity)),color:.systemYellow)
-        for view in [campaignHUD,campaignRoutePanel,campaignRefill,campaignItems,campaignEdit,campaignTeam,campaignEnd,randomMapSummary] {view.isHidden=battlePreviewActive}
+        campaignHUD.isHidden=classroomMode || battlePreviewActive
+        campaignRoutePanel.isHidden=true
+        for view in [campaignRefill,campaignItems,campaignEdit,campaignTeam,campaignEnd,randomMapSummary] {view.isHidden=battlePreviewActive}
         if let route=campaign.routeReadout {
             campaignRouteTitle.text=route.title;campaignRouteDetail.text=route.detail
             campaignRouteDetail.textColor=route.additionalCoins>0 ? MeadowPreviewPalette.gold:MeadowPreviewPalette.ink

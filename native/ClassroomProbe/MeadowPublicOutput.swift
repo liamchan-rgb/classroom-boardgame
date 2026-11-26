@@ -16,6 +16,8 @@ struct PublicSurface:View {
             else {
                 GeometryReader { geometry in
                     let rect=ClassroomCanvas.fitted(in:geometry.size)
+                    let gamePlayers=game.backend.bookPlayers
+                    let showCompactPlayers = !gamePlayers.isEmpty && game.surface != .results && game.campaign?.engine.state.battle == nil && game.miniGame == nil
                     ZStack {
                     if teacherPreview && game.externalConnected {MeadowLiveMirror(game:game)}
                     else if game.renderer != nil {MeadowRendererHost(game:game,teacherPreview:teacherPreview)}
@@ -28,6 +30,12 @@ struct PublicSurface:View {
                     .frame(width:ClassroomCanvas.size.width,height:ClassroomCanvas.size.height)
                     .scaleEffect(rect.width/ClassroomCanvas.size.width)
                     .position(x:rect.midX,y:rect.midY)
+                    if showCompactPlayers,let layout=ClassroomBookStatusLayout.compactCards(in:rect.size,players:gamePlayers.count) {
+                        CompactGamePlayerStrip(players:gamePlayers,layout:layout,dropTarget:teacherPreview)
+                            .frame(width:rect.width,height:rect.height,alignment:.bottomTrailing)
+                            .position(x:rect.midX,y:rect.midY)
+                            .foregroundStyle(.white)
+                    }
                 }.allowsHitTesting(false)
             }
         }.background(.black)
@@ -38,6 +46,29 @@ struct PublicSurface:View {
         // so it stays on over the picture book too: the wheel is opened from the book tab as well).
         .overlay{if !teacherPreview {MeadowPanelMirror(game:game).ignoresSafeArea()}}
         .overlay{ClassroomTVOverlays(timer:game.classTimer,overlays:game.overlays,game:game,showMiniGame:false)}
+    }
+}
+
+/// Bottom-right frosted player strip over the game exploration map: reuses `BookPlayerCard` with tighter spacing and drag-drop support.
+private struct CompactGamePlayerStrip:View {
+    let players:[ClassroomBookPlayerStatus]
+    let layout:ClassroomBookCardLayout
+    let dropTarget:Bool
+    var body:some View {
+        VStack(alignment:.trailing,spacing:layout.spacing){
+            ForEach(Array(rowSlices(layout.rows).enumerated()),id:\.offset){_,range in
+                HStack(spacing:layout.spacing){
+                    ForEach(range,id:\.self){i in
+                        BookPlayerCard(unit:players[i],index:i,size:layout.card,dropTarget:dropTarget,dropSource:.game)
+                    }
+                }
+            }
+        }
+        .padding(.trailing,max(8,layout.spacing*1.8))
+        .padding(.bottom,max(8,layout.spacing*1.6))
+    }
+    private func rowSlices(_ rows:[Int])->[Range<Int>] {
+        var start=0;return rows.map{n in defer{start+=n};return start..<start+n}
     }
 }
 
@@ -104,6 +135,7 @@ private struct BookPlayerCard:View {
     let size:CGSize
     /// The teacher's preview: the card takes grant icons dragged from the grant bar (the TV's cards do not).
     var dropTarget=false
+    var dropSource:BookDropTargets.Source = .book
     @ObservedObject private var targets=BookDropTargets.shared
     /// The badge in the team's colour (红队 party, 蓝队 team-2, 绿队 team-3, then gold, purple, orange).
     static func teamTint(_ team:String?)->Color {
@@ -142,7 +174,7 @@ private struct BookPlayerCard:View {
                     Capsule().fill(.white.opacity(0.16))
                     Capsule().fill(LinearGradient(colors:[barColor.opacity(0.85),barColor],startPoint:.leading,endPoint:.trailing)).frame(width:g.size.width*ratio)
                 }
-            }.frame(height:max(4,h*0.085))
+            }.frame(height:max(3,h*0.085))
             HStack(spacing:h*0.06){
                 // The team's movement bar in steps (what the picture-book bar grants), replacing the old AP diamonds.
                 Image(systemName:"figure.walk").foregroundStyle(Color(red:0.45,green:0.85,blue:0.95))
@@ -182,12 +214,12 @@ private struct BookPlayerCard:View {
             if dropTarget {
                 GeometryReader{g in
                     Color.clear
-                        .onAppear{targets.setFrame(g.frame(in:.global),for:unit.id,source:.book)}
-                        .onChange(of:g.frame(in:.global)){_,frame in targets.setFrame(frame,for:unit.id,source:.book)}
+                        .onAppear{targets.setFrame(g.frame(in:.global),for:unit.id,source:dropSource)}
+                        .onChange(of:g.frame(in:.global)){_,frame in targets.setFrame(frame,for:unit.id,source:dropSource)}
                 }
             }
         }
-        .onDisappear{if dropTarget {targets.setFrame(nil,for:unit.id,source:.book)}}
+        .onDisappear{if dropTarget {targets.setFrame(nil,for:unit.id,source:dropSource)}}
         .overlay{BookGainBurst(gain:gain,size:size).frame(width:size.width,height:size.height).allowsHitTesting(false)}
         .onChange(of:unit.coins){old,new in
             guard new>old else{heldCoins=nil;return}
