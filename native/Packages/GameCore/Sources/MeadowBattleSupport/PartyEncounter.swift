@@ -134,7 +134,8 @@ public enum PartyAction:String,CaseIterable,Codable {
     public var skillVFX:PartySkillVFXSpec? { PartySkillVFXSpec.find(rawValue) }
     public var statusVFXCueAge:Double? { SpellbladeEffects.statusVFXCueAge(for:self) }
     public var usesRangedMotion:Bool {
-        [.starlightPulse,.holyBolt,.quickShot,.fireball,.frostNova,.sonicNote,.piercingArrow,.galeBarrage,.thornSnare,.meteorStarfall,.galeVolley,.emberNova,.astralJudgement].contains(self)
+        [.starlightPulse,.holyBolt,.quickShot,.fireball,.frostNova,.sonicNote,.piercingArrow,.galeBarrage,.thornSnare,.meteorStarfall,.galeVolley,.emberNova,.astralJudgement,
+         .emberBreath,.quakeSlam,.boomBomb,.rootSweep,.blizzardBreath,.eclipseRay].contains(self)
     }
     public var isNodeAttack:Bool {
         [.dragonFlame,.starlightPulse,.sweep,.frostNova,.galeBarrage,.thornSnare,.meteorStarfall,.galeVolley,.emberNova,.astralJudgement,.emberBreath,.quakeSlam,.capSlam,.boomBomb,.rootSweep,.blizzardBreath,.eclipseRay].contains(self)
@@ -340,7 +341,30 @@ public final class PartyEncounter {
             guard let before=state.units[key],let after=receipt.after.units[key] else{return false}
             return before.health != after.health || before.shield != after.shield || before.damageBuff != after.damageBuff
         }
-        let targets=changed.isEmpty ? [nextEnemyTarget() ?? "p1"]:changed
+        let targets:[String]
+        if action.isSelfOnly {
+            targets=[actor]
+        } else if action.isOffensive {
+            let enemyChanged=changed.filter { state.units[$0]?.kind != .monster }
+            if !enemyChanged.isEmpty {
+                targets=enemyChanged
+            } else if action.isNodeAttack {
+                let alivePlayers=state.players.filter { $0.isAlive && $0.nodeID == state.units[actor]?.nodeID }.map(\.id).sorted()
+                targets=alivePlayers.isEmpty ? [nextEnemyTarget() ?? "p1"]:alivePlayers
+            } else {
+                targets=[nextEnemyTarget() ?? "p1"]
+            }
+        } else if action.isNodeSupport {
+            let allyChanged=changed.filter { state.units[$0]?.kind == .monster }
+            if !allyChanged.isEmpty {
+                targets=allyChanged
+            } else {
+                let aliveAllies=state.units.values.filter { $0.isAlive && $0.kind == .monster && $0.nodeID == state.units[actor]?.nodeID }.map(\.id).sorted()
+                targets=aliveAllies.isEmpty ? [actor]:aliveAllies
+            }
+        } else {
+            targets=changed.isEmpty ? [nextEnemyTarget() ?? "p1"]:changed
+        }
         let intent=PartyIntent(id:id,action:action,actor:actor,target:targets[0],targets:targets,command:.monsterStep,enemy:true,weaponID:nil,monsterTemplateID:state.units[actor]?.templateID,enemyRanged:action == .attack && ((try? engine.catalog.monster(state.units[actor]!.templateID).attack.range) ?? 0)>0,sourceSkillID:skillID,targetTemplateID:state.units[targets[0]]?.templateID)
         confirmedEngine=staged;confirmedReceipt=receipt;pending=intent;return intent
     }

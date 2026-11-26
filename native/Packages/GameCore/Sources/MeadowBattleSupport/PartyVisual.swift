@@ -51,6 +51,14 @@ public enum PartyVisual {
     public static var mirrored:Set<String>=[]
     /// +1 for a unit that faces right (the usual heroes), -1 for a mirrored one.
     public static func facing(_ id:String)->Double { mirrored.contains(slot(id)) ? -1:1 }
+    /// Effective horizontal VFX direction (+1 facing right, -1 facing left) for `actor`.
+    /// Self/ally casts and zero-delta casts always follow the caster's battle facing
+    /// (monsters always face left = -1; PvP right-hand heroes use `facing(actor)` = -1).
+    public static func effectDirection(actor:String,enemy:Bool,fromX:Double,toX:Double,sameSide:Bool=false)->Double {
+        let natural=(enemy || actor.hasPrefix("m")) ? -1.0:facing(actor)
+        if sameSide || abs(toX-fromX) < 1.0 { return natural }
+        return toX > fromX ? 1.0:-1.0
+    }
     public static func smooth(_ x:Double)->Double { let t=min(1,max(0,x));return t*t*(3-2*t) }
     public static func pulse(_ age:Double,_ start:Double,_ peak:Double,_ end:Double)->Double { age<peak ? smooth((age-start)/(peak-start)):1-smooth((age-peak)/(end-peak)) }
     public static func chest(_ id:String)->PartyPoint { let p=foot(id)!;return PartyPoint(p.x+5*heroScale*facing(id),p.y-70*heroScale) }

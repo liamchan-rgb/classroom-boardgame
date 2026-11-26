@@ -1,3 +1,11 @@
+## 怪物技能特效释放方向根因排查与全链路修复（2026-11-26，基于v0.32.4/build48，未改版本号、未存档）
+
+针对「部分怪物技能特效释放方向相反」的反馈，对战斗特效方向计算、怪物移动路径、AI 目标筛选及全部 39 组新片段与 70 条拓展配方做了全链路核查与根因修复：
+- **修复自施/友方技能方向误判为朝右 `+1`**（`PartyVisual.swift`、`MeadowPartyStageView.swift`）：原 `first.chest.x >= geo.caster.x ? 1 : -1` 在怪物施放自施（`sporeCoat`、`vineGuard`、`nightPlume`、`armorCharge`、`crystalShell`、`heartwoodWall`、`glacialWard`、`frostRebirth`、`warlordRally`、`celestialBastion` 等）或对右侧队友施法（`shamanMend`、`shamanChant`、`frostHowl`）时因 `toX >= fromX` 误判为 `+1`，导致 `impacts_shield_block` 等定向特效在怪物背后反向播放；新增 `PartyVisual.effectDirection(actor:enemy:fromX:toX:sameSide:)` 统一接管全部 6 处特效生成点，同阵营/零横向位移一律遵循施法者朝向（怪物固定 `-1` 朝左，PvP 右侧英雄跟随 `PartyVisual.facing`），并同步修复 `labPlay` 远程怪物发射口偏移。
+- **修复怪物吐息/射线/爆弹/地震类技能误走近战前冲导致越过前排英雄反向施放**（`PartyEncounter.swift`）：将 `.emberBreath`、`.quakeSlam`、`.boomBomb`、`.rootSweep`、`.blizzardBreath`、`.eclipseRay` 加入 `PartyAction.usesRangedMotion`，使其原地朝左施放而不越过前排 `p2/p6/p7`；同步加固 `prepareMonsterStep()` 目标筛选（自施固定 `[actor]`、进攻技能仅取玩家目标避免 `"m-..."` 字母序排在 `"p..."` 前）。
+- **校准定向特效纵向锚点并补齐专项防回归单测**（`recipes_expansion.json`、`PixelFXRecipes.dataset/recipes.json`、`ExpansionContentTests.swift`）：校准 `eclipseRay` 中 `astral_eclipse_beam`（自身已内含 `-24px` 胸口偏移，将额外 `dy` 由 `-22` 调为 `-2`）与 `boomBomb`/`projBoomBomb` 中 `bomb_firework_blast`（`dy: -38` 避免烟花下坠穿地）；新增 `testMonsterSkillVFXDirectionAndRangedTravelNeverReverse` 验证怪物/英雄/PvP 镜像朝向及全部 7 项远程/吐息怪物技原地施放。
+- **实测与未实测边界**：`verify_expansion_pack.py --zip artifacts/meadow-expansion-art-v1.zip`、`scripts/local-build.sh test`（配置校验、837 项外观校验、工具单测、`ProbeCore` 8/8、`GameCore` 501/501，合计 **509/509** 全通过）与 `MAC_OPEN=0 scripts/local-build.sh mac` Release 编译全通过，并完成全部 70 条配方舞台坐标覆盖与定向质心程序化审计（0 告警）。尚未在 Mac / iPad 实机战斗中逐一触发全部 26 项怪物技目视验收。
+
 ## 基于 patch-gg/pixelfx 同源管线全面重制全部新增技能特效（2026-11-26，基于v0.32.4/build48，未改版本号、未存档）
 
 针对上一轮手工几何绘图产出的 23 组拓展技能特效与游戏既有 77 组原版特效风格脱节的问题，接入与原版 77 组同源的开源项目 `https://github.com/patch-gg/pixelfx`（MIT），按原版 `color` + 加法 `light` 双缓冲、`120 Hz` 物理粒子模拟、`edgeFade`、`composite(..., null)` 透明光晕预乘、20 FPS `back+front` 双层精灵表与紧包围盒裁剪标准，彻底重做全部拓展技能特效并重排全 70 条技能配方：

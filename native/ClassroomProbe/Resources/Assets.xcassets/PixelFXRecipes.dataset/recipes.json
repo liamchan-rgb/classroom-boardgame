@@ -2754,7 +2754,7 @@
         "clip": "bomb_firework_blast",
         "at": 0.46,
         "anchor": "center",
-        "dy": -22
+        "dy": -38
       },
       {
         "clip": "bomb_star_smoke",
@@ -2907,7 +2907,7 @@
         "at": 0.26,
         "anchor": "caster",
         "dx": 14,
-        "dy": -22
+        "dy": -2
       },
       {
         "clip": "shadow_dark_explosion",
@@ -3001,7 +3001,7 @@
         "clip": "bomb_firework_blast",
         "at": 0.3,
         "anchor": "target",
-        "dy": -18
+        "dy": -38
       }
     ],
     "projFrostShard": [

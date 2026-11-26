@@ -338,7 +338,11 @@ final class MeadowPartyStageView:UIView {
                     // The effect starts early enough that its release lands on the rule's impact moment, inside the existing cast motion.
                     let start=sceneTime+max(0,value.impactAge-proc.release)
                     let ids=value.targets.filter { PartyVisual.foot($0) != nil }
-                    procVFX.append(MeadowPartyProcEvent(skill:procName,start:start,direction:first.chest.x>=geo.caster.x ? 1:-1,geo:geo,casterID:value.actor,targetIDs:ids))
+                    let firstID=ids.first ?? value.target
+                    let casterUnit=before.units[value.actor],targetUnit=before.units[firstID]
+                    let sameSide=value.action.isSelfOnly || value.action.isNodeSupport || (casterUnit != nil && targetUnit != nil && casterUnit!.kind == targetUnit!.kind && casterUnit!.teamID == targetUnit!.teamID)
+                    let dir=PartyVisual.effectDirection(actor:value.actor,enemy:value.enemy,fromX:geo.caster.x,toX:first.chest.x,sameSide:sameSide)
+                    procVFX.append(MeadowPartyProcEvent(skill:procName,start:start,direction:dir,geo:geo,casterID:value.actor,targetIDs:ids))
                 }
             }
         } else if let spec=value.action.skillVFX {
@@ -416,7 +420,8 @@ final class MeadowPartyStageView:UIView {
     private func spawnProc(_ name:String,_ intent:PartyIntent,target id:String,hit:PartyPoint,foot:PartyPoint,templates:[String:String],power:Double,delay:Double) {
         let casterChest=PartyVisual.skillEffectCenter(targets:[intent.actor],actor:intent.actor,templates:templates),casterFoot=PartyVisual.foot(intent.actor) ?? hit
         let geo=MeadowSkillProcedural.Geometry(caster:.init(casterChest.x,casterChest.y),casterFoot:.init(casterFoot.x,casterFoot.y),targets:[.init(chest:.init(hit.x,hit.y),foot:.init(foot.x,foot.y))],ground:foot.y)
-        var event=MeadowPartyProcEvent(skill:name,start:sceneTime+delay,direction:hit.x>=casterChest.x ? 1:-1,geo:geo,casterID:intent.actor,targetIDs:[id])
+        let dir=PartyVisual.effectDirection(actor:intent.actor,enemy:intent.enemy,fromX:casterChest.x,toX:hit.x,sameSide:id == intent.actor)
+        var event=MeadowPartyProcEvent(skill:name,start:sceneTime+delay,direction:dir,geo:geo,casterID:intent.actor,targetIDs:[id])
         event.power=power
         procVFX.append(event)
     }
@@ -449,7 +454,8 @@ final class MeadowPartyStageView:UIView {
         } else { return }
         let casterChest=PartyVisual.skillEffectCenter(targets:[value.actor],actor:value.actor,templates:templates)
         let geo=MeadowSkillProcedural.Geometry(caster:.init(from.x,from.y),casterFoot:.init(foot.x,foot.y),targets:[.init(chest:.init(to.x,to.y),foot:.init(targetFoot.x,targetFoot.y))],ground:targetFoot.y)
-        procVFX.append(MeadowPartyProcEvent(skill:name,start:sceneTime+launch-charge,direction:to.x>=casterChest.x ? 1:-1,geo:geo,casterID:value.actor,targetIDs:[value.target]))
+        let dir=PartyVisual.effectDirection(actor:value.actor,enemy:value.enemy,fromX:casterChest.x,toX:to.x,sameSide:false)
+        procVFX.append(MeadowPartyProcEvent(skill:name,start:sceneTime+launch-charge,direction:dir,geo:geo,casterID:value.actor,targetIDs:[value.target]))
     }
     /// The roll that ends the fight: a long, loud effect on the target, a hard push-in, and a run of heavy haptics.
     private func spawnNaturalTwenty(_ intent:PartyIntent,receipt:OperationReceipt) {
@@ -459,7 +465,8 @@ final class MeadowPartyStageView:UIView {
         guard let foot=PartyVisual.foot(target) else { return }
         let chest=PartyVisual.hitPoint(target:target,weaponID:weaponID,templateID:templates[target]),casterChest=PartyVisual.skillEffectCenter(targets:[actor],actor:actor,templates:templates),casterFoot=PartyVisual.foot(actor) ?? foot
         let geo=MeadowSkillProcedural.Geometry(caster:.init(casterChest.x,casterChest.y),casterFoot:.init(casterFoot.x,casterFoot.y),targets:[.init(chest:.init(chest.x,chest.y),foot:.init(foot.x,foot.y))],ground:foot.y)
-        procVFX.append(MeadowPartyProcEvent(skill:"natural20",start:sceneTime+delay,direction:chest.x>=casterChest.x ? 1:-1,geo:geo,casterID:actor,targetIDs:[target]))
+        let dir=PartyVisual.effectDirection(actor:actor,enemy:actor.hasPrefix("m"),fromX:casterChest.x,toX:chest.x,sameSide:false)
+        procVFX.append(MeadowPartyProcEvent(skill:"natural20",start:sceneTime+delay,direction:dir,geo:geo,casterID:actor,targetIDs:[target]))
         MeadowBattleHaptics.naturalTwenty()
     }
     private func apply(_ receipt:OperationReceipt,intent:PartyIntent) {
@@ -756,7 +763,8 @@ final class MeadowPartyStageView:UIView {
                 guard MeadowPixelFX.covers(skill) else { continue }
                 let foot=liveFeet[id] ?? base,chest=MeadowSkillProcedural.Pt(foot.x,foot.y-70*PartyVisual.heroScale)
                 let geo=MeadowSkillProcedural.Geometry(caster:chest,casterFoot:.init(foot.x,foot.y),targets:[.init(chest:chest,foot:.init(foot.x,foot.y))],ground:foot.y)
-                pixelSources.append(MeadowPixelFXSource(key:"heal|\(id)|\(at)",skill:skill,start:at,direction:1,geo:geo))
+                let healDir=unit.kind == .monster ? -1.0:PartyVisual.facing(id)
+                pixelSources.append(MeadowPixelFXSource(key:"heal|\(id)|\(at)",skill:skill,start:at,direction:healDir,geo:geo))
             }
             fx.allyRecoveries=[];fx.monsterRecoveries=[]
         }
@@ -1373,7 +1381,9 @@ extension MeadowPartyStageView {
         func spawn(_ name:String,from:PartyPoint,to:[(chest:PartyPoint,foot:PartyPoint)],ids:[String],pw:Double) {
             guard let f=to.first else { return }
             let geo=MeadowSkillProcedural.Geometry(caster:.init(from.x,from.y),casterFoot:.init(aFoot.x,aFoot.y),targets:to.map { .init(chest:.init($0.chest.x,$0.chest.y),foot:.init($0.foot.x,$0.foot.y)) },ground:f.foot.y)
-            var event=MeadowPartyProcEvent(skill:name,start:sceneTime+delay,direction:f.chest.x>=aChest.x ? 1:-1,geo:geo,casterID:actor,targetIDs:ids)
+            let sameSide=(ids.first ?? first) == actor || ((ids.first ?? first).hasPrefix("m") == actor.hasPrefix("m"))
+            let dir=PartyVisual.effectDirection(actor:actor,enemy:actor.hasPrefix("m"),fromX:aChest.x,toX:f.chest.x,sameSide:sameSide)
+            var event=MeadowPartyProcEvent(skill:name,start:sceneTime+delay,direction:dir,geo:geo,casterID:actor,targetIDs:ids)
             event.power=pw;procVFX.append(event)
         }
         let heals:[String:HealingEffectTier]=["healMicro":.micro,"healStandard":.standard,"healStrong":.strong]
@@ -1388,8 +1398,9 @@ extension MeadowPartyStageView {
             case "projStaff":
                 let g=(PixelHeroAtlas.enabled ? PixelHeroAtlas.staffGem:LegendaryStaffRig.gem(progress:LegendaryStaffRig.progress(age:LegendaryStaffRig.releaseAge)));from=PartyPoint(aFoot.x+(g.x-123)*PartyVisual.heroScale*PartyVisual.facing(actor),aFoot.y+(g.y-214)*PartyVisual.heroScale)
             default:
-                let spec=MonsterVisualSpec.find(templateID),goblin=id == "projArcher",scale=spec?.scale ?? 0.88
-                from=PartyPoint(aFoot.x+(goblin ? -82:-143)*scale,aFoot.y-(goblin ? 144:149)*scale)
+                let spec=MonsterVisualSpec.find(templateID),scale=spec?.scale ?? 0.88
+                let m=spec?.muzzleOffset ?? (id == "projArcher" ? PartyPoint(-82,-144):PartyPoint(-143,-149))
+                from=PartyPoint(aFoot.x+m.x*scale,aFoot.y+m.y*scale)
             }
             spawn(id,from:from,to:[(chest:hit,foot:tFoot)],ids:[first],pw:power);return
         }

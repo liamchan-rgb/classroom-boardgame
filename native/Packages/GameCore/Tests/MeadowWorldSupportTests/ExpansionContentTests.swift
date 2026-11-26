@@ -103,4 +103,29 @@ final class ExpansionContentTests: XCTestCase {
             XCTAssertEqual(actions.count, 4, "Expected attack + 3 skills for \(cls.id)")
         }
     }
+
+    func testMonsterSkillVFXDirectionAndRangedTravelNeverReverse() throws {
+        // 1. Self/ally monster skills MUST face left (-1), never right (+1) even when toX >= fromX.
+        XCTAssertEqual(PartyVisual.effectDirection(actor: "m1", enemy: true, fromX: 650, toX: 650, sameSide: true), -1.0)
+        XCTAssertEqual(PartyVisual.effectDirection(actor: "m1", enemy: true, fromX: 650, toX: 835, sameSide: true), -1.0)
+        // Offensive monster skills targeting left-side heroes face left (-1).
+        XCTAssertEqual(PartyVisual.effectDirection(actor: "m1", enemy: true, fromX: 650, toX: 165, sameSide: false), -1.0)
+        // Left-side heroes face right (+1) on self/ally/offensive casts.
+        PartyVisual.mirrored = []
+        XCTAssertEqual(PartyVisual.effectDirection(actor: "p1", enemy: false, fromX: 165, toX: 165, sameSide: true), 1.0)
+        XCTAssertEqual(PartyVisual.effectDirection(actor: "p1", enemy: false, fromX: 165, toX: 650, sameSide: false), 1.0)
+        // Right-side mirrored PvP heroes face left (-1) on self/ally casts.
+        PartyVisual.mirrored = ["p4"]
+        defer { PartyVisual.mirrored = [] }
+        XCTAssertEqual(PartyVisual.effectDirection(actor: "p4", enemy: false, fromX: 700, toX: 700, sameSide: true), -1.0)
+
+        // 2. Monster ranged/breath/beam/bomb/wave skills must NOT melee-walk past front heroes.
+        PartyVisual.feet = PartyVisual.classicFeet
+        for action in [PartyAction.dragonFlame, .emberBreath, .quakeSlam, .boomBomb, .rootSweep, .blizzardBreath, .eclipseRay] {
+            let intent = PartyIntent(id: "t-\(action.rawValue)", action: action, actor: "m1", target: "p1", targets: ["p1", "p6"], command: .monsterStep, enemy: true, weaponID: nil, monsterTemplateID: "frostPhoenix", enemyRanged: false, sourceSkillID: action.rawValue)
+            let travel = PartyVisual.travel(intent, age: 0.46)
+            XCTAssertEqual(travel.x, 0, accuracy: 0.001, "\(action.rawValue) should cast in place, not walk past heroes")
+            XCTAssertEqual(travel.y, 0, accuracy: 0.001, "\(action.rawValue) should cast in place")
+        }
+    }
 }

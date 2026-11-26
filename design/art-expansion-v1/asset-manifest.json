@@ -4,7 +4,7 @@
   "specSource": "design/主游戏拓展企划_职业装备怪物_美术交接_v1.txt",
   "baseAppVersion": "v0.32.4/build48",
   "installed": false,
-  "builtAtUTC": "2026-11-26T15:05:09Z",
+  "builtAtUTC": "2026-11-26T15:20:01Z",
   "summary": {
     "classBadges": 14,
     "itemIcons": 53,
@@ -19,7 +19,7 @@
     "pixelFXRecipes": 70,
     "qaPreviews": 9,
     "totalFiles": 203,
-    "totalBytes": 27454273
+    "totalBytes": 27454272
   },
   "categoryFileCounts": {
     "root": 1,
@@ -1546,8 +1546,8 @@
     },
     {
       "path": "pixel-fx/recipes_expansion.json",
-      "bytes": 29611,
-      "sha256": "5bb2a3a9b7bd1221a591e2010df1dd2b9880553a46572b1126128308caeabf27"
+      "bytes": 29610,
+      "sha256": "8ac3ab18c476e4a0192206a7199fff91be54801bf063affe4210e2f2813b43cb"
     },
     {
       "path": "previews/qa_class_badges.png",
