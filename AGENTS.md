@@ -5,14 +5,14 @@
   - `LiveQuiz` 与 `MeadowQuizCard.present(..., animated:)` 增加无动画即时切换分支；`askNoteCard` 在当前已有闪卡显示时（全班题 / 闪卡练习 / 个人挑战）向 `openClassQuiz` / `showPracticeCard` / `challengeAsk` 传入 `instant: true`，跳过清空再 `withAnimation` 的过渡与 `0.4s` 缩放淡入。
   - `QuizDock` 移除外层 `.id(content.id)`，改为在 `DockedPanel.updateUIViewController` 原地更新 `rootView` 与按键回调（仅在内容 ID 变化时重载），消除侧边答题面板滑入滑出与预览区排版闪动。
 - **修复 Mac Catalyst 框选组合词按 `K` 覆写文本并新增悬浮出题气泡**（`ClassroomNotesWords.swift`、`Views.swift`）：
-  - `NotesTextView` 同步拦截 `insertText`、`setMarkedText`（中文输入法候选拦截）及 `UITextViewDelegate.shouldChangeTextIn` 链路：有合法英文词/短语选区时按 `k`/`K` 直接触发出卡且阻断字符插入；无选区或空白/非英文选区时正常输入字母 `k`。
+  - `NotesTextView` 统一通过 `interceptSelectionK` 拦截 `pressesBegan`（含 `.keyboardK`）、`insertText`、`insertText(_:alternatives:style:)`、`setMarkedText`、`setAttributedMarkedText`（macOS 中文输入法带样式拼音候选）、`replace(_:withText:)`、`replace(_:withAttributedText:)`、`shouldChangeText(in:replacementText:)` 及 `UITextViewDelegate.shouldChangeTextIn`：有合法英文词/短语选区且尚未进入候选态时按 `k`/`K` 直接异步交还焦点并触发出卡；无选区或已有中文候选串时仍可正常拼写打字。
   - 选中词组或短语时，在 `备注` 框选区正上方/下方（按顶边距自动避让）弹出 `NotesSelectionBubble` 悬浮气泡，点击与按 `K` 共享同一套出题并交还焦点的流程（双击单词时主动抑制不闪出气泡）。
 - **删除游戏地图上方进度横框，右下角替换为紧凑绘本风玩家框并支持拖放发奖**（`GameViewController.swift`、`MeadowPublicOutput.swift`、`ClassroomBookStatus.swift`、`MeadowTeacherDashboard.swift`、`MeadowTeacherCoordinator.swift`、`ClassroomGMTests.swift`）：
   - 课堂模式隐藏并移除地图上方 `campaignRoutePanel`（节点预览自动贴顶布局）及旧版 `campaignHUD`。
   - 新增 `ClassroomBookStatusLayout.compactCards` 将 1–7 人状态条收紧在地图右下角 `62%` 宽度内，在 `PublicSurface` 中复用 `BookPlayerCard`（带步骤/得分/金币、`BookGainBurst` 抛金币动画，并同步 `UIState.movement` 按整型步数刷新），探索阶段与战斗阶段分别由玩家框与回合头像条通过 `.game` 拖放源互不冲突地接收快捷发奖条拖放。
 - **实测与未实测边界**：
   - 新增单测 `ClassroomGMTests.testGameCompactCardsStayBottomRightCompactAcrossPartySizes`；全量运行 `scripts/local-build.sh test` 通过（配置与外观校验全过，`ProbeCore` 9/9、`MeadowWorldSupportTests` 264/264、`MeadowClassroomSupportTests` 58/58、`MeadowBattleSupportTests` 108/108、`ClassroomGameCoreTests` 73/73，合计 **512/512** 零失败），`MAC_OPEN=0 scripts/local-build.sh mac` Release 编译成功产出 `artifacts/ClassroomProbe.app`。
-  - 在 Mac Catalyst UIKit 独立测试（`verify_selection_k_bubble.swift`）中实测 `insertText("k")`、`shouldChangeTextIn("K")`、`setMarkedText("k")` 阻断覆写并触发选词、`selectionRects(for:)` 几何定位及无选区正常输入 `k` 通过。因保留本机先前运行的 `ClassroomProbe` 进程（PID `87324`）及未做外接 TV/真机连接，实机双屏实时连点双击换卡、气泡视觉效果与探索地图拖放手感尚未人工目视点击验收。
+  - 在 Mac Catalyst UIKit 独立测试（`verify_selection_k_bubble.swift`）中实测 `insertText("k")`、`shouldChangeTextIn("K")`、`setAttributedMarkedText("k")`、`shouldChangeText(in:replacementText:"k")`、`replace(_:withAttributedText:"k")` 阻断覆写并触发选词、`selectionRects(for:)` 几何定位及无选区中文候选与英文输入 `k` 正常。因保留本机先前运行的 `ClassroomProbe` 进程（PID `87324`）且未切换到系统真实中文输入法向运行中窗口注入按键，真实中文输入法实机按键、双屏实时连点双击换卡、气泡视觉效果与探索地图拖放手感仍需你在 `ClassroomProbe.app` 中实际测试验收。
 
 ## 绘本富文本直接编辑、拼接词与选词按 K 闪卡、快速切题及游戏页快速发奖（2026-11-27，基于v0.32.4/build48，未改版本号、未存档）
 

@@ -124,40 +124,76 @@ final class NotesTextView: UITextView {
         if markedTextRange == nil, presses.count == 1,
            let key = presses.first?.key,
            key.modifierFlags.intersection([.command, .control, .alternate]).isEmpty,
-           key.charactersIgnoringModifiers.lowercased() == "k",
+           (key.keyCode == .keyboardK || key.charactersIgnoringModifiers.lowercased() == "k"),
            triggerSelectionFlashcard() {
-            suppressKUntil = ProcessInfo.processInfo.systemUptime + 0.15
+            suppressKUntil = ProcessInfo.processInfo.systemUptime + 0.25
             return
         }
         super.pressesBegan(presses, with: event)
     }
 
     override func insertText(_ text: String) {
-        if interceptSelectionKIfNeeded(text) { return }
+        if interceptSelectionK(replacementText: text, deferTrigger: true) { return }
         super.insertText(text)
     }
 
+    override func insertText(_ text: String, alternatives: [String], style: UITextAlternativeStyle) {
+        if interceptSelectionK(replacementText: text, deferTrigger: true) { return }
+        super.insertText(text, alternatives: alternatives, style: style)
+    }
+
     override func setMarkedText(_ markedText: String?, selectedRange: NSRange) {
-        if let markedText, interceptSelectionKIfNeeded(markedText) { return }
+        if let markedText, interceptSelectionK(replacementText: markedText, deferTrigger: true) { return }
         super.setMarkedText(markedText, selectedRange: selectedRange)
     }
 
-    func shouldInterceptSelectionK(in range: NSRange, replacementText text: String) -> Bool {
-        guard text.lowercased() == "k" else { return false }
-        if ProcessInfo.processInfo.systemUptime < suppressKUntil { return true }
-        guard markedTextRange == nil, let info = selectionCardInfo(in: range) else { return false }
-        suppressKUntil = ProcessInfo.processInfo.systemUptime + 0.15
-        DispatchQueue.main.async { [weak self] in
-            self?.completeSelectionTrigger(info)
-        }
-        return true
+    override func setAttributedMarkedText(_ markedText: NSAttributedString?, selectedRange: NSRange) {
+        if let markedText, interceptSelectionK(replacementText: markedText.string, deferTrigger: true) { return }
+        super.setAttributedMarkedText(markedText, selectedRange: selectedRange)
     }
 
-    private func interceptSelectionKIfNeeded(_ text: String) -> Bool {
-        guard text.lowercased() == "k" else { return false }
+    override func replace(_ range: UITextRange, withText text: String) {
+        if interceptSelectionK(in: nsRange(from: range), replacementText: text, deferTrigger: true) { return }
+        super.replace(range, withText: text)
+    }
+
+    override func replace(_ range: UITextRange, withAttributedText attributedText: NSAttributedString) {
+        if interceptSelectionK(in: nsRange(from: range), replacementText: attributedText.string, deferTrigger: true) { return }
+        super.replace(range, withAttributedText: attributedText)
+    }
+
+    override func shouldChangeText(in range: UITextRange, replacementText text: String) -> Bool {
+        if interceptSelectionK(in: nsRange(from: range), replacementText: text, deferTrigger: true) { return false }
+        return super.shouldChangeText(in: range, replacementText: text)
+    }
+
+    func shouldInterceptSelectionK(in range: NSRange, replacementText text: String) -> Bool {
+        interceptSelectionK(in: range, replacementText: text, deferTrigger: true)
+    }
+
+    private func nsRange(from textRange: UITextRange) -> NSRange? {
+        let start = offset(from: beginningOfDocument, to: textRange.start)
+        let length = offset(from: textRange.start, to: textRange.end)
+        guard start >= 0, length >= 0 else { return nil }
+        return NSRange(location: start, length: length)
+    }
+
+    /// Unified gate for hardware key presses, English input, and Chinese IME marked/attributed composition.
+    private func interceptSelectionK(in customRange: NSRange? = nil, replacementText text: String, deferTrigger: Bool) -> Bool {
+        let normalized = text.lowercased()
+        guard normalized == "k" || normalized == "ｋ" else { return false }
         if ProcessInfo.processInfo.systemUptime < suppressKUntil { return true }
-        guard markedTextRange == nil, triggerSelectionFlashcard() else { return false }
-        suppressKUntil = ProcessInfo.processInfo.systemUptime + 0.15
+        guard markedTextRange == nil, let info = selectionCardInfo(in: customRange) else { return false }
+        suppressKUntil = ProcessInfo.processInfo.systemUptime + 0.25
+        suppressSelectionBubbleUntil = suppressKUntil
+        onSelectionChange?(nil)
+        if deferTrigger {
+            DispatchQueue.main.async { [weak self] in
+                self?.completeSelectionTrigger(info)
+            }
+        } else {
+            completeSelectionTrigger(info)
+        }
         return true
     }
 
@@ -203,7 +239,7 @@ final class NotesTextView: UITextView {
     }
 
     private func completeSelectionTrigger(_ info: (term: String, rect: CGRect, range: NSRange)) {
-        suppressSelectionBubbleUntil = ProcessInfo.processInfo.systemUptime + 0.15
+        suppressSelectionBubbleUntil = max(suppressSelectionBubbleUntil, ProcessInfo.processInfo.systemUptime + 0.25)
         onSelectionChange?(nil)
         let hostWindow = window
         selectedRange = NSRange(location: info.range.location, length: 0)
