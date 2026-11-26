@@ -1,3 +1,13 @@
+## 基于 patch-gg/pixelfx 同源管线全面重制全部新增技能特效（2026-11-26，基于v0.32.4/build48，未改版本号、未存档）
+
+针对上一轮手工几何绘图产出的 23 组拓展技能特效与游戏既有 77 组原版特效风格脱节的问题，接入与原版 77 组同源的开源项目 `https://github.com/patch-gg/pixelfx`（MIT），按原版 `color` + 加法 `light` 双缓冲、`120 Hz` 物理粒子模拟、`edgeFade`、`composite(..., null)` 透明光晕预乘、20 FPS `back+front` 双层精灵表与紧包围盒裁剪标准，彻底重做全部拓展技能特效并重排全 70 条技能配方：
+- **39 组同源 PixelFX 片段重制入库**（`native/ClassroomProbe/Resources/Assets.xcassets/PixelFX_*.imageset/`、`design/art-expansion-v1/pixel-fx/`、`artifacts/meadow-expansion-art-v1.zip`）：
+  - 彻底替换原有 23 组几何片段，并额外补齐 16 组 `patch-gg/pixelfx` 招牌特效（`ice_lance_proj`、`ice_breath_cone`、`ice_spikes_wave`、`lightning_bolt_strike`、`lightning_thunderclap`、`nature_vine_whip`、`nature_leaf_storm`、`nature_quake_rift`、`holy_smite_hammer`、`shadow_eclipse_corona`、`shadow_dark_explosion`、`fire_flame_pillar`、`melee_hammer_smash`、`melee_spear_sweep`、`impacts_shield_block`、`explosions_plasma_blast`），主工程 PixelFX 总片段规模达 **116 组（既有 77 + 拓展 39）**。
+  - 针对 `pixelfx` 未内置的吟游诗人音波与哥布林童趣烟花弹，严格按 `pixelfx/docs/AUTHORING.md` 原生编写 4 组 JS 模块（`custom/sonic-note`、`custom/sonic-harmony`、`custom/sonic-anthem`、`custom/bomb-lob`），均通过 `node tools/check.mjs` 0 错误 0 警告校验；对 `holy/resurrection`（圣翼天降）、`holy/divine-shield`、`lightning/thunderclap`、`melee/*` 等 `actor` 感知特效传入空白人偶掩码以零假人残影叠加角色；并通过 `startTime` 跳帧与 `speed` 节奏调校保证打击帧即刻爆发、所有非循环片段末帧严格零透明。
+- **70 条拓展技能配方与安装工具升级**（`PixelFXRecipes.dataset/recipes.json`、`design/art-expansion-v1/pixel-fx/recipes_expansion.json`、`design/art-expansion-v1/tools/install_expansion_pack.py`、`design/art-expansion-v1/tools/verify_expansion_pack.py`）：
+  - 全部 30 新职业技、6 新套装技、26 新怪物技与 8 远程怪物弹道按 116 组完整片段库重编多段起手/飞行/打击/残留组合；`install_expansion_pack.py` 升级为对拓展片段与配方支持幂等覆盖更新（upsert）同时原封保留前 77 组原版片段与 46 条原版配方。
+- **实测与未实测边界**：`verify_expansion_pack.py --zip artifacts/meadow-expansion-art-v1.zip`（含 203 文件 SHA-256 与非循环末帧全透明校验）、`scripts/local-build.sh test`（93 Swift 源码工程校验、837 项锁定原文件零改动校验、配置工具单测、`ProbeCore` 8/8、`GameCore` 500/500 全通过）及 `MAC_OPEN=0 scripts/local-build.sh mac` Release 编译通过；程序化交叉校验 `Assets.car` 确认全部 116 组 `PixelFX_*` 片段与 116 条配方零缺失，并对全部 39 组片段的 4 页 5 帧序列拼图及 39 组峰值总览图完成人工目视复核。尚未在 Mac / iPad 实机战斗中逐一施放并目视验收全部 70 条新技能的实时播放节奏与叠层对齐。
+
 ## 主游戏拓展内容与美术特效包正式安装并接入全链路（2026-11-26，基于v0.32.4/build48，未改版本号、未存档）
 
 将前期封包验证完毕的 3 倍以上拓展美术资产与 PixelFX 特效包（`design/art-expansion-v1/`）正式安装入主工程，并完成 `GameCore` 规则数据、AI、抽奖池、遭遇规划、战斗演出、旧存档兼容、穿戴烘焙、教师端/地图设置 UI 与课堂小游戏全链路接入：

@@ -263,13 +263,13 @@ def main() -> int:
             if im.size not in ((64, 64), (128, 64)):
                 errors.append(f"{pp.name}: size {im.size} not in (64x64, 128x64)")
 
-    # 4. PixelFX 8 Packs (23 clips) + recipes_expansion.json (70 recipes)
+    # 4. PixelFX 8 Packs (39 patch-gg/pixelfx clips) + recipes_expansion.json (70 recipes)
     existing_fx = json.loads(EXISTING_RECIPES.read_text(encoding="utf-8"))
     existing_clip_ids = {c["id"] for c in existing_fx["clips"]}
     fx_doc = json.loads((PACK / "pixel-fx/recipes_expansion.json").read_text(encoding="utf-8"))
     new_clips = fx_doc.get("clips", [])
-    if fx_doc.get("fps") != 20 or fx_doc.get("packs") != 8 or len(new_clips) != 23:
-        errors.append(f"recipes_expansion.json: expected fps=20, packs=8, 23 clips; got {len(new_clips)}")
+    if fx_doc.get("fps") != 20 or fx_doc.get("packs") != 8 or len(new_clips) != 39:
+        errors.append(f"recipes_expansion.json: expected fps=20, packs=8, 39 clips; got {len(new_clips)}")
     new_clip_ids = set()
     for c in new_clips:
         cid = c["id"]

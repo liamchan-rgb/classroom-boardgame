@@ -103,16 +103,28 @@ def main() -> int:
         }
         (MOTION_EXP_DATASET / "Contents.json").write_text(json.dumps(ds_contents, indent=2) + "\n", encoding="utf-8")
 
-    # Merge PixelFX recipes.json
+    # Merge (upsert) PixelFX recipes.json — preserves original 77 clips & 46 recipes verbatim
     base_fx = json.loads(RECIPES_JSON.read_text(encoding="utf-8"))
     exp_fx = json.loads((PACK / "pixel-fx/recipes_expansion.json").read_text(encoding="utf-8"))
-    ex_cids = {c["id"] for c in base_fx["clips"]}
-    added_clips = [c for c in exp_fx["clips"] if c["id"] not in ex_cids]
-    added_recipes = {k: v for k, v in exp_fx["recipes"].items() if k not in base_fx["recipes"]}
-    print(f"[{'APPLY' if args.apply else 'DRY-RUN'}] PixelFXRecipes: +{len(added_clips)} clips, +{len(added_recipes)} recipes")
+    exp_clip_map = {c["id"]: c for c in exp_fx["clips"]}
+    existing_idx = {c["id"]: i for i, c in enumerate(base_fx["clips"])}
+    updated_clips = 0
+    added_clips = []
+    for c in exp_fx["clips"]:
+        if c["id"] in existing_idx:
+            updated_clips += 1
+        else:
+            added_clips.append(c)
+    updated_recipes = sum(1 for k in exp_fx["recipes"] if k in base_fx["recipes"])
+    added_recipes = sum(1 for k in exp_fx["recipes"] if k not in base_fx["recipes"])
+    print(f"[{'APPLY' if args.apply else 'DRY-RUN'}] PixelFXRecipes: +{len(added_clips)} new / {updated_clips} updated clips, +{added_recipes} new / {updated_recipes} updated recipes")
     if args.apply:
-        base_fx["clips"].extend(added_clips)
-        base_fx["recipes"].update(added_recipes)
+        for cid, c in exp_clip_map.items():
+            if cid in existing_idx:
+                base_fx["clips"][existing_idx[cid]] = c
+            else:
+                base_fx["clips"].append(c)
+        base_fx["recipes"].update(exp_fx["recipes"])
         RECIPES_JSON.write_text(json.dumps(base_fx, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     # Wire pixel_equipment_expansion.js into build_pixel_baker.py

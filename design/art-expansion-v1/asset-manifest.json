@@ -4,7 +4,7 @@
   "specSource": "design/主游戏拓展企划_职业装备怪物_美术交接_v1.txt",
   "baseAppVersion": "v0.32.4/build48",
   "installed": false,
-  "builtAtUTC": "2026-11-26T13:28:40Z",
+  "builtAtUTC": "2026-11-26T15:05:09Z",
   "summary": {
     "classBadges": 14,
     "itemIcons": 53,
@@ -18,8 +18,8 @@
     "pixelFXClips": 23,
     "pixelFXRecipes": 70,
     "qaPreviews": 9,
-    "totalFiles": 187,
-    "totalBytes": 13171113
+    "totalFiles": 203,
+    "totalBytes": 27454273
   },
   "categoryFileCounts": {
     "root": 1,
@@ -28,7 +28,7 @@
     "item-icons": 53,
     "monsters": 41,
     "pixel-baker": 1,
-    "pixel-fx": 24,
+    "pixel-fx": 40,
     "previews": 9,
     "tools": 3
   },
@@ -1234,192 +1234,320 @@
     },
     {
       "path": "pixel-fx/PixelFX_astral_eclipse_beam.png",
-      "bytes": 22283,
-      "sha256": "65ace90db0b3ba8e9564c1785cf379f11e4e102d0c74410fe8cb5414d04254d0",
-      "width": 3672,
-      "height": 168,
+      "bytes": 308368,
+      "sha256": "e39f03cb04bc2b060c60387bb9082a2bedda857a81967cf9aa1061326c13c26c",
+      "width": 3961,
+      "height": 174,
       "mode": "RGBA"
     },
     {
       "path": "pixel-fx/PixelFX_astral_meteor_rain.png",
-      "bytes": 29063,
-      "sha256": "c73c87c77b69566c0cf9645b01a85734bbd673a8f56c67d303c6228bab31d028",
-      "width": 3760,
-      "height": 704,
+      "bytes": 689583,
+      "sha256": "fd33d48b81e6c8d8d0cbff8119c48a3163c9be28785eaf2e2a959f9cd4ce00b4",
+      "width": 3870,
+      "height": 1505,
       "mode": "RGBA"
     },
     {
       "path": "pixel-fx/PixelFX_astral_zodiac_ring.png",
-      "bytes": 17651,
-      "sha256": "4ea2ad1123de0501068510c9a90bcb9e080db9541392a5d2dd6416647a296bd1",
-      "width": 3264,
-      "height": 312,
+      "bytes": 847530,
+      "sha256": "3244ac0cefb903079436c62c694355bec6c5f839c2b9bf6568d30453a376a66c",
+      "width": 4048,
+      "height": 1100,
       "mode": "RGBA"
     },
     {
       "path": "pixel-fx/PixelFX_bomb_firework_blast.png",
-      "bytes": 36031,
-      "sha256": "a81717e6aeb37619794ae69850d48f11fa619dc398a1a5c99b68b8011e551da5",
-      "width": 3744,
-      "height": 140,
+      "bytes": 778816,
+      "sha256": "c4c42e3458b40ba43ed0c7564479c2fd575decb5f395f87a33324ed9c2130de7",
+      "width": 3990,
+      "height": 928,
       "mode": "RGBA"
     },
     {
       "path": "pixel-fx/PixelFX_bomb_lob_proj.png",
-      "bytes": 620,
-      "sha256": "540b5f03637091fbf52e76f02623617a05469eb846f1b29a8661a026454a379a",
-      "width": 440,
-      "height": 44,
+      "bytes": 27331,
+      "sha256": "f4c76747bd307c85bff7aeb38655a8f6503baa1b26594d252ee3b00905dc47b8",
+      "width": 960,
+      "height": 52,
       "mode": "RGBA"
     },
     {
       "path": "pixel-fx/PixelFX_bomb_star_smoke.png",
-      "bytes": 7167,
-      "sha256": "3be75d108a9fcdeef0fd71e384c664a8da3899af5fbc01a460e75e7cfdb38e55",
-      "width": 2160,
-      "height": 96,
+      "bytes": 364926,
+      "sha256": "ab229868a3b6677b8ddd07a9d01fce05b6a8a216ea8e43fddbb3472f32ecc9b2",
+      "width": 4094,
+      "height": 520,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_explosions_plasma_blast.png",
+      "bytes": 345482,
+      "sha256": "fb07b4fe80c8eed69c4fe260f1b0cd7937898504289e835ac5a4a77ae026e7f7",
+      "width": 3980,
+      "height": 570,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_fire_flame_pillar.png",
+      "bytes": 785943,
+      "sha256": "84ad1fc97a2423e89dd54557dc8e9ed8ae85aeb0b90c6206d3d9b2d29a75565d",
+      "width": 3933,
+      "height": 960,
       "mode": "RGBA"
     },
     {
       "path": "pixel-fx/PixelFX_frost_blizzard_storm.png",
-      "bytes": 78497,
-      "sha256": "d6d099b8fdaf7a6819de413db69cda0933372f0600aaf8a2aebecb95882dd3b9",
-      "width": 3784,
-      "height": 432,
+      "bytes": 304574,
+      "sha256": "a762027d4055adf73f6b928ead3b311b98972da545321457929c64c1fac2a32a",
+      "width": 4085,
+      "height": 228,
       "mode": "RGBA"
     },
     {
       "path": "pixel-fx/PixelFX_frost_nova_ring.png",
-      "bytes": 16958,
-      "sha256": "3ff49da272f29a16b217ccbe7d32aff32f719758c8af9e4c7ae351ddf64693a3",
-      "width": 3456,
-      "height": 192,
+      "bytes": 558100,
+      "sha256": "75b970314211779428be7a9dc3143c806b1f177932a6bcb76264328c861f27ad",
+      "width": 4064,
+      "height": 938,
       "mode": "RGBA"
     },
     {
       "path": "pixel-fx/PixelFX_frost_shard_burst.png",
-      "bytes": 6509,
-      "sha256": "a452cb628f01487251ba8c421b1c2480255d523396b2432e89f664b1f525f842",
-      "width": 2160,
-      "height": 108,
+      "bytes": 172968,
+      "sha256": "6f3ac4eda80a4dfbcf6d5036e307871be508d12a293415fcbdc94025df936ed8",
+      "width": 3990,
+      "height": 432,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_holy_smite_hammer.png",
+      "bytes": 330648,
+      "sha256": "41884b1647c367a1f54064a205888e87fc559eaf72537dbabc5dc968025cd373",
+      "width": 4004,
+      "height": 700,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_ice_breath_cone.png",
+      "bytes": 401397,
+      "sha256": "eb51f77d8e1ac083c68260701f99354e819f736a726d0cac0496a6ac5f730208",
+      "width": 3956,
+      "height": 195,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_ice_lance_proj.png",
+      "bytes": 43660,
+      "sha256": "c86c7e134a8f1997c026eff6648a2c6e90ba78e0428f668c5dc717e5fa9b1b8a",
+      "width": 2288,
+      "height": 46,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_ice_spikes_wave.png",
+      "bytes": 629157,
+      "sha256": "651c6415405416c8da4307d5e0ed2922c4fb67ac578f8f381626704a4adc7f3c",
+      "width": 4046,
+      "height": 465,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_impacts_shield_block.png",
+      "bytes": 102673,
+      "sha256": "c6cee10a41e95e8e7a26a3672fd2bfc132cdf361a96a51e25551ab17579f6fa3",
+      "width": 4060,
+      "height": 152,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_lightning_bolt_strike.png",
+      "bytes": 705060,
+      "sha256": "b65e38fbacc1024dae04b604444791aeb73331db9427eb4df1070d6acb2302a5",
+      "width": 3961,
+      "height": 1315,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_lightning_thunderclap.png",
+      "bytes": 281721,
+      "sha256": "a0877b756d02916aee701e0aff8bc3efb59f009221313d692c47e7512f25df6a",
+      "width": 4016,
+      "height": 720,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_melee_hammer_smash.png",
+      "bytes": 204996,
+      "sha256": "3799e703ba190a65f203a9a307d25715eddf17aa5b236fb7f773487dc513d439",
+      "width": 3952,
+      "height": 297,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_melee_spear_sweep.png",
+      "bytes": 136178,
+      "sha256": "eefb6f0a8e73d30035794ca186e4fd050c133e7676ec6b204e067d3c74347161",
+      "width": 4048,
+      "height": 207,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_nature_leaf_storm.png",
+      "bytes": 184001,
+      "sha256": "bc06c07b65ef4536cec74aeba30a22a74b42763f031bcaf03bbec9fe79cd4ec5",
+      "width": 4059,
+      "height": 188,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_nature_quake_rift.png",
+      "bytes": 304579,
+      "sha256": "39529114b697c75c31094c6b15866c340df3379dc447ae2f6872f8ba97255968",
+      "width": 4032,
+      "height": 468,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_nature_vine_whip.png",
+      "bytes": 70830,
+      "sha256": "aecbf4e24d2de15b3a27a54e7e0696fdea45578d5b96c2606611242bbd49847b",
+      "width": 4032,
+      "height": 276,
       "mode": "RGBA"
     },
     {
       "path": "pixel-fx/PixelFX_seraph_aegis_descend.png",
-      "bytes": 30607,
-      "sha256": "c79a1450d3ef8ad429b80961701f2cdbfd9af0bd23abfe6c3c4368f6051b0d08",
-      "width": 3680,
-      "height": 552,
+      "bytes": 767438,
+      "sha256": "2f997968118f3efa8e75a4185d42f4b43875db7efacf49fadacb8143f1039eb8",
+      "width": 4025,
+      "height": 636,
       "mode": "RGBA"
     },
     {
       "path": "pixel-fx/PixelFX_seraph_wing_shield.png",
-      "bytes": 14375,
-      "sha256": "5571e4b2dee9f388b88df9904168eadee0a93695fd923fda427ab728c4f0d956",
-      "width": 3072,
-      "height": 240,
+      "bytes": 202367,
+      "sha256": "21b2072437c7f9a741981ff91df07bb382092a5e36912a1844d2698b5644992a",
+      "width": 4070,
+      "height": 152,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_shadow_dark_explosion.png",
+      "bytes": 1114328,
+      "sha256": "51300bc3cfe430b94c4c038b769fec32d1ec4b6905836ce18b0e5f9852f30982",
+      "width": 3984,
+      "height": 1476,
+      "mode": "RGBA"
+    },
+    {
+      "path": "pixel-fx/PixelFX_shadow_eclipse_corona.png",
+      "bytes": 460139,
+      "sha256": "578500fe29e6abd4f74c8135c1ce9a7b201d1a524d9ceec780f5937c32827537",
+      "width": 4088,
+      "height": 402,
       "mode": "RGBA"
     },
     {
       "path": "pixel-fx/PixelFX_sonic_anthem_burst.png",
-      "bytes": 11106,
-      "sha256": "efdd46101ad9045ca591a26d80969d63732a8c7ff999edc495669b2183737a0c",
-      "width": 2560,
-      "height": 116,
+      "bytes": 161749,
+      "sha256": "ca8d625a1934316b1a633fdbd9fbf9af29d23b0313274f684c77d2a3fb07f982",
+      "width": 2400,
+      "height": 100,
       "mode": "RGBA"
     },
     {
       "path": "pixel-fx/PixelFX_sonic_harmony_wave.png",
-      "bytes": 17154,
-      "sha256": "42dc376a4ef6ba36fdaf83f3c2b54000f93e9f6a29311de000bd64c497549699",
-      "width": 3552,
-      "height": 224,
+      "bytes": 555412,
+      "sha256": "40582e617b18b0887bc04ccc85b352c1e04d0592067a5bd8e4675e8d8d0fee39",
+      "width": 3920,
+      "height": 525,
       "mode": "RGBA"
     },
     {
       "path": "pixel-fx/PixelFX_sonic_note_proj.png",
-      "bytes": 1174,
-      "sha256": "781a42d6d706b47456d95e35337255ab0a4fba13ca97bbcb732f945cdff85df3",
-      "width": 1056,
-      "height": 36,
+      "bytes": 72417,
+      "sha256": "0e16f0cd6435842df56ff43734dee166b0df2cd24211f57937e9330e2820a5b2",
+      "width": 1872,
+      "height": 46,
       "mode": "RGBA"
     },
     {
       "path": "pixel-fx/PixelFX_thorn_root_sweep.png",
-      "bytes": 16748,
-      "sha256": "c7a7cbc6fe284acf1ef81618955b0745920d3f47f4bbedaf125c8484ebfa0586",
-      "width": 3696,
-      "height": 96,
+      "bytes": 257778,
+      "sha256": "da0cb4ea502c061e72c5e0ca11d91e3b4035f86ab6d9f4dfa87ae237c2dce23d",
+      "width": 3914,
+      "height": 375,
       "mode": "RGBA"
     },
     {
       "path": "pixel-fx/PixelFX_thorn_spore_cloud.png",
-      "bytes": 11625,
-      "sha256": "41e6784a8c71d33b42a78c9069a121999bdd8e40c160db245b512d9dd795bfc8",
-      "width": 2880,
-      "height": 216,
+      "bytes": 394321,
+      "sha256": "ce5e45e2d353939051e0534c7a9f841d13c75df766c68304872dc0f69ec660ac",
+      "width": 4059,
+      "height": 339,
       "mode": "RGBA"
     },
     {
       "path": "pixel-fx/PixelFX_thorn_vine_erupt.png",
-      "bytes": 32230,
-      "sha256": "df1430d28312135c99700909ccb7f38ea2d983388b91a8c76cb93c9683b99df7",
-      "width": 3072,
-      "height": 232,
+      "bytes": 129165,
+      "sha256": "40b7e936c3980445f96ab1c45d1e546678000b8f2b8fd56ea9b87ceeae60f4bc",
+      "width": 4089,
+      "height": 112,
       "mode": "RGBA"
     },
     {
       "path": "pixel-fx/PixelFX_venom_splash_hit.png",
-      "bytes": 3287,
-      "sha256": "2c25dbe3d21bc1c00ed99d69b19a6b06833582a9f005e1ae3b195c530a1cfb40",
-      "width": 1344,
-      "height": 88,
+      "bytes": 199783,
+      "sha256": "96395d47473411834816f2a2a5390ea39c0b350bfe608a48ae3ff1b925f13d4d",
+      "width": 4000,
+      "height": 144,
       "mode": "RGBA"
     },
     {
       "path": "pixel-fx/PixelFX_venom_sting_proj.png",
-      "bytes": 718,
-      "sha256": "114631852873c52d987bfd2400bdfa9be8169278d0ec27e8fd60d32bf64a73ba",
-      "width": 840,
-      "height": 28,
+      "bytes": 12883,
+      "sha256": "49eee7bfd7caa6c80c38f162a0896ecf45b89e5ee0743465d483024b336c3cac",
+      "width": 1010,
+      "height": 29,
       "mode": "RGBA"
     },
     {
       "path": "pixel-fx/PixelFX_venom_swarm_aura.png",
-      "bytes": 9522,
-      "sha256": "9d57fe2f03ca5ed0e03a3960a97b6593f4a0dbd0343928c60119c82c01c31060",
-      "width": 2496,
-      "height": 192,
+      "bytes": 564141,
+      "sha256": "2bb70096baed02322592acd55702cf85f45de4364bf54ff18d86cf95a6f8d3b0",
+      "width": 4066,
+      "height": 276,
       "mode": "RGBA"
     },
     {
       "path": "pixel-fx/PixelFX_wind_gale_barrage.png",
-      "bytes": 16512,
-      "sha256": "da9da9dbc57cf83da46d58b6e0eb232717ac203c8102ce1b8664928e46d45e11",
-      "width": 3520,
-      "height": 124,
+      "bytes": 625250,
+      "sha256": "d5e10163bc35dffa783fa939f32e5d762a830a1477f74f01b168e352d9c86a5d",
+      "width": 4031,
+      "height": 492,
       "mode": "RGBA"
     },
     {
       "path": "pixel-fx/PixelFX_wind_spark_impact.png",
-      "bytes": 9045,
-      "sha256": "a801c67ae6e0535df8ed7ad8c76bcfe26a169a41e4970a8fd60aa9b8e2b99737",
-      "width": 1568,
-      "height": 96,
+      "bytes": 102677,
+      "sha256": "9f004e48dfad17c49842324a3c4b3575e90efc691ad3fd6cd847c23a1f2133c0",
+      "width": 4092,
+      "height": 192,
       "mode": "RGBA"
     },
     {
       "path": "pixel-fx/PixelFX_wind_thunder_bolt.png",
-      "bytes": 1193,
-      "sha256": "a6ab3ca0647eef85035396e8f3d1075edff0800f29430e0657f72472032b7f9d",
-      "width": 1248,
-      "height": 32,
+      "bytes": 13495,
+      "sha256": "9a90f61739a4bc2b7b369ef890b294cc40563302106c22bab537f9544b00f920",
+      "width": 1160,
+      "height": 29,
       "mode": "RGBA"
     },
     {
       "path": "pixel-fx/recipes_expansion.json",
-      "bytes": 24788,
-      "sha256": "284b6e0a5cb523507b32d426a96434da537441059e0950675fc0894550ecb03a"
+      "bytes": 29611,
+      "sha256": "5bb2a3a9b7bd1221a591e2010df1dd2b9880553a46572b1126128308caeabf27"
     },
     {
       "path": "previews/qa_class_badges.png",
@@ -1487,16 +1615,16 @@
     },
     {
       "path": "previews/qa_pixel_fx_8packs.png",
-      "bytes": 51482,
-      "sha256": "0ef82a54d7a9c5f35061840c5a9619f26d20beeaa894118567199239333e1bc2",
-      "width": 950,
-      "height": 1424,
-      "mode": "RGB"
+      "bytes": 507471,
+      "sha256": "f7f8c35023f288d144fe437152ab007d7367975ede9dbf0322c8cb6f04f7da2e",
+      "width": 1760,
+      "height": 900,
+      "mode": "RGBA"
     },
     {
       "path": "tools/install_expansion_pack.py",
-      "bytes": 6919,
-      "sha256": "ce8385e996abcb60a7581e113b6e497cb39e66a0d71dcef50dc5fb82711b6655"
+      "bytes": 7461,
+      "sha256": "20f27ca519abb132830744204b09d4f737902722c0d4c5b66b1ba68447902fcb"
     },
     {
       "path": "tools/package_expansion_pack.py",
@@ -1505,8 +1633,8 @@
     },
     {
       "path": "tools/verify_expansion_pack.py",
-      "bytes": 16166,
-      "sha256": "38eb4e94f817d99a2826e3833b30237b760b266fc648628f702d76726c3bd8f2"
+      "bytes": 16183,
+      "sha256": "54081901609870d005b7da7beb02f1a4c599cd0630e7c3955c414a07efe8c836"
     }
   ]
 }
