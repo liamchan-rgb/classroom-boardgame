@@ -20,6 +20,7 @@ struct MeadowWaterSystem {
         let angle: CGFloat
         let orientation: Orientation
         let mirror: Bool
+        let spriteWidth: CGFloat
         let halfSpan: CGFloat
         let halfWidth: CGFloat
 
@@ -32,47 +33,10 @@ struct MeadowWaterSystem {
         }
     }
     struct Stair {
-        /// All 5 visible 3/4-perspective climb directions (all rendered strictly upright at zRotation = 0
-        /// so vertical walls & risers ALWAYS respect 3/4 orthographic gravity!).
-        enum Orientation {
-            case front   // ↑ Straight North (MapStairsFront, mirror=false)
-            case diagNE  // ↗ Diagonal Northeast (MapStoneStairs, mirror=false)
-            case diagNW  // ↖ Diagonal Northwest (MapStoneStairs, mirror=true)
-            case sideE   // → Horizontal East (MapStairsSide, mirror=false)
-            case sideW   // ← Horizontal West (MapStairsSide, mirror=true)
-        }
+        enum Orientation { case front, diagNE, diagNW, sideE, sideW }
         let center: CGPoint
-        /// Unit tangent pointing strictly UPHILL along the road in map coordinates.
         let uphillDir: CGVector
         let orientation: Orientation
-        var assetName: String {
-            switch orientation {
-            case .front: return "MapStairsFront"
-            case .diagNE, .diagNW: return "MapStoneStairs"
-            case .sideE, .sideW: return "MapStairsSide"
-            }
-        }
-        var mirror: Bool {
-            switch orientation {
-            case .diagNW, .sideW: return true
-            default: return false
-            }
-        }
-        var spriteWidth: CGFloat {
-            switch orientation {
-            case .front: return 32
-            case .diagNE, .diagNW: return 44
-            case .sideE, .sideW: return 54
-            }
-        }
-        /// Vertical offset so the walkable treads (not the lower retaining wall) lock onto the road centerline.
-        var verticalOffset: CGFloat {
-            switch orientation {
-            case .front: return 0
-            case .diagNE, .diagNW: return 2
-            case .sideE, .sideW: return 6
-            }
-        }
     }
     struct Plateau {
         let center: CGPoint
@@ -294,8 +258,9 @@ enum MeadowRoadMask {
         guard abs(denom) > 1e-4 else { return nil }
         let u = ((c.x - a.x) * r.y - (c.y - a.y) * r.x) / denom
         let t = ((c.x - a.x) * s.y - (c.y - a.y) * s.x) / denom
-        guard t >= 0.04 && t <= 0.96 && u >= 0.0 && u <= 1.0 else { return nil }
-        return CGPoint(x: a.x + t * r.x, y: a.y + t * r.y)
+        guard t >= -1e-4 && t <= 1.0 + 1e-4 && u >= -1e-4 && u <= 1.0 + 1e-4 else { return nil }
+        let tc = max(0, min(1, t))
+        return CGPoint(x: a.x + tc * r.x, y: a.y + tc * r.y)
     }
 
     static func planWaterSystem(
@@ -414,61 +379,91 @@ enum MeadowRoadMask {
             }
         }
 
-        // 4. IRONCLAD BRIDGE PLACEMENT:
-        //    - Every crossing MUST lie on a straight road span (no sharp turns/corners under bridge!)
-        //    - BOTH bridge abutments (hit ± roadDir * 44) MUST stay clear of buildings (> 52px)
-        //    - Steer a full 4-point (±50px) river corridor cleanly PERPENDICULAR (90°) to the road so BOTH
-        //      sides of BOTH stone abutments always rest 100% solidly on dry banks!
+        // 4. IRONCLAD ZERO-MISSING-BRIDGE PLANNER:
+        //    - GUARANTEES every single road-river crossing gets a clean perpendicular bridge (NEVER drops a crossing!)
+        //    - When a crossing sits close to a building apron (like a squeezed valley gap), gently slides the
+        //      local river crossing 16..34px along the road away from the building toward the open road span
+        //      and uses a compact bridge width so neither abutment touches the building!
         var bridges: [MeadowWaterSystem.Bridge] = []
         if river.count >= 6 {
             struct RawCrossing {
                 let hit: CGPoint
                 let roadDir: CGVector
                 let riverSegIdx: Int
-                let edge: TrailNetwork.Edge
-                let edgeDist: CGFloat
+                let minNodeDist: CGFloat
             }
             var candidates: [RawCrossing] = []
             for edge in network.edges {
+                guard edge.trail.length >= 44 else { continue }
+                // 1) Exact segment-segment intersection scan (allows exact vertex hits via inclusive [0,1] bounds!)
+                var edgeCrossings: [(hit: CGPoint, segIdx: Int, dAt: CGFloat)] = []
                 for (ra, rb) in zip(edge.trail.points, edge.trail.points.dropFirst()) {
                     for segIdx in 1..<(river.count - 2) {
                         guard let hit = segmentIntersection(ra, rb, river[segIdx], river[segIdx + 1]) else { continue }
                         let dAt = edge.trail.distance(nearestTo: hit)
-                        // Require bridge to sit well away from road endpoints (where buildings & sharp junctions live)
-                        let safeD = max(46, min(edge.trail.length - 46, dAt))
-                        guard edge.trail.length >= 92 else { continue }
-                        // If the raw crossing was close to a road turn/endpoint, shift crossing gently along the road onto the straighter span!
-                        let shifted = abs(safeD - dAt) < 38 ? edge.trail.point(at: safeD) : hit
-                        let pBack = edge.trail.point(at: max(0, safeD - 30))
-                        let pFwd  = edge.trail.point(at: min(edge.trail.length, safeD + 30))
-                        let inDx = shifted.x - pBack.x, inDy = shifted.y - pBack.y
-                        let outDx = pFwd.x - shifted.x, outDy = pFwd.y - shifted.y
-                        let inLen = max(0.001, hypot(inDx, inDy)), outLen = max(0.001, hypot(outDx, outDy))
-                        let straightDot = (inDx * outDx + inDy * outDy) / (inLen * outLen)
-                        guard straightDot > 0.86 else { continue } // Reject sharp hairpin turns under a bridge!
-
-                        let rdx = pFwd.x - pBack.x, rdy = pFwd.y - pBack.y
-                        let rlen = max(0.001, hypot(rdx, rdy))
-                        let rDir = CGVector(dx: rdx / rlen, dy: rdy / rlen)
-
-                        // Check BOTH stone abutment endpoints clear every node/building cleanly
-                        let endA = CGPoint(x: shifted.x - rDir.dx * 42, y: shifted.y - rDir.dy * 42)
-                        let endB = CGPoint(x: shifted.x + rDir.dx * 42, y: shifted.y + rDir.dy * 42)
-                        let clearBuildings = nodePoints.allSatisfy { n in
-                            let bc = CGPoint(x: n.x, y: n.y - 16)
-                            return hypot(bc.x - shifted.x, bc.y - shifted.y) > 66
-                                && hypot(bc.x - endA.x, bc.y - endA.y) > 48
-                                && hypot(bc.x - endB.x, bc.y - endB.y) > 48
+                        if edgeCrossings.allSatisfy({ abs($0.dAt - dAt) > 72 }) {
+                            edgeCrossings.append((hit, segIdx, dAt))
                         }
-                        guard clearBuildings else { continue }
-                        guard candidates.allSatisfy({ hypot($0.hit.x - shifted.x, $0.hit.y - shifted.y) > 105 }) else { continue }
-                        candidates.append(RawCrossing(hit: shifted, roadDir: rDir, riverSegIdx: segIdx, edge: edge, edgeDist: safeD))
                     }
+                }
+                // 2) Dense proximity safety net along the road polyline so tangent/vertex crossings can NEVER be missed!
+                var sampleD: CGFloat = 10
+                while sampleD <= edge.trail.length - 10 {
+                    let sp = edge.trail.point(at: sampleD)
+                    var bestDist: CGFloat = 10.0
+                    var bestSeg = -1
+                    for segIdx in 1..<(river.count - 2) {
+                        let a = river[segIdx], b = river[segIdx + 1]
+                        let dx = b.x - a.x, dy = b.y - a.y
+                        let l2 = max(0.001, dx * dx + dy * dy)
+                        let t = max(0, min(1, ((sp.x - a.x) * dx + (sp.y - a.y) * dy) / l2))
+                        let dist = hypot(sp.x - a.x - t * dx, sp.y - a.y - t * dy)
+                        if dist < bestDist {
+                            bestDist = dist
+                            bestSeg = segIdx
+                        }
+                    }
+                    if bestSeg >= 0 && edgeCrossings.allSatisfy({ abs($0.dAt - sampleD) > 72 }) {
+                        edgeCrossings.append((sp, bestSeg, sampleD))
+                    }
+                    sampleD += 6
+                }
+                for raw in edgeCrossings {
+                    // Search nearby along this road edge (±36px) to maximize distance from buildings AND road straightness
+                    let minD = min(edge.trail.length * 0.5, 36)
+                    let maxD = max(edge.trail.length * 0.5, edge.trail.length - 36)
+                    var bestD = max(minD, min(maxD, raw.dAt))
+                    var bestScore: CGFloat = -1e9
+                    for delta in stride(from: CGFloat(-34), through: CGFloat(34), by: 6) {
+                        let candD = max(minD, min(maxD, raw.dAt + delta))
+                        let pt = edge.trail.point(at: candD)
+                        let pB = edge.trail.point(at: max(0, candD - 24))
+                        let pF = edge.trail.point(at: min(edge.trail.length, candD + 24))
+                        let inDx = pt.x - pB.x, inDy = pt.y - pB.y
+                        let outDx = pF.x - pt.x, outDy = pF.y - pt.y
+                        let straight = (inDx * outDx + inDy * outDy) / max(0.001, hypot(inDx, inDy) * hypot(outDx, outDy))
+                        let minBldg = nodePoints.map { hypot($0.x - pt.x, ($0.y - 16) - pt.y) }.min() ?? 300
+                        // Strongly prefer shifting away from cramped buildings while staying close to the river's natural path
+                        let score = min(minBldg, 105) * 1.6 + straight * 45.0 - abs(delta) * 0.75
+                        if score > bestScore {
+                            bestScore = score
+                            bestD = candD
+                        }
+                    }
+                    let placed = edge.trail.point(at: bestD)
+                    guard candidates.allSatisfy({ hypot($0.hit.x - placed.x, $0.hit.y - placed.y) > 64 }) else { continue }
+                    let pBack = edge.trail.point(at: max(0, bestD - 22))
+                    let pFwd  = edge.trail.point(at: min(edge.trail.length, bestD + 22))
+                    let rdx = pFwd.x - pBack.x, rdy = pFwd.y - pBack.y
+                    let rlen = max(0.001, hypot(rdx, rdy))
+                    let rDir = CGVector(dx: rdx / rlen, dy: rdy / rlen)
+                    let minNodeDist = nodePoints.map { hypot($0.x - placed.x, ($0.y - 16) - placed.y) }.min() ?? 300
+                    candidates.append(RawCrossing(hit: placed, roadDir: rDir, riverSegIdx: raw.segIdx, minNodeDist: minNodeDist))
                 }
             }
 
-            // Steer river cleanly perpendicular across a full ±48px corridor at every bridge crossing!
-            for cand in candidates.prefix(6) {
+            // Bridge EVERY single crossing (no cap dropping bridges!) and steer river perpendicular across ±54px!
+            for cand in candidates {
                 let i = cand.riverSegIdx
                 let curDirX = river[min(river.count - 1, i + 2)].x - river[max(0, i - 1)].x
                 let curDirY = river[min(river.count - 1, i + 2)].y - river[max(0, i - 1)].y
@@ -476,12 +471,11 @@ enum MeadowRoadMask {
                 var py = cand.roadDir.dx
                 if px * curDirX + py * curDirY < 0 { px = -px; py = -py }
 
-                // Lock river center onto `cand.hit` and force 4 local control points cleanly perpendicular across ±56px!
                 let offsets: [(Int, CGFloat, CGFloat)] = [
-                    (i - 1, -56, 0.88),
-                    (i,     -22, 1.00),
-                    (i + 1, +22, 1.00),
-                    (i + 2, +56, 0.88)
+                    (i - 1, -54, 0.86),
+                    (i,     -21, 1.00),
+                    (i + 1, +21, 1.00),
+                    (i + 2, +54, 0.86)
                 ]
                 for (idx, off, w) in offsets where idx > 0 && idx < river.count - 1 {
                     let target = CGPoint(x: cand.hit.x + px * off, y: cand.hit.y + py * off)
@@ -491,24 +485,27 @@ enum MeadowRoadMask {
                     )
                 }
 
-                // Compute EXACT SpriteKit zRotation from canonicalized road tangent:
                 var dx = cand.roadDir.dx
                 var dy = cand.roadDir.dy
                 let orientation: MeadowWaterSystem.Bridge.Orientation
                 let skAngle: CGFloat
+                let spriteW: CGFloat
                 let halfSpan: CGFloat
                 let halfWidth: CGFloat
+                let compact = cand.minNodeDist < 84
                 if abs(dx) >= abs(dy) * 0.92 {
                     orientation = .horizontal
                     if dx < 0 { dx = -dx; dy = -dy }
                     skAngle = max(-0.46, min(0.46, atan2(-dy, dx)))
-                    halfSpan = 46; halfWidth = 24
+                    spriteW = compact ? 76 : 90
+                    halfSpan = spriteW * 0.50; halfWidth = 22
                 } else {
                     orientation = .vertical
                     if dy < 0 { dx = -dx; dy = -dy }
                     let raw = atan2(-dy, dx)
                     skAngle = max(-0.46, min(0.46, raw + .pi / 2))
-                    halfSpan = 46; halfWidth = 24
+                    spriteW = compact ? 44 : 50
+                    halfSpan = spriteW * 0.94; halfWidth = 22
                 }
                 bridges.append(MeadowWaterSystem.Bridge(
                     center: cand.hit,
@@ -516,6 +513,7 @@ enum MeadowRoadMask {
                     angle: skAngle,
                     orientation: orientation,
                     mirror: false,
+                    spriteWidth: spriteW,
                     halfSpan: halfSpan,
                     halfWidth: halfWidth
                 ))
@@ -523,127 +521,49 @@ enum MeadowRoadMask {
         }
 
         // 5. Design organic elevated highland mesa plateaus (rendered with hand-painted 32-bit MapCliffWallTile!)
-        //    STRICT GEOMETRIC INVARIANTS:
-        //    - Never overlap river, lake, or bridge OBBs
-        //    - Never let ANY building apron or roof straddle the 36px vertical cliff wall or cast shadow
-        //    - Every road crossing the visible south-facing cliff wall MUST have room for a proper 3/4 perspective staircase
-        //      (ZERO bare un-staired dirt roads slicing flatly across a sheer vertical stone cliff!)
+        //    Stairs are intentionally removed: wherever a road crosses a plateau edge, `makeTerrainTextures` carves
+        //    a wide, organically tapered mossy-cheek earthen & cobblestone hillside ramp into `terrainField.a`!
         var plateaus: [MeadowWaterSystem.Plateau] = []
         let tempWater = MeadowWaterSystem(
             waterfall: bestWF, plungePool: plungePool, riverPoints: river, lake: lake,
             bridges: bridges, stairs: [], plateaus: [], hills: [], seed: seed, mapHeight: safeH
         )
 
-        func classifyStair(_ ux: CGFloat, _ uy: CGFloat) -> MeadowWaterSystem.Stair.Orientation? {
-            // All 5 visible 3/4 orthographic climb sectors (all rendered at zRotation = 0!):
-            //   ↑ North:    uy < -0.90 (within ~25° of vertical)
-            //   ↗ Diag NE:  ux >= 0.34, uy < -0.34
-            //   ↖ Diag NW:  ux <= -0.34, uy < -0.34
-            //   → Side E:   ux > 0.84, |uy| <= 0.54
-            //   ← Side W:   ux < -0.84, |uy| <= 0.54
-            //   (Southward climbs uy > 0.34 cross the receding north back-rim and use smooth cobblestone ramps!)
-            if uy < -0.90 { return .front }
-            if uy < -0.34 { return ux >= 0 ? .diagNE : .diagNW }
-            if abs(uy) <= 0.54 && abs(ux) > 0.84 { return ux >= 0 ? .sideE : .sideW }
-            return nil
-        }
-
-        func evaluatePlateauCandidate(_ cand: MeadowWaterSystem.Plateau) -> [MeadowWaterSystem.Stair]? {
+        func isCleanPlateau(_ cand: MeadowWaterSystem.Plateau) -> Bool {
             let checkRadius = max(cand.rx, cand.ry) + 34
-            guard !tempWater.isNearWater(cand.center, margin: checkRadius * 0.76) else { return nil }
-            guard plateaus.allSatisfy({ hypot($0.center.x - cand.center.x, $0.center.y - cand.center.y) > ($0.rx + cand.rx) * 1.18 }) else { return nil }
-            // Check NO building apron or tall roof sits in the 36px cliff drop band + shadow zone
+            guard !tempWater.isNearWater(cand.center, margin: checkRadius * 0.76) else { return false }
+            guard plateaus.allSatisfy({ hypot($0.center.x - cand.center.x, $0.center.y - cand.center.y) > ($0.rx + cand.rx) * 1.18 }) else { return false }
             let testSys = MeadowWaterSystem(
                 waterfall: bestWF, plungePool: plungePool, riverPoints: river, lake: lake,
                 bridges: bridges, stairs: [], plateaus: [cand], hills: [], seed: seed, mapHeight: safeH
             )
+            // Keep ALL building aprons, bodies, and upper roofs completely off the 36px cliff face
             for n in nodePoints {
-                // Check apron, mid-building, and upper roof against cliff wall band!
                 for probe in [n, CGPoint(x: n.x, y: n.y - 34), CGPoint(x: n.x, y: n.y - 68)] {
-                    if testSys.isOnCliffWall(probe, margin: 18) { return nil }
+                    if testSys.isOnCliffWall(probe, margin: 18) { return false }
                 }
             }
-            // Audit EVERY road edge crossing this plateau's visible south-facing cliff wall!
-            var foundStairs: [MeadowWaterSystem.Stair] = []
-            for edge in network.edges {
-                var d: CGFloat = 10
-                var lastP = testSys.plateauMask(at: edge.trail.point(at: 0))
-                while d <= edge.trail.length {
-                    let pt = edge.trail.point(at: d)
-                    let curP = testSys.plateauMask(at: pt)
-                    if (lastP < 0.5 && curP >= 0.5) || (lastP >= 0.5 && curP < 0.5) {
-                        // Exact lip crossing! Check whether this crossing is on the VISIBLE south-facing cliff face!
-                        let isVisibleCliff = testSys.plateauMask(at: CGPoint(x: pt.x, y: pt.y - 26)) > 0.55
-                            && testSys.plateauMask(at: CGPoint(x: pt.x, y: pt.y + 22)) < 0.45
-                        if isVisibleCliff {
-                            // MUST be able to place a clean 3/4 perspective staircase here — never leave a bare dirt cut!
-                            guard d >= 34 && d <= edge.trail.length - 34 else { return nil }
-                            let pBack = edge.trail.point(at: max(0, d - 24))
-                            let pFwd  = edge.trail.point(at: min(edge.trail.length, d + 24))
-                            let inDx = pt.x - pBack.x, inDy = pt.y - pBack.y
-                            let outDx = pFwd.x - pt.x, outDy = pFwd.y - pt.y
-                            let inLen = max(0.001, hypot(inDx, inDy)), outLen = max(0.001, hypot(outDx, outDy))
-                            guard (inDx * outDx + inDy * outDy) / (inLen * outLen) > 0.88 else { return nil }
-
-                            // Compute exact uphill unit vector (pointing from lower valley UP onto plateau!)
-                            let pBackPlat = testSys.plateauMask(at: pBack)
-                            let pFwdPlat  = testSys.plateauMask(at: pFwd)
-                            let sgn: CGFloat = pFwdPlat >= pBackPlat ? 1 : -1
-                            let ux0 = (pFwd.x - pBack.x) * sgn
-                            let uy0 = (pFwd.y - pBack.y) * sgn
-                            let ulen = max(0.001, hypot(ux0, uy0))
-                            let ux = ux0 / ulen, uy = uy0 / ulen
-
-                            guard let orient = classifyStair(ux, uy) else { return nil }
-                            guard !tempWater.isNearWater(pt, margin: 34),
-                                  !tempWater.isNearBridge(pt, padAlong: 46, padAcross: 46),
-                                  nodePoints.allSatisfy({ hypot($0.x - pt.x, ($0.y - 12) - pt.y) > 48 }),
-                                  foundStairs.allSatisfy({ hypot($0.center.x - pt.x, $0.center.y - pt.y) > 74 }) else { return nil }
-
-                            // Center staircase squarely inside the 36px cliff drop (lip at pt.y -> cliff foot at pt.y + 36)
-                            let stairCenter = CGPoint(x: pt.x, y: pt.y + 18)
-                            foundStairs.append(MeadowWaterSystem.Stair(
-                                center: stairCenter,
-                                uphillDir: CGVector(dx: ux, dy: uy),
-                                orientation: orient
-                            ))
-                        }
-                    }
-                    lastP = curP
-                    d += 6
-                }
+            // Keep bridges cleanly away from cliff drops
+            for br in bridges {
+                if testSys.isOnCliffWall(br.center, margin: 42) { return false }
             }
-            return foundStairs
+            return true
         }
 
-        var stairs: [MeadowWaterSystem.Stair] = []
         func tryAddPlateau(center: CGPoint, rx: CGFloat, ry: CGFloat, height: CGFloat) {
-            // Try clean shifts & slight size variations to find a zero-conflict mesa where EVERY south-cliff road has proper 3/4 stairs!
             let shifts: [(CGFloat, CGFloat, CGFloat)] = [
                 (0, 0, 1.0), (0, -18, 0.92), (0, 16, 0.92),
                 (-28, 0, 0.92), (28, 0, 0.92),
                 (0, -14, 0.80), (-22, -14, 0.82), (22, -14, 0.82)
             ]
-            var bestPick: (plat: MeadowWaterSystem.Plateau, stairs: [MeadowWaterSystem.Stair], score: Int)?
             for (dx, dy, sc) in shifts {
                 let cand = MeadowWaterSystem.Plateau(
                     center: CGPoint(x: center.x + dx, y: center.y + dy),
                     rx: rx * sc, ry: ry * sc, height: height
                 )
-                if let candStairs = evaluatePlateauCandidate(cand) {
-                    // Prefer clean mesas with 1-2 embedded staircases and minimal shift!
-                    let score = min(candStairs.count, 2) * 30 - Int(abs(dx) + abs(dy)) / 4
-                    if bestPick == nil || score > bestPick!.score {
-                        bestPick = (cand, candStairs, score)
-                    }
-                }
-            }
-            if let pick = bestPick {
-                plateaus.append(pick.plat)
-                for s in pick.stairs {
-                    if stairs.allSatisfy({ hypot($0.center.x - s.center.x, $0.center.y - s.center.y) > 88 }) {
-                        stairs.append(s)
-                    }
+                if isCleanPlateau(cand) {
+                    plateaus.append(cand)
+                    return
                 }
             }
         }
@@ -674,7 +594,7 @@ enum MeadowRoadMask {
 
         return MeadowWaterSystem(
             waterfall: bestWF, plungePool: plungePool, riverPoints: river, lake: lake,
-            bridges: bridges, stairs: stairs, plateaus: plateaus, hills: hills, seed: seed, mapHeight: safeH
+            bridges: bridges, stairs: [], plateaus: plateaus, hills: hills, seed: seed, mapHeight: safeH
         )
     }
 
@@ -707,22 +627,58 @@ enum MeadowRoadMask {
         var allCobbles = cobbleCenters
         if let water {
             for b in water.bridges {
-                allCobbles.append((CGPoint(x: b.center.x - b.roadDir.dx * 40, y: b.center.y - b.roadDir.dy * 40), 42))
-                allCobbles.append((CGPoint(x: b.center.x + b.roadDir.dx * 40, y: b.center.y + b.roadDir.dy * 40), 42))
+                let offset = max(32, b.halfSpan - 6)
+                allCobbles.append((CGPoint(x: b.center.x - b.roadDir.dx * offset, y: b.center.y - b.roadDir.dy * offset), 40))
+                allCobbles.append((CGPoint(x: b.center.x + b.roadDir.dx * offset, y: b.center.y + b.roadDir.dy * offset), 40))
             }
-            for s in water.stairs {
-                allCobbles.append((s.center, 46))
+            // Add subtle weathered cobblestone paving smoothly across every road-plateau hillside pass!
+            if !water.plateaus.isEmpty {
+                for edge in network.edges {
+                    var d: CGFloat = 12
+                    var lastP = water.plateauMask(at: edge.trail.point(at: 0))
+                    while d <= edge.trail.length {
+                        let pt = edge.trail.point(at: d)
+                        let curP = water.plateauMask(at: pt)
+                        if (lastP < 0.5 && curP >= 0.5) || (lastP >= 0.5 && curP < 0.5) {
+                            allCobbles.append((CGPoint(x: pt.x, y: pt.y + 12), 64))
+                        }
+                        lastP = curP
+                        d += 10
+                    }
+                }
             }
         }
 
-        // 1. Rasterize road coverage (R) + rural wear / cobblestone paving (G)
+        // Track half-res road distance field so plateau cliffs smoothly taper into natural hillside ramps at road openings!
+        let fw = max(1, width / 2), fh = max(1, height / 2)
+        var roadDistField = [Float](repeating: 999.0, count: fw * fh)
+
+        // 1. Rasterize road coverage (R) + rural wear / cobblestone paving (G) + half-res roadDistField
         for edge in network.edges {
             let radius = edge.width * 0.5 + 10
+            let rampScanRadius: CGFloat = 72
             for (a, b) in zip(edge.trail.points, edge.trail.points.dropFirst()) {
                 defer { completed += 1; progress?(Double(completed) / Double(max(1, segments)) * 0.52) }
                 let dx = b.x - a.x, dy = b.y - a.y
                 let length2 = dx * dx + dy * dy
                 guard length2 > 0.001 else { continue }
+                // Update half-res road distance field for organic tapered cliff-opening ramps!
+                let fMinX = max(0, Int(floor((min(a.x, b.x) - rampScanRadius - bounds.minX) * 0.5)))
+                let fMaxX = min(fw - 1, Int(ceil((max(a.x, b.x) + rampScanRadius - bounds.minX) * 0.5)))
+                let fMinY = max(0, Int(floor((min(a.y, b.y) - rampScanRadius - bounds.minY) * 0.5)))
+                let fMaxY = min(fh - 1, Int(ceil((max(a.y, b.y) + rampScanRadius - bounds.minY) * 0.5)))
+                if fMinX <= fMaxX && fMinY <= fMaxY {
+                    for fy in fMinY...fMaxY {
+                        let py = bounds.minY + (CGFloat(fy) + 0.5) * 2.0
+                        let row = fy * fw
+                        for fx in fMinX...fMaxX {
+                            let px = bounds.minX + (CGFloat(fx) + 0.5) * 2.0
+                            let t = max(0, min(1, ((px - a.x) * dx + (py - a.y) * dy) / length2))
+                            let dist = Float(hypot(px - a.x - t * dx, py - a.y - t * dy))
+                            if dist < roadDistField[row + fx] { roadDistField[row + fx] = dist }
+                        }
+                    }
+                }
                 let minX = max(0, Int(floor(min(a.x, b.x) - radius - bounds.minX)))
                 let maxX = min(width - 1, Int(ceil(max(a.x, b.x) + radius - bounds.minX)))
                 let minY = max(0, Int(floor(min(a.y, b.y) - radius - bounds.minY)))
@@ -854,8 +810,52 @@ enum MeadowRoadMask {
         //    - R = smooth rolling elevation H(x,y)
         //    - G = downstream flowX (in water) / 0.5 (dry land)
         //    - B = downstream flowY (in water) / 0.5 (dry land)
-        //    - A = water turbulence (when roadMask.b > 4) OR crisp plateauMask P(x,y) (on dry land!)
-        let fw = max(1, width / 2), fh = max(1, height / 2)
+        //    - A = water turbulence (when roadMask.b > 4) OR organically road-tapered plateauMask P(x,y) (on dry land!)
+        //          Near road openings (dRoad < 48px), `plateauMask` smoothly fans into a gentle sloped ramp so
+        //          the 36px MapCliffWallTile cheeks taper naturally down into the roadside with ZERO scissor-cut!
+        var rawPlat = [Float](repeating: 0, count: fw * fh)
+        if let water, !water.plateaus.isEmpty {
+            for fy in 0..<fh {
+                let py = bounds.minY + (CGFloat(fy) + 0.5) * 2.0
+                let row = fy * fw
+                for fx in 0..<fw {
+                    let px = bounds.minX + (CGFloat(fx) + 0.5) * 2.0
+                    rawPlat[row + fx] = Float(water.plateauMask(at: CGPoint(x: px, y: py)))
+                }
+            }
+        }
+        // 2-pass separable box blur (radius 20 half-res texels = 40 world px each -> silky ~90px Gaussian hillside ramp)
+        // ONLY blended inside road ramp corridors so cliffs away from roads remain 100% crisp 36px vertical granite!
+        var rampPlat = rawPlat
+        if let water, !water.plateaus.isEmpty {
+            var tmp = [Float](repeating: 0, count: fw * fh)
+            let rad = 20
+            let inv = 1.0 / Float(rad * 2 + 1)
+            for _ in 0..<2 {
+                for fy in 0..<fh {
+                    let row = fy * fw
+                    var acc: Float = 0
+                    for k in -rad...rad { acc += rampPlat[row + max(0, min(fw - 1, k))] }
+                    for fx in 0..<fw {
+                        tmp[row + fx] = acc * inv
+                        let outIdx = max(0, min(fw - 1, fx - rad))
+                        let inIdx  = max(0, min(fw - 1, fx + rad + 1))
+                        acc += rampPlat[row + inIdx] - rampPlat[row + outIdx]
+                    }
+                }
+                for fx in 0..<fw {
+                    var acc: Float = 0
+                    for k in -rad...rad { acc += tmp[max(0, min(fh - 1, k)) * fw + fx] }
+                    for fy in 0..<fh {
+                        rampPlat[fy * fw + fx] = acc * inv
+                        let outY = max(0, min(fh - 1, fy - rad))
+                        let inY  = max(0, min(fh - 1, fy + rad + 1))
+                        acc += tmp[inY * fw + fx] - tmp[outY * fw + fx]
+                    }
+                }
+            }
+        }
+
         var tBytes = [UInt8](repeating: 0, count: fw * fh * 4)
 
         var segInfo: [(a: CGPoint, b: CGPoint, dx: CGFloat, dy: CGFloat, l2: CGFloat, ux: CGFloat, uy: CGFloat)] = []
@@ -870,6 +870,7 @@ enum MeadowRoadMask {
 
         for fy in 0..<fh {
             let py = bounds.minY + (CGFloat(fy) + 0.5) * 2.0
+            let row = fy * fw
             for fx in 0..<fw {
                 let px = bounds.minX + (CGFloat(fx) + 0.5) * 2.0
                 let p = CGPoint(x: px, y: py)
@@ -912,16 +913,23 @@ enum MeadowRoadMask {
                     if vlen > 1.0 { vx /= vlen; vy /= vlen }
                 }
 
-                // On dry land, store crisp elevated terrace plateau mask P(x,y) in Alpha for GPU 3/4 vertical cliff wall rendering!
+                // On dry land, blend raw crisp plateau mask into the wide smoothed hillside ramp near every road!
                 let aByte: UInt8
                 if waterByte > 4 {
                     aByte = turbByte
                 } else {
-                    let platVal = water?.plateauMask(at: p) ?? 0
-                    aByte = UInt8(min(255, max(0, Int(platVal * 255))))
+                    let rp = rawPlat[row + fx]
+                    let bp = rampPlat[row + fx]
+                    let rd = roadDistField[row + fx]
+                    // Smooth taper over dRoad in [20..68px]: crisp 36px cliff far from roads,
+                    // organically lowering its rocky wedge cheeks into a mossy grass shoulder BEFORE touching the road edge!
+                    let tRoad = max(0.0, min(1.0, (rd - 20.0) / 48.0))
+                    let keepCrisp = tRoad * tRoad * (3.0 - 2.0 * tRoad)
+                    let finalP = bp * (1.0 - keepCrisp) + rp * keepCrisp
+                    aByte = UInt8(min(255, max(0, Int(finalP * 255))))
                 }
 
-                let idx = (fy * fw + fx) * 4
+                let idx = (row + fx) * 4
                 tBytes[idx] = UInt8(min(255, max(0, Int(hVal * 255))))
                 tBytes[idx + 1] = UInt8(min(255, max(0, Int((vx * 0.5 + 0.5) * 255))))
                 tBytes[idx + 2] = UInt8(min(255, max(0, Int((vy * 0.5 + 0.5) * 255))))

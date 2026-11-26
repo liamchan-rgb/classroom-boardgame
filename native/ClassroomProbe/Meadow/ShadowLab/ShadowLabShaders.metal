@@ -311,17 +311,32 @@ fragment float4 meadowGroundFragment(LabRaster in [[stage_in]], constant LabUnif
             grass = mix(grass, grass * float3(1.12, 1.14, 0.98), northRimLit * 0.45);
 
             // Exposed south-facing 36px hand-painted pixel-art granite cliff face!
+            // Near tapered road hillside passages, `dropHeight = pTop - pHere` drops smoothly so the cliff face
+            // PHYSICALLY SHRINKS IN VERTICAL HEIGHT into a crisp mossy granite wedge whose sunlit turf lip curves
+            // naturally down into the grassy embankment BEFORE reaching the cobblestone road (ZERO scissor-cut!).
             float pTopL = terrainField.sample(maskSampler, maskUV + float2(-14.0 / 1600.0, -wallH / worldH)).a;
             float pTopR = terrainField.sample(maskSampler, maskUV + float2( 14.0 / 1600.0, -wallH / worldH)).a;
             float sideSlope = pTopL - pTopR; // >0 = cliff faces SE (shaded), <0 = cliff faces SW (sunlit!)
-            float southFacing = smoothstep(0.08, 0.30, pTop - pHere) * (1.0 - smoothstep(0.62, 0.96, abs(sideSlope)));
-            float rawWall = smoothstep(0.42, 0.68, pTop) * (1.0 - smoothstep(0.46, 0.72, pHere)) * southFacing;
-            if (rawWall > 0.01) {
+            float dropHeight = pTop - pHere;
+            float cheekTaper = smoothstep(0.36, 0.84, dropHeight);
+            float southFacing = 1.0 - smoothstep(0.62, 0.96, abs(sideSlope));
+            float rawWall = smoothstep(0.42, 0.72, pTop) * (1.0 - smoothstep(0.36, 0.66, pHere)) * southFacing;
+            if (rawWall > 0.01 && cheekTaper > 0.03) {
                 // Smooth normalized height from cliff foot (0) to upper grass overhang lip (1)
                 float wallV = clamp((pHere + s1 + s2 + s3 + s4 + s5) / 6.0, 0.0, 1.0);
+                // Physically shrink the cliff's vertical band [vBot, vTop] as cheekTaper drops toward a road pass:
+                // upper sunlit grass lip curves gracefully downward (65%) while rock foot lifts slightly onto the slope (35%)!
+                float vBot = mix(0.34, 0.02, cheekTaper);
+                float vTop = mix(0.38, 0.98, cheekTaper);
+                float localV = clamp((wallV - vBot) / max(0.06, vTop - vBot), 0.0, 1.0);
+                float wedgeMask = smoothstep(vBot - 0.03, vBot + 0.11, wallV)
+                                * (1.0 - smoothstep(vTop - 0.12, vTop + 0.03, wallV))
+                                * smoothstep(0.04, 0.24, cheekTaper);
+
                 // Sample real seamless 32-bit HD-2D MapCliffWallTile (2:1 aspect -> 76px wide x 36px tall = 1:1 crisp pixels!)
+                // Mapping localV keeps the sunlit green turf lip AND dark mossy talus intact all along the curving cheek!
                 float cliffU = p.x / 76.0;
-                float cliffV = clamp(1.0 - wallV, 0.01, 0.99);
+                float cliffV = clamp(1.0 - localV, 0.01, 0.99);
                 float3 cliffTex = cliffWallTexture.sample(cliffSampler, float2(cliffU, cliffV)).rgb;
 
                 // Subtle directional 3D curvature lighting: SW cliff bends catch warm sun, SE bends cool slate!
@@ -331,20 +346,24 @@ fragment float4 meadowGroundFragment(LabRaster in [[stage_in]], constant LabUnif
                     : mix(float3(1.0), float3(0.86, 0.90, 0.96), clamp(sideSlope, 0.0, 1.0) * 0.65);
                 cliffTex *= faceLight * faceTint;
 
-                // Soft organic edge blend at very top grass turf (wallV > 0.88) & talus foot (wallV < 0.12)
-                float topBlend = 1.0 - smoothstep(0.88, 0.99, wallV);
-                float botBlend = smoothstep(0.02, 0.14, wallV);
-                cliffWallMask = rawWall * topBlend * botBlend;
+                cliffWallMask = rawWall * wedgeMask;
                 cliffWallColor = cliffTex;
             }
 
+            // Lush mossy-grass hillside slope shading across tapered road-opening embankments
+            // (bridges upper sunlit plateau smoothly down to the lower meadow between the two receding granite cheeks!)
+            float gentleRamp = smoothstep(0.10, 0.36, dropHeight) * (1.0 - cheekTaper);
+            grass = mix(grass, grass * float3(0.95, 1.01, 0.90), gentleRamp * 0.48);
+
             // Broad, soft directional SE cast shadow falling onto the lower meadow below the 36px raised mesa!
-            float inLowerValley = 1.0 - smoothstep(0.36, 0.62, max(pHere, pTop));
+            // Tapers cleanly in lockstep with shrinking cliff cheeks so NO dark shadow tail sticks across road passes!
+            float inLowerValley = 1.0 - smoothstep(0.32, 0.62, max(pHere, pTop));
             float sh1 = terrainField.sample(maskSampler, maskUV - float2( 7.0 / 1600.0, (wallH +  6.0) / worldH)).a;
             float sh2 = terrainField.sample(maskSampler, maskUV - float2(16.0 / 1600.0, (wallH + 15.0) / worldH)).a;
             float sh3 = terrainField.sample(maskSampler, maskUV - float2(25.0 / 1600.0, (wallH + 24.0) / worldH)).a;
-            float castAmt = (smoothstep(0.42, 0.78, sh1) * 0.55 + smoothstep(0.42, 0.78, sh2) * 0.30 + smoothstep(0.42, 0.78, sh3) * 0.15) * inLowerValley;
-            terraceCastShadow = mix(1.0, 0.64, clamp(castAmt, 0.0, 1.0)) * mix(1.0, 0.85, northBackShadow * 0.72);
+            float sharpCliffHere = smoothstep(0.38, 0.78, sh1 - pHere);
+            float castAmt = (smoothstep(0.45, 0.80, sh1) * 0.55 + smoothstep(0.45, 0.80, sh2) * 0.30 + smoothstep(0.45, 0.80, sh3) * 0.15) * inLowerValley * sharpCliffHere;
+            terraceCastShadow = mix(1.0, 0.66, clamp(castAmt, 0.0, 1.0)) * mix(1.0, 0.86, northBackShadow * 0.72);
         }
     }
 
@@ -356,7 +375,8 @@ fragment float4 meadowGroundFragment(LabRaster in [[stage_in]], constant LabUnif
     float patches = meadowNoise(p * 0.045), fine = meadowHash(floor(p * 1.5));
 
     float3 soil = mix(float3(0.41, 0.35, 0.22), float3(0.62, 0.53, 0.34), patches * 0.64 + fine * 0.25);
-    float cobbleW = smoothstep(0.50, 0.72, mask.g);
+    float cobbleRaw = smoothstep(0.51, 0.84, mask.g);
+    float cobbleW = clamp(cobbleRaw * 1.16 - meadowNoise(p * 0.15) * 0.24 * (1.0 - cobbleRaw), 0.0, 1.0) * smoothstep(0.02, 0.14, cobbleRaw);
     float ruralWear = min(mask.g / 0.45, 1.0) * (1.0 - cobbleW);
     soil *= 1.0 - ruralWear * (0.04 + meadowNoise(p * 0.11) * 0.045);
 
@@ -396,10 +416,15 @@ fragment float4 meadowGroundFragment(LabRaster in [[stage_in]], constant LabUnif
 
     // Apply silky rolling hillshading, elevated sunlit mesa lift, and directional terrace cast shadow
     terrain *= hillShade * hillTint * plateauLiftCol * terraceCastShadow;
-    // Composite the hand-painted 32-bit pixel-art 36px cliff face, opening cleanly ONLY right at cobblestone stair notches!
+    // Composite the hand-painted 32-bit pixel-art 36px cliff face, smoothly feathering off right along road edges
+    // with a subtle mossy-earth kerb transition where rocky cheeks meet the sloped cobblestone ramp!
     if (cliffWallMask > 0.01) {
-        float stairCut = smoothstep(0.24, 0.56, coverage) * smoothstep(0.48, 0.72, mask.g);
-        terrain = mix(terrain, cliffWallColor, cliffWallMask * (1.0 - stairCut * 0.95));
+        float roadFeather = smoothstep(0.04, 0.42, coverage);
+        float wallMix = cliffWallMask * (1.0 - roadFeather);
+        // Subtle natural dark-moss kerb seam right where tapered rocky cliff cheeks hug the sloped road edge
+        float cheekMoss = cliffWallMask * smoothstep(0.02, 0.24, coverage) * (1.0 - smoothstep(0.24, 0.55, coverage));
+        terrain = mix(terrain, float3(0.23, 0.28, 0.14) * hillShade, cheekMoss * 0.45);
+        terrain = mix(terrain, cliffWallColor, wallMix);
     }
 
     // -------------------------------------------------------------------------

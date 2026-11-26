@@ -518,13 +518,12 @@ final class LivingWorld: SKNode {
                 }
             }
 
-            // IRONCLAD ALIGNED BRIDGES (strictly matched horizontal/vertical sprite, clean OBB clearance!)
+            // IRONCLAD ZERO-MISSING BRIDGES (dynamic sizing for tight gaps, clean OBB clearance!)
             for bridge in water.bridges {
                 let asset = bridge.orientation == .horizontal ? "MapBridgeHoriz" : "MapBridgeVert"
-                let w: CGFloat = bridge.orientation == .horizontal ? 92 : 50
                 added.append(SceneDefinition.Prop(
                     asset: asset, x: bridge.center.x, y: bridge.center.y,
-                    width: w, mirror: bridge.mirror, wind: 0, rotation: bridge.angle
+                    width: bridge.spriteWidth, mirror: bridge.mirror, wind: 0, rotation: bridge.angle
                 ))
                 // Place mossy bank boulders ONLY strictly outside the bridge railing OBB (|across| >= 46px along riverbank!)
                 let perpX = -bridge.roadDir.dy, perpY = bridge.roadDir.dx
@@ -541,19 +540,7 @@ final class LivingWorld: SKNode {
                 }
             }
 
-            // ALL-DIRECTION 3/4 PERSPECTIVE STONE STAIRS (Front ↑, Diag NE ↗, Diag NW ↖, Side E →, Side W ←):
-            // Every sprite stays strictly upright (zRotation = 0) so vertical walls respect 3/4 orthographic gravity!
-            for stair in water.stairs {
-                added.append(SceneDefinition.Prop(
-                    asset: stair.assetName,
-                    x: stair.center.x,
-                    y: stair.center.y + stair.verticalOffset,
-                    width: stair.spriteWidth,
-                    mirror: stair.mirror,
-                    wind: 0,
-                    rotation: 0
-                ))
-            }
+            // Stairs intentionally removed: plateau road crossings smoothly taper into natural sloped mossy-cheek ramps!
 
             // Natural boulders & ferns placed cleanly ON THE LOWER VALLEY FLOOR below mesa corners (NEVER floating on the cliff face!)
             for plat in water.plateaus {
