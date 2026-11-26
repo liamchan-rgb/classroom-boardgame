@@ -1,6 +1,7 @@
 import UIKit
 import ClassroomGameCore
 import MeadowBattleSupport
+import MeadowWorldSupport
 
 /// A real two-player/two-target training encounter backed by the tabletop engine.
 final class MeadowPartyBattleView:UIView {
@@ -167,12 +168,27 @@ final class MeadowPartyBattleView:UIView {
         }
     }
     private func configureTrainingMenu() {
-        let choices=[("adventurer","冒险者"),("spellblade","魔剑士"),("dragonKnight","龙骑士")]
-        let classes=choices.map { id,name in UIAction(title:"P1 · "+name,state:playerClassID==id ? .on:.off) { [weak self] _ in
-            guard let self else{return};self.playerClassID=id;self.configureTrainingMenu();self.restart()
-        } }
-        let again=UIAction(title:"重置当前演练") { [weak self] _ in self?.restart() }
-        reset.menu=UIMenu(children:[again,UIMenu(title:"P1职业",children:classes)])
+        let catalog = try? GameCatalog.initial()
+        func badge(_ id: String) -> UIImage? {
+            let cap = id.prefix(1).uppercased() + id.dropFirst()
+            guard let img = UIImage(named: "ClassBadge" + cap) else { return nil }
+            let size = CGSize(width: 24, height: 24)
+            return UIGraphicsImageRenderer(size: size).image { r in
+                r.cgContext.interpolationQuality = .none
+                img.draw(in: CGRect(origin: .zero, size: size))
+            }.withRenderingMode(.alwaysOriginal)
+        }
+        let tierMenus = MeadowPartyConfiguration.classTiers.map { tier in
+            UIMenu(title: tier.title, children: tier.ids.map { id in
+                let name = (try? catalog?.playerClass(id).name) ?? id
+                return UIAction(title: "P1 · " + name, image: badge(id), state: playerClassID == id ? .on : .off) { [weak self] _ in
+                    guard let self else { return }
+                    self.playerClassID = id; self.configureTrainingMenu(); self.restart()
+                }
+            })
+        }
+        let again = UIAction(title: "重置当前演练") { [weak self] _ in self?.restart() }
+        reset.menu = UIMenu(children: [again, UIMenu(title: "P1职业（14 职业）", children: tierMenus)])
     }
     private func restart() {
         generation += 1;scheduled?.cancel();scheduled=nil;stage.stop();accessory.dismiss()
@@ -325,7 +341,11 @@ final class MeadowPartyBattleView:UIView {
         }
         end.isEnabled=active && !busy && current?.hasPrefix("p")==true && !model.terminal
         var menu:[UIAction]=[]
-        for a in [PartyAction.smallPotion,.largePotion,.shieldPotion,.revivalStone] {
+        let classicItems:Set<PartyAction>=[.smallPotion,.largePotion,.shieldPotion,.revivalStone]
+        let visibleConsumables=PartyAction.allConsumables.filter { a in
+            classicItems.contains(a) || (current.flatMap { state.units[$0]?.inventory[a.rawValue] } ?? 0) > 0
+        }
+        for a in visibleConsumables {
             let count=current.flatMap { state.units[$0]?.inventory[a.rawValue] } ?? 0
             let readout=model.actionReadout(a,ally:friend,enemy:foe)
             let allowed=readout.allowed
@@ -349,8 +369,13 @@ final class MeadowPartyBattleView:UIView {
     }
     static func look(_ a:PartyAction)->(symbol:String,tint:UIColor) {
         switch a {
-        case .dragonFlame:return ("flame.fill",UIColor(red:1,green:0.55,blue:0.25,alpha:1))
-        case .runeSlash,.starlightPulse:return ("wand.and.rays",UIColor(red:0.72,green:0.55,blue:1,alpha:1))
+        case .dragonFlame,.fireball,.emberNova:return ("flame.fill",UIColor(red:1,green:0.55,blue:0.25,alpha:1))
+        case .frostNova:return ("snowflake",UIColor(red:0.42,green:0.84,blue:1,alpha:1))
+        case .quickShot,.piercingArrow,.galeBarrage,.galeVolley:return ("wind",UIColor(red:0.32,green:0.88,blue:0.78,alpha:1))
+        case .thornSnare,.elderBloom,.barkAegis,.wildwoodBreeze,.oakBulwark:return ("leaf.fill",UIColor(red:0.42,green:0.88,blue:0.48,alpha:1))
+        case .sonicNote,.healingLullaby,.heroicAnthem:return ("music.note",UIColor(red:1.0,green:0.62,blue:0.78,alpha:1))
+        case .meteorStarfall,.astralDome,.arcaneOverdrive,.astralJudgement,.runeSlash,.starlightPulse:return ("wand.and.rays",UIColor(red:0.72,green:0.55,blue:1,alpha:1))
+        case .holyBolt,.judgmentStrike,.radiantBaptism,.seraphAegis,.valkyrieGuard,.skybreaker:return ("sun.max.fill",UIColor(red:1.0,green:0.82,blue:0.35,alpha:1))
         case .ambush:return ("eye.slash.fill",UIColor(red:0.72,green:0.55,blue:1,alpha:1))
         case .endTurn:return ("hourglass",UIColor(white:0.8,alpha:1))
         default:break
@@ -368,27 +393,26 @@ final class MeadowPartyBattleView:UIView {
         guard let unit=model.state.units[actor] else{return nil}
         let bonus=(try? GameRules.attributes(unit,catalog:model.engine.catalog).damage) ?? 0
         func hit(_ dice:String,_ flat:Int)->String {let total=flat+bonus;return "伤害 "+dice+(total>0 ? "+\(total)":"")}
-        switch a {
-        case .attack:
+        if a == .attack {
             guard let weapon=unit.equipment.weapon,let dice=(try? model.engine.catalog.item(weapon))?.attack?.dice else{return "无武器"}
             return hit("\(dice.count)D\(dice.sides)",dice.flat)
-        case .heavyStrike:return hit("1D6",2)
-        case .ambush:return hit("2D8",2)+" · 治疗 3"
-        case .runeSlash:return hit("2D12",2)+" · 治疗 4 · 护盾 4"
-        case .dragonFlame:return hit("1D20",6)+" · 治疗 6 · 护盾 6"
-        case .starlightPulse:return hit("1D12",4)+" · 治疗 6 · 护盾 6"
-        case .sweep:return hit("1D12",0)
-        case .runeWard:return "治疗 8 · 护盾 6"
-        case .battleRune:return "护盾 4 · 增伤 3"
-        case .dragonSoulWard:return "治疗 10 · 护盾 10 · 增伤 3"
-        case .dragonScaleWard:return "治疗 12 · 护盾 10 · 增伤 2"
-        case .dragonOrder:return "治疗 6 · 护盾 8 · 增伤 4"
-        case .support:return "治疗 6 · 护盾 4"
-        case .rally:return "增伤 2"
-        case .breather,.regeneration:return "治疗 4"
-        case .endTurn:return "保留行动"
-        default:return a.isItem ? nil:"护盾 4"
         }
+        if a == .endTurn { return "保留行动" }
+        if a.isItem { return nil }
+        if let skill=try? model.engine.catalog.skill(a.rawValue) {
+            var parts:[String]=[]
+            for e in skill.effects {
+                switch e.kind {
+                case .damage:
+                    if let d=e.dice { parts.append(hit("\(d.count)D\(d.sides)",d.flat)) }
+                case .heal: parts.append("治疗 \(e.amount)")
+                case .shield: parts.append("护盾 \(e.amount)")
+                case .damageBuff: parts.append("增伤 \(e.amount)")
+                }
+            }
+            if !parts.isEmpty { return parts.joined(separator:" · ") }
+        }
+        return nil
     }
     private func usesLeft(_ a:PartyAction,model:PartyEncounter,actor:String)->Int? {
         guard let unit=model.state.units[actor],let limit=(try? model.engine.catalog.skill(a.rawValue))?.uses else{return nil}
@@ -398,30 +422,39 @@ final class MeadowPartyBattleView:UIView {
         guard a != .attack else {
             guard let unit=model.state.units[actor],let weapon=unit.equipment.weapon,let item=try? model.engine.catalog.item(weapon),let dice=item.attack?.dice else { return "未装备武器 · 请回营地装备" }
             let damage=(try? GameRules.attributes(unit,catalog:model.engine.catalog).damage) ?? 0
-            return "\(item.name) · \(dice.count)D\(dice.sides)"+(damage>0 ? "＋\(damage)":"")
+            let totalFlat=dice.flat+damage
+            return "\(item.name) · \(dice.count)D\(dice.sides)"+(totalFlat>0 ? "＋\(totalFlat)":"")
         }
         let damage=model.state.units[actor].flatMap { try? GameRules.attributes($0,catalog:model.engine.catalog).damage } ?? 0
         let modifier=damage>0 ? " · 增伤＋\(damage)":""
         let uses=model.state.units[actor]?.skillUses[a.rawValue] ?? 0
-        let limit=(try? model.engine.catalog.skill(a.rawValue).uses) ?? 2
-        let rest=max(0,limit-uses)
-        switch a {
-        case .runeSlash:return "2D12＋2"+modifier+" · 自身恢复4 / 盾4 · 余\(rest)"
-        case .runeWard:return "目标地点：队友恢复8 / 盾6 · 余\(rest)"
-        case .battleRune:return "目标地点：盾4 / 增伤3 · 2轮 · 余\(rest)"
-        case .dragonFlame:return "目标地点：1D20＋6\(modifier) · 自身恢复6 / 盾6 / 增伤＋2 · 余\(rest)"
-        case .starlightPulse:return "目标地点：1D12＋4\(modifier) · 自身恢复6 / 盾6 · 余\(rest)"
-        case .sweep:return "目标地点：1D12\(modifier) · 余\(rest)"
-        case .dragonSoulWard:return "目标地点：恢复10 / 盾10 / 增伤3 · 2轮 · 余\(rest)"
-        case .dragonScaleWard:return "目标地点：恢复12 / 盾10 / 增伤2 · 1轮 · 余\(rest)"
-        case .dragonOrder:return "目标地点：恢复6 / 盾8 / 增伤4 · 2轮 · 余\(rest)"
-        case .ambush:return "2D8＋2"+modifier+" · 自身恢复3 · 余\(rest)"
-        case .support:return "1 AP · 治疗6 / 盾4 · 余\(rest)"
-        case .rally:return "1 AP · 节点友方增伤2 / 1轮 · 余\(rest)"
-        case .heavyStrike:return "1D6＋2"+modifier+" · 余\(rest)"
-        case .breather:return "1 AP · 自身恢复4 · 余\(rest)"
-        default:return "1 AP · 自身护盾4 · 余\(rest)"
+        guard let skill=try? model.engine.catalog.skill(a.rawValue) else { return a.title }
+        let rest=skill.uses.map { max(0,$0-uses) }
+        let prefix:String = {
+            switch skill.target {
+            case .enemiesAtNode: return "同点全敌："
+            case .alliesAtNode: return "同点全友："
+            case .ally: return "友方："
+            case .selfOnly: return "自身："
+            case .enemy: return ""
+            }
+        }()
+        var parts:[String]=[]
+        for e in skill.effects {
+            let who=e.scope == .caster && skill.target != .selfOnly ? "自身":""
+            switch e.kind {
+            case .damage:
+                if let d=e.dice {
+                    let base="\(d.count)D\(d.sides)"+(d.flat>0 ? "＋\(d.flat)":"")
+                    parts.append(base+modifier)
+                }
+            case .heal: parts.append("\(who)恢复\(e.amount)")
+            case .shield: parts.append("\(who)盾\(e.amount)")
+            case .damageBuff: parts.append("\(who)增伤＋\(e.amount)(\(e.rounds)轮)")
+            }
         }
+        let tail=rest.map { " · 余\($0)" } ?? ""
+        return prefix+parts.joined(separator:" / ")+tail
     }
     override func layoutSubviews() {
         super.layoutSubviews()

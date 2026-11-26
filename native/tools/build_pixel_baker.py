@@ -38,6 +38,12 @@ def build() -> None:
         + "k,v,ie,Me,ho,Je,ze,We,Ao,i0,J,gt,Mt,Pe,ae,uo,ue,ut,wt,Le,z,mt,Q,V,_t,Et,pt,ct,xa,ma,Sa"
         + "});\n"
         + "// --- END PROCEDURAL CHARACTER EXPANSION ---\n"
+        + "// --- BEGIN PROCEDURAL EQUIPMENT EXPANSION ---\n"
+        + (TOOLS / "pixel_equipment_expansion.js").read_text(encoding="utf-8")
+        + "\nregisterEquipmentExpansion({"
+        + "k,v,Me,J,gt,Mt,Pe,ae,uo,ue,ut,wt,z,Q,V,_t,Et,pt,ct,St,Z,lt,O,ye,jt,At,ko,Ut,xe,te,be,Qe,rt"
+        + "});\n"
+        + "// --- END PROCEDURAL EQUIPMENT EXPANSION ---\n"
     )
     combined = core.replace(INJECTION_ANCHOR, INJECTION_ANCHOR + bridge, 1)
     OUT_PATH.write_text(combined, encoding="utf-8")

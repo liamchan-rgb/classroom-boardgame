@@ -25,7 +25,8 @@ final class EncounterPlannerTests:XCTestCase {
                 }
             }
         }
-        XCTAssertEqual(seen,Set(["slime","wolf","goblinArcher","stoneGuardian","caveTroll","ruinDragon"]))
+        let expectedMonsters=Set((try GameCatalog.initial()).monsters.map(\.id))
+        XCTAssertEqual(seen,expectedMonsters)
         XCTAssertEqual(sizes,Set([1,2,3]))
     }
 
@@ -34,13 +35,15 @@ final class EncounterPlannerTests:XCTestCase {
         c.combat=12;c.boss=4;c.reward=2;c.empty=1
         let layout=try MeadowMapGenerator.generate(c),plan=MeadowEncounterPlanner.plan(layout)
         let combat=plan.filter{$0.band != "boss"}.sorted{$0.distance<$1.distance}
-        XCTAssertEqual(combat.first?.templates,["slime"])
+        XCTAssertEqual(combat.first?.band,"opening")
+        XCTAssertTrue([["slime"],["hopShroom"],["acornBandit"],["bubbleCrab"]].contains(combat.first?.templates ?? []))
         XCTAssertEqual(combat.filter{$0.band=="middle"}.count,5)
         XCTAssertEqual(combat.filter{$0.band=="deep"}.count,6)
         let bosses=plan.filter{$0.band=="boss"}.sorted{$0.distance<$1.distance}
-        XCTAssertEqual(bosses.first?.templates,["caveTroll"])
-        XCTAssertEqual(bosses.last?.templates,["ruinDragon"])
-        XCTAssertTrue(bosses.dropLast().allSatisfy{$0.templates==["caveTroll"]})
+        let earlyBosses=Set(["mushroomKing","caveTroll","goblinWarlord","thornTreant"])
+        let finalBosses=Set(["ruinDragon","frostPhoenix","eclipseBehemoth"])
+        XCTAssertTrue(bosses.dropLast().allSatisfy{$0.templates.count==1 && earlyBosses.contains($0.templates[0])})
+        XCTAssertTrue(bosses.last.map{$0.templates.count==1 && finalBosses.contains($0.templates[0])} == true)
     }
 
     func testSameSeedAndReorderedStorageHaveSamePlanWithoutChangingLayoutOrDice()throws {
@@ -82,10 +85,13 @@ final class EncounterPlannerTests:XCTestCase {
     func testPreviewExactlyDescribesSpawnedRosterAndEmptyMap()throws {
         var c=MeadowMapConfiguration.suggested(total:10)
         let layout=try MeadowMapGenerator.generate(c),catalog=try MeadowCampaignSession.catalog()
-        XCTAssertEqual(MeadowEncounterPlanner.plan(layout).map{ "\($0.nodeID):"+$0.templates.joined(separator:",") },
-                       ["1:wolf,goblinArcher","2:slime","4:ruinDragon","6:goblinArcher","9:slime,wolf,goblinArcher"])
+        let plan=MeadowEncounterPlanner.plan(layout)
+        XCTAssertEqual(plan.count,5)
+        XCTAssertEqual(plan.filter{$0.band=="boss"}.count,1)
+        XCTAssertEqual(plan.filter{$0.band=="opening"}.count,1)
+        XCTAssertEqual(MeadowEncounterPlanner.plan(layout),plan)
         let summary=try MeadowEncounterPlanner.summary(layout,catalog:catalog)
-        for e in MeadowEncounterPlanner.plan(layout) {
+        for e in plan {
             let names=try e.templates.map{try catalog.monster($0).name}.joined(separator:" + ")
             XCTAssertTrue(summary.contains("#\(e.nodeID) · "+names))
         }

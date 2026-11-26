@@ -350,9 +350,18 @@ public final class MeadowCampaignSession {
         let c=try journeyCatalog(version:0);catalogs[0]=c;return c
     }
     private static var catalogs:[Int:GameCatalog]=[:]
+    private static var legacyBaseCatalogs:[Int:GameCatalog]=[:]
     /// 0: tabletop drops; 1: v0.28.0 rich drops (kept so those saves load); 2: journey drops; 3: 2 + kill score 3 / boss 10.
-    static func journeyCatalog(version:Int)throws->GameCatalog {
+    static func journeyCatalog(version:Int,expanded:Bool=true)throws->GameCatalog {
         var c=try GameCatalog.initial()
+        if !expanded {
+            // Preserve pre-expansion (v0.26–v0.32.4) catalog shape so existing classroom saves still pass validation.
+            c.classes=Array(c.classes.prefix(4))
+            c.skills=Array(c.skills.prefix(19))
+            c.items=Array(c.items.prefix(18))
+            c.sets=Array(c.sets.prefix(2))
+            c.monsters=Array(c.monsters.prefix(6))
+        }
         if version>=3 {c.rules.personalLoot=true}
         if version>0 {
             for i in c.monsters.indices {
@@ -383,8 +392,10 @@ public final class MeadowCampaignSession {
     }
     static func isKnownCatalog(_ c:GameCatalog)->Bool {
         for version in 0...3 {
-            if catalogs[version]==nil,let made=try? journeyCatalog(version:version){catalogs[version]=made}
+            if catalogs[version]==nil,let made=try? journeyCatalog(version:version,expanded:true){catalogs[version]=made}
             if catalogs[version]==c{return true}
+            if legacyBaseCatalogs[version]==nil,let made=try? journeyCatalog(version:version,expanded:false){legacyBaseCatalogs[version]=made}
+            if legacyBaseCatalogs[version]==c{return true}
         }
         return false
     }

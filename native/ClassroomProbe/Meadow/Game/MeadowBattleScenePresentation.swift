@@ -64,11 +64,17 @@ enum MeadowMonsterFrames {
     private struct Entry { let poses:[UIImage],death:[UIImage] }
     private static var cache:[String:Entry]=[:]
     private static let contacts:[String:[CGPoint]] = {
-        guard let data=NSDataAsset(name:"MeadowMonsterVisuals")?.data,
-              let object=try? JSONSerialization.jsonObject(with:data) as? [String:Any],
-              let records=object["records"] as? [[String:Any]] else{return [:]}
         var result:[String:[CGPoint]]=[:]
-        for record in records {if let id=record["id"] as? String,let values=record["contacts"] as? [[Double]] {result[id]=values.filter{$0.count==2}.map{CGPoint(x:$0[0],y:$0[1])}}}
+        for assetName in ["MeadowMonsterVisuals","MeadowMonsterVisualsExpansion"] {
+            guard let data=NSDataAsset(name:assetName)?.data,
+                  let object=try? JSONSerialization.jsonObject(with:data) as? [String:Any],
+                  let records=object["records"] as? [[String:Any]] else{continue}
+            for record in records {
+                if let id=record["id"] as? String,let values=record["contacts"] as? [[Double]] {
+                    result[id]=values.filter{$0.count==2}.map{CGPoint(x:$0[0],y:$0[1])}
+                }
+            }
+        }
         return result
     }()
     static func retain(_ ids:Set<String>) {cache=cache.filter{ids.contains($0.key)};for id in ids{_ = entry(id)}}

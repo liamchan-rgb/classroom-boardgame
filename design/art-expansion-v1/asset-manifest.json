@@ -4,7 +4,7 @@
   "specSource": "design/主游戏拓展企划_职业装备怪物_美术交接_v1.txt",
   "baseAppVersion": "v0.32.4/build48",
   "installed": false,
-  "builtAtUTC": "2026-11-26T11:08:27Z",
+  "builtAtUTC": "2026-11-26T13:28:40Z",
   "summary": {
     "classBadges": 14,
     "itemIcons": 53,
@@ -19,7 +19,7 @@
     "pixelFXRecipes": 70,
     "qaPreviews": 9,
     "totalFiles": 187,
-    "totalBytes": 13170902
+    "totalBytes": 13171113
   },
   "categoryFileCounts": {
     "root": 1,
@@ -1495,8 +1495,8 @@
     },
     {
       "path": "tools/install_expansion_pack.py",
-      "bytes": 6708,
-      "sha256": "5ff0ab4eabb6a8081804ba2b18510fef7c279f913a5a1a6d10db8f65583a18c4"
+      "bytes": 6919,
+      "sha256": "ce8385e996abcb60a7581e113b6e497cb39e66a0d71dcef50dc5fb82711b6655"
     },
     {
       "path": "tools/package_expansion_pack.py",

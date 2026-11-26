@@ -4,11 +4,16 @@ import XCTest
 final class CatalogTests: XCTestCase {
     func testConfirmedInitialCountsAndClassProfiles() throws {
         let catalog = try GameCatalog.initial()
-        XCTAssertEqual(catalog.classes.count, 4); XCTAssertEqual(catalog.skills.count, 19)
-        XCTAssertEqual(catalog.items.count, 18); XCTAssertEqual(catalog.monsters.count, 6); XCTAssertEqual(catalog.sets.count, 2)
-        XCTAssertEqual(catalog.classes.map { $0.attributes.maximumHealth }, [12, 18, 24, 32])
-        for value in catalog.classes {
+        XCTAssertEqual(catalog.classes.count, 14); XCTAssertEqual(catalog.skills.count, 81)
+        XCTAssertEqual(catalog.items.count, 71); XCTAssertEqual(catalog.monsters.count, 22); XCTAssertEqual(catalog.sets.count, 8)
+        XCTAssertEqual(catalog.classes.prefix(4).map { $0.attributes.maximumHealth }, [12, 18, 24, 32])
+        for value in catalog.classes.prefix(4) {
             XCTAssertEqual(value.attributes.baseAP, 3); XCTAssertEqual(value.attributes.maximumAP, 8); XCTAssertEqual(value.skills.count, 3)
+        }
+        for value in catalog.classes {
+            XCTAssertTrue((3...4).contains(value.attributes.baseAP), value.id)
+            XCTAssertTrue((8...10).contains(value.attributes.maximumAP), value.id)
+            XCTAssertEqual(value.skills.count, 3, value.id)
         }
         XCTAssertEqual(catalog.rules.mapDistribution.values.reduce(0, +), 10)
     }
@@ -38,13 +43,13 @@ final class CatalogTests: XCTestCase {
     }
     func testAllPricesMonsterStatsAndIndependentRareDrops() throws {
         let catalog = try GameCatalog.initial()
-        XCTAssertEqual(catalog.items.compactMap(\.purchasePrice), [10,50,100,200,30,60,50,100,10,20,15,30])
-        XCTAssertEqual(catalog.items.map(\.sellPrice), [5,25,50,100,15,30,25,50,5,10,7,15,80,45,45,130,75,75])
-        XCTAssertEqual(catalog.monsters.map { $0.attributes.maximumHealth }, [8,12,12,24,48,72])
-        XCTAssertEqual(catalog.monsters.map(\.shield), [0,0,0,6,0,10])
-        XCTAssertEqual(catalog.monsters.map { $0.attributes.baseAP }, [1,2,2,2,3,3])
+        XCTAssertEqual(catalog.items.prefix(18).compactMap(\.purchasePrice), [10,50,100,200,30,60,50,100,10,20,15,30])
+        XCTAssertEqual(catalog.items.prefix(18).map(\.sellPrice), [5,25,50,100,15,30,25,50,5,10,7,15,80,45,45,130,75,75])
+        XCTAssertEqual(catalog.monsters.prefix(6).map { $0.attributes.maximumHealth }, [8,12,12,24,48,72])
+        XCTAssertEqual(catalog.monsters.prefix(6).map(\.shield), [0,0,0,6,0,10])
+        XCTAssertEqual(catalog.monsters.prefix(6).map { $0.attributes.baseAP }, [1,2,2,2,3,3])
         let expected = [[1,1,1,1,1,1],[1,1,1,1,1,1],[1,1,1,1,1,1],[2,2,2,2,2,2],[8,8,8,4,4,4],[4,4,4,8,8,8]]
-        for (index, monster) in catalog.monsters.enumerated() {
+        for (index, monster) in catalog.monsters.prefix(6).enumerated() {
             XCTAssertEqual(monster.drops.suffix(6).map(\.percent),expected[index])
             XCTAssertEqual(monster.drops.first?.coins,monster.boss ? 30 : 5)
             XCTAssertEqual(monster.drops.first?.percent,monster.boss ? 100 : 50)

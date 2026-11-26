@@ -72,7 +72,22 @@ public enum BattleDice {
         return BattleDiePose(angle:(sin(t)*0.21+sin(t*0.47)*0.09)*moving,offsetY:(sin(t*0.79)*4)*moving,scale:1+sin(t*0.69)*0.035*moving,resultMix:settle,alpha:PartyVisual.smooth(visibleAge/0.18)*fade,face:Int(floor(max(0,time)*11+Double(index)*1.7)).quotientAndRemainder(dividingBy:6).remainder+1)
     }
     public static func darkness(_ action:PartyAction)->Double {
-        switch action { case .runeSlash:return 0.64;case .dragonFlame:return 0.66;case .runeWard:return 0.48;case .battleRune:return 0.44;case .ambush:return 0.52;case .heavyStrike:return 0.46;case .attack:return 0.24;case .support:return 0.32;case .rally:return 0.36;case .largePotion,.revivalStone:return 0.34;case .simpleGuard,.shieldPotion:return 0.25;case .endTurn:return 0;default:return 0.22 }
+        switch action {
+        case .runeSlash,.skybreaker,.astralJudgement:return 0.64
+        case .dragonFlame,.meteorStarfall,.eclipseRay,.blizzardBreath:return 0.66
+        case .seraphAegis,.valkyrieGuard,.emberNova:return 0.56
+        case .runeWard,.astralDome,.radiantBaptism,.elderBloom,.boomBomb:return 0.48
+        case .battleRune,.frostNova,.galeBarrage,.galeVolley,.thornSnare,.arcaneOverdrive,.warlordRoar,.rootSweep,.quakeSlam:return 0.44
+        case .ambush,.judgmentStrike,.piercingArrow,.fireball,.runeCleave,.frostFang:return 0.52
+        case .heavyStrike,.shieldBash,.holyBolt,.quickShot,.sonicNote:return 0.46
+        case .attack:return 0.24
+        case .support,.prayerHeal,.healingLullaby,.heroicAnthem,.oathBanner,.windMomentum,.wildwoodBreeze,.oakBulwark,.barkAegis:return 0.34
+        case .rally,.scoutMark,.nimbleStep,.steadfastVow,.manaBarrier,.ironBulwark,.blessingVeil:return 0.36
+        case .largePotion,.revivalStone,.superPotion,.phoenixNectar,.starlightElixir,.aegisCrystal:return 0.34
+        case .simpleGuard,.shieldPotion,.ironbarkElixir,.crystalBarrierFlask,.berryTea,.honeySalve:return 0.25
+        case .endTurn:return 0
+        default:return 0.28
+        }
     }
 }
 

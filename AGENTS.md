@@ -1,3 +1,19 @@
+## 主游戏拓展内容与美术特效包正式安装并接入全链路（2026-11-26，基于v0.32.4/build48，未改版本号、未存档）
+
+将前期封包验证完毕的 3 倍以上拓展美术资产与 PixelFX 特效包（`design/art-expansion-v1/`）正式安装入主工程，并完成 `GameCore` 规则数据、AI、抽奖池、遭遇规划、战斗演出、旧存档兼容、穿戴烘焙、教师端/地图设置 UI 与课堂小游戏全链路接入：
+- **美术资产、怪物帧索引、PixelFX 与穿戴烘焙安装**（`native/ClassroomProbe/Resources/`、`native/tools/pixel_equipment_expansion.js`、`native/tools/build_pixel_baker.py`、`design/art-expansion-v1/tools/install_expansion_pack.py`）：
+  - 安装全部 **171 个新 `.imageset`**（14 枚 `ClassBadge*`、53 张 `PixelIcon*`、41 条 `PixelIconFX*` 发光条、16 只新怪物 32 张 `Motion/Death` 序列帧、8 张远程弹道 `Proj*`、23 组新 `PixelFX_*` 片段）；为保持 `meadow-port-provenance.json` 中 **837 项锁定原文件零改动**，新增独立 `MeadowMonsterVisualsExpansion.dataset`（由 `MeadowMonsterFrames.contacts` 运行时与既有 `MeadowMonsterVisuals` 合并，覆盖全 22 种怪物触地脚点），并将 23 片段与 70 条新配方合并入 `PixelFXRecipes.dataset/recipes.json`（共 100 片段 / 116 配方，交叉校验零缺失）。
+  - 将 31 件穿戴件（17 把新武器 + 14 套新护甲及 16 件史诗/传说 `bakeFx` 流光）并入 `native/tools/pixel_equipment_expansion.js` 并重建 `native/ClassroomProbe/Resources/pixel-baker.js`（无头 Node 验证 `tops: 36`、`costumes: 16`）；`PixelHeroLook` 同步登记全部武器与护甲外观映射。
+- **游戏内容目录、AI、四档抽奖与旧存档兼容**（`initial-content.json`、`MonsterAI.swift`、`Lottery.swift`、`Campaign.swift`、`CampInventory.swift`、`ClassroomBackend.swift`）：
+  - `initial-content.json` 保留原 4 职业 / 19 技能 / 18 物品 / 2 套装 / 6 怪物前置不变，追加 10 新职业 / 62 新技能（30 职业技 + 6 套装技 + 26 怪物技）/ 53 新物品 / 6 新套装 / 16 新怪物，总规模达 **14 职业 / 81 技能 / 71 物品 / 8 套装 / 22 怪物**。
+  - `MonsterAI` 为纯治疗友方技能（如 `shamanMend`）增加伤员过滤避免满血空奶；`Lottery` 扩展铜(30)/银(80)/金(180)并新增第四档 **星穹(280)** 奖池（套装概率严格递增 `11.69% → 22.22% → 35.59% → 51.34%`）；`MeadowCampaignSession.isKnownCatalog` 与 `CampSave.validate` 同时兼容拓展前（4/19/18/2/6）与拓展后（14/81/71/8/22）存档。
+- **战斗、遭遇、PixelFX 演出、UI 与小游戏全量接线**（`PartyConfiguration.swift`、`ClassRoster.swift`、`Encounters.swift`、`MonsterVisual.swift`、`PartyEncounter.swift`、`PartyVisual.swift`、`PartyReadout.swift`、`BattleDice.swift`、`TrainingLoadout.swift`、`MeadowItemIcon.swift`、`MeadowSkillProcedural.swift`、`MeadowPartyStageView.swift`、`MeadowPartyBattleView.swift`、`MeadowTeacherDashboard.swift`、`MeadowMapSettingsViewController.swift`、`ClassroomMiniGames.swift`）：
+  - 全部 30 新职业技、6 套装技、26 怪物技、8 种新消耗品（`PartyAction.allConsumables`）、10 种远程怪物专属弹道配方与 22 种怪物统一跑道打击高度接入战斗执行与 `MeadowPartyStageView` / `MeadowSkillProcedural` 演出管线。
+  - 地图设置职业选择由 4 格分段控件升级为带 `ClassBadge` 图标的 T1–T4 分组下拉菜单，新增全 14 职业滚动图鉴 `MeadowClassGuideController`，怪物图鉴 `MeadowMonsterGalleryController` 支持全 22 种怪物分层浏览；练兵与教师端战斗菜单接入全 14 职业与全部消耗品；Boss 突袭（9 首领/顶级精英）与营地守卫（3 波按阶梯抽怪）同步拓展至全 22 怪。
+- **单测、编译与实机冒烟边界**：
+  - 已补齐 12 个测试集适配并新增 `ExpansionContentTests.swift`（5 项专项测试）；`scripts/local-build.sh test` 全部通过（工程配置 93 Swift 源码、837 项锁定外观零改动校验、配置工具单测、`ProbeCore` 8/8、`MeadowWorldSupportTests` 262/262、`MeadowClassroomSupportTests` 57/57、`MeadowBattleSupportTests` 108/108、`ClassroomGameCoreTests` 73/73，合计 **508/508** Swift 单测零失败）。
+  - `MAC_OPEN=0 scripts/local-build.sh mac` Release 编译通过，对编译产物 `Assets.car`（776 项）做全量程序化交叉校验（14 职业徽章、71 物品图标、52 动态图标条、44 怪物图集、8 远程弹道、100 PixelFX 片段、116 配方与 22 怪物脚点均零缺失）；Mac Catalyst 实机无焦点冒烟启动载入本机既有拓展前存档运行 29 秒无崩溃（测试前已备份并在测后按 `diff -rq` 与 SHA-256 逐字节还原 `ClassroomMeadow` 73 文件、`ClassroomStage0` 21 文件及偏好设置）。未在真机 iPad / 外接 TV 双屏及人工逐一点击体验全部 14 职业/71 物品/22 怪物的实机战斗画面下目视复核。
+
 ## 主游戏拓展美术资产与 PixelFX 特效包构建与封包（待安装，2026-11-26，基于v0.32.4/build48，未改版本号、未存档）
 
 严格依据 `design/主游戏拓展企划_职业装备怪物_美术交接_v1.txt` 与游戏现行渲染/资产规范，完成全部拓展美术与特效制作、视觉审查、SHA-256 校验与独立封包，**按要求仅构建封包、未安装至主工程**（`native/ClassroomProbe/Resources/`、`pixel-baker.js`、`initial-content.json` 及 837 项锁定原文件均零改动）：

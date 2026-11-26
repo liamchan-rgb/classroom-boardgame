@@ -19,7 +19,11 @@ extension Evaluation {
             switch skill.target {
             case .selfOnly: candidates = [nil]
             case .enemy: candidates = enemies.map { .unit($0.id) }
-            case .ally: candidates = state.units.values.filter { $0.isAlive && $0.id != id && GameRules.allies(actor, $0, in: state) }.sorted { $0.id < $1.id }.map { .unit($0.id) }
+            case .ally:
+                let allies = state.units.values.filter { $0.isAlive && $0.id != id && GameRules.allies(actor, $0, in: state) }.sorted { $0.id < $1.id }
+                let pureHeal = skill.effects.allSatisfy { $0.kind == .heal }
+                let eligible = pureHeal ? allies.filter { $0.health < ((try? GameRules.attributes($0, catalog: catalog).maximumHealth) ?? $0.baseAttributes.maximumHealth) } : allies
+                candidates = eligible.map { .unit($0.id) }
             case .enemiesAtNode: candidates = Set(enemies.map(\.nodeID)).sorted().map { .node($0) }
             case .alliesAtNode:
                 candidates = Set(state.units.values.filter { $0.isAlive && GameRules.allies(actor, $0, in: state) }.map(\.nodeID)).sorted().map { .node($0) }

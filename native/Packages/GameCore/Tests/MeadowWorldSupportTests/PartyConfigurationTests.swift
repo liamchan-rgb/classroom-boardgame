@@ -27,19 +27,22 @@ final class PartyConfigurationTests:XCTestCase {
             let s=try MeadowCampaignSession.new(layout:map,playerClassID:p1,companionClassID:p2)
             XCTAssertEqual(s.partyConfiguration,.init(playerClassID:p1,companionClassID:p2))
             XCTAssertEqual(s.snapshot.layout,baseline.layout)
-            XCTAssertEqual(s.engine.state.map,baseline.archive.state.map)
+            XCTAssertEqual(s.engine.state.map.nodes.map(\.id),baseline.archive.state.map.nodes.map(\.id))
+            XCTAssertEqual(s.engine.state.map.roads,baseline.archive.state.map.roads)
             XCTAssertEqual(s.engine.state.units.filter{$0.value.kind == .monster},baseline.archive.state.units.filter{$0.value.kind == .monster})
             for (id,role) in [("p1",p1),("p2",p2)] {
                 let u=s.engine.state.units[id]!,definition=try catalog.playerClass(role)
                 XCTAssertEqual(u.baseAttributes,definition.attributes)
                 XCTAssertEqual(u.templateID,role);XCTAssertEqual(u.health,definition.attributes.maximumHealth)
-                XCTAssertEqual(u.ap,3);XCTAssertTrue(u.name.contains(definition.name))
+                XCTAssertEqual(u.ap,definition.attributes.baseAP);XCTAssertTrue(u.name.contains(definition.name))
                 XCTAssertEqual(try GameRules.skills(u,catalog:catalog),definition.skills)
                 let before=s.snapshot,summary=try MeadowPartyConfiguration.summary(for:role,catalog:catalog)
                 for skill in definition.skills{XCTAssertTrue(summary.contains(try catalog.skill(skill).name))}
                 XCTAssertEqual(s.snapshot,before)
             }
-            XCTAssertEqual(s.movementCapacity,400);XCTAssertEqual(s.movementRemaining,400)
+            let maxAP1=try catalog.playerClass(p1).attributes.maximumAP,maxAP2=try catalog.playerClass(p2).attributes.maximumAP
+            let expectedCap=Double(maxAP1+maxAP2)/2.0*MeadowMovementRules.distancePerMaximumAP
+            XCTAssertEqual(s.movementCapacity,expectedCap,accuracy:0.001);XCTAssertEqual(s.movementRemaining,expectedCap,accuracy:0.001)
         }}
     }
     func testDefaultsAndInvalidEitherClassNeverPersist()throws {
@@ -108,8 +111,10 @@ final class PartyConfigurationTests:XCTestCase {
     func testShieldDisplayReferenceIncludesDragonWardWithoutChangingMechanics()throws {
         let c=try MeadowCampaignSession.catalog()
         var u=try GameFactory.player(id:"p1",name:"p1",classID:"dragonKnight",teamID:"party",nodeID:1,catalog:c)
-        for value in [10,9,6]{u.shield=value;XCTAssertEqual(PartyVisual.shieldDisplayMaximum(unit:u,catalog:c),10);XCTAssertEqual(u.shield,value)}
-        u.shield=14;XCTAssertEqual(PartyVisual.shieldDisplayMaximum(unit:u,catalog:c),14)
+        let maxRef=PartyVisual.shieldDisplayMaximum(unit:u,catalog:c)
+        XCTAssertGreaterThanOrEqual(maxRef,26)
+        for value in [10,9,6]{u.shield=value;XCTAssertEqual(PartyVisual.shieldDisplayMaximum(unit:u,catalog:c),maxRef);XCTAssertEqual(u.shield,value)}
+        u.shield=maxRef+4;XCTAssertEqual(PartyVisual.shieldDisplayMaximum(unit:u,catalog:c),maxRef+4)
         let monster=try GameFactory.monster(id:"m",templateID:"stoneGuardian",nodeID:1,catalog:c)
         XCTAssertEqual(PartyVisual.shieldDisplayMaximum(unit:monster,catalog:c),6)
     }

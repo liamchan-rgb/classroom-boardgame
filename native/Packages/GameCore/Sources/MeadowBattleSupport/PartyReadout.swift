@@ -12,7 +12,7 @@ public extension PartyEncounter {
         let actor=current.flatMap{state.units[$0]},preview=preview(action,target:target)
         let destination:String
         if action.isNodeSupport {destination="同地点存活队员"}
-        else if [.dragonFlame,.starlightPulse].contains(action){destination="目标地点敌人"}
+        else if action.isNodeAttack {destination="目标地点敌人"}
         else {destination=state.units[target]?.name ?? target}
         var resources="个人行动 \(actor?.ap ?? 0) · 消耗 \(cost(action))"
         if action.isItem {resources+=" · 个人库存 \(actor?.inventory[action.rawValue] ?? 0)"}
@@ -24,7 +24,9 @@ public extension PartyEncounter {
     }
     var partyResourceSummary:String {
         state.players.map {u in
-            let items=["smallPotion","largePotion","shieldPotion","revivalStone"].map{((try? engine.catalog.item($0).name) ?? $0)+"×\(u.inventory[$0] ?? 0)"}.joined(separator:" · ")
+            let classic:Set<String>=["smallPotion","largePotion","shieldPotion","revivalStone"]
+            let keys=PartyAction.allConsumables.map(\.rawValue).filter{classic.contains($0) || (u.inventory[$0] ?? 0)>0}
+            let items=keys.map{((try? engine.catalog.item($0).name) ?? $0)+"×\(u.inventory[$0] ?? 0)"}.joined(separator:" · ")
             return "\(u.name)\(u.isAlive ? "":"（倒地）") · 个人行动 \(u.ap)\n"+items
         }.joined(separator:"\n\n")
     }

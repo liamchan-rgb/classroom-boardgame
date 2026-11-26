@@ -31,7 +31,23 @@ enum MeadowSkillProcedural {
                            "shieldShell", "shieldShellHit", "shieldBreak", "deathBurst",
                            "hitSlime", "hitWolf", "hitArrowM", "hitStone", "hitTroll", "hitDragon",
                            "deathSlime", "deathWolf", "deathGoblin", "deathStone", "deathTroll", "deathDragon", "playerDown", "downAura", "revive", "buffAura", "projBow", "projStaff", "projArcher", "projDragon",
-                           "natural20", "shieldDome", "hitBlade", "hitGreat", "hitBow", "hitStaff", "hitClaw", "hitAmbush", "hitWard"]
+                           "natural20", "shieldDome", "hitBlade", "hitGreat", "hitBow", "hitStaff", "hitClaw", "hitAmbush", "hitWard",
+                           // Expansion class skills (30)
+                           "holyBolt", "prayerHeal", "blessingVeil", "quickShot", "nimbleStep", "scoutMark",
+                           "shieldBash", "ironBulwark", "steadfastVow", "fireball", "frostNova", "manaBarrier",
+                           "sonicNote", "healingLullaby", "heroicAnthem", "judgmentStrike", "radiantBaptism", "oathBanner",
+                           "piercingArrow", "galeBarrage", "windMomentum", "thornSnare", "elderBloom", "barkAegis",
+                           "meteorStarfall", "astralDome", "arcaneOverdrive", "skybreaker", "valkyrieGuard", "warlordRoar",
+                           // Expansion set skills (6)
+                           "wildwoodBreeze", "galeVolley", "oakBulwark", "emberNova", "seraphAegis", "astralJudgement",
+                           // Expansion monster skills (26)
+                           "sporeCoat", "waspFrenzy", "vineGuard", "shamanMend", "shamanChant", "emberBreath",
+                           "nightPlume", "runeCleave", "armorCharge", "crystalShell", "quakeSlam", "frostHowl",
+                           "frostFang", "kingRegen", "capSlam", "warlordRally", "boomBomb", "heartwoodWall",
+                           "ancientRegen", "rootSweep", "glacialWard", "frostRebirth", "blizzardBreath",
+                           "celestialBastion", "stellarSurge", "eclipseRay",
+                           // Expansion monster ranged projectiles (8)
+                           "projAcorn", "projVenomSting", "projShamanOrb", "projEmberBall", "projShadowFeather", "projBoomBomb", "projFrostShard", "projEclipseOrb"]
     static let info: [String: Info] = [
         "starlightPulse": Info(duration: 1.6, release: 0.75, dim: 0.34, dimTint: RGB(0.80, 0.76, 1.0), support: false),
         "dragonSoulWard": Info(duration: 2.0, release: 0.38, dim: 0.32, dimTint: RGB(0.74, 0.88, 1.0), support: true),
@@ -59,30 +75,108 @@ enum MeadowSkillProcedural {
         "hitSlime": hitInfo, "hitWolf": hitInfo, "hitArrowM": hitInfo, "hitStone": hitInfo, "hitTroll": hitInfo, "hitDragon": hitInfo,
         "deathBurst": Info(duration: 1.8, release: 0.04, dim: 0.0, dimTint: RGB(1, 1, 1), support: false),
         "projBow": projInfo(0.0, 0.19), "projStaff": projInfo(0.49, 0.21), "projArcher": projInfo(0.0, 0.22), "projDragon": projInfo(0.0, 0.22),
-        "hitBlade": hitInfo, "hitGreat": hitInfo, "hitBow": hitInfo, "hitStaff": hitInfo, "hitClaw": hitInfo, "hitAmbush": hitInfo, "hitWard": hitInfo
+        "hitBlade": hitInfo, "hitGreat": hitInfo, "hitBow": hitInfo, "hitStaff": hitInfo, "hitClaw": hitInfo, "hitAmbush": hitInfo, "hitWard": hitInfo,
+        // Expansion class skills
+        "holyBolt": Info(duration: 1.6, release: 0.50, dim: 0.24, dimTint: RGB(1.0, 0.95, 0.80), support: false),
+        "prayerHeal": Info(duration: 1.6, release: 0.35, dim: 0.22, dimTint: RGB(0.84, 0.98, 0.88), support: true),
+        "blessingVeil": Info(duration: 1.7, release: 0.40, dim: 0.24, dimTint: RGB(0.84, 0.94, 1.0), support: true),
+        "quickShot": Info(duration: 1.4, release: 0.36, dim: 0.18, dimTint: RGB(0.84, 0.98, 0.86), support: false),
+        "nimbleStep": Info(duration: 1.6, release: 0.35, dim: 0.20, dimTint: RGB(0.82, 0.98, 0.90), support: true),
+        "scoutMark": Info(duration: 1.7, release: 0.40, dim: 0.22, dimTint: RGB(1.0, 0.92, 0.78), support: true),
+        "shieldBash": Info(duration: 1.6, release: 0.40, dim: 0.24, dimTint: RGB(0.82, 0.92, 1.0), support: false),
+        "ironBulwark": Info(duration: 1.9, release: 0.46, dim: 0.26, dimTint: RGB(0.80, 0.92, 1.0), support: true),
+        "steadfastVow": Info(duration: 1.7, release: 0.40, dim: 0.24, dimTint: RGB(1.0, 0.92, 0.78), support: true),
+        "fireball": Info(duration: 1.8, release: 0.56, dim: 0.30, dimTint: RGB(1.0, 0.80, 0.65), support: false),
+        "frostNova": Info(duration: 2.0, release: 0.56, dim: 0.30, dimTint: RGB(0.76, 0.92, 1.0), support: false),
+        "manaBarrier": Info(duration: 1.8, release: 0.46, dim: 0.26, dimTint: RGB(0.82, 0.88, 1.0), support: true),
+        "sonicNote": Info(duration: 1.6, release: 0.38, dim: 0.22, dimTint: RGB(1.0, 0.86, 0.94), support: false),
+        "healingLullaby": Info(duration: 1.9, release: 0.46, dim: 0.24, dimTint: RGB(0.86, 0.98, 0.90), support: true),
+        "heroicAnthem": Info(duration: 1.9, release: 0.46, dim: 0.26, dimTint: RGB(1.0, 0.92, 0.82), support: true),
+        "judgmentStrike": Info(duration: 1.9, release: 0.48, dim: 0.30, dimTint: RGB(1.0, 0.94, 0.76), support: false),
+        "radiantBaptism": Info(duration: 2.1, release: 0.56, dim: 0.28, dimTint: RGB(1.0, 0.96, 0.82), support: true),
+        "oathBanner": Info(duration: 1.9, release: 0.46, dim: 0.26, dimTint: RGB(1.0, 0.92, 0.78), support: true),
+        "piercingArrow": Info(duration: 1.6, release: 0.38, dim: 0.26, dimTint: RGB(0.78, 0.96, 1.0), support: false),
+        "galeBarrage": Info(duration: 2.0, release: 0.52, dim: 0.28, dimTint: RGB(0.76, 0.96, 0.92), support: false),
+        "windMomentum": Info(duration: 1.8, release: 0.42, dim: 0.24, dimTint: RGB(0.80, 0.98, 0.92), support: true),
+        "thornSnare": Info(duration: 2.0, release: 0.48, dim: 0.28, dimTint: RGB(0.78, 0.96, 0.80), support: false),
+        "elderBloom": Info(duration: 2.0, release: 0.48, dim: 0.26, dimTint: RGB(0.80, 0.98, 0.84), support: true),
+        "barkAegis": Info(duration: 1.9, release: 0.46, dim: 0.26, dimTint: RGB(0.82, 0.96, 0.82), support: true),
+        "meteorStarfall": Info(duration: 2.4, release: 0.72, dim: 0.38, dimTint: RGB(0.78, 0.74, 1.0), support: false),
+        "astralDome": Info(duration: 2.1, release: 0.52, dim: 0.30, dimTint: RGB(0.78, 0.82, 1.0), support: true),
+        "arcaneOverdrive": Info(duration: 2.0, release: 0.50, dim: 0.30, dimTint: RGB(0.84, 0.76, 1.0), support: true),
+        "skybreaker": Info(duration: 2.2, release: 0.56, dim: 0.36, dimTint: RGB(1.0, 0.92, 0.74), support: false),
+        "valkyrieGuard": Info(duration: 2.3, release: 0.56, dim: 0.32, dimTint: RGB(1.0, 0.94, 0.78), support: true),
+        "warlordRoar": Info(duration: 1.9, release: 0.46, dim: 0.28, dimTint: RGB(1.0, 0.84, 0.72), support: true),
+        // Expansion set skills
+        "wildwoodBreeze": Info(duration: 1.8, release: 0.42, dim: 0.24, dimTint: RGB(0.82, 0.98, 0.84), support: true),
+        "galeVolley": Info(duration: 1.9, release: 0.48, dim: 0.28, dimTint: RGB(0.76, 0.96, 0.94), support: false),
+        "oakBulwark": Info(duration: 2.0, release: 0.48, dim: 0.26, dimTint: RGB(0.80, 0.95, 0.80), support: true),
+        "emberNova": Info(duration: 2.2, release: 0.60, dim: 0.34, dimTint: RGB(1.0, 0.78, 0.62), support: false),
+        "seraphAegis": Info(duration: 2.4, release: 0.56, dim: 0.34, dimTint: RGB(1.0, 0.95, 0.78), support: true),
+        "astralJudgement": Info(duration: 2.4, release: 0.72, dim: 0.40, dimTint: RGB(0.76, 0.72, 1.0), support: false),
+        // Expansion monster skills
+        "sporeCoat": Info(duration: 1.6, release: 0.40, dim: 0.18, dimTint: RGB(0.82, 0.96, 0.82), support: true),
+        "waspFrenzy": Info(duration: 1.6, release: 0.40, dim: 0.18, dimTint: RGB(0.92, 1.0, 0.74), support: true),
+        "vineGuard": Info(duration: 1.7, release: 0.42, dim: 0.20, dimTint: RGB(0.80, 0.95, 0.80), support: true),
+        "shamanMend": Info(duration: 1.6, release: 0.40, dim: 0.20, dimTint: RGB(0.80, 0.98, 0.84), support: true),
+        "shamanChant": Info(duration: 1.7, release: 0.42, dim: 0.22, dimTint: RGB(1.0, 0.90, 0.76), support: true),
+        "emberBreath": Info(duration: 1.9, release: 0.46, dim: 0.28, dimTint: RGB(1.0, 0.78, 0.64), support: false),
+        "nightPlume": Info(duration: 1.7, release: 0.40, dim: 0.22, dimTint: RGB(0.80, 0.80, 1.0), support: true),
+        "runeCleave": Info(duration: 1.8, release: 0.46, dim: 0.26, dimTint: RGB(0.78, 0.90, 1.0), support: false),
+        "armorCharge": Info(duration: 1.7, release: 0.42, dim: 0.22, dimTint: RGB(0.78, 0.90, 1.0), support: true),
+        "crystalShell": Info(duration: 1.8, release: 0.44, dim: 0.24, dimTint: RGB(0.84, 0.78, 1.0), support: true),
+        "quakeSlam": Info(duration: 1.9, release: 0.46, dim: 0.28, dimTint: RGB(0.92, 0.88, 0.80), support: false),
+        "frostHowl": Info(duration: 1.8, release: 0.44, dim: 0.24, dimTint: RGB(0.76, 0.92, 1.0), support: true),
+        "frostFang": Info(duration: 1.7, release: 0.42, dim: 0.24, dimTint: RGB(0.76, 0.92, 1.0), support: false),
+        "kingRegen": Info(duration: 1.7, release: 0.42, dim: 0.22, dimTint: RGB(0.84, 0.98, 0.82), support: true),
+        "capSlam": Info(duration: 1.8, release: 0.44, dim: 0.26, dimTint: RGB(0.96, 0.86, 0.78), support: false),
+        "warlordRally": Info(duration: 1.8, release: 0.44, dim: 0.24, dimTint: RGB(1.0, 0.84, 0.72), support: true),
+        "boomBomb": Info(duration: 2.1, release: 0.50, dim: 0.30, dimTint: RGB(1.0, 0.82, 0.68), support: false),
+        "heartwoodWall": Info(duration: 1.8, release: 0.44, dim: 0.24, dimTint: RGB(0.80, 0.96, 0.82), support: true),
+        "ancientRegen": Info(duration: 1.8, release: 0.44, dim: 0.24, dimTint: RGB(0.80, 0.98, 0.84), support: true),
+        "rootSweep": Info(duration: 2.0, release: 0.48, dim: 0.28, dimTint: RGB(0.80, 0.94, 0.78), support: false),
+        "glacialWard": Info(duration: 1.9, release: 0.46, dim: 0.26, dimTint: RGB(0.74, 0.92, 1.0), support: true),
+        "frostRebirth": Info(duration: 1.9, release: 0.46, dim: 0.26, dimTint: RGB(0.78, 0.94, 1.0), support: true),
+        "blizzardBreath": Info(duration: 2.3, release: 0.56, dim: 0.36, dimTint: RGB(0.70, 0.88, 1.0), support: false),
+        "celestialBastion": Info(duration: 2.0, release: 0.48, dim: 0.28, dimTint: RGB(0.82, 0.78, 1.0), support: true),
+        "stellarSurge": Info(duration: 2.0, release: 0.48, dim: 0.28, dimTint: RGB(0.90, 0.82, 1.0), support: true),
+        "eclipseRay": Info(duration: 2.4, release: 0.56, dim: 0.38, dimTint: RGB(0.76, 0.72, 1.0), support: false),
+        // Expansion monster ranged projectiles
+        "projAcorn": projInfo(0.0, 0.24), "projVenomSting": projInfo(0.0, 0.20), "projShamanOrb": projInfo(0.0, 0.26),
+        "projEmberBall": projInfo(0.0, 0.24), "projShadowFeather": projInfo(0.0, 0.20), "projBoomBomb": projInfo(0.0, 0.30),
+        "projFrostShard": projInfo(0.0, 0.22), "projEclipseOrb": projInfo(0.0, 0.26)
     ]
     private static func projInfo(_ charge: Double, _ flight: Double) -> Info { Info(duration: charge + flight + 0.35, release: charge + flight, dim: 0.0, dimTint: RGB(1, 1, 1), support: false) }
     /// Effects that belong to a single blow or flight: no dim, no wash, no soft ambient light, no lens work of their own.
     static func isBlow(_ id: String) -> Bool { id.hasPrefix("hit") || id.hasPrefix("proj") || id.hasPrefix("shieldShell") || id.hasPrefix("death") || id == "downAura" || id == "buffAura" || id == "shieldBreak" }
     private static func deathInfo(_ d: Double) -> Info { Info(duration: d, release: 0.04, dim: 0.0, dimTint: RGB(1, 1, 1), support: false) }
     private static let hitInfo = Info(duration: 1.1, release: 0.05, dim: 0.0, dimTint: RGB(1, 1, 1), support: false)
-    /// The procedural skill that draws a party action, if any (the two shield actions and the ally support share the shield dome).
+    /// The procedural skill that draws a party action, if any (the shield/potion actions and ally support share the shield dome).
     static func procID(for action: String) -> String? {
-        if info[action] != nil && !action.hasPrefix("hit") && action != "natural20" && action != "shieldDome" { return action }
-        switch action { case "simpleGuard", "shieldPotion", "support": return "shieldDome"; default: return nil }
+        if info[action] != nil && !action.hasPrefix("hit") && !action.hasPrefix("proj") && action != "natural20" && action != "shieldDome" { return action }
+        switch action {
+        case "simpleGuard", "shieldPotion", "ironbarkElixir", "crystalBarrierFlask", "support": return "shieldDome"
+        default: return nil
+        }
     }
     /// Dominant colour of each skill (for the ambient light, floor pool and motes).
     static func tone(_ id: String) -> RGB {
         switch id {
-        case "starlightPulse": return RGB(160, 136, 255)
-        case "dragonSoulWard": return RGB(56, 140, 255)
+        case "starlightPulse", "meteorStarfall", "astralDome", "arcaneOverdrive", "astralJudgement", "celestialBastion", "stellarSurge", "eclipseRay", "crystalShell", "nightPlume", "projEclipseOrb", "projShadowFeather":
+            return RGB(160, 136, 255)
+        case "dragonSoulWard", "frostNova", "frostHowl", "frostFang", "glacialWard", "frostRebirth", "blizzardBreath", "projFrostShard":
+            return RGB(96, 196, 255)
         case "dragonScaleWard": return Pal.scale.mid
-        case "runeSlash", "runeWard": return Pal.rune.mid
-        case "battleRune": return Pal.battle.mid
-        case "dragonFlame": return Pal.flame.mid
+        case "runeSlash", "runeWard", "runeCleave", "armorCharge", "manaBarrier", "ironBulwark": return Pal.rune.mid
+        case "battleRune", "oathBanner", "warlordRoar", "warlordRally", "scoutMark", "steadfastVow", "shamanChant": return Pal.battle.mid
+        case "dragonFlame", "fireball", "emberNova", "emberBreath", "boomBomb", "projEmberBall", "projBoomBomb": return Pal.flame.mid
         case "dragonOrder": return Pal.order.mid
-        case "rally": return Pal.rally.mid
-        case "sweep": return Pal.sweep.mid
+        case "rally", "holyBolt", "judgmentStrike", "radiantBaptism", "skybreaker", "valkyrieGuard", "seraphAegis", "blessingVeil": return Pal.rally.mid
+        case "sweep", "piercingArrow", "galeBarrage", "windMomentum", "galeVolley", "quickShot", "nimbleStep": return Pal.sweep.mid
+        case "sonicNote", "healingLullaby", "heroicAnthem": return RGB(255, 148, 210)
+        case "thornSnare", "elderBloom", "barkAegis", "wildwoodBreeze", "oakBulwark", "sporeCoat", "vineGuard", "shamanMend", "kingRegen", "capSlam", "heartwoodWall", "ancientRegen", "rootSweep", "projShamanOrb": return Pal.heal.mid
+        case "waspFrenzy", "projVenomSting": return Pal.goo.mid
+        case "quakeSlam", "shieldBash", "projAcorn": return Pal.stone.mid
         case "natural20": return Pal.gold.mid
         case "shieldDome", "hitWard": return Pal.ward.mid
         case "deathBurst": return Pal.dust.mid

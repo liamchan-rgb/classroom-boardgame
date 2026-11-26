@@ -2,7 +2,22 @@ import Foundation
 import ClassroomGameCore
 
 public enum PartyAction:String,CaseIterable,Codable {
+    // Classic actions
     case regeneration,attack,heavyStrike,ambush,breather,simpleGuard,support,rally,runeSlash,runeWard,battleRune,dragonFlame,starlightPulse,sweep,dragonSoulWard,dragonScaleWard,dragonOrder,smallPotion,largePotion,shieldPotion,revivalStone,endTurn
+    // +30 Expansion class skills
+    case holyBolt,prayerHeal,blessingVeil,quickShot,nimbleStep,scoutMark,shieldBash,ironBulwark,steadfastVow,fireball,frostNova,manaBarrier,sonicNote,healingLullaby,heroicAnthem,judgmentStrike,radiantBaptism,oathBanner,piercingArrow,galeBarrage,windMomentum,thornSnare,elderBloom,barkAegis,meteorStarfall,astralDome,arcaneOverdrive,skybreaker,valkyrieGuard,warlordRoar
+    // +6 Expansion set skills
+    case wildwoodBreeze,galeVolley,oakBulwark,emberNova,seraphAegis,astralJudgement
+    // +26 Expansion monster skills
+    case sporeCoat,waspFrenzy,vineGuard,shamanMend,shamanChant,emberBreath,nightPlume,runeCleave,armorCharge,crystalShell,quakeSlam,frostHowl,frostFang,kingRegen,capSlam,warlordRally,boomBomb,heartwoodWall,ancientRegen,rootSweep,glacialWard,frostRebirth,blizzardBreath,celestialBastion,stellarSurge,eclipseRay
+    // +8 Expansion consumables
+    case berryTea,ironbarkElixir,honeySalve,superPotion,crystalBarrierFlask,phoenixNectar,starlightElixir,aegisCrystal
+
+    public static let allConsumables:[PartyAction]=[
+        .smallPotion,.berryTea,.shieldPotion,.largePotion,.ironbarkElixir,.revivalStone,
+        .honeySalve,.superPotion,.crystalBarrierFlask,.phoenixNectar,.starlightElixir,.aegisCrystal
+    ]
+
     public var title:String {
         switch self {
         case .regeneration:return "再生"
@@ -27,17 +42,89 @@ public enum PartyAction:String,CaseIterable,Codable {
         case .shieldPotion:return "护盾药水"
         case .revivalStone:return "复活石"
         case .endTurn:return "结束行动"
+        // Class skills
+        case .holyBolt:return "圣光弹"
+        case .prayerHeal:return "祈祷愈合"
+        case .blessingVeil:return "祈福护幕"
+        case .quickShot:return "迅捷快射"
+        case .nimbleStep:return "轻身步"
+        case .scoutMark:return "弱点标记"
+        case .shieldBash:return "盾击震荡"
+        case .ironBulwark:return "钢铁壁垒"
+        case .steadfastVow:return "坚守反击"
+        case .fireball:return "烈焰火球"
+        case .frostNova:return "冰霜新星"
+        case .manaBarrier:return "魔力屏障"
+        case .sonicNote:return "音波箭"
+        case .healingLullaby:return "治愈摇篮曲"
+        case .heroicAnthem:return "英雄赞歌"
+        case .judgmentStrike:return "审判重击"
+        case .radiantBaptism:return "圣光洗礼"
+        case .oathBanner:return "誓约战旗"
+        case .piercingArrow:return "穿云箭"
+        case .galeBarrage:return "疾风连射"
+        case .windMomentum:return "猎风迅捷"
+        case .thornSnare:return "荆棘缠绕"
+        case .elderBloom:return "生命古树"
+        case .barkAegis:return "树皮灵甲"
+        case .meteorStarfall:return "星辰陨落"
+        case .astralDome:return "穹顶圣盾"
+        case .arcaneOverdrive:return "奥术超载"
+        case .skybreaker:return "天穹断空"
+        case .valkyrieGuard:return "英灵护佑"
+        case .warlordRoar:return "战神怒吼"
+        // Set skills
+        case .wildwoodBreeze:return "林风祈愿"
+        case .galeVolley:return "飓风齐射"
+        case .oakBulwark:return "大地壁垒"
+        case .emberNova:return "炽焰陨爆"
+        case .seraphAegis:return "圣盾天降"
+        case .astralJudgement:return "终焉星陨"
+        // Monster skills
+        case .sporeCoat:return "孢子薄膜"
+        case .waspFrenzy:return "蜂群振翅"
+        case .vineGuard:return "藤蔓缠壁"
+        case .shamanMend:return "部落愈合"
+        case .shamanChant:return "战鼓呐喊"
+        case .emberBreath:return "火星吐息"
+        case .nightPlume:return "夜幕羽盾"
+        case .runeCleave:return "符文重斩"
+        case .armorCharge:return "铁壁蓄能"
+        case .crystalShell:return "晶化护壳"
+        case .quakeSlam:return "震地冲击"
+        case .frostHowl:return "霜狼嗥叫"
+        case .frostFang:return "冰牙连扑"
+        case .kingRegen:return "孢子回春"
+        case .capSlam:return "菌盖震击"
+        case .warlordRally:return "战酋号令"
+        case .boomBomb:return "轰天爆弹"
+        case .heartwoodWall:return "树心护壁"
+        case .ancientRegen:return "古木再生"
+        case .rootSweep:return "根须横扫"
+        case .glacialWard:return "寒冰羽壁"
+        case .frostRebirth:return "冰晶浴火"
+        case .blizzardBreath:return "极寒风暴"
+        case .celestialBastion:return "星穹壁垒"
+        case .stellarSurge:return "星核充能"
+        case .eclipseRay:return "星蚀吐息"
+        // Consumables
+        case .berryTea:return "浆果暖茶"
+        case .ironbarkElixir:return "铁皮护盾剂"
+        case .honeySalve:return "蜂蜜修复膏"
+        case .superPotion:return "特级生命圣药"
+        case .crystalBarrierFlask:return "晶壁魔瓶"
+        case .phoenixNectar:return "炽凰琼浆"
+        case .starlightElixir:return "星辉灵液"
+        case .aegisCrystal:return "苍穹圣晶"
         }
     }
     public var visual:String {
         switch self {
         case .runeSlash,.runeWard,.battleRune,.dragonFlame:return rawValue
-        case .starlightPulse,.sweep:return "attack"
-        case .rally,.dragonSoulWard,.dragonScaleWard,.dragonOrder:return "support"
         case .ambush:return "ambush"
-        case .support:return "support"
-        case .regeneration,.breather,.smallPotion,.largePotion:return "heal"
-        case .simpleGuard,.shieldPotion:return "guard"
+        case .regeneration,.breather,.smallPotion,.largePotion,.prayerHeal,.healingLullaby,.elderBloom,.kingRegen,.ancientRegen,.frostRebirth,.shamanMend,.berryTea,.honeySalve,.superPotion,.phoenixNectar,.starlightElixir,.aegisCrystal:return "heal"
+        case .simpleGuard,.shieldPotion,.ironbarkElixir,.crystalBarrierFlask,.ironBulwark,.blessingVeil,.barkAegis,.astralDome,.oakBulwark,.sporeCoat,.vineGuard,.nightPlume,.armorCharge,.crystalShell,.heartwoodWall,.glacialWard,.celestialBastion:return "guard"
+        case .support,.rally,.dragonSoulWard,.dragonScaleWard,.dragonOrder,.nimbleStep,.scoutMark,.steadfastVow,.manaBarrier,.heroicAnthem,.radiantBaptism,.oathBanner,.windMomentum,.arcaneOverdrive,.valkyrieGuard,.warlordRoar,.wildwoodBreeze,.seraphAegis,.waspFrenzy,.shamanChant,.frostHowl,.warlordRally,.stellarSurge:return "support"
         case .revivalStone:return "revive"
         case .endTurn:return "wait"
         default:return "attack"
@@ -46,15 +133,52 @@ public enum PartyAction:String,CaseIterable,Codable {
     public var isRune:Bool { [.runeSlash,.runeWard,.battleRune].contains(self) }
     public var skillVFX:PartySkillVFXSpec? { PartySkillVFXSpec.find(rawValue) }
     public var statusVFXCueAge:Double? { SpellbladeEffects.statusVFXCueAge(for:self) }
-    public var usesRangedMotion:Bool { self == .starlightPulse }
-    public var isNodeCast:Bool { [.rally,.runeWard,.battleRune,.dragonFlame,.starlightPulse,.sweep,.dragonSoulWard,.dragonScaleWard,.dragonOrder].contains(self) }
-    public var isNodeSupport:Bool { [.rally,.runeWard,.battleRune,.dragonSoulWard,.dragonScaleWard,.dragonOrder].contains(self) }
-    public var impact:Double { if self == .runeSlash { return 1.048 };if self == .runeWard { return 0.72 };if self == .battleRune { return 0.56 };if self == .endTurn { return 0 };if self == .ambush { return 0.72 };if self == .dragonFlame { return 0.46 };return visual == "attack" ? 1.048 : visual == "support" ? 0.56 : visual == "revive" ? 0.72 : 0.46 }
-    public var duration:Double { if self == .runeSlash { return 3.0 };if self == .runeWard { return 2.65 };if self == .battleRune { return 2.30 };if self == .dragonFlame { return 2.75 };if self == .endTurn { return 0.25 };if self == .ambush { return 2.10 };return visual == "attack" ? 1.70 : visual == "revive" ? 2.10 : 1.80 }
-    public var isOffensive:Bool { [.attack,.heavyStrike,.ambush,.runeSlash,.dragonFlame,.starlightPulse,.sweep].contains(self) }
-    public var isItem:Bool { [.smallPotion,.largePotion,.shieldPotion,.revivalStone].contains(self) }
+    public var usesRangedMotion:Bool {
+        [.starlightPulse,.holyBolt,.quickShot,.fireball,.frostNova,.sonicNote,.piercingArrow,.galeBarrage,.thornSnare,.meteorStarfall,.galeVolley,.emberNova,.astralJudgement].contains(self)
+    }
+    public var isNodeAttack:Bool {
+        [.dragonFlame,.starlightPulse,.sweep,.frostNova,.galeBarrage,.thornSnare,.meteorStarfall,.galeVolley,.emberNova,.astralJudgement,.emberBreath,.quakeSlam,.capSlam,.boomBomb,.rootSweep,.blizzardBreath,.eclipseRay].contains(self)
+    }
+    public var isNodeSupport:Bool {
+        [.rally,.runeWard,.battleRune,.dragonSoulWard,.dragonScaleWard,.dragonOrder,.blessingVeil,.scoutMark,.ironBulwark,.manaBarrier,.healingLullaby,.heroicAnthem,.radiantBaptism,.oathBanner,.windMomentum,.elderBloom,.barkAegis,.astralDome,.arcaneOverdrive,.valkyrieGuard,.warlordRoar,.wildwoodBreeze,.oakBulwark,.seraphAegis,.shamanChant,.frostHowl].contains(self)
+    }
+    public var isSelfOnly:Bool {
+        [.regeneration,.breather,.simpleGuard,.nimbleStep,.steadfastVow,.sporeCoat,.waspFrenzy,.vineGuard,.nightPlume,.armorCharge,.crystalShell,.kingRegen,.warlordRally,.heartwoodWall,.ancientRegen,.glacialWard,.frostRebirth,.celestialBastion,.stellarSurge].contains(self)
+    }
+    public var isNodeCast:Bool { isNodeSupport || isNodeAttack }
+    public var impact:Double {
+        if self == .runeSlash { return 1.048 }
+        if self == .starlightPulse { return 1.048 }
+        if self == .runeWard { return 0.72 }
+        if self == .battleRune { return 0.56 }
+        if self == .endTurn { return 0 }
+        if self == .ambush { return 0.72 }
+        if self == .dragonFlame { return 0.46 }
+        if usesRangedMotion { return 0.72 }
+        return visual == "attack" ? 1.048 : visual == "support" ? 0.56 : visual == "revive" ? 0.72 : 0.46
+    }
+    public var duration:Double {
+        if self == .runeSlash { return 3.0 }
+        if self == .runeWard { return 2.65 }
+        if self == .battleRune { return 2.30 }
+        if self == .dragonFlame { return 2.75 }
+        if self == .endTurn { return 0.25 }
+        if self == .ambush { return 2.10 }
+        if [.meteorStarfall,.astralJudgement,.seraphAegis,.valkyrieGuard,.skybreaker,.blizzardBreath,.eclipseRay,.boomBomb].contains(self) { return 2.40 }
+        return visual == "attack" ? 1.70 : visual == "revive" ? 2.10 : 1.80
+    }
+    public var isOffensive:Bool {
+        [.attack,.heavyStrike,.ambush,.runeSlash,.dragonFlame,.starlightPulse,.sweep,
+         .holyBolt,.quickShot,.shieldBash,.fireball,.frostNova,.sonicNote,.judgmentStrike,.piercingArrow,.galeBarrage,.thornSnare,.meteorStarfall,.skybreaker,
+         .galeVolley,.emberNova,.astralJudgement,
+         .emberBreath,.runeCleave,.quakeSlam,.frostFang,.capSlam,.boomBomb,.rootSweep,.blizzardBreath,.eclipseRay].contains(self)
+    }
+    public var isItem:Bool { Self.allConsumables.contains(self) }
 }
 public struct PartyIntent {
+    public static let rangedWeapons:Set<String>=["huntingBow","oakSlingshot","thunderCrossbow","galeLongbow","astralGreatbow"]
+    public static let magicalWeapons:Set<String>=["legendaryStaff","woodenStaff","frostWand","emeraldScepter","emberStaff","astralCodex"]
+    public static let heavyWeapons:Set<String>=["greatSword","knightHalberd","flameAxe","oakHammer","sunbreakerBlade","aegisLance","dragonFangSword"]
     public let id:String
     public let action:PartyAction
     public let actor:String
@@ -72,8 +196,8 @@ public struct PartyIntent {
     public init(id:String,action:PartyAction,actor:String,target:String,targets:[String],command:GameCommand,enemy:Bool,weaponID:String?,monsterTemplateID:String?=nil,enemyRanged:Bool=false,sourceSkillID:String?=nil,targetTemplateID:String?=nil) {
         self.id=id;self.action=action;self.actor=actor;self.target=target;self.targets=targets;self.command=command;self.enemy=enemy;self.weaponID=weaponID;self.monsterTemplateID=monsterTemplateID;self.enemyRanged=enemyRanged;self.sourceSkillID=sourceSkillID;self.targetTemplateID=targetTemplateID
     }
-    public var magical:Bool { weaponID=="legendaryStaff" && !enemy && action.visual=="attack" && action != .starlightPulse }
-    public var ranged:Bool { enemyRanged || weaponID=="huntingBow" && !enemy && action.isOffensive && !action.isRune && action != .dragonFlame && action != .starlightPulse }
+    public var magical:Bool { weaponID.map(Self.magicalWeapons.contains) == true && !enemy && action.visual=="attack" && !action.usesRangedMotion }
+    public var ranged:Bool { enemyRanged || (weaponID.map(Self.rangedWeapons.contains) == true && !enemy && action.isOffensive && !action.isRune && action != .dragonFlame && !action.usesRangedMotion) }
 }
 /// Uses the original atomic rule engine. Pending visual actions do not mutate it.
 public final class PartyEncounter {
@@ -92,12 +216,12 @@ public final class PartyEncounter {
     public var round:Int { state.battle?.round ?? 0 }
     public var terminal:Bool { state.battle == nil || state.pauseReasons.contains(.allPlayersDown) || state.pauseReasons.contains(.noSurvivors) }
     public init(seed:UInt64=UInt64.random(in:1...UInt64.max),sessionID:String=UUID().uuidString,loadouts:[String:GameUnit]?=nil,playerClassID:String="adventurer") throws {
-        guard ["adventurer","spellblade","dragonKnight"].contains(playerClassID) else { throw GameError("该职业尚未接入演练。") }
+        var catalog=try GameCatalog.initial()
+        guard catalog.classes.contains(where:{$0.id==playerClassID}) else { throw GameError("该职业尚未接入演练。") }
         self.sessionID=sessionID
         self.monsterIDs=["m1","m2"]
-        var catalog=try GameCatalog.initial()
         // A local training creature using the existing deer art. The six formal
-        // monster definitions and all19 skills/18 items remain unchanged.
+        // monster definitions and all original skills/items remain unchanged.
         var warden=try catalog.monster("wolf")
         warden.id="meadowTrainingWarden";warden.name="林地鹿灵"
         warden.attributes=Attributes(maximumHealth:18,baseAP:1,maximumAP:8)
@@ -119,7 +243,9 @@ public final class PartyEncounter {
         for id in ["p1","p2"] {
             if var unit=units[id] { try GameRules.refill(&unit,catalog:catalog);units[id]=unit }
         }
-        units["p1"]?.health=playerClassID=="spellblade" ? 12:playerClassID=="dragonKnight" ? 20:6;units["p2"]?.health=12
+        let p1Max=units["p1"]?.baseAttributes.maximumHealth ?? 12
+        units["p1"]?.health=playerClassID=="spellblade" ? 12:playerClassID=="dragonKnight" ? 20:playerClassID=="adventurer" ? 6:max(6,p1Max/2)
+        units["p2"]?.health=12
         for (i,id) in ["m1","m2"].enumerated() {
             units[id]=try GameFactory.monster(id:id,templateID:warden.id,nodeID:1,catalog:catalog)
             units[id]?.active=true;units[id]?.name="鹿灵\(i==0 ? "甲":"乙")"
@@ -151,10 +277,11 @@ public final class PartyEncounter {
         case .attack:return .attack(actor:actor,target:target)
         case .endTurn:return .endTurn(actor:actor,timedOut:false)
         case .revivalStone:return .rescue(actor:actor,target:target)
-        case .smallPotion,.largePotion,.shieldPotion:return .useItem(actor:actor,item:action.rawValue,target:target)
-        case .rally,.runeWard,.battleRune,.dragonFlame,.starlightPulse,.sweep,.dragonSoulWard,.dragonScaleWard,.dragonOrder:return .cast(actor:actor,skill:action.rawValue,target:.node(state.units[target]?.nodeID ?? 1))
-        case .regeneration,.breather,.simpleGuard:return .cast(actor:actor,skill:action.rawValue,target:.unit(actor))
-        default:return .cast(actor:actor,skill:action.rawValue,target:.unit(target))
+        default:
+            if action.isItem { return .useItem(actor:actor,item:action.rawValue,target:target) }
+            if action.isNodeCast { return .cast(actor:actor,skill:action.rawValue,target:.node(state.units[target]?.nodeID ?? 1)) }
+            if action.isSelfOnly { return .cast(actor:actor,skill:action.rawValue,target:.unit(actor)) }
+            return .cast(actor:actor,skill:action.rawValue,target:.unit(target))
         }
     }
     public func preview(_ action:PartyAction,target:String)->ActionPreview {
@@ -165,13 +292,22 @@ public final class PartyEncounter {
         guard pending==nil,preview(action,target:target).allowed,let actor=current,let command=command(action,target:target) else { return nil }
         serial += 1
         let targets:[String]
-        if action.isNodeSupport { targets=state.players.filter { $0.isAlive && $0.nodeID==state.units[target]?.nodeID && (!isDuel || $0.teamID==state.units[actor]?.teamID) }.map(\.id) }
-        else if action == .dragonFlame || action == .starlightPulse {
-            let me=state.units[actor]
-            targets=state.units.values.filter { u in u.isAlive && u.nodeID==state.units[target]?.nodeID && (isDuel ? (u.kind == .player && me.map{GameRules.enemies($0,u,in:state)} == true && (duelLeft+duelRight).contains(u.id)):u.kind == .monster) }.map(\.id).sorted()
+        if action.isNodeSupport {
+            if state.units[actor]?.kind == .monster {
+                targets=state.units.values.filter { $0.isAlive && $0.kind == .monster && $0.nodeID==state.units[target]?.nodeID }.map(\.id).sorted()
+            } else {
+                targets=state.players.filter { $0.isAlive && $0.nodeID==state.units[target]?.nodeID && (!isDuel || $0.teamID==state.units[actor]?.teamID) }.map(\.id)
+            }
         }
-        else if action == .sweep { targets=state.players.filter { $0.isAlive && $0.nodeID==state.units[target]?.nodeID && (!isDuel || (duelLeft+duelRight).contains($0.id)) }.map(\.id).sorted() }
-        else if action == .regeneration || action == .breather || action == .simpleGuard { targets=[actor] }
+        else if action.isNodeAttack {
+            let me=state.units[actor]
+            if me?.kind == .monster {
+                targets=state.players.filter { $0.isAlive && $0.nodeID==state.units[target]?.nodeID && (!isDuel || (duelLeft+duelRight).contains($0.id)) }.map(\.id).sorted()
+            } else {
+                targets=state.units.values.filter { u in u.isAlive && u.nodeID==state.units[target]?.nodeID && (isDuel ? (u.kind == .player && me.map{GameRules.enemies($0,u,in:state)} == true && (duelLeft+duelRight).contains(u.id)):u.kind == .monster) }.map(\.id).sorted()
+            }
+        }
+        else if action.isSelfOnly { targets=[actor] }
         else { targets=[target] }
         let intent=PartyIntent(id:sessionID+"/"+String(serial),action:action,actor:actor,target:target,targets:targets,command:command,enemy:state.units[actor]?.kind == .monster,weaponID:state.units[actor]?.equipment.weapon,targetTemplateID:state.units[target]?.templateID)
         // Resolve once in an isolated transaction at confirmation. Live HP/AP,

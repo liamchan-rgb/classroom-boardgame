@@ -74,7 +74,8 @@ final class ProvisionsPreviewTests:XCTestCase {
         XCTAssertEqual(reward.items["largePotion"],plan.healingPressure)
         XCTAssertEqual(reward.items["shieldPotion"],1);XCTAssertEqual(reward.items["revivalStone"],1)
         func stats(_ m:[MonsterDefinition])->[MonsterDefinition] {m.map{var x=$0;x.drops=[];x.score=0;return x}}
-        XCTAssertEqual(stats(try GameCatalog.initial().monsters),stats(Array(s.engine.catalog.monsters.prefix(6))))
+        let initial=try GameCatalog.initial().monsters
+        XCTAssertEqual(stats(initial),stats(Array(s.engine.catalog.monsters.prefix(initial.count))))
     }
     func testPreviewIsReadOnlyAndReflectsManualMixedDamagedAndClearedMonsters()throws {
         let s=try MeadowCampaignSession.new(layout:MeadowMapGenerator.generate(.suggested(total:10)))

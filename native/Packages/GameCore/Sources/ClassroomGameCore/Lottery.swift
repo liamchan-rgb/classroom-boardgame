@@ -18,19 +18,33 @@ public struct LotteryTier: Equatable {
 public enum CampaignLottery {
     private static func item(_ id: String, _ weight: Int, _ count: Int = 1) -> LotteryPrize { LotteryPrize(item: id, count: count, coins: 0, weight: weight) }
     private static func coins(_ amount: Int, _ weight: Int) -> LotteryPrize { LotteryPrize(item: nil, count: 0, coins: amount, weight: weight) }
-    private static let setPieces = ["starlightBlade", "starlightArmor", "starlightCharm", "dragonFangSword", "dragonArmor", "dragonCharm"]
+    private static let t1SetPieces = ["wildwoodSpear", "wildwoodArmor", "wildwoodCharm"]
+    private static let t2SetPieces = ["galeLongbow", "galeArmor", "galeCharm", "oakHammer", "oakArmor", "oakCharm"]
+    private static let t3SetPieces = ["starlightBlade", "starlightArmor", "starlightCharm", "emberStaff", "emberArmor", "emberCharm"]
+    private static let t4SetPieces = ["dragonFangSword", "dragonArmor", "dragonCharm", "aegisLance", "aegisArmor", "aegisCharm", "astralCodex", "astralArmor", "astralCharm"]
     public static let tiers: [LotteryTier] = [
         LotteryTier(title: "铜", cost: 30, prizes: [
-            coins(15, 22), item("smallPotion", 22), item("shieldPotion", 14), item("largePotion", 12), item("leatherArmor", 8),
-            item("huntingBow", 7), item("powerBadge", 5), item("revivalStone", 4), coins(60, 3)
-        ] + setPieces.map { item($0, 1) }),
+            coins(15, 22), item("smallPotion", 18), item("berryTea", 14), item("shieldPotion", 12), item("largePotion", 10),
+            item("oakSlingshot", 6), item("woodenStaff", 6), item("ironDagger", 5), item("travelerCloak", 6), item("leatherArmor", 6),
+            item("studdedVest", 5), item("cloverAmulet", 5), item("woodenWhistle", 5), item("huntingBow", 4), item("powerBadge", 4),
+            item("revivalStone", 4), coins(60, 4)
+        ] + t1SetPieces.map { item($0, 4) } + t2SetPieces.map { item($0, 1) }),
         LotteryTier(title: "银", cost: 80, prizes: [
-            coins(40, 14), item("largePotion", 14, 2), item("revivalStone", 12), item("runeArmor", 11), item("greatSword", 9),
-            item("actionRing", 9), item("powerBadge", 8), coins(150, 5)
-        ] + setPieces.map { item($0, 3) }),
+            coins(45, 14), item("largePotion", 12, 2), item("ironbarkElixir", 10), item("honeySalve", 10), item("revivalStone", 10),
+            item("frostWand", 8), item("knightHalberd", 8), item("greatSword", 7), item("runeArmor", 8), item("chainmailCoat", 7),
+            item("windrunnerGarb", 7), item("eagleEyeLens", 7), item("actionRing", 7), item("powerBadge", 6), coins(150, 5)
+        ] + t2SetPieces.map { item($0, 4) } + t3SetPieces.map { item($0, 2) }),
         LotteryTier(title: "金", cost: 180, prizes: [
-            item("legendaryStaff", 12), item("greatSword", 8), item("actionRing", 8), item("revivalStone", 8, 2), coins(120, 8)
-        ] + setPieces.map { item($0, 9) }),
+            coins(120, 8), item("superPotion", 10, 2), item("crystalBarrierFlask", 10), item("phoenixNectar", 8), item("revivalStone", 8, 2),
+            item("flameAxe", 8), item("thunderCrossbow", 8), item("emeraldScepter", 8), item("shadowTwinblades", 7),
+            item("mithrilPlate", 8), item("arcaneMantle", 8), item("rubyHeartPendant", 8), item("chronoPocketwatch", 7),
+            item("legendaryStaff", 8)
+        ] + t3SetPieces.map { item($0, 6) } + t4SetPieces.map { item($0, 3) }),
+        LotteryTier(title: "星穹", cost: 280, prizes: [
+            item("phoenixNectar", 8, 2), item("starlightElixir", 8, 2), item("aegisCrystal", 8, 2),
+            item("legendaryStaff", 9), item("sunbreakerBlade", 10), item("astralGreatbow", 10),
+            item("titanFortressArmor", 9), item("phoenixFeatherRobe", 10), item("crownOfValor", 9), item("infinityHourglass", 10)
+        ] + t3SetPieces.map { item($0, 4) } + t4SetPieces.map { item($0, 8) }),
     ]
     public static func tier(_ index: Int) throws -> LotteryTier {
         guard tiers.indices.contains(index) else { throw GameError("没有这一档抽奖。") }

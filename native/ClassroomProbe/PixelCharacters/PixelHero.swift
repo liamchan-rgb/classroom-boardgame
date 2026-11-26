@@ -116,6 +116,24 @@ struct PixelHeroLook: Hashable {
         "legendaryStaff": "weapon_legendary_staff",
         "starlightBlade": "weapon_starlight_blade",
         "dragonFangSword": "weapon_dragon_fang",
+        // +17 Expansion weapons
+        "oakSlingshot": "weapon_oak_slingshot",
+        "woodenStaff": "weapon_wooden_staff",
+        "ironDagger": "weapon_iron_dagger",
+        "frostWand": "weapon_frost_wand",
+        "knightHalberd": "weapon_knight_halberd",
+        "flameAxe": "weapon_flame_axe",
+        "thunderCrossbow": "weapon_thunder_crossbow",
+        "emeraldScepter": "weapon_emerald_scepter",
+        "shadowTwinblades": "weapon_shadow_twinblades",
+        "sunbreakerBlade": "weapon_sunbreaker_blade",
+        "astralGreatbow": "weapon_astral_greatbow",
+        "wildwoodSpear": "weapon_wildwood_spear",
+        "galeLongbow": "weapon_gale_longbow",
+        "oakHammer": "weapon_oak_hammer",
+        "emberStaff": "weapon_ember_staff",
+        "aegisLance": "weapon_aegis_lance",
+        "astralCodex": "weapon_astral_codex",
     ]
 
     /// 游戏内护甲装备（仅在「随护甲」或读取旧存档时使用，不再放进时装选择器）
@@ -124,6 +142,21 @@ struct PixelHeroLook: Hashable {
         "runeArmor": "top_rune_armor",
         "starlightArmor": "top_starlight_armor",
         "dragonArmor": "top_dragon_armor",
+        // +14 Expansion armors
+        "travelerCloak": "top_traveler_cloak",
+        "studdedVest": "top_studded_vest",
+        "chainmailCoat": "top_chainmail_coat",
+        "windrunnerGarb": "top_windrunner_garb",
+        "mithrilPlate": "top_mithril_plate",
+        "arcaneMantle": "top_arcane_mantle",
+        "titanFortressArmor": "top_titan_fortress_armor",
+        "phoenixFeatherRobe": "top_phoenix_feather_robe",
+        "wildwoodArmor": "top_wildwood_armor",
+        "galeArmor": "top_gale_armor",
+        "oakArmor": "top_oak_armor",
+        "emberArmor": "top_ember_armor",
+        "aegisArmor": "top_aegis_armor",
+        "astralArmor": "top_astral_armor",
     ]
 
     /// 独立定制时装组合（与游戏内装备护甲完全解耦，自带成套上衣 / 下装 / 鞋靴与配饰）

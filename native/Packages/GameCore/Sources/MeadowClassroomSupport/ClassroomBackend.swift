@@ -69,7 +69,7 @@ public final class ClassroomGameBackend {
         let model=try battleModel(role:role)
         guard model.state.pauseReasons.isEmpty else{throw GameError("请先继续战斗。")}
         guard let actor=model.current,model.state.units[actor]?.kind == .player else{throw GameError("请等待怪物行动结束。")}
-        let items:[PartyAction]=[.smallPotion,.largePotion,.shieldPotion,.revivalStone,.endTurn]
+        let items:[PartyAction]=PartyAction.allConsumables+[.endTurn]
         guard model.playerActions().contains(action) || items.contains(action) else{throw GameError("当前角色没有此技能。")}
         let ally=model.state.units[selected]?.kind == .player ? selected:actor
         let enemy=model.state.units[selected]?.kind == .monster ? selected:(model.state.battle?.queue.first{model.state.units[$0]?.kind == .monster && model.state.units[$0]?.isAlive==true} ?? "")

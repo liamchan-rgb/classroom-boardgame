@@ -3,7 +3,18 @@ import ClassroomGameCore
 
 /// New-journey choices only. Saved GameUnit template IDs remain authoritative.
 public struct MeadowPartyConfiguration:Codable,Equatable {
-    public static let classIDs=["adventurer","ranger","spellblade","dragonKnight"]
+    public static let classIDs=[
+        "adventurer","acolyte","scout",
+        "ranger","guardian","elementalist","bard",
+        "spellblade","paladin","windstalker","druid",
+        "dragonKnight","archmage","valkyrie"
+    ]
+    public static let classTiers:[(title:String,ids:[String])]=[
+        ("T1 启程（简单）",["adventurer","acolyte","scout"]),
+        ("T2 冒险（标准）",["ranger","guardian","elementalist","bard"]),
+        ("T3 精英（困难）",["spellblade","paladin","windstalker","druid"]),
+        ("T4 传奇（噩梦）",["dragonKnight","archmage","valkyrie"])
+    ]
     public var playerClassID:String,companionClassID:String
     public init(playerClassID:String="spellblade",companionClassID:String="ranger") {
         self.playerClassID=playerClassID;self.companionClassID=companionClassID

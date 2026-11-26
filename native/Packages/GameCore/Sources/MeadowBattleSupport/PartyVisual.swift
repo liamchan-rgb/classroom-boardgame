@@ -67,7 +67,7 @@ public enum PartyVisual {
     public static func hitPoint(target:String,shielded:Bool=false,weaponID:String?=nil,templateID:String?=nil)->PartyPoint {
         let foot=foot(target)!
         if target.hasPrefix("m"),let spec=MonsterVisualSpec.find(templateID){return spec.hitPoint(at:foot)}
-        if ["greatSword","legendaryStaff"].contains(weaponID ?? ""),target.hasPrefix("m") { return PartyPoint(foot.x+(94-178.5)*enemyScale,foot.y+(152-240)*enemyScale) }
+        if weaponID.map({ PartyIntent.heavyWeapons.contains($0) || PartyIntent.magicalWeapons.contains($0) }) == true,target.hasPrefix("m") { return PartyPoint(foot.x+(94-178.5)*enemyScale,foot.y+(152-240)*enemyScale) }
         return PartyPoint(foot.x+(target.hasPrefix("m") ? -80:(shielded ? (5+240*0.41)*heroScale:10)*facing(target)),foot.y-(target.hasPrefix("m") ? 72:65))
     }
     public static func damageLabelOrigin(at:PartyPoint,width:Double,height:Double,age:Double)->PartyPoint {
@@ -142,7 +142,7 @@ public enum PartyVisual {
             return PartyPoint((to.x-155+correction.x-from.x)*p,(to.y-12+correction.y-from.y)*p)
         }
         if intent.ranged || intent.magical || intent.action.usesRangedMotion || intent.action.isRune { return PartyPoint(0,0) }
-        if intent.weaponID=="greatSword",!intent.enemy,intent.action != .ambush {
+        if intent.weaponID.map(PartyIntent.heavyWeapons.contains) == true,!intent.enemy,intent.action != .ambush {
             return GreatSwordRig.travel(age:age,from:from,to:registered,scale:heroScale)
         }
         if intent.action == .ambush {
@@ -162,31 +162,35 @@ extension PartyVisual {
         var clip=unit.isAlive ? "idle":"defeat"
         var progress=unit.isAlive ? time.truncatingRemainder(dividingBy:2.4)/2.4:(downAge.map { smooth($0/0.6) } ?? 1)
         if let intent,intent.actor==unit.id,unit.isAlive {
+            let weapon=unit.equipment.weapon
+            let isHeavy=weapon.map(PartyIntent.heavyWeapons.contains) == true
+            let isMagic=weapon.map(PartyIntent.magicalWeapons.contains) == true
+            let isBow=weapon.map(PartyIntent.rangedWeapons.contains) == true
             if intent.action == .runeSlash {
                 clip="attack"
-                if unit.equipment.weapon=="greatSword" { progress=GreatSwordRig.progress(age:age) }
-                else if unit.equipment.weapon=="legendaryStaff" { progress=LegendaryStaffRig.progress(age:age) }
-                else if unit.equipment.weapon=="huntingBow" { progress=BowRig.progress(age:age) }
+                if isHeavy { progress=GreatSwordRig.progress(age:age) }
+                else if isMagic { progress=LegendaryStaffRig.progress(age:age) }
+                else if isBow { progress=BowRig.progress(age:age) }
                 else { let action=max(0,age-0.28);progress=min(1,max(0,action-min(0.1,max(0,action-0.648)))/1.2) }
             } else if intent.action == .dragonFlame {
                 clip="guard";progress=PartyVisual.smooth(age/intent.action.duration)
             } else if intent.action.isRune {
                 clip="guard";progress=smooth(age/intent.action.duration)
-            } else if intent.action == .starlightPulse {
+            } else if intent.action.usesRangedMotion {
                 clip="attack"
-                if unit.equipment.weapon=="greatSword" { progress=GreatSwordRig.progress(age:age) }
-                else if unit.equipment.weapon=="legendaryStaff" { progress=LegendaryStaffRig.progress(age:age) }
-                else if unit.equipment.weapon=="huntingBow" { progress=BowRig.progress(age:age) }
+                if isHeavy { progress=GreatSwordRig.progress(age:age) }
+                else if isMagic { progress=LegendaryStaffRig.progress(age:age) }
+                else if isBow { progress=BowRig.progress(age:age) }
                 else { let action=max(0,age-0.4);progress=min(1,max(0,action-min(0.1,max(0,action-0.648)))/1.2) }
             } else if intent.action == .ambush {
                 clip="attack";progress=ambushProgress(age)
             } else if intent.action.visual=="attack" {
                 clip="attack"
-                if intent.ranged && unit.equipment.weapon=="huntingBow" { progress=BowRig.progress(age:age) }
+                if intent.ranged && isBow { progress=BowRig.progress(age:age) }
                 else if intent.magical { progress=LegendaryStaffRig.progress(age:age) }
-                else if intent.weaponID=="greatSword" { progress=GreatSwordRig.progress(age:age) }
+                else if intent.weaponID.map(PartyIntent.heavyWeapons.contains) == true { progress=GreatSwordRig.progress(age:age) }
                 else { let action=max(0,age-0.4);progress=min(1,max(0,action-min(0.1,max(0,action-0.648)))/1.2) }
-            } else if ["support","rally","guard"].contains(intent.action.visual) { clip="guard";progress=min(1,age/1.4) }
+            } else if ["support","rally","guard","heal"].contains(intent.action.visual) { clip="guard";progress=min(1,age/1.4) }
         }
         if let intent,intent.action == .revivalStone,intent.target==unit.id,age>=intent.action.impact { clip="defeat";progress=1-smooth((age-intent.action.impact)/0.6) }
         if let hurtAge,hurtAge<0.7,unit.isAlive { clip=blocked ? "guard":"hit";progress=min(1,hurtAge/0.7) }

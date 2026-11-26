@@ -4,7 +4,9 @@ import ClassroomGameCore
 
 final class TempoTests:XCTestCase {
     func testSingleBossReadinessRequiresBothCombatAndSupplyRatherThanMapSize()throws {
-        var dragonSeen=false
+        let lightBosses=Set(["caveTroll","mushroomKing"])
+        let heavyBosses=Set(["ruinDragon","frostPhoenix","eclipseBehemoth"])
+        var heavySeen=false
         for seed:UInt64 in 0..<16 {
             for mode in 0..<4 {
                 var c=MeadowMapConfiguration.suggested(total:mode==0 ? 4:30,seed:seed)
@@ -12,20 +14,22 @@ final class TempoTests:XCTestCase {
                 if mode==2{c.combat=20;c.boss=1;c.reward=1;c.empty=7}
                 if mode==3{c.combat=4;c.boss=1;c.reward=2;c.empty=22}
                 let boss=try XCTUnwrap(MeadowEncounterPlanner.plan(MeadowMapGenerator.generate(c)).first{$0.band=="boss"})
-                if mode<3{XCTAssertEqual(boss.templates,["caveTroll"])}
-                else{dragonSeen = dragonSeen || boss.templates==["ruinDragon"]}
+                if mode<3{XCTAssertEqual(boss.templates.count,1);XCTAssertTrue(lightBosses.contains(boss.templates[0]))}
+                else{heavySeen = heavySeen || (boss.templates.count==1 && heavyBosses.contains(boss.templates[0]))}
             }
         }
-        XCTAssertTrue(dragonSeen)
+        XCTAssertTrue(heavySeen)
     }
     func testExplicitBossRushRetainsFinalDragonAndOriginalRules()throws {
         var c=MeadowMapConfiguration.suggested(total:4);c.combat=0;c.boss=3;c.reward=0;c.empty=0
         let s=try MeadowCampaignSession.new(layout:MeadowMapGenerator.generate(c))
         let templates=s.engine.state.units.values.filter{$0.kind == .monster}.map(\.templateID)
-        XCTAssertEqual(templates.filter{$0=="ruinDragon"}.count,1);XCTAssertEqual(templates.filter{$0=="caveTroll"}.count,2)
+        let light=Set(["caveTroll","mushroomKing"]),heavy=Set(["ruinDragon","frostPhoenix"])
+        XCTAssertEqual(templates.filter{heavy.contains($0)}.count,1);XCTAssertEqual(templates.filter{light.contains($0)}.count,2)
         // Combat stats stay the tabletop ones; only the journey's drops are richer.
         func stats(_ m:[MonsterDefinition])->[MonsterDefinition] {m.map{var x=$0;x.drops=[];x.score=0;return x}}
-        XCTAssertEqual(stats(try GameCatalog.initial().monsters),stats(Array(s.engine.catalog.monsters.prefix(6))))
+        let initial=try GameCatalog.initial().monsters
+        XCTAssertEqual(stats(initial),stats(Array(s.engine.catalog.monsters.prefix(initial.count))))
         let plan=try MeadowProvisioning.plan(layout:s.snapshot.layout,players:s.engine.state.players,catalog:s.engine.catalog)
         XCTAssertTrue(plan.bossSupplyNodes.isEmpty);XCTAssertTrue(plan.rewards.isEmpty)
     }

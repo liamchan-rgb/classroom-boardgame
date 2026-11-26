@@ -58,7 +58,7 @@ final class SaveEditingTests:XCTestCase {
     func testEditorDraftOffersAllEightRegisteredSpeciesRetainsSlotsAndDoesNotWriteOnCancel()throws {
         let s=try make(),node=s.engine.state.map.nodes.first{$0.kind == .combat}!,before=s.snapshot
         var draft=try MeadowEncounterEditDraft(node:node,templates:["slime","wolf","goblinArcher"],catalog:s.engine.catalog)
-        XCTAssertEqual(draft.choices.count,8)
+        XCTAssertEqual(draft.choices.count,24)
         try draft.setTemplate("stoneGuardian",at:1);try draft.setCount(1);try draft.setCount(3)
         XCTAssertEqual(draft.templates,["slime","stoneGuardian","goblinArcher"])
         let unchanged=draft;XCTAssertThrowsError(try draft.setTemplate("unknown",at:0));XCTAssertEqual(draft,unchanged)

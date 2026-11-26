@@ -33,7 +33,7 @@ public struct ClassRoster:Codable,Equatable,Identifiable {
         return ClassRoster(name:String(trimmed.prefix(40)),students:students.map{s in
             // A look this version cannot draw is dropped (the student gets a default look) rather than failing the class.
             Student(name:String(s.name.trimmingCharacters(in:.whitespacesAndNewlines).prefix(24)),appearance:s.appearance.flatMap{(try? $0.validate()) == nil ? nil:$0},
-                    classID:ids.contains(s.classID) ? s.classID:ids[1],team:min(2,max(0,s.team)))
+                    classID:ids.contains(s.classID) ? s.classID:"ranger",team:min(2,max(0,s.team)))
         })
     }
 }

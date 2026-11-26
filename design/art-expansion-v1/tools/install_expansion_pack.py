@@ -29,7 +29,7 @@ PACK = Path(__file__).resolve().parents[1]
 ROOT = PACK.parents[1]
 ASSETS = ROOT / "native/ClassroomProbe/Resources/Assets.xcassets"
 TOOLS = ROOT / "native/tools"
-MOTION_JSON = ASSETS / "MeadowMonsterVisuals.dataset/motion.json"
+MOTION_EXP_DATASET = ASSETS / "MeadowMonsterVisualsExpansion.dataset"
 RECIPES_JSON = ASSETS / "PixelFXRecipes.dataset/recipes.json"
 
 OLD_BRIDGE = (
@@ -91,15 +91,17 @@ def main() -> int:
 
     print(f"[{'APPLY' if args.apply else 'DRY-RUN'}] Imagesets: {created} new, {updated} existing (total {len(plan_imagesets)})")
 
-    # Merge motion.json
-    base_motion = json.loads(MOTION_JSON.read_text(encoding="utf-8"))
+    # Install MeadowMonsterVisualsExpansion.dataset (leaves pinned MeadowMonsterVisuals.dataset/motion.json untouched!)
     exp_motion = json.loads((PACK / "monsters/motion_expansion.json").read_text(encoding="utf-8"))
-    existing_ids = {r["id"] for r in base_motion["records"]}
-    added_mon = [r for r in exp_motion["records"] if r["id"] not in existing_ids]
-    print(f"[{'APPLY' if args.apply else 'DRY-RUN'}] motion.json: +{len(added_mon)} monster records")
-    if args.apply and added_mon:
-        base_motion["records"].extend(added_mon)
-        MOTION_JSON.write_text(json.dumps(base_motion, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"[{'APPLY' if args.apply else 'DRY-RUN'}] MeadowMonsterVisualsExpansion.dataset: +{len(exp_motion['records'])} monster records")
+    if args.apply:
+        MOTION_EXP_DATASET.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(PACK / "monsters/motion_expansion.json", MOTION_EXP_DATASET / "motion_expansion.json")
+        ds_contents = {
+            "data": [{"filename": "motion_expansion.json", "idiom": "universal"}],
+            "info": {"author": "xcode", "version": 1},
+        }
+        (MOTION_EXP_DATASET / "Contents.json").write_text(json.dumps(ds_contents, indent=2) + "\n", encoding="utf-8")
 
     # Merge PixelFX recipes.json
     base_fx = json.loads(RECIPES_JSON.read_text(encoding="utf-8"))

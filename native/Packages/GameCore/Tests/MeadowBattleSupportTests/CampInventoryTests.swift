@@ -49,7 +49,8 @@ final class CampInventoryTests:XCTestCase {
         XCTAssertThrowsError(try a.importData(JSONSerialization.data(withJSONObject:invalid)));XCTAssertEqual(a.loadout.engine.archive,stable);XCTAssertEqual(try Data(contentsOf:u),bytes)
     }
     func testRejectsBattleArchiveUnknownClothesAndUnsupportedEquippedArt() throws {
-        let a=try CampInventorySession(store:nil),p=try PartyEncounter(seed:47),before=a.loadout.engine.archive
+        let restricted:Set<String>=["trainingSword","huntingBow","greatSword","legendaryStaff","leatherArmor","runeArmor","powerBadge","actionRing"]
+        let a=try CampInventorySession(store:nil,equipment:restricted),p=try PartyEncounter(seed:47),before=a.loadout.engine.archive
         for data in [try CampSave(appearanceID:"forester",archive:p.engine.archive).encoded(),try CampSave(appearanceID:"missing",archive:before).encoded()] { XCTAssertThrowsError(try a.importData(data)) }
         var state=before.state;state.units["p1"]?.equipment.weapon="starlightBlade"
         XCTAssertThrowsError(try a.importData(CampSave(appearanceID:"forester",archive:GameArchive(catalog:before.catalog,state:state,history:[])).encoded()))

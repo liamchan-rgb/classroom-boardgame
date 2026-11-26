@@ -91,8 +91,12 @@ struct MeadowTeacherDashboard:View {
                         }label:{Label(targetName,systemImage:"scope")}
                         .disabled(miniGameActive || !game.ready || game.busy)
                         Menu {
-                            ForEach([PartyAction.smallPotion,.largePotion,.shieldPotion,.revivalStone],id:\.rawValue){action in
-                                Button(action.title){game.battle(action)}.disabled(!game.canUse(action))
+                            let activeUnit=game.campaign?.engine.state.battle?.current.flatMap{game.campaign?.engine.state.units[$0]}
+                            let classic:Set<PartyAction>=[.smallPotion,.largePotion,.shieldPotion,.revivalStone]
+                            let list=PartyAction.allConsumables.filter{classic.contains($0) || (activeUnit?.inventory[$0.rawValue] ?? 0)>0}
+                            ForEach(list,id:\.rawValue){action in
+                                let count=activeUnit?.inventory[action.rawValue] ?? 0
+                                Button("\(action.title) ×\(count)"){game.battle(action)}.disabled(!game.canUse(action))
                             }
                         }label:{Label("道具",systemImage:"cross.vial.fill")}.disabled(miniGameActive || !game.ready || game.busy)
                         let paused=game.campaign?.engine.state.pauseReasons.contains(.manual)==true

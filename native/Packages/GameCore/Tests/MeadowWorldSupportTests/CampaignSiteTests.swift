@@ -19,7 +19,9 @@ final class CampaignSiteTests:XCTestCase {
         }
     }
     func testAllCatalogPurchasableItemsChargeOnlyBuyerAndNeverEquip()throws {
-        let s=try session(),beforeOther=s.engine.state.units["p2"]!,ap=s.engine.state.units["p1"]!.ap,movement=s.snapshot.movement
+        var rich=try session().snapshot
+        rich.archive.state.units["p1"]!.coins=10000
+        let s=try MeadowCampaignSession(save:rich),beforeOther=s.engine.state.units["p2"]!,ap=s.engine.state.units["p1"]!.ap,movement=s.snapshot.movement
         for item in s.engine.catalog.items where item.purchasePrice != nil && item.setID==nil {
             let old=s.engine.state.units["p1"]!
             try s.tradeAtSite(actor:"p1",item:item.id,buy:true)

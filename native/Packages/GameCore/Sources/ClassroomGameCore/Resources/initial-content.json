@@ -82,6 +82,166 @@
         "dragonScaleWard",
         "dragonOrder"
       ]
+    },
+    {
+      "id": "acolyte",
+      "name": "见习牧师",
+      "attributes": {
+        "maximumHealth": 14,
+        "damage": 0,
+        "baseAP": 3,
+        "maximumAP": 8,
+        "range": 0
+      },
+      "skills": [
+        "holyBolt",
+        "prayerHeal",
+        "blessingVeil"
+      ]
+    },
+    {
+      "id": "scout",
+      "name": "林地斥候",
+      "attributes": {
+        "maximumHealth": 14,
+        "damage": 0,
+        "baseAP": 3,
+        "maximumAP": 8,
+        "range": 0
+      },
+      "skills": [
+        "quickShot",
+        "nimbleStep",
+        "scoutMark"
+      ]
+    },
+    {
+      "id": "guardian",
+      "name": "铁壁卫士",
+      "attributes": {
+        "maximumHealth": 22,
+        "damage": 0,
+        "baseAP": 3,
+        "maximumAP": 8,
+        "range": 0
+      },
+      "skills": [
+        "shieldBash",
+        "ironBulwark",
+        "steadfastVow"
+      ]
+    },
+    {
+      "id": "elementalist",
+      "name": "元素法师",
+      "attributes": {
+        "maximumHealth": 16,
+        "damage": 0,
+        "baseAP": 3,
+        "maximumAP": 9,
+        "range": 0
+      },
+      "skills": [
+        "fireball",
+        "frostNova",
+        "manaBarrier"
+      ]
+    },
+    {
+      "id": "bard",
+      "name": "吟游诗人",
+      "attributes": {
+        "maximumHealth": 18,
+        "damage": 0,
+        "baseAP": 3,
+        "maximumAP": 9,
+        "range": 0
+      },
+      "skills": [
+        "sonicNote",
+        "healingLullaby",
+        "heroicAnthem"
+      ]
+    },
+    {
+      "id": "paladin",
+      "name": "圣殿骑士",
+      "attributes": {
+        "maximumHealth": 28,
+        "damage": 0,
+        "baseAP": 3,
+        "maximumAP": 8,
+        "range": 0
+      },
+      "skills": [
+        "judgmentStrike",
+        "radiantBaptism",
+        "oathBanner"
+      ]
+    },
+    {
+      "id": "windstalker",
+      "name": "狂风猎手",
+      "attributes": {
+        "maximumHealth": 22,
+        "damage": 0,
+        "baseAP": 4,
+        "maximumAP": 9,
+        "range": 0
+      },
+      "skills": [
+        "piercingArrow",
+        "galeBarrage",
+        "windMomentum"
+      ]
+    },
+    {
+      "id": "druid",
+      "name": "自然德鲁伊",
+      "attributes": {
+        "maximumHealth": 24,
+        "damage": 0,
+        "baseAP": 3,
+        "maximumAP": 9,
+        "range": 0
+      },
+      "skills": [
+        "thornSnare",
+        "elderBloom",
+        "barkAegis"
+      ]
+    },
+    {
+      "id": "archmage",
+      "name": "星界大魔导",
+      "attributes": {
+        "maximumHealth": 28,
+        "damage": 0,
+        "baseAP": 4,
+        "maximumAP": 10,
+        "range": 0
+      },
+      "skills": [
+        "meteorStarfall",
+        "astralDome",
+        "arcaneOverdrive"
+      ]
+    },
+    {
+      "id": "valkyrie",
+      "name": "苍穹战神",
+      "attributes": {
+        "maximumHealth": 36,
+        "damage": 0,
+        "baseAP": 3,
+        "maximumAP": 9,
+        "range": 0
+      },
+      "skills": [
+        "skybreaker",
+        "valkyrieGuard",
+        "warlordRoar"
+      ]
     }
   ],
   "skills": [
@@ -630,6 +790,1600 @@
       "priority": 2,
       "condition": "twoEnemiesAtNode",
       "oncePerTurn": false
+    },
+    {
+      "id": "holyBolt",
+      "name": "圣光弹",
+      "cost": 1,
+      "target": "enemy",
+      "range": 1,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "damage",
+          "scope": "targets",
+          "amount": 0,
+          "rounds": 0,
+          "dice": {
+            "sides": 6,
+            "count": 1,
+            "flat": 1
+          }
+        },
+        {
+          "kind": "heal",
+          "scope": "caster",
+          "amount": 2,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "prayerHeal",
+      "name": "祈祷愈合",
+      "cost": 1,
+      "target": "ally",
+      "range": 1,
+      "stage": "both",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "heal",
+          "scope": "targets",
+          "amount": 6,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "blessingVeil",
+      "name": "祈福护幕",
+      "cost": 1,
+      "target": "alliesAtNode",
+      "range": 0,
+      "stage": "both",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "shield",
+          "scope": "targets",
+          "amount": 4,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "quickShot",
+      "name": "迅捷快射",
+      "cost": 1,
+      "target": "enemy",
+      "range": 1,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "damage",
+          "scope": "targets",
+          "amount": 0,
+          "rounds": 0,
+          "dice": {
+            "sides": 6,
+            "count": 1,
+            "flat": 2
+          }
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "nimbleStep",
+      "name": "轻身步",
+      "cost": 1,
+      "target": "selfOnly",
+      "range": 0,
+      "stage": "both",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "shield",
+          "scope": "targets",
+          "amount": 5,
+          "rounds": 0,
+          "dice": null
+        },
+        {
+          "kind": "damageBuff",
+          "scope": "targets",
+          "amount": 2,
+          "rounds": 2,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "scoutMark",
+      "name": "弱点标记",
+      "cost": 1,
+      "target": "alliesAtNode",
+      "range": 0,
+      "stage": "both",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "damageBuff",
+          "scope": "targets",
+          "amount": 2,
+          "rounds": 1,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "shieldBash",
+      "name": "盾击震荡",
+      "cost": 1,
+      "target": "enemy",
+      "range": 0,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "damage",
+          "scope": "targets",
+          "amount": 0,
+          "rounds": 0,
+          "dice": {
+            "sides": 8,
+            "count": 1,
+            "flat": 2
+          }
+        },
+        {
+          "kind": "shield",
+          "scope": "caster",
+          "amount": 6,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "ironBulwark",
+      "name": "钢铁壁垒",
+      "cost": 2,
+      "target": "alliesAtNode",
+      "range": 0,
+      "stage": "both",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "shield",
+          "scope": "targets",
+          "amount": 8,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "steadfastVow",
+      "name": "坚守反击",
+      "cost": 1,
+      "target": "selfOnly",
+      "range": 0,
+      "stage": "both",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "heal",
+          "scope": "targets",
+          "amount": 6,
+          "rounds": 0,
+          "dice": null
+        },
+        {
+          "kind": "damageBuff",
+          "scope": "targets",
+          "amount": 3,
+          "rounds": 2,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "fireball",
+      "name": "烈焰火球",
+      "cost": 2,
+      "target": "enemy",
+      "range": 1,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "damage",
+          "scope": "targets",
+          "amount": 0,
+          "rounds": 0,
+          "dice": {
+            "sides": 6,
+            "count": 2,
+            "flat": 2
+          }
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "frostNova",
+      "name": "冰霜新星",
+      "cost": 2,
+      "target": "enemiesAtNode",
+      "range": 1,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "damage",
+          "scope": "targets",
+          "amount": 0,
+          "rounds": 0,
+          "dice": {
+            "sides": 8,
+            "count": 1,
+            "flat": 2
+          }
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "manaBarrier",
+      "name": "魔力屏障",
+      "cost": 1,
+      "target": "alliesAtNode",
+      "range": 0,
+      "stage": "both",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "shield",
+          "scope": "caster",
+          "amount": 8,
+          "rounds": 0,
+          "dice": null
+        },
+        {
+          "kind": "damageBuff",
+          "scope": "targets",
+          "amount": 2,
+          "rounds": 1,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "sonicNote",
+      "name": "音波箭",
+      "cost": 1,
+      "target": "enemy",
+      "range": 1,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "damage",
+          "scope": "targets",
+          "amount": 0,
+          "rounds": 0,
+          "dice": {
+            "sides": 8,
+            "count": 1,
+            "flat": 1
+          }
+        },
+        {
+          "kind": "shield",
+          "scope": "caster",
+          "amount": 3,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "healingLullaby",
+      "name": "治愈摇篮曲",
+      "cost": 2,
+      "target": "alliesAtNode",
+      "range": 1,
+      "stage": "both",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "heal",
+          "scope": "targets",
+          "amount": 6,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "heroicAnthem",
+      "name": "英雄赞歌",
+      "cost": 1,
+      "target": "alliesAtNode",
+      "range": 1,
+      "stage": "both",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "damageBuff",
+          "scope": "targets",
+          "amount": 3,
+          "rounds": 2,
+          "dice": null
+        },
+        {
+          "kind": "shield",
+          "scope": "targets",
+          "amount": 3,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "judgmentStrike",
+      "name": "审判重击",
+      "cost": 2,
+      "target": "enemy",
+      "range": 0,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "damage",
+          "scope": "targets",
+          "amount": 0,
+          "rounds": 0,
+          "dice": {
+            "sides": 8,
+            "count": 2,
+            "flat": 3
+          }
+        },
+        {
+          "kind": "heal",
+          "scope": "caster",
+          "amount": 5,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "radiantBaptism",
+      "name": "圣光洗礼",
+      "cost": 2,
+      "target": "alliesAtNode",
+      "range": 1,
+      "stage": "both",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "heal",
+          "scope": "targets",
+          "amount": 10,
+          "rounds": 0,
+          "dice": null
+        },
+        {
+          "kind": "shield",
+          "scope": "targets",
+          "amount": 6,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "oathBanner",
+      "name": "誓约战旗",
+      "cost": 1,
+      "target": "alliesAtNode",
+      "range": 1,
+      "stage": "both",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "damageBuff",
+          "scope": "targets",
+          "amount": 3,
+          "rounds": 2,
+          "dice": null
+        },
+        {
+          "kind": "shield",
+          "scope": "targets",
+          "amount": 5,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "piercingArrow",
+      "name": "穿云箭",
+      "cost": 2,
+      "target": "enemy",
+      "range": 1,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "damage",
+          "scope": "targets",
+          "amount": 0,
+          "rounds": 0,
+          "dice": {
+            "sides": 10,
+            "count": 2,
+            "flat": 2
+          }
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "galeBarrage",
+      "name": "疾风连射",
+      "cost": 2,
+      "target": "enemiesAtNode",
+      "range": 1,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "damage",
+          "scope": "targets",
+          "amount": 0,
+          "rounds": 0,
+          "dice": {
+            "sides": 10,
+            "count": 1,
+            "flat": 2
+          }
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "windMomentum",
+      "name": "猎风迅捷",
+      "cost": 1,
+      "target": "alliesAtNode",
+      "range": 1,
+      "stage": "both",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "shield",
+          "scope": "caster",
+          "amount": 6,
+          "rounds": 0,
+          "dice": null
+        },
+        {
+          "kind": "damageBuff",
+          "scope": "targets",
+          "amount": 3,
+          "rounds": 2,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "thornSnare",
+      "name": "荆棘缠绕",
+      "cost": 2,
+      "target": "enemiesAtNode",
+      "range": 1,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "damage",
+          "scope": "targets",
+          "amount": 0,
+          "rounds": 0,
+          "dice": {
+            "sides": 12,
+            "count": 1,
+            "flat": 2
+          }
+        },
+        {
+          "kind": "heal",
+          "scope": "caster",
+          "amount": 4,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "elderBloom",
+      "name": "生命古树",
+      "cost": 2,
+      "target": "alliesAtNode",
+      "range": 1,
+      "stage": "both",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "heal",
+          "scope": "targets",
+          "amount": 12,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "barkAegis",
+      "name": "树皮灵甲",
+      "cost": 2,
+      "target": "alliesAtNode",
+      "range": 1,
+      "stage": "both",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "shield",
+          "scope": "targets",
+          "amount": 10,
+          "rounds": 0,
+          "dice": null
+        },
+        {
+          "kind": "damageBuff",
+          "scope": "targets",
+          "amount": 2,
+          "rounds": 1,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "meteorStarfall",
+      "name": "星辰陨落",
+      "cost": 2,
+      "target": "enemiesAtNode",
+      "range": 1,
+      "stage": "battle",
+      "uses": 1,
+      "effects": [
+        {
+          "kind": "damage",
+          "scope": "targets",
+          "amount": 0,
+          "rounds": 0,
+          "dice": {
+            "sides": 12,
+            "count": 2,
+            "flat": 4
+          }
+        },
+        {
+          "kind": "shield",
+          "scope": "caster",
+          "amount": 6,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "astralDome",
+      "name": "穹顶圣盾",
+      "cost": 2,
+      "target": "alliesAtNode",
+      "range": 1,
+      "stage": "both",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "shield",
+          "scope": "targets",
+          "amount": 14,
+          "rounds": 0,
+          "dice": null
+        },
+        {
+          "kind": "heal",
+          "scope": "targets",
+          "amount": 6,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "arcaneOverdrive",
+      "name": "奥术超载",
+      "cost": 2,
+      "target": "alliesAtNode",
+      "range": 1,
+      "stage": "both",
+      "uses": 1,
+      "effects": [
+        {
+          "kind": "damageBuff",
+          "scope": "targets",
+          "amount": 5,
+          "rounds": 2,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "skybreaker",
+      "name": "天穹断空",
+      "cost": 2,
+      "target": "enemy",
+      "range": 0,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "damage",
+          "scope": "targets",
+          "amount": 0,
+          "rounds": 0,
+          "dice": {
+            "sides": 12,
+            "count": 2,
+            "flat": 6
+          }
+        },
+        {
+          "kind": "heal",
+          "scope": "caster",
+          "amount": 8,
+          "rounds": 0,
+          "dice": null
+        },
+        {
+          "kind": "shield",
+          "scope": "caster",
+          "amount": 8,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "valkyrieGuard",
+      "name": "英灵护佑",
+      "cost": 2,
+      "target": "alliesAtNode",
+      "range": 1,
+      "stage": "both",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "heal",
+          "scope": "targets",
+          "amount": 10,
+          "rounds": 0,
+          "dice": null
+        },
+        {
+          "kind": "shield",
+          "scope": "targets",
+          "amount": 12,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "warlordRoar",
+      "name": "战神怒吼",
+      "cost": 2,
+      "target": "alliesAtNode",
+      "range": 1,
+      "stage": "both",
+      "uses": 1,
+      "effects": [
+        {
+          "kind": "damageBuff",
+          "scope": "targets",
+          "amount": 4,
+          "rounds": 2,
+          "dice": null
+        },
+        {
+          "kind": "shield",
+          "scope": "caster",
+          "amount": 8,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "wildwoodBreeze",
+      "name": "林风祈愿",
+      "cost": 1,
+      "target": "alliesAtNode",
+      "range": 0,
+      "stage": "both",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "heal",
+          "scope": "targets",
+          "amount": 5,
+          "rounds": 0,
+          "dice": null
+        },
+        {
+          "kind": "shield",
+          "scope": "targets",
+          "amount": 3,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "galeVolley",
+      "name": "飓风齐射",
+      "cost": 2,
+      "target": "enemiesAtNode",
+      "range": 1,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "damage",
+          "scope": "targets",
+          "amount": 0,
+          "rounds": 0,
+          "dice": {
+            "sides": 10,
+            "count": 1,
+            "flat": 2
+          }
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "oakBulwark",
+      "name": "大地壁垒",
+      "cost": 2,
+      "target": "alliesAtNode",
+      "range": 1,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "shield",
+          "scope": "targets",
+          "amount": 10,
+          "rounds": 0,
+          "dice": null
+        },
+        {
+          "kind": "heal",
+          "scope": "targets",
+          "amount": 4,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "emberNova",
+      "name": "炽焰陨爆",
+      "cost": 2,
+      "target": "enemiesAtNode",
+      "range": 1,
+      "stage": "battle",
+      "uses": 1,
+      "effects": [
+        {
+          "kind": "damage",
+          "scope": "targets",
+          "amount": 0,
+          "rounds": 0,
+          "dice": {
+            "sides": 8,
+            "count": 2,
+            "flat": 4
+          }
+        },
+        {
+          "kind": "shield",
+          "scope": "caster",
+          "amount": 6,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "seraphAegis",
+      "name": "圣盾天降",
+      "cost": 2,
+      "target": "alliesAtNode",
+      "range": 1,
+      "stage": "battle",
+      "uses": 1,
+      "effects": [
+        {
+          "kind": "heal",
+          "scope": "targets",
+          "amount": 14,
+          "rounds": 0,
+          "dice": null
+        },
+        {
+          "kind": "shield",
+          "scope": "targets",
+          "amount": 14,
+          "rounds": 0,
+          "dice": null
+        },
+        {
+          "kind": "damageBuff",
+          "scope": "targets",
+          "amount": 3,
+          "rounds": 2,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "astralJudgement",
+      "name": "终焉星陨",
+      "cost": 2,
+      "target": "enemiesAtNode",
+      "range": 1,
+      "stage": "battle",
+      "uses": 1,
+      "effects": [
+        {
+          "kind": "damage",
+          "scope": "targets",
+          "amount": 0,
+          "rounds": 0,
+          "dice": {
+            "sides": 12,
+            "count": 2,
+            "flat": 6
+          }
+        },
+        {
+          "kind": "heal",
+          "scope": "caster",
+          "amount": 8,
+          "rounds": 0,
+          "dice": null
+        },
+        {
+          "kind": "shield",
+          "scope": "caster",
+          "amount": 8,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 0,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "sporeCoat",
+      "name": "孢子薄膜",
+      "cost": 1,
+      "target": "selfOnly",
+      "range": 0,
+      "stage": "battle",
+      "uses": 1,
+      "effects": [
+        {
+          "kind": "shield",
+          "scope": "targets",
+          "amount": 3,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 1,
+      "condition": "shieldEmpty",
+      "oncePerTurn": true
+    },
+    {
+      "id": "waspFrenzy",
+      "name": "蜂群振翅",
+      "cost": 1,
+      "target": "selfOnly",
+      "range": 0,
+      "stage": "battle",
+      "uses": 1,
+      "effects": [
+        {
+          "kind": "damageBuff",
+          "scope": "targets",
+          "amount": 2,
+          "rounds": 1,
+          "dice": null
+        }
+      ],
+      "priority": 2,
+      "condition": "always",
+      "oncePerTurn": true
+    },
+    {
+      "id": "vineGuard",
+      "name": "藤蔓缠壁",
+      "cost": 1,
+      "target": "selfOnly",
+      "range": 0,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "shield",
+          "scope": "targets",
+          "amount": 5,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 1,
+      "condition": "shieldEmpty",
+      "oncePerTurn": true
+    },
+    {
+      "id": "shamanMend",
+      "name": "部落愈合",
+      "cost": 1,
+      "target": "ally",
+      "range": 1,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "heal",
+          "scope": "targets",
+          "amount": 6,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 1,
+      "condition": "always",
+      "oncePerTurn": true
+    },
+    {
+      "id": "shamanChant",
+      "name": "战鼓呐喊",
+      "cost": 1,
+      "target": "alliesAtNode",
+      "range": 0,
+      "stage": "battle",
+      "uses": 1,
+      "effects": [
+        {
+          "kind": "damageBuff",
+          "scope": "targets",
+          "amount": 2,
+          "rounds": 1,
+          "dice": null
+        }
+      ],
+      "priority": 2,
+      "condition": "always",
+      "oncePerTurn": true
+    },
+    {
+      "id": "emberBreath",
+      "name": "火星吐息",
+      "cost": 2,
+      "target": "enemiesAtNode",
+      "range": 1,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "damage",
+          "scope": "targets",
+          "amount": 0,
+          "rounds": 0,
+          "dice": {
+            "sides": 8,
+            "count": 1,
+            "flat": 0
+          }
+        }
+      ],
+      "priority": 2,
+      "condition": "twoEnemiesAtNode",
+      "oncePerTurn": false
+    },
+    {
+      "id": "nightPlume",
+      "name": "夜幕羽盾",
+      "cost": 1,
+      "target": "selfOnly",
+      "range": 0,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "shield",
+          "scope": "targets",
+          "amount": 6,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 1,
+      "condition": "shieldEmpty",
+      "oncePerTurn": true
+    },
+    {
+      "id": "runeCleave",
+      "name": "符文重斩",
+      "cost": 2,
+      "target": "enemy",
+      "range": 0,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "damage",
+          "scope": "targets",
+          "amount": 0,
+          "rounds": 0,
+          "dice": {
+            "sides": 10,
+            "count": 1,
+            "flat": 2
+          }
+        }
+      ],
+      "priority": 2,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "armorCharge",
+      "name": "铁壁蓄能",
+      "cost": 1,
+      "target": "selfOnly",
+      "range": 0,
+      "stage": "battle",
+      "uses": 1,
+      "effects": [
+        {
+          "kind": "shield",
+          "scope": "targets",
+          "amount": 8,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 1,
+      "condition": "shieldEmpty",
+      "oncePerTurn": true
+    },
+    {
+      "id": "crystalShell",
+      "name": "晶化护壳",
+      "cost": 1,
+      "target": "selfOnly",
+      "range": 0,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "shield",
+          "scope": "targets",
+          "amount": 10,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 1,
+      "condition": "shieldEmpty",
+      "oncePerTurn": true
+    },
+    {
+      "id": "quakeSlam",
+      "name": "震地冲击",
+      "cost": 2,
+      "target": "enemiesAtNode",
+      "range": 0,
+      "stage": "battle",
+      "uses": 1,
+      "effects": [
+        {
+          "kind": "damage",
+          "scope": "targets",
+          "amount": 0,
+          "rounds": 0,
+          "dice": {
+            "sides": 10,
+            "count": 1,
+            "flat": 0
+          }
+        }
+      ],
+      "priority": 2,
+      "condition": "twoEnemiesAtNode",
+      "oncePerTurn": false
+    },
+    {
+      "id": "frostHowl",
+      "name": "霜狼嗥叫",
+      "cost": 1,
+      "target": "alliesAtNode",
+      "range": 0,
+      "stage": "battle",
+      "uses": 1,
+      "effects": [
+        {
+          "kind": "damageBuff",
+          "scope": "targets",
+          "amount": 3,
+          "rounds": 2,
+          "dice": null
+        }
+      ],
+      "priority": 1,
+      "condition": "always",
+      "oncePerTurn": true
+    },
+    {
+      "id": "frostFang",
+      "name": "冰牙连扑",
+      "cost": 2,
+      "target": "enemy",
+      "range": 0,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "damage",
+          "scope": "targets",
+          "amount": 0,
+          "rounds": 0,
+          "dice": {
+            "sides": 12,
+            "count": 1,
+            "flat": 2
+          }
+        }
+      ],
+      "priority": 2,
+      "condition": "always",
+      "oncePerTurn": false
+    },
+    {
+      "id": "kingRegen",
+      "name": "孢子回春",
+      "cost": 1,
+      "target": "selfOnly",
+      "range": 0,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "heal",
+          "scope": "targets",
+          "amount": 6,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 1,
+      "condition": "healthHalfOrLess",
+      "oncePerTurn": true
+    },
+    {
+      "id": "capSlam",
+      "name": "菌盖震击",
+      "cost": 2,
+      "target": "enemiesAtNode",
+      "range": 0,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "damage",
+          "scope": "targets",
+          "amount": 0,
+          "rounds": 0,
+          "dice": {
+            "sides": 8,
+            "count": 1,
+            "flat": 0
+          }
+        }
+      ],
+      "priority": 2,
+      "condition": "twoEnemiesAtNode",
+      "oncePerTurn": false
+    },
+    {
+      "id": "warlordRally",
+      "name": "战酋号令",
+      "cost": 1,
+      "target": "selfOnly",
+      "range": 0,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "shield",
+          "scope": "targets",
+          "amount": 8,
+          "rounds": 0,
+          "dice": null
+        },
+        {
+          "kind": "damageBuff",
+          "scope": "targets",
+          "amount": 3,
+          "rounds": 2,
+          "dice": null
+        }
+      ],
+      "priority": 1,
+      "condition": "shieldEmpty",
+      "oncePerTurn": true
+    },
+    {
+      "id": "boomBomb",
+      "name": "轰天爆弹",
+      "cost": 2,
+      "target": "enemiesAtNode",
+      "range": 1,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "damage",
+          "scope": "targets",
+          "amount": 0,
+          "rounds": 0,
+          "dice": {
+            "sides": 12,
+            "count": 1,
+            "flat": 2
+          }
+        }
+      ],
+      "priority": 2,
+      "condition": "twoEnemiesAtNode",
+      "oncePerTurn": false
+    },
+    {
+      "id": "heartwoodWall",
+      "name": "树心护壁",
+      "cost": 1,
+      "target": "selfOnly",
+      "range": 0,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "shield",
+          "scope": "targets",
+          "amount": 10,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 1,
+      "condition": "shieldEmpty",
+      "oncePerTurn": true
+    },
+    {
+      "id": "ancientRegen",
+      "name": "古木再生",
+      "cost": 1,
+      "target": "selfOnly",
+      "range": 0,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "heal",
+          "scope": "targets",
+          "amount": 10,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 1,
+      "condition": "healthHalfOrLess",
+      "oncePerTurn": true
+    },
+    {
+      "id": "rootSweep",
+      "name": "根须横扫",
+      "cost": 2,
+      "target": "enemiesAtNode",
+      "range": 0,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "damage",
+          "scope": "targets",
+          "amount": 0,
+          "rounds": 0,
+          "dice": {
+            "sides": 12,
+            "count": 1,
+            "flat": 2
+          }
+        }
+      ],
+      "priority": 2,
+      "condition": "twoEnemiesAtNode",
+      "oncePerTurn": false
+    },
+    {
+      "id": "glacialWard",
+      "name": "寒冰羽壁",
+      "cost": 1,
+      "target": "selfOnly",
+      "range": 0,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "shield",
+          "scope": "targets",
+          "amount": 14,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 1,
+      "condition": "shieldEmpty",
+      "oncePerTurn": true
+    },
+    {
+      "id": "frostRebirth",
+      "name": "冰晶浴火",
+      "cost": 1,
+      "target": "selfOnly",
+      "range": 0,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "heal",
+          "scope": "targets",
+          "amount": 12,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 1,
+      "condition": "healthHalfOrLess",
+      "oncePerTurn": true
+    },
+    {
+      "id": "blizzardBreath",
+      "name": "极寒风暴",
+      "cost": 2,
+      "target": "enemiesAtNode",
+      "range": 1,
+      "stage": "battle",
+      "uses": 1,
+      "effects": [
+        {
+          "kind": "damage",
+          "scope": "targets",
+          "amount": 0,
+          "rounds": 0,
+          "dice": {
+            "sides": 20,
+            "count": 1,
+            "flat": 2
+          }
+        }
+      ],
+      "priority": 2,
+      "condition": "twoEnemiesAtNode",
+      "oncePerTurn": false
+    },
+    {
+      "id": "celestialBastion",
+      "name": "星穹壁垒",
+      "cost": 1,
+      "target": "selfOnly",
+      "range": 0,
+      "stage": "battle",
+      "uses": 2,
+      "effects": [
+        {
+          "kind": "shield",
+          "scope": "targets",
+          "amount": 18,
+          "rounds": 0,
+          "dice": null
+        }
+      ],
+      "priority": 1,
+      "condition": "shieldEmpty",
+      "oncePerTurn": true
+    },
+    {
+      "id": "stellarSurge",
+      "name": "星核充能",
+      "cost": 1,
+      "target": "selfOnly",
+      "range": 0,
+      "stage": "battle",
+      "uses": 1,
+      "effects": [
+        {
+          "kind": "heal",
+          "scope": "targets",
+          "amount": 10,
+          "rounds": 0,
+          "dice": null
+        },
+        {
+          "kind": "damageBuff",
+          "scope": "targets",
+          "amount": 4,
+          "rounds": 2,
+          "dice": null
+        }
+      ],
+      "priority": 1,
+      "condition": "healthHalfOrLess",
+      "oncePerTurn": true
+    },
+    {
+      "id": "eclipseRay",
+      "name": "星蚀吐息",
+      "cost": 2,
+      "target": "enemiesAtNode",
+      "range": 1,
+      "stage": "battle",
+      "uses": 1,
+      "effects": [
+        {
+          "kind": "damage",
+          "scope": "targets",
+          "amount": 0,
+          "rounds": 0,
+          "dice": {
+            "sides": 20,
+            "count": 1,
+            "flat": 4
+          }
+        }
+      ],
+      "priority": 2,
+      "condition": "twoEnemiesAtNode",
+      "oncePerTurn": false
     }
   ],
   "items": [
@@ -1034,6 +2788,1185 @@
       "heal": 0,
       "shield": 0,
       "range": 0
+    },
+    {
+      "id": "oakSlingshot",
+      "name": "橡木弹弓",
+      "kind": "equipment",
+      "slot": "weapon",
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": {
+        "dice": {
+          "sides": 4,
+          "count": 1,
+          "flat": 2
+        },
+        "range": 1
+      },
+      "purchasePrice": 20,
+      "sellPrice": 10,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "woodenStaff",
+      "name": "橡木法杖",
+      "kind": "equipment",
+      "slot": "weapon",
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": {
+        "dice": {
+          "sides": 6,
+          "count": 1,
+          "flat": 0
+        },
+        "range": 1
+      },
+      "purchasePrice": 25,
+      "sellPrice": 12,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "ironDagger",
+      "name": "铁制双匕",
+      "kind": "equipment",
+      "slot": "weapon",
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 1,
+        "range": 0
+      },
+      "attack": {
+        "dice": {
+          "sides": 6,
+          "count": 1,
+          "flat": 1
+        },
+        "range": 0
+      },
+      "purchasePrice": 35,
+      "sellPrice": 18,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "frostWand",
+      "name": "霜晶魔杖",
+      "kind": "equipment",
+      "slot": "weapon",
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": {
+        "dice": {
+          "sides": 8,
+          "count": 1,
+          "flat": 2
+        },
+        "range": 1
+      },
+      "purchasePrice": 80,
+      "sellPrice": 40,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "knightHalberd",
+      "name": "骑士战戟",
+      "kind": "equipment",
+      "slot": "weapon",
+      "attributes": {
+        "maximumHealth": 2,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": {
+        "dice": {
+          "sides": 6,
+          "count": 2,
+          "flat": 1
+        },
+        "range": 0
+      },
+      "purchasePrice": 95,
+      "sellPrice": 48,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "flameAxe",
+      "name": "炎铁巨斧",
+      "kind": "equipment",
+      "slot": "weapon",
+      "attributes": {
+        "maximumHealth": 4,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": {
+        "dice": {
+          "sides": 8,
+          "count": 2,
+          "flat": 2
+        },
+        "range": 0
+      },
+      "purchasePrice": 150,
+      "sellPrice": 75,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "thunderCrossbow",
+      "name": "迅雷手弩",
+      "kind": "equipment",
+      "slot": "weapon",
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": {
+        "dice": {
+          "sides": 8,
+          "count": 2,
+          "flat": 1
+        },
+        "range": 1
+      },
+      "purchasePrice": 160,
+      "sellPrice": 80,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "emeraldScepter",
+      "name": "翡翠长杖",
+      "kind": "equipment",
+      "slot": "weapon",
+      "attributes": {
+        "maximumHealth": 4,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 1,
+        "range": 0
+      },
+      "attack": {
+        "dice": {
+          "sides": 12,
+          "count": 1,
+          "flat": 4
+        },
+        "range": 1
+      },
+      "purchasePrice": 175,
+      "sellPrice": 88,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "shadowTwinblades",
+      "name": "暗影双刃",
+      "kind": "equipment",
+      "slot": "weapon",
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 1,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": {
+        "dice": {
+          "sides": 8,
+          "count": 2,
+          "flat": 3
+        },
+        "range": 0
+      },
+      "purchasePrice": 210,
+      "sellPrice": 105,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "sunbreakerBlade",
+      "name": "破晓圣剑",
+      "kind": "equipment",
+      "slot": "weapon",
+      "attributes": {
+        "maximumHealth": 6,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": {
+        "dice": {
+          "sides": 12,
+          "count": 2,
+          "flat": 3
+        },
+        "range": 0
+      },
+      "purchasePrice": 290,
+      "sellPrice": 145,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "astralGreatbow",
+      "name": "星陨长弓",
+      "kind": "equipment",
+      "slot": "weapon",
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 2,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": {
+        "dice": {
+          "sides": 10,
+          "count": 2,
+          "flat": 4
+        },
+        "range": 1
+      },
+      "purchasePrice": 320,
+      "sellPrice": 160,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "travelerCloak",
+      "name": "旅人布袍",
+      "kind": "equipment",
+      "slot": "armor",
+      "attributes": {
+        "maximumHealth": 2,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 1,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": 20,
+      "sellPrice": 10,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "studdedVest",
+      "name": "铆钉轻甲",
+      "kind": "equipment",
+      "slot": "armor",
+      "attributes": {
+        "maximumHealth": 5,
+        "damage": 1,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": 40,
+      "sellPrice": 20,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "chainmailCoat",
+      "name": "精钢锁子甲",
+      "kind": "equipment",
+      "slot": "armor",
+      "attributes": {
+        "maximumHealth": 10,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": 85,
+      "sellPrice": 42,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "windrunnerGarb",
+      "name": "疾风游侠服",
+      "kind": "equipment",
+      "slot": "armor",
+      "attributes": {
+        "maximumHealth": 6,
+        "damage": 1,
+        "baseAP": 0,
+        "maximumAP": 1,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": 90,
+      "sellPrice": 45,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "mithrilPlate",
+      "name": "秘银板甲",
+      "kind": "equipment",
+      "slot": "armor",
+      "attributes": {
+        "maximumHealth": 14,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": 150,
+      "sellPrice": 75,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "arcaneMantle",
+      "name": "奥术星纹袍",
+      "kind": "equipment",
+      "slot": "armor",
+      "attributes": {
+        "maximumHealth": 10,
+        "damage": 2,
+        "baseAP": 0,
+        "maximumAP": 2,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": 180,
+      "sellPrice": 90,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "titanFortressArmor",
+      "name": "泰坦重堡铠",
+      "kind": "equipment",
+      "slot": "armor",
+      "attributes": {
+        "maximumHealth": 22,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": 270,
+      "sellPrice": 135,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "phoenixFeatherRobe",
+      "name": "炽凰羽衣",
+      "kind": "equipment",
+      "slot": "armor",
+      "attributes": {
+        "maximumHealth": 16,
+        "damage": 3,
+        "baseAP": 1,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": 320,
+      "sellPrice": 160,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "cloverAmulet",
+      "name": "四叶草护符",
+      "kind": "equipment",
+      "slot": "accessory",
+      "attributes": {
+        "maximumHealth": 3,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": 25,
+      "sellPrice": 12,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "woodenWhistle",
+      "name": "林间木哨",
+      "kind": "equipment",
+      "slot": "accessory",
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 1,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": 30,
+      "sellPrice": 15,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "swiftBootsCharm",
+      "name": "轻风鞋扣",
+      "kind": "equipment",
+      "slot": "accessory",
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 2,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": 40,
+      "sellPrice": 20,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "eagleEyeLens",
+      "name": "鹰眼单片镜",
+      "kind": "equipment",
+      "slot": "accessory",
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 1,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 1
+      },
+      "attack": null,
+      "purchasePrice": 85,
+      "sellPrice": 42,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "rubyHeartPendant",
+      "name": "红晶心坠",
+      "kind": "equipment",
+      "slot": "accessory",
+      "attributes": {
+        "maximumHealth": 8,
+        "damage": 2,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": 145,
+      "sellPrice": 72,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "chronoPocketwatch",
+      "name": "时光怀表",
+      "kind": "equipment",
+      "slot": "accessory",
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 1,
+        "maximumAP": 2,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": 185,
+      "sellPrice": 92,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "crownOfValor",
+      "name": "勇者金冠",
+      "kind": "equipment",
+      "slot": "accessory",
+      "attributes": {
+        "maximumHealth": 10,
+        "damage": 4,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": 260,
+      "sellPrice": 130,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "infinityHourglass",
+      "name": "永恒星漏",
+      "kind": "equipment",
+      "slot": "accessory",
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 2,
+        "maximumAP": 2,
+        "range": 1
+      },
+      "attack": null,
+      "purchasePrice": 320,
+      "sellPrice": 160,
+      "setID": null,
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "wildwoodSpear",
+      "name": "林野木枪",
+      "kind": "equipment",
+      "slot": "weapon",
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": {
+        "dice": {
+          "sides": 8,
+          "count": 1,
+          "flat": 0
+        },
+        "range": 0
+      },
+      "purchasePrice": null,
+      "sellPrice": 25,
+      "setID": "wildwood",
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "wildwoodArmor",
+      "name": "林野叶甲",
+      "kind": "equipment",
+      "slot": "armor",
+      "attributes": {
+        "maximumHealth": 5,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": null,
+      "sellPrice": 20,
+      "setID": "wildwood",
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "wildwoodCharm",
+      "name": "林野橡果坠",
+      "kind": "equipment",
+      "slot": "accessory",
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 1,
+        "baseAP": 0,
+        "maximumAP": 1,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": null,
+      "sellPrice": 20,
+      "setID": "wildwood",
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "galeLongbow",
+      "name": "疾风长弓",
+      "kind": "equipment",
+      "slot": "weapon",
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": {
+        "dice": {
+          "sides": 10,
+          "count": 1,
+          "flat": 0
+        },
+        "range": 1
+      },
+      "purchasePrice": null,
+      "sellPrice": 55,
+      "setID": "galeHunter",
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "galeArmor",
+      "name": "疾风轻甲",
+      "kind": "equipment",
+      "slot": "armor",
+      "attributes": {
+        "maximumHealth": 7,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 1,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": null,
+      "sellPrice": 40,
+      "setID": "galeHunter",
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "galeCharm",
+      "name": "疾风羽饰",
+      "kind": "equipment",
+      "slot": "accessory",
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 2,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": null,
+      "sellPrice": 40,
+      "setID": "galeHunter",
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "oakHammer",
+      "name": "橡木战锤",
+      "kind": "equipment",
+      "slot": "weapon",
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": {
+        "dice": {
+          "sides": 10,
+          "count": 1,
+          "flat": 1
+        },
+        "range": 0
+      },
+      "purchasePrice": null,
+      "sellPrice": 55,
+      "setID": "oakBastion",
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "oakArmor",
+      "name": "橡木重甲",
+      "kind": "equipment",
+      "slot": "armor",
+      "attributes": {
+        "maximumHealth": 10,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": null,
+      "sellPrice": 40,
+      "setID": "oakBastion",
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "oakCharm",
+      "name": "橡木护心镜",
+      "kind": "equipment",
+      "slot": "accessory",
+      "attributes": {
+        "maximumHealth": 4,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": null,
+      "sellPrice": 40,
+      "setID": "oakBastion",
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "emberStaff",
+      "name": "秘焰法杖",
+      "kind": "equipment",
+      "slot": "weapon",
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": {
+        "dice": {
+          "sides": 8,
+          "count": 2,
+          "flat": 2
+        },
+        "range": 1
+      },
+      "purchasePrice": null,
+      "sellPrice": 85,
+      "setID": "emberArcana",
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "emberArmor",
+      "name": "秘焰法袍",
+      "kind": "equipment",
+      "slot": "armor",
+      "attributes": {
+        "maximumHealth": 9,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 2,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": null,
+      "sellPrice": 55,
+      "setID": "emberArcana",
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "emberCharm",
+      "name": "秘焰魔戒",
+      "kind": "equipment",
+      "slot": "accessory",
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 3,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": null,
+      "sellPrice": 55,
+      "setID": "emberArcana",
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "aegisLance",
+      "name": "苍穹圣枪",
+      "kind": "equipment",
+      "slot": "weapon",
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": {
+        "dice": {
+          "sides": 12,
+          "count": 2,
+          "flat": 4
+        },
+        "range": 0
+      },
+      "purchasePrice": null,
+      "sellPrice": 135,
+      "setID": "aegisSeraph",
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "aegisArmor",
+      "name": "苍穹光铠",
+      "kind": "equipment",
+      "slot": "armor",
+      "attributes": {
+        "maximumHealth": 18,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": null,
+      "sellPrice": 85,
+      "setID": "aegisSeraph",
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "aegisCharm",
+      "name": "苍穹圣徽",
+      "kind": "equipment",
+      "slot": "accessory",
+      "attributes": {
+        "maximumHealth": 6,
+        "damage": 2,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": null,
+      "sellPrice": 85,
+      "setID": "aegisSeraph",
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "astralCodex",
+      "name": "星辰魔典",
+      "kind": "equipment",
+      "slot": "weapon",
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": {
+        "dice": {
+          "sides": 20,
+          "count": 1,
+          "flat": 4
+        },
+        "range": 1
+      },
+      "purchasePrice": null,
+      "sellPrice": 140,
+      "setID": "astralSovereign",
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "astralArmor",
+      "name": "星辰法衣",
+      "kind": "equipment",
+      "slot": "armor",
+      "attributes": {
+        "maximumHealth": 14,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 2,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": null,
+      "sellPrice": 85,
+      "setID": "astralSovereign",
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "astralCharm",
+      "name": "星辰星环",
+      "kind": "equipment",
+      "slot": "accessory",
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 4,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 1
+      },
+      "attack": null,
+      "purchasePrice": null,
+      "sellPrice": 85,
+      "setID": "astralSovereign",
+      "heal": 0,
+      "shield": 0,
+      "range": 0
+    },
+    {
+      "id": "berryTea",
+      "name": "浆果暖茶",
+      "kind": "consumable",
+      "slot": null,
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": 12,
+      "sellPrice": 6,
+      "setID": null,
+      "heal": 4,
+      "shield": 4,
+      "range": 1
+    },
+    {
+      "id": "ironbarkElixir",
+      "name": "铁皮护盾剂",
+      "kind": "consumable",
+      "slot": null,
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": 28,
+      "sellPrice": 14,
+      "setID": null,
+      "heal": 0,
+      "shield": 14,
+      "range": 1
+    },
+    {
+      "id": "honeySalve",
+      "name": "蜂蜜修复膏",
+      "kind": "consumable",
+      "slot": null,
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": 35,
+      "sellPrice": 17,
+      "setID": null,
+      "heal": 10,
+      "shield": 8,
+      "range": 1
+    },
+    {
+      "id": "superPotion",
+      "name": "特级生命圣药",
+      "kind": "consumable",
+      "slot": null,
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": 40,
+      "sellPrice": 20,
+      "setID": null,
+      "heal": 22,
+      "shield": 0,
+      "range": 1
+    },
+    {
+      "id": "crystalBarrierFlask",
+      "name": "晶壁魔瓶",
+      "kind": "consumable",
+      "slot": null,
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": 45,
+      "sellPrice": 22,
+      "setID": null,
+      "heal": 0,
+      "shield": 22,
+      "range": 1
+    },
+    {
+      "id": "phoenixNectar",
+      "name": "炽凰琼浆",
+      "kind": "consumable",
+      "slot": null,
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": 65,
+      "sellPrice": 32,
+      "setID": null,
+      "heal": 20,
+      "shield": 16,
+      "range": 2
+    },
+    {
+      "id": "starlightElixir",
+      "name": "星辉灵液",
+      "kind": "consumable",
+      "slot": null,
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": 70,
+      "sellPrice": 35,
+      "setID": null,
+      "heal": 32,
+      "shield": 0,
+      "range": 2
+    },
+    {
+      "id": "aegisCrystal",
+      "name": "苍穹圣晶",
+      "kind": "consumable",
+      "slot": null,
+      "attributes": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "attack": null,
+      "purchasePrice": 85,
+      "sellPrice": 42,
+      "setID": null,
+      "heal": 18,
+      "shield": 26,
+      "range": 2
     }
   ],
   "sets": [
@@ -1084,6 +4017,150 @@
         "range": 0
       },
       "skill": "dragonSoulWard"
+    },
+    {
+      "id": "wildwood",
+      "name": "林野旅者",
+      "items": [
+        "wildwoodSpear",
+        "wildwoodArmor",
+        "wildwoodCharm"
+      ],
+      "twoPieces": {
+        "maximumHealth": 3,
+        "damage": 1,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "threePieces": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 1,
+        "range": 0
+      },
+      "skill": "wildwoodBreeze"
+    },
+    {
+      "id": "galeHunter",
+      "name": "疾风猎手",
+      "items": [
+        "galeLongbow",
+        "galeArmor",
+        "galeCharm"
+      ],
+      "twoPieces": {
+        "maximumHealth": 0,
+        "damage": 1,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 1
+      },
+      "threePieces": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 1,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "skill": "galeVolley"
+    },
+    {
+      "id": "oakBastion",
+      "name": "橡木磐石",
+      "items": [
+        "oakHammer",
+        "oakArmor",
+        "oakCharm"
+      ],
+      "twoPieces": {
+        "maximumHealth": 6,
+        "damage": 0,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "threePieces": {
+        "maximumHealth": 2,
+        "damage": 0,
+        "baseAP": 1,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "skill": "oakBulwark"
+    },
+    {
+      "id": "emberArcana",
+      "name": "秘焰苍穹",
+      "items": [
+        "emberStaff",
+        "emberArmor",
+        "emberCharm"
+      ],
+      "twoPieces": {
+        "maximumHealth": 0,
+        "damage": 3,
+        "baseAP": 0,
+        "maximumAP": 1,
+        "range": 0
+      },
+      "threePieces": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 1,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "skill": "emberNova"
+    },
+    {
+      "id": "aegisSeraph",
+      "name": "苍穹圣骑",
+      "items": [
+        "aegisLance",
+        "aegisArmor",
+        "aegisCharm"
+      ],
+      "twoPieces": {
+        "maximumHealth": 10,
+        "damage": 2,
+        "baseAP": 0,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "threePieces": {
+        "maximumHealth": 4,
+        "damage": 0,
+        "baseAP": 1,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "skill": "seraphAegis"
+    },
+    {
+      "id": "astralSovereign",
+      "name": "星辰裁决",
+      "items": [
+        "astralCodex",
+        "astralArmor",
+        "astralCharm"
+      ],
+      "twoPieces": {
+        "maximumHealth": 0,
+        "damage": 4,
+        "baseAP": 0,
+        "maximumAP": 2,
+        "range": 0
+      },
+      "threePieces": {
+        "maximumHealth": 0,
+        "damage": 0,
+        "baseAP": 2,
+        "maximumAP": 0,
+        "range": 0
+      },
+      "skill": "astralJudgement"
     }
   ],
   "monsters": [
@@ -1596,6 +4673,1314 @@
           "coins": 0,
           "count": 1,
           "percent": 8
+        }
+      ]
+    },
+    {
+      "id": "hopShroom",
+      "name": "蹦跳菇灵",
+      "boss": false,
+      "attributes": {
+        "maximumHealth": 10,
+        "damage": 0,
+        "baseAP": 1,
+        "maximumAP": 8,
+        "range": 0
+      },
+      "shield": 0,
+      "attack": {
+        "dice": {
+          "sides": 4,
+          "count": 1,
+          "flat": 1
+        },
+        "range": 0
+      },
+      "strategy": "random",
+      "skills": [
+        "sporeCoat"
+      ],
+      "score": 1,
+      "drops": [
+        {
+          "itemID": null,
+          "coins": 5,
+          "count": 1,
+          "percent": 50
+        },
+        {
+          "itemID": "berryTea",
+          "coins": 0,
+          "count": 1,
+          "percent": 20
+        },
+        {
+          "itemID": "travelerCloak",
+          "coins": 0,
+          "count": 1,
+          "percent": 10
+        },
+        {
+          "itemID": "wildwoodSpear",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        },
+        {
+          "itemID": "wildwoodArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        },
+        {
+          "itemID": "wildwoodCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        }
+      ]
+    },
+    {
+      "id": "acornBandit",
+      "name": "橡果盗贼鼠",
+      "boss": false,
+      "attributes": {
+        "maximumHealth": 9,
+        "damage": 0,
+        "baseAP": 2,
+        "maximumAP": 8,
+        "range": 0
+      },
+      "shield": 0,
+      "attack": {
+        "dice": {
+          "sides": 4,
+          "count": 1,
+          "flat": 0
+        },
+        "range": 1
+      },
+      "strategy": "lowestHealthRatio",
+      "skills": [],
+      "score": 1,
+      "drops": [
+        {
+          "itemID": null,
+          "coins": 6,
+          "count": 1,
+          "percent": 55
+        },
+        {
+          "itemID": "smallPotion",
+          "coins": 0,
+          "count": 1,
+          "percent": 20
+        },
+        {
+          "itemID": "oakSlingshot",
+          "coins": 0,
+          "count": 1,
+          "percent": 12
+        },
+        {
+          "itemID": "wildwoodSpear",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        },
+        {
+          "itemID": "wildwoodArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        },
+        {
+          "itemID": "wildwoodCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        }
+      ]
+    },
+    {
+      "id": "bubbleCrab",
+      "name": "溪畔泡泡蟹",
+      "boss": false,
+      "attributes": {
+        "maximumHealth": 11,
+        "damage": 0,
+        "baseAP": 1,
+        "maximumAP": 8,
+        "range": 0
+      },
+      "shield": 3,
+      "attack": {
+        "dice": {
+          "sides": 4,
+          "count": 1,
+          "flat": 1
+        },
+        "range": 0
+      },
+      "strategy": "nearest",
+      "skills": [],
+      "score": 1,
+      "drops": [
+        {
+          "itemID": null,
+          "coins": 5,
+          "count": 1,
+          "percent": 50
+        },
+        {
+          "itemID": "shieldPotion",
+          "coins": 0,
+          "count": 1,
+          "percent": 18
+        },
+        {
+          "itemID": "cloverAmulet",
+          "coins": 0,
+          "count": 1,
+          "percent": 10
+        },
+        {
+          "itemID": "wildwoodSpear",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        },
+        {
+          "itemID": "wildwoodArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        },
+        {
+          "itemID": "wildwoodCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        }
+      ]
+    },
+    {
+      "id": "stingWasp",
+      "name": "毒刺大黄蜂",
+      "boss": false,
+      "attributes": {
+        "maximumHealth": 14,
+        "damage": 0,
+        "baseAP": 2,
+        "maximumAP": 8,
+        "range": 0
+      },
+      "shield": 0,
+      "attack": {
+        "dice": {
+          "sides": 6,
+          "count": 1,
+          "flat": 1
+        },
+        "range": 1
+      },
+      "strategy": "lowestHealthRatio",
+      "skills": [
+        "waspFrenzy"
+      ],
+      "score": 2,
+      "drops": [
+        {
+          "itemID": null,
+          "coins": 8,
+          "count": 1,
+          "percent": 55
+        },
+        {
+          "itemID": "berryTea",
+          "coins": 0,
+          "count": 1,
+          "percent": 20
+        },
+        {
+          "itemID": "woodenWhistle",
+          "coins": 0,
+          "count": 1,
+          "percent": 10
+        },
+        {
+          "itemID": "galeLongbow",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        },
+        {
+          "itemID": "galeArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        },
+        {
+          "itemID": "galeCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        }
+      ]
+    },
+    {
+      "id": "brambleSprite",
+      "name": "荆棘藤蔓妖",
+      "boss": false,
+      "attributes": {
+        "maximumHealth": 18,
+        "damage": 0,
+        "baseAP": 2,
+        "maximumAP": 8,
+        "range": 0
+      },
+      "shield": 4,
+      "attack": {
+        "dice": {
+          "sides": 6,
+          "count": 1,
+          "flat": 1
+        },
+        "range": 0
+      },
+      "strategy": "nearest",
+      "skills": [
+        "vineGuard"
+      ],
+      "score": 2,
+      "drops": [
+        {
+          "itemID": null,
+          "coins": 8,
+          "count": 1,
+          "percent": 55
+        },
+        {
+          "itemID": "honeySalve",
+          "coins": 0,
+          "count": 1,
+          "percent": 15
+        },
+        {
+          "itemID": "studdedVest",
+          "coins": 0,
+          "count": 1,
+          "percent": 10
+        },
+        {
+          "itemID": "oakHammer",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        },
+        {
+          "itemID": "oakArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        },
+        {
+          "itemID": "oakCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        }
+      ]
+    },
+    {
+      "id": "goblinShaman",
+      "name": "哥布林萨满",
+      "boss": false,
+      "attributes": {
+        "maximumHealth": 15,
+        "damage": 0,
+        "baseAP": 2,
+        "maximumAP": 8,
+        "range": 0
+      },
+      "shield": 0,
+      "attack": {
+        "dice": {
+          "sides": 6,
+          "count": 1,
+          "flat": 0
+        },
+        "range": 1
+      },
+      "strategy": "random",
+      "skills": [
+        "shamanMend",
+        "shamanChant"
+      ],
+      "score": 2,
+      "drops": [
+        {
+          "itemID": null,
+          "coins": 10,
+          "count": 1,
+          "percent": 60
+        },
+        {
+          "itemID": "largePotion",
+          "coins": 0,
+          "count": 1,
+          "percent": 20
+        },
+        {
+          "itemID": "frostWand",
+          "coins": 0,
+          "count": 1,
+          "percent": 10
+        },
+        {
+          "itemID": "galeLongbow",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        },
+        {
+          "itemID": "galeArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        },
+        {
+          "itemID": "galeCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        },
+        {
+          "itemID": "oakHammer",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        },
+        {
+          "itemID": "oakArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        },
+        {
+          "itemID": "oakCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        }
+      ]
+    },
+    {
+      "id": "emberLizard",
+      "name": "灰烬火蜥蜴",
+      "boss": false,
+      "attributes": {
+        "maximumHealth": 22,
+        "damage": 0,
+        "baseAP": 2,
+        "maximumAP": 8,
+        "range": 0
+      },
+      "shield": 0,
+      "attack": {
+        "dice": {
+          "sides": 8,
+          "count": 1,
+          "flat": 1
+        },
+        "range": 1
+      },
+      "strategy": "random",
+      "skills": [
+        "emberBreath"
+      ],
+      "score": 2,
+      "drops": [
+        {
+          "itemID": null,
+          "coins": 12,
+          "count": 1,
+          "percent": 60
+        },
+        {
+          "itemID": "ironbarkElixir",
+          "coins": 0,
+          "count": 1,
+          "percent": 20
+        },
+        {
+          "itemID": "flameAxe",
+          "coins": 0,
+          "count": 1,
+          "percent": 8
+        },
+        {
+          "itemID": "emberStaff",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        },
+        {
+          "itemID": "emberArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        },
+        {
+          "itemID": "emberCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        }
+      ]
+    },
+    {
+      "id": "shadowOwl",
+      "name": "影翼夜枭",
+      "boss": false,
+      "attributes": {
+        "maximumHealth": 20,
+        "damage": 0,
+        "baseAP": 3,
+        "maximumAP": 8,
+        "range": 0
+      },
+      "shield": 0,
+      "attack": {
+        "dice": {
+          "sides": 8,
+          "count": 1,
+          "flat": 2
+        },
+        "range": 1
+      },
+      "strategy": "lowestHealthRatio",
+      "skills": [
+        "nightPlume"
+      ],
+      "score": 2,
+      "drops": [
+        {
+          "itemID": null,
+          "coins": 12,
+          "count": 1,
+          "percent": 60
+        },
+        {
+          "itemID": "honeySalve",
+          "coins": 0,
+          "count": 1,
+          "percent": 20
+        },
+        {
+          "itemID": "eagleEyeLens",
+          "coins": 0,
+          "count": 1,
+          "percent": 10
+        },
+        {
+          "itemID": "starlightBlade",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        },
+        {
+          "itemID": "starlightArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        },
+        {
+          "itemID": "starlightCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        },
+        {
+          "itemID": "galeLongbow",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        },
+        {
+          "itemID": "galeArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        },
+        {
+          "itemID": "galeCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        }
+      ]
+    },
+    {
+      "id": "runeKnight",
+      "name": "符文铠甲兵",
+      "boss": false,
+      "attributes": {
+        "maximumHealth": 28,
+        "damage": 0,
+        "baseAP": 2,
+        "maximumAP": 8,
+        "range": 0
+      },
+      "shield": 8,
+      "attack": {
+        "dice": {
+          "sides": 10,
+          "count": 1,
+          "flat": 0
+        },
+        "range": 0
+      },
+      "strategy": "nearest",
+      "skills": [
+        "runeCleave",
+        "armorCharge"
+      ],
+      "score": 3,
+      "drops": [
+        {
+          "itemID": null,
+          "coins": 14,
+          "count": 1,
+          "percent": 65
+        },
+        {
+          "itemID": "superPotion",
+          "coins": 0,
+          "count": 1,
+          "percent": 18
+        },
+        {
+          "itemID": "mithrilPlate",
+          "coins": 0,
+          "count": 1,
+          "percent": 8
+        },
+        {
+          "itemID": "starlightBlade",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        },
+        {
+          "itemID": "starlightArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        },
+        {
+          "itemID": "starlightCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        },
+        {
+          "itemID": "emberStaff",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        },
+        {
+          "itemID": "emberArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        },
+        {
+          "itemID": "emberCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 2
+        }
+      ]
+    },
+    {
+      "id": "crystalGolem",
+      "name": "晶核魔像",
+      "boss": false,
+      "attributes": {
+        "maximumHealth": 36,
+        "damage": 0,
+        "baseAP": 2,
+        "maximumAP": 8,
+        "range": 0
+      },
+      "shield": 10,
+      "attack": {
+        "dice": {
+          "sides": 10,
+          "count": 1,
+          "flat": 2
+        },
+        "range": 0
+      },
+      "strategy": "nearest",
+      "skills": [
+        "crystalShell",
+        "quakeSlam"
+      ],
+      "score": 3,
+      "drops": [
+        {
+          "itemID": null,
+          "coins": 18,
+          "count": 1,
+          "percent": 75
+        },
+        {
+          "itemID": "crystalBarrierFlask",
+          "coins": 0,
+          "count": 1,
+          "percent": 25
+        },
+        {
+          "itemID": "rubyHeartPendant",
+          "coins": 0,
+          "count": 1,
+          "percent": 10
+        },
+        {
+          "itemID": "starlightBlade",
+          "coins": 0,
+          "count": 1,
+          "percent": 3
+        },
+        {
+          "itemID": "starlightArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 3
+        },
+        {
+          "itemID": "starlightCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 3
+        },
+        {
+          "itemID": "emberStaff",
+          "coins": 0,
+          "count": 1,
+          "percent": 3
+        },
+        {
+          "itemID": "emberArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 3
+        },
+        {
+          "itemID": "emberCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 3
+        },
+        {
+          "itemID": "dragonFangSword",
+          "coins": 0,
+          "count": 1,
+          "percent": 3
+        },
+        {
+          "itemID": "dragonArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 3
+        },
+        {
+          "itemID": "dragonCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 3
+        }
+      ]
+    },
+    {
+      "id": "frostAlphaWolf",
+      "name": "暗霜狼王",
+      "boss": false,
+      "attributes": {
+        "maximumHealth": 32,
+        "damage": 0,
+        "baseAP": 3,
+        "maximumAP": 8,
+        "range": 0
+      },
+      "shield": 0,
+      "attack": {
+        "dice": {
+          "sides": 10,
+          "count": 1,
+          "flat": 2
+        },
+        "range": 0
+      },
+      "strategy": "lowestHealthRatio",
+      "skills": [
+        "frostHowl",
+        "frostFang"
+      ],
+      "score": 3,
+      "drops": [
+        {
+          "itemID": null,
+          "coins": 18,
+          "count": 1,
+          "percent": 75
+        },
+        {
+          "itemID": "superPotion",
+          "coins": 0,
+          "count": 1,
+          "percent": 25
+        },
+        {
+          "itemID": "shadowTwinblades",
+          "coins": 0,
+          "count": 1,
+          "percent": 8
+        },
+        {
+          "itemID": "starlightBlade",
+          "coins": 0,
+          "count": 1,
+          "percent": 3
+        },
+        {
+          "itemID": "starlightArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 3
+        },
+        {
+          "itemID": "starlightCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 3
+        },
+        {
+          "itemID": "aegisLance",
+          "coins": 0,
+          "count": 1,
+          "percent": 3
+        },
+        {
+          "itemID": "aegisArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 3
+        },
+        {
+          "itemID": "aegisCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 3
+        }
+      ]
+    },
+    {
+      "id": "mushroomKing",
+      "name": "巨冠菇王",
+      "boss": true,
+      "attributes": {
+        "maximumHealth": 36,
+        "damage": 0,
+        "baseAP": 2,
+        "maximumAP": 8,
+        "range": 0
+      },
+      "shield": 4,
+      "attack": {
+        "dice": {
+          "sides": 8,
+          "count": 1,
+          "flat": 1
+        },
+        "range": 0
+      },
+      "strategy": "nearest",
+      "skills": [
+        "kingRegen",
+        "capSlam"
+      ],
+      "score": 4,
+      "drops": [
+        {
+          "itemID": null,
+          "coins": 25,
+          "count": 1,
+          "percent": 100
+        },
+        {
+          "itemID": "honeySalve",
+          "coins": 0,
+          "count": 1,
+          "percent": 50
+        },
+        {
+          "itemID": "revivalStone",
+          "coins": 0,
+          "count": 1,
+          "percent": 25
+        },
+        {
+          "itemID": "knightHalberd",
+          "coins": 0,
+          "count": 1,
+          "percent": 20
+        },
+        {
+          "itemID": "wildwoodSpear",
+          "coins": 0,
+          "count": 1,
+          "percent": 10
+        },
+        {
+          "itemID": "wildwoodArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 10
+        },
+        {
+          "itemID": "wildwoodCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 10
+        },
+        {
+          "itemID": "oakHammer",
+          "coins": 0,
+          "count": 1,
+          "percent": 6
+        },
+        {
+          "itemID": "oakArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 6
+        },
+        {
+          "itemID": "oakCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 6
+        }
+      ]
+    },
+    {
+      "id": "goblinWarlord",
+      "name": "哥布林战酋",
+      "boss": true,
+      "attributes": {
+        "maximumHealth": 54,
+        "damage": 0,
+        "baseAP": 3,
+        "maximumAP": 8,
+        "range": 0
+      },
+      "shield": 6,
+      "attack": {
+        "dice": {
+          "sides": 10,
+          "count": 1,
+          "flat": 1
+        },
+        "range": 1
+      },
+      "strategy": "random",
+      "skills": [
+        "warlordRally",
+        "boomBomb"
+      ],
+      "score": 5,
+      "drops": [
+        {
+          "itemID": null,
+          "coins": 35,
+          "count": 1,
+          "percent": 100
+        },
+        {
+          "itemID": "superPotion",
+          "coins": 0,
+          "count": 1,
+          "percent": 50
+        },
+        {
+          "itemID": "revivalStone",
+          "coins": 0,
+          "count": 1,
+          "percent": 30
+        },
+        {
+          "itemID": "thunderCrossbow",
+          "coins": 0,
+          "count": 1,
+          "percent": 18
+        },
+        {
+          "itemID": "galeLongbow",
+          "coins": 0,
+          "count": 1,
+          "percent": 8
+        },
+        {
+          "itemID": "galeArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 8
+        },
+        {
+          "itemID": "galeCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 8
+        },
+        {
+          "itemID": "emberStaff",
+          "coins": 0,
+          "count": 1,
+          "percent": 8
+        },
+        {
+          "itemID": "emberArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 8
+        },
+        {
+          "itemID": "emberCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 8
+        }
+      ]
+    },
+    {
+      "id": "thornTreant",
+      "name": "千年古树精",
+      "boss": true,
+      "attributes": {
+        "maximumHealth": 60,
+        "damage": 0,
+        "baseAP": 3,
+        "maximumAP": 8,
+        "range": 0
+      },
+      "shield": 10,
+      "attack": {
+        "dice": {
+          "sides": 10,
+          "count": 1,
+          "flat": 2
+        },
+        "range": 0
+      },
+      "strategy": "nearest",
+      "skills": [
+        "heartwoodWall",
+        "ancientRegen",
+        "rootSweep"
+      ],
+      "score": 6,
+      "drops": [
+        {
+          "itemID": null,
+          "coins": 40,
+          "count": 1,
+          "percent": 100
+        },
+        {
+          "itemID": "crystalBarrierFlask",
+          "coins": 0,
+          "count": 1,
+          "percent": 50
+        },
+        {
+          "itemID": "revivalStone",
+          "coins": 0,
+          "count": 1,
+          "percent": 30
+        },
+        {
+          "itemID": "emeraldScepter",
+          "coins": 0,
+          "count": 1,
+          "percent": 18
+        },
+        {
+          "itemID": "oakHammer",
+          "coins": 0,
+          "count": 1,
+          "percent": 8
+        },
+        {
+          "itemID": "oakArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 8
+        },
+        {
+          "itemID": "oakCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 8
+        },
+        {
+          "itemID": "starlightBlade",
+          "coins": 0,
+          "count": 1,
+          "percent": 8
+        },
+        {
+          "itemID": "starlightArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 8
+        },
+        {
+          "itemID": "starlightCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 8
+        }
+      ]
+    },
+    {
+      "id": "frostPhoenix",
+      "name": "冰晶霜凰",
+      "boss": true,
+      "attributes": {
+        "maximumHealth": 84,
+        "damage": 0,
+        "baseAP": 3,
+        "maximumAP": 8,
+        "range": 0
+      },
+      "shield": 14,
+      "attack": {
+        "dice": {
+          "sides": 12,
+          "count": 1,
+          "flat": 2
+        },
+        "range": 1
+      },
+      "strategy": "lowestHealthRatio",
+      "skills": [
+        "glacialWard",
+        "frostRebirth",
+        "blizzardBreath"
+      ],
+      "score": 7,
+      "drops": [
+        {
+          "itemID": null,
+          "coins": 50,
+          "count": 1,
+          "percent": 100
+        },
+        {
+          "itemID": "phoenixNectar",
+          "coins": 0,
+          "count": 1,
+          "percent": 50
+        },
+        {
+          "itemID": "revivalStone",
+          "coins": 0,
+          "count": 1,
+          "percent": 40
+        },
+        {
+          "itemID": "sunbreakerBlade",
+          "coins": 0,
+          "count": 1,
+          "percent": 15
+        },
+        {
+          "itemID": "chronoPocketwatch",
+          "coins": 0,
+          "count": 1,
+          "percent": 15
+        },
+        {
+          "itemID": "aegisLance",
+          "coins": 0,
+          "count": 1,
+          "percent": 8
+        },
+        {
+          "itemID": "aegisArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 8
+        },
+        {
+          "itemID": "aegisCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 8
+        },
+        {
+          "itemID": "starlightBlade",
+          "coins": 0,
+          "count": 1,
+          "percent": 6
+        },
+        {
+          "itemID": "starlightArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 6
+        },
+        {
+          "itemID": "starlightCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 6
+        },
+        {
+          "itemID": "emberStaff",
+          "coins": 0,
+          "count": 1,
+          "percent": 6
+        },
+        {
+          "itemID": "emberArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 6
+        },
+        {
+          "itemID": "emberCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 6
+        }
+      ]
+    },
+    {
+      "id": "eclipseBehemoth",
+      "name": "蚀星古巨像",
+      "boss": true,
+      "attributes": {
+        "maximumHealth": 96,
+        "damage": 0,
+        "baseAP": 3,
+        "maximumAP": 8,
+        "range": 0
+      },
+      "shield": 18,
+      "attack": {
+        "dice": {
+          "sides": 8,
+          "count": 2,
+          "flat": 2
+        },
+        "range": 1
+      },
+      "strategy": "nearest",
+      "skills": [
+        "celestialBastion",
+        "stellarSurge",
+        "eclipseRay"
+      ],
+      "score": 8,
+      "drops": [
+        {
+          "itemID": null,
+          "coins": 60,
+          "count": 1,
+          "percent": 100
+        },
+        {
+          "itemID": "aegisCrystal",
+          "coins": 0,
+          "count": 1,
+          "percent": 60
+        },
+        {
+          "itemID": "revivalStone",
+          "coins": 0,
+          "count": 1,
+          "percent": 50
+        },
+        {
+          "itemID": "astralGreatbow",
+          "coins": 0,
+          "count": 1,
+          "percent": 15
+        },
+        {
+          "itemID": "infinityHourglass",
+          "coins": 0,
+          "count": 1,
+          "percent": 15
+        },
+        {
+          "itemID": "astralCodex",
+          "coins": 0,
+          "count": 1,
+          "percent": 10
+        },
+        {
+          "itemID": "astralArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 10
+        },
+        {
+          "itemID": "astralCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 10
+        },
+        {
+          "itemID": "aegisLance",
+          "coins": 0,
+          "count": 1,
+          "percent": 6
+        },
+        {
+          "itemID": "aegisArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 6
+        },
+        {
+          "itemID": "aegisCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 6
+        },
+        {
+          "itemID": "dragonFangSword",
+          "coins": 0,
+          "count": 1,
+          "percent": 6
+        },
+        {
+          "itemID": "dragonArmor",
+          "coins": 0,
+          "count": 1,
+          "percent": 6
+        },
+        {
+          "itemID": "dragonCharm",
+          "coins": 0,
+          "count": 1,
+          "percent": 6
         }
       ]
     }

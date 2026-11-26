@@ -11,7 +11,13 @@ public struct CampSave:Codable {
         guard formatVersion==1,appearances.contains(appearanceID) else { throw GameError("存档版本或衣装不受支持。") }
         try archive.validate()
         let currentCatalog=try GameCatalog.initial()
-        guard archive.catalog == currentCatalog,archive.state.phase == .exploration,archive.state.battle == nil,
+        var legacyCatalog=currentCatalog
+        legacyCatalog.classes=Array(legacyCatalog.classes.prefix(4))
+        legacyCatalog.skills=Array(legacyCatalog.skills.prefix(19))
+        legacyCatalog.items=Array(legacyCatalog.items.prefix(18))
+        legacyCatalog.sets=Array(legacyCatalog.sets.prefix(2))
+        legacyCatalog.monsters=Array(legacyCatalog.monsters.prefix(6))
+        guard (archive.catalog == currentCatalog || archive.catalog == legacyCatalog),archive.state.phase == .exploration,archive.state.battle == nil,
               Set(archive.state.units.keys)==Set(["p1","p2"]),archive.state.units["p1"]?.kind == .player,
               archive.state.units["p2"]?.kind == .player,
               archive.state.units["p1"]?.templateID=="adventurer",archive.state.units["p2"]?.templateID=="ranger",
@@ -50,7 +56,13 @@ public final class CampInventorySession {
     public let equipment:Set<String>
     private let store:CampSaveStore?
     private var staged:TrainingLoadout?
-    public init(store:CampSaveStore?,appearances:[String]=["forester","wayfarer"],equipment:Set<String>=Set(["trainingSword","huntingBow","greatSword","legendaryStaff","leatherArmor","runeArmor","powerBadge","actionRing"])) throws {
+    public static let allSupportedEquipment:Set<String> = {
+        if let catalog=try? GameCatalog.initial() {
+            return Set(catalog.items.filter{$0.kind == .equipment}.map(\.id))
+        }
+        return Set(["trainingSword","huntingBow","greatSword","legendaryStaff","leatherArmor","runeArmor","powerBadge","actionRing"])
+    }()
+    public init(store:CampSaveStore?,appearances:[String]=["forester","wayfarer"],equipment:Set<String>=CampInventorySession.allSupportedEquipment) throws {
         guard let first=appearances.first else { throw GameError("衣装清单为空。") }
         self.store=store;self.appearances=appearances;self.equipment=equipment;appearanceID=first
         var archive:GameArchive?
@@ -127,6 +139,8 @@ public enum CampInventoryProjection {
         if a.maximumHealth != 0 { parts.append("生命上限＋\(a.maximumHealth)") }
         if a.damage != 0 { parts.append("伤害＋\(a.damage)") }
         if a.baseAP != 0 { parts.append("基础行动＋\(a.baseAP)") }
+        if a.maximumAP != 0 { parts.append("行动上限＋\(a.maximumAP)") }
+        if a.range != 0 { parts.append("射程＋\(a.range)") }
         if item.heal>0 { parts.append("恢复\(item.heal)生命") }
         if item.shield>0 { parts.append("护盾至\(item.shield)") }
         if item.kind == .revivalStone { parts.append("同地点复活队友 · 恢复半数生命") }

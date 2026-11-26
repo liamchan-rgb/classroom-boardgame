@@ -55,8 +55,11 @@ public struct AccessoryReadout:Codable,Equatable {
         let item=try catalog.item(id),stats=try GameRules.attributes(unit,catalog:catalog)
         guard item.slot == .accessory else { return nil }
         var parts:[String]=[]
+        if item.attributes.maximumHealth != 0 { parts.append("生命＋\(item.attributes.maximumHealth)") }
         if item.attributes.damage != 0 { parts.append("伤害＋\(item.attributes.damage)") }
         if item.attributes.baseAP != 0 { parts.append("基础行动＋\(item.attributes.baseAP)") }
+        if item.attributes.maximumAP != 0 { parts.append("行动上限＋\(item.attributes.maximumAP)") }
+        if item.attributes.range != 0 { parts.append("射程＋\(item.attributes.range)") }
         let summary=parts.joined(separator:" · ")
         let detail=item.attributes.baseAP>0 ? "回合基础行动 \(stats.baseAP) · 上限 \(stats.maximumAP)\n换装不立即补充行动点" : "普攻与伤害技能生效\n常驻装备属性 · 不占临时增伤"
         return .init(itemID:id,name:item.name,summary:summary,detail:detail,damageBonus:item.attributes.damage,baseAPBonus:item.attributes.baseAP)

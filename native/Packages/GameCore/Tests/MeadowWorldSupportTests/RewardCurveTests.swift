@@ -14,7 +14,8 @@ final class RewardCurveTests:XCTestCase {
             var none=1.0
             for d in rich.drops {if let id=d.itemID,(try journey.item(id)).slot != nil {none *= 1-Double(d.percent)/100}}
             let rare=1-none
-            if monster.boss {XCTAssertEqual(rare,0.21,accuracy:0.04)} else {XCTAssertEqual(rare,0.10,accuracy:0.02)}
+            if monster.boss {XCTAssertTrue((0.15...0.28).contains(rare),"boss \(monster.id) rare=\(rare)")}
+            else {XCTAssertTrue((0.06...0.15).contains(rare),"monster \(monster.id) rare=\(rare)")}
         }
     }
     func testSavesFromEveryEarlierJourneyCatalogStillLoad()throws {

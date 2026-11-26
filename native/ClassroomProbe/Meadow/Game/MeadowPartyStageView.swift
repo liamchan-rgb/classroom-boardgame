@@ -322,7 +322,8 @@ final class MeadowPartyStageView:UIView {
         naturalTwenty=confirmed?.dice.contains { $0.naturalTwenty } ?? false
         intent=value;state=before;startAt=sceneTime;self.impact=onImpact;self.completion=completion;fired=false;focus=nil;meetsShield=(before.units[value.target]?.shield ?? 0)>0
         spawnProjectile(value,before:before)
-        if let procName=MeadowSkillProcedural.procID(for:value.action.rawValue),let proc=MeadowSkillProcedural.info[procName] {
+        let effectKey=value.sourceSkillID ?? value.action.rawValue
+        if let procName=MeadowSkillProcedural.procID(for:effectKey),let proc=MeadowSkillProcedural.info[procName] {
             let templates=before.units.mapValues(\.templateID)
             func target(_ id:String)->MeadowSkillProcedural.Target? {
                 guard let foot=PartyVisual.foot(id) else { return nil }
@@ -391,10 +392,24 @@ final class MeadowPartyStageView:UIView {
         if blocked { name="hitWard" }
         else if intent.enemy {
             // Every species hits in its own way (see `MeadowSkillProcedural.hitEffect`).
-            switch intent.monsterTemplateID ?? "" { case "slime":name="hitSlime";case "wolf":name="hitWolf";case "goblinArcher":name="hitArrowM";case "stoneGuardian":name="hitStone";case "caveTroll":name="hitTroll";case "ruinDragon":name="hitDragon";default:name="hitClaw" }
+            switch intent.monsterTemplateID ?? "" {
+            case "slime","hopShroom","bubbleCrab","stingWasp","brambleSprite","mushroomKing":name="hitSlime"
+            case "wolf","frostAlphaWolf","shadowOwl":name="hitWolf"
+            case "goblinArcher","acornBandit","goblinShaman","goblinWarlord":name="hitArrowM"
+            case "stoneGuardian","runeKnight","crystalGolem":name="hitStone"
+            case "caveTroll","thornTreant":name="hitTroll"
+            case "ruinDragon","emberLizard","frostPhoenix","eclipseBehemoth":name="hitDragon"
+            default:name="hitClaw"
+            }
         }
         else if intent.action == .ambush { name="hitAmbush" }
-        else { switch intent.weaponID ?? "" { case "greatSword":name="hitGreat";case "huntingBow":name="hitBow";case "legendaryStaff":name="hitStaff";default:name="hitBlade" } }
+        else if let w=intent.weaponID {
+            if PartyIntent.heavyWeapons.contains(w) { name="hitGreat" }
+            else if PartyIntent.rangedWeapons.contains(w) { name="hitBow" }
+            else if PartyIntent.magicalWeapons.contains(w) { name="hitStaff" }
+            else { name="hitBlade" }
+        }
+        else { name="hitBlade" }
         spawnProc(name,intent,target:id,hit:hit,foot:foot,templates:templates,power:tier.intensity*(intent.action == .heavyStrike ? 1.2:1),delay:delay)
     }
     /// One procedural effect at a target, aimed along the line from the attacker to it (so sparks, plates and dust all fly the way the blow went).
@@ -407,14 +422,22 @@ final class MeadowPartyStageView:UIView {
     }
     /// Arrows, staff orbs and monster missiles: a procedural flight from the real launch point to the target, timed to the rule's impact.
     private func spawnProjectile(_ value:PartyIntent,before:GameState) {
-        guard MeadowSkillProcedural.procID(for:value.action.rawValue) == nil,let foot=PartyVisual.foot(value.actor) else { return }
+        let effectKey=value.sourceSkillID ?? value.action.rawValue
+        guard MeadowSkillProcedural.procID(for:effectKey) == nil,let foot=PartyVisual.foot(value.actor) else { return }
         let templates=before.units.mapValues(\.templateID)
         let to=PartyVisual.hitPoint(target:value.target,weaponID:value.weaponID,templateID:templates[value.target]),targetFoot=PartyVisual.foot(value.target) ?? to
         let name:String,from:PartyPoint,launch:Double,charge:Double
         if value.enemy {
             guard value.enemyRanged,let spec=MonsterVisualSpec.find(value.monsterTemplateID) else { return }
-            name=spec.id == "ruinDragon" ? "projDragon":"projArcher";launch=0.24;charge=0
-            from=PartyPoint(foot.x+(spec.id == "goblinArcher" ? -82:-143)*spec.scale,foot.y-(spec.id == "goblinArcher" ? 144:149)*spec.scale)
+            let monsterProjectiles:[String:String]=[
+                "ruinDragon":"projDragon","goblinArcher":"projArcher",
+                "acornBandit":"projAcorn","stingWasp":"projVenomSting","goblinShaman":"projShamanOrb",
+                "emberLizard":"projEmberBall","shadowOwl":"projShadowFeather","goblinWarlord":"projBoomBomb",
+                "frostPhoenix":"projFrostShard","eclipseBehemoth":"projEclipseOrb"
+            ]
+            name=monsterProjectiles[spec.id] ?? "projArcher";launch=0.24;charge=0
+            let m=spec.muzzleOffset
+            from=PartyPoint(foot.x+m.x*spec.scale,foot.y+m.y*spec.scale)
         } else if value.ranged {
             let tip=PixelHeroAtlas.enabled ? PixelHeroAtlas.bowTip:BowRig.releaseArrowTip
             name="projBow";launch=BowRig.releaseAge;charge=0
@@ -455,9 +478,10 @@ final class MeadowPartyStageView:UIView {
             let shieldHit=absorbed>0 && id.hasPrefix("p")
             let statusAt=startAt+(intent.action.statusVFXCueAge ?? intent.action.impact)
             let delayStatus=after.isAlive && (heal>0 || gain>0) && statusAt>sceneTime+0.0001
-            let showsBesideOwner=intent.action.isRune || intent.action == .dragonFlame || intent.action == .starlightPulse || intent.action.isNodeSupport
+            let showsBesideOwner=intent.action.isRune || intent.action.isNodeAttack || intent.action.isNodeSupport
             let registered=PartyVisual.hitPoint(target:id,shielded:shieldHit,weaponID:intent.weaponID,templateID:before.templateID)
-            let point=["greatSword","legendaryStaff"].contains(intent.weaponID ?? "") && id.hasPrefix("m") ? CGPoint(x:registered.x,y:registered.y):CGPoint(x:foot.x+(shieldHit ? (5+240*0.41)*PartyVisual.heroScale*PartyVisual.facing(id):(id.hasPrefix("m") ? -80:0)),y:foot.y-(id.hasPrefix("p") ? 65:72))
+            let isLargeWeapon=intent.weaponID.map { PartyIntent.heavyWeapons.contains($0) || PartyIntent.magicalWeapons.contains($0) } == true
+            let point=isLargeWeapon && id.hasPrefix("m") ? CGPoint(x:registered.x,y:registered.y):CGPoint(x:foot.x+(shieldHit ? (5+240*0.41)*PartyVisual.heroScale*PartyVisual.facing(id):(id.hasPrefix("m") ? -80:0)),y:foot.y-(id.hasPrefix("p") ? 65:72))
             if delayStatus {
                 statusSnapshots[id]=(before.health,before.shield)
                 pendingStatusCues.append(.init(unitID:id,heal:heal,shieldGain:gain,at:statusAt,point:point,supportUnit:showsBesideOwner))
@@ -481,7 +505,7 @@ final class MeadowPartyStageView:UIView {
                 if popsHere { hitFeel[id]=MeadowPartyHitEvent(at:sceneTime,tier:hitTier,direction:1,point:CGPoint(x:hit.x,y:hit.y),footX:CGFloat(foot.x),floorY:CGFloat(foot.y)) }
                 // Several targets: their numbers follow one another by a beat instead of all appearing on the same frame.
                 messages.append(.init(text:damage>0 ? "−\(damage)":"BLOCK",point:CGPoint(x:hit.x,y:hit.y),at:sceneTime+0.07*Double(numberOrder),color:damage>0 ? .white:.systemCyan,atImpact:true,hitTier:popsHere ? hitTier:nil,kind:damage>0 ? .damage:.block,rank:hitTier.rawValue,follow:id));numberOrder += 1
-                if !rolledTwenty && MeadowSkillProcedural.procID(for:intent.action.rawValue) == nil { spawnBlow(intent,target:id,hit:hit,foot:foot,templates:receipt.before.units.mapValues(\.templateID),tier:hitTier,blocked:damage == 0 && absorbed>0,delay:0.07*Double(max(0,numberOrder-1))) }
+                if !rolledTwenty && MeadowSkillProcedural.procID(for:intent.sourceSkillID ?? intent.action.rawValue) == nil { spawnBlow(intent,target:id,hit:hit,foot:foot,templates:receipt.before.units.mapValues(\.templateID),tier:hitTier,blocked:damage == 0 && absorbed>0,delay:0.07*Double(max(0,numberOrder-1))) }
             }
             if absorbed>0 {
                 contact[id]=sceneTime
@@ -489,7 +513,7 @@ final class MeadowPartyStageView:UIView {
                 if after.shield==0 {
                     broken[id]=sceneTime
                     spawnProc("shieldBreak",intent,target:id,hit:registered,foot:foot,templates:receipt.before.units.mapValues(\.templateID),power:1.0+Double(min(absorbed,12))/12.0*0.5,delay:0)
-                    if MeadowSkillProcedural.procID(for:intent.action.rawValue) == nil { kickFeel=(sceneTime,.medium,intent.enemy ? -1:1) }
+                    if MeadowSkillProcedural.procID(for:intent.sourceSkillID ?? intent.action.rawValue) == nil { kickFeel=(sceneTime,.medium,intent.enemy ? -1:1) }
                 }
             }
             if before.isAlive && !after.isAlive && after.kind == .monster {
@@ -500,8 +524,7 @@ final class MeadowPartyStageView:UIView {
                     let scale=MonsterVisualSpec.find(before.templateID)?.scale ?? PartyVisual.enemyScale
                     loot.drop(drops.map { (item:$0.detail == "coins" ? nil:$0.detail,count:$0.amount) },foot:foot,height:110*scale,receiver:drops.first?.actor ?? intent.actor,at:sceneTime+0.35,catalog:catalog)
                 }
-                let deathName:String
-                switch before.templateID { case "slime":deathName="deathSlime";case "wolf":deathName="deathWolf";case "goblinArcher":deathName="deathGoblin";case "stoneGuardian":deathName="deathStone";case "caveTroll":deathName="deathTroll";case "ruinDragon":deathName="deathDragon";default:deathName="deathBurst" }
+                let deathName=Self.deathEffectName(for:before.templateID)
                 spawnProc(deathName,intent,target:id,hit:registered,foot:foot,templates:receipt.before.units.mapValues(\.templateID),power:1.0,delay:0)
             }
             if !before.isAlive && after.isAlive && after.kind == .player {
@@ -516,7 +539,7 @@ final class MeadowPartyStageView:UIView {
         if strongestHit>0 {
             let tier=MeadowBattleHitTier.classify(damage:strongestHit,killed:killedAny)
             MeadowBattleHaptics.hit(tier,killed:killedAny)
-            if let procName=MeadowSkillProcedural.procID(for:intent.action.rawValue) {
+            if let procName=MeadowSkillProcedural.procID(for:intent.sourceSkillID ?? intent.action.rawValue) {
                 // A procedural skill has its own lens work; the real damage decides how hard it shakes after the release.
                 for i in procVFX.indices where procVFX[i].casterID == intent.actor && procVFX[i].skill == procName { procVFX[i].power=tier.intensity*(killedAny ? 1.12:1) }
             } else { kickFeel=(sceneTime,tier,intent.enemy ? -1:1) }
@@ -1402,11 +1425,20 @@ extension MeadowPartyStageView {
         labPlay("shieldBreak",actor:attacker,targets:[id],power:1.2)
         kickFeel=(sceneTime,.medium,1)
     }
+    private static func deathEffectName(for template:String)->String {
+        switch template {
+        case "slime","hopShroom","bubbleCrab","stingWasp","brambleSprite","mushroomKing":return "deathSlime"
+        case "wolf","frostAlphaWolf","shadowOwl":return "deathWolf"
+        case "goblinArcher","acornBandit","goblinShaman","goblinWarlord":return "deathGoblin"
+        case "stoneGuardian","runeKnight","crystalGolem":return "deathStone"
+        case "caveTroll","thornTreant":return "deathTroll"
+        case "ruinDragon","emberLizard","frostPhoenix","eclipseBehemoth":return "deathDragon"
+        default:return "deathBurst"
+        }
+    }
     func labKill(_ id:String,from attacker:String) {
         guard let template=state?.units[id]?.templateID else { return }
-        let name:String
-        switch template { case "slime":name="deathSlime";case "wolf":name="deathWolf";case "goblinArcher":name="deathGoblin";case "stoneGuardian":name="deathStone";case "caveTroll":name="deathTroll";case "ruinDragon":name="deathDragon";default:name="deathBurst" }
-        labPlay(name,actor:attacker,targets:[id],power:1.0)
+        labPlay(Self.deathEffectName(for:template),actor:attacker,targets:[id],power:1.0)
         state?.units[id]?.health=0;deaths[id]=sceneTime
     }
     func labDown(_ id:String,from attacker:String) {

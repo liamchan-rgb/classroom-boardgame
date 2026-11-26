@@ -5,7 +5,7 @@ final class MonsterVisualTests:XCTestCase {
     func testSpeciesRegistryIsSeparateFromPersistentIDsAndLegacyDeer() throws {
         let catalog=try GameCatalog.initial()
         XCTAssertEqual(Set(MonsterVisualSpec.ids),Set(catalog.monsters.map(\.id)))
-        XCTAssertEqual(Set(MonsterVisualSpec.ids.compactMap{MonsterVisualSpec.find($0)?.asset}).count,6)
+        XCTAssertEqual(Set(MonsterVisualSpec.ids.compactMap{MonsterVisualSpec.find($0)?.asset}).count,22)
         XCTAssertEqual(MonsterVisualSpec.find("stoneGuardian")!.shieldCapacity(catalog:catalog),6);XCTAssertEqual(MonsterVisualSpec.find("ruinDragon")!.shieldCapacity(catalog:catalog),10)
         XCTAssertNil(MonsterVisualSpec.find("meadowStag"));XCTAssertNil(MonsterVisualSpec.find("m-7-2"))
         XCTAssertGreaterThan(MonsterVisualSpec.find("caveTroll")!.scale,MonsterVisualSpec.find("wolf")!.scale)

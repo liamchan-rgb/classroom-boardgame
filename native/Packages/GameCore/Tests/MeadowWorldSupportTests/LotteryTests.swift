@@ -58,8 +58,11 @@ final class LotteryTests:XCTestCase {
     func testPoorOrMovingOrBadTierIsRejectedWithoutChange()throws {
         let s=try session();var save=s.snapshot;save.archive.state.units["p2"]!.coins=10
         let poor=try MeadowCampaignSession(save:save),before=poor.snapshot
-        XCTAssertThrowsError(try poor.spinLottery(actor:"p2",tier:0));XCTAssertThrowsError(try poor.spinLottery(actor:"p1",tier:3))
+        XCTAssertThrowsError(try poor.spinLottery(actor:"p2",tier:0));XCTAssertThrowsError(try poor.spinLottery(actor:"p1",tier:4))
         XCTAssertEqual(poor.snapshot,before)
+        // 4th tier (星穹, 280 coins) succeeds when coins are sufficient.
+        let r=try poor.spinLottery(actor:"p1",tier:3)
+        XCTAssertEqual(r.after.units["p1"]!.coins,5000-280)
     }
     func testManySpinsCanYieldSetPieces()throws {
         let s=try session();var sets=0

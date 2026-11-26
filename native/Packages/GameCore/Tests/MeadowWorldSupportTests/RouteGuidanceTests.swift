@@ -75,7 +75,11 @@ final class RouteGuidanceTests:XCTestCase {
         var save=s.snapshot
         save.archive.state.map.nodes=save.archive.state.map.nodes.map{var n=$0;if n.id==cache.nodeID{n.rewardCompleted=true};return n}
         let encounter=try XCTUnwrap(options.first{$0.kind=="encounter"})
-        for (id,u) in save.archive.state.units where u.kind == .monster && u.nodeID==encounter.nodeID{save.archive.state.units[id]?.health=0}
+        for (id,u) in save.archive.state.units where u.kind == .monster && u.nodeID==encounter.nodeID {
+            save.archive.state.units[id]?.health=0
+            save.archive.state.units[id]?.shield=0
+            save.archive.state.units[id]?.damageBuff=nil
+        }
         let restored=try MeadowCampaignSession(save:save),actual=restored.snapshot
         XCTAssertFalse(restored.routeOptions().contains{$0.nodeID==cache.nodeID || $0.nodeID==encounter.nodeID})
         XCTAssertEqual(restored.snapshot,actual)

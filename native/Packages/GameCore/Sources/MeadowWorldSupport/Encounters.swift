@@ -58,22 +58,44 @@ public enum MeadowEncounterPlanner {
             let rank=mine.firstIndex(where:{$0.id==node.id}) ?? 0
             let count=camps.count>1 ? mine.count:combats.count
             let band=rank==0 ? "opening":(rank*2<count ? "middle":"deep")
+            let isApex=band=="deep" && ((layout.configuration.total>=14 && rank==count-1) || (count>=5 && rank==count-1))
             let choices:[[String]]
             switch band {
-            case "opening": choices=[["slime"]]
-            case "middle": choices=[["wolf"],["goblinArcher"],["slime","wolf"],["slime","goblinArcher"]]
-            default: choices=[["stoneGuardian"],["wolf","goblinArcher"],["stoneGuardian","slime"],["slime","wolf","goblinArcher"]]
+            case "opening":
+                choices=[["slime"],["hopShroom"],["acornBandit"],["bubbleCrab"]]
+            case "middle":
+                choices=[["wolf"],["goblinArcher"],["stingWasp"],["brambleSprite"],
+                         ["slime","goblinArcher"],["hopShroom","acornBandit"],["bubbleCrab","stingWasp"],["wolf","goblinShaman"]]
+            default:
+                if isApex {
+                    choices=[["crystalGolem"],["frostAlphaWolf","wolf"],["runeKnight","shadowOwl"],["crystalGolem","goblinShaman"]]
+                } else {
+                    choices=[["stoneGuardian"],["runeKnight"],["emberLizard"],
+                             ["stoneGuardian","goblinShaman"],["brambleSprite","shadowOwl"],["emberLizard","wolf"],["bubbleCrab","goblinArcher","goblinShaman"]]
+                }
             }
             result.append(.init(nodeID:node.id,band:band,distance:distances[node.id] ?? 0,
                                 templates:choices[Int(sample(seed:layout.configuration.seed,node:node.id)%UInt64(choices.count))]))
         }
         for (rank,node) in bosses.enumerated() {
-            // A short single-boss expedition should not open against the full
-            // dragon's high group damage. Explicit boss-rush configurations keep
-            // their final dragon; monster stats, skills and dice remain original.
-            let readyForDragon=combats.count>=4 && layout.configuration.reward>=2
-            let dragon=bosses.count==1 ? readyForDragon && sample(seed:layout.configuration.seed,node:node.id)&1==1:rank==bosses.count-1
-            result.append(.init(nodeID:node.id,band:"boss",distance:distances[node.id] ?? 0,templates:[dragon ? "ruinDragon":"caveTroll"]))
+            // A short single-boss expedition stays in the lightweight boss tier
+            // so students never open directly against endgame group damage.
+            let readyForHeavyBoss=combats.count>=4 && layout.configuration.reward>=2
+            let total=layout.configuration.total
+            let pool:[String]
+            if !readyForHeavyBoss {
+                pool=bosses.count==1 ? ["caveTroll","mushroomKing"]:(rank==bosses.count-1 ? ["ruinDragon","frostPhoenix"]:["mushroomKing","caveTroll"])
+            } else if bosses.count==1 {
+                if total>=18 { pool=["frostPhoenix","eclipseBehemoth"] }
+                else if total>=14 { pool=["thornTreant","ruinDragon","frostPhoenix"] }
+                else { pool=["caveTroll","goblinWarlord","thornTreant","ruinDragon"] }
+            } else if rank==bosses.count-1 {
+                pool=(total>=18 || bosses.count>=3) ? ["ruinDragon","frostPhoenix","eclipseBehemoth"]:["ruinDragon","frostPhoenix"]
+            } else {
+                pool=["mushroomKing","caveTroll","goblinWarlord","thornTreant"]
+            }
+            let picked=pool[Int(sample(seed:layout.configuration.seed,node:node.id)%UInt64(pool.count))]
+            result.append(.init(nodeID:node.id,band:"boss",distance:distances[node.id] ?? 0,templates:[picked]))
         }
         return result.sorted{$0.nodeID<$1.nodeID}
     }

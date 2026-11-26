@@ -21,10 +21,9 @@ final class MeadowMapSettingsViewController: UIViewController {
     private let preview = MeadowMapThumbnail()
     private let startCampaignButton=UIButton(type:.system)
 
-    private let campaignClass=UISegmentedControl(items:["冒险者","游侠","魔剑士","龙骑士"])
-    private let companionClass=UISegmentedControl(items:["冒险者","游侠","魔剑士","龙骑士"])
+    private var selectedClasses:[String]=["spellblade","ranger","adventurer","guardian","elementalist","acolyte"]
+    private let classButtons=(0..<6).map{_ in UIButton(type:.system)}
     private let classSummaries=(0..<6).map{_ in UILabel()}
-    private let extraClasses=(0..<4).map{_ in UISegmentedControl(items:["冒险者","游侠","魔剑士","龙骑士"])}
     private let studentCount=UIStepper()
     /// Team camps on the map: each team starts at its own camp; teams that meet can fight a PvP duel once.
     private let teamCount=UISegmentedControl(items:["1队","2队","3队"])
@@ -39,7 +38,6 @@ final class MeadowMapSettingsViewController: UIViewController {
     private let rosterButton=UIButton(type:.system)
     private var rosterName:String?
     static let rosterStore=ClassRosterStore(url:FileManager.default.urls(for:.applicationSupportDirectory,in:.userDomainMask)[0].appendingPathComponent("ClassroomMeadow/classes-v1.json"))
-    private var classControls:[UISegmentedControl] {[campaignClass,companionClass]+extraClasses}
     private var result: GeneratedMeadowMap?
     private var revision = 0
     private let gold = MeadowPreviewPalette.gold
@@ -140,14 +138,16 @@ final class MeadowMapSettingsViewController: UIViewController {
         studentCountLabel.textColor=MeadowPreviewPalette.ink;studentCountLabel.font = .boldSystemFont(ofSize:16)
         let countRow=UIStackView(arrangedSubviews:[rosterButton,UIView(),studentCountLabel,studentCount]);countRow.alignment = .center;countRow.spacing=10
         partyCard.addArrangedSubview(countRow)
-        for (i,selector) in classControls.enumerated() {
+        for (i,button) in classButtons.enumerated() {
             let number=label("\(i+1)",16,.heavy,.white);number.textAlignment = .center;number.backgroundColor=MeadowPreviewPalette.primary
             number.layer.cornerRadius=13;number.clipsToBounds=true
             number.widthAnchor.constraint(equalToConstant:26).isActive=true;number.heightAnchor.constraint(equalToConstant:26).isActive=true
-            selector.accessibilityLabel="P\(i+1)职业"
-            selector.selectedSegmentIndex=i==0 ? 2:1
-            styleSegments(selector,size:14)
-            selector.addTarget(self,action:#selector(refreshPartySummary),for:.valueChanged)
+            var cfg=UIButton.Configuration.tinted();cfg.baseForegroundColor=MeadowPreviewPalette.ink;cfg.baseBackgroundColor=MeadowPreviewPalette.primary.withAlphaComponent(0.16)
+            cfg.cornerStyle = .medium;cfg.imagePadding=6;cfg.indicator = .popup
+            cfg.contentInsets=NSDirectionalEdgeInsets(top:6,leading:10,bottom:6,trailing:10)
+            button.configuration=cfg;button.showsMenuAsPrimaryAction=true;button.accessibilityLabel="P\(i+1)职业"
+            button.setContentHuggingPriority(.defaultLow,for:.horizontal)
+            button.menu=UIMenu(children:[UIDeferredMenuElement.uncached{[weak self] done in done(self?.classMenuItems(for:i) ?? [])}])
             let summary=classSummaries[i];summary.numberOfLines=0
             let name=UITextField();name.placeholder="姓名";name.borderStyle = .roundedRect;name.textColor = MeadowPreviewPalette.ink;name.backgroundColor=MeadowPreviewPalette.glass(.medium);studentNames.append(name)
             name.widthAnchor.constraint(equalToConstant:110).isActive=true
@@ -178,7 +178,7 @@ final class MeadowMapSettingsViewController: UIViewController {
             dice.setContentCompressionResistancePriority(.required,for:.horizontal);dice.widthAnchor.constraint(greaterThanOrEqualToConstant:86).isActive=true
             let team=teamPickers[i];team.selectedSegmentIndex=0;styleSegments(team,size:13);team.accessibilityLabel="P\(i+1)队伍"
             team.widthAnchor.constraint(equalToConstant:150).isActive=true
-            let line=UIStackView(arrangedSubviews:[number,name,dice,selector,team]);line.spacing=8;line.alignment = .center
+            let line=UIStackView(arrangedSubviews:[number,name,dice,button,team]);line.spacing=8;line.alignment = .center
             line.heightAnchor.constraint(greaterThanOrEqualToConstant:40).isActive=true
             classRows.append(line);partyCard.addArrangedSubview(line)
         }
@@ -258,9 +258,34 @@ final class MeadowMapSettingsViewController: UIViewController {
         guard sizes.indices.contains(sizePicker.selectedSegmentIndex) else{advanced.isHidden=false;refreshToggles();return}
         inputs[0].text=String(sizes[sizePicker.selectedSegmentIndex]);suggested()
     }
+    private static func classBadge(_ id:String,side:CGFloat=22)->UIImage? {
+        let cap=id.prefix(1).uppercased()+id.dropFirst()
+        guard let image=UIImage(named:"ClassBadge"+cap) else{return nil}
+        let size=CGSize(width:side,height:side)
+        return UIGraphicsImageRenderer(size:size).image{r in
+            r.cgContext.interpolationQuality = .none
+            image.draw(in:CGRect(origin:.zero,size:size))
+        }.withRenderingMode(.alwaysOriginal)
+    }
+    private func classMenuItems(for row:Int)->[UIMenuElement] {
+        let catalog=try? MeadowCampaignSession.catalog()
+        let current=selectedClasses[row]
+        return MeadowPartyConfiguration.classTiers.map{tier in
+            UIMenu(title:tier.title,children:tier.ids.map{id in
+                let def=try? catalog?.playerClass(id)
+                let name=def?.name ?? id
+                let skills=(def?.skills ?? []).compactMap{try? catalog?.skill($0).name}.joined(separator:" / ")
+                let sub=def.map{"HP \($0.attributes.maximumHealth) · AP \($0.attributes.baseAP)/\($0.attributes.maximumAP) · \(skills)"} ?? ""
+                return UIAction(title:name,subtitle:sub,image:Self.classBadge(id,side:24),state:current==id ? .on:.off){[weak self] _ in
+                    guard let self else{return}
+                    self.selectedClasses[row]=id
+                    self.refreshPartySummary()
+                }
+            })
+        }
+    }
     private func showClassGuide() {
-        let text=(try? MeadowPartyConfiguration.classIDs.compactMap{id in try MeadowPartyConfiguration.summary(for:id,catalog:MeadowCampaignSession.catalog())}.joined(separator:"\n\n")) ?? ""
-        let alert=UIAlertController(title:"职业说明",message:text,preferredStyle:.alert);alert.addAction(UIAlertAction(title:"好",style:.default));present(alert,animated:true)
+        present(MeadowClassGuideController(),animated:true)
     }
     private let quizLabel=UILabel()
     /// The app's question bank (top bar "题库"), given to the new trip.
@@ -407,7 +432,7 @@ final class MeadowMapSettingsViewController: UIViewController {
         for (i,student) in roster.students.prefix(count).enumerated() {
             studentNames[i].text=student.name
             profileLooks["p\(i+1)"]=student.appearance
-            classControls[i].selectedSegmentIndex=ids.firstIndex(of:student.classID) ?? 1
+            selectedClasses[i]=ids.contains(student.classID) ? student.classID:"ranger"
             teamPickers[i].selectedSegmentIndex=student.team;teamPickers[i].tag=1
             profileButtons[i].setTitle("读取人物档案",for:.normal)
             showFace(i)
@@ -416,10 +441,10 @@ final class MeadowMapSettingsViewController: UIViewController {
         if result != nil {status.text="已载入班级“\(roster.name)”（\(count) 人）"}
     }
     private func currentRoster(named name:String)->ClassRoster {
-        let ids=MeadowPartyConfiguration.classIDs,teams=teamCount.selectedSegmentIndex+1
+        let teams=teamCount.selectedSegmentIndex+1
         return ClassRoster(name:name,students:(0..<Int(studentCount.value)).map{i in
             ClassRoster.Student(name:studentNames[i].text ?? "",appearance:profileLooks["p\(i+1)"],
-                                classID:ids[max(0,classControls[i].selectedSegmentIndex)],team:teams<2 ? 0:max(0,teamPickers[i].selectedSegmentIndex))
+                                classID:selectedClasses[i],team:teams<2 ? 0:max(0,teamPickers[i].selectedSegmentIndex))
         })
     }
     private func askToSaveRoster() {
@@ -453,17 +478,20 @@ final class MeadowMapSettingsViewController: UIViewController {
         return MeadowCampaignStore(url:base.appendingPathComponent("ClassroomMeadow/campaign-v1.json"))
     }
     private var partyConfiguration:MeadowPartyConfiguration {
-        let ids=MeadowPartyConfiguration.classIDs
-        func selected(_ control:UISegmentedControl,_ fallback:String)->String {
-            ids.indices.contains(control.selectedSegmentIndex) ? ids[control.selectedSegmentIndex]:fallback
-        }
-        return .init(playerClassID:selected(campaignClass,"spellblade"),companionClassID:selected(companionClass,"ranger"))
+        .init(playerClassID:selectedClasses[0],companionClassID:selectedClasses[1])
     }
     @objc private func refreshPartySummary() {
         do {
-            let catalog=try MeadowCampaignSession.catalog(),config=partyConfiguration
+            let catalog=try MeadowCampaignSession.catalog()
             studentCountLabel.text="\(Int(studentCount.value)) 人"
-            for (i,control) in classControls.enumerated(){classRows[i].isHidden=i>=Int(studentCount.value);classSummaries[i].text=try MeadowPartyConfiguration.summary(for:MeadowPartyConfiguration.classIDs[max(0,control.selectedSegmentIndex)],catalog:catalog)}
+            for (i,button) in classButtons.enumerated() {
+                classRows[i].isHidden=i>=Int(studentCount.value)
+                let id=selectedClasses[i]
+                let def=try catalog.playerClass(id)
+                button.configuration?.title=def.name
+                button.configuration?.image=Self.classBadge(id,side:22)
+                classSummaries[i].text=try MeadowPartyConfiguration.summary(for:id,catalog:catalog)
+            }
             // Team pickers: only with several teams, and only the teams that exist; new rows default to round-robin.
             let teams=teamCount.selectedSegmentIndex+1
             for (i,picker) in teamPickers.enumerated() {
@@ -486,11 +514,11 @@ final class MeadowMapSettingsViewController: UIViewController {
                 var units:[String:ClassroomGameCore.GameUnit]?,appearance="forester"
                 if let bytes=try campStore.read() {
                     let save=try JSONDecoder().decode(CampSave.self,from:bytes)
-                    try save.validate(appearances:["forester","wayfarer"],equipment:Set(["trainingSword","huntingBow","greatSword","legendaryStaff","leatherArmor","runeArmor","powerBadge","actionRing"]))
+                    try save.validate(appearances:["forester","wayfarer"],equipment:CampInventorySession.allSupportedEquipment)
                     units=save.archive.state.units;appearance=save.appearanceID
                 }
                 try store.preserveCompletedCampaign()
-                let session=try MeadowCampaignSession.new(layout:result,appearanceID:appearance,playerClassID:config.playerClassID,companionClassID:config.companionClassID,studentClasses:Array(self.classControls.prefix(Int(self.studentCount.value))).map{MeadowPartyConfiguration.classIDs[max(0,$0.selectedSegmentIndex)]},studentNames:self.studentNames.prefix(Int(self.studentCount.value)).map{$0.text ?? ""},playerAppearances:self.profileLooks,loadouts:units,difficulty:GameDifficulty.lastChosen,quizBank:self.quizBank,studentTeams:self.teamPickers.prefix(Int(self.studentCount.value)).map{max(0,$0.selectedSegmentIndex)},persist:store.write)
+                let session=try MeadowCampaignSession.new(layout:result,appearanceID:appearance,playerClassID:config.playerClassID,companionClassID:config.companionClassID,studentClasses:Array(self.selectedClasses.prefix(Int(self.studentCount.value))),studentNames:self.studentNames.prefix(Int(self.studentCount.value)).map{$0.text ?? ""},playerAppearances:self.profileLooks,loadouts:units,difficulty:GameDifficulty.lastChosen,quizBank:self.quizBank,studentTeams:self.teamPickers.prefix(Int(self.studentCount.value)).map{max(0,$0.selectedSegmentIndex)},persist:store.write)
                 self.presentCampaign(session)
             } catch {self.status.text="未开始新行程："+error.localizedDescription}
         }
@@ -611,34 +639,120 @@ final class MeadowCampaignResultsViewController:UIViewController {
 }
 
 
+/// Scrollable 14-class guide with badges, base stats, and skills.
+private final class MeadowClassGuideController:UIViewController {
+    private let scroll=UIScrollView(),stack=UIStackView(),closeButton=MeadowPreviewPalette.button("关闭")
+    init(){super.init(nibName:nil,bundle:nil);modalPresentationStyle = .formSheet;preferredContentSize=CGSize(width:680,height:640)}
+    required init?(coder:NSCoder){fatalError("init(coder:) has not been implemented")}
+    override func viewDidLoad(){
+        super.viewDidLoad();view.backgroundColor=MeadowPreviewPalette.panel
+        scroll.translatesAutoresizingMaskIntoConstraints=false;stack.translatesAutoresizingMaskIntoConstraints=false;closeButton.translatesAutoresizingMaskIntoConstraints=false
+        stack.axis = .vertical;stack.spacing=12
+        view.addSubview(scroll);scroll.addSubview(stack);view.addSubview(closeButton)
+        closeButton.addAction(UIAction{[weak self] _ in self?.dismiss(animated:true)},for:.touchUpInside)
+        let title=MeadowPreviewPalette.label("全部 14 职业图鉴",size:24,weight:.heavy);stack.addArrangedSubview(title)
+        if let catalog=try? MeadowCampaignSession.catalog() {
+            for tier in MeadowPartyConfiguration.classTiers {
+                let header=MeadowPreviewPalette.label(tier.title,size:17,weight:.bold);header.textColor=MeadowPreviewPalette.primary
+                stack.addArrangedSubview(header)
+                for id in tier.ids {
+                    guard let summary=try? MeadowPartyConfiguration.summary(for:id,catalog:catalog) else{continue}
+                    let row=UIStackView();row.spacing=12;row.alignment = .center;row.isLayoutMarginsRelativeArrangement=true
+                    row.layoutMargins=UIEdgeInsets(top:10,left:12,bottom:10,right:12);row.backgroundColor=MeadowPreviewPalette.glass(.medium)
+                    row.layer.cornerRadius=12;row.layer.cornerCurve = .continuous
+                    let cap=id.prefix(1).uppercased()+id.dropFirst()
+                    let icon=UIImageView(image:UIImage(named:"ClassBadge"+cap));icon.contentMode = .scaleAspectFit;icon.layer.magnificationFilter = .nearest
+                    icon.widthAnchor.constraint(equalToConstant:48).isActive=true;icon.heightAnchor.constraint(equalToConstant:48).isActive=true
+                    let label=MeadowPreviewPalette.label(summary,size:15,weight:.medium);label.numberOfLines=0
+                    row.addArrangedSubview(icon);row.addArrangedSubview(label);stack.addArrangedSubview(row)
+                }
+            }
+        }
+        let safe=view.safeAreaLayoutGuide
+        NSLayoutConstraint.activate([
+            closeButton.leadingAnchor.constraint(equalTo:safe.leadingAnchor,constant:16),closeButton.trailingAnchor.constraint(equalTo:safe.trailingAnchor,constant:-16),
+            closeButton.bottomAnchor.constraint(equalTo:safe.bottomAnchor,constant:-14),closeButton.heightAnchor.constraint(equalToConstant:44),
+            scroll.topAnchor.constraint(equalTo:safe.topAnchor),scroll.leadingAnchor.constraint(equalTo:safe.leadingAnchor),
+            scroll.trailingAnchor.constraint(equalTo:safe.trailingAnchor),scroll.bottomAnchor.constraint(equalTo:closeButton.topAnchor,constant:-10),
+            stack.topAnchor.constraint(equalTo:scroll.contentLayoutGuide.topAnchor,constant:16),stack.bottomAnchor.constraint(equalTo:scroll.contentLayoutGuide.bottomAnchor,constant:-16),
+            stack.leadingAnchor.constraint(equalTo:scroll.contentLayoutGuide.leadingAnchor,constant:16),stack.trailingAnchor.constraint(equalTo:scroll.contentLayoutGuide.trailingAnchor,constant:-16),
+            stack.widthAnchor.constraint(equalTo:scroll.frameLayoutGuide.widthAnchor,constant:-32)
+        ])
+    }
+}
+
 /// A separate art inspection screen, never attached to the saved rule engine.
 private final class MeadowMonsterGalleryController:UIViewController {
-    private let gallery=MeadowMonsterGalleryView(),pick=UISegmentedControl(items:["史莱姆","森林狼","弓手","石像","巨魔","魔龙"])
-    private let titleLabel=MeadowPreviewPalette.label("怪物动作检视",size:26,weight:.heavy)
+    private let gallery=MeadowMonsterGalleryView()
+    private let prevButton=MeadowPreviewPalette.button("◀ 上一只")
+    private let pickerButton=UIButton(type:.system)
+    private let nextButton=MeadowPreviewPalette.button("下一只 ▶")
+    private let titleLabel=MeadowPreviewPalette.label("怪物动作检视（22 种）",size:26,weight:.heavy)
     private let phase=MeadowPreviewPalette.label("",size:19,weight:.bold)
     private let close=MeadowPreviewPalette.button("返回"),replay=MeadowPreviewPalette.button("重播动作")
+    private var selectedIndex=0
+    private static let groups:[(title:String,ids:[String])]=[
+        ("开局林缘（4）",["slime","hopShroom","acornBandit","bubbleCrab"]),
+        ("中段幽林（5）",["wolf","goblinArcher","stingWasp","brambleSprite","goblinShaman"]),
+        ("深处遗迹（4）",["stoneGuardian","emberLizard","shadowOwl","runeKnight"]),
+        ("禁区精英（2）",["crystalGolem","frostAlphaWolf"]),
+        ("首领 Boss（7）",["mushroomKing","caveTroll","goblinWarlord","thornTreant","ruinDragon","frostPhoenix","eclipseBehemoth"])
+    ]
+    private var currentID:String { MonsterVisualSpec.ids[selectedIndex] }
     init(){super.init(nibName:nil,bundle:nil);modalPresentationStyle = .fullScreen}
     required init?(coder:NSCoder){fatalError("init(coder:) has not been implemented")}
     override var prefersStatusBarHidden:Bool{true}
     override var supportedInterfaceOrientations:UIInterfaceOrientationMask{.landscape}
     override func viewDidLoad(){
         super.viewDidLoad();view.backgroundColor=MeadowPreviewPalette.panel
-        for v in [gallery,pick,titleLabel,phase,close,replay]{view.addSubview(v)}
+        for v in [gallery,prevButton,pickerButton,nextButton,titleLabel,phase,close,replay]{view.addSubview(v)}
         phase.numberOfLines=2;phase.font=MeadowPreviewPalette.font(17)
-        pick.selectedSegmentIndex=0;pick.selectedSegmentTintColor=MeadowPreviewPalette.primary
-        pick.setTitleTextAttributes([.foregroundColor:MeadowPreviewPalette.panel,.font:MeadowPreviewPalette.font(18)],for:.selected)
-        pick.setTitleTextAttributes([.foregroundColor:MeadowPreviewPalette.ink,.font:MeadowPreviewPalette.font(18)],for:.normal)
-        pick.addAction(UIAction{[weak self] _ in guard let self else{return};self.gallery.select(MonsterVisualSpec.ids[self.pick.selectedSegmentIndex])},for:.valueChanged)
+        var cfg=UIButton.Configuration.filled();cfg.baseBackgroundColor=MeadowPreviewPalette.primary;cfg.baseForegroundColor = .white;cfg.cornerStyle = .medium;cfg.indicator = .popup
+        pickerButton.configuration=cfg;pickerButton.showsMenuAsPrimaryAction=true
+        pickerButton.menu=UIMenu(children:[UIDeferredMenuElement.uncached{[weak self] done in done(self?.monsterMenuItems() ?? [])}])
+        prevButton.addAction(UIAction{[weak self] _ in self?.step(-1)},for:.touchUpInside)
+        nextButton.addAction(UIAction{[weak self] _ in self?.step(1)},for:.touchUpInside)
         gallery.onPhase={ [weak self] value in self?.phase.text=value+" · 仅外观检视，不消耗行程资源" }
         close.addAction(UIAction{[weak self] _ in self?.dismiss(animated:true)},for:.touchUpInside)
-        replay.addAction(UIAction{[weak self] _ in guard let self else{return};self.gallery.select(MonsterVisualSpec.ids[self.pick.selectedSegmentIndex])},for:.touchUpInside)
+        replay.addAction(UIAction{[weak self] _ in guard let self else{return};self.gallery.select(self.currentID)},for:.touchUpInside)
+        refreshSelection()
+    }
+    private func step(_ delta:Int) {
+        let n=MonsterVisualSpec.ids.count
+        selectedIndex=(selectedIndex+delta+n)%n
+        refreshSelection()
+    }
+    private func refreshSelection() {
+        let catalog=try? GameCatalog.initial()
+        let name=(try? catalog?.monster(currentID).name) ?? currentID
+        let spec=MonsterVisualSpec.find(currentID)
+        let tag=spec?.ranged == true ? " · 远程":""
+        pickerButton.configuration?.title="\(name)（\(selectedIndex+1)/\(MonsterVisualSpec.ids.count)\(tag)）"
+        gallery.select(currentID)
+    }
+    private func monsterMenuItems()->[UIMenuElement] {
+        let catalog=try? GameCatalog.initial()
+        return Self.groups.map{group in
+            UIMenu(title:group.title,children:group.ids.map{id in
+                let def=try? catalog?.monster(id)
+                let name=def?.name ?? id
+                let sub=def.map{"HP \($0.attributes.maximumHealth) · 盾 \($0.shield) · \($0.attack.dice.label)"+($0.attack.range>0 ? " · 远程":"")} ?? ""
+                return UIAction(title:name,subtitle:sub,state:id==currentID ? .on:.off){[weak self] _ in
+                    guard let self,let idx=MonsterVisualSpec.ids.firstIndex(of:id) else{return}
+                    self.selectedIndex=idx;self.refreshSelection()
+                }
+            })
+        }
     }
     override func viewDidAppear(_ animated:Bool){super.viewDidAppear(animated);gallery.start()}
     override func viewWillDisappear(_ animated:Bool){super.viewWillDisappear(animated);gallery.stop()}
     override func viewDidLayoutSubviews(){
         super.viewDidLayoutSubviews();let safe=view.safeAreaInsets,left=max(16,safe.left+8),right=view.bounds.width-max(16,safe.right+8),width=right-left,top=max(12,safe.top+8),bottom=view.bounds.height-max(12,safe.bottom+8)
-        titleLabel.frame=CGRect(x:left,y:top,width:250,height:36);close.frame=CGRect(x:right-90,y:top,width:90,height:38)
-        pick.frame=CGRect(x:left,y:top+46,width:width,height:42)
+        titleLabel.frame=CGRect(x:left,y:top,width:320,height:36);close.frame=CGRect(x:right-90,y:top,width:90,height:38)
+        let navW:CGFloat=120
+        prevButton.frame=CGRect(x:left,y:top+46,width:navW,height:42)
+        nextButton.frame=CGRect(x:right-navW,y:top+46,width:navW,height:42)
+        pickerButton.frame=CGRect(x:left+navW+10,y:top+46,width:max(120,width-2*navW-20),height:42)
         gallery.frame=CGRect(x:left,y:top+98,width:width,height:max(1,bottom-top-156))
         phase.frame=CGRect(x:left,y:bottom-44,width:width-150,height:40);replay.frame=CGRect(x:right-140,y:bottom-44,width:140,height:40)
     }

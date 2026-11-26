@@ -45,6 +45,7 @@ import MeadowBattleSupport
     let studentTints: [String: Int]
     @Published var boss: BossRaid?
     @Published var camp: CampDefense?
+    var campWaveSpecies: [String] = ["slime", "wolf", "caveTroll"]
     @Published var race: RaceTrack?
     @Published var memory: MemoryMatch?
     @Published var arena: ArenaKing?
@@ -87,8 +88,15 @@ import MeadowBattleSupport
         PixelHeroAtlas.prepare(battle: students.map(\.look))
         MeadowPixelFX.prewarm()
         switch kind {
-        case .boss: boss = BossRaid(monster: dice.shuffle(["caveTroll", "ruinDragon", "stoneGuardian"])[0], students: ordered.count)
-        case .camp: camp = CampDefense()
+        case .boss:
+            let bossPool = ["mushroomKing", "caveTroll", "goblinWarlord", "thornTreant", "ruinDragon", "frostPhoenix", "eclipseBehemoth", "crystalGolem", "frostAlphaWolf"]
+            boss = BossRaid(monster: dice.shuffle(bossPool)[0], students: ordered.count)
+        case .camp:
+            let wave1 = dice.shuffle(["slime", "hopShroom", "acornBandit", "bubbleCrab"])[0]
+            let wave2 = dice.shuffle(["wolf", "goblinArcher", "stingWasp", "brambleSprite", "goblinShaman", "stoneGuardian", "emberLizard", "shadowOwl", "runeKnight"])[0]
+            let wave3 = dice.shuffle(["crystalGolem", "frostAlphaWolf", "mushroomKing", "caveTroll", "goblinWarlord", "thornTreant", "ruinDragon", "frostPhoenix", "eclipseBehemoth"])[0]
+            campWaveSpecies = [wave1, wave2, wave3]
+            camp = CampDefense()
         case .race: race = RaceTrack(sides: sides, seed: seed)
         case .memory:
             let pairs = dice.shuffle(MemoryMatch.candidates(bank, among: course)).prefix(8)
@@ -102,11 +110,28 @@ import MeadowBattleSupport
     func studentTint(_ id: String) -> Color { MiniGamePalette.side(studentTints[id] ?? 0) }
     static func monsterName(_ id: String) -> String {
         switch id {
-        case "caveTroll": "洞穴巨魔"
-        case "ruinDragon": "遗迹巨龙"
+        case "slime": "捣蛋史莱姆"
+        case "wolf": "森林狼"
+        case "goblinArcher": "哥布林弓手"
         case "stoneGuardian": "石像守卫"
-        case "slime": "史莱姆"
-        case "wolf": "森林恶狼"
+        case "caveTroll": "洞穴巨魔"
+        case "ruinDragon": "遗迹魔龙"
+        case "hopShroom": "蹦跳菇灵"
+        case "acornBandit": "橡果盗贼鼠"
+        case "bubbleCrab": "溪畔泡泡蟹"
+        case "stingWasp": "毒刺大黄蜂"
+        case "brambleSprite": "荆棘藤蔓妖"
+        case "goblinShaman": "哥布林萨满"
+        case "emberLizard": "灰烬火蜥蜴"
+        case "shadowOwl": "影翼夜枭"
+        case "runeKnight": "符文铠甲兵"
+        case "crystalGolem": "晶核魔像"
+        case "frostAlphaWolf": "暗霜狼王"
+        case "mushroomKing": "巨冠菇王"
+        case "goblinWarlord": "哥布林战酋"
+        case "thornTreant": "千年古树精"
+        case "frostPhoenix": "冰晶霜凰"
+        case "eclipseBehemoth": "蚀星古巨像"
         default: "怪物"
         }
     }
@@ -1685,7 +1710,7 @@ private struct CampStage: View {
             let left = 416 * unit
             let trailY = 550 * unit
             let dist = CampDefense.length - c.position
-            let species = ["slime", "wolf", "caveTroll"][c.wave]
+            let species = model.campWaveSpecies[min(c.wave, max(0, model.campWaveSpecies.count - 1))]
             let monsterH: CGFloat = (c.wave == 2 ? 228 : c.wave == 1 ? 192 : 164) * unit
             let monsterX = dist > 0 ? (left + CGFloat(dist - 1) * cell + cell / 2) : 305 * unit
             let monsterY = trailY - monsterH * 0.44 - 8 * unit
@@ -1819,7 +1844,7 @@ private struct CampStage: View {
                 }
                 if c.wave != lastWave {
                     lastWave = c.wave
-                    let nextSpecies = ["slime", "wolf", "caveTroll"][c.wave]
+                    let nextSpecies = model.campWaveSpecies[min(c.wave, max(0, model.campWaveSpecies.count - 1))]
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
                         waveCallout = "第 \(c.wave + 1) 波 · \(MiniGameModel.monsterName(nextSpecies))来袭！"
                     }

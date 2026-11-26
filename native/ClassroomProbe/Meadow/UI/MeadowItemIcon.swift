@@ -20,8 +20,20 @@ enum MeadowItemIcon {
     }
 
     private static func badge(_ id:String,item:ItemDefinition?)->UIImage {
-        let set=item?.setID ?? (id.hasPrefix("starlight") ? "starlight":id.hasPrefix("dragon") ? "dragonMark":nil)
-        let tint:UIColor = set=="starlight" ? UIColor(red:0.45,green:0.78,blue:1,alpha:1):set=="dragonMark" ? UIColor(red:0.95,green:0.38,blue:0.30,alpha:1):MeadowPreviewPalette.gold
+        let set=item?.setID ?? (id.hasPrefix("starlight") ? "starlight":id.hasPrefix("dragon") ? "dragonMark":id.hasPrefix("wildwood") ? "wildwood":id.hasPrefix("gale") ? "galeHunter":id.hasPrefix("oak") ? "oakBastion":id.hasPrefix("ember") ? "emberArcana":id.hasPrefix("aegis") ? "aegisSeraph":id.hasPrefix("astral") ? "astralSovereign":nil)
+        let tint:UIColor = {
+            switch set {
+            case "wildwood": return UIColor(red:0.42,green:0.80,blue:0.46,alpha:1)
+            case "galeHunter": return UIColor(red:0.35,green:0.82,blue:0.92,alpha:1)
+            case "oakBastion": return UIColor(red:0.62,green:0.74,blue:0.38,alpha:1)
+            case "starlight": return UIColor(red:0.45,green:0.78,blue:1,alpha:1)
+            case "emberArcana": return UIColor(red:0.95,green:0.48,blue:0.25,alpha:1)
+            case "dragonMark": return UIColor(red:0.95,green:0.38,blue:0.30,alpha:1)
+            case "aegisSeraph": return UIColor(red:1.0,green:0.82,blue:0.38,alpha:1)
+            case "astralSovereign": return UIColor(red:0.76,green:0.52,blue:1.0,alpha:1)
+            default: return MeadowPreviewPalette.gold
+            }
+        }()
         let symbol:String
         switch item?.slot {
         case .weapon?: symbol="bolt.fill"
@@ -88,11 +100,30 @@ enum MeadowItemRarity: Int, Comparable {
 
     static func of(_ id: String, item: ItemDefinition? = nil) -> MeadowItemRarity {
         switch id {
-        case "greatSword", "runeArmor", "actionRing", "revivalStone": return .rare
-        case "starlightBlade", "starlightArmor", "starlightCharm": return .epic
-        case "legendaryStaff", "dragonFangSword", "dragonArmor", "dragonCharm": return .legendary
+        case "greatSword", "runeArmor", "actionRing", "revivalStone",
+             "frostWand", "knightHalberd", "chainmailCoat", "windrunnerGarb", "eagleEyeLens",
+             "galeLongbow", "galeArmor", "galeCharm", "oakHammer", "oakArmor", "oakCharm",
+             "ironbarkElixir", "honeySalve":
+            return .rare
+        case "starlightBlade", "starlightArmor", "starlightCharm",
+             "flameAxe", "thunderCrossbow", "emeraldScepter", "shadowTwinblades",
+             "mithrilPlate", "arcaneMantle", "rubyHeartPendant", "chronoPocketwatch",
+             "emberStaff", "emberArmor", "emberCharm",
+             "superPotion", "crystalBarrierFlask":
+            return .epic
+        case "legendaryStaff", "dragonFangSword", "dragonArmor", "dragonCharm",
+             "sunbreakerBlade", "astralGreatbow", "titanFortressArmor", "phoenixFeatherRobe",
+             "crownOfValor", "infinityHourglass",
+             "aegisLance", "aegisArmor", "aegisCharm", "astralCodex", "astralArmor", "astralCharm",
+             "phoenixNectar", "starlightElixir", "aegisCrystal":
+            return .legendary
         default:
-            switch item?.setID { case "starlight"?: return .epic; case "dragonMark"?: return .legendary; default: return .common }
+            switch item?.setID {
+            case "galeHunter"?, "oakBastion"?: return .rare
+            case "starlight"?, "emberArcana"?: return .epic
+            case "dragonMark"?, "aegisSeraph"?, "astralSovereign"?: return .legendary
+            default: return .common
+            }
         }
     }
 
