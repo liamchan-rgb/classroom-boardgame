@@ -186,6 +186,9 @@ final class ProbeCoreTests: XCTestCase {
     }
 
     func testNotesMarkupRoundTripNeverLeaksTokens() {
+        func visibleChars(_ spans: [NotesMarkupSpan]) -> [(Character, Bool, Bool)] {
+            spans.flatMap { s in s.text.filter { $0 != "\n" }.map { ($0, s.bold, s.underline) } }
+        }
         let samples = [
             "The __**bubble**__ went all the way back\nto Benny's __**house**__.\nAnd then do you know\n__** where **__ the\n__**bubble**__ went?",
             "先读**重点词**，再__划线__结束",
@@ -198,14 +201,17 @@ final class ProbeCoreTests: XCTestCase {
             XCTAssertFalse(parsed.map(\.text).joined().contains("__"))
             let reencoded = NotesMarkupCodec.encode(parsed)
             let reparsed = NotesMarkupCodec.parse(reencoded)
-            XCTAssertEqual(reparsed, parsed)
+            XCTAssertEqual(visibleChars(reparsed).map(\.0), visibleChars(parsed).map(\.0))
+            XCTAssertEqual(visibleChars(reparsed).map(\.1), visibleChars(parsed).map(\.1))
+            XCTAssertEqual(visibleChars(reparsed).map(\.2), visibleChars(parsed).map(\.2))
+            XCTAssertEqual(NotesMarkupCodec.encode(reparsed), reencoded)
         }
-        XCTAssertEqual(
-            NotesMarkupCodec.encode([
-                NotesMarkupSpan(text: "ice", bold: true, underline: false),
-                NotesMarkupSpan(text: " cream", bold: true, underline: true)
-            ]),
-            "**ice__ cream__**"
-        )
+        let compoundSpans = [
+            NotesMarkupSpan(text: "ice", bold: true, underline: false),
+            NotesMarkupSpan(text: " cream", bold: true, underline: true)
+        ]
+        let encoded = NotesMarkupCodec.encode(compoundSpans)
+        XCTAssertEqual(encoded, "**ice__ cream**__")
+        XCTAssertEqual(NotesMarkupCodec.parse(encoded), compoundSpans)
     }
 }

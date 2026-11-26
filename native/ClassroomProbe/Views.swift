@@ -113,7 +113,7 @@ private struct TeacherBookConsole:View {
                     }
                     ZStack(alignment:.topLeading) {
                         if session.currentNote.isEmpty {
-                            Text("点击输入备注（⌘B 粗体，⌘U 下划线）")
+                            Text(session.state.pageCount > 0 ? "点击输入备注（⌘B 粗体，⌘U 下划线）" : "先导入或打开课件后再编辑备注")
                                 .font(.system(size:17))
                                 .foregroundStyle(.secondary.opacity(0.6))
                                 .padding(.horizontal,11).padding(.vertical,16)
@@ -121,6 +121,7 @@ private struct TeacherBookConsole:View {
                         }
                         NotesWordText(
                             raw:session.currentNote,
+                            editable:session.state.pageCount > 0,
                             onEdit:{session.editNote($0)},
                             onFocus:{session.notesFocus($0)},
                             onPick:{pick,rect,view in game.openWordCard(pick,rect:rect,in:view)},

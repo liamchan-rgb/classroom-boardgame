@@ -96,7 +96,7 @@ struct TeacherBookGrantBar:View {
             Spacer(minLength:0)
         }.buttonStyle(GlassIconButtonStyle()).padding(.horizontal,10).padding(.vertical,6).glassPanel(radius:20,padding:0)
             .disabled(players.isEmpty || game.campaign?.isCompleted==true)
-            .onAppear{if draft.recipients.isEmpty,let id=game.campaign?.selectedPlayerID{draft.recipients=[id]}}
+            .onAppear{if draft.recipients.isEmpty,!game.grantRecipientsCustomized,let id=game.campaign?.selectedPlayerID{draft.recipients=[id]}}
     }
     /// Tick any number of players; whole groups in one tap. Stays open until tapped outside or 完成.
     private var recipientPicker:some View {
@@ -104,17 +104,18 @@ struct TeacherBookGrantBar:View {
             HStack{
                 VStack(alignment:.leading,spacing:2){
                     Label("发放对象 · 已选 \(selected.count)",systemImage:"person.2.fill").font(.headline)
-                    Text("数字键按编号勾选 · 长按成员改编号 · G发金币 M发体力（输数字回车；连按两下按输入框）").font(.caption).foregroundStyle(GameTheme.muted)
+                    Text("点选或绘本页按1–7勾选 · 长按改编号 · G发金币 M发体力（连按两下按输入框）").font(.caption).foregroundStyle(GameTheme.muted)
                 }
                 Spacer()
                 Button("完成"){picking=false}.bold()
             }
             HStack(spacing:8){
-                chip("全员",systemImage:"person.3.fill",on:selected.count==players.count && !players.isEmpty){draft.recipients=Set(players.map(\.id))}
-                chip("清空",systemImage:"xmark.circle",on:false){draft.recipients=[]}
+                chip("全员",systemImage:"person.3.fill",on:selected.count==players.count && !players.isEmpty){game.grantRecipientsCustomized=true;draft.recipients=Set(players.map(\.id))}
+                chip("清空",systemImage:"xmark.circle",on:false){game.grantRecipientsCustomized=true;draft.recipients=[]}
                 ForEach(teams){team in
                     let members=Set(players.filter{$0.teamID==team.id}.map(\.id))
                     chip(team.name,systemImage:"flag.fill",on:!members.isEmpty && members.isSubset(of:draft.recipients)){
+                        game.grantRecipientsCustomized=true
                         // Tap a group: tick all of it; tap again (all ticked): untick it.
                         if members.isSubset(of:draft.recipients){draft.recipients.subtract(members)}else{draft.recipients.formUnion(members)}
                     }
@@ -123,7 +124,7 @@ struct TeacherBookGrantBar:View {
             LazyVGrid(columns:[GridItem(.adaptive(minimum:150),spacing:8)],spacing:8){
                 ForEach(players.sorted{game.seatNumber($0.id)<game.seatNumber($1.id)}){unit in
                     let on=draft.recipients.contains(unit.id)
-                    Button{if on{draft.recipients.remove(unit.id)}else{draft.recipients.insert(unit.id)}}label:{
+                    Button{game.grantRecipientsCustomized=true;if on{draft.recipients.remove(unit.id)}else{draft.recipients.insert(unit.id)}}label:{
                         HStack(spacing:8){
                             Image(systemName:on ? "checkmark.circle.fill":"circle").foregroundStyle(on ? GameTheme.primary:GameTheme.muted)
                             // The number key that ticks this player (long-press to change it).
@@ -154,19 +155,29 @@ struct TeacherBookGrantBar:View {
     }
 }
 
-/// Where the players' cards sit in the teacher's book preview, so a grant icon dragged from the bar knows
-/// which card it was let go over.
+/// Where the players' cards sit (picture book cards or game HUD/turn-order targets), so a grant icon
+/// dragged from the bar knows which player it was let go over.
 @MainActor final class BookDropTargets:ObservableObject {
+    enum Source:Hashable {case book,game}
     static let shared=BookDropTargets()
-    var frames:[String:CGRect]=[:]
+    var activeSource:Source = .book
+    private var bySource:[Source:[String:CGRect]]=[:]
+    func setFrame(_ frame:CGRect?,for id:String,source:Source) {
+        if let frame {bySource[source,default:[:]][id]=frame}
+        else {bySource[source]?[id]=nil}
+    }
+    func setAllFrames(_ frames:[String:CGRect],source:Source) {
+        bySource[source]=frames
+    }
     /// The card under the dragged icon (highlighted).
     @Published var hover:String?
-    func target(at point:CGPoint)->String? {frames.first{$0.value.contains(point)}?.key}
+    func target(at point:CGPoint)->String? {bySource[activeSource]?.first{$0.value.contains(point)}?.key}
     /// The box whose icon is being dragged: digits typed meanwhile set its amount (the first digit replaces it).
     var dragging:Binding<String>?
+    @Published var isDragging=false
     private var typedDuringDrag=false
-    func beginDrag(_ amount:Binding<String>) {dragging=amount;typedDuringDrag=false}
-    func endDrag() {dragging=nil}
+    func beginDrag(_ amount:Binding<String>) {dragging=amount;typedDuringDrag=false;isDragging=true}
+    func endDrag() {dragging=nil;isDragging=false}
     /// Digits / Backspace while a grant icon is held; true when the key was used.
     func dragKey(_ key:UIKey)->Bool {
         guard let box=dragging else{return false}

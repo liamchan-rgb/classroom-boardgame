@@ -82,7 +82,9 @@ final class NotesTextView: UITextView {
     var suppressKUntil: TimeInterval = 0
 
     override var keyCommands: [UIKeyCommand]? {
-        var cmds = super.keyCommands ?? []
+        var cmds = (super.keyCommands ?? []).filter {
+            !($0.modifierFlags == .command && ["b", "u"].contains(($0.input ?? "").lowercased()))
+        }
         let bold = UIKeyCommand(title: "粗体", action: #selector(toggleBoldface(_:)), input: "b", modifierFlags: .command)
         let underline = UIKeyCommand(title: "下划线", action: #selector(toggleUnderline(_:)), input: "u", modifierFlags: .command)
         bold.wantsPriorityOverSystemBehavior = true
@@ -132,11 +134,15 @@ final class NotesTextView: UITextView {
         let hostWindow = window
         selectedRange = NSRange(location: range.location, length: 0)
         resignFirstResponder()
-        hostWindow?.rootViewController?.becomeFirstResponder()
+        if hostWindow?.rootViewController?.presentedViewController == nil {
+            hostWindow?.rootViewController?.becomeFirstResponder()
+        }
         onTriggerSelection?(cleaned, rect, self)
         DispatchQueue.main.async { [weak self, weak hostWindow] in
             self?.resignFirstResponder()
-            hostWindow?.rootViewController?.becomeFirstResponder()
+            if hostWindow?.rootViewController?.presentedViewController == nil {
+                hostWindow?.rootViewController?.becomeFirstResponder()
+            }
         }
         return true
     }
@@ -253,6 +259,7 @@ struct NotesWordPick: Identifiable {
 /// double-click an English word (or any word of a compound card) or highlight a phrase and press K to summon a flashcard.
 struct NotesWordText: UIViewRepresentable {
     let raw: String
+    var editable: Bool = true
     var onEdit: (String) -> Void
     var onFocus: (Bool) -> Void
     var onPick: (NotesWordPick, CGRect, UIView) -> Void
@@ -261,7 +268,7 @@ struct NotesWordText: UIViewRepresentable {
     func makeCoordinator() -> Coordinator { Coordinator() }
     func makeUIView(context: Context) -> NotesTextView {
         let v = NotesTextView()
-        v.isEditable = true
+        v.isEditable = editable
         v.isSelectable = true
         v.allowsEditingTextAttributes = true
         v.backgroundColor = .clear
@@ -276,6 +283,7 @@ struct NotesWordText: UIViewRepresentable {
         return v
     }
     func updateUIView(_ v: NotesTextView, context: Context) {
+        if v.isEditable != editable { v.isEditable = editable }
         context.coordinator.onEdit = onEdit
         context.coordinator.onFocus = onFocus
         context.coordinator.onPick = onPick
@@ -321,13 +329,17 @@ struct NotesWordText: UIViewRepresentable {
             let hostWindow = v.window
             v.selectedRange = NSRange(location: location, length: 0)
             v.resignFirstResponder()
-            hostWindow?.rootViewController?.becomeFirstResponder()
+            if hostWindow?.rootViewController?.presentedViewController == nil {
+                hostWindow?.rootViewController?.becomeFirstResponder()
+            }
             onPick?(pick, rect, v)
             DispatchQueue.main.async { [weak v, weak hostWindow] in
                 guard let v else { return }
                 v.selectedRange = NSRange(location: min(location, (v.text as NSString).length), length: 0)
                 v.resignFirstResponder()
-                hostWindow?.rootViewController?.becomeFirstResponder()
+                if hostWindow?.rootViewController?.presentedViewController == nil {
+                    hostWindow?.rootViewController?.becomeFirstResponder()
+                }
             }
         }
         func gestureRecognizer(_ g: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer) -> Bool { true }

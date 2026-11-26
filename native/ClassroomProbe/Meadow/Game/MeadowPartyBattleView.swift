@@ -47,6 +47,11 @@ final class MeadowPartyBattleView:UIView {
         if let id=track.unit(at:convert(point,to:track)){return .target(id)}
         return stage.classroomTarget(at:convert(point,to:stage)).map{.target($0)}
     }
+    func classroomPlayerDropFrames(in host:UIView)->[String:CGRect] {
+        guard classroomMode,active,!track.isHidden else{return [:]}
+        layoutIfNeeded()
+        return track.tokenFrames(in:host)
+    }
     /// The teacher's click on the pull tab (the public screen has no touch of its own).
     func classroomToggleMap(){toggleMap()}
     /// "撤离" in the header (classroom only): leave the fight and go back to the map.

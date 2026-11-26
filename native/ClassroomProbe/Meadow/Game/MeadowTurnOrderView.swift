@@ -71,6 +71,14 @@ final class MeadowTurnOrderView: UIView {
         return order.first { tokens[$0].map { !$0.isHidden && $0.frame.contains(point) } ?? false }
     }
 
+    func tokenFrames(in host: UIView) -> [String: CGRect] {
+        var result: [String: CGRect] = [:]
+        for (id, token) in tokens where !token.isHidden {
+            result[id] = token.convert(token.bounds, to: host)
+        }
+        return result
+    }
+
     override func layoutSubviews() {
         super.layoutSubviews()
         guard bounds.width > 0, bounds.height > 0 else { return }

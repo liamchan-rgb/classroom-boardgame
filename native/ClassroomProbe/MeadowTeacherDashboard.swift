@@ -160,6 +160,9 @@ struct MeadowTeacherDashboard:View {
             if fullScreen == fullPreview {QuizDock(game:game,book:false)}
             }
             MiniGameBar(game:game)
+            if game.campaign != nil {
+                TeacherBookGrantBar(game:game,draft:game.grantDraft).zIndex(1)
+            }
             HStack(spacing:8){
                 Image(systemName:selectingNode && !inBattle ? "mappin.and.ellipse":(inBattle ? "hand.point.up.left.fill":"info.circle")).foregroundStyle(GameTheme.primary)
                 Text(selectingNode && !inBattle ? "点建筑选取地点":"\(game.message)").lineLimit(1).truncationMode(.tail)
@@ -200,6 +203,7 @@ struct MeadowTeacherDashboard:View {
 private struct TeacherGamePreview:View {
     @ObservedObject var game:MeadowTeacherCoordinator
     let selectingNode:Bool
+    @ObservedObject private var dropTargets=BookDropTargets.shared
     @State private var previewID=UUID()
     var body:some View {
         PublicSurface(model:TeacherSession.shared.display,game:game,teacherPreview:true)
@@ -208,10 +212,53 @@ private struct TeacherGamePreview:View {
                     tap:{game.canvasTap($0,selectingNode:selectingNode)},
                     pan:game.canvasPan,zoom:{game.canvasZoom($0,anchor:$1)},hover:game.canvasHover)
             }
+            .overlay{if dropTargets.isDragging,game.surface != .book,game.miniGame == nil {GameDropTargetOverlay(game:game)}}
             .overlay{MiniGameTapLayer(game:game)}
             .overlay{QuizRevealTapCatcher(game:game)}
             .overlay{LaserCapture(laser:game.laser)}
             .onAppear{game.previewVisibility(previewID,visible:true)}
             .onDisappear{game.previewVisibility(previewID,visible:false);game.canvasHover(nil)}
+    }
+}
+
+private struct GameDropTargetOverlay:View {
+    @ObservedObject var game:MeadowTeacherCoordinator
+    @ObservedObject private var targets=BookDropTargets.shared
+    @State private var localRects:[String:CGRect]=[:]
+    private func sync(_ size:CGSize,_ origin:CGPoint) {
+        let fitted=ClassroomCanvas.fitted(in:size)
+        guard fitted.width>0 else{localRects=[:];targets.setAllFrames([:],source:.game);return}
+        let scale=fitted.width/ClassroomCanvas.size.width
+        let raw=game.renderer?.classroomPlayerDropFrames(role:.teacher) ?? [:]
+        var nextLocal:[String:CGRect]=[:],nextGlobal:[String:CGRect]=[:]
+        for (id,r) in raw {
+            let local=CGRect(x:fitted.minX+r.minX*scale,y:fitted.minY+r.minY*scale,width:r.width*scale,height:r.height*scale)
+            nextLocal[id]=local
+            nextGlobal[id]=local.offsetBy(dx:origin.x,dy:origin.y)
+        }
+        localRects=nextLocal
+        targets.setAllFrames(nextGlobal,source:.game)
+    }
+    var body:some View {
+        GeometryReader { g in
+            let origin=g.frame(in:.global).origin
+            ZStack(alignment:.topLeading) {
+                ForEach(Array(localRects.keys.sorted()),id:\.self) { id in
+                    if let rect=localRects[id] {
+                        let hovered = targets.hover == id
+                        RoundedRectangle(cornerRadius:8,style:.continuous)
+                            .stroke(hovered ? Color(red:1.0,green:0.84,blue:0.36):.white.opacity(0.45),lineWidth:hovered ? 3:1.5)
+                            .background(RoundedRectangle(cornerRadius:8,style:.continuous).fill(hovered ? Color(red:1.0,green:0.84,blue:0.36).opacity(0.18):.clear))
+                            .frame(width:rect.width,height:rect.height)
+                            .position(x:rect.midX,y:rect.midY)
+                            .shadow(color:hovered ? Color(red:1.0,green:0.84,blue:0.36).opacity(0.85):.clear,radius:8)
+                    }
+                }
+            }
+            .onAppear{sync(g.size,origin)}
+            .onChange(of:g.frame(in:.global)){_,frame in sync(frame.size,frame.origin)}
+            .onChange(of:game.revision){_,_ in sync(g.size,origin)}
+            .onDisappear{targets.setAllFrames([:],source:.game)}
+        }.allowsHitTesting(false)
     }
 }

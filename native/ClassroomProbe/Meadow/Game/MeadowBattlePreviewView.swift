@@ -80,6 +80,7 @@ final class MeadowBattlePreviewView: UIView {
     func classroomToggleMap(){party.classroomToggleMap()}
     func classroomLeaveTap()->Bool {party.classroomLeaveTap()}
     func classroomHit(at point:CGPoint)->MeadowPartyBattleView.ClassroomHit? {party.classroomHit(at:convert(point,to:party))}
+    func classroomPlayerDropFrames(in host:UIView)->[String:CGRect]{party.classroomPlayerDropFrames(in:host)}
     var classroomMode=false {didSet {
         party.classroomMode=classroomMode
         if classroomMode {

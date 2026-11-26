@@ -26,10 +26,11 @@ final class MeadowTeacherCoordinator:ObservableObject {
     let classTimer=ClassTimerModel()
     let overlays=ClassOverlayModel()
     let grantDraft=BookGrantDraft()
+    var grantRecipientsCustomized=false
     @Published var grantCapture:ClassroomGrantCapture?
     var lastGrantKey:(kind:ClassroomGrantKind,at:Date)?
     /// The teacher has the picture-book tab open (G then grants the book bar's amounts).
-    @Published var bookTabActive=false
+    @Published var bookTabActive=false {didSet{BookDropTargets.shared.activeSource = bookTabActive ? .book:.game}}
     /// Timer panel (teacher window); the countdown itself shows on the TV. Opens over anything (pack, shop, sheets).
     func openTimer(){
         guard let presenter=presentationHost else{return}
@@ -267,7 +268,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
         }
         challengeAsk(i)
     }
-    private func challengeAsk(_ i:Int){
+    func challengeAsk(_ i:Int){
         guard let c=campaign,let model=challenge,model.phase != .finished,model.remaining>0,c.quizBank.indices.contains(i) else{return}
         model.note=nil;model.phase = .question;model.questionStart=Date()
         quizToken += 1
@@ -411,19 +412,51 @@ final class MeadowTeacherCoordinator:ObservableObject {
         }catch{withAnimation{quiz=nil};message=error.localizedDescription;revision += 1}
     }
 
+    /// Notes double-click / selection+K may summon a flashcard when idle, between class questions, or while another flashcard is up (quick swap).
+    var canSwitchNotesFlashcard:Bool {
+        if let model=practiceModel {return model.editing==nil}
+        if let model=challenge {return model.phase != .finished && (quiz==nil || quiz?.question.type == .flashcard)}
+        if let live=quiz {
+            return live.mode == .classwide && (live.attempt != nil || live.question.type == .flashcard)
+        }
+        return quizPanel == nil || quizPanel === classPicker
+    }
+    /// Opens or swaps to a course flashcard triggered from the notes.
+    func askNoteCard(at index:Int,englishFront:Bool=false){
+        guard let c=campaign,c.quizBank.indices.contains(index),canSwitchNotesFlashcard else{return}
+        if let live=quiz,live.index==index,live.attempt==nil,live.question.type == .flashcard {return}
+        if let model=practiceModel {
+            model.waiting=false;model.note=nil
+            rebuildDeck(keeping:index);showPracticeCard()
+            return
+        }
+        if let model=challenge,model.phase != .finished {
+            challengeAsk(index)
+            return
+        }
+        noteCardIndex=index
+        openClassQuiz(index:index,englishFront:englishFront)
+    }
+
     /// ⇧Q: a question to the whole class (drawn the teacher's way, or picked from the list); the teacher picks who
     /// answered and sends rewards by hand.
     func openClassQuiz(index:Int?=nil,excluding:Set<Int>=[],englishFront:Bool=false){
         // No trip open yet: the launcher offers to continue the last one.
         if campaign == nil {openQuiz();return}
-        // The class question list is up (between questions): it gives way to this question (a double-click in the
-        // notes, a pick, a draw).
-        if let picker=classPicker,quizPanel===picker {
-            classPicker=nil
-            closePanel{[weak self] in self?.openClassQuiz(index:index,excluding:excluding,englishFront:englishFront)};return
+        // Replacing the class picker, a completed class reveal, or an active classwide flashcard.
+        let canReplace = (classPicker != nil && quizPanel === classPicker)
+            || (quiz?.mode == .classwide && (quiz?.attempt != nil || quiz?.question.type == .flashcard))
+        if canReplace {
+            classPicker=nil;classModel=nil;quizDraft=nil;quizReward=nil;skippedPrompt=nil
+            if let panel=quizPanel {
+                if panel===dockPanel {
+                    quizPanel=nil;dockPanel=nil;dockContent=nil
+                } else {
+                    closePanel{[weak self] in self?.quiz=nil;self?.openClassQuiz(index:index,excluding:excluding,englishFront:englishFront)};return
+                }
+            }
+            quiz=nil
         }
-        // The last class question's answer may still be showing: the next one takes over.
-        if quiz?.mode == .classwide,quiz?.attempt != nil {quiz=nil}
         guard let c=campaign,quiz == nil,quizPanel == nil,presentationHost != nil else{return}
         guard !c.courseIndices.isEmpty else{message="当前课程没有题，先在题库里选课或导入。";revision += 1;return}
         if index == nil,QuizDrawSettings.shared.draw == nil {openClassPicker();return}
@@ -973,6 +1006,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
             controller.classroomInventoryChanged={ [weak self] id in self?.project(id.map{.inventory($0)} ?? .exploration) }
             controller.classroomReload={ [weak self,weak session] in if let session{self?.install(session)} }
             renderer=controller;installed=true;selectedNode=nil;selectedTarget=session.selectedPlayerID
+            grantRecipientsCustomized=false;grantDraft.recipients=[session.selectedPlayerID]
             message="地图已由后台准备，投放端只显示游戏。";updateMirrorDemand();revision += 1
         }catch{message=error.localizedDescription}
     }
@@ -1071,7 +1105,7 @@ final class MeadowTeacherCoordinator:ObservableObject {
             revision += 1
         }catch{message=error.localizedDescription}
     }
-    func select(_ id:String){do{try backend.selectPlayer(id,role:.teacher);selectedTarget=id;renderer?.classroomRefresh();revision += 1}catch{message=error.localizedDescription}}
+    func select(_ id:String){do{try backend.selectPlayer(id,role:.teacher);selectedTarget=id;if !grantRecipientsCustomized{grantDraft.recipients=[id]};renderer?.classroomRefresh();revision += 1}catch{message=error.localizedDescription}}
     func canTapCanvas(_ point:CGPoint)->Bool {
         guard ready,!modalOpen,surface != .book,miniGame == nil else{return false}
         if renderer?.classroomHasGainPopup==true {return true}

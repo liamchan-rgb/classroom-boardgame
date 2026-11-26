@@ -482,8 +482,7 @@ struct ClassroomGrantCapture:Equatable {var kind:ClassroomGrantKind;var digits:S
 extension MeadowTeacherCoordinator {
     var grantTargets:[String] {
         guard let c=campaign else{return []}
-        if bookTabActive {return c.engine.state.players.map(\.id).filter{grantDraft.recipients.contains($0)}}
-        return [c.selectedPlayerID]
+        return c.engine.state.players.map(\.id).filter{grantDraft.recipients.contains($0)}
     }
     /// The grant key was pressed.
     func grantKey(_ kind:ClassroomGrantKind) {

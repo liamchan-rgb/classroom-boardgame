@@ -1,3 +1,19 @@
+## 绘本富文本直接编辑、拼接词与选词按 K 闪卡、快速切题及游戏页快速发奖（2026-11-27，基于v0.32.4/build48，未改版本号、未存档）
+
+围绕课堂绘本与游戏同步操作反馈，完成绘本注释编辑、拼词闪卡匹配、连续换题及游戏页快捷发奖四项增强：
+- **去掉备注编辑锁定开关并实现无源码泄露的富文本直接编辑**（`Views.swift`、`ClassroomNotesWords.swift`、`TeacherSession.swift`、`ProbeState.swift`）：
+  - 删除 `TeacherBookConsole` 原右上角编辑/锁定切换按钮（`editingNotes`）与原始文本 `TextEditor`，常驻统一可编辑富文本视图 `NotesWordText`（`NotesTextView`），通过 `ClassroomProbeCore` 新增的 `NotesMarkupCodec` 做纯数据层 `**粗体**` / `__下划线__` 与原生 `NSAttributedString` 双向无损转换，阅读和编辑全程不露出 `__` / `**` 符号。
+  - 原生支持 `⌘B` 粗体与 `⌘U` 下划线（有选中内容切换选区样式、无选区切换 `typingAttributes`），并在粘贴与编辑时统一规范字号/文字色，避免外部富文本样式或无效格式污染；退出备注焦点同步写回 `DeckLibrary`。
+- **拼接词任意一词命中整体闪卡 + 光标框选按 `K` 出卡 + 显示中闪卡双击快速换题**（`ClassroomDictionary.swift`、`ClassroomNotesWords.swift`、`MeadowTeacherCoordinator.swift`）：
+  - `ClassroomDictionary.matchingFlashcard` 在 `tokens` 中按长度由高到低优先匹配跨词组词/短语（含自定义未入词典组合及连字符/词形还原变体）并支持选中文本归一化精确查找；题库中已有 `ice cream` 等整体闪卡时，双击其中任意一词均优先呼出整体闪卡（优先于拆分的单词卡）。
+  - 题库尚未收录该词组时，在备注框光标框选词组后直接按 `k`（不覆写选中文本并自动交还焦点），通过 `openSelectionCard` 自动查词出题或预填正面弹出「做成闪卡」弹窗。
+  - 新增 `canSwitchNotesFlashcard` 与 `askNoteCard`，调整 `openClassQuiz` 支持在全班题、闪卡练习与个人挑战闪卡已显示时双击备注或框选按 `K` 直接平滑换题。
+- **游戏页接入同款快速发奖励条及画面拖放目标**（`MeadowTeacherDashboard.swift`、`TeacherBookGrantBar.swift`、`ClassroomTools.swift`、`App.swift`、`GameViewController.swift`、`MeadowBattlePreviewView.swift`、`MeadowPartyBattleView.swift`、`MeadowTurnOrderView.swift`、`MeadowPublicOutput.swift`）：
+  - 游戏页主工作区（含全屏预览）下方加入 `TeacherBookGrantBar`，与绘本页共享同一套 `grantDraft`（步数 / 金币 / 积分、多人/按队勾选、撤销、`G`/`M` 快捷发放）。未在发奖条中自定义多选时，切换地图选中成员自动同步发奖勾选点；拖放发奖图标时可在探索 HUD 成员条及战斗回合头像条上高亮并单人直投。
+- **实测与未实测边界**：
+  - 新增 `ProbeCoreTests.testNotesMarkupRoundTripNeverLeaksTokens` 与 `DictionaryTests.testCompoundFlashcardMatchesEitherWordAndSelection` 专项单测，并执行 `scripts/local-build.sh test` 全量通过、`MAC_OPEN=0 scripts/local-build.sh mac` Mac Catalyst Release 构建与 iPad Simulator 模拟器构建及启动截图检查；在 Mac Catalyst UIKit 独立运行时测试（`verify_notes_uikit.swift`）中实测 `NotesTextView` 隐藏 `**`/`__`、`toggleBoldface`/`toggleUnderline`、粘贴格式清洗及选区/光标属性切换全部通过。
+  - 因测试时本机已有用户先前开启的 `ClassroomProbe` 窗口运行，未抢占焦点实机模拟连续键鼠操作逐项点击验证 `⌘B`/`⌘U`、框选按 `K` 及游戏页拖放发奖动画，亦未在真机 iPad 或外接 TV 双屏下目视检查。
+
 ## 拓展技能特效去复用专研与 33 组按名自研原生 PixelFX 模块全量接入（2026-11-26，基于v0.32.4/build48，未改版本号、未存档）
 
 针对「部分拓展技能过度复用原库素材造成撞车」与「技能名与特效画面不贴合」的反馈，沿用与原版 77 组特效同源的 `patch-gg/pixelfx` 双缓冲像素引擎（`color` + 加法 `light`、`120 Hz` 粒子、`edgeFade`、`composite(..., null)`、20 FPS `back+front` 双层切片），代码原创 33 组按技能名量身定制的原生 `pixelfx` JS 模块并重构全部 70 条拓展技能配方：

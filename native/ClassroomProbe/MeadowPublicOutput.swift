@@ -182,12 +182,12 @@ private struct BookPlayerCard:View {
             if dropTarget {
                 GeometryReader{g in
                     Color.clear
-                        .onAppear{targets.frames[unit.id]=g.frame(in:.global)}
-                        .onChange(of:g.frame(in:.global)){_,frame in targets.frames[unit.id]=frame}
+                        .onAppear{targets.setFrame(g.frame(in:.global),for:unit.id,source:.book)}
+                        .onChange(of:g.frame(in:.global)){_,frame in targets.setFrame(frame,for:unit.id,source:.book)}
                 }
             }
         }
-        .onDisappear{if dropTarget {targets.frames[unit.id]=nil}}
+        .onDisappear{if dropTarget {targets.setFrame(nil,for:unit.id,source:.book)}}
         .overlay{BookGainBurst(gain:gain,size:size).frame(width:size.width,height:size.height).allowsHitTesting(false)}
         .onChange(of:unit.coins){old,new in
             guard new>old else{heldCoins=nil;return}

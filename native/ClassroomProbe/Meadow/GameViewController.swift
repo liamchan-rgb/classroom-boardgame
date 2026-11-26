@@ -113,6 +113,22 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         guard classroomMode,ready,battlePreviewActive,!classroomBusy,let battle=battlePreviewView else{return nil}
         return battle.classroomHit(at:view.convert(point,to:battle))
     }
+    func classroomPlayerDropFrames(role:ClassroomRole)->[String:CGRect] {
+        guard (try? ClassroomGameBackend.requireTeacher(role)) != nil,classroomMode,ready,let campaign,let rootView=view else{return [:]}
+        rootView.layoutIfNeeded()
+        let players=campaign.engine.state.players
+        if battlePreviewActive {
+            let frames=battlePreviewView?.classroomPlayerDropFrames(in:rootView) ?? [:]
+            let ids=Set(players.map(\.id))
+            return frames.filter{ids.contains($0.key)}
+        }
+        guard !campaignHUD.isHidden else{return [:]}
+        var result:[String:CGRect]=[:]
+        for (i,u) in players.enumerated() where i<campaignHealth.count && !campaignHealth[i].isHidden {
+            result[u.id]=campaignHUD.convert(campaignHealth[i].frame,to:rootView)
+        }
+        return result
+    }
     /// The "you received" card on the public display, put away from the teacher window.
     var classroomHasGainPopup:Bool {view.subviews.contains{$0 is MeadowGainPopup}}
     func classroomGainPopupTap(at point:CGPoint,role:ClassroomRole)throws->Bool {

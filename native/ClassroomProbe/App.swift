@@ -209,6 +209,7 @@ final class TeacherHostController: UIViewController {
             // Number keys follow the seat numbers set by long-pressing in the grant picker.
             guard let seat=action.seat,let id=game.player(forSeat:seat) else{return}
             if game.bookTabActive {
+                game.grantRecipientsCustomized=true
                 if game.grantDraft.recipients.contains(id){game.grantDraft.recipients.remove(id)}else{game.grantDraft.recipients.insert(id)}
             } else {game.select(id)}
         case .award:game.grantKey(.coins)
