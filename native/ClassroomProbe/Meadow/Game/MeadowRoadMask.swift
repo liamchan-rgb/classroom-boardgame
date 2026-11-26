@@ -246,9 +246,62 @@ struct MeadowWaterSystem {
 ///   - A: DUAL-USE CHANNEL! Inside water (roadMask.b > 0.02): water turbulence/foam energy;
 ///        On dry land: crisp elevated terrace plateau mask P(x,y) driving true 3/4 24px vertical cliff walls!
 enum MeadowRoadMask {
+    /// Half-resolution 16-bit-per-channel (`rgba16Unorm`) seamless water field:
+    /// - R: smooth-union water depth in [0, 1] (ZERO segment kinks or pool/lake splicing seams)
+    /// - G: continuous monotonic downstream arc-length S / 4096.0 (0.06px precision!)
+    /// - B: continuous signed cross-channel coordinate (N + 256.0) / 512.0 (0.008px precision!)
+    /// - A: flowStrength in [0, 1] (1.0 rushing waterfall/river -> 0.0 calm woodland lake)
+    struct WaterFlowField {
+        let width: Int
+        let height: Int
+        let data: Data
+    }
+
     struct TerrainTextures {
         let roadMask: CGImage
         let terrainField: CGImage
+        let waterFlowField: WaterFlowField?
+    }
+
+    /// Zero-preserving polynomial smooth-max: returns exact 0 on dry land while smoothly blending
+    /// overlapping water basins (plunge pool <-> river <-> lake) with ZERO hard junction seams!
+    @inline(__always)
+    private static func smoothMax(_ a: Float, _ b: Float, k: Float = 0.22) -> Float {
+        if a <= 0.0001 { return b }
+        if b <= 0.0001 { return a }
+        let h = max(k - abs(a - b), 0.0) / k
+        let overlap = min(a, b)
+        return max(a, b) + h * h * min(k * 0.25, overlap * 0.50)
+    }
+
+    /// Subdivides a coarse polyline into a silky C1-continuous Catmull-Rom spline (~6px spacing).
+    private static func catmullRomSpline(_ pts: [CGPoint], subdivisions: Int = 5) -> [CGPoint] {
+        guard pts.count >= 2 else { return pts }
+        var out: [CGPoint] = []
+        out.reserveCapacity((pts.count - 1) * subdivisions + 1)
+        let n = pts.count
+        for i in 0..<(n - 1) {
+            let p0 = pts[max(0, i - 1)]
+            let p1 = pts[i]
+            let p2 = pts[i + 1]
+            let p3 = pts[min(n - 1, i + 2)]
+            for s in 0..<subdivisions {
+                let t = CGFloat(s) / CGFloat(subdivisions)
+                let t2 = t * t
+                let t3 = t2 * t
+                let x = 0.5 * ((2 * p1.x)
+                    + (-p0.x + p2.x) * t
+                    + (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * t2
+                    + (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t3)
+                let y = 0.5 * ((2 * p1.y)
+                    + (-p0.y + p2.y) * t
+                    + (2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * t2
+                    + (-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3)
+                out.append(CGPoint(x: x, y: y))
+            }
+        }
+        out.append(pts[n - 1])
+        return out
     }
 
     private static func segmentIntersection(_ a: CGPoint, _ b: CGPoint, _ c: CGPoint, _ d: CGPoint) -> CGPoint? {
@@ -712,80 +765,240 @@ enum MeadowRoadMask {
             }
         }
 
-        // 2. Rasterize water depth (B) and temporary turbulence (A) into roadMask
+        // 2. Rasterize SEAMLESS smooth-union water depth into BOTH full-res roadMask.b AND half-res 16-bit waterFlowField!
+        //    - Uses Catmull-Rom C1 smooth river spline + polynomial smoothMax across plungePool/river/lake
+        //      (ZERO polygon kinks, ZERO hard junctions, ZERO segment splicing!)
+        //    - Computes C-infinity continuous curvilinear river coordinates (S, N) via Gaussian-weighted spline projection
+        //      so waves travel continuously downstream along EVERY bend without EVER breaking phase between segments!
+        var wfDepth = [Float](repeating: 0, count: fw * fh)
+        var wfS     = [Float](repeating: 0, count: fw * fh)
+        var wfN     = [Float](repeating: 0, count: fw * fh)
+        var wfFlow  = [Float](repeating: 0, count: fw * fh)
+        var hasWaterField = false
+
         if let water {
-            func paintWaterDisc(center: CGPoint, rx: CGFloat, ry: CGFloat, maxDepth: CGFloat, turb: CGFloat, lobes: CGFloat = 3.0) {
-                let pad: CGFloat = 18
-                let minX = max(0, Int(floor(center.x - rx - pad - bounds.minX)))
-                let maxX = min(width - 1, Int(ceil(center.x + rx + pad - bounds.minX)))
-                let minY = max(0, Int(floor(center.y - ry - pad - bounds.minY)))
-                let maxY = min(height - 1, Int(ceil(center.y + ry + pad - bounds.minY)))
-                guard minX <= maxX, minY <= maxY else { return }
-                for y in minY...maxY { for x in minX...maxX {
-                    let px = CGFloat(x) + bounds.minX + 0.5, py = CGFloat(y) + bounds.minY + 0.5
-                    let nx = (px - center.x) / max(1, rx)
-                    let ny = (py - center.y) / max(1, ry)
-                    let ang = atan2(ny, nx)
-                    let wobble = 1.0 + 0.09 * sin(ang * lobes + 0.7) + 0.05 * cos(ang * (lobes + 2.0) - 0.4)
-                    let d = hypot(nx, ny) / wobble
-                    guard d < 1.0 else { continue }
-                    let val = pow(max(0, 1 - d), 0.58) * maxDepth
-                    let bVal = UInt8(min(255, max(0, Int(val * 255))))
-                    let tVal = UInt8(min(255, max(0, Int(pow(max(0, 1 - d), 0.75) * turb * 255))))
-                    let i = (y * width + x) * 4
-                    rgba[i + 2] = max(rgba[i + 2], bVal)
-                    rgba[i + 3] = max(rgba[i + 3], tVal)
-                } }
+            hasWaterField = water.plungePool != nil || water.lake != nil || water.riverPoints.count >= 2
+            let smoothPts = catmullRomSpline(water.riverPoints, subdivisions: 5)
+
+            // Precompute cumulative arc-length S and smooth unit tangents along the dense Catmull-Rom river spline
+            struct SplineSample {
+                let x: Float, y: Float
+                let tx: Float, ty: Float // unit downstream tangent
+                let nx: Float, ny: Float // unit right-hand normal (-ty, tx)
+                let s: Float             // cumulative downstream arc-length in world pixels
+                let radius: Float        // local channel half-width
+                let u: Float             // normalized 0..1 from waterfall to lake
+            }
+            var spline: [SplineSample] = []
+            var totalArcLen: Float = 1.0
+            if smoothPts.count >= 2 {
+                var cumS: Float = 0
+                let count = Float(smoothPts.count - 1)
+                for idx in 0..<smoothPts.count {
+                    let cur = smoothPts[idx]
+                    if idx > 0 {
+                        let prev = smoothPts[idx - 1]
+                        cumS += Float(hypot(cur.x - prev.x, cur.y - prev.y))
+                    }
+                    // Wide tangent window (±3 samples ≈ ±18px) guarantees C2 smooth tangents everywhere!
+                    let pA = smoothPts[max(0, idx - 3)]
+                    let pB = smoothPts[min(smoothPts.count - 1, idx + 3)]
+                    let dx = Float(pB.x - pA.x), dy = Float(pB.y - pA.y)
+                    let len = max(0.001, sqrt(dx * dx + dy * dy))
+                    let tx = dx / len, ty = dy / len
+                    let u = Float(idx) / count
+                    let estuaryFlare = pow(max(0.0, (u - 0.78) / 0.22), 2.0) * 22.0
+                    var radius: Float = 22.0 + 10.0 * u + sin(u * .pi * 4.0) * 2.5 + estuaryFlare
+                    for br in water.bridges {
+                        let bd = Float(hypot(cur.x - br.center.x, cur.y - br.center.y))
+                        if bd < 54.0 {
+                            let w = max(0.0, 1.0 - bd / 54.0)
+                            let sw = w * w * (3.0 - 2.0 * w)
+                            radius = radius * (1.0 - sw * 0.65) + 21.0 * (sw * 0.65)
+                        }
+                    }
+                    spline.append(SplineSample(
+                        x: Float(cur.x), y: Float(cur.y),
+                        tx: tx, ty: ty, nx: -ty, ny: tx,
+                        s: cumS, radius: radius, u: u
+                    ))
+                }
+                totalArcLen = max(1.0, cumS)
             }
 
-            if let plunge = water.plungePool {
-                paintWaterDisc(center: plunge, rx: 60, ry: 42, maxDepth: 0.96, turb: 1.0, lobes: 3.0)
+            // Helper: smooth-union water depth at any world point (px, py)
+            @inline(__always)
+            func evalBasinDepth(px: Float, py: Float) -> (plunge: Float, lake: Float) {
+                var dPlunge: Float = 0
+                if let plunge = water.plungePool {
+                    let nx = (px - Float(plunge.x)) / 62.0
+                    let ny = (py - Float(plunge.y)) / 44.0
+                    let ang = atan2(ny, nx)
+                    let wob = 1.0 + 0.08 * sin(ang * 3.0 + 0.7) + 0.04 * cos(ang * 5.0 - 0.4)
+                    let d = sqrt(nx * nx + ny * ny) / wob
+                    if d < 1.0 { dPlunge = pow(max(0, 1.0 - d), 0.60) * 0.96 }
+                }
+                var dLake: Float = 0
+                if let lake = water.lake {
+                    let nx1 = (px - Float(lake.center.x)) / max(1.0, Float(lake.rx))
+                    let ny1 = (py - Float(lake.center.y)) / max(1.0, Float(lake.ry))
+                    let a1 = atan2(ny1, nx1)
+                    let w1 = 1.0 + 0.08 * sin(a1 * 3.0 + 0.7) + 0.04 * cos(a1 * 5.0 - 0.4)
+                    let d1 = sqrt(nx1 * nx1 + ny1 * ny1) / w1
+                    let v1: Float = d1 < 1.0 ? pow(max(0, 1.0 - d1), 0.58) : 0
+
+                    let nx2 = (px - Float(lake.lobeCenter.x)) / max(1.0, Float(lake.lobeRx))
+                    let ny2 = (py - Float(lake.lobeCenter.y)) / max(1.0, Float(lake.lobeRy))
+                    let a2 = atan2(ny2, nx2)
+                    let w2 = 1.0 + 0.07 * sin(a2 * 4.0 - 0.6) + 0.04 * cos(a2 * 6.0 + 0.2)
+                    let d2 = sqrt(nx2 * nx2 + ny2 * ny2) / w2
+                    let v2: Float = d2 < 1.0 ? pow(max(0, 1.0 - d2), 0.60) * 0.96 : 0
+                    dLake = smoothMax(v1, v2, k: 0.24)
+                }
+                return (dPlunge, dLake)
             }
-            if water.riverPoints.count >= 2 {
-                let count = water.riverPoints.count - 1
-                for (segIdx, (a, b)) in zip(water.riverPoints, water.riverPoints.dropFirst()).enumerated() {
-                    let dx = b.x - a.x, dy = b.y - a.y
-                    let length2 = dx * dx + dy * dy
-                    guard length2 > 0.001 else { continue }
-                    let maxRadius: CGFloat = 40
-                    let minX = max(0, Int(floor(min(a.x, b.x) - maxRadius - bounds.minX)))
-                    let maxX = min(width - 1, Int(ceil(max(a.x, b.x) + maxRadius - bounds.minX)))
-                    let minY = max(0, Int(floor(min(a.y, b.y) - maxRadius - bounds.minY)))
-                    let maxY = min(height - 1, Int(ceil(max(a.y, b.y) + maxRadius - bounds.minY)))
-                    guard minX <= maxX, minY <= maxY else { continue }
-                    for y in minY...maxY { for x in minX...maxX {
-                        let px = CGFloat(x) + bounds.minX + 0.5, py = CGFloat(y) + bounds.minY + 0.5
-                        let t = max(0, min(1, ((px - a.x) * dx + (py - a.y) * dy) / length2))
-                        let u = (CGFloat(segIdx) + t) / CGFloat(count)
-                        let estuaryFlare = pow(max(0, (u - 0.80) / 0.20), 2.0) * 18.0
-                        var radius = 22 + 10 * u + sin(u * .pi * 4.0) * 3.0 + estuaryFlare
-                        for br in water.bridges {
-                            let bd = hypot(px - br.center.x, py - br.center.y)
-                            if bd < 52 {
-                                let w = max(0, 1 - bd / 52)
-                                radius = radius * (1 - w * 0.65) + 21.0 * (w * 0.65)
-                            }
-                        }
-                        let distance = hypot(px - a.x - t * dx, py - a.y - t * dy)
-                        guard distance < radius else { continue }
-                        let val = pow(max(0, 1 - distance / radius), 0.66) * 0.88
-                        let bVal = UInt8(min(255, max(0, Int(val * 255))))
-                        let rapid = (0.34 + 0.30 * (1.0 - u)) * pow(max(0, 1 - distance / radius), 0.85)
-                        let tVal = UInt8(min(255, max(0, Int(rapid * 255))))
-                        let i = (y * width + x) * 4
-                        rgba[i + 2] = max(rgba[i + 2], bVal)
-                        rgba[i + 3] = max(rgba[i + 3], tVal)
-                    } }
+
+            // Build spatial buckets by half-res row (every 16 world px) so evaluating exact smooth river + (S, N) is O(1) fast!
+            let bucketH: Float = 16.0
+            let numBuckets = max(1, Int(ceil(Float(height) / bucketH)) + 2)
+            var splineBuckets = [[Int]](repeating: [], count: numBuckets)
+            for (idx, sp) in spline.enumerated() {
+                let bMin = max(0, Int(floor((sp.y - Float(bounds.minY) - 115.0) / bucketH)))
+                let bMax = min(numBuckets - 1, Int(ceil((sp.y - Float(bounds.minY) + 115.0) / bucketH)))
+                if bMin <= bMax {
+                    for b in bMin...bMax { splineBuckets[b].append(idx) }
                 }
             }
-            if let lake = water.lake {
-                paintWaterDisc(center: lake.center, rx: lake.rx, ry: lake.ry, maxDepth: 1.0, turb: 0.14, lobes: 3.0)
-                paintWaterDisc(center: lake.lobeCenter, rx: lake.lobeRx, ry: lake.lobeRy, maxDepth: 0.96, turb: 0.10, lobes: 4.0)
+
+            // 2a. Compute silky half-res 16-bit WaterFlowField (depth, continuous S, continuous N, flowStrength)
+            let invTwoSigma2: Float = 1.0 / (2.0 * 24.0 * 24.0)
+            for fy in 0..<fh {
+                let py = Float(bounds.minY) + (Float(fy) + 0.5) * 2.0
+                let row = fy * fw
+                let bIdx = max(0, min(numBuckets - 1, Int(floor((py - Float(bounds.minY)) / bucketH))))
+                let nearIndices = splineBuckets[bIdx]
+                for fx in 0..<fw {
+                    let px = Float(bounds.minX) + (Float(fx) + 0.5) * 2.0
+                    let (dPlunge, dLake) = evalBasinDepth(px: px, py: py)
+
+                    // Smooth river distance + Gaussian-weighted continuous curvilinear (S, N)
+                    var bestDist: Float = 1e6
+                    var bestIdx = -1
+                    var wSum: Float = 0
+                    var sAcc: Float = 0
+                    var nAcc: Float = 0
+                    var uAcc: Float = 0
+                    var radAcc: Float = 0
+
+                    for si in nearIndices {
+                        let sp = spline[si]
+                        let dx = px - sp.x, dy = py - sp.y
+                        let d2 = dx * dx + dy * dy
+                        if d2 < 110.0 * 110.0 {
+                            let d = sqrt(d2)
+                            if d < bestDist { bestDist = d; bestIdx = si }
+                            let w = exp(-d2 * invTwoSigma2)
+                            let localS = sp.s + dx * sp.tx + dy * sp.ty
+                            let localN = dx * sp.nx + dy * sp.ny
+                            wSum += w
+                            sAcc += w * localS
+                            nAcc += w * localN
+                            uAcc += w * sp.u
+                            radAcc += w * sp.radius
+                        }
+                    }
+
+                    var dRiver: Float = 0
+                    var curS: Float = 0
+                    var curN: Float = 0
+                    var curU: Float = 0
+                    if wSum > 1e-6 && bestIdx >= 0 {
+                        curS = sAcc / wSum
+                        curN = nAcc / wSum
+                        curU = uAcc / wSum
+                        let smoothRad = radAcc / wSum
+                        // Use true perpendicular distance |curN| inside river corridor (zero circle-cap bumps!)
+                        let effDist = min(bestDist, abs(curN) * 0.35 + bestDist * 0.65)
+                        if effDist < smoothRad {
+                            dRiver = pow(max(0.0, 1.0 - effDist / smoothRad), 0.66) * 0.90
+                        }
+                    } else if let lake = water.lake, dLake > 0.001 {
+                        // Smoothly extrapolate S/N into the far lake basin along the inflow axis
+                        let lastSp = spline.last
+                        let tx = lastSp?.tx ?? 0.0, ty = lastSp?.ty ?? 1.0
+                        let nx = -ty, ny = tx
+                        let dx = px - Float(lake.center.x), dy = py - Float(lake.center.y)
+                        curS = totalArcLen + dx * tx + dy * ty
+                        curN = dx * nx + dy * ny
+                        curU = 1.0
+                    }
+
+                    // Smooth-union plunge pool + river + lake (ZERO sharp junctions or splicing creases!)
+                    let dPR = smoothMax(dPlunge, dRiver, k: 0.22)
+                    let depth = min(1.0, smoothMax(dPR, dLake, k: 0.24))
+                    wfDepth[row + fx] = depth
+                    wfS[row + fx] = curS
+                    wfN[row + fx] = curN
+
+                    // Smooth flowStrength: 1.0 in waterfall/river -> smoothly calms down to 0.08 in lake basin!
+                    var flowStr: Float = 0.0
+                    if depth > 0.001 || wSum > 1e-4 {
+                        let riverContrib = max(dPlunge, dRiver)
+                        let lakeCalm = dLake > 0.01 ? min(1.0, max(0.0, (dLake - riverContrib * 0.45) * 1.45)) : 0.0
+                        let estuaryFade = 1.0 - max(0.0, min(1.0, (curU - 0.84) / 0.16)) * 0.65
+                        flowStr = max(0.0, min(1.0, estuaryFade * (1.0 - lakeCalm * 0.90)))
+                        if dPlunge > 0.08 { flowStr = max(flowStr, min(1.0, dPlunge * 1.35)) }
+                    }
+                    wfFlow[row + fx] = flowStr
+                }
+            }
+
+            // Gentle 1-pass 3x3 smoothing on wfDepth (eliminates any micro-kinks along shoreline)
+            var depthTmp = wfDepth
+            for fy in 1..<(fh - 1) {
+                let row = fy * fw
+                for fx in 1..<(fw - 1) {
+                    let c = wfDepth[row + fx]
+                    if c > 0.0005 || wfDepth[row + fx - 1] > 0.0005 || wfDepth[row + fx + 1] > 0.0005
+                        || wfDepth[(fy - 1) * fw + fx] > 0.0005 || wfDepth[(fy + 1) * fw + fx] > 0.0005 {
+                        let avg = (c * 4.0
+                            + wfDepth[row + fx - 1] + wfDepth[row + fx + 1]
+                            + wfDepth[(fy - 1) * fw + fx] + wfDepth[(fy + 1) * fw + fx]
+                            + (wfDepth[(fy - 1) * fw + fx - 1] + wfDepth[(fy - 1) * fw + fx + 1]
+                               + wfDepth[(fy + 1) * fw + fx - 1] + wfDepth[(fy + 1) * fw + fx + 1]) * 0.5) / 10.0
+                        depthTmp[row + fx] = avg
+                    }
+                }
+            }
+            wfDepth = depthTmp
+
+            // 2b. Mirror the exact smooth water depth & turbulence into full-res roadMask.b / roadMask.a
+            //     by bilinearly upsampling wfDepth & wfFlow so roadMask and waterFlowField match 100% identically!
+            for y in 0..<height {
+                let ffy = max(0.0, min(Float(fh - 1), (Float(y) + 0.5) * 0.5 - 0.5))
+                let y0 = Int(floor(ffy)), y1 = min(fh - 1, y0 + 1)
+                let ty = ffy - Float(y0)
+                let r0 = y0 * fw, r1 = y1 * fw
+                for x in 0..<width {
+                    let ffx = max(0.0, min(Float(fw - 1), (Float(x) + 0.5) * 0.5 - 0.5))
+                    let x0 = Int(floor(ffx)), x1 = min(fw - 1, x0 + 1)
+                    let tx = ffx - Float(x0)
+                    let d00 = wfDepth[r0 + x0], d10 = wfDepth[r0 + x1]
+                    let d01 = wfDepth[r1 + x0], d11 = wfDepth[r1 + x1]
+                    let dVal = (d00 * (1 - tx) + d10 * tx) * (1 - ty) + (d01 * (1 - tx) + d11 * tx) * ty
+                    guard dVal > 0.002 else { continue }
+                    let f00 = wfFlow[r0 + x0], f10 = wfFlow[r0 + x1]
+                    let f01 = wfFlow[r1 + x0], f11 = wfFlow[r1 + x1]
+                    let fVal = (f00 * (1 - tx) + f10 * tx) * (1 - ty) + (f01 * (1 - tx) + f11 * tx) * ty
+                    let i = (y * width + x) * 4
+                    rgba[i + 2] = UInt8(min(255, max(0, Int(dVal * 255.0))))
+                    rgba[i + 3] = UInt8(min(255, max(0, Int((0.15 + fVal * 0.72) * pow(dVal, 0.7) * 255.0))))
+                }
             }
 
             // Clear muddy road dirt cleanly under the entire open water span beneath every bridge!
             for bridge in water.bridges {
-                let rad: CGFloat = 34
+                let rad: CGFloat = 36
                 let minX = max(0, Int(floor(bridge.center.x - rad - bounds.minX)))
                 let maxX = min(width - 1, Int(ceil(bridge.center.x + rad - bounds.minX)))
                 let minY = max(0, Int(floor(bridge.center.y - rad - bounds.minY)))
@@ -793,7 +1006,7 @@ enum MeadowRoadMask {
                 guard minX <= maxX, minY <= maxY else { continue }
                 for y in minY...maxY { for x in minX...maxX {
                     let i = (y * width + x) * 4
-                    if rgba[i + 2] > 40 {
+                    if rgba[i + 2] > 28 {
                         let px = CGFloat(x) + bounds.minX + 0.5, py = CGFloat(y) + bounds.minY + 0.5
                         let along = abs((px - bridge.center.x) * bridge.roadDir.dx + (py - bridge.center.y) * bridge.roadDir.dy)
                         if along < 30 {
@@ -957,6 +1170,25 @@ enum MeadowRoadMask {
                 provider: terrProvider, decode: nil, shouldInterpolate: true, intent: .defaultIntent
               )
         else { fatalError("Terrain mask allocation failed") }
-        return TerrainTextures(roadMask: roadImg, terrainField: terrImg)
+        // Pack half-res 16-bit rgba16Unorm WaterFlowField (0.06px arc-length precision, ZERO segment jumps!)
+        var waterFlowOut: WaterFlowField? = nil
+        if hasWaterField {
+            var wfU16 = [UInt16](repeating: 0, count: fw * fh * 4)
+            for idx in 0..<(fw * fh) {
+                let dClamped = max(0.0, min(1.0, wfDepth[idx]))
+                let sNorm = max(0.0, min(1.0, (wfS[idx] + 128.0) / 4096.0))
+                let nNorm = max(0.0, min(1.0, (wfN[idx] + 256.0) / 512.0))
+                let fNorm = max(0.0, min(1.0, wfFlow[idx]))
+                let o = idx * 4
+                wfU16[o]     = UInt16(dClamped * 65535.0)
+                wfU16[o + 1] = UInt16(sNorm * 65535.0)
+                wfU16[o + 2] = UInt16(nNorm * 65535.0)
+                wfU16[o + 3] = UInt16(fNorm * 65535.0)
+            }
+            let wfData = wfU16.withUnsafeBufferPointer { Data(buffer: $0) }
+            waterFlowOut = WaterFlowField(width: fw, height: fh, data: wfData)
+        }
+
+        return TerrainTextures(roadMask: roadImg, terrainField: terrImg, waterFlowField: waterFlowOut)
     }
 }

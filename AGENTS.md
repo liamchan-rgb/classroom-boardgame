@@ -1,3 +1,20 @@
+## 大地图高清晶透无接缝水系、瀑布彩虹、稳态去闪阴影、高密植被与生态小动物/风吹花叶升级（2026-11-26，基于v0.32.4/build48，未改版本号、未存档）
+
+针对两批实机反馈（瀑布水流反向、交汇处缺水花雾气彩虹、水体分段拼接与硬边线及波浪相位不连贯、水体高清清澈透亮与波光反射强化；植被密度种类加密少露草皮、增加环境小动物、减少阴影闪动、按植被增加随风飞舞花瓣树叶草叶），完成全链路升级与实机复拍验收：
+- **瀑布流向根因修复 + 交汇水花/雾气/折射彩虹**（`EnvironmentShaders.swift`、`LivingWorld.swift`）：
+  - 根因修复：`waterfall` 原 `uv.y * 4.8 + t * 2.5 * accel(uv.y)` 使 `dPhi/dy` 在 `t > 2.67s` 时变负导致瀑布反向向上流动；现改为单调非线性纵坐标 `yCurve = 1 - drop^0.76` 加常量速度 `+t * speed`，保证任意时长严格自上而下重力加速倾泻。
+  - 在瀑布-河道交汇处重写 `waterfallMist`（去除极角星纹改为笛卡尔翻涌泡沫云、升腾水雾与柔和阳光折射彩虹弧），并在 `LivingWorld.buildWaterfallCascade` 叠加物理抛物线飞溅水滴粒子。
+- **16 位连续流场无接缝高清晶透水体与夸张波光反射**（`MeadowRoadMask.swift`、`MeadowShadowRenderer.swift`、`ShadowLabShaders.metal`、`MeadowLoader.swift`、`GameScene.swift`）：
+  - 引入 Catmull-Rom 平滑河道样条 + 零保留平滑并集水深 `smoothMax`（干地严格归零、仅在潭/河/湖交界处平滑融合）及半分辨率 16 位 `rgba16Unorm` 纹理 `WaterFlow`（Metal `texture(8)`），通过高斯加权样条投影编码 0.06px 精度的连续弧长 `streamS`、横向坐标 `streamN` 与 `flowStrength`，彻底消除分段拼接感、硬岸线与跨段波浪断层。
+  - `MeadowShadowRenderer.encodeComposite` 将地表/水体缓冲升级至 Retina 原生分辨率（上限 2560px）；`meadowGroundFragment` 调校为晶莹通透的翡翠蓝绿水色配水底卵石与动态焦散，并以黄金时刻斜射阳光角在迎光波峰激发高对比金白反光带与钻石波光点。
+- **阴影稳态化与大幅降闪**（`MeadowShadowRenderer.swift`、`ShadowLabShaders.metal`、`EnvironmentShaders.swift`）：
+  - `MeadowSun.cast(at:)` 保持稳态不再逐帧旋转，`MeadowShadowRenderer.makeUniforms` 改为围绕视口中心构建高密度阴影视锥并在光源空间做整数 texel 对齐（消除静态阴影像素爬行）；阴影片元改用线性采样与阻尼树冠摆动，剔除贴地小花草的深度图噪点，接收端升级 9 采样高斯 PCF，并放缓云影与对角光束移动速度。实测 0.45 秒双帧建筑阴影像素差均值由 `11.41 (p95=42)` 降至 `1.37 (p95=2)`。
+- **高密多样植被、8 件新 32 位像素资产、环境小动物与植被匹配风吹花叶草**（`Assets.xcassets/`、`ShadowLabGeometry.swift`、`LivingWorld.swift`、`MeadowAmbientLife.swift`、`generate_xcode_project.py`）：
+  - 仅消耗 2 次 2×2 纯白底生图并做数学去白边，新增 4 件地被花木（`MapCloverMossPatch`、`MapWildflowerBed`、`MapFloweringShrub`、`MapReedsCattail`）与 4 种 32 位像素小动物（`MapCritterBunny`、`MapCritterSquirrel`、`MapCritterDuck`、`MapCritterBird`），零改动既有锁定资源。
+  - 大幅提升林木群落、树基伴生灌木地被、草地三叶草/野花/芦苇毯与路边草花密度并在地表着色器补充微草/三叶草/零星野花细节，同时将分批挂载步长由 `12` 提至 `32` 加快加载。
+  - 新增 `MeadowAmbientLife` 驱动草地兔（轻跳与呼吸）、林间松鼠、湖面绿头鸭（带水波纹）、滑翔林鸟、花丛双翼蝴蝶、河湖蜻蜓，以及按周围真实树种/草丛生成的随风飞舞樱花瓣、红枫金叶、翠绿树叶与草叶。
+- **实测与未实测边界**：`generate_xcode_project.py`、`validate_xcode_project.py`（93 Swift 源码校验通过）、`check_custom_appearance.py`（837 原始资源校验通过）、`scripts/local-build.sh test`（配置、外观校验、工具单测、`ProbeCore` 8/8、`GameCore` 73/73）与 `MAC_OPEN=0 scripts/local-build.sh mac` 全部通过；Mac Catalyst 实机对 2150px 课堂长图完成两轮 5 区域 Retina 复拍、200% 局部特写与 0.45 秒 5× 帧差稳定性验收（确认瀑布向下倾泻与交汇水花/雾气/彩虹、高清晶透无接缝波光河道、建筑与树影稳态无闪、高密植被/小动物/飞舞花叶均自然融合；测后本机 `ClassroomMeadow`、`ClassroomStage0` 及偏好设置按 `diff -rq` 与 SHA-256 逐字节还原）。未在真机 iPad、外接 TV 双屏及长时间 60 帧连续动态录屏下目视复核。
+
 ## 大地图移除石阶、台地开口楔形自然过渡与跨河漏桥根因修复（2026-11-26，基于v0.32.4/build48，未改版本号、未存档）
 
 针对用户实机近景反馈的两项问题（石阶元素整体效果不佳、希望移除石阶并把台地开口处的纹理过渡做自然；中上部 Asher 旁跨河道路漏放一座桥），完成以下根因修复与实机复拍验收：

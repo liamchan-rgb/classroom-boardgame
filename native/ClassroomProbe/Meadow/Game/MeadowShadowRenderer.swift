@@ -95,16 +95,16 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
     private var gpuStopped = false
 
     convenience init(device: MTLDevice, world: LivingWorld) throws {
-        try self.init(device: device, props: world.casterProps, roadMask: world.roadMask, terrainField: world.terrainField, plungePool: world.waterSystem?.plungePool, bounds: world.worldBounds, seed: world.definition.seed)
+        try self.init(device: device, props: world.casterProps, roadMask: world.roadMask, terrainField: world.terrainField, waterFlowField: world.waterFlowField, plungePool: world.waterSystem?.plungePool, bounds: world.worldBounds, seed: world.definition.seed)
         world.terrain.removeFromParent()
     }
 
     init(device: MTLDevice, props: [SceneDefinition.Prop], roadMask: CGImage,
-         terrainField: CGImage? = nil, plungePool: CGPoint? = nil,
+         terrainField: CGImage? = nil, waterFlowField: MeadowRoadMask.WaterFlowField? = nil, plungePool: CGPoint? = nil,
          bounds: CGRect = LivingWorld.bounds, images: [String: CGImage] = [:], seed: UInt64 = 31827, progress: ((Double, String) -> Void)? = nil) throws {
         self.receiverBounds = bounds
         var biome = MeadowBiomeUniforms()
-        biome.params = SIMD4<Float>(Float(Double(seed % 1024) * 0.61803398875), 1.0, terrainField != nil ? 1.0 : 0.0, 0)
+        biome.params = SIMD4<Float>(Float(Double(seed % 1024) * 0.61803398875), 1.0, terrainField != nil ? 1.0 : 0.0, waterFlowField != nil ? 1.0 : 0.0)
         if let plungePool {
             biome.plunge = SIMD4<Float>(Float(plungePool.x), Float(plungePool.y), 1.0, 0)
         }
@@ -165,7 +165,9 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
         }
         for (index, prop) in props.enumerated() {
             guard let asset = ShadowLabAsset(rawValue: prop.asset), let image = assetImage(prop.asset) else { throw ShadowLabError.setup("未配置投影素材：\(prop.asset)") }
-            if asset.isGroundDecal { continue }
+            // Skip ground decals AND tiny ground-flush flowers/grass tufts from the directional shadow depth map:
+            // eliminates 1px swaying shadow-dot flicker while keeping all trees, shrubs, rocks & buildings crisp!
+            if asset.isGroundDecal || asset.isFlower { continue }
             let instance = ShadowLabInstance(asset: asset, root: Self.root(CGPoint(x: prop.x, y: prop.y)), width: Float(prop.width) / Self.units,
                                              aspect: Float(image.height) / Float(image.width), anchor: SIMD2(0.5, asset.anchorY))
             // Mutate the grouped value in place: extracting a mesh from the
@@ -212,6 +214,9 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
         } else {
             textures["TerrainField"] = textures["RoadMask"]
         }
+        if let waterFlowField {
+            textures["WaterFlow"] = try uploadRGBA16Unorm(waterFlowField)
+        }
         progress?(1, "完成地表投影")
     }
 
@@ -229,6 +234,19 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
     private func draw(_ mesh: ShadowLabMesh, texture: MTLTexture, kind: Float) throws -> Draw {
         guard let buffer = device.makeBuffer(bytes: mesh.vertices, length: mesh.vertices.count * MemoryLayout<ShadowLabVertex>.stride) else { throw ShadowLabError.setup("地图投影网格上传失败") }
         return Draw(buffer: buffer, count: mesh.vertices.count, texture: texture, kind: kind)
+    }
+
+    /// Uploads half-res 16-bit-per-channel (`rgba16Unorm`) continuous water depth & curvilinear (S, N) flow field.
+    private func uploadRGBA16Unorm(_ field: MeadowRoadMask.WaterFlowField) throws -> MTLTexture {
+        let d = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba16Unorm, width: field.width, height: field.height, mipmapped: false)
+        d.storageMode = .shared; d.usage = .shaderRead
+        guard let texture = device.makeTexture(descriptor: d) else { throw ShadowLabError.setup("水系流场纹理分配失败") }
+        field.data.withUnsafeBytes { raw in
+            guard let ptr = raw.baseAddress else { return }
+            texture.replace(region: MTLRegionMake2D(0, 0, field.width, field.height), mipmapLevel: 0, withBytes: ptr, bytesPerRow: field.width * 8)
+        }
+        textureUploadCount += 1
+        return texture
     }
 
     /// Uploads raw unpremultiplied 4-channel data masks (RoadMask / TerrainField) bit-for-bit without alpha premultiplication.
@@ -336,6 +354,7 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
         color.setFragmentTexture(textures["MapGroundSanctum"] ?? textures["MeadowGround"], index: 5)
         color.setFragmentTexture(textures["TerrainField"] ?? textures["RoadMask"], index: 6)
         color.setFragmentTexture(textures["MapCliffWallTile"] ?? textures["MeadowGround"], index: 7)
+        color.setFragmentTexture(textures["WaterFlow"] ?? textures["TerrainField"] ?? textures["RoadMask"], index: 8)
         var settings = SIMD4<Float>(roads ? 1 : 0, alignment ? 1 : 0, Float(receiverBounds.height), 0)
         color.setFragmentBytes(&settings, length: MemoryLayout<SIMD4<Float>>.stride, index: 2)
         var biome = biomeUniforms
@@ -347,8 +366,30 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
     private func makeUniforms(camera: MeadowViewport, time: TimeInterval, sunCast: CGVector, shadows: Bool) -> ShadowLabUniforms {
         let up = ShadowLabMath.cameraUp
         let sun = simd_normalize(SIMD3(-Float(sunCast.dx) * up.z, Float(sunCast.dy) * up.z / up.y, 1))
-        let light = ShadowLabMath.orthographic(halfWidth: max(46, Float(receiverBounds.height)/32), halfHeight: max(46, Float(receiverBounds.height)/32), near: 0.1, far: 180)
-            * ShadowLabMath.lookAt(eye: sun * 85, target: .zero, up: SIMD3(0, 0, 1))
+        // Camera-centered, texel-snapped orthographic shadow frustum:
+        // ~2.5x higher shadow-map resolution than whole-map bounds AND zero sub-texel shadow swimming/flicker!
+        let scaleX = max(0.25, hypot(camera.xAxis.dx, camera.xAxis.dy))
+        let scaleY = max(0.25, hypot(camera.yAxis.dx, camera.yAxis.dy))
+        let visW = Float(camera.size.width / scaleX) / Self.units
+        let visH = Float(camera.size.height / scaleY) / (Self.units * up.y)
+        let halfSpan = max(25.0, min(42.0, max(visW, visH) * 0.72 + 7.0))
+        let baseView = ShadowLabMath.lookAt(eye: sun * 85, target: .zero, up: SIMD3(0, 0, 1))
+        let rawCenterX = (camera.size.width * 0.5 - camera.origin.x) / (abs(camera.xAxis.dx) > 0.05 ? camera.xAxis.dx : scaleX)
+        let rawCenterY = (camera.size.height * 0.5 - camera.origin.y) / (abs(camera.yAxis.dy) > 0.05 ? camera.yAxis.dy : scaleY)
+        let clampedCenter = CGPoint(
+            x: max(receiverBounds.minX, min(receiverBounds.maxX, rawCenterX)),
+            y: max(receiverBounds.minY, min(receiverBounds.maxY, rawCenterY))
+        )
+        let focus = Self.root(clampedCenter)
+        let focusLight = baseView * SIMD4<Float>(focus.x, focus.y, 0, 1)
+        let texel = (halfSpan * 2.0) / Float(shadowSize)
+        let snapX = floor(focusLight.x / texel) * texel
+        let snapY = floor(focusLight.y / texel) * texel
+        var ortho = ShadowLabMath.orthographic(halfWidth: halfSpan, halfHeight: halfSpan, near: 0.1, far: 180)
+        // Shift orthographic frustum cleanly onto texel-snapped focus in light space
+        ortho.columns.3.x -= snapX / halfSpan
+        ortho.columns.3.y -= snapY / halfSpan
+        let light = ortho * baseView
         return ShadowLabUniforms(camera: camera.matrix, light: light, sunTime: SIMD4(sun, Float(time)), options: SIMD4(shadows ? 1 : 0, 1 / Float(shadowSize), 1, 1))
     }
 
@@ -473,11 +514,14 @@ final class MeadowShadowRenderer: NSObject, MTKViewDelegate {
     }
 
     /// The offscreen repeated probe and the live drawable use this same path.
-    /// Keep terrain at one pixel per point and foreground at native Retina size.
+    /// Render terrain & HD crystal water at Retina resolution (capped at 2560px) for crisp ripples, sparkles & cliffs.
     func encodeComposite(command: MTLCommandBuffer, target: MTLRenderPassDescriptor, frame: MeadowFrameState,
                          foreground: SKRenderer, forceBackground: Bool = false) throws {
-        let width = max(1, Int(frame.camera.size.width.rounded(.up)))
-        let height = max(1, Int(frame.camera.size.height.rounded(.up)))
+        let outW = target.colorAttachments[0].texture?.width ?? Int(frame.camera.size.width.rounded(.up))
+        let outH = target.colorAttachments[0].texture?.height ?? Int(frame.camera.size.height.rounded(.up))
+        let cap = min(1.0, 2560.0 / Double(max(1, max(outW, outH))))
+        let width = max(1, Int((Double(outW) * cap).rounded(.up)))
+        let height = max(1, Int((Double(outH) * cap).rounded(.up)))
         var recreated = false
         if backgroundTarget?.width != width || backgroundTarget?.height != height {
             let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm, width: width, height: height, mipmapped: false)

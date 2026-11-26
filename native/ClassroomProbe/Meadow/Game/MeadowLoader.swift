@@ -5,6 +5,7 @@ struct PreparedMeadow {
     let definition: SceneDefinition
     let roadMask: CGImage
     let terrainField: CGImage
+    let waterFlowField: MeadowRoadMask.WaterFlowField?
     let waterSystem: MeadowWaterSystem
     let props: [SceneDefinition.Prop]
     let textures: [String: SKTexture]
@@ -44,6 +45,7 @@ enum MeadowLoader {
                 }
                 let mask = terrainTextures.roadMask
                 let terrainField = terrainTextures.terrainField
+                let waterFlowField = terrainTextures.waterFlowField
                 // Filter out any static non-landmark props inside the river/lake footprint,
                 // and skip redundant standalone MapPonds when they sit too close to the connected river/lake.
                 let safeBaseProps = definition.props.filter { prop in
@@ -67,6 +69,8 @@ enum MeadowLoader {
                        "MapMountainPeakA", "MapMountainPeakB", "MapWaterfallGorge", "MapTerraceCliff",
                        "MapTreeWillow", "MapTreeBirch", "MapTreeCypress", "MapTreeAncientOak",
                        "MapFernsCluster", "MapTallGrassTuft", "MapBerryBush", "MapRiverBoulders",
+                       "MapCloverMossPatch", "MapWildflowerBed", "MapFloweringShrub", "MapReedsCattail",
+                       "MapCritterBunny", "MapCritterSquirrel", "MapCritterDuck", "MapCritterBird",
                        "MapBridgeHoriz", "MapBridgeVert", "MapStairsFront", "MapStairsSide", "MapStoneStairs",
                        "MapLakeIslet", "MapWoodPier", "MapLakeFlora", "MapHillMound", "MapTrailFence"]
                     + HeroFrames.atlasNames).sorted()
@@ -81,7 +85,7 @@ enum MeadowLoader {
                     var lastStage = ""
                     renderer = try MeadowShadowRenderer(
                         device: device, props: props, roadMask: mask,
-                        terrainField: terrainField, plungePool: water.plungePool,
+                        terrainField: terrainField, waterFlowField: waterFlowField, plungePool: water.plungePool,
                         bounds: definition.worldBounds, images: images, seed: definition.seed
                     ) {
                         report(0.50 + $0 * 0.23, $1)
@@ -107,7 +111,7 @@ enum MeadowLoader {
                 }
                 let effects = EnvironmentShaders(worldHeight:definition.worldBounds.height)
                 let prepared = PreparedMeadow(definition: definition, roadMask: mask, terrainField: terrainField,
-                                             waterSystem: water, props: props,
+                                             waterFlowField: waterFlowField, waterSystem: water, props: props,
                                              textures: textures, heroes: heroes, effects: effects, renderer: renderer)
                 report(0.84, "上传场景纹理")
                 if diagnosticSize != nil { MeadowGPUDiagnostics.shared.beginStage("B00 SpriteKit 纹理预加载", kind: "SpriteKit preload API; GPU completion is not exposed") }

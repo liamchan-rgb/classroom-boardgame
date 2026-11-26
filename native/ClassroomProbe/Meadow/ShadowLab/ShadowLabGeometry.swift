@@ -39,9 +39,10 @@ enum ShadowLabAsset: String {
     case cliffCorner = "MapCliffCorner", hillMound = "MapHillMound", waterfall = "MapWaterfall"
     case mountainPeakA = "MapMountainPeakA", mountainPeakB = "MapMountainPeakB"
     case waterfallGorge = "MapWaterfallGorge", terraceCliff = "MapTerraceCliff", riverBoulders = "MapRiverBoulders"
-    case shrub = "Shrub", shrubAutumn = "MapShrubAutumn", berryBush = "MapBerryBush"
+    case shrub = "Shrub", shrubAutumn = "MapShrubAutumn", berryBush = "MapBerryBush", floweringShrub = "MapFloweringShrub"
     case flowers = "Flowers", flowersBlue = "MapFlowersBlue", flowersCrimson = "MapFlowersCrimson", flowersLavender = "MapFlowersLavender"
     case fernsCluster = "MapFernsCluster", tallGrassTuft = "MapTallGrassTuft"
+    case cloverMossPatch = "MapCloverMossPatch", wildflowerBed = "MapWildflowerBed", reedsCattail = "MapReedsCattail"
     case banner = "Banner", victoryBanner = "MapPropVictoryBanner"
     case combatOutpost = "NodeCombatOutpost", combatTower = "NodeCombatTower", combatDen = "NodeCombatDen"
     case bossSanctum = "NodeBossSanctum", bossAltar = "NodeBossAltar", bossRuins = "NodeBossRuins"
@@ -66,15 +67,15 @@ enum ShadowLabAsset: String {
     }
     var isFlower: Bool {
         switch self {
-        case .flowers, .flowersBlue, .flowersCrimson, .flowersLavender, .fernsCluster, .tallGrassTuft: return true
+        case .flowers, .flowersBlue, .flowersCrimson, .flowersLavender, .fernsCluster, .tallGrassTuft, .wildflowerBed, .reedsCattail: return true
         default: return false
         }
     }
-    var isShrub: Bool { self == .shrub || self == .shrubAutumn || self == .berryBush }
+    var isShrub: Bool { self == .shrub || self == .shrubAutumn || self == .berryBush || self == .floweringShrub }
     var isGroundDecal: Bool {
         switch self {
         case .groundStonePlaza, .pond, .bridgeWood, .bridgeHoriz, .bridgeVert,
-             .lakeIslet, .woodPier, .lakeFlora, .stoneStairs, .stairsFront, .stairsSide:
+             .lakeIslet, .woodPier, .lakeFlora, .stoneStairs, .stairsFront, .stairsSide, .cloverMossPatch:
             return true
         default:
             return false
@@ -94,11 +95,11 @@ enum ShadowLabAsset: String {
         case .rockLow, .rockHigh, .rockSmall, .rockSlate, .rockAutumn, .cliffTerrace, .cliffCorner,
              .hillMound, .waterfall, .mountainPeakA, .mountainPeakB, .waterfallGorge, .terraceCliff,
              .riverBoulders, .logMushrooms: return 5
-        case .shrub, .shrubAutumn, .berryBush, .campfire, .supplies: return 6
-        case .flowers, .flowersBlue, .flowersCrimson, .flowersLavender, .fernsCluster, .tallGrassTuft: return 7
+        case .shrub, .shrubAutumn, .berryBush, .floweringShrub, .campfire, .supplies: return 6
+        case .flowers, .flowersBlue, .flowersCrimson, .flowersLavender, .fernsCluster, .tallGrassTuft, .wildflowerBed, .reedsCattail: return 7
         case .banner, .victoryBanner: return 8
         case .groundStonePlaza, .pond, .bridgeWood, .bridgeHoriz, .bridgeVert,
-             .lakeIslet, .woodPier, .lakeFlora, .stoneStairs, .stairsFront, .stairsSide: return 9
+             .lakeIslet, .woodPier, .lakeFlora, .stoneStairs, .stairsFront, .stairsSide, .cloverMossPatch: return 9
         }
     }
     var isTree: Bool { casterKind == 0 }
@@ -127,10 +128,10 @@ enum ShadowLabAsset: String {
         case .trailFence: return 0.06
         case .campfire: return 0.12
         case .signpost, .lanternPost, .ruinedPillar, .victoryBanner: return 0.05
-        case .shrub, .shrubAutumn, .berryBush, .flowers, .flowersBlue, .flowersCrimson, .flowersLavender,
-             .fernsCluster, .tallGrassTuft, .banner: return 0.04
+        case .shrub, .shrubAutumn, .berryBush, .floweringShrub, .flowers, .flowersBlue, .flowersCrimson, .flowersLavender,
+             .fernsCluster, .tallGrassTuft, .wildflowerBed, .reedsCattail, .banner: return 0.04
         case .groundStonePlaza, .pond, .bridgeWood, .bridgeHoriz, .bridgeVert,
-             .lakeIslet, .woodPier, .lakeFlora, .stoneStairs, .stairsFront, .stairsSide: return 0.50
+             .lakeIslet, .woodPier, .lakeFlora, .stoneStairs, .stairsFront, .stairsSide, .cloverMossPatch: return 0.50
         }
     }
 }

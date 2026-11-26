@@ -4,12 +4,10 @@ import SpriteKit
 enum MeadowSun {
     static let cast = CGVector(dx: 0.86, dy: 0.62)
 
-    /// Atmospheric rays fan out from a viewport source; ground shadows remain directional.
+    /// Keep ground shadow direction rock-steady so static shadows never swim or flicker across shadow-map texels.
     static func cast(at time: TimeInterval) -> CGVector {
-        let baseAngle = atan2(cast.dy, cast.dx)
-        let angle = baseAngle + CGFloat(0.11 * sin(time * 0.035))
-        let magnitude = hypot(cast.dx, cast.dy)
-        return CGVector(dx: cos(angle) * magnitude, dy: sin(angle) * magnitude)
+        _ = time
+        return cast
     }
 }
 
@@ -40,12 +38,12 @@ final class EnvironmentShaders {
                    mix(hash21(i + vec2(0.0, 1.0)), hash21(i + vec2(1.0)), f.x), f.y);
     }
     float meadowCloud(vec2 p, float t) {
-        return noise21((p - vec2(t * 14.0, t * 5.0)) * 0.0065);
+        return noise21((p - vec2(t * 6.0, t * 2.2)) * 0.0055);
     }
     float sunStrength(vec2 p, float t) {
-        float cloud = smoothstep(0.25, 0.76, meadowCloud(p, t));
+        float cloud = smoothstep(0.22, 0.80, meadowCloud(p, t));
         float warmth = exp(-length(p - vec2(-100.0, -170.0)) * 0.0012);
-        return 0.65 + cloud * 0.36 + warmth * 0.07;
+        return 0.78 + cloud * 0.24 + warmth * 0.06;
     }
     float canopyBend(float height, float t, float phase, float wind) {
         float root = smoothstep(0.06, 0.95, height);
@@ -218,101 +216,154 @@ final class EnvironmentShaders {
             vec2 delta = viewPoint + u_viewSize * vec2(0.035, 0.055);
             float angular = delta.y / max(delta.x + delta.y, 0.001);
             float radialDistance = length(delta) / referenceSize;
-            float sway = sin(u_sceneTime * 0.38 + angular * 9.0) * 0.40;
-            float axis = angular * 64.0 - u_sceneTime * 0.75 + sway;
+            float sway = sin(u_sceneTime * 0.18 + angular * 9.0) * 0.25;
+            float axis = angular * 64.0 - u_sceneTime * 0.18 + sway;
             float rays = pow(0.5 + 0.5 * sin(axis), 4.0);
-            rays += pow(0.5 + 0.5 * sin(angular * 108.0 - u_sceneTime * 0.49 + sway * 0.7 + 1.3), 6.0) * 0.22;
+            rays += pow(0.5 + 0.5 * sin(angular * 108.0 - u_sceneTime * 0.14 + sway * 0.6 + 1.3), 6.0) * 0.18;
             float castAngle = u_sunCast.y / max(u_sunCast.x + u_sunCast.y, 0.001);
             float fan = 1.0 - smoothstep(0.36, 0.72, abs(angular - castAngle));
             float falloff = exp(-radialDistance * 0.85) * smoothstep(0.025, 0.14, radialDistance);
-            float travel = 0.72 + 0.28 * sin(radialDistance * 10.0 - u_sceneTime * 1.10 + angular * 12.0);
+            float travel = 0.84 + 0.16 * sin(radialDistance * 10.0 - u_sceneTime * 0.32 + angular * 12.0);
             float glow = exp(-radialDistance * 3.5) * 0.045;
-            float cloud = smoothstep(0.18, 0.78, meadowCloud(p, u_sceneTime));
-            float alpha = (rays * 0.29 * fan * travel + glow) * falloff * mix(0.55, 1.0, cloud);
+            float cloud = smoothstep(0.22, 0.80, meadowCloud(p, u_sceneTime));
+            float alpha = (rays * 0.17 * fan * travel + glow) * falloff * mix(0.70, 1.0, cloud);
             gl_FragColor = vec4(vec3(1.0, 0.84, 0.48) * alpha, alpha);
         }
         """, uniforms: [clock(), SKUniform(name: "u_sunCast",
                                             vectorFloat2: SIMD2(Float(MeadowSun.cast.dx), Float(MeadowSun.cast.dy))),
                         SKUniform(name: "u_viewSize", vectorFloat2: SIMD2(1280, 720))])
 
-        // Real-time animated flowing waterfall cascade (pure SKUniforms, zero SKAttributes, strictly ascending smoothstep):
-        // shares exact realistic alpine-emerald & sunlit foam palette with meadowGroundFragment!
+        // Real-time animated flowing waterfall cascade (pure SKUniforms, strictly downward gravity acceleration!):
+        // Uses nonlinear vertical mapping `yCurve` with CONSTANT time multipliers so dPhi/dy > 0 ALWAYS
+        // (guaranteed downward flow at every t >= 0, never reversing!). Harmonized with crystal-clear alpine river!
         waterfall = SKShader(source: Self.noise + """
         void main() {
             vec2 uv = v_tex_coord; // uv.y = 1.0 top crest, uv.y = 0.0 bottom plunge impact
             float t = u_sceneTime;
             float drop = 1.0 - uv.y; // 0 at top lip -> 1 at plunge pool base
-            // Organic tapered width widening slightly as the cascade tumbles over the lower ledge
-            float halfW = mix(0.24, 0.39, pow(max(drop, 0.001), 0.85));
+            // Organic tapered chute widening gently as the cascade tumbles into the plunge pool
+            float halfW = mix(0.23, 0.41, pow(max(drop, 0.001), 0.82));
             float xDist = abs(uv.x - 0.5);
-            float edgeWarp = (noise21(vec2(uv.x * 5.0, uv.y * 7.0 + t * 2.4)) - 0.5) * 0.085;
-            float bodyMask = 1.0 - smoothstep(halfW - 0.11, halfW + 0.03, xDist + edgeWarp);
+            // Strictly downward-scrolling edge turbulence (constant +t speed so flow is ALWAYS top -> bottom!)
+            float yCurve = 1.0 - pow(max(drop, 0.0005), 0.76);
+            float edgeWarp = (noise21(vec2(uv.x * 5.5, yCurve * 6.5 + t * 3.0)) - 0.5) * 0.085;
+            float bodyMask = 1.0 - smoothstep(halfW - 0.10, halfW + 0.03, xDist + edgeWarp);
             float topMask = 1.0 - smoothstep(0.86, 0.99, uv.y);
-            float botMask = smoothstep(0.01, 0.16, uv.y);
+            float botMask = smoothstep(0.01, 0.14, uv.y);
             float mask = bodyMask * topMask * botMask;
 
-            // Multi-speed vertical gravity-accelerated water filaments pouring downward!
-            float accel = 1.0 + drop * 0.72;
-            float s1 = noise21(vec2(uv.x * 15.0, uv.y * 4.8 + t * 2.5 * accel));
-            float s2 = noise21(vec2(uv.x * 26.0 + 4.3, uv.y * 8.2 + t * 3.9 * accel));
-            float s3 = noise21(vec2(uv.x * 44.0 - 2.1, uv.y * 12.5 + t * 5.4 * accel));
-            float braid = 0.70 + 0.30 * cos((uv.x - 0.5) * 19.0 + sin(uv.y * 6.5 + t * 3.1) * 0.75);
-            float streams = (s1 * 0.46 + s2 * 0.35 + s3 * 0.19) * braid;
+            // Multi-octave high-definition water filaments accelerating smoothly DOWNWARD (never multiplying t by y!)
+            float s1 = noise21(vec2(uv.x * 16.0, yCurve * 4.4 + t * 2.9));
+            float s2 = noise21(vec2(uv.x * 29.0 + 4.3, yCurve * 7.8 + t * 4.4));
+            float s3 = noise21(vec2(uv.x * 52.0 - 2.1, yCurve * 12.6 + t * 6.2));
+            float braid = 0.68 + 0.32 * cos((uv.x - 0.5) * 20.0 + sin(yCurve * 6.0 + t * 3.4) * 0.65);
+            float streams = (s1 * 0.44 + s2 * 0.36 + s3 * 0.20) * braid;
 
-            // Exact realistic alpine mountain-stream colors harmonized with meadowGroundFragment river!
-            vec3 deepStream = vec3(0.055, 0.155, 0.175);
-            vec3 midStream  = vec3(0.135, 0.285, 0.295);
-            vec3 litRibbon  = vec3(0.75, 0.84, 0.82);
-            vec3 foamSpray  = vec3(0.92, 0.95, 0.91);
+            // Crystal-clear sunlit alpine turquoise-aqua palette harmonized with HD meadowGroundFragment river!
+            vec3 deepStream = vec3(0.08, 0.30, 0.37);
+            vec3 midStream  = vec3(0.22, 0.58, 0.65);
+            vec3 litRibbon  = vec3(0.84, 0.96, 0.97);
+            vec3 foamSpray  = vec3(0.98, 0.99, 0.96);
 
-            // Upper-left sunlight bias across the falling water sheet
-            float sideSun = 1.0 - smoothstep(0.22, 0.78, uv.x);
-            vec3 col = mix(deepStream, midStream, smoothstep(0.26, 0.72, streams) * (0.62 + 0.38 * sideSun));
+            // Upper-left warm sunlight illuminating the falling crystal water sheet
+            float sideSun = 1.0 - smoothstep(0.18, 0.80, uv.x);
+            vec3 col = mix(deepStream, midStream, smoothstep(0.22, 0.70, streams) * (0.64 + 0.36 * sideSun));
 
-            // Two-tier rocky ledge splash bursts (upper crest lip + mid-cliff rock ledge + roaring plunge foot)
-            float topLipFoam = exp(-pow((uv.y - 0.86) / 0.08, 2.0)) * smoothstep(0.28, 0.70, s1);
-            float ledgeBurst = exp(-pow((uv.y - 0.46) / 0.10, 2.0)) * smoothstep(0.30, 0.72, s2);
-            float plungeChurn = (1.0 - smoothstep(0.02, 0.28, uv.y)) * smoothstep(0.22, 0.68, s2 * 0.58 + s3 * 0.42);
-            float ribbonHighlight = smoothstep(0.54, 0.80, streams) * (0.55 + 0.45 * sideSun);
+            // Multi-tier aerated splash bursts: crest lip + mid-cliff rock ledge + roaring plunge foot
+            float topLipFoam = exp(-pow((uv.y - 0.86) / 0.075, 2.0)) * smoothstep(0.26, 0.68, s1);
+            float ledgeBurst = exp(-pow((uv.y - 0.47) / 0.095, 2.0)) * smoothstep(0.28, 0.70, s2);
+            float plungeChurn = (1.0 - smoothstep(0.02, 0.30, uv.y)) * smoothstep(0.18, 0.64, s2 * 0.55 + s3 * 0.45);
+            float ribbonHighlight = smoothstep(0.50, 0.78, streams) * (0.58 + 0.42 * sideSun);
+            // Sparkling sunlit water glints pouring down the illuminated filaments
+            float glint = pow(smoothstep(0.68, 0.92, s2 * 0.5 + s3 * 0.5), 3.0) * (0.5 + 0.5 * sideSun);
 
-            col = mix(col, litRibbon, clamp(ribbonHighlight * 0.74 + topLipFoam * 0.46, 0.0, 0.86));
-            col = mix(col, foamSpray, clamp(ledgeBurst * 0.68 + plungeChurn * 0.86 + smoothstep(0.73, 0.91, streams) * 0.54, 0.0, 0.92));
+            col = mix(col, litRibbon, clamp(ribbonHighlight * 0.78 + topLipFoam * 0.52, 0.0, 0.88));
+            col = mix(col, foamSpray, clamp(ledgeBurst * 0.72 + plungeChurn * 0.92 + smoothstep(0.72, 0.90, streams) * 0.56, 0.0, 0.95));
+            col += vec3(1.0, 0.97, 0.84) * glint * 0.48;
 
             vec2 wp = u_wfOrigin + vec2((uv.x - 0.5) * u_wfExtent.x, (0.5 - uv.y) * u_wfExtent.y);
             float light = sunStrength(wp, t);
             col *= light;
 
-            float alpha = mask * clamp(0.44 + streams * 0.50 + plungeChurn * 0.45 + ledgeBurst * 0.30, 0.0, 0.93);
+            float alpha = mask * clamp(0.52 + streams * 0.46 + plungeChurn * 0.46 + ledgeBurst * 0.32, 0.0, 0.95);
             gl_FragColor = vec4(col * alpha, alpha);
         }
         """, uniforms: [
             clock(),
             SKUniform(name: "u_wfOrigin", vectorFloat2: SIMD2(640, 20)),
-            SKUniform(name: "u_wfExtent", vectorFloat2: SIMD2(74, 114))
+            SKUniform(name: "u_wfExtent", vectorFloat2: SIMD2(74, 118))
         ])
 
-        // Soft billowing waterfall mist & spray hovering over the plunge pool (pure SKUniforms)
+        // Waterfall-river junction VFX: billowing Cartesian white foam splash plumes + rising sunlit mist + dreamy arched rainbow!
         waterfallMist = SKShader(source: Self.noise + """
+        vec3 spectralRainbow(float u) {
+            // Vivid yet airy translucent sunlit prism arc: red (outer) -> orange -> yellow -> green -> cyan -> blue -> violet (inner)
+            vec3 c0 = vec3(1.00, 0.34, 0.28);
+            vec3 c1 = vec3(1.00, 0.68, 0.20);
+            vec3 c2 = vec3(0.98, 0.96, 0.30);
+            vec3 c3 = vec3(0.34, 0.92, 0.52);
+            vec3 c4 = vec3(0.24, 0.84, 1.00);
+            vec3 c5 = vec3(0.44, 0.52, 1.00);
+            vec3 c6 = vec3(0.78, 0.42, 0.98);
+            float s = clamp(u, 0.0, 1.0) * 6.0;
+            if (s < 1.0) return mix(c0, c1, s);
+            if (s < 2.0) return mix(c1, c2, s - 1.0);
+            if (s < 3.0) return mix(c2, c3, s - 2.0);
+            if (s < 4.0) return mix(c3, c4, s - 3.0);
+            if (s < 5.0) return mix(c4, c5, s - 4.0);
+            return mix(c5, c6, s - 5.0);
+        }
         void main() {
-            vec2 uv = v_tex_coord;
+            vec2 uv = v_tex_coord; // uv.y = 0 bottom -> 1 top
             float t = u_sceneTime;
-            vec2 d = (uv - vec2(0.5, 0.46)) * vec2(2.0, 2.2);
-            float r = length(d);
-            float radial = 1.0 - smoothstep(0.16, 0.96, r);
-            float n1 = noise21(vec2(uv.x * 5.0, uv.y * 5.0 - t * 0.72));
-            float n2 = noise21(vec2(uv.x * 10.2 + sin(t * 0.6) * 0.8, uv.y * 9.2 - t * 1.32) + 7.2);
-            float puff = smoothstep(0.32, 0.82, n1 * 0.6 + n2 * 0.4);
-            float core = (1.0 - smoothstep(0.0, 0.52, r)) * smoothstep(0.28, 0.74, n2);
             vec2 wp = u_mistOrigin + vec2((uv.x - 0.5) * u_mistExtent.x, (0.5 - uv.y) * u_mistExtent.y);
             float light = sunStrength(wp, t);
-            vec3 mistCol = vec3(0.86, 0.91, 0.88) * light;
-            float alpha = clamp(radial * (puff * 0.44 + core * 0.40), 0.0, 0.58);
-            gl_FragColor = vec4(mistCol * alpha, alpha);
+
+            // 1. Billowing organic Cartesian impact splash foam (ZERO polar atan spokes!)
+            vec2 spD = (uv - vec2(0.43, 0.38)) * vec2(2.7, 3.6);
+            float spR = length(spD);
+            float f1 = noise21(vec2(uv.x * 9.5 + sin(t * 0.9) * 0.35, uv.y * 8.5 - t * 2.8));
+            float f2 = noise21(vec2(uv.x * 18.0 - t * 0.5, uv.y * 15.0 - t * 4.4) + 5.3);
+            float f3 = noise21(vec2(uv.x * 30.0 + t * 0.7, uv.y * 24.0 - t * 6.0) + 12.1);
+            float foamCloud = f1 * 0.46 + f2 * 0.36 + f3 * 0.18;
+            float splashBody = (1.0 - smoothstep(0.10, 0.96, spR)) * smoothstep(0.24, 0.72, foamCloud);
+            float splashHeart = (1.0 - smoothstep(0.0, 0.52, spR)) * (0.45 + 0.55 * smoothstep(0.28, 0.74, f2));
+            float splashAlpha = clamp(splashBody * 0.72 + splashHeart * 0.56, 0.0, 0.88);
+
+            // 2. Soft billowing pearlescent mist clouds rising upward & drifting gently downwind
+            vec2 md = (uv - vec2(0.48, 0.50)) * vec2(1.90, 2.05);
+            float mr = length(md);
+            float mRadial = 1.0 - smoothstep(0.10, 0.95, mr);
+            float mn1 = noise21(vec2(uv.x * 4.6 - t * 0.20, uv.y * 4.8 - t * 0.65));
+            float mn2 = noise21(vec2(uv.x * 9.2 - t * 0.32 + sin(t * 0.45) * 0.35, uv.y * 8.6 - t * 1.15) + 7.2);
+            float puff = smoothstep(0.26, 0.78, mn1 * 0.58 + mn2 * 0.42);
+            float mistAlpha = clamp(mRadial * puff * 0.56, 0.0, 0.54);
+
+            // 3. Dreamy sunlit refracted rainbow arc curving gracefully over the waterfall-river mist plume!
+            vec2 rbD = (uv - vec2(0.55, 0.24)) * vec2(1.02, 1.24);
+            float rbR = length(rbD);
+            float bandPos = (0.46 - rbR) / 0.145; // 0 = outer red, 1 = inner violet
+            float bandShape = smoothstep(0.0, 0.18, bandPos) * (1.0 - smoothstep(0.82, 1.0, bandPos));
+            float archFade = smoothstep(0.03, 0.24, rbD.y) * smoothstep(-0.42, -0.08, rbD.x) * (1.0 - smoothstep(0.22, 0.46, rbD.x));
+            float shimmer = 0.84 + 0.16 * sin(t * 1.1 + rbD.x * 7.0);
+            float rbAlpha = clamp(bandShape * archFade * shimmer * 0.62, 0.0, 0.62);
+            vec3 rbCol = spectralRainbow(bandPos) * 1.08;
+
+            // Composite splash foam + mist + luminous sunlit rainbow cleanly in premultiplied RGBA
+            vec3 splashCol = vec3(0.96, 0.99, 0.99) * light;
+            vec3 mistCol   = vec3(0.90, 0.96, 0.97) * light;
+            float baseAlpha = clamp(splashAlpha + mistAlpha * (1.0 - splashAlpha * 0.58), 0.0, 0.88);
+            vec3 baseCol = mix(mistCol, splashCol, clamp(splashAlpha / max(baseAlpha, 0.001), 0.0, 1.0));
+            // Keep rainbow crisp and glowing clearly over the mist without washing out
+            vec3 outCol = mix(baseCol, rbCol, rbAlpha * 0.82);
+            float outAlpha = clamp(max(baseAlpha, rbAlpha * 0.88) + rbAlpha * 0.18, 0.0, 0.94);
+            vec3 premul = baseCol * baseAlpha * (1.0 - rbAlpha * 0.55) + rbCol * rbAlpha * 0.88;
+            gl_FragColor = vec4(premul, outAlpha);
         }
         """, uniforms: [
             clock(),
             SKUniform(name: "u_mistOrigin", vectorFloat2: SIMD2(640, 56)),
-            SKUniform(name: "u_mistExtent", vectorFloat2: SIMD2(138, 86))
+            SKUniform(name: "u_mistExtent", vectorFloat2: SIMD2(208, 138))
         ])
     }
 
