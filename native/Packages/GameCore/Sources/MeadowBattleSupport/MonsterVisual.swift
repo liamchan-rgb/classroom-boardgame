@@ -4,6 +4,7 @@ import ClassroomGameCore
 /// Species artwork is independent of persistent battle IDs and rule stats.
 public struct MonsterVisualSpec:Equatable {
     public let id:String
+    public init(id:String){self.id=id}
     public var asset:String { "MeadowMonster"+id.prefix(1).uppercased()+id.dropFirst() }
     public static let bossIDs:Set<String>=["caveTroll","ruinDragon","mushroomKing","goblinWarlord","thornTreant","frostPhoenix","eclipseBehemoth"]
     public static let apexIDs:Set<String>=["crystalGolem","frostAlphaWolf"]

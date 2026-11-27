@@ -1,6 +1,9 @@
 import SwiftUI
 import UIKit
 import NaturalLanguage
+#if targetEnvironment(macCatalyst)
+import ObjectiveC
+#endif
 import ClassroomGameCore
 import ClassroomProbeCore
 import MeadowWorldSupport
@@ -86,12 +89,88 @@ struct NotesSelectionTarget: Equatable {
     }
 }
 
+#if targetEnvironment(macCatalyst)
+/// Intercepts `K` at the AppKit event layer before macOS IMK / Chinese IME opens its candidate popup.
+@MainActor
+private final class NotesKeyDownMonitor {
+    static let shared = NotesKeyDownMonitor()
+    private var monitor: Any?
+    weak var activeTextView: NotesTextView?
+
+    func installIfNeeded() {
+        guard monitor == nil, let nsEventCls = NSClassFromString("NSEvent") else { return }
+        let sel = NSSelectorFromString("addLocalMonitorForEventsMatchingMask:handler:")
+        let mask: UInt = 1 << 10 // NSEventMaskKeyDown
+        let block: @convention(block) (AnyObject) -> AnyObject? = { [weak self] event in
+            MainActor.assumeIsolated {
+                guard let self, let tv = self.activeTextView else { return event }
+                return self.handle(event, for: tv)
+            }
+        }
+        typealias Fn = @convention(c) (AnyClass, Selector, UInt, AnyObject) -> Any?
+        if let imp = class_getMethodImplementation(object_getClass(nsEventCls), sel) {
+            let blockObj = unsafeBitCast(block, to: AnyObject.self)
+            monitor = unsafeBitCast(imp, to: Fn.self)(nsEventCls, sel, mask, blockObj)
+        }
+    }
+
+    private func handle(_ event: AnyObject, for tv: NotesTextView) -> AnyObject? {
+        guard tv.isFirstResponder, tv.window?.isKeyWindow == true, tv.markedTextRange == nil else { return event }
+        guard (event.value(forKey: "type") as? NSNumber)?.uintValue == 10 else { return event }
+        let flags = (event.value(forKey: "modifierFlags") as? NSNumber)?.uintValue ?? 0
+        // Ignore Control (1<<18), Option (1<<19), Command (1<<20); plain k and Shift+K both trigger.
+        let disallowed: UInt = (1 << 18) | (1 << 19) | (1 << 20)
+        guard (flags & disallowed) == 0 else { return event }
+        let isRepeat = (event.value(forKey: "isARepeat") as? NSNumber)?.boolValue ?? false
+        guard !isRepeat else { return event }
+        let keyCode = (event.value(forKey: "keyCode") as? NSNumber)?.uint16Value ?? 0
+        let chars = (event.value(forKey: "charactersIgnoringModifiers") as? String)?.lowercased() ?? ""
+        guard chars == "k" || (chars.isEmpty && keyCode == 40) else { return event }
+        guard tv.interceptSelectionKFromMonitor() else { return event }
+        return nil
+    }
+}
+#endif
+
 /// Editable rich-text UITextView supporting Cmd+B / Cmd+U formatting, double-click word cards, and K / bubble on selection.
 final class NotesTextView: UITextView {
     var onTriggerSelection: ((String, CGRect, UIView) -> Void)?
     var onSelectionChange: ((NotesSelectionTarget?) -> Void)?
     var suppressKUntil: TimeInterval = 0
     var suppressSelectionBubbleUntil: TimeInterval = 0
+
+    override func becomeFirstResponder() -> Bool {
+        let ok = super.becomeFirstResponder()
+        #if targetEnvironment(macCatalyst)
+        if ok {
+            NotesKeyDownMonitor.shared.installIfNeeded()
+            NotesKeyDownMonitor.shared.activeTextView = self
+        }
+        #endif
+        return ok
+    }
+
+    override func resignFirstResponder() -> Bool {
+        #if targetEnvironment(macCatalyst)
+        if NotesKeyDownMonitor.shared.activeTextView === self {
+            NotesKeyDownMonitor.shared.activeTextView = nil
+        }
+        #endif
+        return super.resignFirstResponder()
+    }
+
+    override func removeFromSuperview() {
+        #if targetEnvironment(macCatalyst)
+        if NotesKeyDownMonitor.shared.activeTextView === self {
+            NotesKeyDownMonitor.shared.activeTextView = nil
+        }
+        #endif
+        super.removeFromSuperview()
+    }
+
+    func interceptSelectionKFromMonitor() -> Bool {
+        interceptSelectionK(replacementText: "k", deferTrigger: true)
+    }
 
     override var keyCommands: [UIKeyCommand]? {
         var cmds = (super.keyCommands ?? []).filter {
@@ -250,7 +329,8 @@ final class NotesTextView: UITextView {
         onTriggerSelection?(info.term, info.rect, self)
         DispatchQueue.main.async { [weak self, weak hostWindow] in
             self?.onSelectionChange?(nil)
-            self?.resignFirstResponder()
+            guard let self, self.isFirstResponder else { return }
+            self.resignFirstResponder()
             if hostWindow?.rootViewController?.presentedViewController == nil {
                 hostWindow?.rootViewController?.becomeFirstResponder()
             }
@@ -416,6 +496,12 @@ struct NotesWordText: UIViewRepresentable {
         var onSelectionChange: ((NotesSelectionTarget?) -> Void)?
 
         func textViewDidBeginEditing(_ textView: UITextView) {
+            #if targetEnvironment(macCatalyst)
+            if let notesView = textView as? NotesTextView {
+                NotesKeyDownMonitor.shared.installIfNeeded()
+                NotesKeyDownMonitor.shared.activeTextView = notesView
+            }
+            #endif
             onFocus?(true)
             publishSelection(textView)
         }
@@ -446,6 +532,12 @@ struct NotesWordText: UIViewRepresentable {
 
         private func publishSelection(_ textView: UITextView) {
             guard let notesView = textView as? NotesTextView else { return }
+            #if targetEnvironment(macCatalyst)
+            if notesView.isFirstResponder {
+                NotesKeyDownMonitor.shared.installIfNeeded()
+                NotesKeyDownMonitor.shared.activeTextView = notesView
+            }
+            #endif
             let target = (notesView.isFirstResponder || notesView.window == nil) ? notesView.currentSelectionTarget() : nil
             onSelectionChange?(target)
         }
@@ -771,7 +863,12 @@ extension MeadowTeacherCoordinator {
         applyQuizCourse()
         message = "已加入「\(course)」：\(card.prompt) → \(card.parts[0].options[0])"
         guard ask else { revision += 1; return }
-        guard let c = campaign else { message += "（还没有打开行程，未出题）"; revision += 1; return }
+        guard let c = campaign else {
+            message += "（还没有打开行程，先点「继续上次行程」）"
+            revision += 1
+            openQuiz()
+            return
+        }
         guard canSwitchNotesFlashcard else { message += "（正在答题，稍后在全班题里出）"; revision += 1; return }
         guard let index = c.quizBank.lastIndex(where: { $0 == card }) else { revision += 1; return }
         askNoteCard(at: index, englishFront: true)
