@@ -1,3 +1,25 @@
+## 小游戏 HD-2D 场景与双层特效、翻牌直点与自定义规模、拟物转盘、背包重构、商店分类与公开屏 UI 精修（2026-11-27，基于v0.32.4/build48，未改版本号、未存档）
+
+围绕小游戏演出质量、翻牌交互直觉、背包/商店/转盘与公开屏可读性完成五项全面重构与精修：
+- **5 款小游戏动态场景、比例校准与双层精确定位 PixelFX 升级**（`ClassroomMiniGames.swift`）：
+  - 以 `HD2DPixelFXEffect`（严格按 `clip.ox / clip.oy` 原点注册、`back`/`front` 双层与 `direction: +1/-1` 镜像）与 `HD2DPixelFXProjectile`（抛物线弹道与切线转向）取代原简陋单层特效；并在启动时预热 46 组小游戏特效片段与全员 `PixelHeroAtlas.battle` 像素英雄帧，避免首帧出现占位圆。
+  - `HD2DAtmosphereOverlay` 为 5 个场景补充动态环境细节（Boss 火盆跃动火光与拱门紫晶脉动/暮雾、营地/赛跑/擂台随风飘动花瓣树叶彩带、翻牌木桌提灯烛火呼吸与树影晃动）；校准守护营地守卫站位至木门外土路正前方、Boss 按物种比例立足地面与物种专属反击特效（`direction: -1`）、赛跑多队车道自适应与终点拱门缩放。
+- **翻牌（Memory）改直接点击舞台卡牌并支持 4–24 张自定义规模**（`MeadowWorldSupport/ClassroomMiniGames.swift`、`ClassroomMiniGames.swift`、`MeadowTeacherDashboard.swift`）：
+  - 彻底删除底部数字选项行 `MemoryTeacherGrid`；翻牌状态栏新增 `- / N张▾ / +` 规模选择（支持 `4–24` 偶数张并记忆 `classroom.memoryPairs`，内置 `MemoryMatch.gridDimensions` 零孤行矩形排布）。
+  - 针对 Mac Catalyst / iPadOS 下透明 SwiftUI 按钮与底层地图手势层冲突导致点不动的问题，将 `MiniGameTapContent` 实现为原生 UIKit 触摸/悬停层 `MiniGameStageTouchView`（`touchesBegan`/`touchesEnded` + `UIHoverGestureRecognizer` 精确映射到 `MemoryBoardLayout` 坐标，含错配点击即刻翻回），并在小游戏进行时卸载底层 `MeadowTeacherMapInput`。卡牌接入 3D Y 轴翻面动画、悬停抬升与逐卡精准 PixelFX（翻牌火花、配对圣光、收宝金币与欢呼）。
+- **拟物化胡桃木黄铜大转盘与双栏奖池面板**（`MeadowPrizeWheel.swift`、`MeadowLotteryView.swift`、`ClassroomCustomWheel.swift`）：
+  - 淘汰旧版荧光糖果色扇面与冲突的外圈细条，重绘为带实体木质底座、胡桃木外圈、双层拉丝黄铜包边、28 颗暖光跑马灯、每格分界实体黄铜拨钉、宝石品质扇面材质（羊皮纸普通 / 皇家蓝宝石稀有 / 紫晶天鹅绒史诗 / 耀金日曜传说 + 外缘品级宝石镶嵌）、错排防碰撞像素图章（彻底消除窄格 `"-"`）、红宝石黄铜指针与 8 铆钉拉丝黄铜 `"抽!"` 中心钮，同步升级镀金中奖铭牌 `WheelPrizeCard`。
+  - 商店抽奖 `MeadowLotteryView` 与自定义转盘 `CustomWheelViewController` 均升级为宽屏双栏布局（左转盘 + 右毛玻璃奖池/奖项概率一览，中奖后自动滚动并高亮对应条目），彻底消除左右大面积留白。
+- **背包布局重构与换装属性对比 + 商店分类整理与买前对比**（`MeadowItemIcon.swift`、`MeadowInventoryViewController.swift`、`MeadowShopViewController.swift`、`EquipmentReadout.swift`、`CampInventory.swift`）：
+  - 扩展 `MeadowItemRarity` 浅毛玻璃高对比度色彩体系（`inkColor`/`badgeColor`/`surfaceTint`/`borderColor`/`stars`/`shortStat`）并封装复用组件 `MeadowItemCardButton`（顶部品质彩条、实心品质胶囊、套装标、装备/数量角标、右上角绿底 `▲ 提升` 徽章）与 `MeadowEquipmentDetailUI`（横向紧凑头部、结构化双栏绿升/红降属性对比卡、套装 2/3 件进度与套装技解锁卡）。
+  - `MeadowCampaignInventoryViewController` 左栏新增英雄实时「试穿预览」（选中未装备武器/护甲即刻换装展示）、职业标签、2×2 基础属性芯片与带 `将替换` 提示的品质装备槽；中栏按「已装备 → 品质降序 → 部位」自动排序并标注实时数量；右栏直观呈现综合提升判定、均伤与各项数值差值及套装进度。
+  - `MeadowShopViewController` 在购买与出售模式均加入 `ShopItemCategory` 分类栏（`全部 / 武器 / 护甲 / 饰品 / 补给` 及实时数量）与品质快速筛选胶囊（`全品质 / 普通 / 稀有 / 史诗 / 传说`），`全部` 模式下按分类分段展示；通过新增 `MeadowCampaignSession.simulatedEquipmentComparison` 在购买前即于右栏展示该买家装备后的完整属性提升对比。
+- **公开屏其余 UI 精修**（`MeadowGainPopup.swift`、`MeadowEncounterPreviewView.swift`、`MeadowPublicOutput.swift`、`MeadowBattleScenePresentation.swift`、`MeadowBattlePreviewView.swift`、`MeadowTurnOrderView.swift`、`ClassroomTools.swift`）：
+  - 掉落弹窗改用高对比度实心品质胶囊与深墨字彻底消除普通物品浅灰白字隐身；怪物预览重排为紧凑分卡片与彩底属性徽章并校准高度防技能行裁切；旅程结算由两行纯文本重制为毛玻璃领奖台排行卡；强化探索玩家卡暗玻璃背板、战斗资源条左右对齐数字与圆角高光、行动点计数、技能卡左侧彩条与图标底座、回合条姓名胶囊及记分板第一名皇冠。
+- **实测与未实测边界**：
+  - 新增 3 项专项单测（`MiniGameTests.testMemoryCustomScaleClampingAndGridDimensionsCover4To24Cards`、`CampInventoryTests.testShopCategoryGroupingCoversEveryCatalogItemCleanly`、`EquipmentJourneyTests.testSimulatedShopComparisonWorksForUnownedItemsWithoutMutatingState`）；全量运行 `scripts/local-build.sh test` 全部通过（工程配置与 837 项锁定原文件零改动校验、工具单测、`ProbeCore` 9/9、`MeadowWorldSupportTests` 266/266、`MeadowClassroomSupportTests` 58/58、`MeadowBattleSupportTests` 109/109、`ClassroomGameCoreTests` 73/73，合计 **515/515** 零失败），`MAC_OPEN=0 scripts/local-build.sh mac` Release 编译零新增警告通过产出 `artifacts/ClassroomProbe.app`。
+  - 通过独立 Mac Catalyst 场景渲染宿主（隔离 Bundle ID 与纯内存 `persist: nil` 会话，零改动用户本地课堂数据）导出了背包升级对比/套装解锁、分类商店、金档拟物大转盘、自定义转盘、掉落弹窗/怪物预览及全部 5 款小游戏共 11 张 1280×800 / 1280×720 实景渲染 PNG 并完成了两轮目视检查与 6 处细节精修，同时实测 `MiniGameStageTouchView` 在 1280×720 / 1500×720 / 1000×720 三种窗口比例下均 16/16 卡全命中且赢得 `hitTest`。尚未在真机 iPad 或外接 TV 双屏下人工逐项旋转转盘、连续点击实机翻牌与拖放发奖验收实时动效帧率。
+
 ## 闪卡切换去闪烁、框选按 K 修复与出题气泡、游戏页精简与紧凑玩家框（2026-11-27，基于v0.32.4/build48，未改版本号、未存档）
 
 围绕绘本出卡流畅度与游戏探索画面排版继续优化四处交互：

@@ -179,6 +179,55 @@ public enum CampInventoryProjection {
     }
 }
 
+public enum ShopItemCategory: String, CaseIterable, Codable {
+    case all, weapon, armor, accessory, supplies
+
+    public var title: String {
+        switch self {
+        case .all: return "全部"
+        case .weapon: return "武器"
+        case .armor: return "护甲"
+        case .accessory: return "饰品"
+        case .supplies: return "补给"
+        }
+    }
+
+    public var symbol: String {
+        switch self {
+        case .all: return "square.grid.2x2.fill"
+        case .weapon: return "bolt.horizontal.fill"
+        case .armor: return "shield.lefthalf.filled"
+        case .accessory: return "sparkles"
+        case .supplies: return "cross.vial.fill"
+        }
+    }
+
+    public static let sections: [ShopItemCategory] = [.weapon, .armor, .accessory, .supplies]
+
+    public static func of(_ item: ItemDefinition) -> ShopItemCategory {
+        switch item.slot {
+        case .weapon?: return .weapon
+        case .armor?: return .armor
+        case .accessory?: return .accessory
+        case nil: return .supplies
+        }
+    }
+
+    public func matches(_ item: ItemDefinition) -> Bool {
+        self == .all || Self.of(item) == self
+    }
+
+    /// Groups items into clean display sections (`武器 / 护甲 / 饰品 / 补给`) preserving internal order or applying a custom comparator.
+    public static func grouped(_ items: [ItemDefinition], filter: ShopItemCategory = .all, sort: ((ItemDefinition, ItemDefinition) -> Bool)? = nil) -> [(category: ShopItemCategory, items: [ItemDefinition])] {
+        let targets: [ShopItemCategory] = filter == .all ? sections : [filter]
+        return targets.compactMap { cat in
+            var bucket = items.filter { Self.of($0) == cat }
+            if let sort { bucket.sort(by: sort) }
+            return bucket.isEmpty ? nil : (cat, bucket)
+        }
+    }
+}
+
 public struct InventoryRect:Codable { public let x:Double,y:Double,width:Double,height:Double }
 public struct CampInventoryLayout:Codable {
     public let header:InventoryRect,equipment:InventoryRect,bag:InventoryRect,detail:InventoryRect,footer:InventoryRect

@@ -588,28 +588,36 @@ final class MeadowPreviewCard: UIView {
         addSubview(title); addSubview(detail); addSubview(button)
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    private let accentStrip = UIView(), iconHalo = UIView()
     private let icon = UIImageView(), pip = UILabel(), usesPip = UILabel()
     private var compact = false
-    /// Classroom card: tinted icon + name, an AP pip in the corner, at most one short stat line.
+    /// Classroom card: tinted accent stripe + icon medallion + bold title, AP cost pip, and crisp stat line.
     func updateCompact(name: String, cost: Int, uses: Int? = nil, symbol: String, tint: UIColor, stat: String?, enabled: Bool) {
         if !compact {
             compact = true
-            icon.contentMode = .scaleAspectFit; pip.textAlignment = .center; pip.layer.cornerRadius = 11; pip.clipsToBounds = true
-            usesPip.textAlignment = .center; usesPip.layer.cornerRadius = 11; usesPip.clipsToBounds = true; usesPip.layer.borderWidth = 1
-            insertSubview(icon, belowSubview: button); insertSubview(pip, belowSubview: button); insertSubview(usesPip, belowSubview: button)
+            clipsToBounds = true
+            accentStrip.isUserInteractionEnabled = false
+            iconHalo.layer.cornerRadius = 10; iconHalo.layer.cornerCurve = .continuous; iconHalo.isUserInteractionEnabled = false
+            icon.contentMode = .scaleAspectFit; pip.textAlignment = .center; pip.layer.cornerRadius = 10; pip.clipsToBounds = true
+            usesPip.textAlignment = .center; usesPip.layer.cornerRadius = 10; usesPip.clipsToBounds = true; usesPip.layer.borderWidth = 1.2
+            [accentStrip, iconHalo, icon, pip, usesPip].forEach { insertSubview($0, belowSubview: button) }
             layer.cornerRadius = 14; layer.cornerCurve = .continuous
         }
-        icon.image = UIImage(systemName: symbol, withConfiguration: UIImage.SymbolConfiguration(pointSize: 22, weight: .bold)); icon.tintColor = MeadowPreviewPalette.readable(tint)
-        title.text = name; title.font = MeadowPreviewPalette.font(20, .heavy); title.adjustsFontSizeToFitWidth = true; title.minimumScaleFactor = 0.7
-        detail.text = stat; detail.font = MeadowPreviewPalette.font(15, .semibold); detail.textColor = MeadowPreviewPalette.readable(tint); detail.numberOfLines = 1
-        pip.text = cost > 0 ? "◆\(cost)" : "—"; pip.font = MeadowPreviewPalette.font(14, .heavy)
-        usesPip.isHidden = uses == nil; usesPip.text = uses.map { "×\($0)" }; usesPip.font = MeadowPreviewPalette.font(13, .heavy)
-        usesPip.textColor = MeadowPreviewPalette.readable(tint); usesPip.layer.borderColor = MeadowPreviewPalette.readable(tint).withAlphaComponent(0.6).cgColor
+        let readable = MeadowPreviewPalette.readable(tint)
+        accentStrip.backgroundColor = enabled ? readable : MeadowPreviewPalette.muted.withAlphaComponent(0.35)
+        iconHalo.backgroundColor = enabled ? readable.withAlphaComponent(0.13) : UIColor.white.withAlphaComponent(0.25)
+        icon.image = UIImage(systemName: symbol, withConfiguration: UIImage.SymbolConfiguration(pointSize: 20, weight: .bold)); icon.tintColor = readable
+        title.text = name; title.font = MeadowPreviewPalette.font(19, .heavy); title.adjustsFontSizeToFitWidth = true; title.minimumScaleFactor = 0.72
+        detail.text = stat; detail.font = MeadowPreviewPalette.font(14, .bold); detail.textColor = readable; detail.numberOfLines = 1
+        pip.text = cost > 0 ? "◆\(cost)" : "免费"; pip.font = MeadowPreviewPalette.font(13, .heavy)
+        usesPip.isHidden = uses == nil; usesPip.text = uses.map { "×\($0)" }; usesPip.font = MeadowPreviewPalette.font(12.5, .heavy)
+        usesPip.textColor = readable; usesPip.backgroundColor = UIColor.white.withAlphaComponent(0.75)
+        usesPip.layer.borderColor = readable.withAlphaComponent(0.55).cgColor
         pip.textColor = .white; pip.backgroundColor = enabled ? MeadowPreviewPalette.primary : MeadowPreviewPalette.muted.withAlphaComponent(0.5)
-        backgroundColor = enabled ? MeadowPreviewPalette.glass(.medium) : MeadowPreviewPalette.glass(.thin)
+        backgroundColor = enabled ? UIColor.white.withAlphaComponent(0.82) : MeadowPreviewPalette.glass(.thin)
         button.isEnabled = enabled; button.isUserInteractionEnabled = enabled; button.backgroundColor = .clear
-        alpha = enabled ? 1 : 0.42
-        layer.borderWidth = enabled ? 1.5 : 1; layer.borderColor = (enabled ? MeadowPreviewPalette.readable(tint).withAlphaComponent(0.55) : UIColor.white.withAlphaComponent(0.5)).cgColor
+        alpha = enabled ? 1 : 0.44
+        layer.borderWidth = enabled ? 1.6 : 1; layer.borderColor = (enabled ? readable.withAlphaComponent(0.58) : UIColor.white.withAlphaComponent(0.5)).cgColor
         button.accessibilityLabel = name + (stat.map { "，" + $0 } ?? ""); button.accessibilityValue = enabled ? "可用" : "不可用"
         setNeedsLayout()
     }
@@ -628,15 +636,17 @@ final class MeadowPreviewCard: UIView {
         super.layoutSubviews(); guard bounds.width > 0, bounds.height > 0 else { return }
         button.frame = bounds
         if compact {
-            let h = bounds.height, iconSide = min(30, h * 0.42)
-            icon.frame = CGRect(x: 12, y: (h - iconSide) / 2 - (detail.text == nil ? 0 : 0), width: iconSide, height: iconSide)
-            pip.frame = CGRect(x: bounds.width - 46, y: 8, width: 38, height: 22)
-            usesPip.frame = CGRect(x: bounds.width - 46, y: 34, width: 38, height: 22)
-            let x = icon.frame.maxX + 10, w = max(1, bounds.width - x - 50)
+            let h = bounds.height, haloSide = min(38, h * 0.56)
+            accentStrip.frame = CGRect(x: 0, y: 0, width: 4.5, height: h)
+            iconHalo.frame = CGRect(x: 11, y: (h - haloSide) / 2, width: haloSide, height: haloSide)
+            icon.frame = iconHalo.frame.insetBy(dx: 5, dy: 5)
+            pip.frame = CGRect(x: bounds.width - 46, y: 7, width: 39, height: 21)
+            usesPip.frame = CGRect(x: bounds.width - 46, y: 31, width: 39, height: 20)
+            let x = iconHalo.frame.maxX + 9, w = max(1, bounds.width - x - 50)
             if detail.text?.isEmpty == false {
-                title.frame = CGRect(x: x, y: h / 2 - 25, width: w, height: 26); detail.frame = CGRect(x: x, y: h / 2 + 2, width: w, height: 20)
-                detail.adjustsFontSizeToFitWidth = true; detail.minimumScaleFactor = 0.7
-            } else { title.frame = CGRect(x: x, y: (h - 26) / 2, width: w, height: 26); detail.frame = .zero }
+                title.frame = CGRect(x: x, y: h / 2 - 24, width: w, height: 24); detail.frame = CGRect(x: x, y: h / 2 + 1, width: w, height: 19)
+                detail.adjustsFontSizeToFitWidth = true; detail.minimumScaleFactor = 0.72
+            } else { title.frame = CGRect(x: x, y: (h - 24) / 2, width: w, height: 24); detail.frame = .zero }
             return
         }
         title.frame = CGRect(x: 10, y: 6, width: max(1, bounds.width - 20), height: 27)

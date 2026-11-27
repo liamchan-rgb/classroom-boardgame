@@ -259,4 +259,28 @@ final class MiniGameTests: XCTestCase {
         XCTAssertEqual(sides[1].members, ["p2"])
         XCTAssertEqual(sides[2].members, ["p3"])
     }
+
+    func testMemoryCustomScaleClampingAndGridDimensionsCover4To24Cards() {
+        XCTAssertEqual(MemoryMatch.clampPairs(1, available: 10), 2)
+        XCTAssertEqual(MemoryMatch.clampPairs(8, available: 5), 5)
+        XCTAssertEqual(MemoryMatch.clampPairs(20, available: 30), 12)
+        XCTAssertEqual(MemoryMatch.clampPairs(6, available: 12), 6)
+
+        for pairs in 2...12 {
+            let cards = pairs * 2
+            let grid = MemoryMatch.gridDimensions(cardCount: cards)
+            XCTAssertGreaterThanOrEqual(grid.columns * grid.rows, cards, "Grid must fit all \(cards) cards")
+            XCTAssertGreaterThanOrEqual(grid.columns, grid.rows, "Landscape board should prefer columns >= rows for \(cards) cards")
+            XCTAssertLessThanOrEqual(grid.columns * grid.rows - cards, 2, "Minimal empty trailing slots for \(cards) cards")
+        }
+        // Key presets have exact zero-orphan rectangles
+        XCTAssertEqual(MemoryMatch.gridDimensions(cardCount: 12).columns, 4)
+        XCTAssertEqual(MemoryMatch.gridDimensions(cardCount: 12).rows, 3)
+        XCTAssertEqual(MemoryMatch.gridDimensions(cardCount: 16).columns, 4)
+        XCTAssertEqual(MemoryMatch.gridDimensions(cardCount: 16).rows, 4)
+        XCTAssertEqual(MemoryMatch.gridDimensions(cardCount: 20).columns, 5)
+        XCTAssertEqual(MemoryMatch.gridDimensions(cardCount: 20).rows, 4)
+        XCTAssertEqual(MemoryMatch.gridDimensions(cardCount: 24).columns, 6)
+        XCTAssertEqual(MemoryMatch.gridDimensions(cardCount: 24).rows, 4)
+    }
 }

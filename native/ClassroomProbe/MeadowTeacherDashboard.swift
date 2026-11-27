@@ -208,9 +208,11 @@ private struct TeacherGamePreview:View {
     var body:some View {
         PublicSurface(model:TeacherSession.shared.display,game:game,teacherPreview:true)
             .overlay {
-                MeadowTeacherMapInput(canBegin:game.canBeginMapGesture,canTap:game.canTapCanvas,
-                    tap:{game.canvasTap($0,selectingNode:selectingNode)},
-                    pan:game.canvasPan,zoom:{game.canvasZoom($0,anchor:$1)},hover:game.canvasHover)
+                if game.miniGame == nil {
+                    MeadowTeacherMapInput(canBegin:game.canBeginMapGesture,canTap:game.canTapCanvas,
+                        tap:{game.canvasTap($0,selectingNode:selectingNode)},
+                        pan:game.canvasPan,zoom:{game.canvasZoom($0,anchor:$1)},hover:game.canvasHover)
+                }
             }
             .overlay{if dropTargets.isDragging,game.surface != .book,game.miniGame == nil,game.campaign?.engine.state.battle != nil {GameDropTargetOverlay(game:game)}}
             .overlay{MiniGameTapLayer(game:game)}

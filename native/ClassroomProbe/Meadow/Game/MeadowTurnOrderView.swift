@@ -133,8 +133,9 @@ private final class MeadowTurnOrderToken: UIView {
     init(id: String) {
         self.id = id
         super.init(frame: .zero); isAccessibilityElement = true; accessibilityIdentifier = "previewQueue\(id)"
-        name.font = .systemFont(ofSize: 11, weight: .heavy); name.textAlignment = .center; name.adjustsFontSizeToFitWidth = true; name.minimumScaleFactor = 0.7
-        circle.backgroundColor = MeadowPreviewPalette.card
+        name.font = MeadowPreviewPalette.font(11.5, .heavy); name.textAlignment = .center; name.adjustsFontSizeToFitWidth = true; name.minimumScaleFactor = 0.7
+        name.layer.cornerRadius = 6; name.clipsToBounds = true
+        circle.backgroundColor = UIColor.white.withAlphaComponent(0.82)
         portrait.contentMode = .scaleAspectFit; portrait.layer.magnificationFilter = .nearest
         badge.font = .systemFont(ofSize: 11, weight: .heavy); badge.textAlignment = .center; badge.textColor = .white; badge.layer.cornerRadius = 8; badge.clipsToBounds = true
         arrow.text = "▼"; arrow.font = .systemFont(ofSize: 10, weight: .heavy); arrow.textColor = MeadowPreviewPalette.gold; arrow.textAlignment = .center
@@ -159,7 +160,8 @@ private final class MeadowTurnOrderToken: UIView {
         // The short name: "P1" for heroes, the species for monsters.
         name.text = entry.name.components(separatedBy: " · ").first ?? entry.name
         portrait.layer.minificationFilter = .nearest
-        name.textColor = status == .current ? MeadowPreviewPalette.primary : MeadowPreviewPalette.ink
+        name.textColor = status == .current ? .white : MeadowPreviewPalette.ink
+        name.backgroundColor = status == .current ? MeadowPreviewPalette.primary : UIColor.white.withAlphaComponent(0.68)
         if let face = entry.portrait { portrait.image = face; portrait.tintColor = nil }
         else if entry.id.hasPrefix("p"), let number = Int(entry.id.dropFirst()) { portrait.image = Self.portraits[(number - 1) % Self.portraits.count]; portrait.tintColor = nil }
         else { portrait.image = UIImage(systemName: "pawprint.fill"); portrait.tintColor = UIColor(red: 0.93, green: 0.45, blue: 0.38, alpha: 1) }

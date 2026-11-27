@@ -91,4 +91,17 @@ final class CampInventoryTests:XCTestCase {
             XCTAssertLessThan(a.detail.y+a.detail.height,a.footer.y)
         }
     }
+    func testShopCategoryGroupingCoversEveryCatalogItemCleanly() throws {
+        let catalog = try GameCatalog.initial()
+        let shopItems = catalog.items.filter { $0.purchasePrice != nil && $0.setID == nil }
+        let grouped = ShopItemCategory.grouped(shopItems, filter: .all)
+        XCTAssertEqual(grouped.map(\.category), [.weapon, .armor, .accessory, .supplies])
+        XCTAssertEqual(grouped.reduce(0) { $0 + $1.items.count }, shopItems.count)
+        for section in grouped {
+            XCTAssertTrue(section.items.allSatisfy { ShopItemCategory.of($0) == section.category })
+            let filtered = ShopItemCategory.grouped(shopItems, filter: section.category)
+            XCTAssertEqual(filtered.count, 1)
+            XCTAssertEqual(filtered[0].items.count, section.items.count)
+        }
+    }
 }

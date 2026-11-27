@@ -169,12 +169,23 @@ extension CustomWheel {
             let p = prizes[i], chance = self.chance(i)
             if let id = p.item {
                 let item = try? catalog?.item(id)
-                return WheelSlice(title: p.title, icon: MeadowItemIcon.image(id, item: item, side: 96), badge: p.count > 1 ? "×\(p.count)" : nil,
-                                  rarity: WheelSlice.rarity(chance: chance, item: MeadowItemRarity.of(id, item: item)), weight: Double(max(0, p.weight)))
+                let stat = item.map { MeadowItemRarity.shortStat($0) }
+                return WheelSlice(
+                    title: p.title,
+                    icon: MeadowItemIcon.image(id, item: item, side: 96),
+                    badge: p.count > 1 ? "×\(p.count)" : nil,
+                    rarity: WheelSlice.rarity(chance: chance, item: MeadowItemRarity.of(id, item: item)),
+                    weight: Double(max(0, p.weight)),
+                    subtitle: stat?.isEmpty == false ? stat : "已直接发放到行囊"
+                )
             }
-            if p.coins > 0 { return WheelSlice(title: p.title, icon: nil, badge: "\(p.coins)", rarity: WheelSlice.rarity(chance: chance), coins: true, weight: Double(max(0, p.weight))) }
-            if p.score > 0 { return WheelSlice(title: p.title, icon: nil, badge: "+\(p.score)", rarity: WheelSlice.rarity(chance: chance), coins: true, weight: Double(max(0, p.weight))) }
-            return WheelSlice(title: p.title, icon: nil, badge: nil, rarity: WheelSlice.rarity(chance: chance), weight: Double(max(0, p.weight)))
+            if p.coins > 0 {
+                return WheelSlice(title: p.title, icon: nil, badge: "\(p.coins)", rarity: WheelSlice.rarity(chance: chance), coins: true, weight: Double(max(0, p.weight)), subtitle: "游戏金币奖励")
+            }
+            if p.score > 0 {
+                return WheelSlice(title: p.title, icon: nil, badge: "+\(p.score)", rarity: WheelSlice.rarity(chance: chance), coins: true, weight: Double(max(0, p.weight)), subtitle: "课堂积分奖励")
+            }
+            return WheelSlice(title: p.title, icon: nil, badge: nil, rarity: WheelSlice.rarity(chance: chance), weight: Double(max(0, p.weight)), subtitle: "课堂兑现奖励")
         }
     }
 }
@@ -198,6 +209,11 @@ final class CustomWheelViewController: UIViewController {
     private var lastWin: (wheel: String, slot: Int)?
     private let wheel = MeadowPrizeWheelView()
     private let card = WheelPrizeCard()
+    private let legendPanel = UIView()
+    private let legendTitle = UILabel()
+    private let legendScroll = UIScrollView()
+    private let legendContent = UIView()
+    private var legendRows: [(slot: Int, view: UIView)] = []
     private var library: CustomWheelLibrary { .shared }
 
     init(session: MeadowCampaignSession, actor: String) {
@@ -217,35 +233,45 @@ final class CustomWheelViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor(red: 0.80, green: 0.88, blue: 0.88, alpha: 1); MeadowGlassBackdrop.install(in: view)
-        // No odds list: the slices' sizes show how likely each prize is.
-        [header].forEach { MeadowPreviewPalette.stylePanel($0, liveBlur: true); view.addSubview($0) }
+        MeadowPreviewPalette.stylePanel(header, liveBlur: true)
+        view.addSubview(header)
         view.addSubview(stage)
         [titleLabel, wheelButton, members, coinsLabel, history, edit, close].forEach(header.addSubview)
-        [wheel, spin, removeWon, result, card].forEach(stage.addSubview)
+
+        MeadowPreviewPalette.stylePanel(legendPanel, liveBlur: false, level: .thick)
+        legendTitle.font = MeadowPreviewPalette.font(17, .heavy)
+        legendTitle.textColor = MeadowPreviewPalette.ink
+        legendScroll.alwaysBounceVertical = true
+        legendScroll.addSubview(legendContent)
+        [legendTitle, legendScroll].forEach(legendPanel.addSubview)
+
+        [wheel, spin, removeWon, result, legendPanel, card].forEach(stage.addSubview)
         history.addAction(UIAction { [weak self] _ in self?.openHistory() }, for: .touchUpInside)
         removeWon.addAction(UIAction { [weak self] _ in self?.removeLastWin() }, for: .touchUpInside)
         removeWon.isHidden = true
-        titleLabel.attributedText = MeadowGlassText.iconLine("chart.pie.fill", "转盘", size: 26)
-        wheelButton.titleLabel?.font = MeadowPreviewPalette.font(18, .heavy); wheelButton.tintColor = MeadowPreviewPalette.ink
+        titleLabel.attributedText = MeadowGlassText.iconLine("chart.pie.fill", "转盘", size: 24, tint: MeadowPreviewPalette.gold, weight: .heavy)
+        wheelButton.titleLabel?.font = MeadowPreviewPalette.font(17, .heavy); wheelButton.tintColor = MeadowPreviewPalette.ink
         wheelButton.showsMenuAsPrimaryAction = true
-        wheelButton.backgroundColor = UIColor.white.withAlphaComponent(0.55); wheelButton.layer.cornerRadius = 12
-        for state in [UIControl.State.normal, .selected] { members.setTitleTextAttributes([.font: MeadowPreviewPalette.font(16), .foregroundColor: MeadowPreviewPalette.ink], for: state) }
+        wheelButton.backgroundColor = UIColor.white.withAlphaComponent(0.62); wheelButton.layer.cornerRadius = 12
+        for state in [UIControl.State.normal, .selected] {
+            members.setTitleTextAttributes([.font: MeadowPreviewPalette.font(15, .bold), .foregroundColor: state == .selected ? UIColor.white : MeadowPreviewPalette.ink], for: state)
+        }
         members.selectedSegmentTintColor = MeadowPreviewPalette.primary
         for (i, p) in people.enumerated() { members.insertSegment(withTitle: p.shortName, at: i, animated: false) }
         members.addAction(UIAction { [weak self] _ in guard let self else { return }; let list = self.people; if list.indices.contains(self.members.selectedSegmentIndex) { self.actor = list[self.members.selectedSegmentIndex].id }; self.refresh() }, for: .valueChanged)
         edit.addAction(UIAction { [weak self] _ in self?.openEditor(new: false) }, for: .touchUpInside)
-        // The star in the middle spins too; the win and its prize card fade after a second (the line below the
-        // wheel keeps what was won).
         wheel.onHubTap = { [weak self] in self?.go() }
         wheel.onWinFaded = { [weak self] in self?.card.hide() }
         close.addAction(UIAction { [weak self] _ in self?.dismiss(animated: true) }, for: .touchUpInside)
         spin.addAction(UIAction { [weak self] _ in self?.go() }, for: .touchUpInside)
-        result.font = MeadowPreviewPalette.font(20, .heavy); result.textColor = MeadowPreviewPalette.ink; result.textAlignment = .center; result.numberOfLines = 2
+        result.font = MeadowPreviewPalette.font(18, .heavy); result.textColor = MeadowPreviewPalette.ink; result.textAlignment = .center; result.numberOfLines = 2
         loadWheel()
     }
+
     private func loadWheel() {
         let w = library.current
-        wheel.slices = w.slices(catalog: session.engine.catalog); card.hide(); result.text = nil
+        let slices = w.slices(catalog: session.engine.catalog)
+        wheel.slices = slices; card.hide(); result.text = nil
         lastWin = nil; removeWon.isHidden = true
         wheelButton.setTitle("  \(w.name)  ▾", for: .normal)
         wheelButton.menu = UIMenu(children: library.wheels.map { item in
@@ -254,15 +280,84 @@ final class CustomWheelViewController: UIViewController {
             UIAction(title: "新建转盘…", image: UIImage(systemName: "plus")) { [weak self] _ in self?.openEditor(new: true) },
             UIAction(title: "编辑当前转盘…", image: UIImage(systemName: "slider.horizontal.3")) { [weak self] _ in self?.openEditor(new: false) },
         ])])
+        rebuildLegend(wheel: w, slices: slices)
         refresh()
         view.setNeedsLayout()
     }
+
+    private func rebuildLegend(wheel w: CustomWheel, slices: [WheelSlice]) {
+        legendContent.subviews.forEach { $0.removeFromSuperview() }
+        legendRows = []
+        legendTitle.attributedText = MeadowGlassText.iconLine("list.star", "奖项一览 · \(w.prizes.count)格", size: 17, tint: MeadowPreviewPalette.gold, weight: .heavy)
+
+        let indexed = w.prizes.indices.map { ($0, w.prizes[$0], slices[$0], w.chance($0) * 100.0) }
+            .sorted { a, b in a.2.rarity != b.2.rarity ? a.2.rarity > b.2.rarity : a.3 > b.3 }
+
+        for (slot, prize, slice, pct) in indexed {
+            let row = UIView()
+            row.backgroundColor = slice.rarity.surfaceTint
+            row.layer.cornerRadius = 11
+            row.layer.cornerCurve = .continuous
+            row.layer.borderWidth = 1.2
+            row.layer.borderColor = slice.rarity.borderColor.withAlphaComponent(0.75).cgColor
+            row.clipsToBounds = true
+
+            let bar = UIView(); bar.backgroundColor = slice.coins ? MeadowPreviewPalette.gold : slice.rarity.badgeColor; bar.tag = 1
+            let nameL = UILabel()
+            nameL.font = MeadowPreviewPalette.font(14.5, .heavy)
+            nameL.textColor = slice.rarity >= .epic ? slice.rarity.inkColor : MeadowPreviewPalette.ink
+            nameL.text = prize.title
+            nameL.lineBreakMode = .byTruncatingTail
+            nameL.tag = 2
+
+            let kindL = UILabel()
+            kindL.font = MeadowPreviewPalette.font(11.5, .semibold)
+            kindL.textColor = MeadowPreviewPalette.muted
+            kindL.text = prize.offGame ? "课堂兑现" : (prize.item != nil ? "装备/道具 ×\(max(1, prize.count))" : (prize.coins > 0 ? "+\(prize.coins) 金币" : "+\(prize.score) 积分"))
+            kindL.tag = 3
+
+            let pill = UILabel()
+            pill.font = MeadowPreviewPalette.font(10.5, .heavy)
+            pill.textColor = .white
+            pill.textAlignment = .center
+            pill.layer.cornerRadius = 6
+            pill.clipsToBounds = true
+            pill.backgroundColor = slice.coins ? MeadowPreviewPalette.gold : slice.rarity.badgeColor
+            pill.text = slice.coins ? "奖励" : slice.rarity.title
+            pill.tag = 4
+
+            let pctL = UILabel()
+            pctL.font = UIFont.monospacedDigitSystemFont(ofSize: 13.5, weight: .heavy)
+            pctL.textAlignment = .right
+            pctL.textColor = slice.rarity.inkColor
+            pctL.text = String(format: "%.1f%%", pct)
+            pctL.tag = 5
+
+            [bar, nameL, kindL, pill, pctL].forEach(row.addSubview)
+            legendContent.addSubview(row)
+            legendRows.append((slot, row))
+        }
+    }
+
+    private func highlightLegend(_ slot: Int) {
+        for (s, row) in legendRows {
+            let won = s == slot
+            row.layer.borderWidth = won ? 2.6 : 1.2
+            if won {
+                row.layer.borderColor = MeadowPreviewPalette.gold.cgColor
+                let targetY = max(0, min(legendScroll.contentSize.height - legendScroll.bounds.height, row.frame.midY - legendScroll.bounds.height / 2))
+                legendScroll.setContentOffset(CGPoint(x: 0, y: targetY), animated: true)
+            }
+        }
+    }
+
     private func refresh() {
         guard let unit = session.engine.state.units[actor] else { return }
         members.selectedSegmentIndex = people.firstIndex { $0.id == actor } ?? 0
         let cost = library.current.cost
-        coinsLabel.attributedText = MeadowGlassText.iconLine("bitcoinsign.circle.fill", "\(unit.coins)" + (cost > 0 ? " · 每次 \(cost)" : " · 免费"), size: 18, tint: MeadowPreviewPalette.gold)
+        coinsLabel.attributedText = MeadowGlassText.iconLine("bitcoinsign.circle.fill", "\(unit.coins)" + (cost > 0 ? " · 每次 \(cost)" : " · 免费"), size: 17, tint: MeadowPreviewPalette.gold)
     }
+
     private func go() {
         guard !wheel.spinning else { return }
         let w = library.current
@@ -280,6 +375,7 @@ final class CustomWheelViewController: UIViewController {
                 self.wheel.celebrate(slot)
                 let slices = w.slices(catalog: self.session.engine.catalog)
                 if slices.indices.contains(slot) { self.card.show(slices[slot]) }
+                self.highlightLegend(slot)
                 let prize = w.prizes[slot]
                 self.result.text = "\(name) 抽中：\(prize.title)" + (prize.offGame ? "（课堂奖励，请老师兑现）" : "（已发到背包 / 金币积分）")
                 self.lastWin = (w.name, slot); self.removeWon.isHidden = w.prizes.count <= 2
@@ -287,7 +383,7 @@ final class CustomWheelViewController: UIViewController {
             }
         } catch { result.text = error.localizedDescription }
     }
-    /// 移除这一格: the prize just won leaves this wheel (saved), so it is not drawn again.
+
     private func removeLastWin() {
         guard !wheel.spinning, let win = lastWin, win.wheel == library.current.name else { return }
         let title = library.current.prizes.indices.contains(win.slot) ? library.current.prizes[win.slot].title : ""
@@ -298,13 +394,14 @@ final class CustomWheelViewController: UIViewController {
             result.text = (keep.map { $0 + "\n" } ?? "") + "已从「\(library.current.name)」移除：\(title)"
         } catch { result.text = error.localizedDescription }
     }
-    /// 历史: the selected student's draws on every custom wheel, in every trip.
+
     private func openHistory() {
         let name = session.engine.state.units[actor]?.shortName ?? actor
         let screen = UIHostingController(rootView: WheelHistoryView(player: name, entries: CustomWheelHistory.shared.of(name), onClose: { [weak self] in self?.dismiss(animated: true) }))
         screen.modalPresentationStyle = .formSheet; screen.preferredContentSize = CGSize(width: 640, height: 620)
         present(screen, animated: true)
     }
+
     private func openEditor(new: Bool) {
         guard !wheel.spinning else { return }
         let start = new ? CustomWheel(name: library.unusedName(), prizes: CustomWheelLibrary.sample.prizes) : library.current
@@ -314,30 +411,67 @@ final class CustomWheelViewController: UIViewController {
         editor.modalPresentationStyle = .formSheet; editor.preferredContentSize = CGSize(width: 820, height: 680)
         present(editor, animated: true)
     }
+
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         let inset = view.safeAreaInsets, w = view.bounds.width, h = view.bounds.height
-        header.frame = CGRect(x: inset.left + 16, y: inset.top + 12, width: w - inset.left - inset.right - 32, height: 64)
+        header.frame = CGRect(x: inset.left + 14, y: inset.top + 10, width: w - inset.left - inset.right - 28, height: 60)
         let hw = header.bounds.width
-        titleLabel.frame = CGRect(x: 18, y: 14, width: 110, height: 36)
-        wheelButton.frame = CGRect(x: 128, y: 13, width: 230, height: 38)
-        // Icon-and-word buttons: room for both.
-        close.frame = CGRect(x: hw - 104, y: 10, width: 92, height: 44)
-        edit.frame = CGRect(x: hw - 204, y: 10, width: 92, height: 44)
-        history.frame = CGRect(x: hw - 304, y: 10, width: 92, height: 44)
-        coinsLabel.frame = CGRect(x: hw - 520, y: 14, width: 206, height: 36)
-        let mx = wheelButton.frame.maxX + 14
-        members.frame = CGRect(x: mx, y: 14, width: max(120, coinsLabel.frame.minX - mx - 12), height: 36)
-        let top = header.frame.maxY + 12
-        stage.frame = CGRect(x: inset.left + 16, y: top, width: w - inset.left - inset.right - 32, height: h - top - inset.bottom - 16)
+        titleLabel.frame = CGRect(x: 16, y: 12, width: 96, height: 36)
+        wheelButton.frame = CGRect(x: 114, y: 11, width: 214, height: 38)
+        close.frame = CGRect(x: hw - 112, y: 8, width: 102, height: 44)
+        edit.frame = CGRect(x: hw - 220, y: 8, width: 102, height: 44)
+        history.frame = CGRect(x: hw - 328, y: 8, width: 102, height: 44)
+        coinsLabel.frame = CGRect(x: hw - 498, y: 12, width: 162, height: 36)
+        let mx = wheelButton.frame.maxX + 10
+        members.frame = CGRect(x: mx, y: 12, width: max(120, coinsLabel.frame.minX - mx - 10), height: 36)
+
+        let top = header.frame.maxY + 10
+        stage.frame = CGRect(x: inset.left + 14, y: top, width: w - inset.left - inset.right - 28, height: h - top - inset.bottom - 12)
         let sw = stage.bounds.width, sh = stage.bounds.height
-        let size = max(160, min(sw - 20, sh - 120))
-        wheel.frame = CGRect(x: (sw - size) / 2, y: 0, width: size, height: size)
-        spin.frame = CGRect(x: sw / 2 - 120, y: wheel.frame.maxY + 4, width: 240, height: 56)
-        removeWon.frame = CGRect(x: spin.frame.maxX + 12, y: spin.frame.minY + 4, width: 150, height: 48)
-        result.frame = CGRect(x: 10, y: spin.frame.maxY + 4, width: sw - 20, height: 52)
-        let cw = min(320, sw - 40)
-        card.frame = CGRect(x: (sw - cw) / 2, y: wheel.frame.midY - 115, width: cw, height: 240)
+        let wide = sw >= 820
+
+        if wide {
+            let rightW = min(400, max(290, sw * 0.36))
+            let leftW = sw - rightW - 14
+            let size = max(200, min(leftW - 12, sh - 114))
+            wheel.frame = CGRect(x: (leftW - size) / 2, y: 2, width: size, height: size)
+            spin.frame = CGRect(x: leftW / 2 - 116, y: wheel.frame.maxY + 6, width: 232, height: 50)
+            removeWon.frame = CGRect(x: spin.frame.maxX + 10, y: spin.frame.minY + 3, width: 142, height: 44)
+            result.frame = CGRect(x: 8, y: spin.frame.maxY + 4, width: leftW - 16, height: 48)
+
+            legendPanel.isHidden = false
+            legendPanel.frame = CGRect(x: leftW + 14, y: 2, width: rightW, height: sh - 4)
+            let lw = legendPanel.bounds.width
+            legendTitle.frame = CGRect(x: 14, y: 12, width: lw - 28, height: 26)
+            legendScroll.frame = CGRect(x: 10, y: 44, width: lw - 20, height: max(1, legendPanel.bounds.height - 54))
+            let rw = legendScroll.bounds.width
+            let rowH: CGFloat = 46, gap: CGFloat = 6
+            for (idx, item) in legendRows.enumerated() {
+                let row = item.view
+                row.frame = CGRect(x: 0, y: CGFloat(idx) * (rowH + gap), width: rw, height: rowH)
+                row.viewWithTag(1)?.frame = CGRect(x: 0, y: 0, width: 4.5, height: rowH)
+                row.viewWithTag(5)?.frame = CGRect(x: rw - 56, y: 13, width: 48, height: 20)
+                row.viewWithTag(4)?.frame = CGRect(x: rw - 98, y: 14, width: 38, height: 18)
+                let tw = max(50, rw - 114)
+                row.viewWithTag(2)?.frame = CGRect(x: 12, y: 6, width: tw, height: 19)
+                row.viewWithTag(3)?.frame = CGRect(x: 12, y: 25, width: tw, height: 15)
+            }
+            legendContent.frame = CGRect(x: 0, y: 0, width: rw, height: max(1, CGFloat(legendRows.count) * (rowH + gap)))
+            legendScroll.contentSize = legendContent.bounds.size
+
+            let cw = min(310, leftW - 32)
+            card.frame = CGRect(x: (leftW - cw) / 2, y: wheel.frame.midY - 122, width: cw, height: 248)
+        } else {
+            legendPanel.isHidden = true
+            let size = max(180, min(sw - 16, sh - 116))
+            wheel.frame = CGRect(x: (sw - size) / 2, y: 0, width: size, height: size)
+            spin.frame = CGRect(x: sw / 2 - 116, y: wheel.frame.maxY + 4, width: 232, height: 52)
+            removeWon.frame = CGRect(x: spin.frame.maxX + 10, y: spin.frame.minY + 4, width: 144, height: 44)
+            result.frame = CGRect(x: 10, y: spin.frame.maxY + 4, width: sw - 20, height: 50)
+            let cw = min(310, sw - 40)
+            card.frame = CGRect(x: (sw - cw) / 2, y: wheel.frame.midY - 120, width: cw, height: 244)
+        }
     }
 }
 

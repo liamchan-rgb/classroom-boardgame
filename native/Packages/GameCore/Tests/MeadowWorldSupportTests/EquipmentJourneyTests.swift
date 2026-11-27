@@ -86,4 +86,17 @@ final class EquipmentJourneyTests:XCTestCase {
         XCTAssertEqual(a,b);XCTAssertTrue(["victory","defeat"].contains(a.outcome))
         XCTAssertGreaterThan(a.resumes,0);XCTAssertGreaterThan(a.stagedRestarts,0)
     }
+    func testSimulatedShopComparisonWorksForUnownedItemsWithoutMutatingState()throws {
+        let s=try session("trainingSword-plain")
+        let before=s.snapshot
+        // sunbreakerBlade is not in p1's inventory, yet shop preview should compare cleanly without mutating live state.
+        XCTAssertNil(s.engine.state.units["p1"]?.inventory["sunbreakerBlade"])
+        let comp=try s.simulatedEquipmentComparison(actor:"p1",slot:.weapon,item:"sunbreakerBlade")
+        XCTAssertEqual(s.snapshot,before)
+        XCTAssertGreaterThan(comp.upgradeScore(catalog:s.engine.catalog),0)
+        XCTAssertNotEqual(comp.attackBefore,comp.attackAfter)
+        // Comparing against currently worn trainingSword yields neutral upgrade score.
+        let same=try s.simulatedEquipmentComparison(actor:"p1",slot:.weapon,item:"trainingSword")
+        XCTAssertEqual(same.upgradeScore(catalog:s.engine.catalog),0,accuracy:1e-6)
+    }
 }

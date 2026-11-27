@@ -440,56 +440,77 @@ enum MeadowBattleFrameTiming {
 /// The same bars are used in the action panel and actor status headers.
 final class MeadowBattleResourceBar: UIView {
     private let caption=UILabel()
+    private let valueLabel=UILabel()
     private let track=UIView()
     private let fill=UIView()
+    private let gloss=UIView()
     private var fraction:CGFloat=0
     override init(frame:CGRect) {
         super.init(frame:frame);isAccessibilityElement=true
-        caption.font=MeadowPreviewPalette.font(17);caption.textColor=MeadowPreviewPalette.ink
+        caption.font=MeadowPreviewPalette.font(14.5,.heavy);caption.textColor=MeadowPreviewPalette.ink
+        valueLabel.font=UIFont.monospacedDigitSystemFont(ofSize:14.5,weight:.heavy);valueLabel.textColor=MeadowPreviewPalette.ink;valueLabel.textAlignment = .right
         track.backgroundColor=MeadowPreviewPalette.ink.withAlphaComponent(0.14)
-        track.layer.borderColor=MeadowPreviewPalette.border.cgColor;track.layer.borderWidth=1;track.layer.cornerRadius=3;track.clipsToBounds=true
-        addSubview(caption);addSubview(track);track.addSubview(fill)
+        track.layer.borderColor=UIColor.white.withAlphaComponent(0.85).cgColor;track.layer.borderWidth=1;track.clipsToBounds=true
+        gloss.backgroundColor=UIColor.white.withAlphaComponent(0.28)
+        addSubview(caption);addSubview(valueLabel);addSubview(track);track.addSubview(fill);fill.addSubview(gloss)
     }
     required init?(coder:NSCoder) { fatalError("init(coder:) has not been implemented") }
     func show(_ name:String,value:Int,maximum:Int,color:UIColor) {
-        caption.text="\(name)  \(value)/\(maximum)";fill.backgroundColor=color
+        caption.text=name;valueLabel.text="\(value)/\(maximum)";fill.backgroundColor=color
         fraction=CGFloat(max(0,min(value,maximum)))/CGFloat(max(1,maximum))
         accessibilityLabel=name;accessibilityValue="\(value)/\(maximum)";setNeedsLayout()
     }
     override func layoutSubviews() {
-        super.layoutSubviews();caption.frame=CGRect(x:0,y:0,width:bounds.width,height:23)
-        track.frame=CGRect(x:0,y:27,width:bounds.width,height:max(8,bounds.height-29))
-        fill.frame=CGRect(x:1,y:1,width:max(0,(track.bounds.width-2)*fraction),height:max(0,track.bounds.height-2))
+        super.layoutSubviews()
+        let labelH=min(20,max(16,bounds.height*0.52))
+        caption.frame=CGRect(x:0,y:0,width:bounds.width*0.52,height:labelH)
+        valueLabel.frame=CGRect(x:bounds.width*0.48,y:0,width:bounds.width*0.52,height:labelH)
+        let barH=max(8,bounds.height-labelH-3)
+        track.frame=CGRect(x:0,y:labelH+2,width:bounds.width,height:barH)
+        track.layer.cornerRadius=barH/2
+        let fw=max(0,(track.bounds.width-2)*fraction),fh=max(0,track.bounds.height-2)
+        fill.frame=CGRect(x:1,y:1,width:fw,height:fh)
+        fill.layer.cornerRadius=fh/2
+        gloss.frame=CGRect(x:0,y:0,width:fw,height:fh*0.42)
     }
 }
 
 /// Discrete AP uses the same panel slot in solo and party scenes.
 final class MeadowBattleActionPointsView:UIView {
     private let caption=UILabel()
+    private let counter=UILabel()
     private var remaining=0,maximum=0
     override init(frame:CGRect) {
         super.init(frame:frame);isOpaque=false;isAccessibilityElement=true
-        caption.font=MeadowPreviewPalette.font(17);caption.textColor=MeadowPreviewPalette.ink;caption.text="行动"
-        addSubview(caption);accessibilityLabel="行动点数"
+        caption.font=MeadowPreviewPalette.font(14.5,.heavy);caption.textColor=MeadowPreviewPalette.ink;caption.text="行动"
+        counter.font=UIFont.monospacedDigitSystemFont(ofSize:14,weight:.heavy);counter.textColor=MeadowPreviewPalette.gold;counter.textAlignment = .right
+        addSubview(caption);addSubview(counter);accessibilityLabel="行动点数"
     }
     required init?(coder:NSCoder) { fatalError("init(coder:) has not been implemented") }
     func show(value:Int,maximum:Int,owner:String?=nil) {
         caption.text=owner.map{$0+" 行动"} ?? "行动"
         self.maximum=max(0,maximum);remaining=max(0,min(value,self.maximum))
+        counter.text="\(remaining)/\(self.maximum)"
         accessibilityValue="剩余\(remaining)，共\(self.maximum)个行动点标记";setNeedsDisplay()
     }
     override func layoutSubviews() {
-        super.layoutSubviews();caption.frame=CGRect(x:0,y:0,width:bounds.width,height:23);setNeedsDisplay()
+        super.layoutSubviews()
+        let labelH=min(19,max(15,bounds.height*0.5))
+        caption.frame=CGRect(x:0,y:0,width:bounds.width*0.65,height:labelH)
+        counter.frame=CGRect(x:bounds.width*0.60,y:0,width:bounds.width*0.40,height:labelH)
+        setNeedsDisplay()
     }
     override func draw(_ rect:CGRect) {
         guard maximum>0 else { return }
-        let side=min(18,max(1,bounds.height-25),bounds.width/CGFloat(maximum)),gap=min(9,max(0,(bounds.width-side*CGFloat(maximum))/CGFloat(maximum)))
-        let cy=CGFloat(26)+side/2
+        let topY=min(20,max(16,bounds.height*0.52))+2
+        let availH=max(8,bounds.height-topY)
+        let side=min(15,availH,bounds.width/CGFloat(maximum)),gap=min(7,max(1,(bounds.width-side*CGFloat(maximum))/CGFloat(max(1,maximum-1))))
+        let cy=topY+side/2
         for i in 0..<maximum {
             let cx=side/2+CGFloat(i)*(side+gap),h=side/2
             let path=UIBezierPath();path.move(to:CGPoint(x:cx,y:cy-h));path.addLine(to:CGPoint(x:cx+h,y:cy));path.addLine(to:CGPoint(x:cx,y:cy+h));path.addLine(to:CGPoint(x:cx-h,y:cy));path.close()
-            (i<remaining ? MeadowPreviewPalette.gold:MeadowPreviewPalette.gold.withAlphaComponent(0.10)).setFill();path.fill()
-            MeadowPreviewPalette.gold.withAlphaComponent(i<remaining ? 1:0.45).setStroke();path.lineWidth=1.25;path.stroke()
+            (i<remaining ? MeadowPreviewPalette.gold:MeadowPreviewPalette.gold.withAlphaComponent(0.14)).setFill();path.fill()
+            MeadowPreviewPalette.gold.withAlphaComponent(i<remaining ? 1:0.5).setStroke();path.lineWidth=1.3;path.stroke()
         }
     }
 }

@@ -23,8 +23,7 @@ struct PublicSurface:View {
                     else if game.renderer != nil {MeadowRendererHost(game:game,teacherPreview:teacherPreview)}
                     else{Color(red:0.07,green:0.12,blue:0.08);Text("林间旅程 · 等待教师开始").font(.largeTitle.bold()).foregroundStyle(.white)}
                     if game.surface == .results,let c=game.campaign,let result=c.snapshot.completion {
-                        VStack(spacing:20){Text(result.outcome=="victory" ? "行程完成":"本次旅程结束").font(.largeTitle.bold());ForEach(result.players){u in Text("\(u.name) · 积分 \(u.score) · 金币 \(u.coins)").font(.title2)}}
-                            .padding(40).foregroundStyle(.white).background(Color(red:0.08,green:0.15,blue:0.1).opacity(0.96),in:RoundedRectangle(cornerRadius:20))
+                        CampaignCompletionCard(result:result,state:c.engine.state)
                     }
                     }
                     .frame(width:ClassroomCanvas.size.width,height:ClassroomCanvas.size.height)
@@ -46,6 +45,104 @@ struct PublicSurface:View {
         // so it stays on over the picture book too: the wheel is opened from the book tab as well).
         .overlay{if !teacherPreview {MeadowPanelMirror(game:game).ignoresSafeArea()}}
         .overlay{ClassroomTVOverlays(timer:game.classTimer,overlays:game.overlays,game:game,showMiniGame:false)}
+    }
+}
+
+/// Polished public completion podium card (replaces the old bare 2-line overlay).
+private struct CampaignCompletionCard:View {
+    let result:MeadowCampaignCompletion
+    let state:GameState
+    var body:some View {
+        let victory = result.outcome == "victory"
+        let ranked = result.players.sorted { ($0.score, $0.coins) > ($1.score, $1.coins) }
+        VStack(spacing:16){
+            HStack(spacing:14){
+                Image(systemName:victory ? "trophy.fill":"flag.checkered.circle.fill")
+                    .font(.system(size:42,weight:.heavy))
+                    .foregroundStyle(victory ? Color(red:1.0,green:0.82,blue:0.26) : Color(red:0.55,green:0.84,blue:0.96))
+                VStack(alignment:.leading,spacing:3){
+                    Text(victory ? "旅程大捷 · 行程完成" : "本次旅程结算")
+                        .font(.system(size:34,weight:.heavy,design:.rounded))
+                        .foregroundStyle(Color(red:0.08,green:0.22,blue:0.28))
+                    Text("共 \(ranked.count) 位冒险者参与本场旅程")
+                        .font(.system(size:16,weight:.semibold,design:.rounded))
+                        .foregroundStyle(Color(red:0.30,green:0.42,blue:0.47))
+                }
+                Spacer()
+            }
+            Divider()
+            VStack(spacing:9){
+                ForEach(Array(ranked.enumerated()),id:\.element.id){idx,u in
+                    let medal:Color = idx == 0 ? Color(red:0.88,green:0.58,blue:0.08) : (idx == 1 ? Color(red:0.48,green:0.54,blue:0.60) : (idx == 2 ? Color(red:0.72,green:0.42,blue:0.18) : Color(red:0.35,green:0.45,blue:0.50)))
+                    HStack(spacing:14){
+                        ZStack{
+                            Circle().fill(medal.opacity(idx < 3 ? 1 : 0.25)).frame(width:38,height:38)
+                            if idx == 0 {
+                                Image(systemName:"crown.fill").font(.system(size:18,weight:.heavy)).foregroundStyle(.white)
+                            } else {
+                                Text("\(idx+1)").font(.system(size:19,weight:.heavy,design:.rounded)).foregroundStyle(idx < 3 ? .white : Color(red:0.20,green:0.30,blue:0.35))
+                            }
+                        }
+                        Text(u.name)
+                            .font(.system(size:24,weight:.heavy,design:.rounded))
+                            .foregroundStyle(Color(red:0.08,green:0.22,blue:0.28))
+                            .lineLimit(1)
+                        Spacer()
+                        HStack(spacing:6){
+                            Image(systemName:"star.fill").foregroundStyle(Color(red:0.09,green:0.44,blue:0.62))
+                            Text("\(u.score) 分").monospacedDigit()
+                        }
+                        .font(.system(size:22,weight:.heavy,design:.rounded))
+                        .foregroundStyle(Color(red:0.09,green:0.42,blue:0.55))
+                        .padding(.horizontal,14).padding(.vertical,6)
+                        .background(Color(red:0.09,green:0.42,blue:0.53).opacity(0.12),in:Capsule())
+                        HStack(spacing:6){
+                            Image(systemName:"bitcoinsign.circle.fill").foregroundStyle(Color(red:0.80,green:0.50,blue:0.06))
+                            Text("\(u.coins)").monospacedDigit()
+                        }
+                        .font(.system(size:22,weight:.heavy,design:.rounded))
+                        .foregroundStyle(Color(red:0.74,green:0.44,blue:0.04))
+                        .padding(.horizontal,14).padding(.vertical,6)
+                        .background(Color(red:0.92,green:0.66,blue:0.14).opacity(0.16),in:Capsule())
+                    }
+                    .padding(.horizontal,16).padding(.vertical,10)
+                    .background(
+                        RoundedRectangle(cornerRadius:16,style:.continuous)
+                            .fill(idx == 0 ? Color(red:1.0,green:0.96,blue:0.84) : Color.white.opacity(0.75))
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius:16,style:.continuous)
+                            .stroke(idx == 0 ? Color(red:0.92,green:0.62,blue:0.12) : Color.white,lineWidth:idx == 0 ? 2 : 1)
+                    )
+                }
+            }
+            if state.teams.count > 1 {
+                let rows = GameRules.teamStandings(state)
+                HStack(spacing:10){
+                    ForEach(rows){row in
+                        let idx = state.teams.firstIndex(where:{$0.id == row.id}) ?? 0
+                        let tint = ClassroomTeamScoreboard.tints[idx % ClassroomTeamScoreboard.tints.count]
+                        HStack(spacing:8){
+                            Text("#\(row.rank)").font(.system(size:18,weight:.heavy,design:.rounded))
+                            Text(row.name).font(.system(size:18,weight:.heavy,design:.rounded))
+                            Spacer()
+                            Text("均分 \(row.averageScore.formatted(.number.precision(.fractionLength(0...1))))").font(.system(size:18,weight:.heavy,design:.rounded)).monospacedDigit()
+                        }
+                        .foregroundStyle(.white)
+                        .padding(.horizontal,14).padding(.vertical,8)
+                        .background(tint,in:RoundedRectangle(cornerRadius:12,style:.continuous))
+                    }
+                }
+            }
+        }
+        .padding(28)
+        .frame(width:760)
+        .background(
+            RoundedRectangle(cornerRadius:28,style:.continuous)
+                .fill(LinearGradient(colors:[Color(red:0.96,green:0.99,blue:0.99).opacity(0.97),Color(red:0.90,green:0.95,blue:0.96).opacity(0.95)],startPoint:.top,endPoint:.bottom))
+        )
+        .overlay(RoundedRectangle(cornerRadius:28,style:.continuous).stroke(.white,lineWidth:2))
+        .shadow(color:.black.opacity(0.32),radius:28,y:10)
     }
 }
 
@@ -171,34 +268,35 @@ private struct BookPlayerCard:View {
             }
             GeometryReader{g in
                 ZStack(alignment:.leading){
-                    Capsule().fill(.white.opacity(0.16))
-                    Capsule().fill(LinearGradient(colors:[barColor.opacity(0.85),barColor],startPoint:.leading,endPoint:.trailing)).frame(width:g.size.width*ratio)
+                    Capsule().fill(.white.opacity(0.22))
+                    Capsule().fill(LinearGradient(colors:[barColor.opacity(0.92),barColor],startPoint:.leading,endPoint:.trailing)).frame(width:g.size.width*ratio)
                 }
-            }.frame(height:max(3,h*0.085))
+            }.frame(height:max(4,h*0.10))
             HStack(spacing:h*0.06){
                 // The team's movement bar in steps (what the picture-book bar grants), replacing the old AP diamonds.
-                Image(systemName:"figure.walk").foregroundStyle(Color(red:0.45,green:0.85,blue:0.95))
+                Image(systemName:"figure.walk").foregroundStyle(Color(red:0.48,green:0.88,blue:1.0))
                 Text("\(number(heldMovement ?? unit.movement))/\(number(unit.maximumMovement))").monospacedDigit()
-                    .scaleEffect(apPop ? 1.4:1,anchor:.leading).foregroundStyle(apPop ? Color(red:0.62,green:0.92,blue:1.0):.white)
+                    .scaleEffect(apPop ? 1.4:1,anchor:.leading).foregroundStyle(apPop ? Color(red:0.65,green:0.94,blue:1.0):.white)
                 Spacer(minLength:0)
-                Image(systemName:"star.fill").foregroundStyle(Color(red:0.98,green:0.86,blue:0.45))
+                Image(systemName:"star.fill").foregroundStyle(Color(red:1.0,green:0.88,blue:0.45))
                 Text(number(unit.score)).monospacedDigit()
                 Spacer(minLength:0)
-                Image(systemName:"bitcoinsign.circle.fill").foregroundStyle(Color(red:0.98,green:0.80,blue:0.40))
+                Image(systemName:"bitcoinsign.circle.fill").foregroundStyle(Color(red:1.0,green:0.82,blue:0.38))
                 Text(number(heldCoins ?? unit.coins)).monospacedDigit()
-                    .scaleEffect(coinPop ? 1.4:1,anchor:.trailing).foregroundStyle(coinPop ? Color(red:1.0,green:0.86,blue:0.42):.white)
-            }.font(.system(size:h*0.16,weight:.semibold,design:.rounded))
+                    .scaleEffect(coinPop ? 1.4:1,anchor:.trailing).foregroundStyle(coinPop ? Color(red:1.0,green:0.88,blue:0.42):.white)
+            }.font(.system(size:h*0.17,weight:.bold,design:.rounded))
         }
-        .padding(.horizontal,h*0.14).padding(.vertical,h*0.1)
+        .shadow(color:.black.opacity(0.42),radius:1.2,y:1)
+        .padding(.horizontal,h*0.14).padding(.vertical,h*0.09)
         .frame(width:size.width,height:size.height)
         .background {
-            // Frosted: a real blur is cheap here (the page under it is a still picture) plus a dark tint for legibility.
+            // Frosted: a real blur is cheap here plus a deeper dark backing so digits stay crisp on bright maps & TV projection.
             ZStack{
                 RoundedRectangle(cornerRadius:h*0.2,style:.continuous).fill(.ultraThinMaterial).environment(\.colorScheme,.dark)
-                RoundedRectangle(cornerRadius:h*0.2,style:.continuous).fill(LinearGradient(colors:[.black.opacity(0.30),.black.opacity(0.48)],startPoint:.top,endPoint:.bottom))
+                RoundedRectangle(cornerRadius:h*0.2,style:.continuous).fill(LinearGradient(colors:[.black.opacity(0.44),.black.opacity(0.64)],startPoint:.top,endPoint:.bottom))
             }
         }
-        .overlay(RoundedRectangle(cornerRadius:h*0.2,style:.continuous).stroke(LinearGradient(colors:[.white.opacity(0.45),.white.opacity(0.1)],startPoint:.top,endPoint:.bottom),lineWidth:1))
+        .overlay(RoundedRectangle(cornerRadius:h*0.2,style:.continuous).stroke(LinearGradient(colors:[.white.opacity(0.55),.white.opacity(0.16)],startPoint:.top,endPoint:.bottom),lineWidth:1.2))
         .opacity(alive ? 1:0.6).saturation(alive ? 1:0.2)
         .overlay{
             if dropTarget,targets.hover==unit.id {

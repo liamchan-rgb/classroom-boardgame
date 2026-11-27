@@ -247,6 +247,25 @@ public struct MemoryMatch: Equatable {
         cards = dice.shuffle(all)
         self.sides = sides
     }
+    public static let pairPresets: [Int] = [3, 4, 5, 6, 8, 10, 12]
+    public static func clampPairs(_ requested: Int, available: Int) -> Int {
+        guard available >= 2 else { return max(0, available) }
+        return min(max(2, requested), min(12, available))
+    }
+    /// Balanced grid dimensions (columns × rows) for any even card count 4...24 with zero awkward orphan rows.
+    public static func gridDimensions(cardCount: Int) -> (columns: Int, rows: Int) {
+        switch cardCount {
+        case ...4: return (2, 2)
+        case 5...6: return (3, 2)
+        case 7...8: return (4, 2)
+        case 9...10: return (5, 2)
+        case 11...12: return (4, 3)
+        case 13...16: return (4, 4)
+        case 17...18: return (6, 3)
+        case 19...20: return (5, 4)
+        default: return (6, 4)
+        }
+    }
     public var pairCount: Int { cards.count / 2 }
     public var current: MiniGameSide? { sides.isEmpty ? nil : sides[turn % sides.count] }
     public var phase: Phase {

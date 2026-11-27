@@ -161,22 +161,28 @@ private struct ClassroomScoreboard:View {
             ForEach(Array(ranked.enumerated()),id:\.element.id){rank,u in
                 let seat=(players.firstIndex{$0.id==u.id} ?? rank)
                 HStack(spacing:14*unit){
-                    Text("\(rank+1)").font(.system(size:24*unit,weight:.heavy,design:.rounded)).frame(width:34*unit)
-                        .foregroundStyle(rank==0 ? Color(red:0.74,green:0.52,blue:0.12):GameTheme.muted)
-                    Text(String(u.shortName.prefix(1)).uppercased()).font(.system(size:20*unit,weight:.heavy,design:.rounded))
+                    Group{
+                        if rank == 0 {
+                            Image(systemName:"crown.fill").font(.system(size:22*unit,weight:.heavy)).foregroundStyle(Color(red:0.86,green:0.56,blue:0.06))
+                        } else {
+                            Text("\(rank+1)").font(.system(size:24*unit,weight:.heavy,design:.rounded)).foregroundStyle(GameTheme.muted)
+                        }
+                    }.frame(width:34*unit)
+                    Text(String(u.shortName.prefix(1)).uppercased()).font(.system(size:20*unit,weight:.heavy,design:.rounded)).foregroundStyle(.white)
                         .frame(width:40*unit,height:40*unit).background(Self.tints[seat%Self.tints.count],in:Circle())
-                    Text(u.name).font(.system(size:26*unit,weight:.bold,design:.rounded)).lineLimit(1).minimumScaleFactor(0.6)
+                    Text(u.name).font(.system(size:25*unit,weight:.heavy,design:.rounded)).lineLimit(1).minimumScaleFactor(0.6)
                     if let t=team(u) {
-                        Text(t.name).font(.system(size:16*unit,weight:.heavy,design:.rounded)).foregroundStyle(.white).lineLimit(1)
+                        Text(t.name).font(.system(size:15*unit,weight:.heavy,design:.rounded)).foregroundStyle(.white).lineLimit(1)
                             .padding(.horizontal,10*unit).padding(.vertical,3*unit).background(t.tint,in:Capsule())
                     }
                     Spacer(minLength:0)
-                    Text("\(u.score)").frame(width:150*unit,alignment:.trailing).foregroundStyle(GameTheme.primary)
-                    Text("\(u.coins)").frame(width:150*unit,alignment:.trailing).foregroundStyle(Color(red:0.74,green:0.52,blue:0.12))
+                    Text("\(u.score)").frame(width:146*unit,alignment:.trailing).foregroundStyle(GameTheme.primary)
+                    Text("\(u.coins)").frame(width:146*unit,alignment:.trailing).foregroundStyle(Color(red:0.78,green:0.48,blue:0.06))
                 }
                 .font(.system(size:28*unit,weight:.heavy,design:.rounded)).monospacedDigit().foregroundStyle(GameTheme.ink)
-                .padding(.horizontal,16*unit).padding(.vertical,8*unit)
-                .background(RoundedRectangle(cornerRadius:16*unit,style:.continuous).fill(.white.opacity(rank==0 ? 0.7:0.42)))
+                .padding(.horizontal,16*unit).padding(.vertical,7*unit)
+                .background(RoundedRectangle(cornerRadius:15*unit,style:.continuous).fill(rank==0 ? Color(red:1.0,green:0.96,blue:0.84) : .white.opacity(0.64)))
+                .overlay(RoundedRectangle(cornerRadius:15*unit,style:.continuous).stroke(rank==0 ? Color(red:0.90,green:0.62,blue:0.12) : .white.opacity(0.7),lineWidth:rank==0 ? 2*unit : 1*unit))
             }
             if players.isEmpty {Text("还没有进行中的行程").font(.system(size:22*unit)).foregroundStyle(GameTheme.muted)}
             // Teams: average score of their students (as in the team view), total and head count.
@@ -230,16 +236,21 @@ struct ClassroomTeamScoreboard:View {
             ForEach(rows){row in
                 let tint=Self.tints[(order.firstIndex(of:row.id) ?? 0)%Self.tints.count]
                 HStack(spacing:14*unit){
-                    Text("\(row.rank)").font(.system(size:26*unit,weight:.heavy,design:.rounded)).frame(width:34*unit)
-                        .foregroundStyle(row.rank==1 ? Color(red:0.74,green:0.52,blue:0.12):GameTheme.muted)
-                    RoundedRectangle(cornerRadius:5*unit).fill(tint).frame(width:10*unit,height:56*unit)
+                    Group{
+                        if row.rank == 1 {
+                            Image(systemName:"crown.fill").font(.system(size:23*unit,weight:.heavy)).foregroundStyle(Color(red:0.86,green:0.56,blue:0.06))
+                        } else {
+                            Text("\(row.rank)").font(.system(size:26*unit,weight:.heavy,design:.rounded)).foregroundStyle(GameTheme.muted)
+                        }
+                    }.frame(width:34*unit)
+                    RoundedRectangle(cornerRadius:5*unit).fill(tint).frame(width:10*unit,height:54*unit)
                     VStack(alignment:.leading,spacing:4*unit){
-                        Text(row.name).font(.system(size:28*unit,weight:.heavy,design:.rounded)).lineLimit(1).minimumScaleFactor(0.6)
+                        Text(row.name).font(.system(size:27*unit,weight:.heavy,design:.rounded)).lineLimit(1).minimumScaleFactor(0.6)
                         HStack(spacing:4*unit){
                             ForEach(row.memberIDs,id:\.self){id in
                                 Text(String((state?.units[id]?.shortName ?? id).prefix(1)).uppercased())
                                     .font(.system(size:13*unit,weight:.heavy,design:.rounded)).foregroundStyle(.white)
-                                    .frame(width:24*unit,height:24*unit).background(tint.opacity(0.85),in:Circle())
+                                    .frame(width:24*unit,height:24*unit).background(tint.opacity(0.88),in:Circle())
                             }
                             Text("\(row.memberIDs.count) 人").font(.system(size:15*unit,weight:.bold,design:.rounded)).foregroundStyle(GameTheme.muted)
                         }
@@ -248,11 +259,12 @@ struct ClassroomTeamScoreboard:View {
                     Text(row.averageScore.formatted(.number.precision(.fractionLength(0...1)))).font(.system(size:38*unit,weight:.heavy,design:.rounded))
                         .frame(width:190*unit,alignment:.trailing).foregroundStyle(GameTheme.primary)
                     Text("\(row.totalScore)").frame(width:130*unit,alignment:.trailing).foregroundStyle(GameTheme.ink)
-                    Text("\(row.totalCoins)").frame(width:130*unit,alignment:.trailing).foregroundStyle(Color(red:0.74,green:0.52,blue:0.12))
+                    Text("\(row.totalCoins)").frame(width:130*unit,alignment:.trailing).foregroundStyle(Color(red:0.78,green:0.48,blue:0.06))
                 }
                 .font(.system(size:26*unit,weight:.heavy,design:.rounded)).monospacedDigit().foregroundStyle(GameTheme.ink)
-                .padding(.horizontal,16*unit).padding(.vertical,10*unit)
-                .background(RoundedRectangle(cornerRadius:16*unit,style:.continuous).fill(.white.opacity(row.rank==1 ? 0.7:0.42)))
+                .padding(.horizontal,16*unit).padding(.vertical,9*unit)
+                .background(RoundedRectangle(cornerRadius:15*unit,style:.continuous).fill(row.rank==1 ? Color(red:1.0,green:0.96,blue:0.84) : .white.opacity(0.64)))
+                .overlay(RoundedRectangle(cornerRadius:15*unit,style:.continuous).stroke(row.rank==1 ? Color(red:0.90,green:0.62,blue:0.12) : .white.opacity(0.7),lineWidth:row.rank==1 ? 2*unit : 1*unit))
             }
             if rows.isEmpty {Text(state==nil ? "还没有进行中的行程":"还没有队伍成员").font(.system(size:22*unit)).foregroundStyle(GameTheme.muted)}
             Text("按队员平均积分排名（不含老师）").font(.system(size:16*unit,weight:.semibold,design:.rounded)).foregroundStyle(GameTheme.muted)

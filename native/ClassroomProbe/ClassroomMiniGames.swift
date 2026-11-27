@@ -34,7 +34,21 @@ import MeadowBattleSupport
             }
         }
     }
-    struct Student: Identifiable { let id: String; let name: String; let look: PixelHeroLook; let seat: Int }
+    struct Student: Identifiable {
+        enum AttackStyle { case melee, bow, magic }
+        let id: String; let name: String; let look: PixelHeroLook; let seat: Int; let style: AttackStyle
+    }
+    enum MemoryFXKind: Equatable { case flip, pairReady, claimed, mismatch }
+    struct MemoryFXEvent: Equatable { let id: Int; let indices: [Int]; let kind: MemoryFXKind; let sideID: String? }
+
+    static let memoryPairsKey = "classroom.memoryPairs"
+    static var preferredMemoryPairs: Int {
+        get {
+            let stored = UserDefaults.standard.integer(forKey: memoryPairsKey)
+            return stored > 0 ? min(12, max(2, stored)) : 8
+        }
+        set { UserDefaults.standard.set(min(12, max(2, newValue)), forKey: memoryPairsKey) }
+    }
 
     let kind: Kind
     let students: [Student]
@@ -43,11 +57,16 @@ import MeadowBattleSupport
     let tints: [String: Int]
     /// Student id → colour index (matches team color when in team mode, else seat color).
     let studentTints: [String: Int]
+    let memoryAvailablePairs: Int
+    private let memoryPool: [(english: String, meaning: String)]
+    private let memorySides: [MiniGameSide]
     @Published var boss: BossRaid?
     @Published var camp: CampDefense?
     var campWaveSpecies: [String] = ["slime", "wolf", "caveTroll"]
     @Published var race: RaceTrack?
     @Published var memory: MemoryMatch?
+    @Published var hoveredMemoryCard: Int?
+    @Published var memoryFX: MemoryFXEvent?
     @Published var arena: ArenaKing?
     /// Bumped each time a round is applied (the TV animates on it).
     @Published var beat = 0
@@ -56,15 +75,40 @@ import MeadowBattleSupport
     @Published var rewarded = false
     @Published private(set) var hasPendingRound = false
     private var dice: MiniGameDice
+    private var memoryFXCounter = 0
     private var pendingID = 0
     private var pending: (id: Int, round: MiniGameRound, token: Int?)?
 
-    init(kind: Kind, state: GameState, playerIDs: [String], seats: (String) -> Int, bank: [QuizQuestion], course: [Int]) {
+    private static let miniGameFXClips: [String] = [
+        "melee_heavy_cleave_51", "melee_heavy_cleave_36", "melee_spear_sweep", "shield_bash_wave",
+        "impacts_hit_spark_10", "impacts_hit_spark_55", "impacts_crit_hit_3", "impacts_blunt_hit_6",
+        "projectiles_arrow_42", "holy_orb_proj", "fire_fireball_47", "wind_thunder_bolt",
+        "lightning_bolt_strike", "skybreaker_lance", "fire_flame_pillar", "fire_fire_breath_5",
+        "status_burning_7", "ice_breath_cone", "frost_nova_ring", "frost_fang_bite", "frost_shard_burst",
+        "astral_eclipse_beam", "shadow_dark_explosion", "cap_spore_slam", "bomb_lob_proj",
+        "bomb_firework_blast", "bomb_star_smoke", "nature_vine_whip", "thorn_root_sweep",
+        "thorn_vine_erupt", "nature_boulder_smash", "nature_quake_rift", "iron_bastion_wall",
+        "astral_dome_barrier", "wind_dash_step", "wind_spark_impact", "tribal_drum_chant",
+        "holy_sunburst_16", "holy_sunburst_39", "holy_blessing_17", "oath_banner_plant",
+        "warlord_roar_wave", "seraph_aegis_descend", "sonic_anthem_burst", "collectGold", "collectLegendary"
+    ]
+
+    init(kind: Kind, state: GameState, playerIDs: [String], seats: (String) -> Int, bank: [QuizQuestion], course: [Int], memoryPairs: Int? = nil) {
         self.kind = kind
         let seed = UInt64(Date().timeIntervalSince1970 * 1000)
         dice = MiniGameDice(seed: seed)
         let ordered = state.players.filter { !$0.host }.sorted { (seats($0.id), $0.id) < (seats($1.id), $1.id) }
-        students = ordered.map { u in Student(id: u.id, name: u.shortName, look: .battle(unit: u, slot: playerIDs.firstIndex(of: u.id) ?? 0), seat: seats(u.id)) }
+        students = ordered.map { u in
+            let look = PixelHeroLook.battle(unit: u, slot: playerIDs.firstIndex(of: u.id) ?? 0)
+            let w = (u.equipment.weapon ?? "").lowercased()
+            let style: Student.AttackStyle =
+                (w.contains("bow") || w.contains("slingshot")) ? .bow
+                : (w.contains("staff") || w.contains("wand") || w.contains("scepter") || w.contains("codex") || w.contains("harp") || w.contains("lute")) ? .magic
+                : .melee
+            return Student(id: u.id, name: u.shortName, look: look, seat: seats(u.id), style: style)
+        }
+        // Prewarm every student's baked pixel battle sheet right away so heroes never show placeholder circles on frame 1.
+        for s in students { _ = PixelHeroAtlas.battle(s.look) }
         let activeTeams = state.teams.filter { team in ordered.contains { $0.teamID == team.id } }
         isTeamMode = activeTeams.count >= 2
         var sides = MiniGameSide.sides(state)
@@ -84,24 +128,54 @@ import MeadowBattleSupport
             }
         }
         studentTints = st
-        // Prewarm full-body battle sprites & pixel VFX in background for instant crisp HD-2D rendering.
+        let pool = MemoryMatch.candidates(bank, among: course)
+        memoryPool = pool
+        memoryAvailablePairs = min(12, pool.count)
+        memorySides = sides
+        // Prewarm full-body battle sprites & all mini-game pixel VFX in background for zero first-hit hitch.
         PixelHeroAtlas.prepare(battle: students.map(\.look))
         MeadowPixelFX.prewarm()
+        DispatchQueue.global(qos: .utility).async {
+            let clips = Self.miniGameFXClips.compactMap { MeadowPixelFX.clips[$0] }
+            DispatchQueue.main.async {
+                for c in clips { _ = MeadowPixelFX.images(c) }
+            }
+        }
         switch kind {
         case .boss:
             let bossPool = ["mushroomKing", "caveTroll", "goblinWarlord", "thornTreant", "ruinDragon", "frostPhoenix", "eclipseBehemoth", "crystalGolem", "frostAlphaWolf"]
-            boss = BossRaid(monster: dice.shuffle(bossPool)[0], students: ordered.count)
+            let chosen = dice.shuffle(bossPool)[0]
+            MeadowMonsterFrames.retain([chosen])
+            boss = BossRaid(monster: chosen, students: ordered.count)
         case .camp:
             let wave1 = dice.shuffle(["slime", "hopShroom", "acornBandit", "bubbleCrab"])[0]
             let wave2 = dice.shuffle(["wolf", "goblinArcher", "stingWasp", "brambleSprite", "goblinShaman", "stoneGuardian", "emberLizard", "shadowOwl", "runeKnight"])[0]
             let wave3 = dice.shuffle(["crystalGolem", "frostAlphaWolf", "mushroomKing", "caveTroll", "goblinWarlord", "thornTreant", "ruinDragon", "frostPhoenix", "eclipseBehemoth"])[0]
             campWaveSpecies = [wave1, wave2, wave3]
+            MeadowMonsterFrames.retain(Set(campWaveSpecies))
             camp = CampDefense()
         case .race: race = RaceTrack(sides: sides, seed: seed)
         case .memory:
-            let pairs = dice.shuffle(MemoryMatch.candidates(bank, among: course)).prefix(8)
+            let count = MemoryMatch.clampPairs(memoryPairs ?? Self.preferredMemoryPairs, available: pool.count)
+            let pairs = dice.shuffle(pool).prefix(count)
             memory = MemoryMatch(pairs: Array(pairs), sides: sides, seed: seed)
         case .arena: arena = ArenaKing(players: ordered.map(\.id))
+        }
+    }
+
+    func configureMemoryPairs(_ requested: Int) {
+        guard kind == .memory, memoryAvailablePairs >= 2 else { return }
+        let clamped = MemoryMatch.clampPairs(requested, available: memoryAvailablePairs)
+        Self.preferredMemoryPairs = clamped
+        let seed = UInt64(Date().timeIntervalSince1970 * 1000) ^ UInt64(clamped * 997)
+        dice = MiniGameDice(seed: seed)
+        let pairs = dice.shuffle(memoryPool).prefix(clamped)
+        withAnimation(.spring(response: 0.38, dampingFraction: 0.8)) {
+            memory = MemoryMatch(pairs: Array(pairs), sides: memorySides, seed: seed)
+            hoveredMemoryCard = nil
+            rewarded = false
+            banner = "已切换为 \(clamped * 2) 张卡牌（\(clamped) 组词对），直接点击舞台卡牌翻开！"
+            beat += 1
         }
     }
     func name(_ id: String) -> String { students.first { $0.id == id }?.name ?? race?.sides.first { $0.id == id }?.name ?? memory?.sides.first { $0.id == id }?.name ?? id }
@@ -252,23 +326,32 @@ import MeadowBattleSupport
         }.filter { !$0.isEmpty }.joined(separator: " · ")
     }
 
-    // Memory: the teacher turns the cards and judges the reading.
+    // Memory: direct click on stage cards to flip & teacher judges the reading.
+    private func emitMemoryFX(_ indices: [Int], kind: MemoryFXKind, sideID: String? = nil) {
+        memoryFXCounter += 1
+        memoryFX = MemoryFXEvent(id: memoryFXCounter, indices: indices, kind: kind, sideID: sideID)
+    }
     func flip(_ i: Int) {
         guard var m = memory, m.canFlip(i) else { return }
+        hoveredMemoryCard = nil
         withAnimation(.spring(response: 0.42, dampingFraction: 0.78)) { m.flip(i); memory = m }
         switch m.phase {
         case .judging:
             banner = "配对成功！\(m.current.map { name($0.id) } ?? "")大声读出来"
+            emitMemoryFX(m.faceUp, kind: .pairReady, sideID: m.current?.id)
             beat += 1
         case .mismatch:
             banner = "没配上，记住位置哦"
+            emitMemoryFX(m.faceUp, kind: .mismatch)
             beat += 1
             let up = m.faceUp
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.4) { [weak self] in
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) { [weak self] in
                 guard let self, self.memory?.faceUp == up else { return }
                 self.turnBack()
             }
-        case .picking: banner = nil
+        case .picking:
+            emitMemoryFX([i], kind: .flip)
+            banner = nil
         }
     }
     func turnBack() {
@@ -280,9 +363,12 @@ import MeadowBattleSupport
     }
     func judge(right: Bool) {
         guard var m = memory, m.phase == .judging else { return }
+        let matchedIndices = m.faceUp
+        let winnerSideID = m.current?.id
         withAnimation(.spring(response: 0.48, dampingFraction: 0.75)) {
             let who = m.current.map { name($0.id) } ?? ""
             m.judge(right: right); memory = m; beat += 1
+            if right { emitMemoryFX(matchedIndices, kind: .claimed, sideID: winnerSideID) }
             banner = m.finished ? "宝箱全部找到了！" : right ? "\(who) 拿走宝箱，再翻一次！" : "读错了，宝箱合上，轮到 \(m.current.map { name($0.id) } ?? "")"
         }
     }
@@ -320,12 +406,12 @@ enum MiniGamePalette {
 // MARK: Coordinator
 
 extension MeadowTeacherCoordinator {
-    func startMiniGame(_ kind: MiniGameModel.Kind) {
+    func startMiniGame(_ kind: MiniGameModel.Kind, memoryPairs: Int? = nil) {
         guard let c = campaign else { message = "先打开一个行程（学生名单）再玩小游戏。"; revision += 1; return }
         let students = c.engine.state.players.filter { !$0.host }
         if kind == .arena, students.count < 2 { message = "擂台王至少要两名学生。"; revision += 1; return }
-        if kind == .memory, MemoryMatch.candidates(c.quizBank, among: c.courseIndices).count < 4 {
-            message = "翻牌寻宝需要当前课程至少 4 张★/★★单词闪卡。"; revision += 1; return
+        if kind == .memory, MemoryMatch.candidates(c.quizBank, among: c.courseIndices).count < 2 {
+            message = "翻牌寻宝需要当前课程至少 2 张★/★★单词闪卡。"; revision += 1; return
         }
         if kind != .memory, c.courseIndices.isEmpty { message = "当前课程没有题，先在题库里选课或导入。"; revision += 1; return }
         if quizActive { abortQuiz() }
@@ -334,10 +420,10 @@ extension MeadowTeacherCoordinator {
         cancelEnemyWork()
         skippedPrompt = nil
         let model = MiniGameModel(kind: kind, state: c.engine.state, playerIDs: c.playerIDs, seats: { [weak self] in self?.seatNumber($0) ?? 0 },
-                                  bank: c.quizBank, course: c.courseIndices)
+                                  bank: c.quizBank, course: c.courseIndices, memoryPairs: memoryPairs)
         model.banner = kind.rule
         withAnimation(.easeOut(duration: 0.3)) { miniGame = model }
-        message = "\(kind.title)开始：" + (kind == .memory ? "直接点舞台上的牌，或在下方点数字翻开" : "点“出题”或按 ⇧Q 出全班题")
+        message = "\(kind.title)开始：" + (kind == .memory ? "直接点击舞台上的卡牌即可翻开，顶部可自定义卡牌张数" : "点“出题”或按 ⇧Q 出全班题")
         revision += 1
     }
     func endMiniGame() {
@@ -424,15 +510,18 @@ private struct MiniGameBarContent: View {
                 status.font(.subheadline.weight(.semibold)).lineLimit(1).minimumScaleFactor(0.7)
                     .transaction { $0.animation = nil }
                 Spacer(minLength: 4)
-                if let m = model.memory, !model.finished {
-                    if m.phase == .judging {
-                        Button { model.judge(right: true) } label: { Label("读对了", systemImage: "checkmark.circle.fill") }
-                            .buttonStyle(GlassIconButtonStyle(tint: .green, prominent: true))
-                        Button { model.judge(right: false) } label: { Label("读错了", systemImage: "xmark.circle.fill") }
-                            .buttonStyle(GlassIconButtonStyle(tint: .red))
-                    } else if m.phase == .mismatch {
-                        Button { model.turnBack() } label: { Label("翻回去", systemImage: "arrow.uturn.backward") }
-                            .buttonStyle(GlassIconButtonStyle(tint: .orange))
+                if let m = model.memory {
+                    memoryScaleControl(m)
+                    if !model.finished {
+                        if m.phase == .judging {
+                            Button { model.judge(right: true) } label: { Label("读对了", systemImage: "checkmark.circle.fill") }
+                                .buttonStyle(GlassIconButtonStyle(tint: .green, prominent: true))
+                            Button { model.judge(right: false) } label: { Label("读错了", systemImage: "xmark.circle.fill") }
+                                .buttonStyle(GlassIconButtonStyle(tint: .red))
+                        } else if m.phase == .mismatch {
+                            Button { model.turnBack() } label: { Label("翻回去", systemImage: "arrow.uturn.backward") }
+                                .buttonStyle(GlassIconButtonStyle(tint: .orange))
+                        }
                     }
                 }
                 if model.finished {
@@ -459,9 +548,46 @@ private struct MiniGameBarContent: View {
                 }
                 Button { game.endMiniGame() } label: { Label("结束", systemImage: "xmark.circle") }.buttonStyle(GlassIconButtonStyle(tint: .red))
             }
-            if let m = model.memory { MemoryTeacherGrid(model: model, memory: m) }
         }
         .padding(.horizontal, 12).padding(.vertical, 8).glassPanel(radius: 18, padding: 0)
+    }
+
+    /// Compact custom card-count control for Memory (presets 4–24 cards + ±2 custom stepper; zero bottom number strip!).
+    @ViewBuilder private func memoryScaleControl(_ m: MemoryMatch) -> some View {
+        let maxPairs = max(2, model.memoryAvailablePairs)
+        let currentPairs = m.pairCount
+        HStack(spacing: 4) {
+            Button { model.configureMemoryPairs(currentPairs - 1) } label: {
+                Image(systemName: "minus").font(.caption.weight(.black)).frame(width: 24, height: 24)
+            }
+            .buttonStyle(GlassIconButtonStyle())
+            .disabled(currentPairs <= 2)
+            .help("减少 2 张卡牌")
+
+            Menu {
+                Section("卡牌规模（当前课程最多 \(maxPairs * 2) 张）") {
+                    ForEach(2...maxPairs, id: \.self) { pairs in
+                        let dims = MemoryMatch.gridDimensions(cardCount: pairs * 2)
+                        Button {
+                            model.configureMemoryPairs(pairs)
+                        } label: {
+                            Label("\(pairs * 2) 张（\(pairs) 组 · \(dims.columns)×\(dims.rows)）", systemImage: pairs == currentPairs ? "checkmark.circle.fill" : "square.grid.2x2")
+                        }
+                    }
+                }
+            } label: {
+                Label("\(currentPairs * 2) 张", systemImage: "square.grid.2x2.fill")
+            }
+            .buttonStyle(GlassIconButtonStyle(tint: GameTheme.primary))
+            .menuStyle(.button)
+
+            Button { model.configureMemoryPairs(currentPairs + 1) } label: {
+                Image(systemName: "plus").font(.caption.weight(.black)).frame(width: 24, height: 24)
+            }
+            .buttonStyle(GlassIconButtonStyle())
+            .disabled(currentPairs >= maxPairs)
+            .help("增加 2 张卡牌")
+        }
     }
     @ViewBuilder private var status: some View {
         switch model.kind {
@@ -474,50 +600,9 @@ private struct MiniGameBarContent: View {
         case .arena: Text("擂台：\(model.answering ?? "") · 在全班题里记下这两人的答案")
         case .memory:
             if let m = model.memory {
-                Text(m.finished ? "全部找到" : "轮到 \(m.current.map { model.name($0.id) } ?? "") · " + (m.phase == .judging ? "读对了吗？" : m.phase == .mismatch ? "没配上" : "点牌翻开"))
+                Text(m.finished ? "全部找到" : "轮到 \(m.current.map { model.name($0.id) } ?? "") · " + (m.phase == .judging ? "读对了吗？" : m.phase == .mismatch ? "没配上" : "直接点击舞台卡牌翻开"))
             }
         }
-    }
-}
-
-/// Fixed full-width memory card strip for the teacher (zero collapse / jump when judging buttons appear on header row).
-private struct MemoryTeacherGrid: View {
-    @ObservedObject var model: MiniGameModel
-    let memory: MemoryMatch
-    var body: some View {
-        let cols = max(4, (memory.cards.count + 1) / 2)
-        let columns = Array(repeating: GridItem(.flexible(), spacing: 5), count: cols)
-        LazyVGrid(columns: columns, spacing: 5) {
-            ForEach(memory.cards.indices, id: \.self) { i in
-                let card = memory.cards[i], up = memory.faceUp.contains(i), done = memory.matched(i)
-                let clickable = memory.canFlip(i)
-                Button { model.flip(i) } label: {
-                    HStack(spacing: 4) {
-                        if done {
-                            Image("MiniGameChestOpen").resizable().interpolation(.none).scaledToFit().frame(width: 15, height: 15)
-                        }
-                        Text(up || done ? card.text : "\(i + 1)")
-                            .font(.system(size: 13, weight: .bold, design: .rounded))
-                            .lineLimit(1).minimumScaleFactor(0.55)
-                    }
-                    .padding(.horizontal, 4)
-                    .frame(maxWidth: .infinity, minHeight: 30)
-                    .foregroundStyle(done ? .white : MiniGamePalette.ink)
-                    .background(
-                        RoundedRectangle(cornerRadius: 7, style: .continuous)
-                            .fill(done ? model.tint(memory.owner[card.pair] ?? "").opacity(0.92) : up ? MiniGamePalette.gold.opacity(0.65) : Color.white.opacity(0.75))
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 7, style: .continuous)
-                            .stroke(up ? MiniGamePalette.goldDeep : (done ? Color.white.opacity(0.35) : Color.black.opacity(0.08)), lineWidth: up ? 1.5 : 1)
-                    )
-                }
-                .buttonStyle(.plain)
-                .allowsHitTesting(clickable)
-                .opacity(clickable || done || up ? 1 : 0.55)
-            }
-        }
-        .frame(maxWidth: .infinity)
     }
 }
 
@@ -538,24 +623,31 @@ private struct MemoryBoardLayout {
     init(count: Int, unit: CGFloat) {
         self.count = count
         self.unit = unit
-        let cols = count >= 8 ? 4 : (count >= 6 ? 3 : 2)
-        let r = max(1, (count + cols - 1) / cols)
+        let dims = MemoryMatch.gridDimensions(cardCount: count)
+        let cols = dims.columns
+        let r = dims.rows
         self.columns = cols
         self.rows = r
-        let cw: CGFloat = (cols == 4 ? 174 : 204) * unit
-        let ch: CGFloat = (r >= 4 ? 104 : r == 3 ? 130 : 160) * unit
-        let g: CGFloat = (r >= 4 ? 11 : 15) * unit
+        // Fit crisply inside the oak tabletop between lantern/scroll (left) and standings panel (right).
+        let sw: CGFloat = 250 * unit
+        let splitGap: CGFloat = 22 * unit
+        let maxGridW: CGFloat = 824 * unit
+        let maxGridH: CGFloat = 486 * unit
+        let g: CGFloat = (cols >= 6 ? 9 : r >= 4 ? 11 : 14) * unit
+        let idealCW = (maxGridW - CGFloat(cols - 1) * g) / CGFloat(cols)
+        let idealCH = (maxGridH - CGFloat(r - 1) * g) / CGFloat(r)
+        // Keep pleasant card aspect ratio (~1.42...1.78) without giant bloated or paper-thin tiles.
+        let cw = min(idealCW, idealCH * 1.72, 238 * unit)
+        let ch = min(idealCH, cw * 0.80, 174 * unit)
         self.cardSize = CGSize(width: cw, height: ch)
         self.gap = g
         let gw = CGFloat(cols) * cw + CGFloat(cols - 1) * g
         let gh = CGFloat(r) * ch + CGFloat(r - 1) * g
         self.gridSize = CGSize(width: gw, height: gh)
-        let sw = 260 * unit
-        let splitGap = 24 * unit
         let totalW = gw + splitGap + sw
         // Slightly nudged right so the oak table's top-left brass lantern & bottom-left scroll/satchel breathe cleanly!
-        let gx = (1280 * unit - totalW) / 2 + 28 * unit
-        let gy = 356 * unit - gh / 2
+        let gx = (1280 * unit - totalW) / 2 + 26 * unit
+        let gy = 358 * unit - gh / 2
         self.gridOrigin = CGPoint(x: gx, y: gy)
         self.sideWidth = sw
         self.sideX = gx + gw + splitGap + sw / 2
@@ -570,7 +662,7 @@ private struct MemoryBoardLayout {
     }
 }
 
-/// Interactive tap layer on teacher preview: prevents map/book bleed-through & enables direct card flipping in Memory.
+/// Interactive tap layer on teacher preview: blocks map/book bleed-through & enables rock-solid direct card clicking & pointer hover in Memory.
 struct MiniGameTapLayer: View {
     @ObservedObject var game: MeadowTeacherCoordinator
     var body: some View {
@@ -580,31 +672,101 @@ struct MiniGameTapLayer: View {
     }
 }
 
-private struct MiniGameTapContent: View {
+private struct MiniGameTapContent: UIViewRepresentable {
     @ObservedObject var model: MiniGameModel
-    var body: some View {
-        GeometryReader { g in
-            let unit = min(g.size.height / 720, g.size.width / 1280)
-            ZStack {
-                Color.clear.contentShape(Rectangle())
-                if let m = model.memory {
-                    let layout = MemoryBoardLayout(count: m.cards.count, unit: unit)
-                    ZStack(alignment: .topLeading) {
-                        ForEach(m.cards.indices, id: \.self) { i in
-                            if m.canFlip(i) {
-                                Button { model.flip(i) } label: { Color.clear }
-                                    .buttonStyle(.plain)
-                                    .contentShape(RoundedRectangle(cornerRadius: 15 * unit))
-                                    .frame(width: layout.cardSize.width, height: layout.cardSize.height)
-                                    .position(layout.cardCenter(i))
-                                    .accessibilityLabel("舞台牌 \(i + 1)")
-                            }
-                        }
-                    }
-                    .frame(width: 1280 * unit, height: 720 * unit)
-                }
+
+    func makeUIView(context: Context) -> MiniGameStageTouchView {
+        let view = MiniGameStageTouchView()
+        view.model = model
+        return view
+    }
+
+    func updateUIView(_ view: MiniGameStageTouchView, context: Context) {
+        view.model = model
+    }
+}
+
+/// Native UIKit touch & hover catcher matching `MiniGameStage`'s exact `1280×720` centered coordinate space.
+/// Uses direct `touchesBegan`/`touchesEnded` so Mac mouse, trackpad, and iPad touches always register cleanly
+/// with zero SwiftUI clear-button or gesture-recognizer interference.
+final class MiniGameStageTouchView: UIView {
+    weak var model: MiniGameModel?
+    private let hoverGesture = UIHoverGestureRecognizer()
+    private var pressedCard: Int?
+    private var pressedPoint: CGPoint?
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        isOpaque = false
+        backgroundColor = .clear
+        isUserInteractionEnabled = true
+
+        hoverGesture.addTarget(self, action: #selector(handleHover(_:)))
+        addGestureRecognizer(hoverGesture)
+    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    /// Maps a point in this view's bounds into `MemoryBoardLayout` card index (with forgiving edge padding).
+    func memoryCardIndex(at point: CGPoint) -> Int? {
+        guard let m = model?.memory, bounds.width > 0, bounds.height > 0 else { return nil }
+        let unit = min(bounds.height / 720, bounds.width / 1280)
+        let stageW = 1280 * unit, stageH = 720 * unit
+        let ox = (bounds.width - stageW) / 2
+        let oy = (bounds.height - stageH) / 2
+        let local = CGPoint(x: point.x - ox, y: point.y - oy)
+        let layout = MemoryBoardLayout(count: m.cards.count, unit: unit)
+        for i in m.cards.indices {
+            let c = layout.cardCenter(i)
+            let rect = CGRect(
+                x: c.x - layout.cardSize.width / 2,
+                y: c.y - layout.cardSize.height / 2,
+                width: layout.cardSize.width,
+                height: layout.cardSize.height
+            ).insetBy(dx: -4 * unit, dy: -4 * unit)
+            if rect.contains(local) { return i }
+        }
+        return nil
+    }
+
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let pt = touches.first?.location(in: self) else { return }
+        pressedPoint = pt
+        pressedCard = memoryCardIndex(at: pt)
+    }
+
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        defer { pressedCard = nil; pressedPoint = nil }
+        guard let pt = touches.first?.location(in: self), let model, let m = model.memory else { return }
+        // Ignore accidental long drags; tolerate small trackpad/finger jitter up to 24pt.
+        if let start = pressedPoint, hypot(pt.x - start.x, pt.y - start.y) > 24 { return }
+        if m.phase == .mismatch {
+            model.turnBack()
+            let idx = memoryCardIndex(at: pt) ?? pressedCard
+            if let idx, model.memory?.canFlip(idx) == true { model.flip(idx) }
+            return
+        }
+        let idx = memoryCardIndex(at: pt) ?? pressedCard
+        guard let idx, m.canFlip(idx) else { return }
+        model.flip(idx)
+    }
+
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        pressedCard = nil
+        pressedPoint = nil
+    }
+
+    @objc private func handleHover(_ gesture: UIHoverGestureRecognizer) {
+        guard let model, let m = model.memory else { return }
+        switch gesture.state {
+        case .began, .changed:
+            let pt = gesture.location(in: self)
+            if let idx = memoryCardIndex(at: pt), m.canFlip(idx) {
+                if model.hoveredMemoryCard != idx { model.hoveredMemoryCard = idx }
+            } else if model.hoveredMemoryCard != nil {
+                model.hoveredMemoryCard = nil
             }
-            .frame(width: g.size.width, height: g.size.height)
+        default:
+            if model.hoveredMemoryCard != nil { model.hoveredMemoryCard = nil }
         }
     }
 }
@@ -771,26 +933,26 @@ private struct HD2DMeadowBackdrop: View {
     }
 }
 
-/// Drifting volumetric diagonal sunbeams (or twilight moonbeams in Boss), floating sunlit dust motes / fire embers,
-/// and restrained HD-2D optical vignette matching `MeadowPostProcess.Settings.hd2d`.
+/// Scene-tailored animated HD-2D atmosphere: volumetric light shafts, brazier fire tongues, fluttering flags,
+/// wind-blown petals/leaves, warm lantern candle flicker & dappled tabletop canopy light, and restrained optical vignette.
 private struct HD2DAtmosphereOverlay: View {
     let kind: MiniGameModel.Kind
     let size: CGSize
 
     var body: some View {
+        let unit = min(size.height / 720, size.width / 1280)
         ZStack {
-            // Drifting volumetric light shafts & floating motes/embers
             TimelineView(.animation(minimumInterval: 1.0 / 24)) { ctx in
                 let t = ctx.date.timeIntervalSinceReferenceDate
                 Canvas { g, canvasSize in
-                    // 1. Soft diagonal light shafts (upper-left sun/moon)
+                    // 1. Soft diagonal volumetric sun/moon shafts
                     let rayColor: Color = kind == .boss
                         ? Color(red: 0.72, green: 0.78, blue: 1.0)
-                        : Color(red: 1.0, green: 0.90, blue: 0.66)
-                    let rayAlpha: Double = kind == .boss ? 0.045 : (kind == .memory ? 0.04 : 0.075)
+                        : Color(red: 1.0, green: 0.91, blue: 0.68)
+                    let rayAlpha: Double = kind == .boss ? 0.055 : (kind == .memory ? 0.045 : 0.085)
                     for i in 0..<4 {
-                        let phase = sin(t * 0.22 + Double(i) * 1.7)
-                        let x0 = canvasSize.width * (0.04 + Double(i) * 0.24) + phase * 26
+                        let phase = sin(t * 0.28 + Double(i) * 1.7)
+                        let x0 = canvasSize.width * (0.04 + Double(i) * 0.24) + phase * 26 * unit
                         let w = canvasSize.width * (0.10 + Double(i % 2) * 0.05)
                         var path = Path()
                         path.move(to: CGPoint(x: x0, y: -20))
@@ -798,7 +960,7 @@ private struct HD2DAtmosphereOverlay: View {
                         path.addLine(to: CGPoint(x: x0 + w + canvasSize.height * 0.36, y: canvasSize.height + 20))
                         path.addLine(to: CGPoint(x: x0 + canvasSize.height * 0.36, y: canvasSize.height + 20))
                         path.closeSubpath()
-                        let alpha = rayAlpha * (0.72 + 0.28 * sin(t * 0.45 + Double(i) * 1.1))
+                        let alpha = rayAlpha * (0.72 + 0.28 * sin(t * 0.52 + Double(i) * 1.1))
                         g.fill(path, with: .linearGradient(
                             Gradient(colors: [rayColor.opacity(alpha), rayColor.opacity(alpha * 0.45), .clear]),
                             startPoint: CGPoint(x: x0, y: 0),
@@ -806,23 +968,101 @@ private struct HD2DAtmosphereOverlay: View {
                         ))
                     }
 
-                    // 2. Floating golden sunlight dust motes (or glowing fire embers in Boss)
-                    let moteCount = kind == .boss ? 22 : (kind == .memory ? 12 : 16)
+                    // 2. Scene-specific living world motion
+                    switch kind {
+                    case .boss:
+                        // Pulsing amethyst crystal gleam on sanctum arch keystone (x:1004, y:118)
+                        let pulse = 0.65 + 0.35 * sin(t * 2.4)
+                        let cPt = CGPoint(x: 1004 * unit, y: 118 * unit)
+                        let cRad = 96 * unit * (0.9 + 0.14 * pulse)
+                        g.fill(Path(ellipseIn: CGRect(x: cPt.x - cRad, y: cPt.y - cRad, width: cRad * 2, height: cRad * 2)),
+                               with: .radialGradient(Gradient(colors: [Color(red: 0.80, green: 0.48, blue: 1.0).opacity(0.32 * pulse), .clear]), center: cPt, startRadius: 4 * unit, endRadius: cRad))
+                        // Animated live flames & rising sparks on both mossy stone braziers
+                        let braziers: [CGPoint] = [CGPoint(x: 708 * unit, y: 446 * unit), CGPoint(x: 1172 * unit, y: 462 * unit)]
+                        for (bi, bp) in braziers.enumerated() {
+                            let flick = 0.78 + 0.22 * sin(t * 9.5 + Double(bi) * 2.1) * cos(t * 5.3 + Double(bi))
+                            let haloR = 72 * unit * flick
+                            g.fill(Path(ellipseIn: CGRect(x: bp.x - haloR, y: bp.y - haloR, width: haloR * 2, height: haloR * 2)),
+                                   with: .radialGradient(Gradient(colors: [Color(red: 1.0, green: 0.72, blue: 0.24).opacity(0.34 * flick), Color.orange.opacity(0.10 * flick), .clear]), center: bp, startRadius: 4 * unit, endRadius: haloR))
+                            for f in 0..<7 {
+                                let seed = Double(bi * 11 + f) * 4.7
+                                let age = (t * (1.5 + Double(f % 3) * 0.45) + seed).truncatingRemainder(dividingBy: 1.0)
+                                let fx = bp.x + CGFloat(sin(age * 9.0 + seed) * 10.0) * unit + CGFloat(f - 3) * 2.4 * unit
+                                let fy = bp.y - CGFloat(age * 52.0) * unit
+                                let fr = CGFloat(max(1.5, (1.0 - age) * 7.5)) * unit
+                                let fCol = age < 0.35 ? Color(red: 1.0, green: 0.94, blue: 0.62) : age < 0.72 ? Color(red: 1.0, green: 0.56, blue: 0.16) : Color(red: 0.90, green: 0.24, blue: 0.10)
+                                g.fill(Path(ellipseIn: CGRect(x: fx - fr, y: fy - fr * 1.25, width: fr * 2, height: fr * 2.5)), with: .color(fCol.opacity((1.0 - age) * 0.85)))
+                            }
+                        }
+                        // Drifting low twilight mist wisps across ruins flagstones
+                        for m in 0..<5 {
+                            let mx = ((t * (18 + Double(m) * 4) + Double(m) * 290).truncatingRemainder(dividingBy: 1580) - 150) * Double(unit)
+                            let my = (530.0 + Double(m % 3) * 48.0 + sin(t * 0.7 + Double(m)) * 12.0) * Double(unit)
+                            let mw = (210.0 + Double(m % 2) * 80.0) * Double(unit)
+                            let mh = 42.0 * Double(unit)
+                            g.fill(Path(ellipseIn: CGRect(x: mx - mw / 2, y: my - mh / 2, width: mw, height: mh)),
+                                   with: .color(Color(red: 0.56, green: 0.66, blue: 0.94).opacity(0.065)))
+                        }
+
+                    case .memory:
+                        // Warm breathing candlelight glow right over the top-left brass lantern (x:126, y:120)
+                        let flick = 0.84 + 0.16 * sin(t * 7.2) * cos(t * 4.1)
+                        let lPt = CGPoint(x: 126 * unit, y: 120 * unit)
+                        let lRad = 155 * unit * flick
+                        g.fill(Path(ellipseIn: CGRect(x: lPt.x - lRad, y: lPt.y - lRad, width: lRad * 2, height: lRad * 2)),
+                               with: .radialGradient(Gradient(colors: [Color(red: 1.0, green: 0.82, blue: 0.36).opacity(0.34 * flick), Color(red: 1.0, green: 0.58, blue: 0.18).opacity(0.10 * flick), .clear]), center: lPt, startRadius: 6 * unit, endRadius: lRad))
+                        // Soft dappled canopy light spots swaying gently on the oak table edges
+                        for i in 0..<7 {
+                            let sx = (220.0 + Double(i) * 145.0 + sin(t * 0.65 + Double(i) * 1.4) * 18.0) * Double(unit)
+                            let sy = (118.0 + Double(i % 2) * 36.0 + cos(t * 0.55 + Double(i)) * 10.0) * Double(unit)
+                            let sr = (28.0 + Double(i % 3) * 12.0) * Double(unit)
+                            let a = 0.055 + 0.03 * sin(t * 1.1 + Double(i) * 1.9)
+                            g.fill(Path(ellipseIn: CGRect(x: sx - sr, y: sy - sr * 0.6, width: sr * 2, height: sr * 1.2)), with: .color(Color(red: 1.0, green: 0.92, blue: 0.62).opacity(a)))
+                        }
+
+                    case .camp, .race, .arena:
+                        // Wind-blown sunlit leaves, flower petals & dandelion fluff drifting gently rightward across the meadow!
+                        let petalCount = kind == .race ? 24 : 18
+                        for i in 0..<petalCount {
+                            let seed = Double(i) * 17.3 + 2.7
+                            let vx = 42.0 + Double(i % 4) * 16.0
+                            let x = ((t * vx + seed * 93.0).truncatingRemainder(dividingBy: 1380.0) - 50.0) * Double(unit)
+                            let baseY = (70.0 + (sin(seed * 1.9) * 0.5 + 0.5) * 560.0)
+                            let y = (baseY + sin(t * (1.8 + Double(i % 3) * 0.5) + seed) * 26.0 + (t * 10.0).truncatingRemainder(dividingBy: 90.0) * 0.2) * Double(unit)
+                            let rot = Angle(radians: t * (2.4 + Double(i % 3)) + seed)
+                            let isPetal = i % 3 != 0
+                            let color: Color = {
+                                if kind == .race && i % 4 == 0 { return [Color(red: 1.0, green: 0.45, blue: 0.52), Color(red: 1.0, green: 0.84, blue: 0.28), Color(red: 0.42, green: 0.84, blue: 1.0)][i % 3] }
+                                return isPetal
+                                    ? (i % 2 == 0 ? Color(red: 1.0, green: 0.96, blue: 0.82) : Color(red: 1.0, green: 0.84, blue: 0.88))
+                                    : Color(red: 0.54, green: 0.86, blue: 0.36)
+                            }()
+                            let w = CGFloat(isPetal ? 5.5 : 7.5) * unit
+                            let h = CGFloat(isPetal ? 3.5 : 4.0) * unit
+                            var ctxCopy = g
+                            ctxCopy.translateBy(x: x, y: y)
+                            ctxCopy.rotate(by: rot)
+                            ctxCopy.fill(Path(ellipseIn: CGRect(x: -w / 2, y: -h / 2, width: w, height: h)), with: .color(color.opacity(0.76)))
+                        }
+                    }
+
+                    // 3. Floating golden sunlight dust motes (or glowing twilight fire embers in Boss)
+                    let moteCount = kind == .boss ? 26 : (kind == .memory ? 16 : 18)
                     for i in 0..<moteCount {
                         let seed = Double(i) * 13.7 + 1.3
-                        let speed = kind == .boss ? 16.0 : 8.5
+                        let speed = kind == .boss ? 20.0 : 9.5
                         let cycle = (t * (speed + Double(i % 5) * 3.0) + seed * 37).truncatingRemainder(dividingBy: Double(canvasSize.height + 60))
                         let y = Double(canvasSize.height + 30) - cycle
                         let baseX = (sin(seed * 2.13) * 0.5 + 0.5) * Double(canvasSize.width)
-                        let x = baseX + sin(t * 0.7 + seed) * 24.0
-                        let r = CGFloat(2.0 + Double(i % 3) * 1.1)
-                        let twinkle = 0.35 + 0.65 * (0.5 + 0.5 * sin(t * 2.1 + seed * 1.9))
-                        let edgeFade = min(1.0, min(y / 60.0, (Double(canvasSize.height) - y) / 60.0))
-                        let a = max(0, twinkle * edgeFade * (kind == .boss ? 0.76 : 0.52))
+                        let x = baseX + sin(t * 0.85 + seed) * 26.0 * Double(unit)
+                        let r = CGFloat(2.0 + Double(i % 3) * 1.1) * unit
+                        let twinkle = 0.35 + 0.65 * (0.5 + 0.5 * sin(t * 2.4 + seed * 1.9))
+                        let edgeFade = min(1.0, min(y / Double(60 * unit), (Double(canvasSize.height) - y) / Double(60 * unit)))
+                        let a = max(0, twinkle * edgeFade * (kind == .boss ? 0.82 : 0.58))
                         let color: Color = kind == .boss
-                            ? (i % 3 == 0 ? Color(red: 1.0, green: 0.80, blue: 0.36) : Color(red: 1.0, green: 0.48, blue: 0.18))
-                            : Color(red: 1.0, green: 0.95, blue: 0.74)
-                        let glowRect = CGRect(x: x - Double(r * 2.2), y: y - Double(r * 2.2), width: Double(r * 4.4), height: Double(r * 4.4))
+                            ? (i % 3 == 0 ? Color(red: 1.0, green: 0.82, blue: 0.36) : Color(red: 1.0, green: 0.48, blue: 0.18))
+                            : Color(red: 1.0, green: 0.95, blue: 0.72)
+                        let glowRect = CGRect(x: x - Double(r * 2.4), y: y - Double(r * 2.4), width: Double(r * 4.8), height: Double(r * 4.8))
                         g.fill(Path(ellipseIn: glowRect), with: .color(color.opacity(a * 0.30)))
                         let coreRect = CGRect(x: x - Double(r), y: y - Double(r), width: Double(r * 2), height: Double(r * 2))
                         g.fill(Path(ellipseIn: coreRect), with: .color(color.opacity(a)))
@@ -830,9 +1070,9 @@ private struct HD2DAtmosphereOverlay: View {
                 }
             }
 
-            // 3. Restrained HD-2D diorama vignette (matches MeadowPostProcess)
+            // 4. Restrained HD-2D diorama vignette (matches MeadowPostProcess)
             RadialGradient(
-                colors: [.clear, .clear, Color(red: 0.03, green: 0.05, blue: 0.04).opacity(kind == .boss ? 0.38 : (kind == .memory ? 0.24 : 0.22))],
+                colors: [.clear, .clear, Color(red: 0.03, green: 0.05, blue: 0.04).opacity(kind == .boss ? 0.38 : (kind == .memory ? 0.24 : 0.20))],
                 center: .center,
                 startRadius: min(size.width, size.height) * 0.38,
                 endRadius: max(size.width, size.height) * 0.76
@@ -1017,43 +1257,56 @@ private struct HD2DBattleHero: View {
     }
 }
 
-/// Real animated battle monster (`MeadowMonsterFrames`) with oblique sunlight shadow + crisp impact flash.
+/// Real animated battle monster (`MeadowMonsterFrames` + `MonsterVisualSpec`) supporting full idle, attack, cast,
+/// hurt, and 40-frame death dissolution animations with oblique sunlight shadow + crisp hit flash.
 private struct HD2DMonster: View {
     let id: String
     let height: CGFloat
     var mirrored = false
-    var hurtAt: Date?
+    var hurtAt: Date? = nil
+    var attackAt: Date? = nil
+    var castAt: Date? = nil
+    var deadAt: Date? = nil
     var dead = false
+
     var body: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 12)) { context in
-            let t = context.date.timeIntervalSinceReferenceDate
-            let isHurt: Bool = {
-                guard let at = hurtAt, !dead else { return false }
-                let age = context.date.timeIntervalSince(at)
-                return age >= 0 && age < 0.6
-            }()
-            let flashOn: Bool = {
-                guard let at = hurtAt, !dead else { return false }
-                let age = context.date.timeIntervalSince(at)
-                return age >= 0 && age < 0.14
-            }()
+        let spec = MonsterVisualSpec.find(id) ?? MonsterVisualSpec(id: id)
+        TimelineView(.animation(minimumInterval: 1.0 / 20)) { context in
+            let now = context.date
+            let t = now.timeIntervalSinceReferenceDate
+            let hurtAge = hurtAt.map { now.timeIntervalSince($0) }
+            let attackAge = attackAt.map { now.timeIntervalSince($0) }
+            let castAge = castAt.map { now.timeIntervalSince($0) }
+            let flashOn = !dead && (hurtAge.map { $0 >= 0 && $0 < 0.14 } ?? false)
+            let isDeath = dead
+            let deathAge = deadAt.map { now.timeIntervalSince($0) } ?? MonsterVisualSpec.deathDuration
             let image: UIImage? = {
-                if dead { return MeadowMonsterFrames.image(id, index: 39, death: true) }
-                if let at = hurtAt, isHurt {
-                    let age = context.date.timeIntervalSince(at)
-                    return MeadowMonsterFrames.image(id, index: 48 + min(7, Int(age / 0.6 * 8)))
+                if isDeath {
+                    let idx = MonsterVisualSpec.deathFrame(deathAge)
+                    return MeadowMonsterFrames.image(id, index: idx, death: true)
                 }
-                return MeadowMonsterFrames.image(id, index: Int(t.truncatingRemainder(dividingBy: 2.4) / 2.4 * 12) % 12)
+                let idx = spec.frame(time: t, attackAge: attackAge, castAge: castAge, hurtAge: hurtAge)
+                return MeadowMonsterFrames.image(id, index: idx)
+            }()
+            // Death frames are 512×320 vs motion 384×256: keep consistent ground scale during dissolution.
+            let drawH = isDeath ? height * (320.0 / 256.0) : height
+            let lungeX: CGFloat = {
+                guard !dead, let a = attackAge, a >= 0 && a < 0.65 else { return 0 }
+                let k = sin((a / 0.65) * .pi)
+                return (mirrored ? 1 : -1) * CGFloat(k) * height * 0.14
             }()
             ZStack(alignment: .bottom) {
                 if let image {
-                    ObliqueShadowView(image: image, width: height * 1.45, height: height, mirrored: mirrored)
-                        .offset(y: -height * 0.04)
+                    if !isDeath || deathAge < MonsterVisualSpec.deathDuration * 0.7 {
+                        ObliqueShadowView(image: image, width: height * 1.45, height: height, mirrored: mirrored)
+                            .opacity(isDeath ? max(0, 1 - deathAge / (MonsterVisualSpec.deathDuration * 0.7)) : 1)
+                            .offset(x: lungeX, y: -height * 0.04)
+                    }
                     Image(uiImage: image)
                         .resizable()
                         .interpolation(.none)
                         .scaledToFit()
-                        .frame(height: height)
+                        .frame(height: drawH)
                         .overlay {
                             if flashOn {
                                 Image(uiImage: image)
@@ -1061,11 +1314,12 @@ private struct HD2DMonster: View {
                                     .renderingMode(.template)
                                     .interpolation(.none)
                                     .scaledToFit()
-                                    .frame(height: height)
+                                    .frame(height: drawH)
                                     .foregroundStyle(.white.opacity(0.75))
                             }
                         }
                         .scaleEffect(x: mirrored ? -1 : 1, y: 1)
+                        .offset(x: lungeX)
                 } else {
                     Image(systemName: "pawprint.fill").font(.system(size: height * 0.45)).foregroundStyle(.brown)
                 }
@@ -1074,29 +1328,106 @@ private struct HD2DMonster: View {
     }
 }
 
-/// Plays a real `MeadowPixelFX` sprite-sheet VFX burst (slashes, hit sparks, sunbursts, coin/treasure sparkles).
-private struct HD2DPixelFXBurst: View {
+/// Anchored, dual-layer (`back` + `front`) `MeadowPixelFX` player matching `MeadowPixelFXPlayer`'s exact `(ox, oy)`
+/// registration and horizontal mirroring (`direction: -1`) so every mini-game VFX lands at pinpoint coordinates.
+private struct HD2DPixelFXEffect: View {
+    enum Layer { case back, front, both }
     let clipID: String
     let playedAt: Date?
-    let size: CGFloat
-    var fps: Double = 18
+    /// Exact anchor point in stage coordinates (e.g., actor foot or exact impact point).
+    let anchor: CGPoint
+    /// Scale multiplier in stage points per FX pixel (standard battle parity ≈ 1.85...2.4 * unit).
+    let pixelScale: CGFloat
+    /// +1 faces right, -1 mirrors horizontally to face left (for monster casts!).
+    var direction: CGFloat = 1
+    var delay: Double = 0
+    var fps: Double = 20
+    var layer: Layer = .both
 
     var body: some View {
         if let playedAt, let clip = MeadowPixelFX.clips[clipID] {
             let all = MeadowPixelFX.images(clip)
-            let start = clip.back && clip.front ? clip.n : 0
-            let count = min(clip.n, max(0, all.count - start))
-            if count > 0 {
-                let duration = Double(count) / fps
+            if !all.isEmpty {
+                let duration = Double(clip.n) / max(1, fps)
+                let w = CGFloat(clip.w) * pixelScale
+                let h = CGFloat(clip.h) * pixelScale
+                let dir: CGFloat = direction < 0 ? -1 : 1
+                let originX = dir > 0
+                    ? anchor.x - CGFloat(clip.ox) * pixelScale
+                    : anchor.x - CGFloat(clip.w - clip.ox) * pixelScale
+                let originY = anchor.y - CGFloat(clip.oy) * pixelScale
                 TimelineView(.animation(minimumInterval: 1.0 / 24)) { ctx in
-                    let age = ctx.date.timeIntervalSince(playedAt)
+                    let age = ctx.date.timeIntervalSince(playedAt) - delay
                     if age >= 0 && age < duration {
-                        let idx = min(count - 1, Int(age * fps))
-                        Image(uiImage: UIImage(cgImage: all[start + idx]))
-                            .resizable()
-                            .interpolation(.none)
-                            .scaledToFit()
-                            .frame(width: size, height: size)
+                        let f = min(clip.n - 1, Int(age * fps))
+                        let backIdx: Int? = (clip.back && (layer == .back || layer == .both)) ? f : nil
+                        let frontIdx: Int? = (clip.front && (layer == .front || layer == .both)) ? ((clip.back ? clip.n : 0) + f) : nil
+                        ZStack {
+                            if let bi = backIdx, bi < all.count {
+                                Image(uiImage: UIImage(cgImage: all[bi]))
+                                    .resizable().interpolation(.none)
+                                    .frame(width: w, height: h)
+                                    .scaleEffect(x: dir, y: 1)
+                            }
+                            if let fi = frontIdx, fi < all.count {
+                                Image(uiImage: UIImage(cgImage: all[fi]))
+                                    .resizable().interpolation(.none)
+                                    .frame(width: w, height: h)
+                                    .scaleEffect(x: dir, y: 1)
+                            }
+                        }
+                        .frame(width: w, height: h)
+                        .position(x: originX + w / 2, y: originY + h / 2)
+                    }
+                }
+                .allowsHitTesting(false)
+            }
+        }
+    }
+}
+
+/// Real flying `MeadowPixelFX` projectile travelling from exact `from` chest/muzzle point to exact `to` hit point
+/// with optional parabolic arc and automatic tangent rotation (handles both hero → monster and monster → hero!).
+private struct HD2DPixelFXProjectile: View {
+    let clipID: String
+    let playedAt: Date?
+    let from: CGPoint
+    let to: CGPoint
+    let pixelScale: CGFloat
+    var delay: Double = 0
+    var flight: Double = 0.28
+    var arc: CGFloat = 18
+    var fps: Double = 20
+
+    var body: some View {
+        if let playedAt, let clip = MeadowPixelFX.clips[clipID] {
+            let all = MeadowPixelFX.images(clip)
+            if !all.isEmpty {
+                let w = CGFloat(clip.w) * pixelScale
+                let h = CGFloat(clip.h) * pixelScale
+                let dir: CGFloat = to.x >= from.x ? 1 : -1
+                TimelineView(.animation(minimumInterval: 1.0 / 30)) { ctx in
+                    let age = ctx.date.timeIntervalSince(playedAt) - delay
+                    if age >= 0 && age <= flight {
+                        let k = CGFloat(age / max(0.01, flight))
+                        let x = from.x + (to.x - from.x) * k
+                        let y = from.y + (to.y - from.y) * k - sin(k * .pi) * arc
+                        let dx = to.x - from.x
+                        let dy = (to.y - from.y) - cos(k * .pi) * .pi * arc
+                        let tilt = atan2(dy, abs(dx)) * (dir > 0 ? 1 : -1) * 0.45
+                        let f = Int(age * fps) % max(1, clip.n)
+                        let idx = (clip.back && clip.front ? clip.n : 0) + f
+                        if idx < all.count {
+                            // Align head `(ox, oy)` right onto `(x, y)`
+                            let offX = dir > 0 ? (w / 2 - CGFloat(clip.ox) * pixelScale) : (CGFloat(clip.ox) * pixelScale - w / 2)
+                            let offY = h / 2 - CGFloat(clip.oy) * pixelScale
+                            Image(uiImage: UIImage(cgImage: all[idx]))
+                                .resizable().interpolation(.none)
+                                .frame(width: w, height: h)
+                                .scaleEffect(x: dir, y: 1)
+                                .rotationEffect(.radians(Double(tilt)))
+                                .position(x: x + offX, y: y + offY)
+                        }
                     }
                 }
                 .allowsHitTesting(false)
@@ -1505,10 +1836,25 @@ private struct MiniGameFinale: View {
 // MARK: - 1. 全班打Boss (HD-2D Twilight Boss Sanctum Battle — Left Party vs Right Boss!)
 
 private struct BossStage: View {
+    private struct ShotCue: Identifiable {
+        let id: Int
+        let from: CGPoint
+        let clip: String
+        let delay: Double
+        let arc: CGFloat
+    }
     @ObservedObject var model: MiniGameModel
     let unit: CGFloat
     @State private var hurtAt: Date?
+    @State private var deadAt: Date?
+    @State private var bossCastAt: Date?
+    @State private var bossAttackAt: Date?
     @State private var fxAt: Date?
+    @State private var counterFXAt: Date?
+    @State private var victoryFXAt: Date?
+    @State private var maxHitSides = 4
+    @State private var shots: [ShotCue] = []
+    @State private var shotStartAt: Date?
     @State private var diceAt: Date?
     @State private var numbersAt: Date?
     @State private var attackAt: Date?
@@ -1519,22 +1865,47 @@ private struct BossStage: View {
     @State private var dashingIDs: Set<String> = []
     @State private var rolledDice: [BattleDie] = []
 
+    /// Species-authentic counterattack VFX (cast with direction = -1 from Boss toward hero party!).
+    private func bossCounterCue(_ monster: String) -> (anchor: String, clip: String, followClip: String?, projectile: String?) {
+        switch monster {
+        case "ruinDragon": return ("casterMouth", "fire_fire_breath_5", "status_burning_7", nil)
+        case "frostPhoenix": return ("casterMouth", "ice_breath_cone", "frost_nova_ring", nil)
+        case "eclipseBehemoth": return ("casterChest", "astral_eclipse_beam", "shadow_dark_explosion", nil)
+        case "mushroomKing": return ("partyCenter", "cap_spore_slam", "thorn_spore_cloud", nil)
+        case "goblinWarlord": return ("partyCenter", "bomb_firework_blast", "bomb_star_smoke", "bomb_lob_proj")
+        case "thornTreant": return ("partyCenter", "thorn_root_sweep", "nature_vine_whip", nil)
+        case "frostAlphaWolf": return ("partyCenter", "frost_fang_bite", "frost_shard_burst", nil)
+        case "crystalGolem": return ("casterFoot", "nature_boulder_smash", "impacts_ground_slam_57", nil)
+        default: return ("partyCenter", "nature_quake_rift", "impacts_ground_slam_57", nil)
+        }
+    }
+
     var body: some View {
         if let b = model.boss {
+            let spec = MonsterVisualSpec.find(b.monster) ?? MonsterVisualSpec(id: b.monster)
+            let bossH = (288.0 * spec.scale) * unit
+            // Keep Boss feet solidly grounded on the stone courtyard flagstones (`footY ≈ 574`).
+            let bossFoot = CGPoint(x: 946 * unit, y: 576 * unit)
+            let bossCenterY = bossFoot.y - bossH * 0.44
+            let bossHitPt = CGPoint(
+                x: bossFoot.x + CGFloat(spec.hitAnchor.x - 178.5) * (bossH / 256.0) * 0.85,
+                y: bossFoot.y - bossH * 0.42
+            )
+            let bossMouthPt = CGPoint(x: bossFoot.x - bossH * 0.30, y: bossFoot.y - bossH * 0.48)
+            let spots = partyFormation(count: model.students.count)
+            let partyCenter = CGPoint(
+                x: spots.isEmpty ? 320 * unit : spots.map(\.x).reduce(0, +) / CGFloat(spots.count),
+                y: spots.isEmpty ? 520 * unit : spots.map(\.y).reduce(0, +) / CGFloat(spots.count) + 52 * unit
+            )
+            let cue = bossCounterCue(b.monster)
+            let fxScale = 2.05 * unit
+
             ZStack(alignment: .topLeading) {
-                // 1) Subtle amethyst aura over the twilight ruins archway crystal built into `MiniGameSceneBoss`
-                Circle()
-                    .fill(RadialGradient(colors: [Color(red: 0.72, green: 0.40, blue: 1.0).opacity(0.42), .clear], center: .center, startRadius: 6 * unit, endRadius: 115 * unit))
-                    .frame(width: 230 * unit, height: 230 * unit)
-                    .position(x: 1004 * unit, y: 118 * unit)
-                    .zIndex(120)
+                // 1) Twin Glowing Pixel Stone Braziers planted solidly on the mossy ruins flagstones flanking the Boss
+                brazierWithGlow(x: 708 * unit, y: 484 * unit, height: 118 * unit)
+                brazierWithGlow(x: 1172 * unit, y: 500 * unit, height: 122 * unit)
 
-                // Twin Glowing Pixel Stone Braziers planted solidly on the mossy ruins flagstones flanking the Boss
-                brazierWithGlow(x: 708 * unit, y: 474 * unit, height: 120 * unit)
-                brazierWithGlow(x: 1172 * unit, y: 492 * unit, height: 124 * unit)
-
-                // 2) Left Tactical Party Formation — REAL Full-Body Animated Battle Heroes standing on left flagstones!
-                let spots = partyFormation(count: model.students.count)
+                // 2) Left Tactical Party Formation — REAL Full-Body Animated Battle Heroes grounded on left flagstones!
                 ForEach(Array(model.students.enumerated()), id: \.element.id) { idx, s in
                     let p = spots[idx]
                     let isAttacker = dashingIDs.contains(s.id)
@@ -1545,7 +1916,8 @@ private struct BossStage: View {
                         return .ready
                     }()
                     let triggerDate: Date? = isAttacker ? attackAt : (heroHurtAt ?? (b.outcome == .won ? hurtAt : nil))
-                    let heroH = (model.students.count > 4 ? 166 : 188) * unit
+                    let heroH = (model.students.count > 4 ? 174 : 196) * unit
+                    let dashShift: CGFloat = isAttacker ? (s.style == .melee ? 92 * unit : 28 * unit) : 0
                     HD2DBattleHero(
                         student: s,
                         height: heroH,
@@ -1555,7 +1927,6 @@ private struct BossStage: View {
                         ringColor: model.studentTint(s.id)
                     )
                     .overlay(alignment: .bottom) {
-                        // Snug battle nameplate right beneath boots with guaranteed vertical & horizontal clearance!
                         Text(s.name)
                             .font(.system(size: 14 * unit, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
@@ -1565,26 +1936,87 @@ private struct BossStage: View {
                             .overlay(RoundedRectangle(cornerRadius: 6 * unit).stroke(model.studentTint(s.id).opacity(0.92), lineWidth: 1.5 * unit))
                             .offset(y: 4 * unit)
                     }
-                    .position(x: p.x + (isAttacker ? 52 * unit : 0), y: p.y)
+                    .position(x: p.x + dashShift, y: p.y)
                     .zIndex(Double(p.y))
                 }
 
-                // 3) Right Boss Monster squarely grounded on the stone ruins courtyard in front of the Sanctum Arch!
-                HD2DMonster(id: b.monster, height: 315 * unit, mirrored: false, hurtAt: hurtAt, dead: b.outcome == .won)
-                    .offset(x: shake ? 14 * unit : 0)
-                    .position(x: 950 * unit, y: 456 * unit)
-                    .zIndex(480)
+                // 3) Right Boss Monster with back-layer VFX behind it and front-layer impact FX directly on torso!
+                HD2DPixelFXEffect(
+                    clipID: maxHitSides >= 10 ? "fire_flame_pillar" : "melee_heavy_cleave_51",
+                    playedAt: fxAt, anchor: bossFoot, pixelScale: fxScale, direction: 1, layer: .back
+                )
+                .zIndex(460)
 
-                HD2DPixelFXBurst(clipID: "melee_heavy_cleave_51", playedAt: fxAt, size: 280 * unit)
-                    .position(x: 930 * unit, y: 438 * unit)
-                    .zIndex(520)
-                HD2DPixelFXBurst(clipID: "impacts_hit_spark_55", playedAt: fxAt, size: 240 * unit)
-                    .position(x: 952 * unit, y: 428 * unit)
-                    .zIndex(530)
+                HD2DMonster(
+                    id: b.monster, height: bossH, mirrored: false,
+                    hurtAt: hurtAt, attackAt: bossAttackAt, castAt: bossCastAt, deadAt: deadAt, dead: b.outcome == .won
+                )
+                .offset(x: shake ? 14 * unit : 0)
+                .position(x: bossFoot.x, y: bossCenterY)
+                .zIndex(480)
 
-                // Floating Battle Damage Numbers (`MeadowBattleNumber` physics!)
+                // Hero flying weapon projectiles (arrows / holy orbs / fireballs / wind bolts -> exact Boss torso!)
+                ForEach(shots) { shot in
+                    HD2DPixelFXProjectile(
+                        clipID: shot.clip, playedAt: shotStartAt,
+                        from: shot.from, to: bossHitPt,
+                        pixelScale: 1.85 * unit, delay: shot.delay, flight: 0.24, arc: shot.arc
+                    )
+                    .zIndex(515)
+                }
+
+                // Escalating Star-Level Hero Impact VFX anchored squarely on Boss foot/torso
+                HD2DPixelFXEffect(
+                    clipID: maxHitSides >= 10 ? "skybreaker_lance" : maxHitSides >= 6 ? "lightning_bolt_strike" : "melee_heavy_cleave_51",
+                    playedAt: fxAt, anchor: bossFoot, pixelScale: fxScale, direction: 1, layer: .front
+                )
+                .zIndex(520)
+                HD2DPixelFXEffect(
+                    clipID: maxHitSides >= 6 ? "impacts_crit_hit_3" : "impacts_hit_spark_55",
+                    playedAt: fxAt, anchor: CGPoint(x: bossHitPt.x, y: bossHitPt.y + 42 * unit), pixelScale: 1.95 * unit, direction: 1
+                )
+                .zIndex(530)
+
+                // Boss Victory Dissolution Sunburst + Legendary Collect
+                HD2DPixelFXEffect(clipID: "holy_sunburst_39", playedAt: victoryFXAt, anchor: bossHitPt, pixelScale: 2.3 * unit)
+                    .zIndex(540)
+                HD2DPixelFXEffect(clipID: "collectLegendary", playedAt: victoryFXAt, anchor: bossFoot, pixelScale: 2.1 * unit, delay: 0.14)
+                    .zIndex(545)
+
+                // Authentic Species Boss Counterattack VFX (direction: -1 facing LEFT toward heroes!)
+                if let proj = cue.projectile {
+                    HD2DPixelFXProjectile(
+                        clipID: proj, playedAt: counterFXAt,
+                        from: bossMouthPt, to: CGPoint(x: partyCenter.x, y: partyCenter.y - 52 * unit),
+                        pixelScale: 2.0 * unit, delay: 0.08, flight: 0.30, arc: 46 * unit
+                    )
+                    .zIndex(550)
+                }
+                let primaryAnchor: CGPoint = {
+                    switch cue.anchor {
+                    case "casterMouth": return bossMouthPt
+                    case "casterChest": return CGPoint(x: bossFoot.x - 42 * unit, y: bossFoot.y - 36 * unit)
+                    case "casterFoot": return CGPoint(x: bossFoot.x - 24 * unit, y: bossFoot.y - 10 * unit)
+                    default: return partyCenter
+                    }
+                }()
+                let primaryDelay = cue.projectile != nil ? 0.36 : 0.14
+                HD2DPixelFXEffect(
+                    clipID: cue.clip, playedAt: counterFXAt,
+                    anchor: primaryAnchor, pixelScale: 2.05 * unit, direction: -1, delay: primaryDelay
+                )
+                .zIndex(555)
+                if let follow = cue.followClip {
+                    HD2DPixelFXEffect(
+                        clipID: follow, playedAt: counterFXAt,
+                        anchor: partyCenter, pixelScale: 1.9 * unit, direction: -1, delay: primaryDelay + 0.12
+                    )
+                    .zIndex(560)
+                }
+
+                // Floating Battle Damage Numbers right above Boss head
                 BattleFloatingNumbers(hits: b.lastHits, startedAt: numbersAt, model: model, unit: unit)
-                    .position(x: 942 * unit, y: 286 * unit)
+                    .position(x: bossFoot.x - 10 * unit, y: bossFoot.y - bossH * 0.92)
                     .zIndex(600)
 
                 // 4) Top-Left Class Hearts & Top-Right Battle-Style Boss Vitals HUD
@@ -1598,8 +2030,8 @@ private struct BossStage: View {
                     }
                 }
                 .padding(.horizontal, 16 * unit).padding(.vertical, 9 * unit)
-                .background(RoundedRectangle(cornerRadius: 14 * unit, style: .continuous).fill(MiniGamePalette.battlePlate.opacity(0.84)))
-                .overlay(RoundedRectangle(cornerRadius: 14 * unit, style: .continuous).stroke(MiniGamePalette.battleRim.opacity(0.65), lineWidth: 1.5 * unit))
+                .background(RoundedRectangle(cornerRadius: 14 * unit, style: .continuous).fill(MiniGamePalette.battlePlate.opacity(0.86)))
+                .overlay(RoundedRectangle(cornerRadius: 14 * unit, style: .continuous).stroke(MiniGamePalette.battleRim.opacity(0.68), lineWidth: 1.5 * unit))
                 .position(x: 192 * unit, y: 52 * unit)
                 .zIndex(700)
 
@@ -1613,7 +2045,7 @@ private struct BossStage: View {
                     .zIndex(750)
 
                 if counterFlash {
-                    RadialGradient(colors: [.clear, Color.red.opacity(0.45)], center: .center, startRadius: 180 * unit, endRadius: 720 * unit)
+                    RadialGradient(colors: [.clear, Color.red.opacity(0.36)], center: .center, startRadius: 210 * unit, endRadius: 720 * unit)
                         .transition(.opacity)
                         .zIndex(800)
                 }
@@ -1622,20 +2054,44 @@ private struct BossStage: View {
             .onChange(of: model.beat) { _, _ in
                 guard let b = model.boss else { return }
                 let now = Date()
+                let spots = partyFormation(count: model.students.count)
                 if !b.lastHits.isEmpty {
                     let colors = ["red", "yellow", "green", "blue"]
                     rolledDice = b.lastHits.enumerated().map { idx, h in
                         BattleDie(colors[idx % colors.count], sides: h.sides, value: h.damage, label: "D\(h.sides)")
                     }
+                    maxHitSides = b.lastHits.map(\.sides).max() ?? 4
                     diceAt = now
                     attackAt = now
+                    // Build authentic weapon-matched projectiles for ranged/magic attackers
+                    var newShots: [ShotCue] = []
+                    for (k, h) in b.lastHits.enumerated() {
+                        if let sIdx = model.students.firstIndex(where: { $0.id == h.player }), sIdx < spots.count {
+                            let s = model.students[sIdx]
+                            let chest = CGPoint(x: spots[sIdx].x + 36 * unit, y: spots[sIdx].y - 12 * unit)
+                            let clip: String = switch s.style {
+                            case .bow: h.sides >= 10 ? "wind_thunder_bolt" : "projectiles_arrow_42"
+                            case .magic: h.sides >= 10 ? "fire_fireball_47" : "holy_orb_proj"
+                            case .melee: h.sides >= 6 ? "wind_thunder_bolt" : "holy_orb_proj"
+                            }
+                            if s.style != .melee || k == 0 {
+                                newShots.append(ShotCue(id: k, from: chest, clip: clip, delay: Double(k) * 0.05, arc: s.style == .bow ? 14 * unit : 22 * unit))
+                            }
+                        }
+                    }
+                    shots = newShots
+                    shotStartAt = now
                     withAnimation(.spring(response: 0.25, dampingFraction: 0.65)) {
                         dashingIDs = Set(b.lastHits.map(\.player))
                     }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.22) {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.24) {
                         hurtAt = Date()
                         fxAt = Date()
                         numbersAt = Date()
+                        if b.outcome == .won {
+                            deadAt = Date()
+                            victoryFXAt = Date()
+                        }
                         withAnimation(.default.repeatCount(5, autoreverses: true).speed(4)) { shake = true }
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.48) { shake = false }
                     }
@@ -1645,14 +2101,23 @@ private struct BossStage: View {
                 }
                 if b.lastCounter {
                     let lostIndex = b.hearts
-                    heroHurtAt = now
-                    withAnimation(.spring(response: 0.22, dampingFraction: 0.45)) { shatteredHeart = lostIndex }
-                    withAnimation(.easeOut(duration: 0.15)) { counterFlash = true }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.60) {
-                        withAnimation(.easeOut(duration: 0.3)) {
-                            counterFlash = false
-                            heroHurtAt = nil
-                            if shatteredHeart == lostIndex { shatteredHeart = nil }
+                    let delay = b.lastHits.isEmpty ? 0.05 : 0.72
+                    DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                        let cNow = Date()
+                        bossCastAt = cNow
+                        bossAttackAt = cNow
+                        counterFXAt = cNow
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.24) {
+                            heroHurtAt = Date()
+                            withAnimation(.spring(response: 0.22, dampingFraction: 0.45)) { shatteredHeart = lostIndex }
+                            withAnimation(.easeOut(duration: 0.15)) { counterFlash = true }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.62) {
+                                withAnimation(.easeOut(duration: 0.3)) {
+                                    counterFlash = false
+                                    heroHurtAt = nil
+                                    if shatteredHeart == lostIndex { shatteredHeart = nil }
+                                }
+                            }
                         }
                     }
                 }
@@ -1663,8 +2128,8 @@ private struct BossStage: View {
     private func brazierWithGlow(x: CGFloat, y: CGFloat, height: CGFloat) -> some View {
         ZStack {
             Circle()
-                .fill(RadialGradient(colors: [Color(red: 1.0, green: 0.68, blue: 0.22).opacity(0.55), Color.orange.opacity(0.18), .clear], center: .center, startRadius: 6 * unit, endRadius: 96 * unit))
-                .frame(width: 192 * unit, height: 192 * unit)
+                .fill(RadialGradient(colors: [Color(red: 1.0, green: 0.68, blue: 0.22).opacity(0.45), Color.orange.opacity(0.14), .clear], center: .center, startRadius: 6 * unit, endRadius: 90 * unit))
+                .frame(width: 180 * unit, height: 180 * unit)
                 .offset(y: -34 * unit)
             HD2DProp(name: "MiniGameBrazier", height: height, depthBlur: 0, shadow: true)
         }
@@ -1675,17 +2140,17 @@ private struct BossStage: View {
     /// Staggered left-side tactical battle positions grounded on the left ruins flagstones (zero nameplate overlap even with quiz dock open!).
     private func partyFormation(count: Int) -> [CGPoint] {
         switch count {
-        case 1: return [CGPoint(x: 355 * unit, y: 472 * unit)]
-        case 2: return [CGPoint(x: 240 * unit, y: 432 * unit), CGPoint(x: 440 * unit, y: 500 * unit)]
-        case 3: return [CGPoint(x: 185 * unit, y: 416 * unit), CGPoint(x: 455 * unit, y: 462 * unit), CGPoint(x: 305 * unit, y: 522 * unit)]
-        case 4: return [CGPoint(x: 175 * unit, y: 412 * unit), CGPoint(x: 395 * unit, y: 424 * unit), CGPoint(x: 265 * unit, y: 522 * unit), CGPoint(x: 490 * unit, y: 526 * unit)]
+        case 1: return [CGPoint(x: 345 * unit, y: 486 * unit)]
+        case 2: return [CGPoint(x: 232 * unit, y: 448 * unit), CGPoint(x: 425 * unit, y: 514 * unit)]
+        case 3: return [CGPoint(x: 184 * unit, y: 428 * unit), CGPoint(x: 442 * unit, y: 472 * unit), CGPoint(x: 296 * unit, y: 534 * unit)]
+        case 4: return [CGPoint(x: 175 * unit, y: 424 * unit), CGPoint(x: 388 * unit, y: 438 * unit), CGPoint(x: 260 * unit, y: 534 * unit), CGPoint(x: 478 * unit, y: 538 * unit)]
         default:
             return (0..<count).map { i in
                 let col = i % 2
                 let row = i / 2
                 let rows = max(1, (count + 1) / 2)
-                let x = (col == 0 ? 185.0 : 415.0) + Double(row % 2) * 44.0
-                let y = 398.0 + Double(row) * (132.0 / Double(max(1, rows - 1)))
+                let x = (col == 0 ? 182.0 : 408.0) + Double(row % 2) * 44.0
+                let y = 412.0 + Double(row) * (132.0 / Double(max(1, rows - 1)))
                 return CGPoint(x: x * unit, y: y * unit)
             }
         }
@@ -1698,7 +2163,13 @@ private struct CampStage: View {
     @ObservedObject var model: MiniGameModel
     let unit: CGFloat
     @State private var hurtAt: Date?
-    @State private var fxAt: Date?
+    @State private var deadAt: Date?
+    @State private var monsterAttackAt: Date?
+    @State private var pushbackFXAt: Date?
+    @State private var shieldFXAt: Date?
+    @State private var breachFXAt: Date?
+    @State private var waveSpawnFXAt: Date?
+    @State private var heroAttackAt: Date?
     @State private var cheerAt: Date?
     @State private var campWarn = false
     @State private var waveCallout: String?
@@ -1707,13 +2178,19 @@ private struct CampStage: View {
     var body: some View {
         if let c = model.camp {
             let cell = 132 * unit
-            let left = 416 * unit
-            let trailY = 550 * unit
+            let left = 420 * unit
+            // `MiniGameSceneCamp`'s sunlit dirt road runs cleanly through y ≈ 495...558
+            let trailY = 532 * unit
             let dist = CampDefense.length - c.position
             let species = model.campWaveSpecies[min(c.wave, max(0, model.campWaveSpecies.count - 1))]
-            let monsterH: CGFloat = (c.wave == 2 ? 228 : c.wave == 1 ? 192 : 164) * unit
-            let monsterX = dist > 0 ? (left + CGFloat(dist - 1) * cell + cell / 2) : 305 * unit
-            let monsterY = trailY - monsterH * 0.44 - 8 * unit
+            let spec = MonsterVisualSpec.find(species) ?? MonsterVisualSpec(id: species)
+            let monsterH: CGFloat = (c.wave == 2 ? 236 : c.wave == 1 ? 198 : 172) * CGFloat(max(0.92, spec.scale)) * unit
+            let monsterFootX = dist > 0 ? (left + CGFloat(dist - 1) * cell + cell / 2) : 332 * unit
+            let monsterFootY = trailY - 2 * unit
+            let monsterCenterY = monsterFootY - monsterH * 0.44
+            let monsterChest = CGPoint(x: monsterFootX - monsterH * 0.10, y: monsterFootY - monsterH * 0.44)
+            let gateShieldPt = CGPoint(x: 368 * unit, y: trailY + 4 * unit)
+            let wave6Foot = CGPoint(x: left + CGFloat(CampDefense.length - 1) * cell + cell / 2, y: monsterFootY)
 
             ZStack(alignment: .topLeading) {
                 // 1) Camp Gate Warning Glow (pulses over the camp timber gate built into `MiniGameSceneCamp` when breached!)
@@ -1728,21 +2205,26 @@ private struct CampStage: View {
                 // 2) Full-Body Animated Defending Heroes Standing Guard Outside the Open Timber Camp Gate!
                 let defenders = Array(model.students.prefix(4))
                 ForEach(Array(defenders.enumerated()), id: \.element.id) { idx, s in
-                    let dx = (216 + CGFloat(idx) * 46) * unit
-                    let dy = (484 + CGFloat(idx % 2) * 22) * unit
+                    let dx = (276 + CGFloat(idx) * 34) * unit
+                    let dy = (488 + CGFloat(idx % 2) * 28) * unit
+                    let heroAct: HD2DBattleHero.Action =
+                        c.outcome == .won ? .victory
+                        : heroAttackAt != nil ? .attack
+                        : cheerAt != nil ? .victory
+                        : campWarn ? .hurt : .ready
                     HD2DBattleHero(
                         student: s,
-                        height: 152 * unit,
+                        height: 168 * unit,
                         mirrored: false,
-                        action: c.outcome == .won || cheerAt != nil ? .victory : .ready,
-                        actionAt: cheerAt,
+                        action: heroAct,
+                        actionAt: heroAttackAt ?? cheerAt,
                         ringColor: model.studentTint(s.id)
                     )
                     .position(x: dx, y: dy)
                     .zIndex(Double(dy))
                 }
 
-                // 3) 6 Real Pixel-Art Stepping Stones (`MiniGameSteppingStone`) seated squarely along the horizontal dirt road!
+                // 3) 6 Real Pixel-Art Stepping Stones (`MiniGameSteppingStone`) seated squarely along the dirt road!
                 ForEach(1...CampDefense.length, id: \.self) { step in
                     let cx = left + CGFloat(step - 1) * cell + cell / 2
                     let active = step == dist
@@ -1754,14 +2236,13 @@ private struct CampStage: View {
                             .scaledToFit()
                             .frame(width: cell - 10 * unit)
                             .colorMultiply(danger ? Color(red: 1.0, green: 0.78, blue: 0.74) : .white)
-                            .shadow(color: active ? MiniGamePalette.gold.opacity(0.7) : .black.opacity(0.28), radius: (active ? 10 : 4) * unit, y: 3 * unit)
-                        // Clean step numeral seated near the front face of the flagstone so monster feet never block it!
+                            .shadow(color: active ? MiniGamePalette.gold.opacity(0.75) : .black.opacity(0.28), radius: (active ? 10 : 4) * unit, y: 3 * unit)
                         Text("\(step)")
                             .font(.system(size: 19 * unit, weight: .black, design: .rounded))
                             .monospacedDigit()
                             .foregroundStyle(.white)
                             .padding(.horizontal, 10 * unit).padding(.vertical, 2 * unit)
-                            .background(Capsule().fill(danger ? Color(red: 0.84, green: 0.22, blue: 0.20).opacity(0.92) : MiniGamePalette.battlePlate.opacity(0.80)))
+                            .background(Capsule().fill(danger ? Color(red: 0.84, green: 0.22, blue: 0.20).opacity(0.92) : MiniGamePalette.battlePlate.opacity(0.82)))
                             .overlay(Capsule().stroke(active ? MiniGamePalette.goldBright : MiniGamePalette.battleRim.opacity(0.75), lineWidth: 1.5 * unit))
                             .offset(y: 16 * unit)
                     }
@@ -1769,22 +2250,73 @@ private struct CampStage: View {
                     .zIndex(310)
                 }
 
-                // 4) Approaching Monster on its Stepping Stone + Real Pixel VFX + Battle Wave Tag
-                VStack(spacing: -8 * unit) {
+                // 4) Approaching Monster on its Stepping Stone + Real Multi-Phase PixelFX!
+                HD2DPixelFXEffect(clipID: "tribal_drum_chant", playedAt: waveSpawnFXAt, anchor: wave6Foot, pixelScale: 1.9 * unit, direction: -1, layer: .back)
+                    .zIndex(430)
+
+                VStack(spacing: -10 * unit) {
                     Text("第 \(c.wave + 1) 波 · \(MiniGameModel.monsterName(species))")
                         .font(.system(size: 15 * unit, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 11 * unit).padding(.vertical, 3 * unit)
-                        .background(RoundedRectangle(cornerRadius: 6 * unit).fill(MiniGamePalette.battlePlate.opacity(0.84)))
-                        .overlay(RoundedRectangle(cornerRadius: 6 * unit).stroke(MiniGamePalette.battleRim.opacity(0.8), lineWidth: 1.4 * unit))
-                    HD2DMonster(id: species, height: monsterH, mirrored: false, hurtAt: hurtAt, dead: c.outcome == .won)
+                        .background(RoundedRectangle(cornerRadius: 6 * unit).fill(MiniGamePalette.battlePlate.opacity(0.86)))
+                        .overlay(RoundedRectangle(cornerRadius: 6 * unit).stroke(MiniGamePalette.battleRim.opacity(0.82), lineWidth: 1.4 * unit))
+                    HD2DMonster(
+                        id: species, height: monsterH, mirrored: false,
+                        hurtAt: hurtAt, attackAt: monsterAttackAt, deadAt: deadAt, dead: c.outcome == .won
+                    )
                 }
-                .position(x: monsterX, y: monsterY)
+                .position(x: monsterFootX, y: monsterCenterY)
                 .zIndex(450)
 
-                HD2DPixelFXBurst(clipID: "impacts_hit_spark_55", playedAt: fxAt, size: 220 * unit)
-                    .position(x: monsterX, y: monsterY + 18 * unit)
-                    .zIndex(520)
+                // Defender pushback projectile + shield bash wave landing right on monster!
+                HD2DPixelFXProjectile(
+                    clipID: "wind_thunder_bolt", playedAt: pushbackFXAt,
+                    from: CGPoint(x: 342 * unit, y: 472 * unit), to: monsterChest,
+                    pixelScale: 1.9 * unit, delay: 0.04, flight: 0.22, arc: 12 * unit
+                )
+                .zIndex(510)
+                HD2DPixelFXEffect(
+                    clipID: "shield_bash_wave", playedAt: pushbackFXAt,
+                    anchor: CGPoint(x: monsterFootX - 36 * unit, y: monsterFootY - 6 * unit),
+                    pixelScale: 1.95 * unit, direction: 1, delay: 0.20
+                )
+                .zIndex(520)
+                HD2DPixelFXEffect(
+                    clipID: "wind_spark_impact", playedAt: pushbackFXAt,
+                    anchor: monsterChest, pixelScale: 1.9 * unit, direction: 1, delay: 0.24
+                )
+                .zIndex(525)
+
+                // Hold-the-line defensive barrier rising right in front of camp gate defenders!
+                HD2DPixelFXEffect(
+                    clipID: "iron_bastion_wall", playedAt: shieldFXAt,
+                    anchor: gateShieldPt, pixelScale: 2.2 * unit, direction: 1
+                )
+                .zIndex(525)
+                HD2DPixelFXEffect(
+                    clipID: "astral_dome_barrier", playedAt: shieldFXAt,
+                    anchor: CGPoint(x: 274 * unit, y: trailY + 2 * unit), pixelScale: 2.0 * unit, direction: 1, delay: 0.08
+                )
+                .zIndex(528)
+
+                // Monster advance slam facing LEFT toward camp gate!
+                HD2DPixelFXEffect(
+                    clipID: "nature_quake_rift", playedAt: breachFXAt,
+                    anchor: CGPoint(x: max(360 * unit, monsterFootX - 58 * unit), y: monsterFootY + 4 * unit),
+                    pixelScale: 1.9 * unit, direction: -1, delay: 0.14
+                )
+                .zIndex(530)
+                HD2DPixelFXEffect(
+                    clipID: "melee_heavy_cleave_36", playedAt: breachFXAt,
+                    anchor: CGPoint(x: monsterFootX - 18 * unit, y: monsterFootY),
+                    pixelScale: 1.95 * unit, direction: -1, delay: 0.10
+                )
+                .zIndex(532)
+
+                // New Wave arrival smoke & drum ring
+                HD2DPixelFXEffect(clipID: "shadow_dark_explosion", playedAt: waveSpawnFXAt, anchor: wave6Foot, pixelScale: 1.75 * unit, direction: -1)
+                    .zIndex(535)
 
                 // 5) Frosted Meadow-Glass Progress & Distance HUD (top center, below title pill)
                 HStack(spacing: 14 * unit) {
@@ -1808,7 +2340,7 @@ private struct CampStage: View {
                         .background(Capsule().fill(dist <= 2 ? Color(red: 0.86, green: 0.22, blue: 0.20) : Color(red: 0.16, green: 0.56, blue: 0.36)))
                 }
                 .padding(.horizontal, 18 * unit).padding(.vertical, 8 * unit)
-                .background(Capsule().fill(Color.white.opacity(0.84)))
+                .background(Capsule().fill(Color.white.opacity(0.86)))
                 .overlay(Capsule().stroke(.white, lineWidth: 1.5 * unit))
                 .shadow(color: .black.opacity(0.20), radius: 8 * unit, y: 3 * unit)
                 .position(x: 640 * unit, y: 98 * unit)
@@ -1823,7 +2355,7 @@ private struct CampStage: View {
                         .background(Capsule().fill(Color(red: 0.68, green: 0.14, blue: 0.16).opacity(0.92)))
                         .overlay(Capsule().stroke(MiniGamePalette.battleRim, lineWidth: 2 * unit))
                         .shadow(color: .black.opacity(0.35), radius: 10 * unit, y: 4 * unit)
-                        .position(x: 640 * unit, y: 205 * unit)
+                        .position(x: 640 * unit, y: 196 * unit)
                         .transition(.scale(scale: 0.85).combined(with: .opacity))
                         .zIndex(760)
                 }
@@ -1831,19 +2363,31 @@ private struct CampStage: View {
             .frame(width: 1280 * unit, height: 720 * unit)
             .onChange(of: model.beat) { _, _ in
                 guard let c = model.camp else { return }
-                if c.lastMove < 1 {
-                    hurtAt = Date()
-                    fxAt = Date()
-                    if c.lastMove == -1 {
-                        cheerAt = Date()
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { cheerAt = nil }
+                let now = Date()
+                if c.lastMove == -1 {
+                    heroAttackAt = now
+                    pushbackFXAt = now
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.22) {
+                        hurtAt = Date()
+                        if c.outcome == .won { deadAt = Date() }
                     }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.65) {
+                        heroAttackAt = nil
+                        cheerAt = Date()
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { cheerAt = nil }
+                    }
+                } else if c.lastMove == 0 {
+                    shieldFXAt = now
+                    if c.outcome == .won { deadAt = now }
                 } else {
+                    monsterAttackAt = now
+                    breachFXAt = now
                     withAnimation(.default.repeatCount(3, autoreverses: true).speed(4)) { campWarn = true }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { campWarn = false }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) { campWarn = false }
                 }
                 if c.wave != lastWave {
                     lastWave = c.wave
+                    waveSpawnFXAt = Date()
                     let nextSpecies = model.campWaveSpecies[min(c.wave, max(0, model.campWaveSpecies.count - 1))]
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
                         waveCallout = "第 \(c.wave + 1) 波 · \(MiniGameModel.monsterName(nextSpecies))来袭！"
@@ -1860,29 +2404,38 @@ private struct CampStage: View {
 // MARK: - 3. 答题赛跑 (HD-2D Sunlit Meadow Festival Racetrack + Finish Arch + Native 3D Gem d6!)
 
 private struct RaceStage: View {
+    private struct RaceFXCue: Identifiable {
+        let id: Int
+        let clip: String
+        let anchor: CGPoint
+        let scale: CGFloat
+        let delay: Double
+    }
     @ObservedObject var model: MiniGameModel
     let unit: CGFloat
     @State private var rolledDice: [BattleDie] = []
     @State private var diceAt: Date?
     @State private var fxAt: Date?
-    @State private var fxPos: CGPoint = .zero
+    @State private var fxCues: [RaceFXCue] = []
+    @State private var runningSideID: String?
 
     var body: some View {
         if let r = model.race {
             let lanes = max(1, r.sides.count)
-            // Keep lanes cleanly on the sunlit lower emerald meadow so upper festival hills, tent & bunting shine unclipped!
-            let top: CGFloat = (lanes <= 3 ? 216 : 132) * unit
-            let bottom: CGFloat = (lanes <= 3 ? 104 : 98) * unit
+            // Always leave breathing room for sunlit festival sky/bunting & finish arch while maximizing lane legibility.
+            let top: CGFloat = (lanes <= 3 ? 210 : lanes <= 5 ? 148 : 118) * unit
+            let bottom: CGFloat = (lanes <= 3 ? 98 : 88) * unit
             let laneAreaH = 720 * unit - top - bottom
-            let laneH = min(140 * unit, laneAreaH / CGFloat(lanes))
+            let laneH = min(136 * unit, laneAreaH / CGFloat(lanes))
             let firstLaneY = top + (laneAreaH - laneH * CGFloat(lanes)) / 2
-            let laneW = 1180 * unit
+            let laneW = 1196 * unit
             let laneLeft = 36 * unit
-            let plateW = 128 * unit
+            let plateW = 132 * unit
             let trackLeft = laneLeft + plateW + 10 * unit
             let trackW = laneW - plateW - 18 * unit
             let cellW = trackW / CGFloat(RaceTrack.length + 1)
             let finishX = trackLeft + CGFloat(RaceTrack.length) * cellW + cellW / 2
+            let leadPos = r.positions.values.max() ?? 0
 
             ZStack(alignment: .topLeading) {
                 // 1) Frosted Meadow-Glass Special Tile Legend Strip
@@ -1893,10 +2446,10 @@ private struct RaceStage: View {
                     legendItem("flag.checkered", color: MiniGamePalette.ink, text: "冲线获胜")
                 }
                 .padding(.horizontal, 16 * unit).padding(.vertical, 5 * unit)
-                .background(Capsule().fill(Color.white.opacity(0.84)))
+                .background(Capsule().fill(Color.white.opacity(0.86)))
                 .overlay(Capsule().stroke(.white, lineWidth: 1.4 * unit))
                 .shadow(color: .black.opacity(0.18), radius: 6 * unit, y: 2 * unit)
-                .position(x: 640 * unit, y: 84 * unit)
+                .position(x: 640 * unit, y: 82 * unit)
                 .zIndex(700)
 
                 // 2) Translucent Frosted-Glass Lanes Letting Sunlit HD-2D Grass Shine Through
@@ -1905,35 +2458,39 @@ private struct RaceStage: View {
                     let midY = y + laneH / 2
                     let current = r.current?.id == side.id && r.winner == nil
                     let at = r.positions[side.id] ?? 0
+                    let leading = leadPos > 0 && at == leadPos
                     let sideColor = model.tint(side.id)
-                    let cellH = min(72 * unit, laneH - 22 * unit)
+                    let cellH = min(72 * unit, laneH - 18 * unit)
 
                     RoundedRectangle(cornerRadius: 16 * unit, style: .continuous)
-                        .fill(Color.white.opacity(current ? 0.80 : 0.62))
+                        .fill(Color.white.opacity(current ? 0.84 : 0.66))
                         .overlay(RoundedRectangle(cornerRadius: 16 * unit, style: .continuous).fill(sideColor.opacity(current ? 0.14 : 0.06)))
                         .overlay(
                             RoundedRectangle(cornerRadius: 16 * unit, style: .continuous)
                                 .stroke(current ? AnyShapeStyle(MiniGamePalette.goldStroke) : AnyShapeStyle(Color.white.opacity(0.8)), lineWidth: (current ? 3.5 : 1.5) * unit)
                         )
                         .shadow(color: current ? MiniGamePalette.gold.opacity(0.45) : .black.opacity(0.16), radius: (current ? 10 : 5) * unit, y: 3 * unit)
-                        .frame(width: laneW, height: laneH - 10 * unit)
+                        .frame(width: laneW, height: laneH - 8 * unit)
                         .position(x: laneLeft + laneW / 2, y: midY)
                         .zIndex(200)
 
-                    // Left Team Nameplate
+                    // Left Team Nameplate with leader crown badge
                     HStack(spacing: 6 * unit) {
                         RoundedRectangle(cornerRadius: 4 * unit)
                             .fill(sideColor)
-                            .frame(width: 6 * unit, height: max(28 * unit, laneH - 34 * unit))
+                            .frame(width: 6 * unit, height: max(26 * unit, laneH - 30 * unit))
                         VStack(alignment: .leading, spacing: 2 * unit) {
                             HStack(spacing: 4 * unit) {
-                                if current {
+                                if leading {
+                                    Image("MiniGameCrown").resizable().interpolation(.none).scaledToFit()
+                                        .frame(width: 16 * unit, height: 16 * unit)
+                                } else if current {
                                     Image(systemName: "play.fill")
                                         .font(.system(size: 11 * unit, weight: .black))
                                         .foregroundStyle(MiniGamePalette.goldDeep)
                                 }
                                 Text(side.name)
-                                    .font(.system(size: min(20, max(14, laneH / unit * 0.2)) * unit, weight: .heavy, design: .rounded))
+                                    .font(.system(size: min(20, max(14, laneH / unit * 0.21)) * unit, weight: .heavy, design: .rounded))
                                     .foregroundStyle(MiniGamePalette.ink)
                                     .lineLimit(1).minimumScaleFactor(0.6)
                             }
@@ -1944,7 +2501,7 @@ private struct RaceStage: View {
                         }
                         Spacer(minLength: 0)
                     }
-                    .frame(width: plateW - 10 * unit)
+                    .frame(width: plateW - 8 * unit)
                     .position(x: laneLeft + plateW / 2 + 4 * unit, y: midY)
                     .zIndex(260)
 
@@ -1957,25 +2514,26 @@ private struct RaceStage: View {
                             .zIndex(240)
                     }
 
-                    // Pixel Hero Runner Token on tile `at`
-                    let runnerH = min(84 * unit, laneH - 12 * unit)
-                    runnerToken(side, height: runnerH, trapped: r.trapped.contains(side.id), active: current)
-                        .position(x: trackLeft + CGFloat(at) * cellW + cellW / 2, y: midY - 6 * unit)
+                    // Crisp Larger Pixel Hero Runner Token grounded directly on tile `at`
+                    let runnerH = min(106 * unit, max(72 * unit, laneH * 0.94))
+                    runnerToken(side, height: runnerH, trapped: r.trapped.contains(side.id), active: current, sprinting: runningSideID == side.id)
+                        .position(x: trackLeft + CGFloat(at) * cellW + cellW / 2, y: midY - runnerH * 0.10)
                         .zIndex(Double(300 + lane))
                 }
 
-                // 3) Wooden Festival Finish-Line Arch planted cleanly on the grass right above the finish column (when headroom allows!)
-                if firstLaneY >= 215 * unit {
-                    let archH: CGFloat = 132 * unit
+                // 3) Wooden Festival Finish-Line Arch planted cleanly above the finish column (scales cleanly for any team count!)
+                let archH = min(132 * unit, max(62 * unit, firstLaneY - 72 * unit))
+                if archH >= 60 * unit {
                     HD2DProp(name: "MiniGameFinishArch", height: archH, depthBlur: 0, shadow: true)
-                        .position(x: finishX, y: firstLaneY + 12 * unit - archH / 2)
+                        .position(x: finishX, y: firstLaneY + 8 * unit - archH / 2)
                         .zIndex(190)
                 }
 
-                // Pixel VFX burst on boost/reward
-                HD2DPixelFXBurst(clipID: "collectGold", playedAt: fxAt, size: 150 * unit)
-                    .position(fxPos)
-                    .zIndex(550)
+                // Pinpoint Tile-Anchored PixelFX (wind dash / lightning boost / reward burst / trap vines / finish firework!)
+                ForEach(fxCues) { cue in
+                    HD2DPixelFXEffect(clipID: cue.clip, playedAt: fxAt, anchor: cue.anchor, pixelScale: cue.scale, delay: cue.delay)
+                        .zIndex(560)
+                }
 
                 // 4) Real Native 3D Gem d6 Dice Roll (`MeadowBattleDiceView`) at Top-Right!
                 HD2DDiceStrip(dice: rolledDice, startedAt: diceAt, unit: unit)
@@ -1986,20 +2544,50 @@ private struct RaceStage: View {
             .onChange(of: model.beat) { _, _ in
                 guard let r = model.race else { return }
                 let now = Date()
+                var cues: [RaceFXCue] = []
+                var nextID = 0
+                func tilePoint(side: String, at tile: Int) -> CGPoint? {
+                    guard let lane = r.sides.firstIndex(where: { $0.id == side }) else { return nil }
+                    let y = firstLaneY + CGFloat(lane) * laneH + laneH / 2 + min(26 * unit, laneH * 0.24)
+                    let x = trackLeft + CGFloat(min(RaceTrack.length, max(0, tile))) * cellW + cellW / 2
+                    return CGPoint(x: x, y: y)
+                }
                 for e in r.events {
-                    if case .moved(let side, let roll, _) = e {
+                    switch e {
+                    case .moved(let side, let roll, let to):
                         let color = (model.tints[side] ?? 0) == 0 ? "red" : (model.tints[side] ?? 0) == 1 ? "blue" : "yellow"
                         rolledDice = [BattleDie(color, sides: 6, value: roll, label: "D6")]
                         diceAt = now
-                    }
-                    if case .landed(let side, let cell) = e, cell == .reward || cell == .boost {
-                        if let lane = r.sides.firstIndex(where: { $0.id == side }) {
-                            let y = firstLaneY + CGFloat(lane) * laneH + laneH / 2
-                            let at = r.positions[side] ?? 0
-                            fxPos = CGPoint(x: trackLeft + CGFloat(at) * cellW + cellW / 2, y: y)
-                            fxAt = now
+                        runningSideID = side
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) { if runningSideID == side { runningSideID = nil } }
+                        if let pt = tilePoint(side: side, at: to) {
+                            nextID += 1; cues.append(RaceFXCue(id: nextID, clip: "wind_dash_step", anchor: pt, scale: 1.35 * unit, delay: 0.04))
                         }
+                    case .landed(let side, let cell):
+                        let finalPos = r.positions[side] ?? 0
+                        if cell == .boost, let pt = tilePoint(side: side, at: max(0, finalPos - 3)), let destPt = tilePoint(side: side, at: finalPos) {
+                            nextID += 1; cues.append(RaceFXCue(id: nextID, clip: "lightning_bolt_strike", anchor: pt, scale: 1.2 * unit, delay: 0.14))
+                            nextID += 1; cues.append(RaceFXCue(id: nextID, clip: "wind_dash_step", anchor: destPt, scale: 1.65 * unit, delay: 0.28))
+                        } else if cell == .reward, let pt = tilePoint(side: side, at: finalPos) {
+                            nextID += 1; cues.append(RaceFXCue(id: nextID, clip: "collectLegendary", anchor: pt, scale: 1.75 * unit, delay: 0.16))
+                            nextID += 1; cues.append(RaceFXCue(id: nextID, clip: "holy_sunburst_16", anchor: CGPoint(x: pt.x, y: pt.y - 24 * unit), scale: 1.55 * unit, delay: 0.22))
+                        } else if cell == .trap, let pt = tilePoint(side: side, at: finalPos) {
+                            nextID += 1; cues.append(RaceFXCue(id: nextID, clip: "thorn_vine_erupt", anchor: pt, scale: 1.8 * unit, delay: 0.16))
+                        }
+                    case .trapFailed(let side, let to):
+                        if let pt = tilePoint(side: side, at: to) {
+                            nextID += 1; cues.append(RaceFXCue(id: nextID, clip: "thorn_vine_erupt", anchor: pt, scale: 1.85 * unit, delay: 0.06))
+                        }
+                    case .missed: break
                     }
+                }
+                if let winner = r.winner, let winPt = tilePoint(side: winner, at: RaceTrack.length) {
+                    nextID += 1; cues.append(RaceFXCue(id: nextID, clip: "bomb_firework_blast", anchor: CGPoint(x: winPt.x, y: winPt.y - 54 * unit), scale: 1.85 * unit, delay: 0.22))
+                    nextID += 1; cues.append(RaceFXCue(id: nextID, clip: "holy_sunburst_39", anchor: CGPoint(x: winPt.x, y: winPt.y - 26 * unit), scale: 2.0 * unit, delay: 0.28))
+                }
+                if !cues.isEmpty {
+                    fxCues = cues
+                    fxAt = now
                 }
             }
         }
@@ -2028,7 +2616,7 @@ private struct RaceStage: View {
         case .plain: .white
         }
         RoundedRectangle(cornerRadius: 8 * unit, style: .continuous)
-            .fill(cell == .plain ? (passed ? sideColor.opacity(0.24) : Color.white.opacity(0.84)) : color.opacity(0.92))
+            .fill(cell == .plain ? (passed ? sideColor.opacity(0.24) : Color.white.opacity(0.86)) : color.opacity(0.92))
             .overlay(
                 RoundedRectangle(cornerRadius: 8 * unit, style: .continuous)
                     .stroke(cell == .finish ? MiniGamePalette.battleRim : (cell == .plain ? Color.black.opacity(0.08) : Color.white.opacity(0.55)), lineWidth: (cell == .finish ? 2 : 1) * unit)
@@ -2051,11 +2639,11 @@ private struct RaceStage: View {
             }
     }
 
-    private func runnerToken(_ side: MiniGameSide, height: CGFloat, trapped: Bool, active: Bool) -> some View {
+    private func runnerToken(_ side: MiniGameSide, height: CGFloat, trapped: Bool, active: Bool, sprinting: Bool) -> some View {
         HStack(spacing: -height * 0.24) {
             ForEach(side.members.prefix(3), id: \.self) { id in
                 if let student = model.student(id) {
-                    RaceHeroSprite(student: student, height: side.members.count > 1 ? height * 0.84 : height, tint: model.tint(side.id))
+                    RaceHeroSprite(student: student, height: side.members.count > 1 ? height * 0.86 : height, tint: model.tint(side.id), sprinting: sprinting)
                 }
             }
         }
@@ -2074,38 +2662,46 @@ private struct RaceStage: View {
     }
 }
 
-/// Compact side-facing full-body pixel runner for Quiz Race (falls back to portrait while baking).
+/// Animated side-facing full-body pixel runner for Quiz Race (live breathing + sprint stride bounce).
 private struct RaceHeroSprite: View {
     let student: MiniGameModel.Student
     let height: CGFloat
     let tint: Color
+    var sprinting = false
     @State private var sprite: PixelHeroAtlas.BattleSprite?
     @State private var fallback: UIImage?
 
     var body: some View {
         let boxW = height * (256.0 / 320.0)
-        ZStack(alignment: .bottom) {
-            Ellipse()
-                .fill(tint.opacity(0.28))
-                .overlay(Ellipse().stroke(tint.opacity(0.9), lineWidth: 1.6))
-                .frame(width: boxW * 0.68, height: boxW * 0.22)
-                .offset(y: -height * 0.08)
-            if let frame = sprite?.frames["ready"]?.first {
-                Image(uiImage: frame.tall)
-                    .resizable().interpolation(.none).scaledToFit()
-                    .frame(width: boxW, height: height)
-                    .shadow(color: .black.opacity(0.32), radius: 3, y: 2)
-            } else if let fallback {
-                Image(uiImage: fallback)
-                    .resizable().interpolation(.none).scaledToFit()
-                    .frame(height: height * 0.72)
+        TimelineView(.animation(minimumInterval: 1.0 / 12)) { ctx in
+            let t = ctx.date.timeIntervalSinceReferenceDate
+            let bounce = sprinting ? abs(sin(t * 14)) * height * 0.08 : 0
+            let readyList = sprite?.frames["ready"] ?? []
+            let frame = readyList.isEmpty ? nil : readyList[Int(t * (sprinting ? 8 : 2.2)) % readyList.count]
+            ZStack(alignment: .bottom) {
+                Ellipse()
+                    .fill(tint.opacity(0.28))
+                    .overlay(Ellipse().stroke(tint.opacity(0.9), lineWidth: 1.6))
+                    .frame(width: boxW * 0.68, height: boxW * 0.22)
                     .offset(y: -height * 0.08)
-            } else {
-                MiniGameFace(student: student, size: height * 0.56, tint: tint)
-                    .offset(y: -height * 0.14)
+                if let frame {
+                    Image(uiImage: frame.tall)
+                        .resizable().interpolation(.none).scaledToFit()
+                        .frame(width: boxW, height: height)
+                        .shadow(color: .black.opacity(0.32), radius: 3, y: 2)
+                        .offset(y: -bounce)
+                } else if let fallback {
+                    Image(uiImage: fallback)
+                        .resizable().interpolation(.none).scaledToFit()
+                        .frame(height: height * 0.72)
+                        .offset(y: -height * 0.08 - bounce)
+                } else {
+                    MiniGameFace(student: student, size: height * 0.56, tint: tint)
+                        .offset(y: -height * 0.14 - bounce)
+                }
             }
+            .frame(width: boxW, height: height)
         }
-        .frame(width: boxW, height: height)
         .onAppear {
             if PixelHeroAtlas.isBattleReady(student.look) {
                 sprite = PixelHeroAtlas.battle(student.look)
@@ -2117,20 +2713,28 @@ private struct RaceHeroSprite: View {
     }
 }
 
-// MARK: - 4. 翻牌寻宝 (Shallow-DoF Meadow Camp Supply Clearing + Wooden Camp Treasure Table!)
+// MARK: - 4. 翻牌寻宝 (Direct-Click Oak Table Cards + Adaptive 4–24 Scale + Pinpoint Per-Card PixelFX!)
 
 private struct MemoryStage: View {
+    private struct CardBurst: Identifiable {
+        let id: Int
+        let clip: String
+        let anchor: CGPoint
+        let scale: CGFloat
+        let delay: Double
+    }
     @ObservedObject var model: MiniGameModel
     let unit: CGFloat
-    @State private var sparkleAt: Date?
-    @State private var lastMatchedCount = 0
+    @State private var fxAt: Date?
+    @State private var bursts: [CardBurst] = []
+    @State private var mismatchShake = false
 
     var body: some View {
         if let m = model.memory {
             let layout = MemoryBoardLayout(count: m.cards.count, unit: unit)
             ZStack(alignment: .topLeading) {
                 // 1) Warm Antique-Gold Recessed Parchment Card Mat seated harmoniously on `MiniGameSceneMemory`'s oak tabletop
-                let matPad = 16 * unit
+                let matPad = 15 * unit
                 RoundedRectangle(cornerRadius: 20 * unit, style: .continuous)
                     .fill(LinearGradient(colors: [MiniGamePalette.parchmentTop.opacity(0.92), MiniGamePalette.parchmentBottom.opacity(0.88)], startPoint: .top, endPoint: .bottom))
                     .overlay(
@@ -2146,7 +2750,7 @@ private struct MemoryStage: View {
                     .frame(width: layout.gridSize.width + matPad * 2, height: layout.gridSize.height + matPad * 2)
                     .position(x: layout.gridOrigin.x + layout.gridSize.width / 2, y: layout.gridOrigin.y + layout.gridSize.height / 2)
 
-                // 3) Card Grid — exact coordinates shared with MiniGameTapLayer
+                // 2) Card Grid — exact coordinates shared with MiniGameTapLayer (direct click to flip!)
                 ForEach(m.cards.indices, id: \.self) { i in
                     let up = m.faceUp.contains(i)
                     let state: MemoryCardView.Highlight = {
@@ -2155,72 +2759,124 @@ private struct MemoryStage: View {
                         if up && m.phase == .mismatch { return .mismatch }
                         return .normal
                     }()
+                    let hovered = model.hoveredMemoryCard == i && m.canFlip(i)
                     MemoryCardView(
                         card: m.cards[i],
                         number: i + 1,
                         up: up,
                         owner: m.owner[m.cards[i].pair].map(model.tint),
                         highlight: state,
+                        hovered: hovered,
+                        shaking: state == .mismatch && mismatchShake,
                         size: layout.cardSize,
                         unit: unit
                     )
                     .position(layout.cardCenter(i))
+                    .zIndex(hovered ? 420 : (up ? 380 : 300))
                 }
 
-                // 4) Right-Side Frosted Meadow-Glass Treasure Standings
-                VStack(alignment: .leading, spacing: 12 * unit) {
+                // 3) Right-Side Frosted Meadow-Glass Treasure Standings + Scale Badge
+                VStack(alignment: .leading, spacing: 10 * unit) {
+                    HStack(spacing: 6 * unit) {
+                        Image("MiniGameChestOpen").resizable().interpolation(.none).scaledToFit()
+                            .frame(width: 22 * unit, height: 22 * unit)
+                        Text("已寻获 \(m.owner.count) / \(m.pairCount) 对")
+                            .font(.system(size: 16 * unit, weight: .heavy, design: .rounded))
+                            .monospacedDigit()
+                            .foregroundStyle(MiniGamePalette.ink)
+                        Spacer(minLength: 0)
+                        Text("\(m.cards.count)张")
+                            .font(.system(size: 13 * unit, weight: .black, design: .rounded))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 8 * unit).padding(.vertical, 2 * unit)
+                            .background(Capsule().fill(MiniGamePalette.goldDeep))
+                    }
+                    .padding(.horizontal, 12 * unit).padding(.vertical, 7 * unit)
+                    .frame(width: layout.sideWidth)
+                    .background(RoundedRectangle(cornerRadius: 12 * unit, style: .continuous).fill(Color.white.opacity(0.86)))
+                    .overlay(RoundedRectangle(cornerRadius: 12 * unit, style: .continuous).stroke(MiniGamePalette.gold.opacity(0.55), lineWidth: 1.5 * unit))
+
                     ForEach(m.sides) { side in
                         let turn = m.current?.id == side.id && !m.finished
                         let sideColor = model.tint(side.id)
+                        let compactRow = m.sides.count >= 6
                         HStack(spacing: 10 * unit) {
                             HStack(spacing: -10 * unit) {
                                 ForEach(side.members.prefix(2), id: \.self) { id in
-                                    MiniGameFace(student: model.student(id), size: 38 * unit, tint: sideColor)
+                                    MiniGameFace(student: model.student(id), size: (compactRow ? 32 : 38) * unit, tint: sideColor)
                                 }
                             }
                             VStack(alignment: .leading, spacing: 1 * unit) {
                                 Text(side.name)
-                                    .font(.system(size: 20 * unit, weight: .heavy, design: .rounded))
+                                    .font(.system(size: (compactRow ? 17 : 20) * unit, weight: .heavy, design: .rounded))
                                     .foregroundStyle(MiniGamePalette.ink)
                                     .lineLimit(1).minimumScaleFactor(0.65)
                                 if turn {
                                     Text("当前翻牌")
-                                        .font(.system(size: 12 * unit, weight: .heavy, design: .rounded))
+                                        .font(.system(size: 11.5 * unit, weight: .heavy, design: .rounded))
                                         .foregroundStyle(MiniGamePalette.goldDeep)
                                 }
                             }
                             Spacer(minLength: 4 * unit)
                             Image("MiniGameChestOpen")
                                 .resizable().interpolation(.none).scaledToFit()
-                                .frame(width: 30 * unit, height: 30 * unit)
+                                .frame(width: (compactRow ? 24 : 28) * unit, height: (compactRow ? 24 : 28) * unit)
                             Text("\(m.pairs(of: side.id))")
-                                .font(.system(size: 27 * unit, weight: .black, design: .rounded))
+                                .font(.system(size: (compactRow ? 23 : 27) * unit, weight: .black, design: .rounded))
                                 .monospacedDigit()
                                 .foregroundStyle(MiniGamePalette.ink)
                         }
-                        .padding(.horizontal, 14 * unit).padding(.vertical, 10 * unit)
+                        .padding(.horizontal, 13 * unit).padding(.vertical, (compactRow ? 7 : 9) * unit)
                         .frame(width: layout.sideWidth)
-                        .background(RoundedRectangle(cornerRadius: 16 * unit, style: .continuous).fill(Color.white.opacity(turn ? 0.90 : 0.72)))
+                        .background(RoundedRectangle(cornerRadius: 15 * unit, style: .continuous).fill(Color.white.opacity(turn ? 0.92 : 0.74)))
                         .overlay(
-                            RoundedRectangle(cornerRadius: 16 * unit, style: .continuous)
+                            RoundedRectangle(cornerRadius: 15 * unit, style: .continuous)
                                 .stroke(turn ? AnyShapeStyle(MiniGamePalette.goldStroke) : AnyShapeStyle(Color.white.opacity(0.8)), lineWidth: (turn ? 3.5 : 1.5) * unit)
                         )
                         .shadow(color: turn ? MiniGamePalette.gold.opacity(0.45) : .black.opacity(0.18), radius: (turn ? 12 : 6) * unit, y: 3 * unit)
                         .scaleEffect(turn ? 1.03 : 1.0)
                     }
                 }
-                .position(x: layout.sideX, y: 356 * unit)
+                .position(x: layout.sideX, y: 358 * unit)
+                .zIndex(340)
 
-                // Pixel VFX golden burst when a treasure pair is claimed!
-                HD2DPixelFXBurst(clipID: "collectGold", playedAt: sparkleAt, size: 180 * unit)
-                    .position(x: layout.sideX, y: 356 * unit)
+                // 4) Pinpoint Per-Card PixelFX bursts (flip spark / pair resonance / treasure chest claim!)
+                ForEach(bursts) { b in
+                    HD2DPixelFXEffect(clipID: b.clip, playedAt: fxAt, anchor: b.anchor, pixelScale: b.scale, delay: b.delay)
+                        .zIndex(540)
+                }
             }
             .frame(width: 1280 * unit, height: 720 * unit)
-            .onChange(of: model.beat) { _, _ in
-                let count = model.memory?.owner.count ?? 0
-                if count > lastMatchedCount {
-                    lastMatchedCount = count
-                    sparkleAt = Date()
+            .onChange(of: model.memoryFX) { _, event in
+                guard let event, let m = model.memory else { return }
+                let layout = MemoryBoardLayout(count: m.cards.count, unit: unit)
+                let now = Date()
+                var list: [CardBurst] = []
+                var nid = 0
+                switch event.kind {
+                case .flip:
+                    for idx in event.indices {
+                        let c = layout.cardCenter(idx)
+                        nid += 1; list.append(CardBurst(id: nid, clip: "impacts_hit_spark_10", anchor: CGPoint(x: c.x, y: c.y + 12 * unit), scale: 1.25 * unit, delay: 0))
+                    }
+                case .pairReady:
+                    for (k, idx) in event.indices.enumerated() {
+                        let c = layout.cardCenter(idx)
+                        nid += 1; list.append(CardBurst(id: nid, clip: "holy_blessing_17", anchor: CGPoint(x: c.x, y: c.y + layout.cardSize.height * 0.42), scale: 1.35 * unit, delay: Double(k) * 0.05))
+                    }
+                case .claimed:
+                    for (k, idx) in event.indices.enumerated() {
+                        let c = layout.cardCenter(idx)
+                        nid += 1; list.append(CardBurst(id: nid, clip: "collectGold", anchor: CGPoint(x: c.x, y: c.y + 24 * unit), scale: 1.75 * unit, delay: Double(k) * 0.06))
+                    }
+                    nid += 1; list.append(CardBurst(id: nid, clip: "sonic_anthem_burst", anchor: CGPoint(x: layout.sideX, y: 382 * unit), scale: 1.55 * unit, delay: 0.14))
+                case .mismatch:
+                    withAnimation(.default.repeatCount(4, autoreverses: true).speed(6)) { mismatchShake = true }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.36) { mismatchShake = false }
+                }
+                if !list.isEmpty {
+                    bursts = list
+                    fxAt = now
                 }
             }
         }
@@ -2234,93 +2890,109 @@ private struct MemoryCardView: View {
     let up: Bool
     let owner: Color?
     let highlight: Highlight
+    var hovered = false
+    var shaking = false
     let size: CGSize
     let unit: CGFloat
 
     var body: some View {
         let shown = up || owner != nil
+        let compact = size.width < 145 * unit || size.height < 98 * unit
+        let corner = (compact ? 11 : 14) * unit
         let border: AnyShapeStyle = switch highlight {
         case .pairReady: AnyShapeStyle(MiniGamePalette.goldStroke)
         case .mismatch: AnyShapeStyle(Color(red: 0.90, green: 0.28, blue: 0.28))
-        case .matched: AnyShapeStyle(Color.white.opacity(0.85))
-        case .normal: shown ? AnyShapeStyle(MiniGamePalette.gold.opacity(0.8)) : AnyShapeStyle(MiniGamePalette.goldStroke)
+        case .matched: AnyShapeStyle(Color.white.opacity(0.88))
+        case .normal: hovered ? AnyShapeStyle(MiniGamePalette.goldBright) : (shown ? AnyShapeStyle(MiniGamePalette.gold.opacity(0.85)) : AnyShapeStyle(MiniGamePalette.goldStroke))
         }
+        let chestSide = min((compact ? 42 : 58) * unit, size.height * 0.56)
+        let numSide = min((compact ? 28 : 34) * unit, size.height * 0.36)
         ZStack {
             // Back: deep navy & antique gold treasure chest card with real pixel-art closed chest
-            RoundedRectangle(cornerRadius: 14 * unit, style: .continuous)
-                .fill(LinearGradient(colors: [Color(red: 0.20, green: 0.29, blue: 0.54), Color(red: 0.12, green: 0.18, blue: 0.36)], startPoint: .topLeading, endPoint: .bottomTrailing))
+            RoundedRectangle(cornerRadius: corner, style: .continuous)
+                .fill(LinearGradient(
+                    colors: hovered
+                        ? [Color(red: 0.28, green: 0.40, blue: 0.70), Color(red: 0.16, green: 0.25, blue: 0.48)]
+                        : [Color(red: 0.20, green: 0.29, blue: 0.54), Color(red: 0.12, green: 0.18, blue: 0.36)],
+                    startPoint: .topLeading, endPoint: .bottomTrailing
+                ))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 10 * unit, style: .continuous)
-                        .stroke(MiniGamePalette.gold.opacity(0.45), lineWidth: 1.5 * unit)
-                        .padding(5 * unit)
+                    RoundedRectangle(cornerRadius: max(6 * unit, corner - 4 * unit), style: .continuous)
+                        .stroke(MiniGamePalette.gold.opacity(hovered ? 0.85 : 0.45), lineWidth: 1.5 * unit)
+                        .padding(4 * unit)
                 )
                 .overlay {
-                    HStack(spacing: 10 * unit) {
+                    HStack(spacing: (compact ? 6 : 10) * unit) {
                         Image("MiniGameChestClosed")
                             .resizable().interpolation(.none).scaledToFit()
-                            .frame(width: min(62 * unit, size.height * 0.58), height: min(62 * unit, size.height * 0.58))
+                            .frame(width: chestSide, height: chestSide)
                             .shadow(color: .black.opacity(0.45), radius: 4 * unit, y: 2 * unit)
                         Text("\(number)")
-                            .font(.system(size: 23 * unit, weight: .black, design: .rounded))
+                            .font(.system(size: (compact ? 17 : 22) * unit, weight: .black, design: .rounded))
                             .monospacedDigit()
                             .foregroundStyle(MiniGamePalette.goldBright)
-                            .frame(width: 36 * unit, height: 36 * unit)
+                            .frame(width: numSide, height: numSide)
                             .background(Circle().fill(Color.black.opacity(0.32)))
                             .overlay(Circle().stroke(MiniGamePalette.gold.opacity(0.75), lineWidth: 1.5 * unit))
                     }
                 }
                 .opacity(shown ? 0 : 1)
 
-            // Front: clean ivory card with #number + EN/中 tag, or claimed team treasure card
-            RoundedRectangle(cornerRadius: 14 * unit, style: .continuous)
+            // Front: crisp ivory card with #number + EN/中 tag, or claimed team treasure card
+            RoundedRectangle(cornerRadius: corner, style: .continuous)
                 .fill(
                     owner.map { AnyShapeStyle(LinearGradient(colors: [$0.opacity(0.95), $0.opacity(0.80)], startPoint: .top, endPoint: .bottom)) }
                     ?? AnyShapeStyle(LinearGradient(colors: [Color.white, Color(red: 0.99, green: 0.97, blue: 0.92)], startPoint: .top, endPoint: .bottom))
                 )
                 .overlay {
                     Text(card.text)
-                        .font(.system(size: (card.english ? 27 : 29) * unit, weight: .heavy, design: .rounded))
+                        .font(.system(size: (compact ? (card.english ? 21 : 23) : (card.english ? 27 : 29)) * unit, weight: .heavy, design: .rounded))
                         .foregroundStyle(owner != nil ? .white : MiniGamePalette.ink)
                         .multilineTextAlignment(.center)
                         .lineLimit(2)
-                        .minimumScaleFactor(0.42)
-                        .padding(.horizontal, 12 * unit)
-                        .padding(.top, 14 * unit)
-                        .padding(.bottom, 6 * unit)
+                        .minimumScaleFactor(0.40)
+                        .padding(.horizontal, (compact ? 8 : 12) * unit)
+                        .padding(.top, (compact ? 12 : 15) * unit)
+                        .padding(.bottom, 5 * unit)
                 }
                 .overlay(alignment: .topLeading) {
                     Text("#\(number)")
-                        .font(.system(size: 12 * unit, weight: .heavy, design: .rounded))
+                        .font(.system(size: (compact ? 10 : 12) * unit, weight: .heavy, design: .rounded))
                         .monospacedDigit()
-                        .foregroundStyle(owner != nil ? .white.opacity(0.82) : MiniGamePalette.ink.opacity(0.5))
-                        .padding(.horizontal, 7 * unit).padding(.vertical, 2 * unit)
+                        .foregroundStyle(owner != nil ? .white.opacity(0.84) : MiniGamePalette.ink.opacity(0.5))
+                        .padding(.horizontal, 6 * unit).padding(.vertical, 2 * unit)
                         .background(Capsule().fill(owner != nil ? Color.black.opacity(0.22) : Color.black.opacity(0.06)))
-                        .padding(6 * unit)
+                        .padding(5 * unit)
                 }
                 .overlay(alignment: .topTrailing) {
                     if owner != nil {
                         Image("MiniGameChestOpen")
                             .resizable().interpolation(.none).scaledToFit()
-                            .frame(width: 28 * unit, height: 28 * unit)
-                            .padding(6 * unit)
+                            .frame(width: (compact ? 22 : 28) * unit, height: (compact ? 22 : 28) * unit)
+                            .padding(5 * unit)
                     } else {
                         Text(card.english ? "EN" : "中")
-                            .font(.system(size: 11 * unit, weight: .black, design: .rounded))
+                            .font(.system(size: (compact ? 9.5 : 11) * unit, weight: .black, design: .rounded))
                             .foregroundStyle(.white)
-                            .padding(.horizontal, 7 * unit).padding(.vertical, 2 * unit)
+                            .padding(.horizontal, 6 * unit).padding(.vertical, 2 * unit)
                             .background(Capsule().fill(card.english ? Color(red: 0.24, green: 0.54, blue: 0.88) : Color(red: 0.86, green: 0.54, blue: 0.16)))
-                            .padding(6 * unit)
+                            .padding(5 * unit)
                     }
                 }
                 .opacity(shown ? 1 : 0)
+                .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
         }
         .frame(width: size.width, height: size.height)
         .overlay(
-            RoundedRectangle(cornerRadius: 14 * unit, style: .continuous)
-                .stroke(border, lineWidth: (highlight == .pairReady || highlight == .mismatch ? 4 : 2.2) * unit)
+            RoundedRectangle(cornerRadius: corner, style: .continuous)
+                .stroke(border, lineWidth: (highlight == .pairReady || highlight == .mismatch ? 4 : hovered ? 3.2 : 2.2) * unit)
         )
-        .scaleEffect(shown ? (highlight == .pairReady ? 1.03 : 1.0) : 0.96)
-        .shadow(color: highlight == .pairReady ? MiniGamePalette.gold.opacity(0.65) : Color.black.opacity(0.24), radius: (highlight == .pairReady ? 12 : 5) * unit, y: 3 * unit)
+        .rotation3DEffect(.degrees(shown ? 180 : 0), axis: (x: 0, y: 1, z: 0), perspective: 0.45)
+        .scaleEffect(hovered ? 1.045 : (shown ? (highlight == .pairReady ? 1.03 : 1.0) : 0.97))
+        .offset(x: shaking ? 7 * unit : 0, y: hovered ? -3 * unit : 0)
+        .shadow(color: (highlight == .pairReady || hovered) ? MiniGamePalette.gold.opacity(0.68) : Color.black.opacity(0.24), radius: (highlight == .pairReady || hovered ? 12 : 5) * unit, y: 3 * unit)
+        .animation(.spring(response: 0.36, dampingFraction: 0.78), value: shown)
+        .animation(.easeOut(duration: 0.14), value: hovered)
     }
 }
 
@@ -2331,44 +3003,77 @@ private struct ArenaStage: View {
     let unit: CGFloat
     @State private var clashAt: Date?
     @State private var fxAt: Date?
+    @State private var lastResult: ArenaKing.Result?
+    @State private var lastBonus = false
     @State private var champAction: HD2DBattleHero.Action = .ready
     @State private var chalAction: HD2DBattleHero.Action = .ready
 
     var body: some View {
         if let a = model.arena {
+            let champFoot = CGPoint(x: 468 * unit, y: 506 * unit)
+            let chalFoot = CGPoint(x: 812 * unit, y: 506 * unit)
+            let clashPoint = CGPoint(x: 640 * unit, y: 458 * unit)
+
             ZStack(alignment: .topLeading) {
                 // 1) Focal-Plane Circular Stone & Gold Tournament Stage (`MiniGameArenaRing`) planted solidly on
-                // `MiniGameSceneArena`'s flat sunlit packed-earth tournament courtyard (all 3 front steps clear of bottom banner!)
-                HD2DProp(name: "MiniGameArenaRing", width: 700 * unit, depthBlur: 0, shadow: true)
-                    .position(x: 640 * unit, y: 472 * unit)
+                // `MiniGameSceneArena`'s flat sunlit packed-earth tournament courtyard!
+                HD2DProp(name: "MiniGameArenaRing", width: 720 * unit, depthBlur: 0, shadow: true)
+                    .position(x: 640 * unit, y: 482 * unit)
                     .zIndex(280)
+
+                // Back-layer victory / streak aura behind the Champion
+                if lastResult == .defended || lastResult == .dethroned {
+                    HD2DPixelFXEffect(
+                        clipID: lastBonus ? "seraph_aegis_descend" : (lastResult == .dethroned ? "oath_banner_plant" : "warlord_roar_wave"),
+                        playedAt: fxAt, anchor: champFoot, pixelScale: 2.05 * unit, delay: 0.18, layer: .back
+                    )
+                    .zIndex(390)
+                }
 
                 // 2) Champion (Left, facing RIGHT) vs Challenger (Right, mirrored facing LEFT) — Real Animated Battle Heroes!
                 duelist(id: a.champion, champion: true, streak: a.streak, action: champAction)
                     .id("champ-\(a.champion)")
-                    .position(x: 472 * unit, y: 382 * unit)
+                    .position(x: champFoot.x, y: 400 * unit)
                     .zIndex(420)
 
                 vsEmblem
-                    .position(x: 640 * unit, y: 378 * unit)
+                    .position(x: 640 * unit, y: 386 * unit)
                     .zIndex(430)
 
                 duelist(id: a.challenger, champion: false, streak: 0, action: chalAction)
                     .id("chal-\(a.challenger)")
-                    .position(x: 808 * unit, y: 382 * unit)
+                    .position(x: chalFoot.x, y: 400 * unit)
                     .zIndex(420)
 
-                // Real Pixel VFX Clash Sunburst
-                HD2DPixelFXBurst(clipID: "holy_sunburst_39", playedAt: fxAt, size: 240 * unit)
-                    .position(x: 472 * unit, y: 365 * unit)
-                    .zIndex(520)
+                // 3) Pinpoint Authentic Outcome PixelFX (clash midpoint + champion coronation / streak glory / miss smoke!)
+                if lastResult == .dethroned {
+                    HD2DPixelFXEffect(clipID: "skybreaker_lance", playedAt: fxAt, anchor: clashPoint, pixelScale: 1.9 * unit, direction: -1)
+                        .zIndex(520)
+                    HD2DPixelFXEffect(clipID: "holy_sunburst_39", playedAt: fxAt, anchor: CGPoint(x: champFoot.x, y: champFoot.y - 76 * unit), pixelScale: 2.15 * unit, delay: 0.14)
+                        .zIndex(525)
+                    HD2DPixelFXEffect(clipID: "oath_banner_plant", playedAt: fxAt, anchor: champFoot, pixelScale: 1.95 * unit, delay: 0.18, layer: .front)
+                        .zIndex(530)
+                } else if lastResult == .defended {
+                    HD2DPixelFXEffect(clipID: "melee_heavy_cleave_51", playedAt: fxAt, anchor: CGPoint(x: clashPoint.x - 16 * unit, y: clashPoint.y + 18 * unit), pixelScale: 2.0 * unit, direction: 1)
+                        .zIndex(520)
+                    HD2DPixelFXEffect(clipID: "impacts_crit_hit_3", playedAt: fxAt, anchor: CGPoint(x: clashPoint.x + 28 * unit, y: clashPoint.y + 18 * unit), pixelScale: 1.85 * unit, delay: 0.08)
+                        .zIndex(524)
+                    HD2DPixelFXEffect(
+                        clipID: lastBonus ? "seraph_aegis_descend" : "warlord_roar_wave",
+                        playedAt: fxAt, anchor: champFoot, pixelScale: 2.05 * unit, delay: 0.18, layer: .front
+                    )
+                    .zIndex(530)
+                } else if lastResult == .nobody {
+                    HD2DPixelFXEffect(clipID: "bomb_star_smoke", playedAt: fxAt, anchor: CGPoint(x: clashPoint.x, y: clashPoint.y + 38 * unit), pixelScale: 1.85 * unit)
+                        .zIndex(520)
+                }
 
                 // 4) Top-Left `下一位挑战` & Top-Right `胜场榜` in Frosted Meadow Glass (zero collision with fighters!)
                 if !a.line.isEmpty {
                     VStack(alignment: .leading, spacing: 6 * unit) {
                         Text("下一位挑战")
                             .font(.system(size: 14 * unit, weight: .heavy, design: .rounded))
-                            .foregroundStyle(MiniGamePalette.ink.opacity(0.72))
+                            .foregroundStyle(MiniGamePalette.ink.opacity(0.75))
                         HStack(spacing: 8 * unit) {
                             ForEach(a.line.prefix(5), id: \.self) { id in
                                 VStack(spacing: 2 * unit) {
@@ -2382,7 +3087,7 @@ private struct ArenaStage: View {
                         }
                     }
                     .padding(.horizontal, 14 * unit).padding(.vertical, 10 * unit)
-                    .background(RoundedRectangle(cornerRadius: 16 * unit, style: .continuous).fill(Color.white.opacity(0.84)))
+                    .background(RoundedRectangle(cornerRadius: 16 * unit, style: .continuous).fill(Color.white.opacity(0.86)))
                     .overlay(RoundedRectangle(cornerRadius: 16 * unit, style: .continuous).stroke(.white, lineWidth: 1.5 * unit))
                     .shadow(color: .black.opacity(0.18), radius: 8 * unit, y: 3 * unit)
                     .position(x: 20 * unit + (CGFloat(min(5, a.line.count)) * 50 + 28) * unit / 2, y: 58 * unit)
@@ -2413,7 +3118,7 @@ private struct ArenaStage: View {
                 }
                 .frame(width: 176 * unit)
                 .padding(.horizontal, 14 * unit).padding(.vertical, 10 * unit)
-                .background(RoundedRectangle(cornerRadius: 16 * unit, style: .continuous).fill(Color.white.opacity(0.84)))
+                .background(RoundedRectangle(cornerRadius: 16 * unit, style: .continuous).fill(Color.white.opacity(0.86)))
                 .overlay(RoundedRectangle(cornerRadius: 16 * unit, style: .continuous).stroke(.white, lineWidth: 1.5 * unit))
                 .shadow(color: .black.opacity(0.18), radius: 8 * unit, y: 3 * unit)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
@@ -2425,8 +3130,19 @@ private struct ArenaStage: View {
                 guard let a = model.arena else { return }
                 let now = Date()
                 clashAt = now
+                lastResult = a.last
+                lastBonus = a.bonus
                 switch a.last {
-                case .dethroned, .defended:
+                case .defended:
+                    champAction = .attack
+                    chalAction = .hurt
+                    fxAt = now
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
+                        champAction = .victory
+                        chalAction = .ready
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { champAction = .ready }
+                    }
+                case .dethroned:
                     champAction = .victory
                     chalAction = .ready
                     fxAt = now
@@ -2434,6 +3150,7 @@ private struct ArenaStage: View {
                 case .nobody:
                     champAction = .hurt
                     chalAction = .hurt
+                    fxAt = now
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { champAction = .ready; chalAction = .ready }
                 case nil: break
                 }
@@ -2455,7 +3172,7 @@ private struct ArenaStage: View {
     }
 
     private func duelist(id: String, champion: Bool, streak: Int, action: HD2DBattleHero.Action) -> some View {
-        let crownSize = (50 + CGFloat(min(streak, 5)) * 6) * unit
+        let crownSize = (48 + CGFloat(min(streak, 5)) * 5) * unit
         return VStack(spacing: -8 * unit) {
             ZStack {
                 if champion {
@@ -2468,19 +3185,19 @@ private struct ArenaStage: View {
                         .shadow(color: .black.opacity(0.42), radius: 4 * unit, y: 2 * unit)
                 } else {
                     Image(systemName: "bolt.fill")
-                        .font(.system(size: 38 * unit, weight: .black))
+                        .font(.system(size: 36 * unit, weight: .black))
                         .foregroundStyle(LinearGradient(colors: [MiniGamePalette.goldBright, .orange], startPoint: .top, endPoint: .bottom))
                         .shadow(color: .black.opacity(0.55), radius: 4 * unit, y: 2 * unit)
                 }
             }
-            .frame(height: 62 * unit)
-            .offset(y: 44 * unit)
+            .frame(height: 58 * unit)
+            .offset(y: 26 * unit)
             .zIndex(5)
 
             if let student = model.student(id) {
                 HD2DBattleHero(
                     student: student,
-                    height: 238 * unit,
+                    height: 242 * unit,
                     mirrored: !champion,
                     action: action,
                     actionAt: clashAt,
@@ -2502,14 +3219,14 @@ private struct ArenaStage: View {
             .padding(.vertical, 6 * unit)
             .background(
                 RoundedRectangle(cornerRadius: 10 * unit, style: .continuous)
-                    .fill(MiniGamePalette.battlePlate.opacity(0.86))
+                    .fill(MiniGamePalette.battlePlate.opacity(0.88))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 10 * unit, style: .continuous)
                     .stroke(champion ? AnyShapeStyle(MiniGamePalette.goldStroke) : AnyShapeStyle(MiniGamePalette.battleRim.opacity(0.82)), lineWidth: 2 * unit)
             )
             .shadow(color: .black.opacity(0.4), radius: 6 * unit, y: 3 * unit)
-            .offset(y: 6 * unit)
+            .offset(y: 4 * unit)
         }
         .transition(.asymmetric(insertion: .scale(scale: 0.82).combined(with: .opacity), removal: .opacity))
     }
