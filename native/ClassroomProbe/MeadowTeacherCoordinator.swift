@@ -157,6 +157,14 @@ final class MeadowTeacherCoordinator:ObservableObject {
     }
     /// Anything quiz-related on screen (a question, a challenge, practice or its panel).
     var quizActive:Bool {quiz != nil || challenge != nil || dockContent != nil}
+    /// True when pressing Tab should toggle the quiz card between centered and compact picture-friendly mode.
+    var canToggleQuizCardCompact:Bool {
+        (quiz != nil || dockContent != nil) && !modalOpen && !TeacherSession.shared.isEditingNotes && !UIResponder.classroomTyping
+    }
+    func toggleQuizCardCompact(fromKey:Bool=false){
+        if fromKey {QuizCardLayout.shared.toggleCompactFromKey()}
+        else {QuizCardLayout.shared.toggleCompact()}
+    }
     /// Top bar "结束答题": ends whatever is going on at once (nothing more is recorded; what was already sent stays).
     func abortQuiz(){
         challengeTimer?.invalidate();challengeTimer=nil

@@ -1,3 +1,18 @@
+## 出题题卡「边看图边看题」紧凑可拖动模式与 Tab 一键切换（2026-11-27，基于v0.32.4/build48，未改版本号、未存档）
+
+针对「出题时居中大题卡完全遮挡绘本/游戏画面、无法边看画面辅助教学」的问题，新增「居中大卡 ↔ 边看图边看题」双态平滑切换与自由拖动避让：
+- **双态与偏好记忆 + Tab 一键切换**（`ClassroomQuiz.swift`、`ClassroomTools.swift`、`App.swift`、`MeadowQuizAnswerPanel.swift`、`MeadowTeacherCoordinator.swift`）：
+  - 新增共享状态 `QuizCardLayout`（持久化 `classroom.quizCardCompact` 与 `classroom.quizCardAnchor`），游戏页与绘本页首次均默认「居中大卡」，切换后记住上次选择并在教师预览与外接 TV / Mac 公开窗口实时同步；个人挑战倒计时与题卡计时器在原地切换过程中保持连续走表不中断。
+  - 在右侧答题停靠栏 `QuizDock` 顶部新增统一控制条 `QuizCardViewModeBar`（`居中大卡` / `边看图边看题` 切换、`Tab` 快捷键徽标、紧凑态拖动提示与拖离默认位后的一键 `复位`），全班题、个人挑战、闪卡练习与地图个人题共用且不挤压原面板标题行。
+  - Mac Catalyst 通过 `QuizTabKeyMonitor`（AppKit `NSEvent` 本地监听，仅在非文本输入、无模态弹窗且无修饰键时拦截 `kVK_Tab`）避免焦点跳转劫持 `Tab`；iPadOS 与 UIKit 路径同步补齐 `UIKeyCommand(wantsPriorityOverSystemBehavior: true)`、`panelToken`（`"⇥"`）与 `pressesBegan` 兜底。
+- **紧凑题卡排版减重与可拖动避让**（`MeadowQuizCard.swift`、`ClassroomQuizCardLayout.swift`、`MeadowPublicOutput.swift`、`MeadowTeacherDashboard.swift`、`Views.swift`）：
+  - 紧凑模式下取消全屏暗色蒙版（底图 100% 原亮度露出），改用增强投影与顶缘拖动手柄；默认贴合顶部居中并按 `ClassroomQuizCardLayout.topInset` 自动避让个人挑战顶部横幅（`y=82`）与全班居中倒计时徽标（`y=104`），不压绘本底部玩家状态卡。
+  - 四类题型全部按紧凑模式重排并取消未揭晓前底部空白占位：单词闪卡按字宽收紧为轻量浮卡（约 `360×144`）、长句闪卡与揭晓态自适应扩展不裁切；短选项选择题自动单行横排（`920×141`）、长句选项紧凑双列；填空题压缩空白下划线并紧贴候选行；阅读理解限高留出下半屏画面。
+  - 在游戏与绘本教师预览上叠加透明直通拖移层 `QuizCardDragLayer` / `QuizCardDragHostView`（直接 UIKit `touchesBegan`/`touchesMoved`/`touchesEnded` + `point(inside:)` / `hitTest` 精准匹配紧凑卡矩形），卡外点击/拖动直通底层地图与绘本玩家卡，卡内拖动实时同步公开屏、双击复位，激光笔与揭晓跳过层优先级在其之上。
+- **实测与未实测边界**：
+  - `MeadowClassroomSupportTests` 新增 2 项布局与拖动边界单测（覆盖多宽高比画布防越界、全宽卡片仅纵移保横锚、挑战/计时顶距避让）；全量运行 `scripts/local-build.sh test` 全通过（`ProbeCore` 9/9、`MeadowWorldSupportTests` 266/266、`MeadowClassroomSupportTests` 60/60、`MeadowBattleSupportTests` 109/109、`ClassroomGameCoreTests` 73/73，合计 **517/517** 零失败），`MAC_OPEN=0 scripts/local-build.sh mac` Release 双架构编译零新增警告产出 `artifacts/ClassroomProbe.app`。
+  - 通过 `computer-use-mcp` 实机运行 `artifacts/ClassroomProbe.app` 核验默认居中态、实按键盘 `Tab` 无焦点跳动切入「边看图边看题」紧凑态且倒计时持续走表（测前备份 `ClassroomMeadow`、`ClassroomStage0` 及偏好设置，测后按 SHA-256 与 `diff` 逐字节完全还原）；并通过独立 Mac Catalyst 离屏渲染与 `hitTest` 验证脚本实测验收 4 类题型（闪卡居中/紧凑/拖移左下/长句揭晓、短选项单行选择、长选项双列揭晓、双空填空、阅读理解、个人挑战避让顶条、900×720 窄停靠预览）共 10 组截图与 3 种预览尺寸下的精准穿透命中。因测试后期本机切换至前台使用，未再次通过 `computer-use-mcp` 实机拖动改造后的直接触摸版 `QuizCardDragHostView`、亦未在真实外接 TV 双屏与真机 iPad 上人工目视验收。
+
 ## 转盘实体材质纹理覆盖、拟物立体光影与极窄扇面简略规则升级（2026-11-27，基于v0.32.4/build48，未改版本号、未存档）
 
 围绕「转盘进一步拟物化（支持纹理覆盖）、保证高可读性、极窄扇面图标与文字简略显示」完成一轮材质与排版精修：

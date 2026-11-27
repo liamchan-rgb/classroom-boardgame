@@ -3,6 +3,7 @@ import UIKit
 import UniformTypeIdentifiers
 import ClassroomGameCore
 import MeadowWorldSupport
+import MeadowClassroomSupport
 
 /// A quiz on screen. Shown in the TV overlays (over the game, the picture book and any panel) and in the teacher's
 /// preview; `attempt` is set once the teacher submits.
@@ -39,21 +40,192 @@ struct LiveQuiz: Equatable {
     var instant: Bool = false
 }
 
+/// Shared display mode and compact drag anchor for the live quiz card on both teacher preview and TV / public window.
+/// Defaults to centered on both Game and Picture Book tabs, remembers the teacher's last toggle across questions,
+/// and mirrors compact drag position in real time.
+@MainActor final class QuizCardLayout: ObservableObject {
+    static let shared = QuizCardLayout()
+    private static let compactKey = "classroom.quizCardCompact"
+    private static let anchorKey = "classroom.quizCardAnchor"
+
+    @Published var compact: Bool {
+        didSet { UserDefaults.standard.set(compact, forKey: Self.compactKey) }
+    }
+    @Published var anchor: CGPoint {
+        didSet { UserDefaults.standard.set([Double(anchor.x), Double(anchor.y)], forKey: Self.anchorKey) }
+    }
+    /// Latest compact card size & top safe inset reported by the visible teacher preview (in 720-pt overlay units).
+    var previewCardSize: CGSize = .zero
+    var previewTopInset: CGFloat = ClassroomQuizCardLayout.edgeMargin
+    /// True during active dragging so preview and TV follow the pointer without spring lag.
+    var isDragging = false
+    private var lastKeyToggleUptime: TimeInterval = 0
+
+    private init() {
+        compact = UserDefaults.standard.bool(forKey: Self.compactKey)
+        if let v = UserDefaults.standard.array(forKey: Self.anchorKey) as? [Double], v.count == 2,
+           v[0].isFinite, v[1].isFinite {
+            anchor = ClassroomQuizCardLayout.clampedAnchor(CGPoint(x: v[0], y: v[1]))
+        } else {
+            anchor = ClassroomQuizCardLayout.defaultAnchor
+        }
+    }
+
+    var isDefaultAnchor: Bool {
+        abs(anchor.x - ClassroomQuizCardLayout.defaultAnchor.x) < 0.01 &&
+        abs(anchor.y - ClassroomQuizCardLayout.defaultAnchor.y) < 0.01
+    }
+
+    func toggleCompact() {
+        isDragging = false
+        compact.toggle()
+    }
+
+    /// Keyboard `Tab` toggle with a brief guard against duplicate dispatch across AppKit/UIKit key paths.
+    func toggleCompactFromKey() {
+        let now = ProcessInfo.processInfo.systemUptime
+        guard now - lastKeyToggleUptime > 0.04 else { return }
+        lastKeyToggleUptime = now
+        toggleCompact()
+    }
+
+    func resetAnchor() {
+        isDragging = false
+        anchor = ClassroomQuizCardLayout.defaultAnchor
+    }
+}
+
 /// Hosts the UIKit quiz card inside the SwiftUI overlays on a 720-point-high canvas, so the card looks the same on
 /// the TV and in the teacher's preview.
 struct QuizOverlayHost: View {
     @ObservedObject var game: MeadowTeacherCoordinator
+    @ObservedObject private var layout = QuizCardLayout.shared
+    var teacherPreview = false
+    var timerTopCenter = false
     var body: some View {
         GeometryReader { g in
-            if let quiz = game.quiz {
+            if let quiz = game.quiz, g.size.height > 0 {
                 let scale = g.size.height / 720
-                QuizCardRepresentable(quiz: quiz, done: { [weak game] token in game?.quizCardFinished(token) })
+                let topInset = ClassroomQuizCardLayout.topInset(challengeActive: game.challenge != nil, timerTopCenter: timerTopCenter)
+                let coordinator = game
+                QuizCardRepresentable(
+                    quiz: quiz,
+                    compact: layout.compact,
+                    anchor: layout.anchor,
+                    topInset: topInset,
+                    isDragging: layout.isDragging,
+                    teacherPreview: teacherPreview,
+                    done: { [weak coordinator] token in coordinator?.quizCardFinished(token) }
+                )
                     .frame(width: g.size.width / scale, height: 720)
                     .scaleEffect(scale, anchor: .topLeading)
                     .frame(width: g.size.width, height: g.size.height, alignment: .topLeading)
                     .transition(.opacity)
             }
         }
+    }
+}
+
+/// Teacher-preview-only passthrough drag layer for the compact ("边看图边看题") quiz card.
+/// Hits strictly inside the compact card rect (passing all clicks/drags outside through to the book or map),
+/// drags live to TV & preview via direct UIKit touches (zero SwiftUI/gesture conflict on Mac Catalyst & iPadOS),
+/// and double-taps to reset to top-center.
+struct QuizCardDragLayer: View {
+    @ObservedObject var game: MeadowTeacherCoordinator
+    @ObservedObject private var layout = QuizCardLayout.shared
+    var body: some View {
+        if game.quiz != nil, layout.compact, game.quiz?.attempt == nil, !game.laser.on {
+            QuizCardDragRepresentable(anchor: layout.anchor)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+    }
+}
+
+private struct QuizCardDragRepresentable: UIViewRepresentable {
+    let anchor: CGPoint
+    func makeUIView(context: Context) -> QuizCardDragHostView { QuizCardDragHostView() }
+    func updateUIView(_ view: QuizCardDragHostView, context: Context) { view.syncedAnchor = anchor }
+}
+
+final class QuizCardDragHostView: UIView {
+    var syncedAnchor: CGPoint = ClassroomQuizCardLayout.defaultAnchor
+    private var dragStartPoint: CGPoint?
+    private var dragStartAnchor: CGPoint = ClassroomQuizCardLayout.defaultAnchor
+    private var didMove = false
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        isOpaque = false
+        backgroundColor = .clear
+        isUserInteractionEnabled = true
+    }
+    required init?(coder: NSCoder) { fatalError() }
+
+    func cardRectInSelf() -> CGRect? {
+        guard bounds.height > 0 else { return nil }
+        let layout = QuizCardLayout.shared
+        let cardSize = layout.previewCardSize
+        guard cardSize.width > 1, cardSize.height > 1 else { return nil }
+        let scale = bounds.height / 720
+        let canvasSize = CGSize(width: bounds.width / scale, height: 720)
+        let canonical = ClassroomQuizCardLayout.compactFrame(cardSize: cardSize, in: canvasSize, anchor: layout.anchor, topInset: layout.previewTopInset)
+        return CGRect(x: canonical.minX * scale, y: canonical.minY * scale, width: canonical.width * scale, height: canonical.height * scale)
+    }
+
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        guard let rect = cardRectInSelf() else { return false }
+        return rect.insetBy(dx: -8, dy: -8).contains(point)
+    }
+
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        self.point(inside: point, with: event) ? self : nil
+    }
+
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let touch = touches.first else { return }
+        if touch.tapCount == 2 {
+            dragStartPoint = nil
+            didMove = false
+            KeyHostingController<EmptyView>.endEditing()
+            QuizCardLayout.shared.resetAnchor()
+            return
+        }
+        KeyHostingController<EmptyView>.endEditing()
+        dragStartPoint = touch.location(in: self)
+        dragStartAnchor = QuizCardLayout.shared.anchor
+        didMove = false
+        QuizCardLayout.shared.isDragging = true
+    }
+
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let touch = touches.first, let start = dragStartPoint, bounds.height > 0 else { return }
+        let pt = touch.location(in: self)
+        let dx = pt.x - start.x, dy = pt.y - start.y
+        if !didMove, hypot(dx, dy) < 2 { return }
+        didMove = true
+        let layout = QuizCardLayout.shared
+        let scale = bounds.height / 720
+        let delta = CGPoint(x: dx / scale, y: dy / scale)
+        let canvasSize = CGSize(width: bounds.width / scale, height: 720)
+        layout.anchor = ClassroomQuizCardLayout.draggedAnchor(
+            from: dragStartAnchor,
+            delta: delta,
+            cardSize: layout.previewCardSize,
+            in: canvasSize,
+            topInset: layout.previewTopInset
+        )
+    }
+
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        dragStartPoint = nil
+        didMove = false
+        QuizCardLayout.shared.isDragging = false
+    }
+
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        dragStartPoint = nil
+        didMove = false
+        QuizCardLayout.shared.isDragging = false
     }
 }
 
@@ -69,6 +241,11 @@ struct QuizRevealTapCatcher: View {
 
 private struct QuizCardRepresentable: UIViewRepresentable {
     let quiz: LiveQuiz
+    let compact: Bool
+    let anchor: CGPoint
+    let topInset: CGFloat
+    let isDragging: Bool
+    let teacherPreview: Bool
     var done: (Int) -> Void
     final class Box: UIView {
         var token = -1, revealed = false
@@ -77,14 +254,35 @@ private struct QuizCardRepresentable: UIViewRepresentable {
     }
     func makeUIView(context: Context) -> Box { let b = Box(); b.isUserInteractionEnabled = false; b.backgroundColor = .clear; return b }
     func updateUIView(_ box: Box, context: Context) {
+        let report: ((CGSize, CGFloat) -> Void)? = teacherPreview ? { [weak box] size, inset in
+            guard let box, box.window != nil else { return }
+            QuizCardLayout.shared.previewCardSize = size
+            QuizCardLayout.shared.previewTopInset = inset
+        } : nil
         if box.token != quiz.token {
             box.card?.removeFromSuperview()
             box.layoutIfNeeded()
             let who = quiz.mode == .classwide ? "全班" : quiz.playerName
-            let card = MeadowQuizCard.present(in: box, question: quiz.question, player: who, place: quiz.mode == .practice ? "闪卡练习" : quiz.mode == .challenge ? "个人挑战" : quiz.place, start: quiz.start, mode: quiz.mode, countdown: quiz.countdown?.read, animated: !quiz.instant)
+            let card = MeadowQuizCard.present(
+                in: box,
+                question: quiz.question,
+                player: who,
+                place: quiz.mode == .practice ? "闪卡练习" : quiz.mode == .challenge ? "个人挑战" : quiz.place,
+                start: quiz.start,
+                mode: quiz.mode,
+                countdown: quiz.countdown?.read,
+                compact: compact,
+                anchor: anchor,
+                topInset: topInset,
+                animated: !quiz.instant,
+                onLayoutReport: report
+            )
             card.layer.zPosition = 0
             box.card = card; box.token = quiz.token; box.revealed = false
             box.setNeedsLayout()
+        } else if let card = box.card {
+            card.onLayoutReport = report
+            card.setPresentation(compact: compact, anchor: anchor, topInset: topInset, animated: !isDragging)
         }
         if let attempt = quiz.attempt, !box.revealed, let card = box.card {
             box.revealed = true
@@ -107,6 +305,72 @@ extension KeyHostingController: DockablePanel {
     func dockContent() -> DockContent { DockContent(view: AnyView(rootView), onKey: onKey) }
 }
 
+/// Slim top strip inside the docked answer panel: one-click (or Tab) switch between centered and picture-friendly
+/// compact mode, plus a quick reset when the compact card has been dragged away from top-center.
+private struct QuizCardViewModeBar: View {
+    @ObservedObject var layout = QuizCardLayout.shared
+    var body: some View {
+        HStack(spacing: 8) {
+            HStack(spacing: 3) {
+                modeChip("居中大卡", icon: "rectangle.center.inset.filled", active: !layout.compact) {
+                    if layout.compact { layout.toggleCompact() }
+                }
+                modeChip("边看图边看题", icon: "pip.enter", active: layout.compact) {
+                    if !layout.compact { layout.toggleCompact() }
+                }
+            }
+            .padding(3)
+            .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(Color.white.opacity(0.45)))
+
+            Text("Tab")
+                .font(.system(size: 11, weight: .bold, design: .monospaced))
+                .foregroundStyle(GameTheme.muted)
+                .padding(.horizontal, 6).padding(.vertical, 3)
+                .background(RoundedRectangle(cornerRadius: 6, style: .continuous).fill(Color.white.opacity(0.55)))
+                .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous).stroke(Color.black.opacity(0.08), lineWidth: 0.75))
+
+            Spacer(minLength: 4)
+
+            if layout.compact {
+                if !layout.isDefaultAnchor {
+                    Button {
+                        KeyHostingController<EmptyView>.endEditing()
+                        layout.resetAnchor()
+                    } label: {
+                        Label("复位", systemImage: "arrow.uturn.backward")
+                            .font(.caption.bold())
+                            .padding(.horizontal, 8).padding(.vertical, 4)
+                            .foregroundStyle(GameTheme.primary)
+                            .background(Capsule().fill(GameTheme.primary.opacity(0.14)))
+                    }.buttonStyle(.plain)
+                } else {
+                    Text("可拖动避让")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(GameTheme.muted)
+                }
+            }
+        }
+        .padding(.horizontal, 14).padding(.vertical, 8)
+        .background(Color.white.opacity(0.32))
+        .help("切换题卡显示：居中大卡 ↔ 边看图边看题（快捷键 Tab；紧凑模式可在预览画面直接拖动题卡，双击复位）")
+    }
+
+    private func modeChip(_ title: String, icon: String, active: Bool, action: @escaping () -> Void) -> some View {
+        Button {
+            KeyHostingController<EmptyView>.endEditing()
+            action()
+        } label: {
+            HStack(spacing: 4) {
+                Image(systemName: icon).font(.caption.bold())
+                Text(title).font(.caption.bold()).lineLimit(1)
+            }
+            .padding(.horizontal, 10).padding(.vertical, 5)
+            .foregroundStyle(active ? Color.white : GameTheme.ink)
+            .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(active ? GameTheme.primary : Color.clear))
+        }.buttonStyle(.plain)
+    }
+}
+
 /// Beside the teacher's preview (game or picture book tab): the panel of the question on screen. Only the tab in
 /// front shows it; each place builds its own controller from the same content (the models inside are shared).
 struct QuizDock: View {
@@ -114,10 +378,16 @@ struct QuizDock: View {
     var book: Bool
     var body: some View {
         if let content = game.dockContent, game.bookTabActive == book {
-            DockedPanel(content: content).frame(width: 480).layoutPriority(1)
-                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(.white.opacity(0.5), lineWidth: 1))
-                .transition(.move(edge: .trailing).combined(with: .opacity))
+            VStack(spacing: 0) {
+                QuizCardViewModeBar()
+                Divider().opacity(0.35)
+                DockedPanel(content: content)
+            }
+            .frame(width: 480).layoutPriority(1)
+            .background(GlassBackdrop())
+            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(.white.opacity(0.5), lineWidth: 1))
+            .transition(.move(edge: .trailing).combined(with: .opacity))
         }
     }
 }
@@ -533,7 +803,7 @@ struct ChallengePanel: View {
                     Text("答对 \(model.right)/\(model.answered) 题 · 获得 \(model.coins) 金币、\(model.score) 积分").font(.title3)
                 }
             }
-            Text("键盘：作答时 D 对 C 错（闪卡）或 A–H 选项、0 不会，选好即揭晓并发奖（填了“其他答案”时按回车）；空格换一题；等下一题时回车出题、1/2/3 按该难度出、R 全随机出；Esc 结束。时间到时正在答的这题不计。").font(.caption).foregroundStyle(GameTheme.muted)
+            Text("键盘：作答时 D 对 C 错（闪卡）或 A–H 选项、0 不会，选好即揭晓并发奖（填了“其他答案”时按回车）；Tab 切换边看图；空格换一题；等下一题时回车出题、1/2/3 按该难度出、R 全随机出；Esc 结束。时间到时正在答的这题不计。").font(.caption).foregroundStyle(GameTheme.muted)
         }
         .padding(22).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(GlassBackdrop())
         // Switching to 老师点选 while a question is up opens the list at once (not only on the next question).
@@ -925,10 +1195,10 @@ struct ClassQuizPanel: View {
                 }
             }
             Text(useChoiceGrid
-                 ? "键盘：1–7 选人（可多选）再按 A–H 记下他们的答案，0 不会，⌫ 清掉选中的人的答案；回车揭晓答案、按每人的答案发奖并记录；Esc 只揭晓不发奖。"
+                 ? "键盘：1–7 选人（可多选）再按 A–H 记下他们的答案，0 不会，⌫ 清掉选中的人的答案；Tab 切换边看图；回车揭晓答案、按每人的答案发奖并记录；Esc 只揭晓不发奖。"
                  : usePerStudent
-                 ? "键盘：直接点对/错，或按 1–7 选人再按 D（对）/ C（错），⌫ 清除；回车揭晓并发奖；Esc 只揭晓不发奖。"
-                 : "键盘：1–7 选人，A–H 选答案，0 不会，⌫ 撤回，回车揭晓答案、同时发奖并记录；Esc 只揭晓不发奖。").font(.caption).foregroundStyle(GameTheme.muted)
+                 ? "键盘：直接点对/错，或按 1–7 选人再按 D（对）/ C（错），⌫ 清除；Tab 切换边看图；回车揭晓并发奖；Esc 只揭晓不发奖。"
+                 : "键盘：1–7 选人，A–H 选答案，0 不会，⌫ 撤回；Tab 切换边看图；回车揭晓答案、同时发奖并记录；Esc 只揭晓不发奖。").font(.caption).foregroundStyle(GameTheme.muted)
         }.padding(22).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(GlassBackdrop())
     }
     private var marks: [String: String] {
@@ -1192,8 +1462,8 @@ struct PracticePanel: View {
                 Label(model.classwide ? "当前课程没有闪卡。" : "题库里没有这位同学能练的闪卡。", systemImage: "tray").foregroundStyle(GameTheme.muted)
             }
             Text(model.classwide
-                 ? "键盘：1–7 选回答的同学，D 对、C 错：记录、揭晓背面并自动下一张；空格跳过这张；←/→ 上一张/下一张，O 顺序/乱序，A 全选（再按取消），Esc 结束。答对按难度发奖（★ 10 金币 / ★★ 20 / ★★★ 30，+1 行动，+1/2/3 积分），错词进报告。"
-                 : "键盘：D 对、C 错，记录后自动下一张；←/→ 上一张/下一张，O 顺序/乱序；1–7 换人，A 切到全班并全选，Esc 结束。答对按难度发奖，错词进报告。").font(.caption).foregroundStyle(GameTheme.muted)
+                 ? "键盘：1–7 选回答的同学，D 对、C 错：记录、揭晓背面并自动下一张；Tab 切换边看图；空格跳过这张；←/→ 上一张/下一张，O 顺序/乱序，A 全选（再按取消），Esc 结束。答对按难度发奖（★ 10 金币 / ★★ 20 / ★★★ 30，+1 行动，+1/2/3 积分），错词进报告。"
+                 : "键盘：D 对、C 错，记录后自动下一张；Tab 切换边看图；←/→ 上一张/下一张，O 顺序/乱序；1–7 换人，A 切到全班并全选，Esc 结束。答对按难度发奖，错词进报告。").font(.caption).foregroundStyle(GameTheme.muted)
         }.padding(22).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(GlassBackdrop())
     }
 }

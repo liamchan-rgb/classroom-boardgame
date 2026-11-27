@@ -1,5 +1,8 @@
 import SwiftUI
 import UIKit
+#if targetEnvironment(macCatalyst)
+import ObjectiveC
+#endif
 import ClassroomProbeCore
 import MeadowWorldSupport
 
@@ -87,6 +90,46 @@ struct TeacherHost: UIViewControllerRepresentable {
     func updateUIViewController(_ controller: TeacherHostController, context: Context) {}
 }
 
+#if targetEnvironment(macCatalyst)
+/// Intercepts plain Tab at the AppKit keyDown layer before macOS focus navigation consumes it,
+/// so Tab reliably toggles the quiz card between centered and picture-friendly compact mode.
+@MainActor
+private final class QuizTabKeyMonitor {
+    static let shared = QuizTabKeyMonitor()
+    private var monitor: Any?
+
+    func installIfNeeded() {
+        guard monitor == nil, let nsEventCls = NSClassFromString("NSEvent") else { return }
+        let sel = NSSelectorFromString("addLocalMonitorForEventsMatchingMask:handler:")
+        let mask: UInt = 1 << 10 // NSEventMaskKeyDown
+        let block: @convention(block) (AnyObject) -> AnyObject? = { [weak self] event in
+            MainActor.assumeIsolated {
+                self?.handle(event) ?? event
+            }
+        }
+        typealias Fn = @convention(c) (AnyClass, Selector, UInt, AnyObject) -> Any?
+        if let imp = class_getMethodImplementation(object_getClass(nsEventCls), sel) {
+            let blockObj = unsafeBitCast(block, to: AnyObject.self)
+            monitor = unsafeBitCast(imp, to: Fn.self)(nsEventCls, sel, mask, blockObj)
+        }
+    }
+
+    private func handle(_ event: AnyObject) -> AnyObject? {
+        guard (event.value(forKey: "type") as? NSNumber)?.uintValue == 10 else { return event }
+        let isRepeat = (event.value(forKey: "isARepeat") as? NSNumber)?.boolValue ?? false
+        guard !isRepeat else { return event }
+        let keyCode = (event.value(forKey: "keyCode") as? NSNumber)?.uint16Value ?? 0
+        guard keyCode == 48 else { return event } // kVK_Tab
+        let flags = (event.value(forKey: "modifierFlags") as? NSNumber)?.uintValue ?? 0
+        let disallowed: UInt = (1 << 17) | (1 << 18) | (1 << 19) | (1 << 20) // Shift | Control | Option | Command
+        guard (flags & disallowed) == 0 else { return event }
+        guard TeacherSession.shared.game.canToggleQuizCardCompact else { return event }
+        TeacherSession.shared.game.toggleQuizCardCompact(fromKey: true)
+        return nil
+    }
+}
+#endif
+
 @MainActor
 final class TeacherHostController: UIViewController {
     #if !targetEnvironment(macCatalyst)
@@ -98,6 +141,19 @@ final class TeacherHostController: UIViewController {
     private static weak var primary: TeacherHostController?
     private var isPrimary: Bool { Self.primary === self }
     override var canBecomeFirstResponder: Bool { true }
+    override var keyCommands: [UIKeyCommand]? {
+        var cmds = super.keyCommands ?? []
+        if TeacherSession.shared.game.canToggleQuizCardCompact {
+            let tab = UIKeyCommand(input: "\t", modifierFlags: [], action: #selector(handleQuizTabToggle))
+            tab.wantsPriorityOverSystemBehavior = true
+            cmds.append(tab)
+        }
+        return cmds
+    }
+    @objc private func handleQuizTabToggle() {
+        guard TeacherSession.shared.game.canToggleQuizCardCompact else { return }
+        TeacherSession.shared.game.toggleQuizCardCompact(fromKey: true)
+    }
     override func viewDidLoad() {
         super.viewDidLoad()
         if Self.primary?.view.window == nil { Self.primary = self }
@@ -138,6 +194,7 @@ final class TeacherHostController: UIViewController {
             UIApplication.shared.requestSceneSessionDestruction(scene.session, options: nil)
             return
         }
+        if isPrimary { QuizTabKeyMonitor.shared.installIfNeeded() }
         #endif
         becomeFirstResponder()
         // A tap anywhere outside a text field ends typing (the shortcut keys work again right away).
@@ -165,6 +222,12 @@ final class TeacherHostController: UIViewController {
                 if let t=ClassroomShortcuts.token(key),let a=ClassroomShortcuts.action(for:t),a == .award || a == .grantMovement {break}
                 session.game.grantCaptureCancel()
             }
+        }
+        // Tab toggles the quiz card between centered and picture-friendly compact mode.
+        if presses.contains(where:{$0.key?.keyCode == .keyboardTab && ($0.key?.modifierFlags.intersection([.shift,.command,.control,.alternate]).isEmpty ?? false)}),
+           session.game.canToggleQuizCardCompact {
+            session.game.toggleQuizCardCompact(fromKey:true)
+            return
         }
         // An answer is showing: Esc or Space ends the reveal right away (advancing any waiting mini-game).
         if presses.contains(where:{$0.key?.keyCode == .keyboardEscape || $0.key?.keyCode == .keyboardSpacebar}),!UIResponder.classroomTyping,session.game.skipQuizReveal() {return}

@@ -69,4 +69,49 @@ final class ClassroomCanvasTests:XCTestCase {
         }
         XCTAssertEqual(c.snapshot,before)
     }
+
+    func testCompactQuizCardStaysInsideAllAspectRatiosAndMapsEdgesConsistently(){
+        let canvases=[CGSize(width:840,height:720),CGSize(width:960,height:720),CGSize(width:1280,height:720),CGSize(width:1800,height:720)]
+        let cards=[CGSize(width:380,height:144),CGSize(width:720,height:185),CGSize(width:920,height:240)]
+        let anchors=[ClassroomQuizCardLayout.defaultAnchor,CGPoint(x:0,y:0),CGPoint(x:1,y:0),CGPoint(x:0,y:1),CGPoint(x:1,y:1),CGPoint(x:0.25,y:0.75)]
+        for canvas in canvases {
+            for card in cards {
+                let effectiveCard=CGSize(width:min(card.width,canvas.width-36),height:card.height)
+                for anchor in anchors {
+                    let frame=ClassroomQuizCardLayout.compactFrame(cardSize:effectiveCard,in:canvas,anchor:anchor)
+                    XCTAssertGreaterThanOrEqual(frame.minX,0)
+                    XCTAssertGreaterThanOrEqual(frame.minY,0)
+                    XCTAssertLessThanOrEqual(frame.maxX,canvas.width+0.001)
+                    XCTAssertLessThanOrEqual(frame.maxY,canvas.height+0.001)
+                    XCTAssertEqual(frame.size,effectiveCard)
+                }
+                let defaultFrame=ClassroomQuizCardLayout.compactFrame(cardSize:effectiveCard,in:canvas,anchor:ClassroomQuizCardLayout.defaultAnchor)
+                XCTAssertEqual(defaultFrame.midX,canvas.width/2,accuracy:0.5)
+                XCTAssertEqual(defaultFrame.minY,ClassroomQuizCardLayout.edgeMargin,accuracy:0.5)
+            }
+        }
+    }
+
+    func testCompactQuizCardDragClampsAndPreservesHorizontalAnchorWhenFullWidth(){
+        let canvas=CGSize(width:1280,height:720),card=CGSize(width:420,height:150)
+        let moved=ClassroomQuizCardLayout.draggedAnchor(from:ClassroomQuizCardLayout.defaultAnchor,delta:CGPoint(x:9999,y:9999),cardSize:card,in:canvas)
+        XCTAssertEqual(moved,CGPoint(x:1,y:1))
+        let backTopLeft=ClassroomQuizCardLayout.draggedAnchor(from:moved,delta:CGPoint(x:-9999,y:-9999),cardSize:card,in:canvas)
+        XCTAssertEqual(backTopLeft,CGPoint(x:0,y:0))
+        let invalid=ClassroomQuizCardLayout.draggedAnchor(from:CGPoint(x:0.4,y:0.6),delta:CGPoint(x:Double.nan,y:20),cardSize:card,in:canvas)
+        XCTAssertEqual(invalid,CGPoint(x:0.4,y:0.6))
+
+        // Narrow preview where card fills full width (travel.width == 0): vertical drag keeps horizontal anchor intact.
+        let narrowCanvas=CGSize(width:900,height:720),wideCard=CGSize(width:864,height:180)
+        let verticalOnly=ClassroomQuizCardLayout.draggedAnchor(from:CGPoint(x:0.25,y:0.0),delta:CGPoint(x:120,y:252),cardSize:wideCard,in:narrowCanvas)
+        XCTAssertEqual(verticalOnly.x,0.25,accuracy:0.0001)
+        XCTAssertGreaterThan(verticalOnly.y,0.45)
+
+        // Challenge & top-center timer clear their respective top banners.
+        XCTAssertEqual(ClassroomQuizCardLayout.topInset(challengeActive:false,timerTopCenter:false),ClassroomQuizCardLayout.edgeMargin)
+        XCTAssertEqual(ClassroomQuizCardLayout.topInset(challengeActive:true,timerTopCenter:false),ClassroomQuizCardLayout.challengeTopInset)
+        XCTAssertEqual(ClassroomQuizCardLayout.topInset(challengeActive:false,timerTopCenter:true),ClassroomQuizCardLayout.timerTopInset)
+        let challengeFrame=ClassroomQuizCardLayout.compactFrame(cardSize:card,in:canvas,anchor:ClassroomQuizCardLayout.defaultAnchor,topInset:ClassroomQuizCardLayout.topInset(challengeActive:true,timerTopCenter:false))
+        XCTAssertEqual(challengeFrame.minY,ClassroomQuizCardLayout.challengeTopInset,accuracy:0.5)
+    }
 }

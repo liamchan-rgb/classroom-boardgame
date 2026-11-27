@@ -96,8 +96,9 @@ private struct TeacherBookConsole:View {
                 VStack(spacing:8){
                     PublicBookPage(model:session.display,players:game.backend.bookPlayers,draggable:true).frame(minWidth:0,maxWidth:.infinity,maxHeight:.infinity)
                         // The teacher's preview shows the same countdown / scoreboard as the TV.
-                        .overlay{ClassroomTVOverlays(timer:game.classTimer,overlays:game.overlays,game:game)}
+                        .overlay{ClassroomTVOverlays(timer:game.classTimer,overlays:game.overlays,game:game,teacherPreview:true)}
                         .overlay{MiniGameTapLayer(game:game)}
+                        .overlay{QuizCardDragLayer(game:game)}
                         .overlay{QuizRevealTapCatcher(game:game)}
                         .overlay{LaserCapture(laser:game.laser)}
                         .clipShape(RoundedRectangle(cornerRadius:18,style:.continuous)).overlay(RoundedRectangle(cornerRadius:18,style:.continuous).stroke(.white.opacity(0.5),lineWidth:1))

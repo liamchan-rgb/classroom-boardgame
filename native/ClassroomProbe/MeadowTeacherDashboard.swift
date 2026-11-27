@@ -216,6 +216,7 @@ private struct TeacherGamePreview:View {
             }
             .overlay{if dropTargets.isDragging,game.surface != .book,game.miniGame == nil,game.campaign?.engine.state.battle != nil {GameDropTargetOverlay(game:game)}}
             .overlay{MiniGameTapLayer(game:game)}
+            .overlay{QuizCardDragLayer(game:game)}
             .overlay{QuizRevealTapCatcher(game:game)}
             .overlay{LaserCapture(laser:game.laser)}
             .onAppear{game.previewVisibility(previewID,visible:true)}

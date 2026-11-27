@@ -10,6 +10,19 @@ final class KeyHostingController<Content: View>: UIHostingController<Content> {
     var onKey: ((String) -> Bool)?
     private var editingEnded: NSObjectProtocol?
     override var canBecomeFirstResponder: Bool { true }
+    override var keyCommands: [UIKeyCommand]? {
+        var cmds = super.keyCommands ?? []
+        if TeacherSession.shared.game.canToggleQuizCardCompact {
+            let tab = UIKeyCommand(input: "\t", modifierFlags: [], action: #selector(handleQuizTabToggle))
+            tab.wantsPriorityOverSystemBehavior = true
+            cmds.append(tab)
+        }
+        return cmds
+    }
+    @objc private func handleQuizTabToggle() {
+        guard TeacherSession.shared.game.canToggleQuizCardCompact else { return }
+        TeacherSession.shared.game.toggleQuizCardCompact(fromKey: true)
+    }
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated); becomeFirstResponder()
         // After a coin / other-answer field is done, the keys come back to the panel.
@@ -21,6 +34,12 @@ final class KeyHostingController<Content: View>: UIHostingController<Content> {
     /// Ends typing in any field (taps on option buttons do this, so letter keys pick again).
     static func endEditing() { UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil) }
     override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
+        // Tab toggles centered ↔ picture-friendly compact quiz card while answering.
+        if presses.contains(where: { $0.key?.keyCode == .keyboardTab && ($0.key?.modifierFlags.intersection([.shift, .command, .control, .alternate]).isEmpty ?? false) }),
+           TeacherSession.shared.game.canToggleQuizCardCompact {
+            TeacherSession.shared.game.toggleQuizCardCompact(fromKey: true)
+            return
+        }
         // An answer is showing: Esc or Space ends the reveal first (advancing any waiting mini-game).
         if presses.contains(where: { $0.key?.keyCode == .keyboardEscape || $0.key?.keyCode == .keyboardSpacebar }), !UIResponder.classroomTyping, TeacherSession.shared.game.skipQuizReveal() { return }
         var handled = false
@@ -250,7 +269,7 @@ struct MeadowQuizAnswerPanel: View {
                 Text("已录 \(draft.answered)/\(question.parts.count)").font(.callout.bold()).foregroundStyle(GameTheme.muted)
                 Button { onSubmit() } label: { Label("提交并揭晓 (⏎)", systemImage: "checkmark.seal.fill") }.buttonStyle(GlassIconButtonStyle(prominent: true))
             }
-            Text(question.type == .flashcard ? "键盘：D 对，C 错，⌫ 撤回，回车提交。" : "键盘：A–H 选学生说的答案，0 不会，⌫ 撤回，回车提交。未录入的按答错记。").font(.caption).foregroundStyle(GameTheme.muted)
+            Text(question.type == .flashcard ? "键盘：D 对，C 错，⌫ 撤回，Tab 切换边看图，回车提交。" : "键盘：A–H 选学生说的答案，0 不会，⌫ 撤回，Tab 切换边看图，回车提交。未录入的按答错记。").font(.caption).foregroundStyle(GameTheme.muted)
         }.padding(22).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(GlassBackdrop())
     }
 }

@@ -81,6 +81,7 @@ struct ClassroomTVOverlays:View {
     @ObservedObject var overlays:ClassOverlayModel
     @ObservedObject var game:MeadowTeacherCoordinator
     var showMiniGame = true
+    var teacherPreview = false
     var body:some View {
         GeometryReader{g in
             let unit=g.size.height/720
@@ -92,7 +93,7 @@ struct ClassroomTVOverlays:View {
                         else {ClassroomScoreboard(players:game.campaign?.engine.state.players ?? [],state:game.campaign?.engine.state,unit:unit)}
                     }.frame(maxWidth:.infinity,maxHeight:.infinity)
                 }
-                if game.quiz != nil {QuizOverlayHost(game:game)}
+                if game.quiz != nil {QuizOverlayHost(game:game,teacherPreview:teacherPreview,timerTopCenter:timer.visible && game.miniGame == nil)}
                 if let challenge=game.challenge {ChallengeOverlay(model:challenge,unit:unit)}
                 if timer.visible {
                     if let mini = game.miniGame {
@@ -397,12 +398,13 @@ enum ClassroomShortcuts {
         }
     }
     static func label(_ key:String)->String {key.isEmpty ? "未设置":key==" " ? "空格":key.hasPrefix("⇧") ? "⇧"+key.dropFirst().uppercased():key.uppercased()}
-    /// Keys inside quiz panels: the shortcut token, plus ⏎ ⎋ ⌫ (which shortcuts leave alone).
+    /// Keys inside quiz panels: the shortcut token, plus ⏎ ⎋ ⌫ ⇥ (which shortcuts leave alone).
     static func panelToken(_ key:UIKey)->String? {
         switch key.keyCode {
         case .keyboardReturnOrEnter,.keypadEnter:return "⏎"
         case .keyboardEscape:return "⎋"
         case .keyboardDeleteOrBackspace:return "⌫"
+        case .keyboardTab:return "⇥"
         default:return token(key)
         }
     }
