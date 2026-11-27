@@ -1325,15 +1325,20 @@ final class MeadowRendererContainer:UIViewController {
         controller.view.bounds=CGRect(origin:.zero,size:ClassroomCanvas.size)
         controller.view.autoresizingMask=[]
         controller.view.setNeedsLayout();controller.view.layoutIfNeeded()
-        addChild(controller);view.addSubview(controller.view);layoutCanvas(controller);controller.didMove(toParent:self)
+        // install() runs inside SwiftUI's update of the host: only place the canvas here and let UIKit lay it out in
+        // its own pass. layoutIfNeeded() on a view that is already in the window also lays out its ancestors, i.e.
+        // SwiftUI's hosting view, re-entrantly mid-update (memory corruption → later crashes when the public window
+        // opens or closes and the game view moves between screens).
+        addChild(controller);view.addSubview(controller.view);layoutCanvas(controller,now:false);controller.didMove(toParent:self)
+        view.setNeedsLayout()
     }
-    private func layoutCanvas(_ child:UIViewController){
+    private func layoutCanvas(_ child:UIViewController,now:Bool=true){
         let rect=ClassroomCanvas.fitted(in:view.bounds.size)
         guard rect.width>0 else{return}
         child.view.transform = .identity
         child.view.bounds=CGRect(origin:.zero,size:ClassroomCanvas.size)
         child.view.center=CGPoint(x:rect.midX,y:rect.midY)
-        child.view.setNeedsLayout();child.view.layoutIfNeeded()
+        child.view.setNeedsLayout();if now {child.view.layoutIfNeeded()}
         let scale=rect.width/ClassroomCanvas.size.width
         child.view.transform=CGAffineTransform(scaleX:scale,y:scale)
     }

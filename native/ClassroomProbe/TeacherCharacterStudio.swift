@@ -130,7 +130,7 @@ struct TeacherCharacterStudio: View {
 
     private var preview: some View {
         VStack(spacing: 10) {
-            TimelineView(.periodic(from: .now, by: 0.11)) { context in
+            TimelineView(.periodic(from: .timelineAnchor, by: 0.11)) { context in
                 let tick = Int(context.date.timeIntervalSinceReferenceDate / 0.11)
                 let facing = Self.turn[turning ? (tick / 16) % 8 : facingIndex]
                 let column = 1 + tick % 8

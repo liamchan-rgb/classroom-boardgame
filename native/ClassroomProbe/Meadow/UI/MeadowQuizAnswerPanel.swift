@@ -255,7 +255,7 @@ struct MeadowQuizAnswerPanel: View {
                         .font(.caption).foregroundStyle(GameTheme.muted)
                 }
                 Spacer()
-                TimelineView(.periodic(from: .now, by: 0.5)) { context in
+                TimelineView(.periodic(from: .timelineAnchor, by: 0.5)) { context in
                     let left = Double(question.timeLimit) - context.date.timeIntervalSince(start)
                     Text(left <= 0 ? "超时 \(Int(-left))s" : String(format: "%d:%02d", Int(ceil(left)) / 60, Int(ceil(left)) % 60))
                         .font(.system(size: 22, weight: .heavy, design: .rounded)).monospacedDigit()

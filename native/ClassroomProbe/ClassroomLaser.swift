@@ -158,6 +158,7 @@ extension LaserPointer {
 final class LaserPanelCatcher: UIView {
     weak var laser: LaserPointer?
     private var start: CGPoint?
+    private var dotHost: UIHostingController<LaserLayer>?
     init(laser: LaserPointer) {
         self.laser = laser
         super.init(frame: .zero)
@@ -168,7 +169,10 @@ final class LaserPanelCatcher: UIView {
         addGestureRecognizer(pan)
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tap(_:))))
         // The same dot on the teacher's panel (the public screen draws it over its copy of the panel).
-        let dot = UIHostingController(rootView: LaserLayer(laser: laser, onPanel: true)).view!
+        // Keep the hosting controller alive as long as its view is shown: a hosting view whose controller has
+        // already been freed is not supported by SwiftUI.
+        let host = UIHostingController(rootView: LaserLayer(laser: laser, onPanel: true)); dotHost = host
+        let dot = host.view!
         dot.backgroundColor = .clear; dot.isUserInteractionEnabled = false
         dot.frame = bounds; dot.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         addSubview(dot)

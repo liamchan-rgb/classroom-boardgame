@@ -3,6 +3,13 @@ import UIKit
 import ClassroomGameCore
 import MeadowWorldSupport
 
+extension Date {
+    /// A fixed start for `TimelineView(.periodic(from:by:))`. `from: .now` made a new schedule on every update of
+    /// the view around it (several times a second while a mini-game or quiz runs), so SwiftUI rebuilt the timeline's
+    /// content each time — part of the SwiftUI layout crashes while answering / with the public window open.
+    static let timelineAnchor = Date(timeIntervalSinceReferenceDate: 0)
+}
+
 // MARK: - Class timer
 
 /// The classroom countdown shown on the TV over everything (game and picture book). Only state changes are
@@ -119,7 +126,7 @@ private struct ClassTimerBadge:View {
     @ObservedObject var timer:ClassTimerModel
     let unit:CGFloat
     var body:some View {
-        TimelineView(.periodic(from:.now,by:0.1)){context in
+        TimelineView(.periodic(from: .timelineAnchor, by: 0.1)){context in
             let left=timer.remaining(at:context.date),done=left<=0.05
             let urgent = !done && left<=3.05
             let pulse=done ? (Int(context.date.timeIntervalSinceReferenceDate*2)%2==0 ? 1.0:0.55):1.0
@@ -292,7 +299,7 @@ struct ClassTimerPanel:View {
                 Toggle(isOn:$timer.visible){Label("投屏显示",systemImage:"tv")}.fixedSize()
                 Button{onClose()}label:{Image(systemName:"xmark.circle.fill").font(.title2)}.buttonStyle(.plain).foregroundStyle(GameTheme.muted)
             }
-            TimelineView(.periodic(from:.now,by:0.1)){context in
+            TimelineView(.periodic(from: .timelineAnchor, by: 0.1)){context in
                 let left=timer.remaining(at:context.date)
                 Text(left<=0.05 && timer.running ? "时间到":ClassTimerModel.label(left))
                     .font(.system(size:84,weight:.heavy,design:.rounded)).monospacedDigit()

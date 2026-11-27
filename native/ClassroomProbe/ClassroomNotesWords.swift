@@ -474,7 +474,12 @@ struct NotesWordText: UIViewRepresentable {
         return v
     }
     func updateUIView(_ v: NotesTextView, context: Context) {
-        if v.isEditable != editable { v.isEditable = editable }
+        if v.isEditable != editable {
+            // Turning editing off ends editing at once (focus callbacks), inside this update.
+            context.coordinator.applyingUpdate = true
+            v.isEditable = editable
+            context.coordinator.applyingUpdate = false
+        }
         context.coordinator.onEdit = onEdit
         context.coordinator.onFocus = onFocus
         context.coordinator.onPick = onPick
@@ -483,13 +488,18 @@ struct NotesWordText: UIViewRepresentable {
         v.onSelectionChange = onSelectionChange
         if context.coordinator.raw != raw {
             context.coordinator.raw = raw
+            // Setting the text fires the selection delegate right away, i.e. inside this SwiftUI update; publishing
+            // the selection then would change SwiftUI state mid-update. The selection is cleared on the next turn.
+            context.coordinator.applyingUpdate = true
             v.attributedText = NotesMarkup.uiText(raw)
             v.typingAttributes = [.font: UIFont.systemFont(ofSize: NotesMarkup.fontSize), .foregroundColor: UIColor.label]
+            context.coordinator.applyingUpdate = false
             DispatchQueue.main.async { onSelectionChange(nil) }
         }
     }
     final class Coordinator: NSObject, UITextViewDelegate, UIGestureRecognizerDelegate {
         var raw = ""
+        var applyingUpdate = false
         var onEdit: ((String) -> Void)?
         var onFocus: ((Bool) -> Void)?
         var onPick: ((NotesWordPick, CGRect, UIView) -> Void)?
@@ -502,11 +512,15 @@ struct NotesWordText: UIViewRepresentable {
                 NotesKeyDownMonitor.shared.activeTextView = notesView
             }
             #endif
-            onFocus?(true)
+            focus(true)
             publishSelection(textView)
         }
+        /// Focus changes reach SwiftUI state; when they happen inside a SwiftUI update, report them on the next turn.
+        private func focus(_ on: Bool) {
+            if applyingUpdate { DispatchQueue.main.async { [weak self] in self?.onFocus?(on) } } else { onFocus?(on) }
+        }
         func textViewDidEndEditing(_ textView: UITextView) {
-            onFocus?(false)
+            focus(false)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) { [weak self, weak textView] in
                 guard let self, let tv = textView as? NotesTextView else { return }
                 if !tv.isFirstResponder || tv.selectedRange.length == 0 { self.onSelectionChange?(nil) }
@@ -531,7 +545,7 @@ struct NotesWordText: UIViewRepresentable {
         }
 
         private func publishSelection(_ textView: UITextView) {
-            guard let notesView = textView as? NotesTextView else { return }
+            guard !applyingUpdate, let notesView = textView as? NotesTextView else { return }
             #if targetEnvironment(macCatalyst)
             if notesView.isFirstResponder {
                 NotesKeyDownMonitor.shared.installIfNeeded()

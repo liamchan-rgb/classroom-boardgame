@@ -1,3 +1,16 @@
+## 答题与投屏小游戏闪退排查与修复（2026-11-27，基于v0.32.4/build48，未改版本号、未存档）
+
+用户反馈答题功能很容易闪退，开公开窗口（投屏）后的小游戏更严重。本机 11-27 共 5 份 `ClassroomProbe` 崩溃报告（19:10–22:21，均为 Release）全部是主线程 SwiftUI 布局内存损坏（`EXC_BAD_ACCESS`，`swift_release` 释放野指针：`StackLayout.makeChildren`、`GeometryReader→ZStack→Padding→HStack`、渲染时 `invalidate_subgraphs` 销毁 `ViewLayoutEngine`），没有后台线程同时活动，调用栈里没有本 App 代码。
+- **排查结论**（ASan Debug 构建、lldb 断点探针与 Release 实机压测）：ASan 抓不到这类问题（SwiftUI 未插桩，隔离区反而掩盖），手动在 Release 下压测（小游戏 + 公开窗口 + 计时 + 挑战 + Tab 切换 + 持续无障碍遍历）没有复现崩溃。lldb 探针确认 Mac Catalyst 上无障碍查询（电脑控制、输入法等辅助工具都会触发）会经 SwiftUI 自带的 `ViewBasedUIButton`（自定义 ButtonStyle 的按钮）在图更新中途嵌套触发 `_UIHostingView.layoutSubviews`，属于系统内部，App 无法直接改。代码审查找出多处会在 SwiftUI 更新中途重入布局或改状态的写法，正是这类内存损坏的成因，全部修掉：
+  - 题卡（`ClassroomQuiz.swift`、`MeadowQuizCard.swift`）：出题/切换/揭晓/切换紧凑态时在 `updateUIView` 里调用 `layoutIfNeeded()`（UIKit 会连带布局上层的 SwiftUI 宿主视图），改为只排题卡自己的 `layoutNow()`；公开窗口开着时教师预览和公开屏各一张题卡，原来风险翻倍。
+  - 右侧答题停靠栏 `DockedPanel`：在父视图更新中途替换 `rootView` 并 `becomeFirstResponder()`（旧面板视图图在更新中被拆、备注框被迫交出焦点并回写状态），改为下一轮主循环再换（只应用最新的一块面板）。
+  - 游戏画面在教师预览与公开窗口之间搬家（`MeadowRendererContainer.install`）时不再在更新中 `layoutIfNeeded`；拖放发奖查询玩家框位置（`classroomPlayerDropFrames`，在 SwiftUI `onChange` 里调用）去掉强制布局。
+  - 计时徽标、挑战倒计时、答题面板计时等 7 处 `TimelineView(.periodic(from: .now, …))` 改为固定起点 `Date.timelineAnchor`（原来父视图每次更新都换一个新时间表，小游戏/答题时每秒多次重建子图）。
+  - 备注框 `NotesWordText` 在 `updateUIView` 设文本/切可编辑时会同步触发选区与焦点回调改 SwiftUI 状态，改为更新期间不发布、焦点回调延到下一轮。
+  - 激光笔面板红点 `LaserPanelCatcher` 只留了宿主视图、把 `UIHostingController` 扔掉，改为持有控制器。
+  - 头像/全身像烘焙中同一外观第二个请求的回调被丢弃（公开屏与教师预览同时要同一个人时其中一处一直显示首字母），改为排队全部回调。
+- **实测与未实测边界**：`scripts/local-build.sh test` 全通过（`ProbeCore` 9/9、`MeadowWorldSupportTests` 266/266、`MeadowClassroomSupportTests` 60/60、`MeadowBattleSupportTests` 109/109、`ClassroomGameCoreTests` 73/73，合计 517/517），Mac Catalyst Release arm64 编译通过。用 computer use 在修复后 Release 版（MallocScribble + 每 0.3 秒无障碍遍历）实测：继续行程、开关公开窗口、打 Boss 出全班阅读/选择题与揭晓、Tab 切紧凑、个人挑战 + 计时器、结束答题、绘本页双击备注出闪卡与原位换卡，全程无崩溃、无新崩溃报告，画面与面板切换正常。测前备份 `ClassroomMeadow`、`ClassroomStage0` 与偏好设置，测后按 `diff -rq` 与偏好 XML 比对完全还原。修复前版本同样没能在本机复现崩溃，所以无法 100% 证明根因已全部消除，需要用户上课实际使用确认；未在 iPad 真机与外接 TV 上验证。
+
 ## 出题题卡「边看图边看题」紧凑可拖动模式与 Tab 一键切换（2026-11-27，基于v0.32.4/build48，未改版本号、未存档）
 
 针对「出题时居中大题卡完全遮挡绘本/游戏画面、无法边看画面辅助教学」的问题，新增「居中大卡 ↔ 边看图边看题」双态平滑切换与自由拖动避让：

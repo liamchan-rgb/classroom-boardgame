@@ -115,7 +115,8 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     }
     func classroomPlayerDropFrames(role:ClassroomRole)->[String:CGRect] {
         guard (try? ClassroomGameBackend.requireTeacher(role)) != nil,classroomMode,ready,let campaign,let rootView=view else{return [:]}
-        rootView.layoutIfNeeded()
+        // Read the frames as last laid out: this is asked from SwiftUI onAppear / onChange, where layoutIfNeeded()
+        // would lay out SwiftUI's own hosting view re-entrantly.
         let players=campaign.engine.state.players
         if battlePreviewActive {
             let frames=battlePreviewView?.classroomPlayerDropFrames(in:rootView) ?? [:]

@@ -755,20 +755,22 @@ extension PixelHeroAtlas {
     private static var portraitStore: [String: UIImage] = [:]
     private static var portraitOrder: [String] = []
     private static var portraitFailed = Set<String>()
-    private static var portraitPending = Set<String>()
+    /// 正在做的头像，以及做好后要回调的所有调用方（同一外观可能同时出现在教师预览和公开屏两处）
+    private static var portraitPending: [String: [() -> Void]] = [:]
     /// 已经做好的头像；没有就排队去做（主线程调用），做好后 `ready` 在主线程回调。
     static func portrait(_ look: PixelHeroLook, ready: @escaping () -> Void = {}) -> UIImage? {
         if let hit = portraitStore[look.key] { return hit }
-        guard !portraitPending.contains(look.key), !portraitFailed.contains(look.key) else { return nil }
-        portraitPending.insert(look.key)
+        guard !portraitFailed.contains(look.key) else { return nil }
+        if portraitPending[look.key] != nil { portraitPending[look.key]?.append(ready); return nil }
+        portraitPending[look.key] = [ready]
         workQueue.async {
             let face = cell(look: look, facing: 0, column: 0).flatMap(headCrop)
             DispatchQueue.main.async {
-                portraitPending.remove(look.key)
+                let callbacks = portraitPending.removeValue(forKey: look.key) ?? []
                 guard let face else { portraitFailed.insert(look.key); return }
                 portraitStore[look.key] = face; portraitOrder.append(look.key)
                 if portraitOrder.count > 64 { portraitStore[portraitOrder.removeFirst()] = nil }
-                ready()
+                callbacks.forEach { $0() }
             }
         }
         return nil
@@ -805,19 +807,19 @@ extension PixelHeroAtlas {
     /// pressure, and a caller that refreshes when the image is ready would then bake again and again.
     private static var fullBodyCache: [String: UIImage] = [:]
     private static var fullBodyOrder: [String] = []
-    private static var fullBodyPending = Set<String>()
+    private static var fullBodyPending: [String: [() -> Void]] = [:]
     static func fullBody(_ look: PixelHeroLook, ready: @escaping () -> Void = {}) -> UIImage? {
         if let hit = fullBodyCache[look.key] { return hit }
-        guard !fullBodyPending.contains(look.key) else { return nil }
-        fullBodyPending.insert(look.key)
+        if fullBodyPending[look.key] != nil { fullBodyPending[look.key]?.append(ready); return nil }
+        fullBodyPending[look.key] = [ready]
         workQueue.async {
             let body = cell(look: look, facing: 0, column: 0).flatMap(opaqueCrop)
             DispatchQueue.main.async {
-                fullBodyPending.remove(look.key)
+                let callbacks = fullBodyPending.removeValue(forKey: look.key) ?? []
                 if let body {
                     fullBodyCache[look.key] = body; fullBodyOrder.removeAll { $0 == look.key }; fullBodyOrder.append(look.key)
                     while fullBodyOrder.count > 32 { fullBodyCache[fullBodyOrder.removeFirst()] = nil }
-                    ready()
+                    callbacks.forEach { $0() }
                 }
             }
         }

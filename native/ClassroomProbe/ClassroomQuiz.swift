@@ -261,7 +261,8 @@ private struct QuizCardRepresentable: UIViewRepresentable {
         } : nil
         if box.token != quiz.token {
             box.card?.removeFromSuperview()
-            box.layoutIfNeeded()
+            // No box.layoutIfNeeded() here: this runs inside a SwiftUI update, and laying out the box would lay out
+            // the hosting view around it re-entrantly. The new card sizes itself from the box now or on its next layout.
             let who = quiz.mode == .classwide ? "全班" : quiz.playerName
             let card = MeadowQuizCard.present(
                 in: box,
@@ -404,9 +405,18 @@ private struct DockedPanel: UIViewControllerRepresentable {
     func updateUIViewController(_ c: KeyHostingController<AnyView>, context: Context) {
         c.onKey = content.onKey
         guard context.coordinator.contentID != content.id else { return }
-        context.coordinator.contentID = content.id
-        c.rootView = AnyView(content.view.id(content.id))
-        if c.view.window != nil && c.presentedViewController == nil { c.becomeFirstResponder() }
+        let id = content.id, view = content.view
+        context.coordinator.contentID = id
+        // Swap the panel on the next turn, outside this SwiftUI update: replacing the hosted root view here tore the
+        // old panel's view graph down in the middle of the parent's update (SwiftUI memory corruption, crashes while
+        // answering). Only the newest panel is applied when several arrive at once. Taking the keys here would also
+        // make the old first responder (e.g. the notes text view) publish its edits mid-update.
+        let coordinator = context.coordinator
+        DispatchQueue.main.async { [weak c] in
+            guard let c, coordinator.contentID == id else { return }
+            c.rootView = AnyView(view.id(id))
+            if c.view.window != nil && c.presentedViewController == nil { c.becomeFirstResponder() }
+        }
     }
     final class Coordinator { var contentID: UUID? }
 }
@@ -763,7 +773,7 @@ struct ChallengePanel: View {
                     Text("答对 \(model.right)/\(model.answered) · +\(model.coins) 金币 · +\(model.score) 积分").font(.caption).foregroundStyle(GameTheme.muted)
                 }
                 Spacer()
-                TimelineView(.periodic(from: .now, by: 0.25)) { _ in
+                TimelineView(.periodic(from: .timelineAnchor, by: 0.25)) { _ in
                     let left = model.remaining
                     HStack(spacing: 4) {
                         if model.phase != .finished && !model.running { Image(systemName: "pause.circle.fill").font(.title3).foregroundStyle(GameTheme.muted) }
@@ -817,7 +827,7 @@ struct ChallengeOverlay: View {
     let unit: CGFloat
     var body: some View {
         VStack(spacing: 18 * unit) {
-            TimelineView(.periodic(from: .now, by: 0.25)) { _ in
+            TimelineView(.periodic(from: .timelineAnchor, by: 0.25)) { _ in
                 let left = model.remaining
                 HStack(spacing: 14 * unit) {
                     Image(systemName: "timer").font(.system(size: 26 * unit, weight: .bold))
@@ -1149,7 +1159,7 @@ struct ClassQuizPanel: View {
                 }
                 Spacer()
                 if model.sent.isEmpty { Button { onOther() } label: { Label(QuizDrawSettings.shared.mode == .manual ? "重新选题 (空格)" : "换一题 (空格)", systemImage: "arrow.triangle.2.circlepath") }.buttonStyle(GlassIconButtonStyle()) }
-                TimelineView(.periodic(from: .now, by: 1)) { context in
+                TimelineView(.periodic(from: .timelineAnchor, by: 1)) { context in
                     Text("\(Int(context.date.timeIntervalSince(start)))s").font(.system(size: 18, weight: .heavy, design: .rounded)).monospacedDigit().foregroundStyle(GameTheme.muted)
                 }
             }

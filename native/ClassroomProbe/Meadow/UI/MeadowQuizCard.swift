@@ -42,7 +42,7 @@ final class MeadowQuizCard: UIView {
         view.compact = compact; view.anchor = ClassroomQuizCardLayout.clampedAnchor(anchor); view.topInset = topInset
         view.onLayoutReport = onLayoutReport
         view.build(); host.addSubview(view)
-        view.layoutIfNeeded()
+        view.layoutNow()
         if animated {
             view.alpha = 0; view.card.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
             UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: 0.75, initialSpringVelocity: 0.6) { view.alpha = 1; view.card.transform = .identity }
@@ -73,11 +73,11 @@ final class MeadowQuizCard: UIView {
         if animated {
             UIView.animate(withDuration: 0.28, delay: 0, usingSpringWithDamping: 0.85, initialSpringVelocity: 0.35, options: [.beginFromCurrentState, .allowUserInteraction]) {
                 self.applyVisualChrome()
-                self.layoutIfNeeded()
+                self.layoutNow()
             }
         } else {
             applyVisualChrome()
-            layoutIfNeeded()
+            layoutNow()
         }
     }
 
@@ -382,7 +382,7 @@ final class MeadowQuizCard: UIView {
         setNeedsLayout()
         UIView.animate(withDuration: 0.28) {
             self.result.alpha = 1
-            if self.compact { self.layoutIfNeeded() }
+            if self.compact { self.layoutNow() }
         }
         let hold: Double = customHold ?? (mode == .classwide || q.type == .reading || q.type == .fill ? 5 : (q.explanation == nil ? 3 : 4.5))
         DispatchQueue.main.asyncAfter(deadline: .now() + hold) { [weak self] in
@@ -409,6 +409,15 @@ final class MeadowQuizCard: UIView {
             }
         }
         return min(2, count)
+    }
+
+    /// Places this card's subviews right away. Not `layoutIfNeeded()`: UIKit then also lays out every ancestor that
+    /// needs it, and this card is created / switched / revealed from inside SwiftUI view updates (it lives in a
+    /// UIViewRepresentable), so that re-entered SwiftUI's layout of its hosting view mid-update — memory corruption
+    /// that crashed the app a little later in SwiftUI layout (worst with the public window open: two cards).
+    func layoutNow() {
+        guard bounds.width > 0, bounds.height > 0 else { setNeedsLayout(); return }
+        layoutSubviews()
     }
 
     override func layoutSubviews() {

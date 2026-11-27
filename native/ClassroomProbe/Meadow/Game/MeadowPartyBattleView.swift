@@ -49,7 +49,7 @@ final class MeadowPartyBattleView:UIView {
     }
     func classroomPlayerDropFrames(in host:UIView)->[String:CGRect] {
         guard classroomMode,active,!track.isHidden else{return [:]}
-        layoutIfNeeded()
+        // No layoutIfNeeded(): asked from SwiftUI updates (drop-target overlay), where it would re-enter SwiftUI layout.
         return track.tokenFrames(in:host)
     }
     /// The teacher's click on the pull tab (the public screen has no touch of its own).
