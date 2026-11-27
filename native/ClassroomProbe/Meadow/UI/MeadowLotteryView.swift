@@ -105,7 +105,7 @@ final class MeadowLotteryView: UIView {
         wheel.slices = list
         card.hide()
         spin.configuration?.title = "抽一次 · \(t.cost) 金币"
-        note.text = "点击转盘中心「抽!」或下方按钮开始 · 扇面材质区分品级"
+        note.text = "点击中心「抽!」旋转 · 极窄扇面以品级徽标简略呈现，详见右侧奖池"
         rebuildPoolLedger(tier: t, slices: list)
         setNeedsLayout()
     }
