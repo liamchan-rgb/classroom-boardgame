@@ -5,7 +5,7 @@
 - **获胜转转盘**：翻牌全部配完（并列多方都算）、赛跑冲线、营地撑过 12 题胜利、擂台每连胜 3 场，以及赛跑踩礼物格时，约 1.6–2.6 秒后自动打开自定义转盘窗口（`CustomWheelViewController`，老师在里面选哪个转盘，默认选中第一位获胜者，可在成员栏切换）；结束后底栏“获胜者转盘”/擂台“领先者转盘”可再打开。原“获胜者 +5 积分”去掉。
 - **Boss 掉落**：Boss 倒下即从物品表里品级为史诗/传说（`MeadowItemRarity`）的装备中给每位学生放一件进行囊（人数不超过装备数时各不相同，`MiniGameRewards.bossLoot`），每人一步 GM 修改（可撤销），播报条列出谁拿到什么；底栏显示“史诗装备已发”。输掉 Boss/营地不发。
 - 规则说明文字同步写上奖励。核心新增 `MiniGameRewardTests` 3 项。
-- **实测与未实测边界**：`scripts/local-build.sh test` 全通过（4 个 GameCore 测试目标与 ProbeCore 零失败），`MAC_OPEN=0 scripts/local-build.sh mac` 编译通过。本机已有一个 09:09 启动的旧版 ClassroomProbe 在运行（可能是用户自己开的），未擅自重启，因此**未在 App 里实测**发奖、转盘自动弹出与 Boss 掉落。
+- **实测与未实测边界**：`scripts/local-build.sh test` 全通过（4 个 GameCore 测试目标与 ProbeCore 零失败），`MAC_OPEN=0 scripts/local-build.sh mac` 编译通过。经用户同意关掉 09:09 启动的旧版后，用新版实测（爱丽丝梦游仙境第三章行程，菜单点选借用全屏控制）：翻牌缩到 4 张，红队（Yoyo、Mickey）读对 shout 后状态栏“配对 shout：Yoyo、Mickey 每人 +10 金币 · 队伍 +1 行动”，Mickey 198→208、队伍移动条 5/9→6/9；配完第二对显示“胜利！Yoyo、Mickey”，约 2.6 秒后自动打开转盘窗口并选中 Yoyo（未转，直接关闭）；擂台王 Jerry 对 Mickey 出★题 wet，Jerry 错、Mickey 对 → Mickey 成新擂主，状态栏“赢下擂台：Mickey +10 金币 · 队伍 +1 行动”，Mickey 218→238（题目奖励+擂台奖励）、移动条 7/9→9/9。**未实测**：Boss 掉落史诗装备（需打完整场 Boss）、营地与赛跑的发奖和礼物格转盘。测前备份、测后 `ClassroomMeadow`、`ClassroomStage0` 按校验值逐文件还原、偏好按备份导回。
 
 ## 登场横幅用老师名字、移除战斗中的时间暂停（2026-11-28，基于v0.32.4/build48，未改版本号、未存档）
 
