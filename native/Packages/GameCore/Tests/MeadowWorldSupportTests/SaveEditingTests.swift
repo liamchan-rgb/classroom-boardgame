@@ -8,11 +8,7 @@ final class SaveEditingTests:XCTestCase {
         try MeadowCampaignSession.new(layout:MeadowMapGenerator.generate(.suggested(total:4,seed:31827)),persist:persist)
     }
     private func move(_ s:MeadowCampaignSession,to:Int)throws {
-        try s.beginTravel(to:to)
-        while s.travel != nil {
-            if !s.isMoving{try s.refillMovement(usingCoins:false);try s.setPaused(false)}
-            try s.advanceTravel(distance:100000)
-        }
+        try s.walkAll(to:to)
     }
     func testBackgroundCheckpointWritesCursorPauseCameraAndSelectionExactlyOnce()throws {
         var bytes=Data(),writes=0

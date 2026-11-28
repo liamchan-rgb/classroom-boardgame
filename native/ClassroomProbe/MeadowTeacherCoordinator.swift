@@ -1219,7 +1219,11 @@ final class MeadowTeacherCoordinator:ObservableObject {
     /// Mid-trip (also mid-battle): take one player out of the game in place - no map reload. Undo in 历史.
     func removePlayer(_ id:String){leaveGame(id)}
     func teamCommand(_ command:GameCommand){
-        guard !busy,let c=campaign,c.travel==nil else{message="请先抵达道路目的地，再调整组队或仓库。";return}
+        guard !busy,let c=campaign else{return}
+        // Renaming never waits; merging only waits for the two teams it touches to stand on a node.
+        if case .mergeTeams(let a,let b)=command,c.engine.state.players.contains(where:{($0.teamID==a || $0.teamID==b) && c.travel(holding:$0.id) != nil}) {
+            message="这两队有人还停在路上，先让他们走到地点再合并（停在节点上就行）。";return
+        }
         do{try c.checkpoint();try backend.apply(command,role:.teacher);renderer?.classroomRefresh();message="组队操作已保存。";revision += 1}catch{message=error.localizedDescription}
     }
     /// Monster challenge switch (outside battle). Rescales every monster at once; the TV map/encounter previews refresh.

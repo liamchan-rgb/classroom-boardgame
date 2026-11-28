@@ -1108,7 +1108,9 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     @objc private func backgroundCampaign() {guard ready,campaign != nil else{return};do{try saveCampaign()}catch{campaign?.pauseAfterFailure();showCampaignMessage("保存失败："+error.localizedDescription)}}
     @objc private func foregroundCampaign() {guard ready,campaign != nil,!classroomSuspended else{return};if battlePreviewActive{battlePreviewView?.setActive(true)};refreshCampaignStatus(allowBattleOpen:false)}
     private func refillCampaign() {
-        guard let campaign,!campaign.isMoving,campaign.engine.state.battle==nil else{return}
+        guard let campaign,campaign.engine.state.battle==nil else{return}
+        // Refilling while walking: stop first instead of refusing.
+        if campaign.isMoving {try? campaign.setPaused(true);scene.refreshCampaign();refreshCampaignStatus()}
         let cost=campaign.movementRefillCost,affordable=campaign.movementPurchaseCoins
         let menu=UIAlertController(title:"补充移动条",message:"剩余 \(MeadowMovementRules.steps(campaign.movementRemaining))/\(MeadowMovementRules.steps(campaign.movementCapacity)) 步\n一次补满需要 \(cost) 金币，全队持有 \(campaign.partyCoins) 金币。",preferredStyle:.actionSheet)
         func fill(_ coins:Bool) {
@@ -1259,7 +1261,8 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     private func showEditableNodes() {
         guard let campaign else{return}
         if scene.selectingCampaignNode {cancelNodeSelection();showCampaignMessage("已取消编辑选点");return}
-        guard campaign.travel==nil,campaign.engine.state.battle==nil else{showCampaignMessage("请先完成移动并结束战斗。");return}
+        guard campaign.engine.state.battle==nil else{showCampaignMessage("请先结束战斗。");return}
+        if campaign.isMoving {try? campaign.setPaused(true);scene.refreshCampaign();refreshCampaignStatus()}
         selectEncounterPreview(nil)
         scene.selectingCampaignNode=true
         campaignEdit.configuration?.title="取消选点"
@@ -1417,7 +1420,7 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         randomMapSummary.attributedText=hudLine([("map.fill","\(state.map.revealed.count)/\(state.map.nodes.count)",MeadowPreviewPalette.ink),("bitcoinsign.circle.fill","\(players.reduce(0){$0+$1.coins})",MeadowPreviewPalette.gold),("star.fill","\(players.reduce(0){$0+$1.score})",UIColor(red:0.12,green:0.45,blue:0.72,alpha:1))]+(campaign.cleared ? [("checkmark.seal.fill","清理完成",UIColor.systemGreen)]:[]))
         if scene.selectingCampaignNode {randomMapSummary.attributedText=hudLine([("mappin.and.ellipse","选择建筑",UIColor.orange)])}
         let busy=campaign.travel != nil || state.battle != nil || campaign.isCompleted
-        campaignRefill.isEnabled = !campaign.isCompleted && !campaign.isMoving && state.battle==nil && campaign.movementRefillCost>0
+        campaignRefill.isEnabled = !campaign.isCompleted && state.battle==nil && campaign.movementRefillCost>0
         campaignItems.isEnabled = !busy;campaignEdit.isEnabled = !busy
         let actor=scene.selectedCampaignPlayerID,node=state.map.nodes.first{$0.id==state.units[actor]?.nodeID}
         let eventAvailable=campaign.siteAvailable(actor:actor) || (node.map{n in n.kind == .reward ? !n.rewardCompleted:((n.kind == .combat || n.kind == .boss) && state.units.values.contains{$0.kind == .monster && $0.nodeID==n.id && $0.isAlive})} ?? false)
@@ -1550,7 +1553,9 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         case .team:showCampaignTeam()
         case .route:showCampaignEnd()
         case .editNode(let id):
-            guard let campaign,!campaign.isMoving,campaign.engine.state.battle==nil,!campaign.isCompleted else{throw GameError("请先停止移动并结束战斗。")}
+            guard let campaign,campaign.engine.state.battle==nil,!campaign.isCompleted else{throw GameError("请先结束战斗。")}
+            // Editing a place never waits for the walk: a moving team just stops where it is.
+            if campaign.isMoving {try? campaign.setPaused(true);scene.refreshCampaign();refreshCampaignStatus()}
             editNodeContents(id)
         case .pauseOrResume:togglePlayback()
         case .save:try campaign?.checkpoint(camera:scene.campaignCamera)

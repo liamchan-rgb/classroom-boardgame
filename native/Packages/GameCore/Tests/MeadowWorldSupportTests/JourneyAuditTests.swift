@@ -68,10 +68,7 @@ final class JourneyAuditTests:XCTestCase {
         let target=s.engine.state.map.nodes.first{$0.kind == .combat}!.id
         try s.beginTravel(to:target)
         XCTAssertFalse(s.inventoryActionRefillNeeded);XCTAssertThrowsError(try s.refillInventoryActions())
-        while s.travel != nil {
-            if !s.isMoving{try s.refillMovement(usingCoins:false);try s.setPaused(false)}
-            try s.advanceTravel(distance:100000)
-        }
+        try s.walkAll(to:target)
         try s.interactCurrentNode();let before=s.engine.archive
         XCTAssertThrowsError(try s.refillInventoryActions());XCTAssertEqual(s.engine.archive,before)
         for id in s.playerIDs{try s.engine.apply(.setHealth(unit:id,value:0,killer:nil))}

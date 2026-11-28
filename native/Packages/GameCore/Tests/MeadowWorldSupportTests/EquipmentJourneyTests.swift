@@ -35,11 +35,7 @@ final class EquipmentJourneyTests:XCTestCase {
         try s.equipInventory(actor:"p1",slot:.accessory,item:"actionRing")
         XCTAssertEqual(s.engine.state.units["p1"]!.ap,3);XCTAssertEqual(s.movementRemaining,before)
         let target=s.engine.state.map.nodes.first{$0.kind == .combat}!.id
-        try s.beginTravel(to:target)
-        while s.travel != nil {
-            if !s.isMoving{try s.refillMovement(usingCoins:false);try s.setPaused(false)}
-            try s.advanceTravel(distance:100000)
-        }
+        try s.walkAll(to:target)
         try s.interactCurrentNode()
         XCTAssertEqual(s.engine.state.units["p1"]!.ap,4);XCTAssertEqual(s.engine.state.units["p2"]!.ap,3)
         let resumed=try MeadowCampaignSession(save:.decoded(s.snapshot.encoded()))

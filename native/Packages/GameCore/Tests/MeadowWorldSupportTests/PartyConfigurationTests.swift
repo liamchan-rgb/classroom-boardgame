@@ -9,11 +9,7 @@ final class PartyConfigurationTests:XCTestCase {
     private func battle(_ p1:String,_ p2:String,current:String)throws->MeadowCampaignSession {
         let s=try MeadowCampaignSession.new(layout:layout(),playerClassID:p1,companionClassID:p2)
         let node=s.engine.state.map.nodes.first{$0.kind == .combat}!.id
-        try s.beginTravel(to:node)
-        while s.travel != nil {
-            if !s.isMoving{try s.refillMovement(usingCoins:false);try s.setPaused(false)}
-            try s.advanceTravel(distance:100000)
-        }
+        try s.walkAll(to:node)
         try s.interactCurrentNode()
         // Controlled turn fixture; full journeys below retain actual initiative.
         var save=s.snapshot;save.archive.state.battle?.current=current

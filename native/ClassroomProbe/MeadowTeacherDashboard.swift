@@ -58,7 +58,7 @@ struct MeadowTeacherDashboard:View {
                     }
                     Section("地图") {
                         Button{game.operation(.route)}label:{Label("路线与结算",systemImage:"flag.checkered")}.disabled(!game.ready || game.busy)
-                        Button{if let id=game.selectedNode{game.operation(.editNode(id))}}label:{Label("编辑选中地点",systemImage:"pencil")}.disabled(miniGameActive || game.selectedNode==nil || game.campaign?.isMoving==true || inBattle)
+                        Button{if let id=game.selectedNode{game.operation(.editNode(id))}}label:{Label("编辑选中地点",systemImage:"pencil")}.disabled(miniGameActive || game.selectedNode==nil || inBattle)
                         Button{if let id=game.selectedNode{game.project(.encounter(id))}}label:{Label("预览选中地点的怪物",systemImage:"eye")}.disabled(miniGameActive || game.selectedNode==nil || inBattle)
                         Menu {
                             ForEach(GameDifficulty.allCases,id:\.self){level in
@@ -109,7 +109,7 @@ struct MeadowTeacherDashboard:View {
                         Button{selectingNode.toggle();if selectingNode{game.project(.exploration)}}label:{Label(selectingNode ? "完成":"选点",systemImage:selectingNode ? "checkmark.circle.fill":"mappin.and.ellipse")}
                             .buttonStyle(GlassIconButtonStyle(tint:selectingNode ? .orange:GameTheme.primary)).disabled(miniGameActive || !game.ready || game.busy)
                         if selectingNode {
-                            Button{if let id=game.selectedNode{game.operation(.editNode(id))}}label:{Label("修改",systemImage:"pencil")}.disabled(miniGameActive || game.selectedNode==nil || game.campaign?.isMoving==true)
+                            Button{if let id=game.selectedNode{game.operation(.editNode(id))}}label:{Label("修改",systemImage:"pencil")}.disabled(miniGameActive || game.selectedNode==nil)
                         }else{
                             Button{game.operation(.interact)}label:{Label("交互",systemImage:"hand.tap.fill")}.disabled(miniGameActive || !game.ready || game.busy || game.campaign?.isMoving==true)
                             Button{game.operation(.inventory)}label:{Label("行囊",systemImage:"bag.fill")}.disabled(!game.ready || game.busy || game.campaign?.isCompleted != false)
@@ -120,7 +120,7 @@ struct MeadowTeacherDashboard:View {
                         if miniGameActive {
                             Label("小游戏进行中，地图已锁定",systemImage:"lock.fill").font(.caption.bold()).foregroundStyle(.orange)
                         }
-                        Button{game.operation(.refill)}label:{Label("补充",systemImage:"bolt.fill")}.disabled(miniGameActive || !game.ready || game.busy || game.campaign?.isMoving==true)
+                        Button{game.operation(.refill)}label:{Label("补充",systemImage:"bolt.fill")}.disabled(miniGameActive || !game.ready || game.busy)
                         Button{game.operation(.pauseOrResume)}label:{Label(game.campaign?.isMoving==true ? "暂停":"出发",systemImage:game.campaign?.isMoving==true ? "pause.fill":"play.fill")}
                             .buttonStyle(GlassIconButtonStyle(prominent:true)).disabled(miniGameActive || !game.ready || game.busy)
                     }

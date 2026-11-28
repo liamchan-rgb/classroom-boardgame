@@ -163,6 +163,23 @@ final class DifficultyTests:XCTestCase {
         try s.removePlayer("p2");try s.removePlayer("p3")
         XCTAssertThrowsError(try s.removePlayer("p1"))
     }
+    /// A road never blocks a team switch: a player joins a team that is stopped out on a road (walking on with it),
+    /// and a player on that road can switch away (standing with the new team). The result saves and reloads.
+    func testTeamSwitchWorksWhileATeamIsOutOnARoad()throws {
+        var c=MeadowMapConfiguration.suggested(total:8,seed:9);c.starts=2
+        let s=try MeadowCampaignSession.new(layout:MeadowMapGenerator.generate(c),studentClasses:["spellblade","ranger","adventurer"],studentTeams:[0,1,1])
+        let red=s.engine.state.units["p1"]!.teamID!,blue=s.engine.state.units["p2"]!.teamID!
+        let start=s.engine.state.units["p1"]!.nodeID,next=s.engine.state.map.neighbors(start)[0]
+        try s.beginTravel(to:next);try s.advanceTravel(distance:5);try s.setPaused(true)
+        let road=try XCTUnwrap(s.travel(holding:"p1"))
+        try s.movePlayer("p3",toTeam:red)
+        XCTAssertEqual(s.travel(holding:"p3")?.id,road.id);XCTAssertEqual(s.position(of:"p3"),s.position(of:"p1"))
+        try s.movePlayer("p1",toTeam:blue)
+        XCTAssertNil(s.travel(holding:"p1"));XCTAssertEqual(s.engine.state.units["p1"]!.nodeID,s.engine.state.units["p2"]!.nodeID)
+        XCTAssertEqual(s.travel(holding:"p3")?.actors,["p3"])
+        let back=try MeadowCampaignSession(save:.decoded(s.snapshot.encoded()))
+        XCTAssertEqual(back.travel(holding:"p3")?.id,road.id);XCTAssertNil(back.travel(holding:"p1"))
+    }
     /// Raid-style personal loot: everyone in the fight gets the kill score (3, as much as a near cache), coins are shared
     /// out, and each fighter rolls the item drops on their own. Kill score lines up with supply caches.
     func testPersonalLootGivesEveryFighterTheKillScoreAndASplitPurse()throws {

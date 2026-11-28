@@ -10,8 +10,7 @@ final class SiteConfigurationTests:XCTestCase {
         return try MeadowCampaignSession(save:save,persist:persist)
     }
     private func travel(_ s:MeadowCampaignSession,_ node:Int)throws {
-        try s.beginTravel(to:node)
-        while s.travel != nil {if !s.isMoving{try s.refillMovement(usingCoins:false);try s.setPaused(false)};try s.advanceTravel(distance:100000)}
+        try s.walkAll(to:node)
     }
     func testShopEditAndReloadUseSameActualPricesWithoutResourceGrant()throws {
         let s=try session(),node=s.engine.state.units["p1"]!.nodeID,before=s.snapshot
@@ -67,7 +66,9 @@ final class SiteConfigurationTests:XCTestCase {
         let bytes=try before.encoded();XCTAssertFalse(String(decoding:bytes,as:UTF8.self).contains("siteConfiguration"))
         XCTAssertEqual(try MeadowCampaignSession(save:.decoded(bytes)).snapshot,before)
         let start=s.engine.state.units["p1"]!.nodeID,target=s.engine.state.map.neighbors(start)[0]
-        try s.beginTravel(to:target);try s.setPaused(true);let paused=s.snapshot
-        XCTAssertThrowsError(try s.configureSite(node:start,configuration:.init(kind:.shop)));XCTAssertEqual(s.snapshot,paused)
+        // Editing waits only while the team is actually walking; stopped on the road it goes through.
+        try s.beginTravel(to:target);let moving=s.snapshot
+        XCTAssertThrowsError(try s.configureSite(node:start,configuration:.init(kind:.shop)));XCTAssertEqual(s.snapshot,moving)
+        try s.setPaused(true);XCTAssertNoThrow(try s.configureSite(node:start,configuration:.init(kind:.shop)))
     }
 }

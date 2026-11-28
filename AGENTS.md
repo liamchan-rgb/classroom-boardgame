@@ -1,3 +1,11 @@
+## 行动值不够走完下一段路就停在节点、路上不再锁配置（2026-11-28，基于v0.32.4/build48，未改版本号、未存档）
+
+用户反馈：行程中很多配置改不了很拖拉；路程中行动值用完要直接截断这次移动。
+- **截断移动**（`Campaign.swift`）：队伍只在移动条够走完整段路时才踏上这段路。出发时第一段就不够，直接提示“移动不够走到下一个地点：这段路要 x 步，只剩 y 步”，不出发；多段路线走到某个节点后剩下的不够下一段，就在这个节点结束这次移动（不再停在半路等补充），剩余步数保留。新增 `MeadowTravelCut`/`lastTravelCut`、`MeadowMovementRules.stepText`。地图画面提示“移动不够走下一段路（要 x 步，剩 y 步），队伍停在某地”，并按到达该节点处理（有事件照常询问）（`GameScene.swift`）。比满条还长的路、从半路重新出发仍按原规则走到用完（目前地图最长一段约 7.8 步，满条 8 步）。旧存档里已经停在半路的队伍照旧补充后继续。
+- **路上不再锁配置**：换队不再要求两队都到达地点——换进正在路上的队伍就跟着那段路走，从路上换出就站到新队所在地点（`movePlayer`）；改队名随时可以，合并只要求这两队没人停在半路；编辑地点（遭遇、补给、商店/事件）停下即可改，正在走时点“修改”会先自动停下；补充移动正在走时也先自动停下再补；老师从“存档与历史”加入不再要求队伍到达（`MeadowTeamConsole.swift`、`MeadowTeacherCoordinator.swift`、`GameViewController.swift`、`MeadowTeacherDashboard.swift`、`TeacherArchiveConsole.swift`、`CampaignSiteAccess.swift`）。到达地点才能做的（交互、事件、答题点）不变。
+- **测试**：旧测试里“停在半路等补充”的用例改为新规则（第一段不够不出发、多段在节点停下并保留剩余、读档后无路上游标再出发），新增“队伍在路上时换进换出”测试；走路的测试辅助改为停下后补充再出发（`TravelTestSupport.swift`、审计 `JourneyAudit.swift`）。
+- **实测与未实测边界**：`scripts/local-build.sh test` 全通过（`MeadowWorldSupportTests` 270/270、`MeadowClassroomSupportTests` 67/67、`MeadowBattleSupportTests` 109/109、`ClassroomGameCoreTests` 73/73 与 ProbeCore 零失败），`MAC_OPEN=0 scripts/local-build.sh mac` 编译通过。**未在 App 里实测**：本机课堂存档 12:11 被别处改动过（App 当时已关），为免干扰没有开 App 走一遍截断提示、路上换队和停下改地点。
+
 ## 小游戏奖励改版：成功即发金币行动、获胜转转盘、Boss 掉史诗装备（2026-11-28，基于v0.32.4/build48，未改版本号、未存档）
 
 用户要求：打 Boss 胜利后每人至少一件史诗以上装备；翻牌每配对正确一次奖励相应的行动和金币、胜利后直接让老师选转盘奖励；其余三个（守护营地、答题赛跑、擂台王）同翻牌的奖励逻辑。题目本身的答对奖励照旧，以下是小游戏另发的：

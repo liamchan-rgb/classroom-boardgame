@@ -265,7 +265,7 @@ struct TeacherArchiveConsole:View {
                 ClassroomTextField(placeholder:"老师人物名",text:$teacherName)
                 Picker("职业",selection:$teacherClass){ForEach(MeadowPartyConfiguration.classIDs,id:\.self){id in Text((try? game.campaign?.engine.catalog.playerClass(id).name) ?? id).tag(id)}}
                 Picker("加入队伍",selection:$teacherTeam){ForEach(game.campaign?.engine.state.teams ?? []){Text($0.name).tag($0.id)}}
-                Button("加入行程"){ask("老师加入行程（不占学生名额），使用“人物”里编辑区的装扮？"){try game.joinTeacher(name:teacherName,classID:teacherClass,team:teacherTeam,appearance:appearance);notice=game.message}}.buttonStyle(.borderedProminent).disabled(game.campaign==nil || game.busy || game.campaign?.travel != nil || game.campaign?.engine.state.battle != nil || game.campaign?.isCompleted==true)
+                Button("加入行程"){ask("老师加入行程（不占学生名额），使用“人物”里编辑区的装扮？"){try game.joinTeacher(name:teacherName,classID:teacherClass,team:teacherTeam,appearance:appearance);notice=game.message}}.buttonStyle(.borderedProminent).disabled(game.campaign==nil || game.busy || game.campaign?.engine.state.battle != nil || game.campaign?.isCompleted==true)
                 Text("只能在探索中、队伍没有在走路时加入。").font(.caption).foregroundStyle(.secondary)
             }
         }.glassRow()

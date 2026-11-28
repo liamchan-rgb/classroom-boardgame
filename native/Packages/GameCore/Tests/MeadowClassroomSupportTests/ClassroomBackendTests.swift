@@ -85,12 +85,7 @@ final class ClassroomBackendTests:XCTestCase {
     func testTeacherActionsValidateTurnAPTargetAndDoNotConsumeRandom()throws {
         let b=try fixture(),c=try XCTUnwrap(b.campaign)
         let node=try XCTUnwrap(c.engine.state.map.nodes.first{$0.kind == .combat})
-        try c.beginTravel(to:node.id)
-        while c.travel != nil {
-            if c.movementRemaining<0.000001{try b.refill(usingCoins:false,role:.teacher)}
-            if !c.isMoving{try c.setPaused(false)}
-            _=try b.advanceTravel(distance:10000,role:.teacher)
-        }
+        try c.walkAll(to:node.id)
         _=try c.interactCurrentNode()
         let model=try b.battleModel(role:.teacher),actor=try XCTUnwrap(model.current)
         XCTAssertEqual(model.state.units[actor]?.kind,.player)

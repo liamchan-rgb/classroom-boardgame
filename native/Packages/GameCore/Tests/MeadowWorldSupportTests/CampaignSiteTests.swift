@@ -12,11 +12,7 @@ final class CampaignSiteTests:XCTestCase {
     }
     private func move(_ s:MeadowCampaignSession,to kind:CampaignSiteKind)throws {
         let target=try XCTUnwrap(s.engine.state.map.nodes.first{$0.kind == .empty && s.siteKind(node:$0.id)==kind})
-        try s.beginTravel(to:target.id)
-        while s.travel != nil {
-            if !s.isMoving{try s.refillMovement(usingCoins:false);try s.setPaused(false)}
-            try s.advanceTravel(distance:100000)
-        }
+        try s.walkAll(to:target.id)
     }
     func testAllCatalogPurchasableItemsChargeOnlyBuyerAndNeverEquip()throws {
         var rich=try session().snapshot
@@ -135,11 +131,7 @@ final class CampaignSiteTests:XCTestCase {
         try move(s,to:.satchel);try s.resolveSite(actor:"p1",accept:true)
         for target in s.engine.state.map.nodes.map(\.id)+[start] {
             if s.engine.state.units["p1"]!.nodeID==target{continue}
-            try s.beginTravel(to:target)
-            while s.travel != nil {
-                if !s.isMoving{try s.refillMovement(usingCoins:false);try s.setPaused(false)}
-                try s.advanceTravel(distance:100000)
-            }
+            try s.walkAll(to:target)
         }
         XCTAssertTrue(s.canComplete)
         let expected=s.engine.state.players,result=try s.completeCampaign(),before=s.snapshot

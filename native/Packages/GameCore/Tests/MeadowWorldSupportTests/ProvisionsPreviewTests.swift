@@ -34,7 +34,7 @@ final class ProvisionsPreviewTests:XCTestCase {
             return a==b ? $0.id<$1.id:a<b
         })
         let expected=target.reward!,inventory=s.engine.state.units["p1"]!.inventory
-        try s.beginTravel(to:target.id);try finishPaid(s)
+        try finishPaid(s,to:target.id)
         XCTAssertTrue(s.engine.state.players.allSatisfy{$0.coins>=0})
         let oldCoins=s.partyCoins;try s.interactCurrentNode()
         XCTAssertEqual(s.partyCoins,oldCoins+expected.coins*2)
@@ -49,7 +49,7 @@ final class ProvisionsPreviewTests:XCTestCase {
         func visit(_ n:Int){for next in s.engine.state.map.neighbors(n) where visited.insert(next).inserted{walk.append(next);visit(next);walk.append(n)}}
         visit(start)
         let before=s.engine.state.players.map(\.ap)
-        for id in walk.dropFirst(){try s.beginTravel(to:id);try finishPaid(s)}
+        for id in walk.dropFirst(){try finishPaid(s,to:id)}
         XCTAssertEqual(s.engine.state.units["p1"]!.nodeID,start)
         XCTAssertGreaterThan((s.snapshot.movement?.purchasedRefills ?? 0)+(s.snapshot.movement?.manualRefills ?? 0),0)
         XCTAssertEqual(s.engine.state.players.map(\.ap),before);XCTAssertNil(s.engine.state.battle)
@@ -99,12 +99,18 @@ final class ProvisionsPreviewTests:XCTestCase {
         XCTAssertFalse(try XCTUnwrap(s.encounterPreview(node:node)).canInteract)
         try s.beginTravel(to:node);try s.advanceTravel(distance:10)
         XCTAssertFalse(try XCTUnwrap(s.encounterPreview(node:node)).canInteract)
-        while s.travel != nil{if !s.isMoving{try s.refillMovement(usingCoins:false);try s.setPaused(false)};try s.advanceTravel(distance:100000)}
+        try s.walkAll(to:node)
         XCTAssertTrue(try XCTUnwrap(s.encounterPreview(node:node)).canInteract)
         try s.interactCurrentNode();XCTAssertFalse(try XCTUnwrap(s.encounterPreview(node:node)).canInteract)
     }
-    private func finishPaid(_ s:MeadowCampaignSession)throws {
-        for _ in 0..<300 where s.travel != nil {
+    /// Walks to `goal` paying for refills (the teacher's free refill when the party cannot pay); a move that stops
+    /// short at a node sets off again.
+    private func finishPaid(_ s:MeadowCampaignSession,to goal:Int)throws {
+        for _ in 0..<300 {
+            if s.travel==nil {
+                if s.engine.state.units[s.selectedPlayerID]!.nodeID==goal{break}
+                do{try s.beginTravel(to:goal)}catch{try s.refillMovement(usingCoins:s.movementPurchaseCoins>0);try s.beginTravel(to:goal)}
+            }
             // A coin refill is a flat 80; when the party cannot pay, the teacher's free refill stands in.
             if !s.isMoving{try s.refillMovement(usingCoins:s.movementPurchaseCoins>0);try s.setPaused(false)}
             try s.advanceTravel(distance:100000)

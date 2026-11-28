@@ -44,8 +44,7 @@ final class RewardCurveTests:XCTestCase {
         c.combat=0;c.boss=0;c.reward=0;c.empty=9;c.extraRoads=0
         let s=try MeadowCampaignSession.new(layout:MeadowMapGenerator.generate(c))
         let target=try XCTUnwrap(s.engine.state.map.nodes.first{$0.kind == .empty && s.siteKind(node:$0.id) == .spring})
-        try s.beginTravel(to:target.id)
-        while s.travel != nil {if !s.isMoving{try s.refillMovement(usingCoins:false);try s.setPaused(false)};try s.advanceTravel(distance:100000)}
+        try s.walkAll(to:target.id)
         for id in ["p1","p2"] {try s.engine.apply(.setHealth(unit:id,value:1,killer:nil))}
         try s.resolveSite(actor:"p1",accept:true)
         for id in ["p1","p2"] {

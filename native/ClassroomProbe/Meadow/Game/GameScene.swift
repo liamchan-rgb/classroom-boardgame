@@ -637,7 +637,14 @@ final class GameScene: SKScene {
                 do {
                     let amount=delta*Double(speed*projection)
                     let receipts=try classroomAdvanceTravel?(amount) ?? campaign.advanceTravel(distance:amount)
-                    if let receipt=receipts.last {
+                    // The bar could not cover the next road: the move ended at the node just reached.
+                    if let cut=campaign.lastTravelCut,campaign.travel==nil {
+                        campaign.lastTravelCut=nil
+                        let name=campaign.engine.state.map.nodes.first{$0.id==cut.node}?.name ?? "这里"
+                        refreshCampaign();onCampaignChanged?()
+                        onCampaignError?("移动不够走下一段路（要 \(MeadowMovementRules.stepText(cut.needed)) 步，剩 \(MeadowMovementRules.stepText(cut.remaining)) 步），队伍停在\(name)。补充移动后再选目的地。")
+                        onArrival?(cut.node)
+                    } else if let receipt=receipts.last {
                         refreshCampaign();onCampaignChanged?()
                         let coins=receipt.after.players.reduce(0){$0+$1.coins}-receipt.before.players.reduce(0){$0+$1.coins}
                         if coins>0 {onDiscovery?("小队获得金币 ＋\(coins)")}
