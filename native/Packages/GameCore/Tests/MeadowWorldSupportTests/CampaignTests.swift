@@ -349,30 +349,30 @@ final class CampaignTests:XCTestCase {
         let restored=try MeadowCampaignSession(save:.decoded(session.snapshot.encoded()))
         XCTAssertEqual(restored.position(of:"p1"),session.position(of:"p1"));XCTAssertEqual(restored.movementRemaining,session.movementRemaining)
     }
-    func testShortBarNeverStartsARoadItCannotFinishAndStopsAtTheLastNode()throws {
+    func testRunningOutEndsTheMoveAsFarAsTheBarWent()throws {
         let initial=try MeadowCampaignSession.new(layout:layout());var save=initial.snapshot;save.movement?.remaining=20
         save.archive.state.units["p1"]?.coins=0;save.archive.state.units["p2"]?.coins=0
         let session=try MeadowCampaignSession(save:save),start=session.engine.state.units["p1"]!.nodeID
-        let near=session.engine.state.map.neighbors(start)[0],before=session.snapshot
-        // Not enough for the first road: nothing starts, nobody waits on the road.
-        XCTAssertThrowsError(try session.beginTravel(to:near)){XCTAssertTrue(($0 as? GameError)?.message.contains("移动不够") == true)}
-        XCTAssertNil(session.travel);XCTAssertEqual(session.snapshot,before)
-        // Enough for the first road of a longer route only: the walk ends at that node and keeps what is left of the bar.
-        let map=session.engine.state.map
+        let near=session.engine.state.map.neighbors(start)[0]
+        // Too short for the road: the team still sets off and stops 20 along it, as a reached spot on the road.
+        try session.beginTravel(to:near);try session.advanceTravel(distance:100000)
+        let stop=try XCTUnwrap(session.travel)
+        XCTAssertEqual(stop.distance,20,accuracy:0.000001);XCTAssertEqual(stop.stopDistance ?? 0,20,accuracy:0.000001)
+        XCTAssertFalse(session.isMoving);XCTAssertFalse(session.hasPendingTravel);XCTAssertEqual(session.movementRemaining,0)
+        XCTAssertNil(session.lastTravelCut?.node);XCTAssertEqual(session.lastTravelCut?.destination,near)
+        XCTAssertEqual(session.engine.state.units["p1"]!.nodeID,start)
+        XCTAssertThrowsError(try session.setPaused(false))  // no half route waits for a refill
+        let restored=try MeadowCampaignSession(save:.decoded(session.snapshot.encoded()))
+        XCTAssertEqual(restored.position(of:"p1"),session.position(of:"p1"));XCTAssertFalse(restored.hasPendingTravel)
+        try restored.walkAll(to:near);XCTAssertEqual(restored.engine.state.units["p1"]!.nodeID,near)
+        // Running out exactly at a node of a longer route: the move ends on that node.
+        let map=initial.engine.state.map
         let far=try XCTUnwrap(map.nodes.map(\.id).first{map.distance(from:start,to:$0)==2})
-        let path=try XCTUnwrap(map.shortestPath(from:start,to:far)),first=session.routeDistance(Array(path.prefix(2)))
-        try session.refillMovement(usingCoins:false)
-        let second=session.routeDistance(Array(path.dropFirst().prefix(2))),extra=min(10,second/2,session.movementCapacity-first)
-        var bar=session.snapshot;bar.movement?.remaining=first+extra;let short=try MeadowCampaignSession(save:bar)
+        let path=try XCTUnwrap(map.shortestPath(from:start,to:far)),first=initial.routeDistance(Array(path.prefix(2)))
+        var exact=initial.snapshot;exact.movement?.remaining=first;let short=try MeadowCampaignSession(save:exact)
         try short.beginTravel(to:far);try short.advanceTravel(distance:100000)
-        XCTAssertNil(short.travel);XCTAssertFalse(short.isMoving)
-        XCTAssertEqual(short.engine.state.units["p1"]!.nodeID,path[1]);XCTAssertEqual(short.engine.state.units["p2"]!.nodeID,path[1])
-        XCTAssertEqual(short.movementRemaining,extra,accuracy:0.000001);XCTAssertEqual(short.lastTravelCut?.node,path[1])
-        // Saved as stopped at a node: a reload has no road cursor, and after a refill the team sets off from there.
-        let restored=try MeadowCampaignSession(save:.decoded(short.snapshot.encoded()))
-        XCTAssertNil(restored.travel);XCTAssertTrue(restored.parkedTravels.isEmpty)
-        try restored.walkAll(to:far);XCTAssertEqual(restored.engine.state.units["p1"]!.nodeID,far)
-        XCTAssertFalse(restored.engine.state.map.nodes.contains{$0.rewardCompleted})
+        XCTAssertNil(short.travel);XCTAssertEqual(short.engine.state.units["p1"]!.nodeID,path[1]);XCTAssertEqual(short.lastTravelCut?.node,path[1])
+        XCTAssertFalse(short.engine.state.map.nodes.contains{$0.rewardCompleted})
     }
     func testMovementPurchaseUsesPartyCoinsAndFailedSaveRollsBackBarAndCoins()throws {
         let initial=try MeadowCampaignSession.new(layout:layout());var save=initial.snapshot

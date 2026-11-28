@@ -27,6 +27,33 @@ final class LotteryTests:XCTestCase {
         else {XCTAssertEqual(after.coins,before.coins-180+prize.coins)}
         let saved=s.snapshot;try s.spinLottery(actor:"p1",tier:2,id:"spin");XCTAssertEqual(s.snapshot,saved)
     }
+    /// A mini-game prize: a free spin of any tier, even with no coins; it is recorded and undoable like a paid one.
+    func testRewardSpinIsFreeForAnyTier()throws {
+        var save=try session().snapshot;save.archive.state.units["p1"]!.coins=0
+        let s=try MeadowCampaignSession(save:save)
+        XCTAssertThrowsError(try s.spinLottery(actor:"p1",tier:3))
+        let receipt=try s.spinRewardLottery(actor:"p1",tier:3)
+        let event=try XCTUnwrap(receipt.events.first{$0.kind=="lottery"}),prize=CampaignLottery.tiers[3].prizes[event.amount]
+        let after=s.engine.state.units["p1"]!
+        if let item=prize.item {XCTAssertEqual(after.coins,0);XCTAssertGreaterThanOrEqual(after.inventory[item] ?? 0,prize.count)}
+        else {XCTAssertEqual(after.coins,prize.coins)}
+        try s.engine.undo();XCTAssertEqual(s.engine.state.units["p1"]!.coins,0)
+    }
+    /// Won slices taken off a wheel are kept with it and come back to their old places, one by one or all at once.
+    func testRemovedWheelSlicesComeBackToTheirPlaces()throws {
+        var w=CustomWheel(name:"抽奖",prizes:["A","B","C","D"].map{CustomWheelPrize(title:$0,weight:1)})
+        try w.removePrize(1);try w.removePrize(2)  // B, then D (now at index 2)
+        XCTAssertEqual(w.prizes.map(\.title),["A","C"]);XCTAssertEqual(w.removed?.map(\.prize.title),["B","D"])
+        XCTAssertThrowsError(try w.removePrize(0))  // two always stay
+        let saved=try JSONDecoder().decode(CustomWheel.self,from:JSONEncoder().encode(w));XCTAssertEqual(saved,w)
+        var one=w;try one.restorePrize(0)
+        XCTAssertEqual(one.prizes.map(\.title),["A","B","C"]);XCTAssertEqual(one.removed?.map(\.prize.title),["D"])
+        try w.restoreAll();XCTAssertEqual(w.prizes.map(\.title),["A","B","C","D"]);XCTAssertNil(w.removed)
+        XCTAssertNil(w.forSpin.removed);XCTAssertNoThrow(try w.validate())
+        // An old wheel file without the list still reads.
+        let old=try JSONDecoder().decode(CustomWheel.self,from:Data(#"{"name":"x","cost":0,"prizes":[{"title":"a","weight":1,"count":0,"coins":0,"score":0},{"title":"b","weight":1,"count":0,"coins":0,"score":0}]}"#.utf8))
+        XCTAssertNil(old.removed)
+    }
     func testCustomWheelPaysWhatTheWeightsAllowAndChecksItself()throws {
         let s=try session(),before=s.engine.state.units["p1"]!
         // Only the second prize can come up (the others weigh 0): 2 revival stones, 15 coins and 3 points.

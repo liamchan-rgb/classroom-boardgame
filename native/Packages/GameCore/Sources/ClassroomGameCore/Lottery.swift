@@ -53,13 +53,13 @@ public enum CampaignLottery {
 }
 
 extension Evaluation {
-    mutating func campaignLottery(actor id: String, tier index: Int) throws {
+    mutating func campaignLottery(actor id: String, tier index: Int, free: Bool = false) throws {
         var actor = try acting(id)
         guard state.phase == .exploration, state.battle == nil, actor.kind == .player else { throw GameError("请在探索中抽奖。") }
         let tier = try CampaignLottery.tier(index)
-        guard actor.coins >= tier.cost else { throw GameError("金币不足：\(tier.title)档需要 \(tier.cost) 金币。") }
+        guard free || actor.coins >= tier.cost else { throw GameError("金币不足：\(tier.title)档需要 \(tier.cost) 金币。") }
         for prize in tier.prizes { if let item = prize.item { _ = try catalog.item(item) } }
-        actor.coins -= tier.cost
+        if !free { actor.coins -= tier.cost }
         var roll = try state.random.next(upperBound: tier.totalWeight)
         var picked = tier.prizes.count - 1
         for (i, prize) in tier.prizes.enumerated() { if roll < prize.weight { picked = i; break }; roll -= prize.weight }
@@ -90,7 +90,38 @@ public struct CustomWheel: Codable, Equatable {
     public var name: String
     public var cost: Int
     public var prizes: [CustomWheelPrize]
+    /// Slices taken off after being won (a draw without repeats), each with the place it had, so they can come back.
+    public var removed: [RemovedPrize]?
+    public struct RemovedPrize: Codable, Equatable {
+        public var prize: CustomWheelPrize
+        public var index: Int
+        public init(prize: CustomWheelPrize, index: Int) { self.prize = prize; self.index = index }
+    }
     public init(name: String, cost: Int = 0, prizes: [CustomWheelPrize]) { self.name = name; self.cost = cost; self.prizes = prizes }
+    /// The wheel as it is spun: what was taken off travels with the library copy only.
+    public var forSpin: CustomWheel { var w = self; w.removed = nil; return w }
+    /// Takes slice `index` off (at least two stay) and remembers it.
+    public mutating func removePrize(_ index: Int) throws {
+        guard prizes.indices.contains(index) else { return }
+        guard prizes.count > 2 else { throw GameError("转盘至少要留两个格子。") }
+        var next = self
+        let gone = next.prizes.remove(at: index)
+        guard next.totalWeight > 0 else { throw GameError("剩下的格子概率都为0，不能再移除。") }
+        next.removed = (removed ?? []) + [RemovedPrize(prize: gone, index: index)]
+        self = next
+    }
+    /// Puts removed slice `at` (in the removed list) back where it was (or at the end if the wheel got shorter).
+    public mutating func restorePrize(_ at: Int) throws {
+        guard var list = removed, list.indices.contains(at) else { return }
+        guard prizes.count < 24 else { throw GameError("转盘最多24个格子。") }
+        let back = list.remove(at: at)
+        prizes.insert(back.prize, at: min(max(0, back.index), prizes.count))
+        removed = list.isEmpty ? nil : list
+    }
+    /// Every removed slice back, the last one taken off first (so each lands on its old place).
+    public mutating func restoreAll() throws {
+        while let list = removed, !list.isEmpty { try restorePrize(list.count - 1) }
+    }
     public var totalWeight: Int { prizes.reduce(0) { $0 + max(0, $1.weight) } }
     /// Chance of each prize (0…1).
     public func chance(_ i: Int) -> Double { totalWeight == 0 || !prizes.indices.contains(i) ? 0 : Double(max(0, prizes[i].weight)) / Double(totalWeight) }
@@ -98,7 +129,8 @@ public struct CustomWheel: Codable, Equatable {
         guard !name.trimmingCharacters(in: .whitespaces).isEmpty, name.count <= 40 else { throw GameError("转盘名称需为1–40字。") }
         guard (2...24).contains(prizes.count) else { throw GameError("转盘需要2–24个奖项。") }
         guard (0...1000).contains(cost) else { throw GameError("每次花费需在0–1000金币之间。") }
-        for p in prizes {
+        guard (removed?.count ?? 0) <= 48 else { throw GameError("已移除的格子太多。") }
+        for p in prizes + (removed ?? []).map(\.prize) {
             guard !p.title.trimmingCharacters(in: .whitespaces).isEmpty, p.title.count <= 40 else { throw GameError("每个奖项需要1–40字的名字。") }
             guard (0...1000).contains(p.weight), (0...99).contains(p.count), (0...10000).contains(p.coins), (0...1000).contains(p.score) else { throw GameError("奖项「\(p.title)」的数值超出范围。") }
             if p.item != nil { guard p.count >= 1 else { throw GameError("奖项「\(p.title)」至少给1件物品。") } }

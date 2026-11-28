@@ -9,7 +9,8 @@ public extension PartyEncounter {
         guard let actor=current,let skill=try? engine.catalog.skill(action.rawValue) else{return ally}
         if skill.target == .selfOnly{return actor}
         if skill.target == .ally,ally==actor {
-            return state.players.first{$0.id != actor && $0.isAlive && (state.battle?.queue.contains($0.id) ?? true)}?.id ?? ally
+            let me=state.units[actor]
+            return state.players.first{u in u.id != actor && u.isAlive && (state.battle?.queue.contains(u.id) ?? true) && !(me.map{GameRules.enemies($0,u,in:state)} ?? false)}?.id ?? ally
         }
         return ally
     }

@@ -73,6 +73,8 @@ import MeadowBattleSupport
     /// The line under the board: what just happened.
     @Published var banner: String?
     @Published var rewarded = false
+    /// Free shop-wheel spins earned and not spun yet, one entry per spin (a win, a gift tile, every 3 arena wins).
+    @Published var prizeSpins: [String] = []
     /// Game rewards (besides the questions' own): a success pays its difficulty (coins + a movement step), a win
     /// opens the prize wheel, a fallen boss leaves epic gear. Handled by the coordinator.
     enum Payout { case pay(ids: [String], level: Int, why: String), wheel(ids: [String], why: String), bossLoot }
@@ -496,7 +498,7 @@ extension MeadowTeacherCoordinator {
     func rewardMiniGameWinners() {
         guard let g = miniGame else { return }
         if g.kind == .boss { if !g.rewarded { grantBossLoot(g) }; return }
-        let ids = g.winners
+        let ids = g.prizeSpins.isEmpty ? g.winners : g.prizeSpins
         guard !ids.isEmpty else { message = "没有获胜的同学。"; revision += 1; return }
         openMiniGameWheel(ids, model: g, delay: 0)
     }
@@ -514,23 +516,30 @@ extension MeadowTeacherCoordinator {
             } catch { message = "小游戏奖励没发出：" + error.localizedDescription }
             revision += 1
         case .wheel(let ids, _):
-            // After the finale / move has shown for a moment.
+            // Each win earns one free spin per winner; the shop wheel opens after the finale / move has shown a moment.
+            model.prizeSpins += ids.filter { campaign?.engine.state.units[$0] != nil }
             openMiniGameWheel(ids, model: model, delay: model.finished ? 2.6 : 1.6)
         case .bossLoot:
             grantBossLoot(model)
         }
     }
-    /// The prize wheel for the winners (the teacher picks which wheel; the first winner is selected, others can be
-    /// switched to in the wheel's member bar).
+    /// The winners' prize: the shop's prize wheel, opened on the first winner who still has a free spin. The teacher
+    /// picks the tier (铜 / 银 / 金 / 星穹); each owed spin is free, the member bar switches to the other winners.
     func openMiniGameWheel(_ ids: [String], model: MiniGameModel, delay: Double) {
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self, weak model] in
-            guard let self, let model, self.miniGame === model, let c = self.campaign, let host = self.presentationHost,
-                  !(host is CustomWheelViewController) else { return }
-            guard let actor = ids.first(where: { c.engine.state.units[$0]?.isAlive == true }) ?? c.engine.state.players.first(where: \.isAlive)?.id else { return }
-            let screen = CustomWheelViewController(session: c, actor: actor)
-            screen.onChange = { [weak self] in self?.renderer?.classroomRefresh(); self?.revision += 1 }
-            host.present(screen, animated: true)
-            self.message = "转盘奖励：" + ids.map(model.name).joined(separator: "、") + "（选好转盘再转）"
+            guard let self, let model, self.miniGame === model, let c = self.campaign, let renderer = self.renderer,
+                  !(self.presentationHost is MeadowShopViewController) else { return }
+            let owed = model.prizeSpins.filter { c.engine.state.units[$0]?.isAlive == true }
+            guard let actor = owed.first ?? ids.first(where: { c.engine.state.units[$0]?.isAlive == true }) ?? c.engine.state.players.first(where: \.isAlive)?.id else { return }
+            let open = {
+                renderer.openTravellingShop(actor: actor, rewardSpins: owed) { [weak self, weak model] id in
+                    if let i = model?.prizeSpins.firstIndex(of: id) { model?.prizeSpins.remove(at: i) }
+                    self?.renderer?.classroomRefresh(); self?.revision += 1
+                }
+            }
+            // Another sheet on top (a custom wheel, the bag): close it first, then the shop wheel comes up.
+            if let host = self.presentationHost, host.presentingViewController != nil { host.dismiss(animated: false, completion: open) } else { open() }
+            self.message = owed.isEmpty ? "转盘：这一局的免费次数已用完（再转按商店价格）。" : "奖励转盘：" + Set(owed).map(model.name).sorted().joined(separator: "、") + " 各免费抽一次，选好档位再转"
             self.revision += 1
         }
     }

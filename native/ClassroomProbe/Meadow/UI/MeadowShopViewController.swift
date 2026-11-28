@@ -24,6 +24,13 @@ final class MeadowShopViewController:UIViewController {
     private var selectedRarity:MeadowItemRarity? = nil
     private var selected:String?
     var onTrade:((GameState)->Void)?
+    /// Free prize spins still owed (one entry per spin, by student): a mini-game win opens the shop wheel with these.
+    /// The teacher picks the tier; a spin for someone listed is free and uses up one of their entries.
+    var rewardSpins:[String]=[]
+    var onRewardSpinUsed:((String)->Void)?
+    /// Swap to the bag for the member shown (same page spot, no trip back to the map).
+    var onSwitchToBag:((String)->Void)?
+    private let bagButton=MeadowPreviewPalette.button("行囊")
 
     private let header=UIView(),catalogPanel=UIView(),grid=UIScrollView(),detail=UIView()
     private let categoryBar=UISegmentedControl()
@@ -84,7 +91,8 @@ final class MeadowShopViewController:UIViewController {
         MeadowGlassBackdrop.install(in:view)
 
         [header,catalogPanel,detail].forEach{MeadowPreviewPalette.stylePanel($0,liveBlur:true);view.addSubview($0)}
-        [titleLabel,coinsLabel,buyers,mode,close,timerButton].forEach(header.addSubview)
+        [titleLabel,coinsLabel,buyers,mode,close,timerButton,bagButton].forEach(header.addSubview)
+        bagButton.addAction(UIAction{[weak self] _ in guard let self else{return};self.onSwitchToBag?(self.actor)},for:.touchUpInside)
 
         // Category segmented bar + Rarity pill strip inside catalogPanel
         for (i,cat) in ShopItemCategory.allCases.enumerated() {
@@ -142,7 +150,7 @@ final class MeadowShopViewController:UIViewController {
             self.reload()
         },for:.valueChanged)
 
-        mode.selectedSegmentIndex=0
+        mode.selectedSegmentIndex=rewardSpins.isEmpty ? 0:2
         mode.addAction(UIAction{[weak self] _ in
             guard let self else{return}
             self.selling=self.mode.selectedSegmentIndex==1
@@ -157,7 +165,9 @@ final class MeadowShopViewController:UIViewController {
             guard let self else{return nil}
             let before=self.session.engine.state
             do{
-                let receipt=try self.session.spinLottery(actor:self.actor,tier:tier)
+                let free=self.rewardSpins.contains(self.actor)
+                let receipt=free ? try self.session.spinRewardLottery(actor:self.actor,tier:tier):try self.session.spinLottery(actor:self.actor,tier:tier)
+                if free,let i=self.rewardSpins.firstIndex(of:self.actor) {self.rewardSpins.remove(at:i);self.onRewardSpinUsed?(self.actor)}
                 self.onTrade?(before);self.reload()
                 return receipt.events.first{$0.kind=="lottery"}?.amount
             }catch{self.flash("未完成："+error.localizedDescription);return nil}
@@ -207,6 +217,9 @@ final class MeadowShopViewController:UIViewController {
     private func reload() {
         guard let unit else{return}
         catalogPanel.isHidden=lotteryMode;detail.isHidden=lotteryMode;lottery.isHidden = !lotteryMode
+        bagButton.isHidden=onSwitchToBag==nil
+        let owed=rewardSpins.filter{$0==actor}.count
+        lottery.freeSpins=owed
         view.bringSubviewToFront(toast)
         let shopSite=node.map{CampaignSiteRules.configuration(node:$0,seed:session.engine.state.map.seed)?.kind == .shop} ?? false
         titleLabel.attributedText=MeadowGlassText.iconLine("cart.fill",shopSite ? "商店":"行商",size:23,tint:MeadowPreviewPalette.gold,weight:.heavy)
@@ -439,8 +452,10 @@ final class MeadowShopViewController:UIViewController {
         mode.frame=CGRect(x:228,y:11,width:228,height:36)
         close.frame=CGRect(x:w-58,y:8,width:48,height:42)
         timerButton.frame=CGRect(x:w-118,y:8,width:52,height:42)
-        let bx=mode.frame.maxX+18,bw=min(CGFloat(people.count)*104,w-130-bx)
-        buyers.frame=CGRect(x:w-130-max(80,bw),y:11,width:max(80,bw),height:36)
+        let right:CGFloat=bagButton.isHidden ? 130:212
+        bagButton.frame=CGRect(x:w-200,y:8,width:76,height:42)
+        let bx=mode.frame.maxX+18,bw=min(CGFloat(people.count)*104,w-right-bx)
+        buyers.frame=CGRect(x:w-right-max(80,bw),y:11,width:max(80,bw),height:36)
 
         let top=header.frame.maxY+12
         let panelW=min(420,max(320,b.width*0.35))

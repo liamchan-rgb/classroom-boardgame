@@ -32,6 +32,11 @@ public extension MeadowCampaignSession {
         guard canManageInventory else{throw GameError("请先暂停移动、结束战斗后抽奖。")}
         return try engine.apply(.campaignLottery(actor:actor,tier:tier),id:id)
     }
+    /// A free spin given as a prize (a mini-game win): any tier, no coins, anywhere outside a fight.
+    @discardableResult func spinRewardLottery(actor:String,tier:Int,id:String=UUID().uuidString)throws->OperationReceipt {
+        guard canManageInventory else{throw GameError("请先暂停移动、结束战斗后抽奖。")}
+        return try engine.apply(.rewardLottery(actor:actor,tier:tier),id:id)
+    }
     @discardableResult func resolveSite(actor:String,accept:Bool,id:String=UUID().uuidString)throws->OperationReceipt {
         guard canManageInventory,travel==nil else{throw GameError("请抵达地点、结束战斗后处理事件。")}
         return try engine.apply(.resolveCampaignSite(actor:actor,accept:accept),id:id)

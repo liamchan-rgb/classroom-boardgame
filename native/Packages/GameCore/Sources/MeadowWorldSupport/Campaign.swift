@@ -21,8 +21,9 @@ public enum MeadowMovementRules {
     }
 }
 /// A move that stopped at a node because the bar could not walk the next road.
+/// A move that ended because the bar ran out: at `node`, or on the road (`node` nil) on the way to `destination`.
 public struct MeadowTravelCut:Equatable {
-    public let node:Int,needed:Double,remaining:Double
+    public let node:Int?,destination:Int?
 }
 public struct MeadowCampaignMovement:Codable,Equatable {
     public var scale:Double?=MeadowMovementRules.distancePerMaximumAP
@@ -637,20 +638,7 @@ public final class MeadowCampaignSession {
                 }
             }
         }
-        guard let chosen else{throw GameError("已在此处，请选择新的目的地。")}
-        // A road is only started when the bar can walk all of it: the team never runs dry halfway and gets stuck on the road.
-        if requireMovement,let needed=firstLegNeed(chosen.0),needed>movementRemaining+0.000001 {
-            throw GameError("移动不够走到下一个地点：这段路要 \(MeadowMovementRules.stepText(needed)) 步，只剩 \(MeadowMovementRules.stepText(movementRemaining)) 步，请先补充移动。")
-        }
-        return chosen
-    }
-    /// Distance still to walk on the travel's current leg, when that leg starts at a node and fits in a full bar
-    /// (nil otherwise: mid-road restarts and over-long roads keep the old walk-until-empty rule).
-    func firstLegNeed(_ t:MeadowCampaignTravel)->Double? {
-        guard t.distance<=0.000001,t.leg+1<t.path.count,let p=MeadowCampaignSave.road(writer.snapshot.layout,from:t.path[t.leg],to:t.path[t.leg+1]) else{return nil}
-        let end=t.leg==t.path.count-2 ? (t.stopDistance ?? MeadowCampaignSave.length(p)):MeadowCampaignSave.length(p)
-        let needed=max(0,end-t.distance)
-        return needed<=movementCapacity+0.000001 ? needed:nil
+        guard let chosen else{throw GameError("已在此处，请选择新的目的地。")};return chosen
     }
     public func preview(to node:Int,actor:String="p1")->ActionPreview {
         do{let(t,cost)=try plannedTravel(node:node,point:nil,actor:actor);return .init(allowed:true,cost:Int(ceil(cost)),message:"路程约\(Int(ceil(cost))) · 移动剩余\(Int(movementRemaining))",path:t.path)}
@@ -676,13 +664,6 @@ public final class MeadowCampaignSession {
             let endpoint=last ? (t.stopDistance ?? MeadowCampaignSave.length(p)):MeadowCampaignSave.length(p)
             let needed=max(0,endpoint-t.distance)
             let available=movementRemaining
-            // Not enough left for the next road: the move ends here, at the node just reached (the rest of the bar stays).
-            if let need=firstLegNeed(t),need>available+0.000001 {
-                writer.snapshot.travel=nil
-                lastTravelCut = .init(node:t.path[t.leg],needed:need,remaining:available)
-                do{try writer.write(snapshot)}catch{writer.snapshot=before;writer.snapshot.travel?.paused=true;throw error}
-                break
-            }
             let step=min(remainder,needed,available),remainingAfterStep=max(0,available-min(remainder,needed,available))
             writer.snapshot.movement?.remaining=remainingAfterStep
             writer.snapshot.movement?.totalDistance+=step
@@ -694,11 +675,21 @@ public final class MeadowCampaignSession {
                     let nextLeg=t.leg+1
                     if nextLeg==t.path.count-1 {writer.snapshot.travel=nil}
                     else {writer.snapshot.travel?.leg=nextLeg;writer.snapshot.travel?.distance=0}
-                    if movementRemaining<=0.000001,writer.snapshot.travel != nil{writer.snapshot.travel?.paused=true}
+                    // The bar ran out right at a node: the move ends there (no half-finished route waits for a refill).
+                    if movementRemaining<=0.000001,writer.snapshot.travel != nil{writer.snapshot.travel=nil;lastTravelCut = .init(node:t.path[nextLeg],destination:t.path.last)}
                     let receipt=try engine.apply(.campaignMove(actors:t.actors,node:t.path[nextLeg]),id:t.id+"/"+String(nextLeg));receipts.append(receipt)
                 }else{
                     writer.snapshot.travel?.distance+=step
-                    if movementRemaining<=0.000001{writer.snapshot.travel?.paused=true;try writer.write(snapshot)}
+                    if movementRemaining<=0.000001 {
+                        // Ran out on the road: the walk stops at this spot as a reached road point, as far as the bar went.
+                        let at=t.distance+step
+                        if at<=0.000001 {writer.snapshot.travel=nil;lastTravelCut = .init(node:t.path[t.leg],destination:t.path.last)}
+                        else {
+                            writer.snapshot.travel=MeadowCampaignTravel(id:t.id,actors:t.actors,path:[t.path[t.leg],t.path[t.leg+1]],leg:0,distance:at,paused:true,stopDistance:at)
+                            lastTravelCut = .init(node:nil,destination:t.stopDistance==nil || !last ? t.path.last:nil)
+                        }
+                        try writer.write(snapshot)
+                    }
                 }
                 if movementRemaining<=0.000001{break}
             }catch{writer.snapshot=before;writer.snapshot.travel?.paused=true;throw error}
@@ -706,7 +697,7 @@ public final class MeadowCampaignSession {
         }
         return receipts
     }
-    /// Set when advanceTravel ended a move early because the bar could not cover the next road; the scene reads and clears it.
+    /// Set when advanceTravel ended a move because the bar ran out (at a node or on the road); the scene reads and clears it.
     public var lastTravelCut:MeadowTravelCut?
     public func setPaused(_ paused:Bool)throws {
         if !paused,let t=travel,t.leg==t.path.count-2,let stop=t.stopDistance,t.distance>=stop-0.000001{throw GameError("已到达道路选点，请点击新的目的地。")}
@@ -788,23 +779,14 @@ public final class MeadowCampaignSession {
         guard let unit=engine.state.units[id],unit.kind == .player else{throw GameError("成员不存在。")}
         // The operator moves with the team bar: switch to someone else first so each team keeps its own movement bar.
         if selectedPlayerID==id,let other=engine.state.players.first(where:{$0.id != id && $0.teamID==team}) ?? engine.state.players.first(where:{$0.id != id}) {try selectPlayer(other.id)}
-        let receipt=try engine.apply(.movePlayerToTeam(unit:id,team:team))
         // Roads never block a switch: the player steps off the old team's road and, when the new team is out on one,
-        // walks along with it from the leg it is on (the engine already put them on that leg's start node).
-        var next=snapshot,changed=false
-        func without(_ t:MeadowCampaignTravel)->MeadowCampaignTravel? {
-            let rest=t.actors.filter{$0 != id}
-            return rest.isEmpty ? nil:MeadowCampaignTravel(id:t.id,actors:rest,path:t.path,leg:t.leg,distance:t.distance,paused:t.paused,stopDistance:t.stopDistance)
-        }
-        func joined(_ t:MeadowCampaignTravel)->MeadowCampaignTravel {MeadowCampaignTravel(id:t.id,actors:t.actors+[id],path:t.path,leg:t.leg,distance:t.distance,paused:t.paused,stopDistance:t.stopDistance)}
-        if let t=next.travel,t.actors.contains(id) {next.travel=without(t);changed=true}
-        for (key,t) in next.parkedTravels ?? [:] where t.actors.contains(id) {next.parkedTravels?[key]=without(t);changed=true}
+        // walks along with it from the leg it is on (the engine puts them on that leg's start node).
         let mates=Set(engine.state.players.filter{$0.id != id && $0.teamID==team}.map(\.id))
-        if let t=next.travel,!mates.isDisjoint(with:t.actors) {next.travel=joined(t);changed=true}
-        else if let key=next.parkedTravels?.first(where:{!mates.isDisjoint(with:$0.value.actors)})?.key,let t=next.parkedTravels?[key] {next.parkedTravels?[key]=joined(t);changed=true}
-        if next.parkedTravels?.isEmpty==true {next.parkedTravels=nil}
-        if changed {try writer.write(next)}
-        return receipt
+        return try applyChangingRoads(.movePlayerToTeam(unit:id,team:team)){next in
+            Self.dropFromRoads(id,&next)
+            if let t=next.travel,!mates.isDisjoint(with:t.actors) {next.travel=Self.joining(id,t)}
+            else if let key=next.parkedTravels?.first(where:{!mates.isDisjoint(with:$0.value.actors)})?.key,let t=next.parkedTravels?[key] {next.parkedTravels?[key]=Self.joining(id,t)}
+        }
     }
     /// Mid-trip: `id` leaves the game (not during a battle, not while their team is on a road; one student stays).
     @discardableResult public func removePlayer(_ id:String)throws->OperationReceipt {
@@ -830,13 +812,10 @@ public final class MeadowCampaignSession {
         let mates=engine.state.players.filter{$0.teamID==team}
         let road=engine.state.battle==nil ? mates.lazy.compactMap{self.travel(holding:$0.id)}.first:nil
         let node=road.map{$0.path[$0.leg]} ?? (mates.first(where:\.isAlive) ?? mates.first)?.nodeID ?? engine.state.units[selectedPlayerID]?.nodeID ?? engine.state.map.nodes[0].id
-        _=try engine.apply(.playerEnter(unit:id,name:name,classID:classID,team:team,node:node,appearance:appearance,loadout:loadout))
-        if let road {
-            var next=snapshot
-            func joined(_ t:MeadowCampaignTravel)->MeadowCampaignTravel {MeadowCampaignTravel(id:t.id,actors:t.actors+[id],path:t.path,leg:t.leg,distance:t.distance,paused:t.paused,stopDistance:t.stopDistance)}
-            if next.travel?.id==road.id {next.travel=joined(road)}
-            else if let key=next.parkedTravels?.first(where:{$0.value.id==road.id})?.key {next.parkedTravels?[key]=joined(road)}
-            try writer.write(next)
+        _=try applyChangingRoads(.playerEnter(unit:id,name:name,classID:classID,team:team,node:node,appearance:appearance,loadout:loadout)){next in
+            guard let road else{return}
+            if next.travel?.id==road.id {next.travel=Self.joining(id,road)}
+            else if let key=next.parkedTravels?.first(where:{$0.value.id==road.id})?.key {next.parkedTravels?[key]=Self.joining(id,road)}
         }
         return id
     }
@@ -848,17 +827,28 @@ public final class MeadowCampaignSession {
             if let t=travel,t.actors.contains(id),!t.actors.contains(other.id),!t.paused {var next=snapshot;next.travel?.paused=true;try writer.write(next)}
             try selectPlayer(other.id)
         }
-        let receipt=try engine.apply(.playerLeave(unit:id))
-        var next=snapshot,changed=false
+        // Off every road first, so the one save the command writes never names someone who is gone.
+        return try applyChangingRoads(.playerLeave(unit:id)){Self.dropFromRoads(id,&$0)}
+    }
+    /// Runs a command that changes who walks on which road. The road records are edited first (and put back if the
+    /// command fails), so the save the command writes already matches: a record naming a player who left, or a player
+    /// now on another team, would be refused and the whole command rolled back.
+    private func applyChangingRoads(_ command:GameCommand,_ edit:(inout MeadowCampaignSave)->Void)throws->OperationReceipt {
+        let before=writer.snapshot
+        edit(&writer.snapshot)
+        if writer.snapshot.parkedTravels?.isEmpty==true {writer.snapshot.parkedTravels=nil}
+        do{return try engine.apply(command)}catch{writer.snapshot=before;throw error}
+    }
+    private static func joining(_ id:String,_ t:MeadowCampaignTravel)->MeadowCampaignTravel {
+        MeadowCampaignTravel(id:t.id,actors:t.actors+[id],path:t.path,leg:t.leg,distance:t.distance,paused:t.paused,stopDistance:t.stopDistance)
+    }
+    private static func dropFromRoads(_ id:String,_ save:inout MeadowCampaignSave) {
         func without(_ t:MeadowCampaignTravel)->MeadowCampaignTravel? {
             let rest=t.actors.filter{$0 != id}
             return rest.isEmpty ? nil:MeadowCampaignTravel(id:t.id,actors:rest,path:t.path,leg:t.leg,distance:t.distance,paused:t.paused,stopDistance:t.stopDistance)
         }
-        if let t=next.travel,t.actors.contains(id) {next.travel=without(t);changed=true}
-        for (key,t) in next.parkedTravels ?? [:] where t.actors.contains(id) {next.parkedTravels?[key]=without(t);changed=true}
-        if next.parkedTravels?.isEmpty==true {next.parkedTravels=nil}
-        if changed {try writer.write(next)}
-        return receipt
+        if let t=save.travel,t.actors.contains(id) {save.travel=without(t)}
+        for (key,t) in save.parkedTravels ?? [:] where t.actors.contains(id) {save.parkedTravels?[key]=without(t)}
     }
     @discardableResult public func startDuel(actor:String)throws->OperationReceipt {
         try requireOpenCampaign()

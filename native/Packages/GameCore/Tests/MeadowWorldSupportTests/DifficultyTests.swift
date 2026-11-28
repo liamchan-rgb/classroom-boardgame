@@ -167,7 +167,10 @@ final class DifficultyTests:XCTestCase {
     /// and a player on that road can switch away (standing with the new team). The result saves and reloads.
     func testTeamSwitchWorksWhileATeamIsOutOnARoad()throws {
         var c=MeadowMapConfiguration.suggested(total:8,seed:9);c.starts=2
-        let s=try MeadowCampaignSession.new(layout:MeadowMapGenerator.generate(c),studentClasses:["spellblade","ranger","adventurer"],studentTeams:[0,1,1])
+        let fresh=try MeadowCampaignSession.new(layout:MeadowMapGenerator.generate(c),studentClasses:["spellblade","ranger","adventurer"],studentTeams:[0,1,1])
+        // A persist hook makes every write run the full save check, as in the app.
+        var written:Data?
+        let s=try MeadowCampaignSession(save:fresh.snapshot,persist:{written=$0})
         let red=s.engine.state.units["p1"]!.teamID!,blue=s.engine.state.units["p2"]!.teamID!
         let start=s.engine.state.units["p1"]!.nodeID,next=s.engine.state.map.neighbors(start)[0]
         try s.beginTravel(to:next);try s.advanceTravel(distance:5);try s.setPaused(true)
@@ -177,8 +180,28 @@ final class DifficultyTests:XCTestCase {
         try s.movePlayer("p1",toTeam:blue)
         XCTAssertNil(s.travel(holding:"p1"));XCTAssertEqual(s.engine.state.units["p1"]!.nodeID,s.engine.state.units["p2"]!.nodeID)
         XCTAssertEqual(s.travel(holding:"p3")?.actors,["p3"])
-        let back=try MeadowCampaignSession(save:.decoded(s.snapshot.encoded()))
+        let back=try MeadowCampaignSession(save:.decoded(XCTUnwrap(written)))
         XCTAssertEqual(back.travel(holding:"p3")?.id,road.id);XCTAssertNil(back.travel(holding:"p1"))
+    }
+    /// The teacher (or a student) can leave while their team is stopped out on a road, also when that road is parked
+    /// because another team is being operated. The save is checked on every write here, as in the app.
+    func testLeavingWorksWhileOnARoad()throws {
+        var c=MeadowMapConfiguration.suggested(total:8,seed:9);c.starts=2
+        let fresh=try MeadowCampaignSession.new(layout:MeadowMapGenerator.generate(c),studentClasses:["spellblade","ranger"],studentTeams:[0,1])
+        var written:Data?
+        let s=try MeadowCampaignSession(save:fresh.snapshot,persist:{written=$0})
+        let blue=s.engine.state.units["p2"]!.teamID!
+        _=try s.enter(host:true,name:"林老师",classID:"adventurer",team:blue,appearance:nil)
+        try s.selectPlayer("p2")
+        let start=s.engine.state.units["p2"]!.nodeID,next=s.engine.state.map.neighbors(start)[0]
+        try s.beginTravel(to:next,actor:"p2");try s.advanceTravel(distance:5);try s.setPaused(true)
+        XCTAssertEqual(Set(s.travel(holding:"p7")?.actors ?? []),["p2","p7"])
+        try s.selectPlayer("p1")  // the blue road is now parked
+        XCTAssertNotNil(s.parkedTravels[blue])
+        try s.leave("p7")
+        XCTAssertNil(s.engine.state.units["p7"]);XCTAssertEqual(s.parkedTravels[blue]?.actors,["p2"])
+        XCTAssertNoThrow(try MeadowCampaignSession(save:.decoded(XCTUnwrap(written))))
+        try s.engine.undo();XCTAssertNotNil(s.engine.state.units["p7"])
     }
     /// Raid-style personal loot: everyone in the fight gets the kill score (3, as much as a near cache), coins are shared
     /// out, and each fighter rolls the item drops on their own. Kill score lines up with supply caches.

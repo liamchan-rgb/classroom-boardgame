@@ -637,13 +637,14 @@ final class GameScene: SKScene {
                 do {
                     let amount=delta*Double(speed*projection)
                     let receipts=try classroomAdvanceTravel?(amount) ?? campaign.advanceTravel(distance:amount)
-                    // The bar could not cover the next road: the move ended at the node just reached.
-                    if let cut=campaign.lastTravelCut,campaign.travel==nil {
+                    // The bar ran out: the move ended as far as it went (at a node, or at a spot on the road).
+                    if let cut=campaign.lastTravelCut {
                         campaign.lastTravelCut=nil
-                        let name=campaign.engine.state.map.nodes.first{$0.id==cut.node}?.name ?? "这里"
+                        func name(_ id:Int?)->String? {id.flatMap{n in campaign.engine.state.map.nodes.first{$0.id==n}?.name}}
                         refreshCampaign();onCampaignChanged?()
-                        onCampaignError?("移动不够走下一段路（要 \(MeadowMovementRules.stepText(cut.needed)) 步，剩 \(MeadowMovementRules.stepText(cut.remaining)) 步），队伍停在\(name)。补充移动后再选目的地。")
-                        onArrival?(cut.node)
+                        let place=name(cut.node) ?? (name(cut.destination).map{"去\($0)的路上"} ?? "路上")
+                        onCampaignError?("移动用完了，队伍走到\(place)停下。补充移动后再点目的地。")
+                        if let node=cut.node,campaign.travel==nil {onArrival?(node)}
                     } else if let receipt=receipts.last {
                         refreshCampaign();onCampaignChanged?()
                         let coins=receipt.after.players.reduce(0){$0+$1.coins}-receipt.before.players.reduce(0){$0+$1.coins}
@@ -655,7 +656,7 @@ final class GameScene: SKScene {
             }
             updateActors(before:previous,seconds:delta)
             if (wasMoving || campaign.isMoving) && environmentTime-lastCampaignUIUpdate>=0.1 {lastCampaignUIUpdate=environmentTime;refreshCampaignRoute();onCampaignChanged?()}
-            if wasMoving && !campaign.isMoving && campaign.travel != nil && campaign.movementRemaining<=0.000001{onCampaignError?("移动条耗尽，点击补充移动后可继续原路线。")}
+            if wasMoving && !campaign.isMoving && campaign.hasPendingTravel && campaign.movementRemaining<=0.000001{onCampaignError?("移动条耗尽，点击补充移动后可继续原路线。")}
             if wasMoving != campaign.isMoving {onPlaybackChanged?(campaign.isMoving);onCampaignChanged?()}
         } else {
             let previous = actors.indices.map { simulation.point(for: $0) }

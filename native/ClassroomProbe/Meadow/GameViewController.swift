@@ -1178,6 +1178,7 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
             // The shop screen: item cards with pictures and prices, buyer switch, buy / sell one at a time.
             let shop=MeadowShopViewController(session:campaign,node:node.id,actor:actor)
             shop.onTrade={[weak self] _ in self?.scene.refreshCampaign();self?.refreshCampaignStatus()}
+            shop.onSwitchToBag={[weak self,weak shop] id in shop?.dismiss(animated:false){self?.openCampaignInventory(actor:id)}}
             if let old=presentedViewController as? UIAlertController {old.dismiss(animated:true){[weak self] in self?.present(shop,animated:true)}}
             else {present(shop,animated:true)}
         }else if kind == .satchel,campaign.isQuizNode(node.id) {
@@ -1504,26 +1505,29 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         menu.addAction(UIAlertAction(title:"关闭",style:.cancel));menu.popoverPresentationController?.sourceView=campaignTeam;menu.popoverPresentationController?.sourceRect=campaignTeam.bounds;present(menu,animated:true)
     }
     /// The shop opens anywhere during exploration: a moving party is paused first; prices follow the buyer's place.
-    private func openTravellingShop() {
+    /// The shop; with `rewardSpins` it opens on the prize wheel and those students spin for free (a mini-game win).
+    func openTravellingShop(actor chosen:String?=nil,rewardSpins:[String]=[],onRewardSpinUsed:((String)->Void)?=nil) {
         guard ready,let campaign else{showCampaignMessage("画面准备中，请稍候。");return}
         if battlePreviewActive {classroomPreviewEncounter(nil)}
         if campaign.isMoving {try? campaign.setPaused(true);scene.refreshCampaign();refreshCampaignStatus()}
-        let actor=scene.selectedCampaignPlayerID
+        let actor=chosen ?? scene.selectedCampaignPlayerID
         guard campaign.canManageInventory,let unit=campaign.engine.state.units[actor],unit.isAlive else{showCampaignMessage(campaign.engine.state.battle != nil ? "战斗中不能交易。":"请选择存活的成员。");return}
         cancelNodeSelection()
         let shop=MeadowShopViewController(session:campaign,node:unit.nodeID,actor:actor)
+        shop.rewardSpins=rewardSpins;shop.onRewardSpinUsed=onRewardSpinUsed
         shop.onTrade={[weak self] _ in self?.scene.refreshCampaign();self?.refreshCampaignStatus()}
+        shop.onSwitchToBag={[weak self,weak shop] id in shop?.dismiss(animated:false){self?.openCampaignInventory(actor:id)}}
         present(shop,animated:true)
     }
-    private func openCampaignInventory() {
+    private func openCampaignInventory(actor chosen:String?=nil) {
         guard ready,let campaign else{showCampaignMessage("画面准备中，请稍候。");return}
         guard classroomMode || presentedViewController==nil else{return}
         if battlePreviewActive {classroomPreviewEncounter(nil)}
         if campaign.isMoving {try? campaign.setPaused(true);scene.refreshCampaign();refreshCampaignStatus()}
         guard campaign.canManageInventory else{showCampaignMessage("请先结束战斗再打开行囊。");return}
         cancelNodeSelection()
-        let screen=MeadowCampaignInventoryViewController(session:campaign,actor:scene.selectedCampaignPlayerID)
-        if classroomMode {classroomInventoryChanged?(scene.selectedCampaignPlayerID)}
+        let screen=MeadowCampaignInventoryViewController(session:campaign,actor:chosen ?? scene.selectedCampaignPlayerID)
+        if classroomMode {classroomInventoryChanged?(chosen ?? scene.selectedCampaignPlayerID)}
         screen.onActorChanged={ [weak self] id in self?.classroomInventoryChanged?(id) }
         screen.performEquip={ [weak self] actor,slot,item in
             guard let self else{return}
@@ -1539,6 +1543,7 @@ final class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         }
         screen.onChange={ [weak self] in self?.scene.refreshCampaign();self?.refreshCampaignStatus(allowBattleOpen:false) }
         screen.onClose={ [weak self] in self?.classroomInventoryChanged?(nil);self?.refreshCampaignStatus() }
+        screen.onSwitchToShop={[weak self,weak screen] id in screen?.dismiss(animated:false){self?.classroomInventoryChanged?(nil);self?.openTravellingShop(actor:id)}}
         present(screen,animated:true)
     }
     enum TeacherOperation {case inventory,shop,interact,refill,team,route,editNode(Int),pauseOrResume,save,zoom(Int),pan(CGPoint)}

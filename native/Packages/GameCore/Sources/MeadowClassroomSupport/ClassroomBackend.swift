@@ -71,8 +71,11 @@ public final class ClassroomGameBackend {
         guard let actor=model.current,model.state.units[actor]?.kind == .player else{throw GameError("请等待怪物行动结束。")}
         let items:[PartyAction]=PartyAction.allConsumables+[.endTurn]
         guard model.playerActions().contains(action) || items.contains(action) else{throw GameError("当前角色没有此技能。")}
-        let ally=model.state.units[selected]?.kind == .player ? selected:actor
-        let enemy=model.state.units[selected]?.kind == .monster ? selected:(model.state.battle?.queue.first{model.state.units[$0]?.kind == .monster && model.state.units[$0]?.isAlive==true} ?? "")
+        // Friend or foe by the battle's own rule, so a team duel (heroes on both sides) finds its targets too.
+        let state=model.state,me=state.units[actor]!,picked=state.units[selected]
+        func foe(_ u:GameUnit)->Bool {u.isAlive && GameRules.enemies(me,u,in:state) && state.battle?.queue.contains(u.id)==true}
+        let ally=picked.map{$0.kind == .player && !GameRules.enemies(me,$0,in:state)}==true ? selected:actor
+        let enemy=picked.map(foe)==true ? selected:(state.battle?.queue.compactMap{state.units[$0]}.first(where:foe)?.id ?? "")
         let target=model.preferredTarget(for:action,ally:ally,enemy:enemy)
         let preview=model.preview(action,target:target)
         guard preview.allowed else{throw GameError(preview.message)}

@@ -49,7 +49,7 @@ public enum MeadowJourneyAudit {
             if s.engine.state.units[actor]!.nodeID==target && s.travel==nil{return true}
             // A coin refill is a flat price now; when the party cannot afford it, the teacher's free refill stands in
             // (in class the teacher also grants movement from the picture-book bar).
-            // A move stops at the last node when the bar cannot finish the next road: refill there and set off again.
+            // A move ends wherever the bar runs out (a node or a spot on the road): refill there and set off again.
             func setOff()throws {
                 do{try s.beginTravel(to:target,actor:actor)}
                 catch{try s.refillMovement(usingCoins:s.movementPurchaseCoins>0);try s.beginTravel(to:target,actor:actor)}
@@ -57,8 +57,8 @@ public enum MeadowJourneyAudit {
             try setOff()
             if resumes==0 {try s.advanceTravel(distance:10);try restore();if s.travel != nil{try s.setPaused(false)}}
             for _ in 0..<500 {
-                if s.travel==nil {
-                    if s.engine.state.units[actor]!.nodeID==target{break}
+                if s.travel==nil || !s.hasPendingTravel {
+                    if s.travel==nil,s.engine.state.units[actor]!.nodeID==target{break}
                     try setOff()
                 }
                 if !s.isMoving {

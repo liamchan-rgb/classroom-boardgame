@@ -9,6 +9,12 @@ final class MeadowLotteryView: UIView {
     var onSpin: ((Int) -> Int?)?
     var onFinished: ((Int, Int) -> Void)?
     private(set) var tier = 0
+    /// Free prize spins the current member still has (a mini-game win): the button says so and costs nothing.
+    var freeSpins = 0 { didSet { if freeSpins != oldValue { updateSpinTitle() } } }
+    private func updateSpinTitle() {
+        let t = CampaignLottery.tiers[tier]
+        spin.configuration?.title = freeSpins > 0 ? "奖励 · 免费抽一次（剩 \(freeSpins) 次）" : "抽一次 · \(t.cost) 金币"
+    }
 
     private let tiers = UISegmentedControl(items: CampaignLottery.tiers.map { "\($0.title)档 · \($0.cost)" })
     private let wheel = MeadowPrizeWheelView()
@@ -104,7 +110,7 @@ final class MeadowLotteryView: UIView {
         let list = Self.slices(t, catalog: catalog)
         wheel.slices = list
         card.hide()
-        spin.configuration?.title = "抽一次 · \(t.cost) 金币"
+        updateSpinTitle()
         note.text = "点击中心「抽!」旋转 · 极窄扇面以品级徽标简略呈现，详见右侧奖池"
         rebuildPoolLedger(tier: t, slices: list)
         setNeedsLayout()

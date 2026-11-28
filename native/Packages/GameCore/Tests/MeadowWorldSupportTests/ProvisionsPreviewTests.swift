@@ -107,8 +107,8 @@ final class ProvisionsPreviewTests:XCTestCase {
     /// short at a node sets off again.
     private func finishPaid(_ s:MeadowCampaignSession,to goal:Int)throws {
         for _ in 0..<300 {
-            if s.travel==nil {
-                if s.engine.state.units[s.selectedPlayerID]!.nodeID==goal{break}
+            if s.travel==nil || !s.hasPendingTravel {
+                if s.travel==nil,s.engine.state.units[s.selectedPlayerID]!.nodeID==goal{break}
                 do{try s.beginTravel(to:goal)}catch{try s.refillMovement(usingCoins:s.movementPurchaseCoins>0);try s.beginTravel(to:goal)}
             }
             // A coin refill is a flat 80; when the party cannot pay, the teacher's free refill stands in.

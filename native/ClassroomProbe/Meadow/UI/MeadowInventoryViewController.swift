@@ -717,6 +717,9 @@ final class MeadowCampaignInventoryViewController:UIViewController {
     var performEquip:((String,ItemSlot,String?)throws->Void)?
     var onChange:(()->Void)?,onClose:(()->Void)?
     var onActorChanged:((String)->Void)?
+    /// Swap to the shop for the member shown (same page spot, no trip back to the map).
+    var onSwitchToShop:((String)->Void)?
+    private let shopButton=MeadowPreviewPalette.button("商店")
     private var actor:String,target:String,selected:String?,filter="all"
 
     private let header=UIView(),left=UIScrollView(),middle=UIView(),right=UIView()
@@ -758,7 +761,8 @@ final class MeadowCampaignInventoryViewController:UIViewController {
         [header,left,middle,right].forEach{MeadowPreviewPalette.stylePanel($0,liveBlur:true);view.addSubview($0)}
         titleLabel.attributedText=MeadowGlassText.iconLine("bag.fill","行囊",size:23,tint:MeadowPreviewPalette.gold,weight:.heavy)
         saveLabel.textColor=MeadowPreviewPalette.gold;saveLabel.alpha=0
-        [titleLabel,saveLabel,members,refillActions,close,timerButton].forEach(header.addSubview)
+        [titleLabel,saveLabel,members,refillActions,close,timerButton,shopButton].forEach(header.addSubview)
+        shopButton.addAction(UIAction{[weak self] _ in guard let self else{return};self.onSwitchToShop?(self.actor)},for:.touchUpInside)
 
         // Hero try-on pedestal
         heroPedestal.backgroundColor=UIColor.white.withAlphaComponent(0.55)
@@ -982,9 +986,11 @@ final class MeadowCampaignInventoryViewController:UIViewController {
         close.frame=CGRect(x:w-58,y:8,width:48,height:42)
         refillActions.frame=CGRect(x:w-162,y:8,width:96,height:42)
         timerButton.frame=CGRect(x:w-222,y:8,width:52,height:42)
-        let mx:CGFloat=134
-        let mw=max(140,min(540,w-234-mx))
-        members.frame=CGRect(x:w-234-mw,y:11,width:mw,height:36)
+        shopButton.isHidden=onSwitchToShop==nil
+        shopButton.frame=CGRect(x:w-304,y:8,width:76,height:42)
+        let mx:CGFloat=134,edge:CGFloat=shopButton.isHidden ? 234:316
+        let mw=max(140,min(540,w-edge-mx))
+        members.frame=CGRect(x:w-edge-mw,y:11,width:mw,height:36)
 
         // Left column layout (tight, zero wasted vertical space)
         let lw2=left.bounds.width

@@ -27,10 +27,13 @@ import MeadowWorldSupport
     /// least two prizes.
     func removePrize(_ index: Int) throws {
         var w = current
-        guard w.prizes.indices.contains(index) else { return }
-        guard w.prizes.count > 2 else { throw GameError("转盘至少要留两个格子。") }
-        w.prizes.remove(at: index)
-        guard w.totalWeight > 0 else { throw GameError("剩下的格子概率都为0，不能再移除。") }
+        try w.removePrize(index)
+        try put(w, replacing: w.name)
+    }
+    /// Puts a removed slice back (`at` in the removed list), or all of them (`at` nil).
+    func restorePrize(_ at: Int?) throws {
+        var w = current
+        if let at { try w.restorePrize(at) } else { try w.restoreAll() }
         try put(w, replacing: w.name)
     }
     /// Weights from the slice sizes in the screenshots (degrees of the circle); prizes outside the game.
@@ -205,6 +208,8 @@ final class CustomWheelViewController: UIViewController {
     private let spin = MeadowPreviewPalette.iconButton("sparkles", "转！", prominent: true)
     private let history = MeadowPreviewPalette.iconButton("clock.arrow.circlepath", "历史")
     private let removeWon = MeadowPreviewPalette.iconButton("minus.circle", "移除这一格")
+    /// Slices taken off this wheel: put one back, or all of them.
+    private let restoreRemoved = MeadowPreviewPalette.iconButton("arrow.uturn.backward.circle", "恢复格子")
     /// The slice just won (on the wheel as it was spun), for 移除这一格.
     private var lastWin: (wheel: String, slot: Int)?
     private let wheel = MeadowPrizeWheelView()
@@ -245,7 +250,8 @@ final class CustomWheelViewController: UIViewController {
         legendScroll.addSubview(legendContent)
         [legendTitle, legendScroll].forEach(legendPanel.addSubview)
 
-        [wheel, spin, removeWon, result, legendPanel, card].forEach(stage.addSubview)
+        [wheel, spin, removeWon, restoreRemoved, result, legendPanel, card].forEach(stage.addSubview)
+        restoreRemoved.showsMenuAsPrimaryAction = true
         history.addAction(UIAction { [weak self] _ in self?.openHistory() }, for: .touchUpInside)
         removeWon.addAction(UIAction { [weak self] _ in self?.removeLastWin() }, for: .touchUpInside)
         removeWon.isHidden = true
@@ -273,6 +279,15 @@ final class CustomWheelViewController: UIViewController {
         let slices = w.slices(catalog: session.engine.catalog)
         wheel.slices = slices; card.hide(); result.text = nil
         lastWin = nil; removeWon.isHidden = true
+        let gone = w.removed ?? []
+        restoreRemoved.isHidden = gone.isEmpty
+        restoreRemoved.configuration?.title = "已移除 \(gone.count) 格"
+        restoreRemoved.menu = UIMenu(title: "恢复被移除的格子", children: [
+            UIAction(title: "全部恢复（\(gone.count) 格）", image: UIImage(systemName: "arrow.uturn.backward.circle.fill")) { [weak self] _ in self?.restore(nil) },
+            UIMenu(title: "单独恢复", options: .displayInline, children: gone.indices.reversed().map { i in
+                UIAction(title: gone[i].prize.title, image: UIImage(systemName: "arrow.uturn.backward")) { [weak self] _ in self?.restore(i) }
+            }),
+        ])
         wheelButton.setTitle("  \(w.name)  ▾", for: .normal)
         wheelButton.menu = UIMenu(children: library.wheels.map { item in
             UIAction(title: item.name, state: item.name == w.name ? .on : .off) { [weak self] _ in self?.library.currentName = item.name; self?.loadWheel() }
@@ -362,7 +377,7 @@ final class CustomWheelViewController: UIViewController {
         guard !wheel.spinning else { return }
         let w = library.current
         do {
-            let receipt = try session.spinCustomWheel(actor: actor, wheel: w)
+            let receipt = try session.spinCustomWheel(actor: actor, wheel: w.forSpin)
             guard let slot = receipt.events.first(where: { $0.kind == "customWheel" })?.amount else { return }
             spin.isEnabled = false; members.isEnabled = false; wheelButton.isEnabled = false; edit.isEnabled = false
             card.hide(); result.text = nil; lastWin = nil; removeWon.isHidden = true
@@ -392,6 +407,16 @@ final class CustomWheelViewController: UIViewController {
             let keep = result.text
             loadWheel(); onChange?()
             result.text = (keep.map { $0 + "\n" } ?? "") + "已从「\(library.current.name)」移除：\(title)"
+        } catch { result.text = error.localizedDescription }
+    }
+
+    private func restore(_ at: Int?) {
+        guard !wheel.spinning else { return }
+        let names = (library.current.removed ?? []).enumerated().filter { at == nil || $0.offset == at }.map(\.element.prize.title)
+        do {
+            try library.restorePrize(at)
+            loadWheel(); onChange?()
+            result.text = "已恢复到「\(library.current.name)」：" + names.joined(separator: "、")
         } catch { result.text = error.localizedDescription }
     }
 
@@ -438,6 +463,7 @@ final class CustomWheelViewController: UIViewController {
             wheel.frame = CGRect(x: (leftW - size) / 2, y: 2, width: size, height: size)
             spin.frame = CGRect(x: leftW / 2 - 116, y: wheel.frame.maxY + 6, width: 232, height: 50)
             removeWon.frame = CGRect(x: spin.frame.maxX + 10, y: spin.frame.minY + 3, width: 142, height: 44)
+            restoreRemoved.frame = CGRect(x: max(4, spin.frame.minX - 162), y: spin.frame.minY + 3, width: 152, height: 44)
             result.frame = CGRect(x: 8, y: spin.frame.maxY + 4, width: leftW - 16, height: 48)
 
             legendPanel.isHidden = false
@@ -468,6 +494,7 @@ final class CustomWheelViewController: UIViewController {
             wheel.frame = CGRect(x: (sw - size) / 2, y: 0, width: size, height: size)
             spin.frame = CGRect(x: sw / 2 - 116, y: wheel.frame.maxY + 4, width: 232, height: 52)
             removeWon.frame = CGRect(x: spin.frame.maxX + 10, y: spin.frame.minY + 4, width: 144, height: 44)
+            restoreRemoved.frame = CGRect(x: max(4, spin.frame.minX - 164), y: spin.frame.minY + 4, width: 154, height: 44)
             result.frame = CGRect(x: 10, y: spin.frame.maxY + 4, width: sw - 20, height: 50)
             let cw = min(310, sw - 40)
             card.frame = CGRect(x: (sw - cw) / 2, y: wheel.frame.midY - 120, width: cw, height: 244)

@@ -10,6 +10,30 @@ final class ClassroomBackendTests:XCTestCase {
         try backend.install(MeadowCampaignSession.new(layout:layout),role:.teacher)
         return backend
     }
+    /// Six students against the teacher in a team duel: whoever acts, an attack finds someone on the other side
+    /// (the target picker used to look only for monsters and found nobody in a duel).
+    func testDuelTargetsTheOtherSideSixAgainstTheTeacher()throws {
+        var c=MeadowMapConfiguration.suggested(total:8,seed:9);c.starts=2
+        let fresh=try MeadowCampaignSession.new(layout:MeadowMapGenerator.generate(c),studentClasses:Array(repeating:"adventurer",count:6),studentTeams:[0,0,0,0,0,1])
+        let red=fresh.engine.state.units["p1"]!.teamID!,blue=fresh.engine.state.units["p6"]!.teamID!
+        _=try fresh.enter(host:true,name:"林老师",classID:"adventurer",team:blue,appearance:nil)
+        try fresh.movePlayer("p6",toTeam:red)
+        var save=fresh.snapshot;save.archive.state.units["p7"]!.nodeID=save.archive.state.units["p1"]!.nodeID
+        let session=try MeadowCampaignSession(save:save,persist:{_ in})
+        let backend=ClassroomGameBackend();try backend.install(session,role:.teacher)
+        try session.startDuel(actor:"p1")
+        let model=try backend.battleModel(role:.teacher)
+        XCTAssertEqual(Set(model.duelLeft+model.duelRight),["p1","p2","p3","p4","p5","p6","p7"])
+        XCTAssertEqual(min(model.duelLeft.count,model.duelRight.count),1)
+        for _ in 0..<8 {
+            guard let actor=model.current,let me=model.state.units[actor] else{break}
+            let target=try backend.battleTarget(for:.attack,selected:actor,role:.teacher)
+            let other=try XCTUnwrap(model.state.units[target])
+            XCTAssertTrue(GameRules.enemies(me,other,in:model.state),"\(actor) → \(target)")
+            XCTAssertEqual(actor=="p7",target != "p7" && other.teamID==red)
+            _=try session.engine.apply(.endTurn(actor:actor,timedOut:false))
+        }
+    }
     func testDisplayCannotGenerateMapsOrInstallGame()throws {
         let backend=ClassroomGameBackend()
         XCTAssertThrowsError(try backend.generate(.suggested(total:10),role:.publicDisplay))
@@ -66,14 +90,7 @@ final class ClassroomBackendTests:XCTestCase {
     func testBattleBindingUsesOneExistingEngineAndDoesNotRoll()throws {
         let b=try fixture(),c=try XCTUnwrap(b.campaign)
         let node=try XCTUnwrap(c.engine.state.map.nodes.first{$0.kind == .combat})
-        try c.beginTravel(to:node.id)
-        var count=0
-        while c.travel != nil {
-            count += 1;XCTAssertLessThan(count,100);if count>=100{return}
-            if c.movementRemaining<0.000001{try b.refill(usingCoins:false,role:.teacher)}
-            if !c.isMoving{try c.setPaused(false)}
-            _=try b.advanceTravel(distance:10000,role:.teacher)
-        }
+        try c.walkAll(to:node.id)
         _=try c.interactCurrentNode()
         let before=c.snapshot
         let one=try b.battleModel(role:.teacher),two=try b.battleModel(role:.teacher)

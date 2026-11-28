@@ -38,7 +38,7 @@ public enum MeadowHistoryCategory:String,CaseIterable {case all,combat,travel,re
         switch command {
         case .startCampaignDuel,.resetDuelLimits,.startBattle,.attack,.cast,.monsterStep,.endTurn,.joinMonster,.reorderQueue,.finishBattle,.rescue,.retreatAfterDefeat:return .combat
         case .campaignMove,.move,.interactCampaignNode,.resolveCampaignSite,.answerCampaignQuiz,.recordCampaignQuiz,.editQuizRecord,.removeQuizRecord,.refillCampaignMovement:return .travel
-        case .tradeCampaignSite,.campaignLottery,.customWheel,.editPlayer,.grantPlayerResources,.grantPlayerSupplies,.grantPlayerRewards,.givePlayerResource,.editResources,.useItem,.reward,.setHealth,.revive,.equip,.refillExploration:return .resources
+        case .tradeCampaignSite,.campaignLottery,.rewardLottery,.customWheel,.editPlayer,.grantPlayerResources,.grantPlayerSupplies,.grantPlayerRewards,.givePlayerResource,.editResources,.useItem,.reward,.setHealth,.revive,.equip,.refillExploration:return .resources
         case .configureTeams,.mergeTeams,.transferTeamResource,.teacherTransferTeamResource,.addHost,.playerEnter,.playerLeave,.changeTeam,.movePlayerToTeam,.removePlayer:return .team
         case .applyPlayerProfile:return .appearance
         case .configureCampaignSite,.configureNodeEncounter,.configureNodeReward,.resetNodeReward,.setDifficulty:return .configuration
@@ -115,6 +115,7 @@ public struct MeadowHistoryIndex:Identifiable,Equatable {
         case .answerCampaignQuiz(_,let correct,_):return correct ? "答题正确":"答题未答对"
         case .recordCampaignQuiz(let r):return "答题 · \(r.attempt.playerName) · \(r.attempt.rightCount)/\(r.attempt.correct.count)"
         case .campaignLottery(_,let tier):return "商店抽奖 · "+((try? CampaignLottery.tier(tier).title) ?? "")+"档"
+        case .rewardLottery(_,let tier):return "奖励抽奖（免费） · "+((try? CampaignLottery.tier(tier).title) ?? "")+"档"
         case .customWheel(_,let wheel):return "转盘 · "+wheel.name
         case .editQuizRecord(_,_,let correct):return correct.allSatisfy{$0} ? "修改作答 · 改为答对":"修改作答 · 改为答错"
         case .removeQuizRecord:return "删除作答记录"
