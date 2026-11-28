@@ -299,6 +299,39 @@ public struct MemoryMatch: Equatable {
         }
         return result
     }
+    /// The difficulty (1–2) of each candidate card, by its English side (lowercased): a kept pair pays by it.
+    public static func levels(_ bank: [QuizQuestion], among indices: [Int]) -> [String: Int] {
+        var result: [String: Int] = [:]
+        for i in indices where bank.indices.contains(i) {
+            let q = bank[i]
+            guard q.type == .flashcard, q.level <= 2, let w = QuizReport.word(q, part: 0) else { continue }
+            let key = w.word.trimmingCharacters(in: .whitespaces).lowercased()
+            if result[key] == nil { result[key] = q.level }
+        }
+        return result
+    }
+}
+
+// MARK: Rewards
+
+/// What the games pay besides the questions' own rewards. Every success in a game (a pair kept, a race move, a round
+/// won at the arena, the camp held) pays the success's difficulty like a right answer: coins and one movement step
+/// for the team. A won game ends with a spin of a prize wheel the teacher picks; a fallen boss leaves every student
+/// at least one epic or legendary piece of equipment.
+public enum MiniGameRewards {
+    public static func coins(level: Int) -> Int { QuizRewards.baseCoins[min(3, max(1, level)) - 1] }
+    public static let steps = QuizRewards.steps
+    /// One piece from `pool` (epic and better equipment) for each student: all different while the pool lasts, then
+    /// drawn again. Empty pool → nothing.
+    public static func bossLoot(students: [String], pool: [String], dice: inout MiniGameDice) -> [String: String] {
+        guard !pool.isEmpty else { return [:] }
+        var bag: [String] = [], result: [String: String] = [:]
+        for id in students {
+            if bag.isEmpty { bag = dice.shuffle(pool.sorted()) }
+            result[id] = bag.removeLast()
+        }
+        return result
+    }
 }
 
 // MARK: 擂台王

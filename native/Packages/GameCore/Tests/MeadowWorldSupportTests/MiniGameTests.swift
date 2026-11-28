@@ -284,3 +284,32 @@ final class MiniGameTests: XCTestCase {
         XCTAssertEqual(MemoryMatch.gridDimensions(cardCount: 24).rows, 4)
     }
 }
+
+final class MiniGameRewardTests: XCTestCase {
+    func testSuccessPaysLikeARightAnswerByDifficulty() {
+        XCTAssertEqual(MiniGameRewards.coins(level: 1), 10)
+        XCTAssertEqual(MiniGameRewards.coins(level: 2), 20)
+        XCTAssertEqual(MiniGameRewards.coins(level: 3), 30)
+        XCTAssertEqual(MiniGameRewards.coins(level: 9), 30)
+        XCTAssertEqual(MiniGameRewards.steps, 1)
+    }
+
+    func testMemoryPairLevelsByEnglishSide() {
+        let card = { (p: String, a: String, d: Int) in QuizQuestion(prompt: p, options: [], answer: 0, kind: .flashcard, difficulty: d, items: [QuizItem(options: [a], answer: 0)]) }
+        let bank = [card("cat", "猫", 1), card("狗", "dog", 2), card("I like books.", "我喜欢书。", 3)]
+        let levels = MemoryMatch.levels(bank, among: Array(bank.indices))
+        XCTAssertEqual(levels, ["cat": 1, "dog": 2])
+    }
+
+    func testBossLootGivesEveryStudentOnePieceDistinctWhileThePoolLasts() {
+        var dice = MiniGameDice(seed: 4)
+        let pool = ["starlightBlade", "dragonArmor", "legendaryStaff"]
+        let loot = MiniGameRewards.bossLoot(students: ["p1", "p2", "p3"], pool: pool, dice: &dice)
+        XCTAssertEqual(Set(loot.keys), ["p1", "p2", "p3"])
+        XCTAssertEqual(Set(loot.values), Set(pool))
+        let many = MiniGameRewards.bossLoot(students: ["p1", "p2", "p3", "p4", "p5"], pool: pool, dice: &dice)
+        XCTAssertEqual(many.count, 5)
+        XCTAssertTrue(many.values.allSatisfy(pool.contains))
+        XCTAssertTrue(MiniGameRewards.bossLoot(students: ["p1"], pool: [], dice: &dice).isEmpty)
+    }
+}

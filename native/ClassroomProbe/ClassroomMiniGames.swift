@@ -26,11 +26,11 @@ import MeadowBattleSupport
         }
         var rule: String {
             switch self {
-            case .boss: "全班齐攻Boss：答对掷骰攻击（★d4 ★★d6 ★★★d10），答对不到一半Boss反击掉1颗心！"
-            case .camp: "全对打退怪物1步，答对过半守住不动，不到一半怪物逼近1步；撑过12题营地安全！"
-            case .race: "轮到的队答题，答对掷骰前进；踩礼物转转盘，踩闪电再冲3格，踩陷阱下回答错退2格。"
-            case .memory: "轮流翻两张牌，英文和中文配对后大声读出来，读对拿走宝箱并再翻一次！"
-            case .arena: "擂主与挑战者同答一题：挑战者独对或答对★★★即登台；连胜3场转转盘！"
+            case .boss: "全班齐攻Boss：答对掷骰攻击（★d4 ★★d6 ★★★d10），答对不到一半Boss反击掉1颗心；打倒Boss每人得一件史诗以上装备！"
+            case .camp: "全对打退怪物1步，答对过半守住不动，不到一半怪物逼近1步；每守住一题全班得金币和行动，撑过12题营地安全并转转盘！"
+            case .race: "轮到的队答题，答对掷骰前进；踩礼物转转盘，踩闪电再冲3格，踩陷阱下回答错退2格；每次前进得金币和行动，冲线转转盘。"
+            case .memory: "轮流翻两张牌，英文和中文配对后大声读出来，读对拿走宝箱（金币和行动）并再翻一次，获胜转转盘！"
+            case .arena: "擂主与挑战者同答一题：挑战者独对或答对★★★即登台；每赢一场得金币和行动，连胜3场转转盘！"
             }
         }
     }
@@ -73,6 +73,13 @@ import MeadowBattleSupport
     /// The line under the board: what just happened.
     @Published var banner: String?
     @Published var rewarded = false
+    /// Game rewards (besides the questions' own): a success pays its difficulty (coins + a movement step), a win
+    /// opens the prize wheel, a fallen boss leaves epic gear. Handled by the coordinator.
+    enum Payout { case pay(ids: [String], level: Int, why: String), wheel(ids: [String], why: String), bossLoot }
+    var onPayout: ((Payout) -> Void)?
+    /// Difficulty of each memory pair, by its English side (lowercased).
+    private var memoryLevels: [String: Int] = [:]
+    private func payout(_ p: Payout) { DispatchQueue.main.async { [weak self] in self?.onPayout?(p) } }
     @Published private(set) var hasPendingRound = false
     private var dice: MiniGameDice
     private var memoryFXCounter = 0
@@ -128,6 +135,7 @@ import MeadowBattleSupport
         studentTints = st
         let pool = MemoryMatch.candidates(bank, among: course)
         memoryPool = pool
+        memoryLevels = MemoryMatch.levels(bank, among: course)
         memoryAvailablePairs = min(12, pool.count)
         memorySides = sides
         // Prewarm full-body battle sprites & all mini-game pixel VFX in background for zero first-hit hitch.
@@ -271,7 +279,9 @@ import MeadowBattleSupport
         withAnimation(.spring(response: 0.45, dampingFraction: 0.78)) {
             switch kind {
             case .boss:
+                let wasOn = boss?.outcome == nil
                 boss?.resolve(q, dice: &dice)
+                if wasOn, boss?.outcome == .won { payout(.bossLoot) }
                 if let b = boss {
                     let total = b.lastHits.reduce(0) { $0 + $1.damage }
                     banner = b.outcome == .won ? "Boss 倒下了！全班胜利！" : b.outcome == .lost ? "心都没了……下次再来！"
@@ -280,12 +290,26 @@ import MeadowBattleSupport
                 }
             case .camp:
                 camp?.resolve(q)
+                if let c = camp, c.outcome != .lost, c.lastMove <= 0 { payout(.pay(ids: students.map(\.id), level: q.level, why: "守住营地")) }
+                if camp?.outcome == .won { payout(.wheel(ids: students.map(\.id), why: "营地守住了")) }
                 if let c = camp {
                     banner = c.outcome == .won ? "撑过了 \(CampDefense.rounds) 题，营地安全！" : c.outcome == .lost ? "怪物冲进营地了……" : ["全对！把怪物打退一步", "守住了！怪物停在原地", "怪物逼近一步！"][c.lastMove + 1]
                 }
             case .race:
                 guard race?.resolve(q, dice: &dice) == true else { return }
-                if let r = race { banner = raceLine(r) }
+                if let r = race {
+                    banner = raceLine(r)
+                    for e in r.events {
+                        switch e {
+                        case .moved(let side, _, _):
+                            if let s = r.sides.first(where: { $0.id == side }) { payout(.pay(ids: s.members, level: q.level, why: "\(s.name) 前进")) }
+                        case .landed(let side, .reward):
+                            if r.winner == nil, let s = r.sides.first(where: { $0.id == side }) { payout(.wheel(ids: s.members, why: "礼物格")) }
+                        default: break
+                        }
+                    }
+                    if let w = r.winner, let s = r.sides.first(where: { $0.id == w }) { payout(.wheel(ids: s.members, why: "冲过终点")) }
+                }
             case .arena:
                 guard let before = arena else { return }
                 guard arena?.resolve(q) == true else {
@@ -297,6 +321,8 @@ import MeadowBattleSupport
                     return
                 }
                 if let a = arena {
+                    if a.last == .defended || a.last == .dethroned { payout(.pay(ids: [a.champion], level: q.level, why: "赢下擂台")) }
+                    if a.bonus { payout(.wheel(ids: [a.champion], why: "连胜 \(a.streak) 场")) }
                     switch a.last {
                     case .dethroned: banner = "挑战成功！\(name(a.champion)) 成为新擂主"
                     case .defended: banner = "\(name(a.champion)) 守擂成功，连胜 \(a.streak) 场" + (a.bonus ? " · 转一次转盘！" : "")
@@ -363,10 +389,16 @@ import MeadowBattleSupport
         guard var m = memory, m.phase == .judging else { return }
         let matchedIndices = m.faceUp
         let winnerSideID = m.current?.id
+        if right, let side = m.current, let first = matchedIndices.first {
+            let card = m.cards[first], other = m.cards[matchedIndices.count > 1 ? matchedIndices[1] : first]
+            let english = card.english ? card.text : other.text
+            payout(.pay(ids: side.members, level: memoryLevels[english.lowercased()] ?? 1, why: "配对 \(english)"))
+        }
         withAnimation(.spring(response: 0.48, dampingFraction: 0.75)) {
             let who = m.current.map { name($0.id) } ?? ""
             m.judge(right: right); memory = m; beat += 1
             if right { emitMemoryFX(matchedIndices, kind: .claimed, sideID: winnerSideID) }
+            if m.finished { payout(.wheel(ids: winners, why: "翻牌获胜")) }
             banner = m.finished ? "宝箱全部找到了！" : right ? "\(who) 拿走宝箱，再翻一次！" : "读错了，宝箱合上，轮到 \(m.current.map { name($0.id) } ?? "")"
         }
     }
@@ -420,6 +452,10 @@ extension MeadowTeacherCoordinator {
         let model = MiniGameModel(kind: kind, state: c.engine.state, playerIDs: c.playerIDs, seats: { [weak self] in self?.seatNumber($0) ?? 0 },
                                   bank: c.quizBank, course: c.courseIndices, memoryPairs: memoryPairs)
         model.banner = kind.rule
+        model.onPayout = { [weak self, weak model] p in
+            guard let self, let model, self.miniGame === model else { return }
+            self.handleMiniGamePayout(p, model: model)
+        }
         withAnimation(.easeOut(duration: 0.3)) { miniGame = model }
         message = "\(kind.title)开始：" + (kind == .memory ? "直接点击舞台上的卡牌即可翻开，顶部可自定义卡牌张数" : "点“出题”或按 ⇧Q 出全班题")
         revision += 1
@@ -456,17 +492,71 @@ extension MeadowTeacherCoordinator {
         if quiz?.mode == .classwide, quiz?.attempt != nil { quiz = nil }
         openClassQuiz()
     }
-    func rewardMiniGameWinners(score: Int = 5) {
-        guard let g = miniGame, !g.rewarded else { return }
+    /// The winners' reward, again by hand (the bar button): the wheel, or the boss's gear if it was not given yet.
+    func rewardMiniGameWinners() {
+        guard let g = miniGame else { return }
+        if g.kind == .boss { if !g.rewarded { grantBossLoot(g) }; return }
         let ids = g.winners
         guard !ids.isEmpty else { message = "没有获胜的同学。"; revision += 1; return }
-        let names = ids.map(g.name).joined(separator: "、")
-        let each = ids.count > 1 ? " 每人" : ""
-        if grantBookPlayers(ids, movement: 0, coins: 0, score: score) {
-            g.rewarded = true
-            g.banner = "获胜奖励：\(names)\(each) +\(score) 积分"
-            g.beat += 1
+        openMiniGameWheel(ids, model: g, delay: 0)
+    }
+    fileprivate func handleMiniGamePayout(_ p: MiniGameModel.Payout, model: MiniGameModel) {
+        switch p {
+        case .pay(let ids, let level, let why):
+            guard let c = campaign else { return }
+            let present = ids.filter { c.engine.state.units[$0] != nil }
+            guard !present.isEmpty else { return }
+            let coins = MiniGameRewards.coins(level: level)
+            do {
+                try backend.grantSupplies(present, movement: MiniGameRewards.steps, coins: coins, role: .teacher)
+                renderer?.classroomRefresh()
+                message = "\(why)：\(present.map(model.name).joined(separator: "、")) " + (present.count > 1 ? "每人 " : "") + "+\(coins) 金币 · 队伍 +\(MiniGameRewards.steps) 行动"
+            } catch { message = "小游戏奖励没发出：" + error.localizedDescription }
+            revision += 1
+        case .wheel(let ids, _):
+            // After the finale / move has shown for a moment.
+            openMiniGameWheel(ids, model: model, delay: model.finished ? 2.6 : 1.6)
+        case .bossLoot:
+            grantBossLoot(model)
         }
+    }
+    /// The prize wheel for the winners (the teacher picks which wheel; the first winner is selected, others can be
+    /// switched to in the wheel's member bar).
+    func openMiniGameWheel(_ ids: [String], model: MiniGameModel, delay: Double) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self, weak model] in
+            guard let self, let model, self.miniGame === model, let c = self.campaign, let host = self.presentationHost,
+                  !(host is CustomWheelViewController) else { return }
+            guard let actor = ids.first(where: { c.engine.state.units[$0]?.isAlive == true }) ?? c.engine.state.players.first(where: \.isAlive)?.id else { return }
+            let screen = CustomWheelViewController(session: c, actor: actor)
+            screen.onChange = { [weak self] in self?.renderer?.classroomRefresh(); self?.revision += 1 }
+            host.present(screen, animated: true)
+            self.message = "转盘奖励：" + ids.map(model.name).joined(separator: "、") + "（选好转盘再转）"
+            self.revision += 1
+        }
+    }
+    /// The boss fell: every student gets one epic or legendary piece of equipment in their pack (each one GM step).
+    func grantBossLoot(_ model: MiniGameModel) {
+        guard !model.rewarded, let c = campaign else { return }
+        let pool = c.engine.catalog.items.filter { $0.kind == .equipment && MeadowItemRarity.of($0.id, item: $0) >= .epic }.map(\.id)
+        var dice = MiniGameDice(seed: UInt64(Date().timeIntervalSince1970 * 1000))
+        let loot = MiniGameRewards.bossLoot(students: model.students.map(\.id), pool: pool, dice: &dice)
+        guard !loot.isEmpty else { message = "没有可发的史诗装备。"; revision += 1; return }
+        var lines: [String] = []
+        for s in model.students {
+            guard let item = loot[s.id], let unit = c.engine.state.units[s.id] else { continue }
+            var edit = TeacherPlayerEdit(unit: unit)
+            edit.inventory[item, default: 0] += 1
+            do {
+                try backend.editPlayer(s.id, value: edit, role: .teacher)
+                lines.append("\(s.name) \((try? c.engine.catalog.item(item).name) ?? item)")
+            } catch { message = "装备没发出：" + error.localizedDescription }
+        }
+        model.rewarded = true
+        model.banner = "Boss 掉落：" + lines.joined(separator: "、")
+        model.beat += 1
+        renderer?.classroomRefresh()
+        message = "史诗以上装备已放进每人行囊：" + lines.joined(separator: "、")
+        revision += 1
     }
 }
 
@@ -523,12 +613,17 @@ private struct MiniGameBarContent: View {
                     }
                 }
                 if model.finished {
-                    Button { game.rewardMiniGameWinners() } label: { Label(model.rewarded ? "已发奖励" : "获胜者 +5 积分", systemImage: "star.fill") }
-                        .buttonStyle(GlassIconButtonStyle(tint: .orange, prominent: !model.rewarded)).disabled(model.rewarded || model.winners.isEmpty)
+                    if model.kind == .boss {
+                        Button { game.rewardMiniGameWinners() } label: { Label(model.rewarded ? "史诗装备已发" : "发史诗装备", systemImage: "shield.lefthalf.filled") }
+                            .buttonStyle(GlassIconButtonStyle(tint: .purple, prominent: !model.rewarded)).disabled(model.rewarded || model.winners.isEmpty)
+                    } else {
+                        Button { game.rewardMiniGameWinners() } label: { Label("获胜者转盘", systemImage: "chart.pie.fill") }
+                            .buttonStyle(GlassIconButtonStyle(tint: .orange, prominent: true)).disabled(model.winners.isEmpty)
+                    }
                     Button { game.startMiniGame(model.kind) } label: { Label("再来一局", systemImage: "arrow.clockwise") }.buttonStyle(GlassIconButtonStyle())
                 } else if model.kind == .arena {
-                    Button { game.rewardMiniGameWinners() } label: { Label(model.rewarded ? "已发奖励" : "给领先者 +5 积分", systemImage: model.rewarded ? "star.fill" : "star") }
-                        .buttonStyle(GlassIconButtonStyle(tint: .orange)).disabled(model.rewarded || model.winners.isEmpty)
+                    Button { game.rewardMiniGameWinners() } label: { Label("领先者转盘", systemImage: "chart.pie") }
+                        .buttonStyle(GlassIconButtonStyle(tint: .orange)).disabled(model.winners.isEmpty)
                 }
                 if model.kind != .memory && !model.finished {
                     if game.skippedPrompt?.pendingMiniGame != nil {
