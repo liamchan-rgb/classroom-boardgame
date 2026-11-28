@@ -940,6 +940,11 @@ final class MeadowTeacherCoordinator:ObservableObject {
             }
             return
         } else {wipeSince=nil}
+        // Battles have no pause button any more: one loaded or rolled back from a save (saved as paused) just goes on.
+        if ready,!busy,!modalOpen,surface != .book,miniGame == nil,let c=campaign,c.engine.state.battle != nil,c.engine.state.pauseReasons.contains(.manual) {
+            do{try c.engine.setPause(.manual,enabled:false);renderer?.classroomResumeRenderer();renderer?.classroomRefresh()}
+            catch{message=error.localizedDescription}
+        }
         guard UIApplication.shared.applicationState == .active,ready,!modalOpen,let c=campaign,c.engine.state.battle != nil,surface != .book,miniGame == nil,c.engine.state.pauseReasons.isEmpty else{cancelEnemyWork();return}
         guard !busy else{return}
         do{
@@ -1252,16 +1257,6 @@ final class MeadowTeacherCoordinator:ObservableObject {
             if paused {renderer?.classroomResumeRenderer()}
             renderer?.classroomRefresh();renderer?.classroomShowLeftBattle(duel:duel)
             message="小队已撤离战斗，怪物仍留在原地，可稍后再来挑战。";revision += 1
-        }catch{message=error.localizedDescription}
-    }
-    func toggleBattlePause(){
-        guard !busy,let c=campaign,c.engine.state.battle != nil else{return}
-        do{
-            let paused=c.engine.state.pauseReasons.contains(.manual)
-            if !paused {try renderer?.classroomSuspend()}
-            try c.engine.setPause(.manual,enabled:!paused)
-            if paused {renderer?.classroomResumeRenderer()}
-            revision += 1
         }catch{message=error.localizedDescription}
     }
     func editResources(){openGM()}

@@ -1433,7 +1433,7 @@ extension MeadowPartyStageView {
     }
     /// A hero joins the running fight: a sky-splitting lance and lightning mark the spot, the hero drops in from above,
     /// lands with a heavy shake and a white flash, a holy pillar and feather burst rise around them, and a gold caption
-    /// announces them ("老师登场！" for the teacher).
+    /// announces them ("林老师 登场！" with the teacher's own name).
     func playEntrance(_ id:String) {
         guard actors[id] != nil,let unit=state?.units[id] else { return }
         entrances[id]=sceneTime
@@ -1442,7 +1442,7 @@ extension MeadowPartyStageView {
         kickFeel=(sceneTime+Self.entranceLand,.heavy,1)
         fx.onFlash?(UIColor.white.withAlphaComponent(0.55))
         DispatchQueue.main.asyncAfter(deadline:.now()+0.12){[weak self] in guard let self else{return};self.wash.backgroundColor=self.washBase}
-        let title=unit.host ? "老师登场！":"\(unit.shortName) 加入战斗！"
+        let title=unit.host ? "\(unit.shortName) 登场！":"\(unit.shortName) 加入战斗！"
         DispatchQueue.main.asyncAfter(deadline:.now()+Self.entranceLand){[weak self] in self?.entranceBanner(id,title:title)}
         poseKeys[id]=nil;setNeedsLayout()
     }

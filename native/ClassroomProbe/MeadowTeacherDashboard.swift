@@ -99,8 +99,6 @@ struct MeadowTeacherDashboard:View {
                                 Button("\(action.title) ×\(count)"){game.battle(action)}.disabled(!game.canUse(action))
                             }
                         }label:{Label("道具",systemImage:"cross.vial.fill")}.disabled(miniGameActive || !game.ready || game.busy)
-                        let paused=game.campaign?.engine.state.pauseReasons.contains(.manual)==true
-                        Button{game.toggleBattlePause()}label:{Label(paused ? "继续":"暂停",systemImage:paused ? "play.fill":"pause.fill")}.disabled(miniGameActive || game.busy)
                         Menu {
                             Button(role:.destructive){game.leaveBattle()}label:{Label("确认撤离战斗（无掉落，怪物留在原地）",systemImage:"figure.walk.departure")}
                         }label:{Label("撤离",systemImage:"figure.walk.departure")}.disabled(miniGameActive || !game.ready || game.busy || game.campaign?.canLeaveBattle != true)
