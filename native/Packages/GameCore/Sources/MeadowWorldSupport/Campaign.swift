@@ -773,6 +773,47 @@ public final class MeadowCampaignSession {
         return try engine.apply(.removePlayer(unit:id))
     }
     public func teamName(_ id:String)->String {engine.state.teams.first{$0.id==id}?.name ?? id}
+    /// The first free student seat (p1–p6), nil when six students already play.
+    public var freeStudentSeat:String? {(1...6).map{"p\($0)"}.first{engine.state.units[$0]==nil}}
+    /// Someone comes on at any time on `team`'s side (see `GameCommand.playerEnter`): the teacher's hero (`host`) or a
+    /// student in the first free seat. Outside battle they stand with that team; when the team is out on a road they
+    /// walk along from the leg it is on. Returns the seat.
+    @discardableResult public func enter(host:Bool,name:String,classID:String,team:String,appearance:PlayerAppearance?,loadout:Equipment=Equipment())throws->String {
+        try requireOpenCampaign()
+        guard let id=host ? "p7":freeStudentSeat else{throw GameError("学生最多6名。")}
+        let mates=engine.state.players.filter{$0.teamID==team}
+        let road=engine.state.battle==nil ? mates.lazy.compactMap{self.travel(holding:$0.id)}.first:nil
+        let node=road.map{$0.path[$0.leg]} ?? (mates.first(where:\.isAlive) ?? mates.first)?.nodeID ?? engine.state.units[selectedPlayerID]?.nodeID ?? engine.state.map.nodes[0].id
+        _=try engine.apply(.playerEnter(unit:id,name:name,classID:classID,team:team,node:node,appearance:appearance,loadout:loadout))
+        if let road {
+            var next=snapshot
+            func joined(_ t:MeadowCampaignTravel)->MeadowCampaignTravel {MeadowCampaignTravel(id:t.id,actors:t.actors+[id],path:t.path,leg:t.leg,distance:t.distance,paused:t.paused,stopDistance:t.stopDistance)}
+            if next.travel?.id==road.id {next.travel=joined(road)}
+            else if let key=next.parkedTravels?.first(where:{$0.value.id==road.id})?.key {next.parkedTravels?[key]=joined(road)}
+            try writer.write(next)
+        }
+        return id
+    }
+    /// `id` leaves at any time, also mid-battle (not on their own turn; one student stays). The operator moves first.
+    @discardableResult public func leave(_ id:String)throws->OperationReceipt {
+        try requireOpenCampaign()
+        guard let gone=engine.state.units[id],gone.kind == .player else{throw GameError("成员不存在。")}
+        if selectedPlayerID==id,let other=engine.state.players.first(where:{$0.id != id && $0.teamID==gone.teamID && $0.isAlive}) ?? engine.state.players.first(where:{$0.id != id}) {
+            if let t=travel,t.actors.contains(id),!t.actors.contains(other.id),!t.paused {var next=snapshot;next.travel?.paused=true;try writer.write(next)}
+            try selectPlayer(other.id)
+        }
+        let receipt=try engine.apply(.playerLeave(unit:id))
+        var next=snapshot,changed=false
+        func without(_ t:MeadowCampaignTravel)->MeadowCampaignTravel? {
+            let rest=t.actors.filter{$0 != id}
+            return rest.isEmpty ? nil:MeadowCampaignTravel(id:t.id,actors:rest,path:t.path,leg:t.leg,distance:t.distance,paused:t.paused,stopDistance:t.stopDistance)
+        }
+        if let t=next.travel,t.actors.contains(id) {next.travel=without(t);changed=true}
+        for (key,t) in next.parkedTravels ?? [:] where t.actors.contains(id) {next.parkedTravels?[key]=without(t);changed=true}
+        if next.parkedTravels?.isEmpty==true {next.parkedTravels=nil}
+        if changed {try writer.write(next)}
+        return receipt
+    }
     @discardableResult public func startDuel(actor:String)throws->OperationReceipt {
         try requireOpenCampaign()
         guard let opponent=duelOpponent(actor:actor),let u=engine.state.units[actor],let mine=u.teamID else{throw GameError("这里没有可以对战的队伍（每两队只能对战一次）。")}

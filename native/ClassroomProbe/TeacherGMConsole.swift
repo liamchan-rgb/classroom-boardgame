@@ -14,6 +14,7 @@ struct TeacherGMConsole:View {
     @State private var buffRounds="1"
     @State private var draft:TeacherPlayerEdit?
     @State private var search=""
+    @State private var bagFilter=BagFilter.owned
     @State private var notice="改动仅在点击保存后生效。"
     private var players:[GameUnit] {game.campaign?.engine.state.players ?? []}
     private var current:GameUnit? {game.campaign?.engine.state.units[selected]}
@@ -77,18 +78,60 @@ struct TeacherGMConsole:View {
             Button("将这些技能的已用次数设为0"){for id in skillUses.keys{skillUses[id]="0"}}
         }.glassRow()
     }
+    private enum BagFilter:String,CaseIterable {case owned="已有",all="全部",weapon="武器",armor="护甲",accessory="饰品",supply="补给"}
+    private func matches(_ item:ItemDefinition)->Bool {
+        switch bagFilter {
+        case .owned:return (Int(inventory[item.id] ?? "0") ?? 0)>0
+        case .all:return true
+        case .weapon:return item.slot == .weapon
+        case .armor:return item.slot == .armor
+        case .accessory:return item.slot == .accessory
+        case .supply:return item.slot == nil
+        }
+    }
     private var backpack:some View {
-        Section("个人背包 · 数量0表示移除") {
+        Section("个人背包 · 点 − / ＋ 立即生效（每次可撤销）") {
+            Picker("分类",selection:$bagFilter){ForEach(BagFilter.allCases,id:\.self){Text($0.rawValue).tag($0)}}.pickerStyle(.segmented)
             ClassroomTextField(placeholder:"按物品名称搜索",text:$search)
-            ForEach((catalog?.items ?? []).filter{search.isEmpty || $0.name.localizedCaseInsensitiveContains(search)}){item in
-                HStack {
-                    Text(item.name)
+            let items=(catalog?.items ?? []).filter{(search.isEmpty || $0.name.localizedCaseInsensitiveContains(search)) && matches($0)}
+            if items.isEmpty {Text(bagFilter == .owned ? "背包是空的，切到“全部”添加物品。":"没有符合的物品。").font(.callout).foregroundStyle(.secondary)}
+            ForEach(items){item in
+                let count=Int(inventory[item.id] ?? "0") ?? 0
+                let rarity=MeadowItemRarity.of(item.id,item:item)
+                HStack(spacing:10) {
+                    Image(uiImage:MeadowItemIcon.image(item.id,item:item,side:36)).interpolation(.none).resizable().frame(width:36,height:36)
+                    VStack(alignment:.leading,spacing:1) {
+                        Text(item.name).font(.body.weight(.semibold))
+                        Text(rarity.title+(item.slot.map{" · "+["weapon":"武器","armor":"护甲","accessory":"饰品"][$0.rawValue]!} ?? " · 补给")+(current?.equipment.itemIDs.contains(item.id)==true ? " · 穿着中":"")).font(.caption).foregroundStyle(Color(rarity.color))
+                    }
                     Spacer()
-                    ClassroomTextField(placeholder:"0",text:Binding(get:{inventory[item.id] ?? "0"},set:{inventory[item.id]=$0}),limit:12,keyboard:.numberPad,alignment:.right).frame(width:100)
+                    quickButton("minus",enabled:count>0){quickAdjust(item.id,-1)}
+                    Text("\(count)").font(.title3.monospacedDigit().weight(.bold)).frame(minWidth:34)
+                    quickButton("plus",enabled:true){quickAdjust(item.id,1)}
+                    Menu {
+                        ForEach([5,10],id:\.self){n in Button("＋\(n)"){quickAdjust(item.id,n)}}
+                        Button("清零",role:.destructive){quickAdjust(item.id,-count)}.disabled(count==0)
+                    } label: {Image(systemName:"ellipsis.circle").font(.title3)}.menuStyle(.borderlessButton).frame(width:32)
                 }
             }
-            Text("这里只调整个人背包。已穿戴物品、队伍仓库和物品定义保持原样；允许教师直接增加或移除数量。").font(.caption)
+            Text("只调整个人背包：已穿戴的装备、队伍仓库保持原样。最上方“撤销最近一次GM/发放”可撤回。").font(.caption)
         }.glassRow()
+    }
+    private func quickButton(_ symbol:String,enabled:Bool,action:@escaping ()->Void)->some View {
+        Button(action:action){Image(systemName:symbol).font(.body.weight(.bold)).frame(width:34,height:30)}
+            .buttonStyle(.bordered).disabled(!enabled || game.busy || game.campaign?.isCompleted==true)
+    }
+    /// One tap changes this item's count right away (its own GM step), leaving the other fields' unsaved edits as they are.
+    private func quickAdjust(_ item:String,_ delta:Int) {
+        guard let unit=current,delta != 0 else{return}
+        var value=TeacherPlayerEdit(unit:unit),bag=unit.inventory
+        let n=max(0,min(999,(bag[item] ?? 0)+delta))
+        if n==0 {bag.removeValue(forKey:item)} else {bag[item]=n}
+        value.inventory=bag
+        if game.saveGM(selected,value:value) {
+            inventory[item]=String(n);draft?.inventory=bag
+            notice="已改：\((try? catalog?.item(item).name) ?? item) × \(n)"
+        } else {notice=game.message}
     }
     private func numeric(_ title:String,key:String)->some View {
         HStack{Text(title);Spacer();ClassroomTextField(placeholder:"0",text:Binding(get:{values[key] ?? "0"},set:{values[key]=$0}),limit:12,keyboard:.numbersAndPunctuation,alignment:.right).frame(width:140)}

@@ -272,6 +272,16 @@ public final class PartyEncounter {
         self.monsterIDs=battle.queue.filter{engine.state.units[$0]?.kind == .monster}.sorted()
         guard (1...3).contains(monsterIDs.count) else {throw GameError("当前战场支持1—3个敌人。")}
     }
+    /// Someone joined or left a running duel (the teacher, a late student): keep each side to who fights on it now.
+    /// Returns true when a side changed.
+    @discardableResult public func syncDuelSides()->Bool {
+        guard isDuel,let battle=engine.state.battle else{return false}
+        let units=engine.state.units
+        let leftTeam=duelLeft.compactMap{units[$0]?.teamID}.first,fighters=battle.queue.compactMap{units[$0]}.filter{$0.kind == .player}
+        let left=fighters.filter{$0.teamID==leftTeam}.map(\.id).sorted(),right=fighters.filter{$0.teamID != leftTeam}.map(\.id).sorted()
+        guard left != duelLeft || right != duelRight,!right.isEmpty else{return false}
+        duelLeft=left;duelRight=right;return true
+    }
     public func command(_ action:PartyAction,target:String)->GameCommand? {
         guard let actor=current else { return nil }
         switch action {

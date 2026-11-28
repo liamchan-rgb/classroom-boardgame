@@ -1021,6 +1021,8 @@ final class MeadowTeacherCoordinator:ObservableObject {
             controller.classroomInventoryChanged={ [weak self] id in self?.project(id.map{.inventory($0)} ?? .exploration) }
             controller.classroomReload={ [weak self,weak session] in if let session{self?.install(session)} }
             renderer=controller;installed=true;selectedNode=nil;selectedTarget=session.selectedPlayerID
+            // The teacher's hero and everyone's current look bake in the background now, so joining later is instant.
+            TeacherHeroPreset.current.prewarm()
             grantRecipientsCustomized=false;grantDraft.recipients=[session.selectedPlayerID]
             message="地图已由后台准备，投放端只显示游戏。";updateMirrorDemand();revision += 1
         }catch{message=error.localizedDescription}
@@ -1070,14 +1072,15 @@ final class MeadowTeacherCoordinator:ObservableObject {
         try profile.validate()
         let wasBook=surface == .book
         try backend.apply(.applyPlayerProfile(unit:id,name:profile.name,appearance:profile.appearance),role:.teacher)
-        install(campaign);if wasBook{project(.book)}
+        // Only the look changes: the map and battle re-dress that person in place (the new look bakes in the background).
+        rosterChanged();if wasBook{project(.book)}
         message="已更新姓名和外观，数值与装备保持。";revision += 1
     }
     func joinTeacher(name:String,classID:String,team:String,appearance:PlayerAppearance?)throws {
         guard !busy,let campaign else{throw GameError("请先开始行程。")}
         let wasBook=surface == .book
-        try backend.joinTeacher(name:name,classID:classID,team:team,appearance:appearance,role:.teacher)
-        install(campaign);if wasBook{project(.book)}
+        try campaign.enter(host:true,name:name,classID:classID,team:team,appearance:appearance)
+        rosterChanged();if wasBook{project(.book)}
         message="老师已加入独立P7席位。";revision += 1
     }
     func restore(){
@@ -1208,16 +1211,8 @@ final class MeadowTeacherCoordinator:ObservableObject {
         do{try c.movePlayer(id,toTeam:team);renderer?.classroomRefresh();message="\(name) 已换到\(c.teamName(team))，站到该队所在地点。";revision += 1}catch{message=error.localizedDescription}
     }
     /// Mid-trip: take one player out of the game. The map is rebuilt for the smaller party; undo in 历史.
-    func removePlayer(_ id:String){
-        guard !busy,let c=campaign else{return}
-        let name=c.engine.state.units[id]?.shortName ?? id
-        do{
-            try c.removePlayer(id)
-            MeadowCampaignSession.flushPendingSaves()
-            try loadJourney(c.snapshot)
-            message="已删除玩家 \(name)（可在存档 → 历史里撤销）。";revision += 1
-        }catch{message=error.localizedDescription}
-    }
+    /// Mid-trip (also mid-battle): take one player out of the game in place - no map reload. Undo in 历史.
+    func removePlayer(_ id:String){leaveGame(id)}
     func teamCommand(_ command:GameCommand){
         guard !busy,let c=campaign,c.travel==nil else{message="请先抵达道路目的地，再调整组队或仓库。";return}
         do{try c.checkpoint();try backend.apply(command,role:.teacher);renderer?.classroomRefresh();message="组队操作已保存。";revision += 1}catch{message=error.localizedDescription}

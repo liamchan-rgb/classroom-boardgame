@@ -36,6 +36,7 @@ final class GameScene: SKScene {
     }
     func refreshCampaign() {
         guard let campaign,world != nil else{return}
+        syncCampaignActors()
         refreshProfileFrames()
         simulation.selected=campaign.playerIDs.firstIndex(of:campaign.selectedPlayerID) ?? 0
         for (index,d) in world.definition.discoveries.enumerated() {
@@ -107,6 +108,7 @@ final class GameScene: SKScene {
                     profileFrames[key]=HeroFrames.load(index%3+1,weaponID:unit.equipment.weapon,armorID:unit.equipment.armor)
                 }
                 frames[index]=profileFrames[key]!
+                if waitingLook.remove(id) != nil {popIn(id)}
                 continue
             }
             let ai=HeroFrames.appearanceIDs.firstIndex(of:look.body) ?? 0,armor=look.armor(worn:unit.equipment.armor)
@@ -118,6 +120,7 @@ final class GameScene: SKScene {
                 profileFrames[key]=HeroFrames.load(1,appearanceIndex:ai,weaponID:unit.equipment.weapon,armorID:armor,hair:look.hair,hairColor:look.hairColor,face:look.face)
             }
             frames[index]=profileFrames[key]!
+            if waitingLook.remove(id) != nil {popIn(id)}
         }
         profileFrames=profileFrames.filter{active.contains($0.key)}
     }
@@ -325,6 +328,59 @@ final class GameScene: SKScene {
         campaignRoute.isHidden=true;world.addChild(campaignRoute)
     }
 
+    /// Who the traveller sprites belong to, in order (the party is sorted by id, so a join or leave shifts them).
+    private var actorIDs:[String]=[]
+    /// Newcomers whose pixel look is still baking: hidden until it is ready, then they pop in.
+    private var waitingLook=Set<String>()
+    /// Someone joined or left (the teacher's hero, a removed student): rebuild only the traveller sprites, keeping
+    /// everyone's textures and walk state, instead of reloading the whole map.
+    private func syncCampaignActors() {
+        guard let campaign,world != nil,gaitTest == nil else{return}
+        let ids=campaign.playerIDs
+        guard ids != actorIDs else{return}
+        if actorIDs.isEmpty {actorIDs=ids;if actorRoots.count==ids.count {return}}
+        var oldFrames:[String:[[SKTexture]]]=[:],oldWalks:[String:WalkCycle]=[:],oldLoco:[String:AuthoredLocomotion]=[:]
+        for (i,id) in actorIDs.enumerated() {
+            if frames.indices.contains(i){oldFrames[id]=frames[i]}
+            if walks.indices.contains(i){oldWalks[id]=walks[i]}
+            if profileLocomotion.indices.contains(i){oldLoco[id]=profileLocomotion[i]}
+        }
+        let newcomers=ids.filter{oldFrames[$0]==nil}
+        for node in actorRoots {node.removeFromParent()};for node in actorLabels {node.removeFromParent()}
+        actorRoots=[];actors=[];actorLabels=[]
+        // A newcomer borrows any loaded frames until its own look is ready (it stays hidden meanwhile).
+        let placeholder=frames.first ?? HeroFrames.load(1)
+        frames=ids.map{oldFrames[$0] ?? placeholder}
+        buildActors()
+        walks=ids.map{oldWalks[$0] ?? WalkCycle()};while walks.count<3 {walks.append(WalkCycle())}
+        for (i,id) in ids.enumerated() where i<profileLocomotion.count {profileLocomotion[i]=oldLoco[id] ?? AuthoredLocomotion(plan:HeroFrames.locomotionPlan)}
+        actorIDs=ids
+        simulation.selected=ids.firstIndex(of:campaign.selectedPlayerID) ?? 0
+        waitingLook=waitingLook.intersection(ids).union(PixelHeroAtlas.enabled ? newcomers.filter{$0 != "p1"}:[])
+        for id in newcomers where !waitingLook.contains(id) {popIn(id)}
+    }
+    /// The map entrance: a quick drop with a flash ring at the traveller's feet (driven per frame in updateActors).
+    private var entranceAt:[String:TimeInterval]=[:]
+    private var entranceRings:[String:SKSpriteNode]=[:]
+    private func popIn(_ id:String) {
+        entranceAt[id]=environmentTime
+        entranceRings[id]?.removeFromParent()
+        let ring=MeadowShapeSprite.ellipse(CGSize(width:30,height:12),stroke:Self.ringColor,lineWidth:2.5)
+        world.addChild(ring);entranceRings[id]=ring
+    }
+    /// Entrance progress for `id` at this frame: (alpha, scale) of the traveller; finished entrances clean up.
+    private func entranceLook(_ id:String,root:SKNode)->(CGFloat,CGFloat) {
+        guard let at=entranceAt[id] else{return (1,1)}
+        let t=CGFloat(environmentTime-at)
+        if let ring=entranceRings[id] {
+            let r=min(1,t/0.55);ring.position=root.position;ring.zPosition=root.zPosition-1
+            ring.setScale(1+r*2.2);ring.alpha=1-r
+        }
+        if t>=0.6 {entranceAt[id]=nil;entranceRings.removeValue(forKey:id)?.removeFromParent();return (1,1)}
+        let alpha=min(1,t/0.18)
+        let scale=t<0.2 ? 1.6-3.75*t:(t<0.34 ? 0.85+(t-0.2)/0.14*0.15:1)
+        return (alpha,scale)
+    }
     private func buildActors() {
         walks=Array(repeating:WalkCycle(),count:max(3,campaign?.playerIDs.count ?? 3))
         for index in 0..<(campaign?.playerIDs.count ?? 3) {
@@ -639,8 +695,26 @@ final class GameScene: SKScene {
     }
 
     private func actorPoint(_ index: Int) -> CGPoint {
-        if let campaign,index<campaign.playerIDs.count {let p=campaign.position(of:campaign.playerIDs[index]);return CGPoint(x:p.x+Double(campaign.playerIDs.count<=2 ? (index==0 ? -10:10):((index%3)-1)*24),y:p.y+Double(campaign.playerIDs.count<=2 ? 0:(index/3)*25))}
+        if let campaign,index<campaign.playerIDs.count {
+            // Everyone standing on the same spot (a team, a late joiner) forms one small group by seat order: two side by
+            // side, three or more in centred rows of three - nobody ends up hidden right behind someone else.
+            let ids=campaign.playerIDs,id=ids[index],p=campaign.position(of:id)
+            let group=ids.filter{let q=campaign.position(of:$0);return abs(q.x-p.x)<1 && abs(q.y-p.y)<1}
+            let rank=group.firstIndex(of:id) ?? 0,n=group.count
+            if n<=1 {return CGPoint(x:p.x,y:p.y)}
+            if n==2 {return CGPoint(x:p.x+(rank==0 ? -10:10),y:p.y)}
+            let row=rank/3,inRow=min(3,n-row*3),col=rank%3
+            return CGPoint(x:p.x+(Double(col)-Double(inRow-1)/2)*28,y:p.y+Double(row)*24)
+        }
         return gaitTest?.point(for:index) ?? simulation.point(for:index)
+    }
+    /// Name plates of a group standing side by side: every other one sits a line lower so the names do not overlap.
+    private func labelDrop(_ index:Int)->CGFloat {
+        guard let campaign,index<campaign.playerIDs.count else{return 0}
+        let ids=campaign.playerIDs,p=campaign.position(of:ids[index])
+        let group=ids.filter{let q=campaign.position(of:$0);return abs(q.x-p.x)<1 && abs(q.y-p.y)<1}
+        guard group.count>=3,let rank=group.firstIndex(of:ids[index]) else{return 0}
+        return rank%3==1 ? 13:0
     }
     private func actorPose(_ index: Int) -> HeroPose {
         if index != 0,profileUnit(index) != nil {
@@ -670,9 +744,10 @@ final class GameScene: SKScene {
             }
             let pose = actorPose(index)
             let visible = campaign != nil ? index<campaign!.playerIDs.count:(!layeredPreview || index < 2)
-            actors[index].isHidden = !visible
+            let waiting=campaign.map{index<$0.playerIDs.count && waitingLook.contains($0.playerIDs[index])} ?? false
+            actors[index].isHidden = !visible || waiting
             if let campaign,index<campaign.playerIDs.count {actors[index].alpha=campaign.engine.state.units[campaign.playerIDs[index]]?.isAlive==true ? 1:0.35}
-            actorLabels[index].isHidden = !visible
+            actorLabels[index].isHidden = !visible || waiting
             let gait = SIMD2(Float(pose.facing), Float(pose.frame))
             let texture: SKTexture
             if layeredPreview && index == 1, let layeredP1Frames {
@@ -690,8 +765,12 @@ final class GameScene: SKScene {
             actors[index].warpGeometry = nil
             actors[index].position = pose.bodyOffset(size: actors[index].size)
             actorRoots[index].position = LivingWorld.position(point)
+            if let campaign,index<campaign.playerIDs.count {
+                let (alpha,scale)=entranceLook(campaign.playerIDs[index],root:actorRoots[index])
+                actorRoots[index].alpha=alpha;actorRoots[index].setScale(scale)
+            }
             actorRoots[index].zPosition = 10000 + point.y
-            actorLabels[index].position = actorRoots[index].position + CGPoint(x: 0, y: -13)
+            actorLabels[index].position = actorRoots[index].position + CGPoint(x: 0, y: -13 - labelDrop(index))
             setMapLabel(index, layeredPreview ? (index == 0 ? "P1 原图" : "P1 分层蓝靴") : mapName(index))
             world.effects.apply(world.effects.vegetation, to: actors[index],
                                 origin: CGPoint(x: point.x, y: point.y - 24), extent: actors[index].size, gait: gait)

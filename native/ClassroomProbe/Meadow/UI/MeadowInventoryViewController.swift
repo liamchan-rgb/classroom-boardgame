@@ -728,6 +728,8 @@ final class MeadowCampaignInventoryViewController:UIViewController {
 
     // Left column (Hero try-on pedestal + vitals + 2×2 stat chips + 3 equipped slot cards)
     private let heroPedestal=UIView(),hero=UIImageView(),tryOnBadge=UILabel(),classBadge=UILabel()
+    /// The background bake for the piece being tried on (waits until the choice rests; a new pick cancels it).
+    private var prebake:DispatchWorkItem?
     private let health=MeadowBattleResourceBar(),ap=MeadowBattleActionPointsView()
     private let statChips=[UILabel(),UILabel(),UILabel(),UILabel()]
     private let slots=ItemSlot.allCases.map{_ in MeadowEquippedSlotCard()}
@@ -937,6 +939,17 @@ final class MeadowCampaignInventoryViewController:UIViewController {
                 : PixelHeroLook.battle(unit:previewUnit,slot:slotIdx)
             hero.image=PixelHeroAtlas.fullBody(pixel){[weak self,actor,selected] in
                 if self?.actor==actor,self?.selected==selected {self?.hero.image=PixelHeroAtlas.fullBody(pixel)}
+            }
+            // Trying a piece on: once the choice rests, bake the map and battle pictures for it in the background, so
+            // pressing 装备 changes the hero on the map / in battle at once instead of after a bake.
+            prebake?.cancel()
+            if tryingOn {
+                let battleLook=PixelHeroLook.battle(unit:previewUnit,slot:slotIdx)
+                let mapLook=(unit.appearance==nil && actor != "p1")
+                    ? HeroFrames.pixelLook(heroIndex:slotIdx%3,weaponID:previewWeapon,armorID:previewArmor)
+                    : HeroFrames.pixelLook(heroIndex:0,appearanceIndex:appearanceIndex,weaponID:previewWeapon,armorID:look.armor(worn:previewArmor),hair:look.hair,hairColor:look.hairColor,face:look.face)
+                let task=DispatchWorkItem{PixelHeroAtlas.prepare(map:mapLook.map{[$0]} ?? [],battle:[battleLook])}
+                prebake=task;DispatchQueue.main.asyncAfter(deadline:.now()+0.4,execute:task)
             }
         } else {
             hero.image=HeroFrames.inventoryImages(appearanceIndex:appearanceIndex,weaponID:previewWeapon,armorID:shownArmor,hair:look.hair,hairColor:look.hairColor,face:look.face).first

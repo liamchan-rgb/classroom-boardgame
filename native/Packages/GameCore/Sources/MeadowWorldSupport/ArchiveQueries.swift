@@ -39,7 +39,7 @@ public enum MeadowHistoryCategory:String,CaseIterable {case all,combat,travel,re
         case .startCampaignDuel,.resetDuelLimits,.startBattle,.attack,.cast,.monsterStep,.endTurn,.joinMonster,.reorderQueue,.finishBattle,.rescue,.retreatAfterDefeat:return .combat
         case .campaignMove,.move,.interactCampaignNode,.resolveCampaignSite,.answerCampaignQuiz,.recordCampaignQuiz,.editQuizRecord,.removeQuizRecord,.refillCampaignMovement:return .travel
         case .tradeCampaignSite,.campaignLottery,.customWheel,.editPlayer,.grantPlayerResources,.grantPlayerSupplies,.grantPlayerRewards,.givePlayerResource,.editResources,.useItem,.reward,.setHealth,.revive,.equip,.refillExploration:return .resources
-        case .configureTeams,.mergeTeams,.transferTeamResource,.teacherTransferTeamResource,.addHost,.changeTeam,.movePlayerToTeam,.removePlayer:return .team
+        case .configureTeams,.mergeTeams,.transferTeamResource,.teacherTransferTeamResource,.addHost,.playerEnter,.playerLeave,.changeTeam,.movePlayerToTeam,.removePlayer:return .team
         case .applyPlayerProfile:return .appearance
         case .configureCampaignSite,.configureNodeEncounter,.configureNodeReward,.resetNodeReward,.setDifficulty:return .configuration
         }
@@ -78,6 +78,8 @@ public struct MeadowHistoryIndex:Identifiable,Equatable {
         switch command {
         case .applyPlayerProfile:return "更新人物档案"
         case .addHost:return "老师加入"
+        case .playerEnter(let id,_,_,_,_,_,_):return id=="p7" ? "老师出场":"学生加入"
+        case .playerLeave(let id):return id=="p7" ? "老师退场":"玩家退场"
         case .grantPlayerResources:return "发放行动点 / 金币"
         case .grantPlayerSupplies:return "发放移动 / 金币"
         case .grantPlayerRewards:return "发放移动 / 金币 / 积分"

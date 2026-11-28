@@ -218,6 +218,13 @@ public enum GameCommand: Codable, Equatable {
     case teacherTransferTeamResource(from:TeamResourceOwner,to:TeamResourceOwner,coins:Int,item:String?,count:Int)
     case addHost(id:String,name:String,classID:String,team:String,node:Int,appearance:PlayerAppearance?=nil)
     case applyPlayerProfile(unit:String,name:String,appearance:PlayerAppearance)
+    /// Someone comes on at any time on the chosen side: a student (seats p1–p6, up to six) or the teacher's own hero
+    /// (seat p7, never a student seat), with a name, class, look and - for the teacher - preset gear (given, not taken
+    /// from a bag; empty slots keep the class start). Outside battle they stand with that team at `node`; in a battle
+    /// they join it at once (PVE: with the players; team duel: on `team`'s side) and may act this round.
+    case playerEnter(unit:String,name:String,classID:String,team:String,node:Int,appearance:PlayerAppearance?,loadout:Equipment)
+    /// Someone leaves the game at any time, also mid-battle (not on their own turn; at least one student stays).
+    case playerLeave(unit:String)
     case changeTeam(unit: String, team: String)
     /// Mid-trip: the player joins another team and stands where that team stands (outside battle).
     case movePlayerToTeam(unit: String, team: String)

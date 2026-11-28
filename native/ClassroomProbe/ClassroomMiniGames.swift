@@ -107,8 +107,6 @@ import MeadowBattleSupport
                 : .melee
             return Student(id: u.id, name: u.shortName, look: look, seat: seats(u.id), style: style)
         }
-        // Prewarm every student's baked pixel battle sheet right away so heroes never show placeholder circles on frame 1.
-        for s in students { _ = PixelHeroAtlas.battle(s.look) }
         let activeTeams = state.teams.filter { team in ordered.contains { $0.teamID == team.id } }
         isTeamMode = activeTeams.count >= 2
         var sides = MiniGameSide.sides(state)

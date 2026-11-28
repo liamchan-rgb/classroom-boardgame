@@ -31,6 +31,86 @@ final class ClassroomTeamTests:XCTestCase {
         XCTAssertEqual(try MeadowCampaignSave.decoded(c.snapshot.encoded()).archive.state.players.count,7)
         XCTAssertNotNil(PartyVisual.foot("p7"))
     }
+    private func gear(_ c:MeadowCampaignSession,_ slot:ItemSlot)->String {c.engine.catalog.items.first{$0.kind == .equipment && $0.slot==slot}!.id}
+    func testHostEntersWithPresetGearOnAChosenSideAndLeavesAnyTime()throws {
+        let c=try campaign(3)
+        try c.engine.apply(.configureTeams(names:["red":"红队"],members:["p3":"red"]))
+        let loadout=Equipment(weapon:gear(c,.weapon),armor:gear(c,.armor),accessory:gear(c,.accessory))
+        let look=PlayerAppearance(body:"forester",hair:"hair_neat")
+        try c.enter(host:true,name:"  林老师 ",classID:"adventurer",team:"red",appearance:look,loadout:loadout)
+        let host=try XCTUnwrap(c.engine.state.units["p7"])
+        XCTAssertTrue(host.host);XCTAssertEqual(host.name,"林老师");XCTAssertEqual(host.teamID,"red");XCTAssertEqual(host.templateID,"adventurer")
+        XCTAssertEqual(host.equipment,loadout);XCTAssertEqual(host.appearance,look);XCTAssertTrue(host.inventory.isEmpty)
+        XCTAssertEqual(host.nodeID,c.engine.state.units["p3"]!.nodeID)
+        let stats=try GameRules.attributes(host,catalog:c.engine.catalog)
+        XCTAssertEqual(host.health,stats.maximumHealth);XCTAssertEqual(host.ap,stats.maximumAP)
+        XCTAssertThrowsError(try c.enter(host:true,name:"第二位",classID:"ranger",team:"party",appearance:nil,loadout:Equipment()))
+        XCTAssertThrowsError(try c.enter(host:true,name:"x",classID:"ranger",team:"party",appearance:nil,loadout:Equipment(weapon:gear(c,.armor))))
+        XCTAssertEqual(try MeadowCampaignSession(save:.decoded(c.snapshot.encoded())).engine.state.units["p7"],host)
+        try c.selectPlayer("p7");try c.leave("p7")
+        XCTAssertNil(c.engine.state.units["p7"]);XCTAssertNotEqual(c.selectedPlayerID,"p7")
+        XCTAssertThrowsError(try c.leave("p7"))
+        try c.engine.undo();XCTAssertNotNil(c.engine.state.units["p7"])
+    }
+    func testHostJumpsIntoARunningBattleAndActsThisRound()throws {
+        let c=try campaign(2);let monster=try XCTUnwrap(c.engine.state.units.values.first{$0.kind == .monster})
+        try c.engine.apply(.startBattle(kind:.pve,monsters:[monster.id]))
+        let round=c.engine.state.battle!.round
+        try c.enter(host:true,name:"老师",classID:"ranger",team:"party",appearance:nil,loadout:Equipment())
+        let battle=try XCTUnwrap(c.engine.state.battle)
+        XCTAssertTrue(battle.queue.contains("p7"));XCTAssertEqual(battle.queue.count,4)
+        XCTAssertEqual(c.engine.state.units["p7"]?.nodeID,monster.nodeID);XCTAssertEqual(c.engine.state.units["p7"]?.canActFromRound,round)
+        XCTAssertTrue(c.engine.state.units["p7"]!.active)
+        XCTAssertNoThrow(try MeadowCampaignSave.decoded(c.snapshot.encoded()).validate())
+        // Leaving mid-battle: not on the teacher's own turn, otherwise out of the queue at once.
+        if battle.current=="p7" {XCTAssertThrowsError(try c.leave("p7"))}
+        else {try c.leave("p7");XCTAssertFalse(c.engine.state.battle!.queue.contains("p7"));XCTAssertNil(c.engine.state.units["p7"])}
+    }
+    func testHostRescuesAPartyThatIsAllDown()throws {
+        let c=try campaign(1);let monster=try XCTUnwrap(c.engine.state.units.values.first{$0.kind == .monster})
+        try c.engine.apply(.startBattle(kind:.pve,monsters:[monster.id]))
+        try c.engine.apply(.setHealth(unit:"p1",value:0,killer:nil))
+        XCTAssertTrue(c.engine.state.pauseReasons.contains(.allPlayersDown))
+        try c.enter(host:true,name:"老师",classID:"ranger",team:"party",appearance:nil,loadout:Equipment())
+        XCTAssertFalse(c.engine.state.pauseReasons.contains(.allPlayersDown));XCTAssertNotNil(c.engine.state.battle?.current)
+    }
+    func testHostOnlyJoinsASideOfTheDuel()throws {
+        let c=try campaign(3)
+        try c.engine.apply(.configureTeams(names:["red":"红队","green":"绿队"],members:["p2":"red","p3":"green"]))
+        let node=c.engine.state.units["p1"]!.nodeID
+        try c.engine.apply(.startCampaignDuel(node:node,teams:["party","red"]))
+        XCTAssertThrowsError(try c.enter(host:true,name:"老师",classID:"ranger",team:"green",appearance:nil,loadout:Equipment()))
+        try c.enter(host:true,name:"老师",classID:"ranger",team:"red",appearance:nil,loadout:Equipment())
+        XCTAssertEqual(c.engine.state.units["p7"]?.teamID,"red");XCTAssertTrue(c.engine.state.battle!.queue.contains("p7"))
+    }
+    func testStudentsJoinAnyTimeIncludingMidBattleAndLeaveMidBattle()throws {
+        let c=try campaign(2);let monster=try XCTUnwrap(c.engine.state.units.values.first{$0.kind == .monster})
+        XCTAssertEqual(c.freeStudentSeat,"p3")
+        XCTAssertEqual(try c.enter(host:false,name:"小明",classID:"ranger",team:"party",appearance:.init(body:"wayfarer")),"p3")
+        try c.engine.apply(.startBattle(kind:.pve,monsters:[monster.id]))
+        XCTAssertEqual(try c.enter(host:false,name:"小红",classID:"adventurer",team:"party",appearance:nil),"p4")
+        let battle=try XCTUnwrap(c.engine.state.battle)
+        XCTAssertTrue(battle.queue.contains("p4"));XCTAssertEqual(c.engine.state.units["p4"]?.nodeID,monster.nodeID)
+        XCTAssertFalse(c.engine.state.units["p4"]!.host)
+        let leaver=try XCTUnwrap(battle.queue.first{$0.hasPrefix("p") && $0 != battle.current})
+        try c.leave(leaver);XCTAssertFalse(c.engine.state.battle!.queue.contains(leaver));XCTAssertNil(c.engine.state.units[leaver])
+        XCTAssertNoThrow(try MeadowCampaignSave.decoded(c.snapshot.encoded()).validate())
+    }
+    func testSixStudentsIsTheLimitAndTheLastStudentStays()throws {
+        let c=try campaign(6);XCTAssertNil(c.freeStudentSeat)
+        XCTAssertThrowsError(try c.enter(host:false,name:"多一位",classID:"ranger",team:"party",appearance:nil))
+        let one=try campaign(1);XCTAssertThrowsError(try one.leave("p1"))
+        try one.enter(host:true,name:"老师",classID:"ranger",team:"party",appearance:nil)
+        XCTAssertThrowsError(try one.leave("p1"));try one.leave("p7")
+    }
+    func testHostWalksAlongWithATeamOnTheRoad()throws {
+        let c=try campaign(2);let start=c.engine.state.units["p1"]!.nodeID
+        try c.beginTravel(to:c.engine.state.map.neighbors(start)[0],actor:"p1");try c.advanceTravel(distance:10)
+        try c.enter(host:true,name:"老师",classID:"ranger",team:"party",appearance:nil,loadout:Equipment())
+        XCTAssertEqual(Set(c.travel!.actors),["p1","p2","p7"]);XCTAssertEqual(c.position(of:"p7"),c.position(of:"p1"))
+        XCTAssertNoThrow(try MeadowCampaignSave.decoded(c.snapshot.encoded()).validate())
+        try c.leave("p7");XCTAssertEqual(Set(c.travel!.actors),["p1","p2"])
+    }
     func testGroupingPreservesEveryPersonalFieldAndRandom()throws {
         let c=try campaign();try c.engine.apply(.editResources(unit:"p1",value:.init(health:9,shield:3,ap:1,coins:19,score:7)))
         let before=c.engine.state

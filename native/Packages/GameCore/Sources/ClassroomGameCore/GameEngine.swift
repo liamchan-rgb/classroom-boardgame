@@ -215,6 +215,9 @@ struct Evaluation {
             state.units[id]=try GameFactory.player(id:id,name:name,classID:classID,teamID:team,nodeID:node,host:true,catalog:catalog)
             try appearance?.validate();state.units[id]?.appearance=appearance
             events.append(GameEvent("hostJoined",actor:id))
+        case .playerEnter(let id,let name,let classID,let team,let node,let appearance,let loadout):
+            try enter(id:id,name:name,classID:classID,team:team,node:node,appearance:appearance,loadout:loadout)
+        case .playerLeave(let id):try leave(id)
         case .movePlayerToTeam(let id, let team):
             guard state.phase == .exploration, state.battle == nil else { throw GameError("请先结束战斗再换队。") }
             guard try unit(id).kind == .player, state.teams.contains(where: { $0.id == team }) else { throw GameError("换队对象或队伍无效。") }
@@ -417,6 +420,67 @@ struct Evaluation {
             ordered += group
         }
         return ordered
+    }
+    /// Someone comes on (see `GameCommand.playerEnter`).
+    mutating func enter(id:String,name:String,classID:String,team:String,node:Int,appearance:PlayerAppearance?,loadout:Equipment) throws {
+        let host=id=="p7"
+        guard host || (1...6).map({"p\($0)"}).contains(id) else{throw GameError("座位无效：\(id)")}
+        guard state.units[id]==nil else{throw GameError(host ? "老师已经在场上。":"这个座位已经有人。")}
+        guard host ? !state.players.contains(where:{$0.host}):state.players.filter({!$0.host}).count<6 else{throw GameError(host ? "老师已经在场上。":"学生最多6名。")}
+        guard state.teams.contains(where:{$0.id==team}) else{throw GameError("没有这支队伍。")}
+        guard state.phase == .exploration || state.isBattle else{throw GameError("现在不能出场。")}
+        let clean=name.trimmingCharacters(in:.whitespacesAndNewlines)
+        guard !clean.isEmpty,clean.count<=40 else{throw GameError("姓名需为1至40个字符。")}
+        var spot=node
+        if let battle=state.battle {
+            let fighters=battle.queue.compactMap{state.units[$0]}
+            if battle.kind == .pve {
+                guard let enemy=fighters.first(where:{$0.kind == .monster}) else{throw GameError("这场战斗没有怪物。")}
+                spot=enemy.nodeID
+            } else {
+                guard let mate=fighters.first(where:{$0.kind == .player && $0.teamID==team}) else{throw GameError("只能加入正在对战的一方。")}
+                spot=mate.nodeID
+            }
+        }
+        guard state.map.nodes.contains(where:{$0.id==spot}) else{throw GameError("出场地点无效。")}
+        var hero=try GameFactory.player(id:id,name:clean,classID:classID,teamID:team,nodeID:spot,host:host,catalog:catalog)
+        try appearance?.validate();hero.appearance=appearance
+        for slot in ItemSlot.allCases {
+            guard let item=loadout[slot] else{continue}
+            let definition=try catalog.item(item)
+            guard definition.kind == .equipment,definition.slot == slot else{throw GameError("装备放错了槽位：\(definition.name)")}
+        }
+        hero.equipment=Equipment(weapon:loadout.weapon ?? hero.equipment.weapon,armor:loadout.armor,accessory:loadout.accessory)
+        let stats=try GameRules.attributes(hero,catalog:catalog)
+        hero.health=stats.maximumHealth;hero.ap=stats.maximumAP
+        guard var battle=state.battle else{
+            state.units[id]=hero;events.append(GameEvent(host ? "hostJoined":"playerJoined",actor:id));return
+        }
+        // Into the running battle: ordered by its own initiative, allowed to act from this very round.
+        hero.active=true;hero.canActFromRound=battle.round;hero.skillUses=[:]
+        state.units[id]=hero
+        let entry=Initiative(unitID:id,value:try roll(DiceFormula(sides:20),source:"initiative").total)
+        var values:[String:Int]=[:];for i in battle.initiatives {values[i.unitID]=i.value}
+        let at=battle.queue.firstIndex(where:{(values[$0] ?? 0)<entry.value}) ?? battle.queue.count
+        battle.queue.insert(id,at:at);battle.initiatives.append(entry);state.battle=battle
+        state.pauseReasons.remove(.allPlayersDown)
+        if state.battle?.current==nil {try nextActor()}
+        events.append(GameEvent(host ? "hostJoined":"playerJoined",actor:id,detail:"battle"))
+    }
+    /// Someone leaves (see `GameCommand.playerLeave`).
+    mutating func leave(_ id:String) throws {
+        let gone=try unit(id)
+        guard gone.kind == .player else{throw GameError("只能让玩家退场。")}
+        guard gone.host || state.players.contains(where:{!$0.host && $0.id != id}) else{throw GameError("至少要保留一名学生。")}
+        if var battle=state.battle,battle.queue.contains(id) {
+            guard battle.current != id else{throw GameError("正轮到\(gone.shortName)行动，请先结束这个回合再退场。")}
+            battle.queue.removeAll{$0==id};battle.initiatives.removeAll{$0.unitID==id};battle.acted.remove(id)
+            battle.monsterTargets=battle.monsterTargets?.filter{$0.value != id}
+            state.battle=battle
+        }
+        state.units.removeValue(forKey:id)
+        events.append(GameEvent(gone.host ? "hostLeft":"playerRemoved",target:id,detail:gone.name))
+        if state.battle != nil {try checkOutcome()}
     }
     mutating func join(_ id: String) throws {
         guard let battle = state.battle, battle.kind == .pve else { throw GameError("仅PVE允许中途加入怪物。") }

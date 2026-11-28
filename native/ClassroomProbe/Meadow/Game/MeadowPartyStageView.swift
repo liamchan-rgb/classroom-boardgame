@@ -115,6 +115,10 @@ final class MeadowPartyStageView:UIView {
     private var cameraTransform:CGAffineTransform?,cameraWidth:CGFloat=0
     /// When a fallen hero was brought back (they fade back in as the revive light gathers).
     private var revivedAt:[String:Double]=[:]
+    /// Heroes who joined a running fight, and when: they drop in from the sky (`playEntrance`).
+    private var entrances:[String:Double]=[:]
+    /// Drop-in timing: the fall, then the landing (shake, light) at `entranceLand`.
+    private static let entranceLand=0.42
     /// When each unit's current damage buff was granted, and buffs the lab shows without the rules (amount).
     private var buffBirth:[String:Double]=[:],labBuff:[String:Int]=[:]
     /// The GPU drawer for procedural skills (nil: Metal unavailable, the effects layer draws them with CoreGraphics).
@@ -272,7 +276,7 @@ final class MeadowPartyStageView:UIView {
         }
     }
     func classroomPause(_ value:Bool){if value{clock.stop()}else{clock.start()}}
-    func start() { MeadowBattleVFXAssets.prewarm();MeadowPixelFX.prewarm();pixelFX.reset();loot.reset();victoryAt=nil;sceneTime=0;recovery=[:];recoveryTier=[:];formation=[:];birth=[:];contact=[:];contactAngle=[:];revivedAt=[:];buffBirth=[:];labBuff=[:];broken=[:];deaths=[:];hurt=[:];hitFeel=[:];kickFeel=nil;messages=[];emissions=[];skillVFX=[];procVFX=[];pendingStatusCues=[];statusSnapshots=[:];poseKeys=[:];fallen=[:];diceAction=nil;diceConfirmedAt=nil;diceView.confirmationAge=nil;diceView.dice=[];diceSettledAt=nil;diceExitAt=nil;dimFrom=0;dimTarget=0;clock.start() }
+    func start() { MeadowBattleVFXAssets.prewarm();MeadowPixelFX.prewarm();pixelFX.reset();loot.reset();victoryAt=nil;sceneTime=0;recovery=[:];recoveryTier=[:];formation=[:];birth=[:];contact=[:];contactAngle=[:];revivedAt=[:];entrances=[:];buffBirth=[:];labBuff=[:];broken=[:];deaths=[:];hurt=[:];hitFeel=[:];kickFeel=nil;messages=[];emissions=[];skillVFX=[];procVFX=[];pendingStatusCues=[];statusSnapshots=[:];poseKeys=[:];fallen=[:];diceAction=nil;diceConfirmedAt=nil;diceView.confirmationAge=nil;diceView.dice=[];diceSettledAt=nil;diceExitAt=nil;dimFrom=0;dimTarget=0;clock.start() }
     func stop() { pixelFX.reset();loot.reset();MeadowMonsterFrames.retain([]);clock.stop();intent=nil;impact=nil;completion=nil;focus=nil;skillVFX=[];procVFX=[];pendingStatusCues=[];statusSnapshots=[:] }
     func displayedVitals(for unitID:String,health:Int,shield:Int)->(health:Int,shield:Int) { statusSnapshots[unitID] ?? (health,shield) }
     func show(_ value:GameState,friend:String,foe:String,current:String?,catalog:GameCatalog) {
@@ -617,8 +621,16 @@ final class MeadowPartyStageView:UIView {
                 shadows[id]?.transform=mirrored ? CGAffineTransform(translationX:2*(foot.x-CGFloat(worldWidth)/2),y:0).scaledBy(x:-1,y:1):.identity
                 actor.layer.zPosition=CGFloat(f.y)
                 // A fallen hero is taken off the field (a soul crystal marks the spot, see downAura) and fades back in when revived.
-                let shown:CGFloat=unit.isAlive ? CGFloat(revivedAt[id].map { MeadowSkillProcedural.smooth((sceneTime-$0-0.35)/0.5) } ?? 1):CGFloat(1-MeadowSkillProcedural.smooth(((fallen[id].map { sceneTime-$0 } ?? 10)-0.45)/0.4))
-                actor.alpha=shown;shadows[id]?.alpha=shown
+                var shown:CGFloat=unit.isAlive ? CGFloat(revivedAt[id].map { MeadowSkillProcedural.smooth((sceneTime-$0-0.35)/0.5) } ?? 1):CGFloat(1-MeadowSkillProcedural.smooth(((fallen[id].map { sceneTime-$0 } ?? 10)-0.45)/0.4))
+                if let at=entrances[id] {
+                    // Falls from high above (accelerating), lands at entranceLand; the shadow grows as the hero comes down.
+                    let t=min(1,max(0,(sceneTime-at)/Self.entranceLand)),drop=CGFloat((1-t*t)*420)
+                    if t<1 { actor.center.y-=drop }
+                    shown=min(shown,CGFloat(MeadowSkillProcedural.smooth(t/0.35)))
+                    shadows[id]?.alpha=CGFloat(t)
+                    if sceneTime-at>3 { entrances[id]=nil }
+                }
+                actor.alpha=shown;if entrances[id]==nil {shadows[id]?.alpha=shown}
                 let key="\(clip)-\(Int((progress*24).rounded()))-\(unit.equipment.weapon ?? "none")-\(displayedArmor ?? "none")-\(unit.appearance?.visualKey ?? "original")"
                 if key != poseKeys[id] { shadows[id]?.update(image:actor.poseSilhouette,soleY:actor.poseFootAnchorPx.y,contacts:actor.poseContacts.map { .init(point:$0,radius:12) });poseKeys[id]=key }
                 attached[id]?.update(shield:shownVitals.shield,preview:0,time:sceneTime,formation:shownVitals.shield==0 ? formation[id].flatMap { sceneTime-$0<1.0 ? sceneTime-$0:nil }:nil,formationBase:0,birth:birth[id].map { sceneTime-$0 },contact:contact[id].map { sceneTime-$0 },broken:broken[id].map { sceneTime-$0 },recovery:unit.isAlive ? recovery[id].map { sceneTime-$0 }:nil,recoveryTier:recoveryTier[id])
@@ -1418,6 +1430,47 @@ extension MeadowPartyStageView {
             return (chest:PartyVisual.skillEffectCenter(targets:[t],actor:actor,templates:templates),foot:f)
         }
         spawn(id,from:aChest,to:list,ids:targets,pw:power)
+    }
+    /// A hero joins the running fight: a sky-splitting lance and lightning mark the spot, the hero drops in from above,
+    /// lands with a heavy shake and a white flash, a holy pillar and feather burst rise around them, and a gold caption
+    /// announces them ("老师登场！" for the teacher).
+    func playEntrance(_ id:String) {
+        guard actors[id] != nil,let unit=state?.units[id] else { return }
+        entrances[id]=sceneTime
+        labPlay("skybreaker",actor:id,targets:[id],power:1.4)
+        labPlay("revive",actor:id,targets:[id],power:1.2,delay:Self.entranceLand)
+        kickFeel=(sceneTime+Self.entranceLand,.heavy,1)
+        fx.onFlash?(UIColor.white.withAlphaComponent(0.55))
+        DispatchQueue.main.asyncAfter(deadline:.now()+0.12){[weak self] in guard let self else{return};self.wash.backgroundColor=self.washBase}
+        let title=unit.host ? "老师登场！":"\(unit.shortName) 加入战斗！"
+        DispatchQueue.main.asyncAfter(deadline:.now()+Self.entranceLand){[weak self] in self?.entranceBanner(id,title:title)}
+        poseKeys[id]=nil;setNeedsLayout()
+    }
+    /// The gold "登场" capsule that bursts up over the newcomer, overshoots, hangs and drifts away.
+    private func entranceBanner(_ id:String,title:String) {
+        guard let foot=PartyVisual.foot(id) else { return }
+        let gold=UIColor(red:1,green:0.78,blue:0.25,alpha:1)
+        let label=UILabel();label.isUserInteractionEnabled=false;label.textAlignment = .center
+        let text=NSMutableAttributedString()
+        if let icon=UIImage(systemName:"bolt.fill",withConfiguration:UIImage.SymbolConfiguration(pointSize:34,weight:.heavy))?.withTintColor(.white,renderingMode:.alwaysOriginal) {
+            let attachment=NSTextAttachment(image:icon);attachment.bounds=CGRect(x:0,y:-4,width:icon.size.width,height:icon.size.height)
+            text.append(NSAttributedString(attachment:attachment));text.append(NSAttributedString(string:"  "))
+        }
+        text.append(NSAttributedString(string:title,attributes:[.font:MeadowPreviewPalette.font(42,.heavy),.foregroundColor:UIColor.white,.kern:2]))
+        label.attributedText=text;label.sizeToFit()
+        let pill=UIView(frame:CGRect(x:0,y:0,width:label.bounds.width+60,height:label.bounds.height+24));pill.isUserInteractionEnabled=false
+        let fill=CAGradientLayer();fill.frame=pill.bounds;fill.cornerRadius=pill.bounds.height/2
+        fill.colors=[UIColor(red:1,green:0.86,blue:0.38,alpha:1).cgColor,UIColor(red:0.93,green:0.52,blue:0.10,alpha:1).cgColor];pill.layer.addSublayer(fill)
+        pill.layer.cornerRadius=pill.bounds.height/2;pill.layer.borderWidth=2.5;pill.layer.borderColor=UIColor.white.cgColor
+        pill.layer.shadowColor=gold.cgColor;pill.layer.shadowOpacity=0.9;pill.layer.shadowRadius=22;pill.layer.shadowOffset = .zero
+        pill.layer.shadowPath=UIBezierPath(roundedRect:pill.bounds,cornerRadius:pill.bounds.height/2).cgPath
+        label.center=CGPoint(x:pill.bounds.midX,y:pill.bounds.midY);pill.addSubview(label)
+        let top=foot.y-300
+        let x=min(worldWidth-Double(pill.bounds.width)/2-8,max(Double(pill.bounds.width)/2+8,foot.x))
+        pill.center=CGPoint(x:x,y:top);pill.alpha=0;pill.transform=CGAffineTransform(scaleX:0.3,y:0.3);pill.layer.zPosition=1160
+        world.addSubview(pill)
+        UIView.animate(withDuration:0.42,delay:0,usingSpringWithDamping:0.5,initialSpringVelocity:0.9,options:[]) { pill.alpha=1;pill.transform = .identity }
+        UIView.animate(withDuration:0.6,delay:1.6,options:[.curveEaseIn],animations:{ pill.alpha=0;pill.center.y=top-40 }) { [weak pill] _ in pill?.removeFromSuperview() }
     }
     /// A shield of `value` on `id`, generated now.
     func labSetShield(_ id:String,_ value:Int) {

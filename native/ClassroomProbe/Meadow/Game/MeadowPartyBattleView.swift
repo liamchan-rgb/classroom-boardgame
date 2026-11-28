@@ -201,6 +201,7 @@ final class MeadowPartyBattleView:UIView {
         if classroomMode,let current=model,(campaignEngine ?? current.engine).state.battle == nil {stage.start();refresh();return}
         do { if classroomMode {guard let factory=classroomModelFactory else{throw GameError("教师后台尚未准备战斗。")};model=try factory()}else{model = try campaignEngine.map { try PartyEncounter(engine:$0) } ?? PartyEncounter(loadouts:loadoutUnits,playerClassID:playerClassID)} } catch { hint.text="演练加载失败：\(error.localizedDescription)";return }
         friend="p1";foe=model?.monsterIDs.first ?? "m1";actionPointCapacity=[:];apRound=0
+        lastQueue=model?.state.battle?.queue ?? []
         reset.isHidden=campaignEngine != nil;back.configuration?.title=campaignEngine == nil ? "返回单人":"返回行程"
         if let model,model.isDuel {stage.configureUnits(players:model.duelLeft,foes:model.duelRight,pvp:true)}
         else {stage.configureMonsters(model?.monsterIDs ?? ["m1","m2"])}
@@ -301,6 +302,9 @@ final class MeadowPartyBattleView:UIView {
             if let b=unit.damageBuff { buff.show(title:"增伤＋\(b.amount)",detail:"剩余 \(b.roundsLeft) 轮\n普攻和伤害技能生效",symbol:"arrow.up",color:MeadowPreviewPalette.gold) } else { buff.hide() }
             if visible.shield>0 { shieldBuff.show(title:"护盾 · \(visible.shield)",detail:"优先抵挡伤害\n新旧授盾取较高值\n战斗结束后清空",symbol:"shield.fill",color:.systemCyan) } else { shieldBuff.hide() }
         }
+        // Someone joined the running fight (the teacher's hero, a late student): place them and play the entrance.
+        let entering=(state.battle?.queue ?? []).filter{state.units[$0]?.kind == .player && !lastQueue.isEmpty && !lastQueue.contains($0)}
+        if model.isDuel,model.syncDuelSides() {stage.configureUnits(players:model.duelLeft,foes:model.duelRight,pvp:true)}
         if let q=state.battle?.queue {lastQueue=q}
         // A finished fight keeps showing who was in it (not the whole class).
         let queue=state.battle?.queue ?? (lastQueue.isEmpty ? ["p1","p2"]+model.monsterIDs:lastQueue)
@@ -319,6 +323,7 @@ final class MeadowPartyBattleView:UIView {
         track.show(entries:entries,current:showing,round:model.round,selected:[friend,foe],finished:model.terminal ? endTitle(state,short:true):nil)
         UIView.animate(withDuration:0.2) { self.panel.alpha=busy ? 0.55:1 }
         stage.show(state,friend:friend,foe:foe,current:current,catalog:model.engine.catalog)
+        for id in entering {stage.playEntrance(id)}
         let actions:[PartyAction]=busy ? showing.map { model.actions(for:$0) } ?? []:model.playerActions()
         if busy { focusedAction=nil }
         for (i,b) in skills.enumerated() {
