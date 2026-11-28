@@ -208,8 +208,6 @@ final class CustomWheelViewController: UIViewController {
     private let spin = MeadowPreviewPalette.iconButton("sparkles", "转！", prominent: true)
     private let history = MeadowPreviewPalette.iconButton("clock.arrow.circlepath", "历史")
     private let removeWon = MeadowPreviewPalette.iconButton("minus.circle", "移除这一格")
-    /// Slices taken off this wheel: put one back, or all of them.
-    private let restoreRemoved = MeadowPreviewPalette.iconButton("arrow.uturn.backward.circle", "恢复格子")
     /// The slice just won (on the wheel as it was spun), for 移除这一格.
     private var lastWin: (wheel: String, slot: Int)?
     private let wheel = MeadowPrizeWheelView()
@@ -250,8 +248,7 @@ final class CustomWheelViewController: UIViewController {
         legendScroll.addSubview(legendContent)
         [legendTitle, legendScroll].forEach(legendPanel.addSubview)
 
-        [wheel, spin, removeWon, restoreRemoved, result, legendPanel, card].forEach(stage.addSubview)
-        restoreRemoved.showsMenuAsPrimaryAction = true
+        [wheel, spin, removeWon, result, legendPanel, card].forEach(stage.addSubview)
         history.addAction(UIAction { [weak self] _ in self?.openHistory() }, for: .touchUpInside)
         removeWon.addAction(UIAction { [weak self] _ in self?.removeLastWin() }, for: .touchUpInside)
         removeWon.isHidden = true
@@ -279,15 +276,6 @@ final class CustomWheelViewController: UIViewController {
         let slices = w.slices(catalog: session.engine.catalog)
         wheel.slices = slices; card.hide(); result.text = nil
         lastWin = nil; removeWon.isHidden = true
-        let gone = w.removed ?? []
-        restoreRemoved.isHidden = gone.isEmpty
-        restoreRemoved.configuration?.title = "已移除 \(gone.count) 格"
-        restoreRemoved.menu = UIMenu(title: "恢复被移除的格子", children: [
-            UIAction(title: "全部恢复（\(gone.count) 格）", image: UIImage(systemName: "arrow.uturn.backward.circle.fill")) { [weak self] _ in self?.restore(nil) },
-            UIMenu(title: "单独恢复", options: .displayInline, children: gone.indices.reversed().map { i in
-                UIAction(title: gone[i].prize.title, image: UIImage(systemName: "arrow.uturn.backward")) { [weak self] _ in self?.restore(i) }
-            }),
-        ])
         wheelButton.setTitle("  \(w.name)  ▾", for: .normal)
         wheelButton.menu = UIMenu(children: library.wheels.map { item in
             UIAction(title: item.name, state: item.name == w.name ? .on : .off) { [weak self] _ in self?.library.currentName = item.name; self?.loadWheel() }
@@ -303,7 +291,8 @@ final class CustomWheelViewController: UIViewController {
     private func rebuildLegend(wheel w: CustomWheel, slices: [WheelSlice]) {
         legendContent.subviews.forEach { $0.removeFromSuperview() }
         legendRows = []
-        legendTitle.attributedText = MeadowGlassText.iconLine("list.star", "奖项一览 · \(w.prizes.count)格", size: 17, tint: MeadowPreviewPalette.gold, weight: .heavy)
+        let hidden = w.removed ?? []
+        legendTitle.attributedText = MeadowGlassText.iconLine("list.star", "格子 · 显示 \(w.prizes.count)" + (hidden.isEmpty ? "" : " · 隐藏 \(hidden.count)") + " · 点按隐藏/恢复", size: 15, tint: MeadowPreviewPalette.gold, weight: .heavy)
 
         let indexed = w.prizes.indices.map { ($0, w.prizes[$0], slices[$0], w.chance($0) * 100.0) }
             .sorted { a, b in a.2.rarity != b.2.rarity ? a.2.rarity > b.2.rarity : a.3 > b.3 }
@@ -349,13 +338,62 @@ final class CustomWheelViewController: UIViewController {
             pctL.tag = 5
 
             [bar, nameL, kindL, pill, pctL].forEach(row.addSubview)
+            addToggle(to: row) { [weak self] in self?.hideSlice(slot) }
             legendContent.addSubview(row)
             legendRows.append((slot, row))
         }
+        // The hidden slices stay listed (greyed): tap one to put it back where it was, or all at once.
+        guard !hidden.isEmpty else { return }
+        let header = UIView()
+        let headL = UILabel(); headL.font = MeadowPreviewPalette.font(13.5, .heavy); headL.textColor = MeadowPreviewPalette.muted
+        headL.text = "已隐藏 \(hidden.count) 格 · 点按恢复"; headL.tag = 10
+        let all = UIButton(type: .system); all.tag = 11
+        all.setTitle("全部恢复", for: .normal); all.titleLabel?.font = MeadowPreviewPalette.font(13.5, .heavy); all.tintColor = MeadowPreviewPalette.primary
+        all.addAction(UIAction { [weak self] _ in self?.restore(nil) }, for: .touchUpInside)
+        [headL, all].forEach(header.addSubview)
+        legendContent.addSubview(header)
+        legendRows.append((Int.min, header))
+        for (i, gone) in hidden.enumerated().reversed() {
+            let row = UIView()
+            row.backgroundColor = UIColor.white.withAlphaComponent(0.35)
+            row.layer.cornerRadius = 11; row.layer.cornerCurve = .continuous
+            row.layer.borderWidth = 1; row.layer.borderColor = UIColor.gray.withAlphaComponent(0.35).cgColor
+            row.clipsToBounds = true
+            let bar = UIView(); bar.backgroundColor = UIColor.gray.withAlphaComponent(0.4); bar.tag = 1
+            let nameL = UILabel(); nameL.font = MeadowPreviewPalette.font(14.5, .heavy); nameL.tag = 2
+            nameL.attributedText = NSAttributedString(string: gone.prize.title, attributes: [.strikethroughStyle: NSUnderlineStyle.single.rawValue, .foregroundColor: MeadowPreviewPalette.muted])
+            let kindL = UILabel(); kindL.font = MeadowPreviewPalette.font(11.5, .semibold); kindL.textColor = MeadowPreviewPalette.muted; kindL.tag = 3
+            kindL.text = "已隐藏 · 原第 \(gone.index + 1) 格"
+            let pill = UILabel(); pill.font = MeadowPreviewPalette.font(10.5, .heavy); pill.textColor = .white; pill.textAlignment = .center
+            pill.layer.cornerRadius = 6; pill.clipsToBounds = true; pill.backgroundColor = MeadowPreviewPalette.primary; pill.text = "恢复"; pill.tag = 4
+            let mark = UIImageView(image: UIImage(systemName: "eye.slash")); mark.tintColor = MeadowPreviewPalette.muted; mark.contentMode = .scaleAspectFit; mark.tag = 5
+            [bar, nameL, kindL, pill, mark].forEach(row.addSubview)
+            addToggle(to: row) { [weak self] in self?.restore(i) }
+            legendContent.addSubview(row)
+            legendRows.append((-1 - i, row))
+        }
+    }
+
+    /// A clear button over a whole list row (tag 6, laid out to the row's size).
+    private func addToggle(to row: UIView, _ action: @escaping () -> Void) {
+        let tap = UIButton(type: .custom); tap.tag = 6
+        tap.addAction(UIAction { _ in action() }, for: .touchUpInside)
+        row.addSubview(tap)
+    }
+
+    /// Hides one shown slice from the list (it stays listed below, ready to come back). Two always stay.
+    private func hideSlice(_ slot: Int) {
+        guard !wheel.spinning else { return }
+        let title = library.current.prizes.indices.contains(slot) ? library.current.prizes[slot].title : ""
+        do {
+            try library.removePrize(slot)
+            loadWheel(); onChange?()
+            result.text = "已隐藏：\(title)（右侧点按可恢复）"
+        } catch { result.text = error.localizedDescription }
     }
 
     private func highlightLegend(_ slot: Int) {
-        for (s, row) in legendRows {
+        for (s, row) in legendRows where s >= 0 {
             let won = s == slot
             row.layer.borderWidth = won ? 2.6 : 1.2
             if won {
@@ -454,16 +492,15 @@ final class CustomWheelViewController: UIViewController {
         let top = header.frame.maxY + 10
         stage.frame = CGRect(x: inset.left + 14, y: top, width: w - inset.left - inset.right - 28, height: h - top - inset.bottom - 12)
         let sw = stage.bounds.width, sh = stage.bounds.height
-        let wide = sw >= 820
+        let wide = sw >= 600
 
         if wide {
-            let rightW = min(400, max(290, sw * 0.36))
+            let rightW = min(400, max(240, sw * 0.36))
             let leftW = sw - rightW - 14
             let size = max(200, min(leftW - 12, sh - 114))
             wheel.frame = CGRect(x: (leftW - size) / 2, y: 2, width: size, height: size)
             spin.frame = CGRect(x: leftW / 2 - 116, y: wheel.frame.maxY + 6, width: 232, height: 50)
             removeWon.frame = CGRect(x: spin.frame.maxX + 10, y: spin.frame.minY + 3, width: 142, height: 44)
-            restoreRemoved.frame = CGRect(x: max(4, spin.frame.minX - 162), y: spin.frame.minY + 3, width: 152, height: 44)
             result.frame = CGRect(x: 8, y: spin.frame.maxY + 4, width: leftW - 16, height: 48)
 
             legendPanel.isHidden = false
@@ -472,18 +509,27 @@ final class CustomWheelViewController: UIViewController {
             legendTitle.frame = CGRect(x: 14, y: 12, width: lw - 28, height: 26)
             legendScroll.frame = CGRect(x: 10, y: 44, width: lw - 20, height: max(1, legendPanel.bounds.height - 54))
             let rw = legendScroll.bounds.width
-            let rowH: CGFloat = 46, gap: CGFloat = 6
-            for (idx, item) in legendRows.enumerated() {
+            let rowH: CGFloat = 46, gap: CGFloat = 6, headH: CGFloat = 34
+            var y: CGFloat = 0
+            for item in legendRows {
                 let row = item.view
-                row.frame = CGRect(x: 0, y: CGFloat(idx) * (rowH + gap), width: rw, height: rowH)
+                if item.slot == Int.min {
+                    row.frame = CGRect(x: 0, y: y + 6, width: rw, height: headH)
+                    row.viewWithTag(10)?.frame = CGRect(x: 4, y: 7, width: rw - 100, height: 20)
+                    row.viewWithTag(11)?.frame = CGRect(x: rw - 92, y: 2, width: 88, height: 30)
+                    y += headH + 6 + gap; continue
+                }
+                row.frame = CGRect(x: 0, y: y, width: rw, height: rowH)
                 row.viewWithTag(1)?.frame = CGRect(x: 0, y: 0, width: 4.5, height: rowH)
                 row.viewWithTag(5)?.frame = CGRect(x: rw - 56, y: 13, width: 48, height: 20)
                 row.viewWithTag(4)?.frame = CGRect(x: rw - 98, y: 14, width: 38, height: 18)
                 let tw = max(50, rw - 114)
                 row.viewWithTag(2)?.frame = CGRect(x: 12, y: 6, width: tw, height: 19)
                 row.viewWithTag(3)?.frame = CGRect(x: 12, y: 25, width: tw, height: 15)
+                row.viewWithTag(6)?.frame = row.bounds
+                y += rowH + gap
             }
-            legendContent.frame = CGRect(x: 0, y: 0, width: rw, height: max(1, CGFloat(legendRows.count) * (rowH + gap)))
+            legendContent.frame = CGRect(x: 0, y: 0, width: rw, height: max(1, y))
             legendScroll.contentSize = legendContent.bounds.size
 
             let cw = min(310, leftW - 32)
@@ -494,7 +540,6 @@ final class CustomWheelViewController: UIViewController {
             wheel.frame = CGRect(x: (sw - size) / 2, y: 0, width: size, height: size)
             spin.frame = CGRect(x: sw / 2 - 116, y: wheel.frame.maxY + 4, width: 232, height: 52)
             removeWon.frame = CGRect(x: spin.frame.maxX + 10, y: spin.frame.minY + 4, width: 144, height: 44)
-            restoreRemoved.frame = CGRect(x: max(4, spin.frame.minX - 164), y: spin.frame.minY + 4, width: 154, height: 44)
             result.frame = CGRect(x: 10, y: spin.frame.maxY + 4, width: sw - 20, height: 50)
             let cw = min(310, sw - 40)
             card.frame = CGRect(x: (sw - cw) / 2, y: wheel.frame.midY - 120, width: cw, height: 244)
